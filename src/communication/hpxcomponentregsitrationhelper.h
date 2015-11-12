@@ -51,10 +51,35 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
 
 }
 
+#define LIBGEODECOMP_HPX_PLUGIN_REGISTRY                                \
+    BOOST_PP_CAT(                                                       \
+        BOOST_PP_CAT(                                                   \
+            HPX_MANGLE_NAME(hpx)                                        \
+          , BOOST_PP_CAT(                                               \
+                _exported_plugins_list_                                 \
+              , HPX_MANGLE_NAME(hpx)                                    \
+            )                                                           \
+        )                                                               \
+      , _registry                                                       \
+    )                                                                   \
+/**/
+
+#define LIBGEODECOMP_HPX_PLUGIN_FACTORY                                 \
+    BOOST_PP_CAT(                                                       \
+        BOOST_PP_CAT(                                                   \
+            HPX_MANGLE_NAME(hpx)                                        \
+          , BOOST_PP_CAT(                                               \
+                _exported_plugins_list_                                 \
+              , HPX_MANGLE_NAME(hpx)                                    \
+            )                                                           \
+        )                                                               \
+      , _factory                                                        \
+    )                                                                   \
+
 // fixme: lacks deletion of parentheses
 #define LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE(PARAMS, TEMPLATE)  \
     extern "C" __attribute__((visibility ("default")))                  \
-    std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_factory(); \
+    std::map<std::string, boost::any>* LIBGEODECOMP_HPX_PLUGIN_FACTORY(); \
                                                                         \
     namespace {                                                         \
                                                                         \
@@ -72,7 +97,7 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
                                                                         \
             std::string actname(typeid(hpx::components::simple_component<TEMPLATE>).name()); \
             boost::algorithm::to_lower(actname);                        \
-            hpx_exported_plugins_list_hpx_factory()->insert( std::make_pair(actname, w)); \
+            LIBGEODECOMP_HPX_PLUGIN_FACTORY()->insert( std::make_pair(actname, w)); \
         }                                                               \
                                                                         \
         static hpx_plugin_exporter_factory instance;                    \
@@ -82,9 +107,6 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
     hpx_plugin_exporter_factory<TEMPLATE> hpx_plugin_exporter_factory<TEMPLATE>::instance; \
                                                                         \
     }                                                                   \
-                                                                        \
-    extern "C" __attribute__((visibility ("default")))                  \
-    std::map<std::string, boost::any>* hpx_exported_plugins_list_hpx_factory(); \
                                                                         \
     namespace {                                                         \
                                                                         \
@@ -97,7 +119,10 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
     public:                                                             \
         init_registry_factory_static<TEMPLATE>()                        \
         {                                                               \
-            hpx::components::static_factory_load_data_type data = { typeid(hpx::components::simple_component<TEMPLATE>).name(), hpx_exported_plugins_list_hpx_factory }; \
+            hpx::components::static_factory_load_data_type data = {     \
+                typeid(hpx::components::simple_component<TEMPLATE>).name(), \
+                LIBGEODECOMP_HPX_PLUGIN_FACTORY                         \
+            };                                                          \
             hpx::components::init_registry_factory(data);               \
         }                                                               \
                                                                         \
@@ -126,7 +151,7 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
     }                                                                   \
                                                                         \
     extern "C" __attribute__((visibility ("default")))                  \
-    std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_registry(); \
+    std::map<std::string, boost::any>* LIBGEODECOMP_HPX_PLUGIN_REGISTRY(); \
                                                                         \
     namespace {                                                         \
                                                                         \
@@ -143,7 +168,7 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
             hpx::util::plugin::abstract_factory<hpx::components::component_registry_base>* w = &cf; \
             std::string actname(typeid(hpx::components::simple_component<TEMPLATE>).name()); \
             boost::algorithm::to_lower(actname);                        \
-            hpx_exported_plugins_list_hpx_registry()->insert( std::make_pair(actname, w)); \
+            LIBGEODECOMP_HPX_PLUGIN_REGISTRY()->insert( std::make_pair(actname, w)); \
         }                                                               \
                                                                         \
         static hpx_plugin_exporter_registry instance;                   \

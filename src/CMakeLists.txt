@@ -33,16 +33,9 @@ endif()
 
 if(WITH_HPX)
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${HPX_INCLUDE_DIRS})
-  link_directories(${HPX_LIBRARY_DIR})
-  add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
+  add_definitions(${HPX_CXX_COMPILE_FLAGS})
   set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/src")
   set(HPXRUN "${HPX_PREFIX}/bin/hpxrun.py")
-
-  set(HPX_LIB_SUFFIX "")
-  if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
-    add_definitions(-DHPX_DEBUG)
-  endif()
 endif()
 
 if(WITH_MPI)
@@ -267,10 +260,13 @@ endif()
 # link 3rd party libraries to main lib and add them to pkg-config file down below
 set(LIBGEODECOMP_LINK_LIBRARIES ${ALL_BOOST_LIBS})
 if(WITH_HPX)
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DHPX_DEBUG)
+  endif()
   set(LIBGEODECOMP_LINK_LIBRARIES
     ${LIBGEODECOMP_LINK_LIBRARIES}
-    hpx${HPX_LIB_SUFFIX}
-    hpx_init${HPX_LIB_SUFFIX}
+    hpx
+    hpx_init
     ${HPX_LIBRARIES})
 endif()
 
