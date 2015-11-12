@@ -80,8 +80,13 @@ list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 # that we can ensure nothing gets added to LGD_AGGREGATED_CXX_FLAGS
 # later and hence lost for CUDA_NVCC_FLAGS
 if(WITH_CPP14)
-  set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -std=c++14")
-  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${LGD_AGGREGATED_CXX_FLAGS} -std=c++11")
+  # CUDA <= 7.5 is incompatible with C++14, so we resort to C++11 and
+  # hope nothing breaks:
+  if(WITH_CUDA)
+    set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -std=c++11")
+  else()
+    set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -std=c++14")
+  endif()
 endif()
 
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_AGGREGATED_C_FLAGS}")
