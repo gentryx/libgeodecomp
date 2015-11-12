@@ -7,6 +7,10 @@
 #include <cuda.h>
 #endif
 
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <libgeodecomp/communication/hpxserialization.h>
+#endif
+
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/cudaarray.h>
 #include <libgeodecomp/storage/defaultcudaarrayfilter.h>
