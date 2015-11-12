@@ -79,8 +79,7 @@ public:
     template<typename INITIALIZER>
     void addNewSimulation(std::string name, std::string typeOfSimulation, INITIALIZER initializer)
     {
-        if (typeOfSimulation == "SerialSimulation")
-        {
+        if (typeOfSimulation == "SerialSimulation") {
             SimFactoryPtr simFac_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
             SimulationPtr sim_p(new Simulation(
                     typeOfSimulation,
@@ -91,8 +90,7 @@ public:
         }
 
 #ifdef LIBGEODECOMP_WITH_THREADS
-        if (typeOfSimulation == "CacheBlockingSimulation")
-        {
+        if (typeOfSimulation == "CacheBlockingSimulation") {
             SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
             SimulationPtr sim_p(new Simulation(
                     typeOfSimulation,
@@ -105,8 +103,7 @@ public:
 
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
-         if (typeOfSimulation == "CudaSimulation")
-         {
+         if (typeOfSimulation == "CudaSimulation") {
             SimFactoryPtr simFac_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
             SimulationPtr sim_p(new Simulation(
                     typeOfSimulation,
@@ -171,7 +168,7 @@ public:
 
     void setParameters(SimulationParameters params, std::string name)
     {
-        if (isInMap(name)){
+        if (isInMap(name)) {
             simulations[name]->parameters = params;
         } else {
             throw std::invalid_argument(
@@ -181,21 +178,24 @@ public:
 
     void run()
     {
-       runTest(); 
+       runTest();
     }
 
     void runTest()
     {
         typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
-        for (IterType iter = simulations.begin(); iter != simulations.end(); iter++)
-        {
-            LOG(Logger::DBG, iter->first)
-            for (unsigned i = 0; i < writers.size(); ++i)
+
+        for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
+            LOG(Logger::DBG, iter->first);
+            for (unsigned i = 0; i < writers.size(); ++i) {
                 iter->second->simulationFactory->addWriter(*writers[i].get()->clone());
-            for (unsigned i = 0; i < parallelWriters.size(); ++i)
+            }
+            for (unsigned i = 0; i < parallelWriters.size(); ++i) {
                 iter->second->simulationFactory->addWriter(*parallelWriters[i].get()->clone());
-            for (unsigned i = 0; i < steerers.size(); ++i)
-                iter->second->simulationFactory->addSteerer(*steerers[i].get()->clone()); 
+            }
+            for (unsigned i = 0; i < steerers.size(); ++i) {
+                iter->second->simulationFactory->addSteerer(*steerers[i].get()->clone());
+            }
 
             OPTIMIZER_TYPE optimizer(iter->second->parameters);
             iter->second->parameters = optimizer(
@@ -206,7 +206,7 @@ public:
             LOG(Logger::DBG, "Result of the " << iter->second->simulationType
                 << ": " << iter->second->fitness << std::endl
                 << "new Parameters:"<< std::endl << iter->second->parameters
-                << std::endl)
+                << std::endl);
         }
     }
 

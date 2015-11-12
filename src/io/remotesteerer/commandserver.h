@@ -321,7 +321,8 @@ private:
             }
         }
         catch (std::exception& e) {
-            LOG(FATAL, "CommandServer::runServer() caught exception " << e.what() << ", exiting");
+            LOG(FATAL, "CommandServer::runServer() listening on port " << port
+                << " caught exception " << e.what() << ", exiting");
             return 1;
         }
 

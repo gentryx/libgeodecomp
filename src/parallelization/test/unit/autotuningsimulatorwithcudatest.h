@@ -11,6 +11,8 @@
 
 using namespace LibGeoDecomp;
 
+namespace LibGeoDecomp {
+
 class SimFabTestCell
 {
 public:
@@ -69,7 +71,6 @@ public:
         }
     }
 };
-namespace LibGeoDecomp {
 
 class AutotuningSimulatorWithCudaTest : public CxxTest::TestSuite
 {
@@ -137,6 +138,7 @@ public:
                 << ats.getFitness(*iter)<< std::endl
                 << ats.getSimulationParameters(*iter));
         }
+    }
 
     void testManuallyParamterized()
     {
