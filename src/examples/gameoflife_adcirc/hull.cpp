@@ -31,9 +31,9 @@ std::vector<FloatCoord<2> > convexHull(std::vector<FloatCoord<2> > *points)
         hull[k++] = points_sorted[i];
     }
 
-    for (long i = n - 2, t = k + 1; i >= 0; --i) {
-        while ((k >= t) &&
-               cross(hull[k-2], hull[k-1], points_sorted[i]) <=0) {
+    std::size_t t = k + 1;
+    for (long i = n - 2; i >= 0; --i) {
+        while ((k >= t) && cross(hull[k-2], hull[k-1], points_sorted[i]) <= 0) {
              --k;
         }
 

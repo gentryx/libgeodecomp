@@ -17,6 +17,7 @@ public:
     static const int DIM = Topology::DIM;
 
     using PatchProvider<GRID_TYPE>::storedNanoSteps;
+    using PatchProvider<GRID_TYPE>::get;
 
     SteererAdapter(
         boost::shared_ptr<Steerer<CELL_TYPE> > steerer,

@@ -182,6 +182,7 @@ public:
         using PatchProvider<GRID_TYPE>::checkNanoStepGet;
         using PatchProvider<GRID_TYPE>::infinity;
         using PatchProvider<GRID_TYPE>::storedNanoSteps;
+        using PatchProvider<GRID_TYPE>::get;
 
         inline
         Provider(

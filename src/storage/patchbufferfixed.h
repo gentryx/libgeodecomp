@@ -28,6 +28,7 @@ public:
     using PatchAccepter<GRID_TYPE1>::requestedNanoSteps;
     using PatchProvider<GRID_TYPE2>::checkNanoStepGet;
     using PatchProvider<GRID_TYPE2>::storedNanoSteps;
+    using PatchProvider<GRID_TYPE2>::get;
 
     explicit PatchBufferFixed(const Region<DIM>& region = Region<DIM>()) :
         region(region),
