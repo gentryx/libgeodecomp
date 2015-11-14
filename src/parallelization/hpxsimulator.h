@@ -67,7 +67,7 @@ public:
         LoadBalancer *balancer = 0,
         const unsigned loadBalancingPeriod = 1,
         const unsigned ghostZoneWidth = 1,
-        std::string basename = "/0/fixme/HPXSimulator") :
+        std::string basename = "/HPXSimulator") :
         ParentType(initializer),
         updateGroupSpeeds(updateGroupSpeeds),
         balancer(balancer),

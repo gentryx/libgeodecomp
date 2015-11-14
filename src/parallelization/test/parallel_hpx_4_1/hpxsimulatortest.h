@@ -152,7 +152,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
-            "/0/fixme/HpxSimulatorTest/testBasic");
+            "/HpxSimulatorTest/testBasic");
 
         MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(events, outputFrequency);
         sim.addWriter(writer);
@@ -190,7 +190,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
-            "/0/fixme/HpxSimulatorTest/testHeterogeneous");
+            "/HpxSimulatorTest/testHeterogeneous");
 
         MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(events, outputFrequency);
         sim.addWriter(writer);
@@ -228,7 +228,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
-            "/0/fixme/HpxSimulatorTest/testWithTestCell2D");
+            "/HpxSimulatorTest/testWithTestCell2D");
 
         MockWriter<TestCell<2> > *writer = new MockWriter<TestCell<2> >(events, outputFrequency);
         sim.addWriter(writer);
@@ -269,7 +269,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
-            "/0/fixme/HpxSimulatorTest/testWithTestCell3DHeterogeneous");
+            "/HpxSimulatorTest/testWithTestCell3DHeterogeneous");
 
         MockWriter<TestCell<3>> *writer = new MockWriter<TestCell<3>>(events, outputFrequency);
         sim.addWriter(writer);
@@ -310,7 +310,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
-            "/0/fixme/HpxSimulatorTest/testStepAndGetStep");
+            "/HpxSimulatorTest/testStepAndGetStep");
 
         TS_ASSERT_EQUALS(startStep + 0, sim.getStep());
 

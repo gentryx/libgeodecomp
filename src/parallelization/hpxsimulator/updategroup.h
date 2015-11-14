@@ -48,7 +48,7 @@ public:
         PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
         PatchProviderVec patchProvidersGhost = PatchProviderVec(),
         PatchProviderVec patchProvidersInner = PatchProviderVec(),
-        std::string basename = "/0/fixme_HPXSimulator::UpdateGroup",
+        std::string basename = "/HPXSimulator::UpdateGroup",
         int rank = hpx::get_locality_id()) :
         ghostZoneWidth(ghostZoneWidth),
         initializer(initializer),
