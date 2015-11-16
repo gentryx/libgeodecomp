@@ -65,7 +65,8 @@ public:
         std::vector<CARGO> vec;
         vec.reserve(size);
 
-        hpx::lcos::broadcast_apply<typename HPXReceiver::receiveAction>(ids, rank, data);
+        hpx::future<void> future = hpx::lcos::broadcast<typename HPXReceiver::receiveAction>(ids, rank, data);
+        future.wait();
 
         for (std::size_t i = 0; i < size; ++i) {
             vec << receiver->get(i).get();

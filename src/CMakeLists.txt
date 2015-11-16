@@ -43,6 +43,12 @@ if(WITH_HPX)
     set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
     add_definitions(-DHPX_DEBUG)
   endif()
+
+  # export -O3 to users as running user applications with LibGeoDecomp
+  # and HPX 0.9.11 will crash otherwise. Weird.
+  if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -O3")
+  endif()
 endif()
 
 if(WITH_MPI)
