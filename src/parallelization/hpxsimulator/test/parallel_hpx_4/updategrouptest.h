@@ -15,6 +15,9 @@
 #include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
+typedef LibGeoDecomp::TestCell<2> TestCell2;
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(TestCell2)
+
 namespace LibGeoDecomp {
 
 namespace DummySimulatorHelpers {

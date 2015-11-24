@@ -218,6 +218,8 @@ FloatCoord<2> DomainCell::quadrantDim;
 // regular grid currently required by LGD
 typedef ContainerCell<DomainCell, 1000> ContainerCellType;
 
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(ContainerCellType)
+
 // type definition required for callback functions below
 typedef LibGeoDecomp::TopologiesHelpers::Topology<2, false, false, false > TopologyType;
 typedef LibGeoDecomp::Grid<ContainerCellType, TopologyType> GridType;

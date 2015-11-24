@@ -53,6 +53,13 @@ public:
     }
 };
 
+typedef TestCell<2> TestCell2;
+typedef TestCell<3> TestCell3;
+
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(ConwayCell)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(TestCell2)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(TestCell3)
+
 class CellInitializer : public SimpleInitializer<ConwayCell>
 {
 public:

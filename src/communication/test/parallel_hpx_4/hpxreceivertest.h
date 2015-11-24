@@ -7,9 +7,15 @@
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/misc/stringops.h>
 
-typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
-typedef LibGeoDecomp::HPXReceiver<hpx::serialization::serialize_buffer<char> > ReceiverType2;
+typedef std::vector<int> Cargo1;
+typedef hpx::serialization::serialize_buffer<char> Cargo2;
+
+typedef LibGeoDecomp::HPXReceiver<Cargo1> ReceiverType1;
+typedef LibGeoDecomp::HPXReceiver<Cargo2> ReceiverType2;
 typedef LibGeoDecomp::HPXReceiver<double> ReceiverType3;
+
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(Cargo1)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(Cargo2)
 
 using namespace LibGeoDecomp;
 

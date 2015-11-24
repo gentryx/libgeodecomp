@@ -10,9 +10,20 @@
 #include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
-#include <libgeodecomp/communication/hpxcomponentregsitrationhelper.h>
 #include <libgeodecomp/misc/stringops.h>
 
+#define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CARGO)                      \
+    typedef LibGeoDecomp::HPXReceiver<CARGO>::receiveAction DummyReceiver_ ## CARGO ## _ReceiveAction; \
+    HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
+    HPX_REGISTER_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction);     \
+    typedef hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> > receiver_type_ ## CARGO; \
+    HPX_REGISTER_COMPONENT(receiver_type_ ## CARGO , DummyReceiver_ ## CARGO); \
+                                                                        \
+    typedef LibGeoDecomp::HPXReceiver<std::vector<CARGO> >::receiveAction DummyReceiver_vector_ ## CARGO ## _ReceiveAction; \
+    HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
+    HPX_REGISTER_ACTION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction);     \
+    typedef hpx::components::simple_component<LibGeoDecomp::HPXReceiver<std::vector<CARGO>> > receiver_type_vector_ ## CARGO; \
+    HPX_REGISTER_COMPONENT(receiver_type_vector_ ## CARGO , DummyReceiver_vector_ ## CARGO);
 
 namespace LibGeoDecomp {
 
@@ -25,8 +36,6 @@ public:
 
     static hpx::future<boost::shared_ptr<HPXReceiver> > make(const std::string& name, std::size_t rank = 0)
     {
-        HPXComponentRegistrator<HPXReceiver> thisEnsuresHPXRegistrationCodeIsRunPriorToComponentCreation;
-
         hpx::id_type id = hpx::new_<HPXReceiver>(hpx::find_here()).get();
         hpx::register_with_basename(name, id, rank).get();
         return hpx::get_ptr<HPXReceiver>(id);
@@ -91,12 +100,8 @@ public:
 
 private:
     Buffer buffer;
-
-    LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANTIATIONS(HPXReceiver);
 };
 
 }
-
-LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE(typename CARGO, LibGeoDecomp::HPXReceiver<CARGO>)
 
 #endif

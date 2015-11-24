@@ -46,6 +46,8 @@ public:
     }
 };
 
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(ConwayCell)
+
 class CellInitializer : public SimpleInitializer<ConwayCell>
 {
 public:
