@@ -1,3 +1,6 @@
+#include <libgeodecomp/config.h>
+
+#ifdef LIBGEODECOMP_WITH_HPX
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/geometry/coordbox.h>
 
@@ -10,3 +13,4 @@ LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(float)
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(int)
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBox2)
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBox3)
+#endif
