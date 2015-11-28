@@ -241,7 +241,7 @@ lgd_add_config_option(WITH_SCOTCH "Enables LibGeoDecomp to use Scotch and PT-Sco
 
 lgd_add_config_option(WITH_SILO "Silo is a flexible output library developed by LLNL." ${Silo_FOUND} true)
 
-lgd_add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
+lgd_add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" ${OpenMP_FOUND} true)
 
 lgd_add_config_option(WITH_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
