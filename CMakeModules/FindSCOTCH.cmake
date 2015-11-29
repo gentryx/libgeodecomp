@@ -15,6 +15,7 @@
 
 #=============================================================================
 # Copyright (C) 2010-2011 Garth N. Wells, Johannes Ring and Anders Logg
+# Copyright (C) 2015 Andreas Schaefer, Konstantin Kronfeldner
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -307,6 +308,51 @@ int main() {
 
       endif()
     endif()
+
+    if(NOT SCOTCH_TEST_RUNS)
+      if (NOT BZIP2_FOUND)
+        find_package(BZip2)
+      endif()
+
+      if (BZIP2_INCLUDE_DIR AND BZIP2_LIBRARIES)
+        set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${BZIP2_INCLUDE_DIR})
+        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${BZIP2_LIBRARIES})
+
+        message(STATUS "Performing test SCOTCH_BZIP2_TEST_RUNS")
+        try_run(
+          SCOTCH_BZIP2_TEST_LIB_EXITCODE
+          SCOTCH_BZIP2_TEST_LIB_COMPILED
+          ${CMAKE_CURRENT_BINARY_DIR}
+          ${SCOTCH_TEST_LIB_CPP}
+          CMAKE_FLAGS
+                  "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}"
+                  "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}"
+          COMPILE_OUTPUT_VARIABLE SCOTCH_BZIP2_TEST_LIB_COMPILE_OUTPUT
+          RUN_OUTPUT_VARIABLE SCOTCH_BZIP2_TEST_LIB_OUTPUT
+          )
+
+        # Add zlib flags if required and set test run to 'true'
+        if (SCOTCH_BZIP2_TEST_LIB_COMPILED AND SCOTCH_BZIP2_TEST_LIB_EXITCODE EQUAL 0)
+          message(STATUS "Performing test SCOTCH_BZIP2_TEST_RUNS - Success")
+          set(SCOTCH_INCLUDE_DIRS ${SCOTCH_INCLUDE_DIRS} ${BZIP2_INCLUDE_DIR})
+          set(SCOTCH_LIBRARIES ${SCOTCH_LIBRARIES} ${BZIP2_LIBRARIES})
+          set(SCOTCH_TEST_RUNS TRUE)
+        else()
+          message(STATUS "Performing test SCOTCH_BZIP2_TEST_RUNS - Failed")
+          if (SCOTCH_DEBUG)
+            message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                           "SCOTCH_BZIP2_TEST_LIB_COMPILED = ${SCOTCH_BZIP2_TEST_LIB_COMPILED}")
+            message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                           "SCOTCH_BZIP2_TEST_LIB_COMPILE_OUTPUT = ${SCOTCH_BZIP2_TEST_LIB_COMPILE_OUTPUT}")
+            message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                           "SCOTCH_TEST_LIB_EXITCODE = ${SCOTCH_TEST_LIB_EXITCODE}")
+            message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                           "SCOTCH_TEST_LIB_OUTPUT = ${SCOTCH_TEST_LIB_OUTPUT}")
+          endif()
+        endif()
+      endif()
+    endif()
+
   endif()
 endif()
 
