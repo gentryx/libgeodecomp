@@ -144,7 +144,7 @@ if(WITH_OPENCV AND NOT OpenCV_FOUND)
 endif()
 
 if(WITH_QT5 AND NOT QT5_FOUND)
-  message(FATAL_ERROR "WITH_QT5 selected, but could not find QT4")
+  message(FATAL_ERROR "WITH_QT5 selected, but could not find QT5")
 endif()
 
 if(WITH_SCOTCH AND NOT SCOTCH_FOUND)
