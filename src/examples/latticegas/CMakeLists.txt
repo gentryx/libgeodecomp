@@ -2,7 +2,7 @@ lgd_generate_sourcelists("./")
 set(RELATIVE_PATH "")
 include(auto.cmake)
 
-if (WITH_CUDA AND WITH_QT AND WITH_OPENCV)
+if (WITH_CUDA AND WITH_QT5 AND WITH_OPENCV)
   include(${QT_USE_FILE})
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")

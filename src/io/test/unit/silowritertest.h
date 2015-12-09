@@ -13,7 +13,7 @@
 #endif
 #endif
 
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
 
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:
@@ -278,7 +278,7 @@ class SiloWriterTest : public CxxTest::TestSuite
 public:
     void setUp()
     {
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
         int argc = 0;
         char **argv = 0;
         app.reset(new QApplication(argc, argv));
@@ -320,14 +320,14 @@ public:
         removeFile(siloFile2);
         removeFile(siloFile3);
 
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
         app.reset();
 #endif
     }
 
 #ifdef LIBGEODECOMP_WITH_SILO
 #ifdef LIBGEODECOMP_WITH_VISIT
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
 
     typedef std::map<QRgb, int> Histogram;
 
@@ -411,7 +411,7 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_SILO
 #ifdef LIBGEODECOMP_WITH_VISIT
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
 
         QColor white(255, 255, 255);
         QColor black(0, 0, 0);
@@ -512,7 +512,7 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_SILO
 #ifdef LIBGEODECOMP_WITH_VISIT
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
 
         // init grid
         Coord<2> dim(10, 5);
@@ -598,7 +598,7 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_SILO
 #ifdef LIBGEODECOMP_WITH_VISIT
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
 
         // init grid
         Coord<2> dim(2, 1);
@@ -729,7 +729,7 @@ public:
     }
 
 private:
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
     boost::shared_ptr<QApplication> app;
 #endif
     std::string prefix;

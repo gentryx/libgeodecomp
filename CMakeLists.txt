@@ -88,7 +88,7 @@ find_package(PythonLibs)
 find_package(Ruby)
 find_package(SCOTCH)
 find_package(Silo)
-find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
+find_package(Qt5 COMPONENTS OpenGL Gui Core)
 find_package(VisIt)
 
 
@@ -131,8 +131,8 @@ if(NOT DEFINED PYTHONLIBS_FOUND)
   set(PYTHONLIBS_FOUND false)
 endif()
 
-if(NOT DEFINED QT4_FOUND)
-  set(QT4_FOUND false)
+if(NOT DEFINED QT5_FOUND)
+  set(QT5_FOUND false)
 endif()
 
 if(NOT DEFINED RUBY_FOUND)
@@ -235,7 +235,7 @@ lgd_add_config_option(WITH_OPENCL "Enable modules for delegating to OpenCL devic
 
 lgd_add_config_option(WITH_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
 
-lgd_add_config_option(WITH_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
+lgd_add_config_option(WITH_QT5 "Build example codes which rely on QT5 for the GUI" ${QT5_FOUND} true)
 
 lgd_add_config_option(WITH_SCOTCH "Enables LibGeoDecomp to use Scotch and PT-Scotch for domain decomposition." ${SCOTCH_FOUND} true)
 

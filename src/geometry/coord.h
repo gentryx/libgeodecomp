@@ -31,7 +31,7 @@
 #include <boost/serialization/is_bitwise_serializable.hpp>
 #endif
 
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
 
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:
@@ -306,7 +306,7 @@ public:
         c[1] = ny;
     }
 
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
 
     inline Coord(const QSize& size)
     {

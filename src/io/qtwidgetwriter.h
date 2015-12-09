@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_IO_QTWIDGETWRITER_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
 
 #include <libgeodecomp/io/plotter.h>
 #include <libgeodecomp/io/writer.h>

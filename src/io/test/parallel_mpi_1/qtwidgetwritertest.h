@@ -4,7 +4,7 @@
 #include <libgeodecomp/io/qtwidgetwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
 
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:
@@ -62,7 +62,7 @@ class QtWidgetWriterTest : public CxxTest::TestSuite
 public:
     void testWithPalette()
     {
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
         int argc = 0;
         char **argv = 0;
         QApplication app(argc, argv);
@@ -119,7 +119,7 @@ public:
 
     void testWithQuickPalette()
     {
-#ifdef LIBGEODECOMP_WITH_QT
+#ifdef LIBGEODECOMP_WITH_QT5
         int argc = 0;
         char **argv = 0;
         QApplication app(argc, argv);

@@ -56,7 +56,7 @@ if(WITH_MPI)
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${MPI_INCLUDE_PATH})
 endif()
 
-if(WITH_QT)
+if(WITH_QT5)
   include(${QT_USE_FILE})
   add_definitions(-DQT_NO_KEYWORDS)
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${QT_HEADERS_DIR})
@@ -143,8 +143,8 @@ if(WITH_OPENCV AND NOT OpenCV_FOUND)
   message(FATAL_ERROR "WITH_OPENCV selected, but could not find OpenCV.")
 endif()
 
-if(WITH_QT AND NOT QT4_FOUND)
-  message(FATAL_ERROR "WITH_QT selected, but could not find QT4")
+if(WITH_QT5 AND NOT QT5_FOUND)
+  message(FATAL_ERROR "WITH_QT5 selected, but could not find QT4")
 endif()
 
 if(WITH_SCOTCH AND NOT SCOTCH_FOUND)
@@ -292,7 +292,7 @@ if(WITH_SCOTCH)
     ${SCOTCH_LIBRARIES})
 endif()
 
-if(WITH_QT)
+if(WITH_QT5)
   set(LIBGEODECOMP_LINK_LIBRARIES
     ${LIBGEODECOMP_LINK_LIBRARIES}
     ${QT_LIBRARIES})
