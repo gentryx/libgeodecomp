@@ -196,10 +196,15 @@ public:
     void gather(const float *ptr, const unsigned *offsets)
     {
         __m256i indices;
+        std::cout << "  gather1 " << offsets << " " << ptr << "\n";
         indices = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(offsets));
+        std::cout << "  gather2\n";
         val1    = _mm256_i32gather_ps(ptr, indices, 4);
+        std::cout << "  gather3\n";
         indices = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(offsets + 8));
+        std::cout << "  gather4\n";
         val2    = _mm256_i32gather_ps(ptr, indices, 4);
+        std::cout << "  gather5\n";
     }
 #else
     inline
