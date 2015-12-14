@@ -17,6 +17,8 @@
 #include <vector>
 #include <cstring>
 
+#include <typeinfo>
+
 #include "test.hpp"
 
 namespace LibFlatArray {
@@ -29,7 +31,7 @@ namespace LibFlatArray {
 template<typename CARGO, int ARITY>
 void testImplementationReal()
 {
-    std::cout << "testImplementationReal \n";
+    std::cout << "testImplementationReal " << ARITY << " " << typeid(CARGO).name() << " A\n";
     typedef short_vec<CARGO, ARITY> ShortVec;
     int numElements = ShortVec::ARITY * 10;
 
@@ -41,6 +43,7 @@ void testImplementationReal()
         vec1[i] = i + 0.1;
     }
 
+    std::cout << "testImplementationReal " << ARITY << " B\n";
     // test default c-tor:
     for (int i = 0; i < numElements; ++i) {
         BOOST_TEST(4711 == vec2[i]);
@@ -53,6 +56,7 @@ void testImplementationReal()
         BOOST_TEST(0 == vec2[i]);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " C\n";
     // tests vector load/store:
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -62,6 +66,7 @@ void testImplementationReal()
         TEST_REAL((i + 0.1), vec2[i]);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " D\n";
     // tests scalar load, vector add:
     ShortVec w = vec1[0];
 
@@ -73,6 +78,7 @@ void testImplementationReal()
         TEST_REAL((i + 0.2), vec2[i]);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " E\n";
     // tests +=
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -84,6 +90,7 @@ void testImplementationReal()
         TEST_REAL((2 * i + 0.3), vec2[i]);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " F\n";
     // test -
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -94,6 +101,7 @@ void testImplementationReal()
         TEST_REAL((-i - 0.2), vec2[i]);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " G\n";
     // test -=
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -105,6 +113,7 @@ void testImplementationReal()
         TEST_REAL((2 * i + 0.3), vec2[i]);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " H\n";
     // test *
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -116,6 +125,7 @@ void testImplementationReal()
         TEST_REAL(reference, vec2[i]);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " I\n";
     // test *=
     for (int i = 0; i < numElements; ++i) {
         vec2[i] = i + 0.2;
@@ -130,6 +140,7 @@ void testImplementationReal()
         TEST_REAL((i + 0.1) * (i + 0.2), vec2[i]);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " J\n";
     // test /
     for (int i = 0; i < numElements; ++i) {
         vec2[i] = i + 0.2;
@@ -145,6 +156,7 @@ void testImplementationReal()
         TEST_REAL_ACCURACY((i + 0.1) / (i + 0.2), vec2[i], 0.0025);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " K\n";
     // test /=
     for (int i = 0; i < numElements; ++i) {
         vec2[i] = i + 0.2;
@@ -161,6 +173,7 @@ void testImplementationReal()
         TEST_REAL_ACCURACY((i + 0.1) / (i + 0.2), vec2[i], 0.0025);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " L\n";
     // test sqrt()
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -171,6 +184,7 @@ void testImplementationReal()
         TEST_REAL_ACCURACY(std::sqrt(double(i + 0.1)), vec2[i], 0.0025);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " M\n";
     // test "/ sqrt()"
     for (int i = 0; i < numElements; ++i) {
         vec2[i] = i + 0.2;
@@ -186,6 +200,7 @@ void testImplementationReal()
         TEST_REAL_ACCURACY((i + 0.2) / std::sqrt(double(i + 0.1)), vec2[i], 0.0035);
     }
 
+    std::cout << "testImplementationReal " << ARITY << " N\n";
     // test string conversion
     for (int i = 0; i < ShortVec::ARITY; ++i) {
         vec1[i] = i + 0.1;
@@ -203,6 +218,7 @@ void testImplementationReal()
 
     BOOST_TEST(buf1.str() == buf2.str());
 
+    std::cout << "testImplementationReal " << ARITY << " O\n";
     // test gather
     {
         CARGO array[ARITY * 10];
@@ -231,6 +247,7 @@ void testImplementationReal()
         }
     }
 
+    std::cout << "testImplementationReal " << ARITY << " P\n";
 #ifdef LIBFLATARRAY_WITH_CPP14
     // test gather via initializer_list
     {
@@ -260,6 +277,7 @@ void testImplementationReal()
     }
 #endif
 
+    std::cout << "testImplementationReal " << ARITY << " R\n";
     // test scatter
     {
         ShortVec vec;
@@ -284,6 +302,7 @@ void testImplementationReal()
         }
     }
 
+    std::cout << "testImplementationReal " << ARITY << " S\n";
     // test non temporal stores
     {
         CARGO array[ARITY] __ALIGNED;
@@ -308,6 +327,7 @@ void testImplementationReal()
         }
     }
 
+    std::cout << "testImplementationReal " << ARITY << " T\n";
     // test aligned stores
     {
         CARGO array[ARITY] __ALIGNED;
@@ -332,6 +352,7 @@ void testImplementationReal()
         }
     }
 
+    std::cout << "testImplementationReal " << ARITY << " U\n";
     // test aligned loads
     {
         CARGO array[ARITY] __ALIGNED;
@@ -348,6 +369,7 @@ void testImplementationReal()
             TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
         }
     }
+    std::cout << "testImplementationReal " << ARITY << " V\n";
 }
 
 template<typename CARGO, int ARITY>

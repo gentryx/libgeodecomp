@@ -15,8 +15,8 @@ addons:
     - libboost1.55-all-dev
 
 compiler:
-    - gcc
     - clang
+    - gcc
 
 before_script:
     - mkdir build
