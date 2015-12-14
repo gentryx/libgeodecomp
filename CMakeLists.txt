@@ -91,7 +91,6 @@ find_package(Silo)
 find_package(Qt5 COMPONENTS OpenGL Gui Core)
 find_package(VisIt)
 
-
 # if a package was not found it's safer to set the corresponding
 # variable to false, this avoids undefined/unintended behavior in some
 # cases.
