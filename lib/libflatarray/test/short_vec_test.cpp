@@ -226,12 +226,14 @@ void testImplementationReal()
         CARGO actual[ARITY];
         CARGO expected[ARITY];
         std::memset(array, '\0', sizeof(CARGO) * ARITY * 10);
+        std::cout << "testImplementationReal " << ARITY << " O1\n";
 
         for (int i = 0; i < ARITY * 10; ++i) {
             if (i % 10 == 0) {
                 array[i] = i * 0.75;
             }
         }
+        std::cout << "testImplementationReal " << ARITY << " O2\n";
 
         for (int i = 0; i < ARITY; ++i) {
             indices[i] = i * 10;
@@ -239,7 +241,9 @@ void testImplementationReal()
         }
 
         ShortVec vec;
+        std::cout << "testImplementationReal " << ARITY << " O3\n";
         vec.gather(array, indices);
+        std::cout << "testImplementationReal " << ARITY << " O4\n";
         actual << vec;
 
         for (int i = 0; i < ARITY; ++i) {
