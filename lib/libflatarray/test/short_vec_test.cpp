@@ -1,5 +1,6 @@
 /**
- * Copyright 2013 - 2014 Andreas Schäfer, Di Xiao
+ * Copyright 2013 - 2015 Andreas Schäfer
+ * Copyright 2015 Di Xiao
  * Copyright 2015 Kurt Kanzenbach
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -31,8 +32,8 @@ namespace LibFlatArray {
 template<typename CARGO, int ARITY>
 void testImplementationReal()
 {
-    std::cout << "testImplementationReal " << ARITY << " " << typeid(CARGO).name() << " A\n";
     typedef short_vec<CARGO, ARITY> ShortVec;
+    std::cout << "testImplementationReal " << ARITY << " " << typeid(CARGO).name() << " strategy: " << ShortVec::strategy() << " A\n";
     int numElements = ShortVec::ARITY * 10;
 
     std::vector<CARGO> vec1(numElements);
