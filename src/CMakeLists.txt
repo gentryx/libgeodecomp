@@ -56,12 +56,6 @@ if(WITH_MPI)
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${MPI_INCLUDE_PATH})
 endif()
 
-if(WITH_QT5)
-  include(${QT_USE_FILE})
-  add_definitions(-DQT_NO_KEYWORDS)
-  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${QT_HEADERS_DIR})
-endif()
-
 if(WITH_SCOTCH)
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${SCOTCH_INCLUDE_DIRS})
 endif()
@@ -143,8 +137,8 @@ if(WITH_OPENCV AND NOT OpenCV_FOUND)
   message(FATAL_ERROR "WITH_OPENCV selected, but could not find OpenCV.")
 endif()
 
-if(WITH_QT5 AND NOT QT5_FOUND)
-  message(FATAL_ERROR "WITH_QT5 selected, but could not find QT5")
+if(WITH_QT5 AND NOT Qt5_FOUND)
+  message(FATAL_ERROR "WITH_QT5 selected, but could not find Qt5")
 endif()
 
 if(WITH_SCOTCH AND NOT SCOTCH_FOUND)

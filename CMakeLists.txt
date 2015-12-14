@@ -131,8 +131,8 @@ if(NOT DEFINED PYTHONLIBS_FOUND)
   set(PYTHONLIBS_FOUND false)
 endif()
 
-if(NOT DEFINED QT5_FOUND)
-  set(QT5_FOUND false)
+if(NOT DEFINED Qt5_FOUND)
+  set(Qt5_FOUND false)
 endif()
 
 if(NOT DEFINED RUBY_FOUND)
@@ -235,7 +235,7 @@ lgd_add_config_option(WITH_OPENCL "Enable modules for delegating to OpenCL devic
 
 lgd_add_config_option(WITH_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
 
-lgd_add_config_option(WITH_QT5 "Build example codes which rely on QT5 for the GUI" ${QT5_FOUND} true)
+lgd_add_config_option(WITH_QT5 "Build example codes which rely on QT5 for the GUI" ${Qt5_FOUND} true)
 
 lgd_add_config_option(WITH_SCOTCH "Enables LibGeoDecomp to use Scotch and PT-Scotch for domain decomposition." ${SCOTCH_FOUND} true)
 
