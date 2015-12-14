@@ -29,6 +29,7 @@ namespace LibFlatArray {
 template<typename CARGO, int ARITY>
 void testImplementationReal()
 {
+    std::cout << "testImplementationReal \n";
     typedef short_vec<CARGO, ARITY> ShortVec;
     int numElements = ShortVec::ARITY * 10;
 
@@ -352,6 +353,7 @@ void testImplementationReal()
 template<typename CARGO, int ARITY>
 void testImplementationInt()
 {
+    std::cout << "testImplementationInt \n";
     typedef short_vec<CARGO, ARITY> ShortVec;
     const int numElements = ShortVec::ARITY * 10;
 
@@ -673,6 +675,7 @@ void testImplementationInt()
 
 ADD_TEST(TestBasic)
 {
+    std::cout << "testbasic1\n";
     testImplementationReal<double, 1>();
     testImplementationReal<double, 2>();
     testImplementationReal<double, 4>();
@@ -680,6 +683,7 @@ ADD_TEST(TestBasic)
     testImplementationReal<double, 16>();
     testImplementationReal<double, 32>();
 
+    std::cout << "testbasic2\n";
     testImplementationReal<float, 1>();
     testImplementationReal<float, 2>();
     testImplementationReal<float, 4>();
@@ -687,12 +691,14 @@ ADD_TEST(TestBasic)
     testImplementationReal<float, 16>();
     testImplementationReal<float, 32>();
 
+    std::cout << "testbasic3\n";
     testImplementationInt<int, 1>();
     testImplementationInt<int, 2>();
     testImplementationInt<int, 4>();
     testImplementationInt<int, 8>();
     testImplementationInt<int, 16>();
     testImplementationInt<int, 32>();
+    std::cout << "testbasic4\n";
 }
 
 template<typename STRATEGY>
@@ -701,6 +707,7 @@ void checkForStrategy(STRATEGY, STRATEGY)
 
 ADD_TEST(TestImplementationStrategyDouble)
 {
+    std::cout << "testimplementationstrategydouble1\n";
 #define EXPECTED_TYPE short_vec_strategy::scalar
     checkForStrategy(short_vec<double, 1>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
@@ -870,10 +877,12 @@ checkForStrategy(short_vec<float, 4>::strategy(), EXPECTED_TYPE());
 #endif
     checkForStrategy(short_vec<float, 32>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
+    std::cout << "testimplementationstrategydouble2\n";
 }
 
 ADD_TEST(TestImplementationStrategyInt)
 {
+    std::cout << "testimplementationstrategyint1\n";
 #define EXPECTED_TYPE short_vec_strategy::scalar
     checkForStrategy(short_vec<int, 1>::strategy(), EXPECTED_TYPE());
     checkForStrategy(short_vec<int, 2>::strategy(), EXPECTED_TYPE());
@@ -926,6 +935,7 @@ ADD_TEST(TestImplementationStrategyInt)
 #endif
     checkForStrategy(short_vec<int, 32>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
+    std::cout << "testimplementationstrategyint2\n";
 }
 
 template<typename SHORT_VEC>
@@ -940,6 +950,7 @@ void scaler(int *i, int endX, double *data, double factor)
 
 ADD_TEST(TestLoopPeeler)
 {
+    std::cout << "testlooppeeler1\n";
     std::vector<double> foo;
     for (int i = 0; i < 123; ++i) {
         foo.push_back(1000 + i);
@@ -956,6 +967,7 @@ ADD_TEST(TestLoopPeeler)
 
         BOOST_TEST(expected == foo[i]);
     }
+    std::cout << "testlooppeeler2\n";
 }
 
 }
