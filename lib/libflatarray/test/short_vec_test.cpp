@@ -33,7 +33,8 @@ template<typename CARGO, int ARITY>
 void testImplementationReal()
 {
     typedef short_vec<CARGO, ARITY> ShortVec;
-    std::cout << "testImplementationReal " << ARITY << " " << typeid(CARGO).name() << " strategy: " << ShortVec::strategy() << " A\n";
+    typedef typename ShortVec::strategy Strategy;
+    std::cout << "testImplementationReal " << ARITY << " " << typeid(CARGO).name() << " strategy: " << typeid(Strategy).name() << " A\n";
     int numElements = ShortVec::ARITY * 10;
 
     std::vector<CARGO> vec1(numElements);
