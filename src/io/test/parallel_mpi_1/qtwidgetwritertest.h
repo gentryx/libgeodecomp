@@ -12,7 +12,7 @@
 #pragma warning (disable: 2304)
 #endif
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 
 #ifdef __ICC
 #pragma warning pop

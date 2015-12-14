@@ -21,9 +21,9 @@
 #pragma warning (disable: 2304)
 #endif
 
-#include <QtGui/QApplication>
 #include <QtGui/QColor>
 #include <QtGui/QImage>
+#include <QtWidgets/QApplication>
 
 #ifdef __ICC
 #pragma warning pop

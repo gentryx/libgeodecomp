@@ -18,7 +18,7 @@
 
 #include <QtGui/QResizeEvent>
 #include <QtGui/QPainter>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #ifdef __ICC
 #pragma warning pop
