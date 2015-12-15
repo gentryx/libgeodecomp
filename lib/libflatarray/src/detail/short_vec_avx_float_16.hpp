@@ -15,8 +15,6 @@
 #include <libflatarray/detail/short_vec_helpers.hpp>
 #include <libflatarray/config.h>
 
-#include <iostream>
-
 #ifdef LIBFLATARRAY_WITH_CPP14
 #include <initializer_list>
 #endif

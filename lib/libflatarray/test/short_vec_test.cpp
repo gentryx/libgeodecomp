@@ -19,8 +19,6 @@
 #include <vector>
 #include <cstring>
 
-#include <typeinfo>
-
 #include "test.hpp"
 
 namespace LibFlatArray {
@@ -29,8 +27,6 @@ template<typename CARGO, int ARITY>
 void testImplementationReal()
 {
     typedef short_vec<CARGO, ARITY> ShortVec;
-    typedef typename ShortVec::strategy Strategy;
-    std::cout << "testImplementationReal " << ARITY << " " << typeid(CARGO).name() << " strategy: " << typeid(Strategy).name() << " A\n";
     int numElements = ShortVec::ARITY * 10;
 
     std::vector<CARGO> vec1(numElements);
@@ -41,7 +37,6 @@ void testImplementationReal()
         vec1[i] = i + 0.1;
     }
 
-    std::cout << "testImplementationReal " << ARITY << " B\n";
     // test default c-tor:
     for (int i = 0; i < numElements; ++i) {
         BOOST_TEST(4711 == vec2[i]);
@@ -54,7 +49,6 @@ void testImplementationReal()
         BOOST_TEST(0 == vec2[i]);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " C\n";
     // tests vector load/store:
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -64,7 +58,6 @@ void testImplementationReal()
         TEST_REAL((i + 0.1), vec2[i]);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " D\n";
     // tests scalar load, vector add:
     ShortVec w = vec1[0];
 
@@ -76,7 +69,6 @@ void testImplementationReal()
         TEST_REAL((i + 0.2), vec2[i]);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " E\n";
     // tests +=
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -88,7 +80,6 @@ void testImplementationReal()
         TEST_REAL((2 * i + 0.3), vec2[i]);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " F\n";
     // test -
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -99,7 +90,6 @@ void testImplementationReal()
         TEST_REAL((-i - 0.2), vec2[i]);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " G\n";
     // test -=
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -111,7 +101,6 @@ void testImplementationReal()
         TEST_REAL((2 * i + 0.3), vec2[i]);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " H\n";
     // test *
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -123,7 +112,6 @@ void testImplementationReal()
         TEST_REAL(reference, vec2[i]);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " I\n";
     // test *=
     for (int i = 0; i < numElements; ++i) {
         vec2[i] = i + 0.2;
@@ -138,7 +126,6 @@ void testImplementationReal()
         TEST_REAL((i + 0.1) * (i + 0.2), vec2[i]);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " J\n";
     // test /
     for (int i = 0; i < numElements; ++i) {
         vec2[i] = i + 0.2;
@@ -154,7 +141,6 @@ void testImplementationReal()
         TEST_REAL_ACCURACY((i + 0.1) / (i + 0.2), vec2[i], 0.0025);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " K\n";
     // test /=
     for (int i = 0; i < numElements; ++i) {
         vec2[i] = i + 0.2;
@@ -171,7 +157,6 @@ void testImplementationReal()
         TEST_REAL_ACCURACY((i + 0.1) / (i + 0.2), vec2[i], 0.0025);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " L\n";
     // test sqrt()
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -182,7 +167,6 @@ void testImplementationReal()
         TEST_REAL_ACCURACY(std::sqrt(double(i + 0.1)), vec2[i], 0.0025);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " M\n";
     // test "/ sqrt()"
     for (int i = 0; i < numElements; ++i) {
         vec2[i] = i + 0.2;
@@ -198,7 +182,6 @@ void testImplementationReal()
         TEST_REAL_ACCURACY((i + 0.2) / std::sqrt(double(i + 0.1)), vec2[i], 0.0035);
     }
 
-    std::cout << "testImplementationReal " << ARITY << " N\n";
     // test string conversion
     for (int i = 0; i < ShortVec::ARITY; ++i) {
         vec1[i] = i + 0.1;
@@ -216,7 +199,6 @@ void testImplementationReal()
 
     BOOST_TEST(buf1.str() == buf2.str());
 
-    std::cout << "testImplementationReal " << ARITY << " O\n";
     // test gather
     {
         CARGO array[ARITY * 10];
@@ -224,14 +206,12 @@ void testImplementationReal()
         CARGO actual[ARITY];
         CARGO expected[ARITY];
         std::memset(array, '\0', sizeof(CARGO) * ARITY * 10);
-        std::cout << "testImplementationReal " << ARITY << " O1\n";
 
         for (int i = 0; i < ARITY * 10; ++i) {
             if (i % 10 == 0) {
                 array[i] = i * 0.75;
             }
         }
-        std::cout << "testImplementationReal " << ARITY << " O2\n";
 
         for (int i = 0; i < ARITY; ++i) {
             indices[i] = i * 10;
@@ -239,9 +219,7 @@ void testImplementationReal()
         }
 
         ShortVec vec;
-        std::cout << "testImplementationReal " << ARITY << " O3\n";
         vec.gather(array, &indices[0]);
-        std::cout << "testImplementationReal " << ARITY << " O4\n";
         actual << vec;
 
         for (int i = 0; i < ARITY; ++i) {
@@ -249,7 +227,6 @@ void testImplementationReal()
         }
     }
 
-    std::cout << "testImplementationReal " << ARITY << " P\n";
 #ifdef LIBFLATARRAY_WITH_CPP14
     // test gather via initializer_list
     {
@@ -279,7 +256,6 @@ void testImplementationReal()
     }
 #endif
 
-    std::cout << "testImplementationReal " << ARITY << " R\n";
     // test scatter
     {
         ShortVec vec;
@@ -304,7 +280,6 @@ void testImplementationReal()
         }
     }
 
-    std::cout << "testImplementationReal " << ARITY << " S\n";
     // test non temporal stores
     {
         std::vector<CARGO, aligned_allocator<CARGO, 64> > array(ARITY);
@@ -329,7 +304,6 @@ void testImplementationReal()
         }
     }
 
-    std::cout << "testImplementationReal " << ARITY << " T\n";
     // test aligned stores
     {
         std::vector<CARGO, aligned_allocator<CARGO, 64> > array(ARITY);
@@ -354,7 +328,6 @@ void testImplementationReal()
         }
     }
 
-    std::cout << "testImplementationReal " << ARITY << " U\n";
     // test aligned loads
     {
         std::vector<CARGO, aligned_allocator<CARGO, 64> > array(ARITY);
@@ -371,13 +344,11 @@ void testImplementationReal()
             TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
         }
     }
-    std::cout << "testImplementationReal " << ARITY << " V\n";
 }
 
 template<typename CARGO, int ARITY>
 void testImplementationInt()
 {
-    std::cout << "testImplementationInt \n";
     typedef short_vec<CARGO, ARITY> ShortVec;
     const int numElements = ShortVec::ARITY * 10;
 
@@ -699,7 +670,6 @@ void testImplementationInt()
 
 ADD_TEST(TestBasic)
 {
-    std::cout << "testbasic1\n";
     testImplementationReal<double, 1>();
     testImplementationReal<double, 2>();
     testImplementationReal<double, 4>();
@@ -707,7 +677,6 @@ ADD_TEST(TestBasic)
     testImplementationReal<double, 16>();
     testImplementationReal<double, 32>();
 
-    std::cout << "testbasic2\n";
     testImplementationReal<float, 1>();
     testImplementationReal<float, 2>();
     testImplementationReal<float, 4>();
@@ -715,14 +684,12 @@ ADD_TEST(TestBasic)
     testImplementationReal<float, 16>();
     testImplementationReal<float, 32>();
 
-    std::cout << "testbasic3\n";
     testImplementationInt<int, 1>();
     testImplementationInt<int, 2>();
     testImplementationInt<int, 4>();
     testImplementationInt<int, 8>();
     testImplementationInt<int, 16>();
     testImplementationInt<int, 32>();
-    std::cout << "testbasic4\n";
 }
 
 template<typename STRATEGY>
@@ -731,7 +698,6 @@ void checkForStrategy(STRATEGY, STRATEGY)
 
 ADD_TEST(TestImplementationStrategyDouble)
 {
-    std::cout << "testimplementationstrategydouble1\n";
 #define EXPECTED_TYPE short_vec_strategy::scalar
     checkForStrategy(short_vec<double, 1>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
@@ -901,12 +867,10 @@ checkForStrategy(short_vec<float, 4>::strategy(), EXPECTED_TYPE());
 #endif
     checkForStrategy(short_vec<float, 32>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
-    std::cout << "testimplementationstrategydouble2\n";
 }
 
 ADD_TEST(TestImplementationStrategyInt)
 {
-    std::cout << "testimplementationstrategyint1\n";
 #define EXPECTED_TYPE short_vec_strategy::scalar
     checkForStrategy(short_vec<int, 1>::strategy(), EXPECTED_TYPE());
     checkForStrategy(short_vec<int, 2>::strategy(), EXPECTED_TYPE());
@@ -959,7 +923,6 @@ ADD_TEST(TestImplementationStrategyInt)
 #endif
     checkForStrategy(short_vec<int, 32>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
-    std::cout << "testimplementationstrategyint2\n";
 }
 
 template<typename SHORT_VEC>
@@ -974,7 +937,6 @@ void scaler(int *i, int endX, double *data, double factor)
 
 ADD_TEST(TestLoopPeeler)
 {
-    std::cout << "testlooppeeler1\n";
     std::vector<double> foo;
     for (int i = 0; i < 123; ++i) {
         foo.push_back(1000 + i);
@@ -991,7 +953,6 @@ ADD_TEST(TestLoopPeeler)
 
         BOOST_TEST(expected == foo[i]);
     }
-    std::cout << "testlooppeeler2\n";
 }
 
 }
