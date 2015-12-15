@@ -25,11 +25,6 @@
 
 namespace LibFlatArray {
 
-// maximum alignment needed for AVX512 is currently 64 bytes
-#ifndef __ALIGNED
-#define __ALIGNED __attribute__ ((aligned (64)))
-#endif
-
 template<typename CARGO, int ARITY>
 void testImplementationReal()
 {
@@ -290,7 +285,7 @@ void testImplementationReal()
         ShortVec vec;
         CARGO array[ARITY * 10];
         CARGO expected[ARITY * 10];
-        unsigned indices[ARITY] __ALIGNED;
+        std::vector<unsigned, aligned_allocator<unsigned, 64> > indices(ARITY);
         std::memset(array,    '\0', sizeof(CARGO) * ARITY * 10);
         std::memset(expected, '\0', sizeof(CARGO) * ARITY * 10);
         for (int i = 0; i < ARITY * 10; ++i) {
@@ -302,8 +297,8 @@ void testImplementationReal()
             indices[i] = i * 10;
         }
 
-        vec.gather(expected, indices);
-        vec.scatter(array, indices);
+        vec.gather(expected, &indices[0]);
+        vec.scatter(array, &indices[0]);
         for (int i = 0; i < ARITY * 10; ++i) {
             TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
         }
@@ -312,14 +307,14 @@ void testImplementationReal()
     std::cout << "testImplementationReal " << ARITY << " S\n";
     // test non temporal stores
     {
-        CARGO array[ARITY] __ALIGNED;
-        CARGO expected[ARITY] __ALIGNED;
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > array(ARITY);
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > expected(ARITY);
 
         for (int i = 0; i < ARITY; ++i) {
             expected[i] = 5.0;
         }
         ShortVec v1 = 5.0;
-        v1.store_nt(array);
+        v1.store_nt(&array[0]);
         for (int i = 0; i < ARITY; ++i) {
             TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
         }
@@ -327,8 +322,8 @@ void testImplementationReal()
         for (int i = 0; i < ARITY; ++i) {
             expected[i] = i + 0.1;
         }
-        ShortVec v2 = expected;
-        v2.store_nt(array);
+        ShortVec v2 = &expected[0];
+        v2.store_nt(&array[0]);
         for (int i = 0; i < ARITY; ++i) {
             TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
         }
@@ -337,14 +332,14 @@ void testImplementationReal()
     std::cout << "testImplementationReal " << ARITY << " T\n";
     // test aligned stores
     {
-        CARGO array[ARITY] __ALIGNED;
-        CARGO expected[ARITY] __ALIGNED;
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > array(ARITY);
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > expected(ARITY);
 
         for (int i = 0; i < ARITY; ++i) {
             expected[i] = 5.0;
         }
         ShortVec v1 = 5.0;
-        v1.store_aligned(array);
+        v1.store_aligned(&array[0]);
         for (int i = 0; i < ARITY; ++i) {
             TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
         }
@@ -352,8 +347,8 @@ void testImplementationReal()
         for (int i = 0; i < ARITY; ++i) {
             expected[i] = i + 0.1;
         }
-        ShortVec v2 = expected;
-        v2.store_aligned(array);
+        ShortVec v2 = &expected[0];
+        v2.store_aligned(&array[0]);
         for (int i = 0; i < ARITY; ++i) {
             TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
         }
@@ -362,16 +357,16 @@ void testImplementationReal()
     std::cout << "testImplementationReal " << ARITY << " U\n";
     // test aligned loads
     {
-        CARGO array[ARITY] __ALIGNED;
-        CARGO expected[ARITY] __ALIGNED;
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > array(ARITY);
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > expected(ARITY);
 
         for (int i = 0; i < ARITY; ++i) {
             array[i]    = i + 0.1;
             expected[i] = 0;
         }
         ShortVec v1;
-        v1.load_aligned(array);
-        v1.store(expected);
+        v1.load_aligned(&array[0]);
+        v1.store(&expected[0]);
         for (int i = 0; i < ARITY; ++i) {
             TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
         }
@@ -558,7 +553,7 @@ void testImplementationInt()
     // test gather
     {
         CARGO array[ARITY * 10];
-        unsigned indices[ARITY] __ALIGNED;
+        std::vector<unsigned, aligned_allocator<unsigned, 64> > indices(ARITY);
         CARGO actual[ARITY];
         CARGO expected[ARITY];
         std::memset(array, '\0', sizeof(CARGO) * ARITY * 10);
@@ -575,7 +570,7 @@ void testImplementationInt()
         }
 
         ShortVec vec;
-        vec.gather(array, indices);
+        vec.gather(array, &indices[0]);
         actual << vec;
 
         for (int i = 0; i < ARITY; ++i) {
@@ -617,7 +612,7 @@ void testImplementationInt()
         ShortVec vec;
         CARGO array[ARITY * 10];
         CARGO expected[ARITY * 10];
-        unsigned indices[ARITY] __ALIGNED;
+        std::vector<unsigned, aligned_allocator<unsigned, 64> > indices(ARITY);
         std::memset(array,    '\0', sizeof(CARGO) * ARITY * 10);
         std::memset(expected, '\0', sizeof(CARGO) * ARITY * 10);
         for (int i = 0; i < ARITY * 10; ++i) {
@@ -629,8 +624,8 @@ void testImplementationInt()
             indices[i] = i * 10;
         }
 
-        vec.gather(expected, indices);
-        vec.scatter(array, indices);
+        vec.gather(expected, &indices[0]);
+        vec.scatter(array, &indices[0]);
         for (int i = 0; i < ARITY * 10; ++i) {
             BOOST_TEST_EQ(array[i], expected[i]);
         }
@@ -638,14 +633,14 @@ void testImplementationInt()
 
     // test non temporal stores
     {
-        CARGO array[ARITY] __ALIGNED;
-        CARGO expected[ARITY] __ALIGNED;
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > array(ARITY);
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > expected(ARITY);
 
         for (int i = 0; i < ARITY; ++i) {
             expected[i] = 5;
         }
         ShortVec v1 = 5;
-        v1.store_nt(array);
+        v1.store_nt(&array[0]);
         for (int i = 0; i < ARITY; ++i) {
             BOOST_TEST_EQ(array[i], expected[i]);
         }
@@ -653,8 +648,8 @@ void testImplementationInt()
         for (int i = 0; i < ARITY; ++i) {
             expected[i] = i;
         }
-        ShortVec v2 = expected;
-        v2.store_nt(array);
+        ShortVec v2 = &expected[0];
+        v2.store_nt(&array[0]);
         for (int i = 0; i < ARITY; ++i) {
             BOOST_TEST_EQ(array[i], expected[i]);
         }
@@ -662,14 +657,14 @@ void testImplementationInt()
 
     // test aligned stores
     {
-        CARGO array[ARITY] __ALIGNED;
-        CARGO expected[ARITY] __ALIGNED;
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > array(ARITY);
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > expected(ARITY);
 
         for (int i = 0; i < ARITY; ++i) {
             expected[i] = 5;
         }
         ShortVec v1 = 5;
-        v1.store_aligned(array);
+        v1.store_aligned(&array[0]);
         for (int i = 0; i < ARITY; ++i) {
             BOOST_TEST_EQ(array[i], expected[i]);
         }
@@ -677,8 +672,8 @@ void testImplementationInt()
         for (int i = 0; i < ARITY; ++i) {
             expected[i] = i;
         }
-        ShortVec v2 = expected;
-        v2.store_aligned(array);
+        ShortVec v2 = &expected[0];
+        v2.store_aligned(&array[0]);
         for (int i = 0; i < ARITY; ++i) {
             BOOST_TEST_EQ(array[i], expected[i]);
         }
@@ -686,16 +681,16 @@ void testImplementationInt()
 
     // test aligned loads
     {
-        CARGO array[ARITY] __ALIGNED;
-        CARGO expected[ARITY] __ALIGNED;
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > array(ARITY);
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > expected(ARITY);
 
         for (int i = 0; i < ARITY; ++i) {
             array[i]    = i;
             expected[i] = 0;
         }
         ShortVec v1;
-        v1.load_aligned(array);
-        v1.store(expected);
+        v1.load_aligned(&array[0]);
+        v1.store(&expected[0]);
         for (int i = 0; i < ARITY; ++i) {
             BOOST_TEST_EQ(array[i], expected[i]);
         }
