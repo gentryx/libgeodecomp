@@ -16,9 +16,10 @@
 #pragma warning (disable: 2304)
 #endif
 
-#include <QtGui/QResizeEvent>
+#include <QtGui/QBackingStore>
 #include <QtGui/QPainter>
-#include <QtWidgets/QWidget>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QWindow>
 
 #ifdef __ICC
 #pragma warning pop
@@ -35,17 +36,24 @@ namespace QtWidgetWriterHelpers {
 
 /**
  * Generic interface between Qt and LibGeoDecomp -- we need this class
- * as a Widget can't be a template class.
+ * as a QWindow can't be a template class.
  */
-class Widget : public QWidget
+class Window : public QWindow
 {
 public:
     friend class LibGeoDecomp::QtWidgetWriterTest;
 
-    Widget() :
+    Window(QWindow *parent = 0) :
+        QWindow(parent),
+        backingStore(new QBackingStore(this)),
         curImage(0, 0, QImage::Format_ARGB32),
         bufImage(0, 0, QImage::Format_ARGB32)
     {}
+
+    ~Window()
+    {
+        delete backingStore;
+    }
 
     void resizeImage(const Coord<2>& imageSize)
     {
@@ -55,10 +63,28 @@ public:
         }
     }
 
-    void paintEvent(QPaintEvent *event)
+    void resizeEvent(QResizeEvent *event)
     {
-        QPainter painter(this);
-        painter.drawImage(event->rect(), curImage);
+        backingStore->resize(event->size());
+    }
+
+    bool event(QEvent *event)
+    {
+        // don't render 0-sized images
+        if ((width() == 0) || (height() == 0)) {
+            return true;
+        }
+
+        if ((event->type() == QEvent::Expose) ||
+            (event->type() == QEvent::Paint) ||
+            (event->type() == QEvent::Resize) ||
+            (event->type() == QEvent::UpdateRequest)) {
+            QPaintDevice *device = backingStore->paintDevice();
+            QPainter painter(device);
+            painter.drawImage(curImage.rect(), curImage);
+        }
+
+        return true;
     }
 
     Coord<2> dimensions() const
@@ -77,6 +103,7 @@ public:
     }
 
 private:
+    QBackingStore *backingStore;
     QImage curImage;
     QImage bufImage;
 };
@@ -144,7 +171,7 @@ public:
         Clonable<Writer<CELL_TYPE>, QtWidgetWriter<CELL_TYPE, CELL_PLOTTER> >("", period),
         plotter(cellDimensions, CELL_PLOTTER(member, QuickPalette<MEMBER>(minValue, maxValue))),
         cellDimensions(cellDimensions),
-        myWidget(new QtWidgetWriterHelpers::Widget)
+        myWindow(new QtWidgetWriterHelpers::Window)
     {}
 
     /**
@@ -161,7 +188,7 @@ public:
         Clonable<Writer<CELL_TYPE>, QtWidgetWriter<CELL_TYPE, CELL_PLOTTER> >("", period),
         plotter(cellDimensions, CELL_PLOTTER(member, palette)),
         cellDimensions(cellDimensions),
-        myWidget(new QtWidgetWriterHelpers::Widget)
+        myWindow(new QtWidgetWriterHelpers::Window)
     {}
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
@@ -170,30 +197,28 @@ public:
         Coord<2> imageSize(
             gridDim.x() * cellDimensions.x(),
             gridDim.y() * cellDimensions.y());
-        myWidget->resizeImage(imageSize);
-
-        QPainter qPainter(myWidget->getImage());
+        myWindow->resizeImage(imageSize);
 
         {
+            QPainter qPainter(myWindow->getImage());
             QtWidgetWriterHelpers::PainterWrapper painter(&qPainter);
-            CoordBox<2> viewport(Coord<2>(0, 0), myWidget->getImage()->size());
+            CoordBox<2> viewport(Coord<2>(0, 0), myWindow->getImage()->size());
             plotter.plotGridInViewport(grid, painter, viewport);
         }
-
-        myWidget->swapImages();
-        myWidget->update();
+        myWindow->swapImages();
+        myWindow->requestUpdate();
     }
 
-    boost::shared_ptr<QtWidgetWriterHelpers::Widget> widget()
+    boost::shared_ptr<QtWidgetWriterHelpers::Window> window()
     {
-        return myWidget;
+        return myWindow;
     }
 
 private:
     Plotter<CELL_TYPE, CELL_PLOTTER> plotter;
     Coord<2> cellDimensions;
     // we can't use multiple inheritance as Q_OBJECT doesn't support template classes.
-    boost::shared_ptr<QtWidgetWriterHelpers::Widget> myWidget;
+    boost::shared_ptr<QtWidgetWriterHelpers::Window> myWindow;
 };
 
 }
