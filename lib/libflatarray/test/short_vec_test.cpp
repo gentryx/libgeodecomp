@@ -8,6 +8,7 @@
  */
 
 #include <libflatarray/config.h>
+#include <libflatarray/aligned_allocator.hpp>
 #include <cmath>
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
@@ -224,7 +225,7 @@ void testImplementationReal()
     // test gather
     {
         CARGO array[ARITY * 10];
-        unsigned indices[ARITY] __ALIGNED;
+        std::vector<unsigned, aligned_allocator<unsigned, 64> > indices(ARITY);
         CARGO actual[ARITY];
         CARGO expected[ARITY];
         std::memset(array, '\0', sizeof(CARGO) * ARITY * 10);
@@ -244,7 +245,7 @@ void testImplementationReal()
 
         ShortVec vec;
         std::cout << "testImplementationReal " << ARITY << " O3\n";
-        vec.gather(array, indices);
+        vec.gather(array, &indices[0]);
         std::cout << "testImplementationReal " << ARITY << " O4\n";
         actual << vec;
 
