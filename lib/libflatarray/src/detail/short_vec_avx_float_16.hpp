@@ -208,7 +208,6 @@ public:
     void gather(const float *ptr, const unsigned *offsets)
     {
         __m128 tmp;
-        std::cout << "  gather1 " << offsets << " " << ptr << "\n";
         tmp  = _mm_load_ss(ptr + offsets[0]);
         SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[1], _MM_MK_INSERTPS_NDX(0,1,0));
         SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[2], _MM_MK_INSERTPS_NDX(0,2,0));
