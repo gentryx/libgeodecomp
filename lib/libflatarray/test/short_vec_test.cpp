@@ -244,7 +244,6 @@ void testImplementationReal()
 
         ShortVec vec;
         std::cout << "testImplementationReal " << ARITY << " O3\n";
-        std::cout << "  Agather1 " << indices << " " << array << "\n";
         vec.gather(array, indices);
         std::cout << "testImplementationReal " << ARITY << " O4\n";
         actual << vec;
