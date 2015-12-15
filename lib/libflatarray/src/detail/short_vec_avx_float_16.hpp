@@ -217,9 +217,8 @@ public:
         SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[5], _MM_MK_INSERTPS_NDX(0,1,0));
         SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[6], _MM_MK_INSERTPS_NDX(0,2,0));
         SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[7], _MM_MK_INSERTPS_NDX(0,3,0));
-        std::cout << "  Bgather4\n";
         val1 = _mm256_insertf128_ps(val1, tmp, 1);
-        std::cout << "  gather5\n";
+        std::cout << "  Bgather5\n";
         tmp  = _mm_load_ss(ptr + offsets[8]);
         SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[ 9], _MM_MK_INSERTPS_NDX(0,1,0));
         SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[10], _MM_MK_INSERTPS_NDX(0,2,0));
