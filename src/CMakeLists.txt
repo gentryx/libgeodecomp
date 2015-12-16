@@ -265,6 +265,9 @@ endif()
 
 # link 3rd party libraries to main lib and add them to pkg-config file down below
 set(LIBGEODECOMP_LINK_LIBRARIES ${ALL_BOOST_LIBS})
+# internal libraries which won't be exported externally
+set(LIBGEODECOMP_INTERNAL_LIBRARIES)
+
 if(WITH_HPX)
   set(LIBGEODECOMP_LINK_LIBRARIES
     ${LIBGEODECOMP_LINK_LIBRARIES}
@@ -292,8 +295,8 @@ if(WITH_SCOTCH)
 endif()
 
 if(WITH_QT5)
-  set(LIBGEODECOMP_LINK_LIBRARIES
-    ${LIBGEODECOMP_LINK_LIBRARIES}
+  set(LIBGEODECOMP_INTERNAL_LIBRARIES
+    ${LIBGEODECOMP_INTERNAL_LIBRARIES}
     ${Qt5Core_LIBRARIES}
     ${Qt5Gui_LIBRARIES}
     ${Qt5OpenGL_LIBRARIES})
@@ -323,7 +326,7 @@ if(WITH_VISIT)
   set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${VisIt_LIBRARIES} ${PYTHON_LIBRARIES} dl)
 endif()
 
-target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
+target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES} ${LIBGEODECOMP_INTERNAL_LIBRARIES})
 
 #============= 6. INSTALLER CONFIG ===================================
 install(
