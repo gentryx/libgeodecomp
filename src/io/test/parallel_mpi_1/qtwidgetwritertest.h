@@ -65,7 +65,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_QT5
         int argc = 0;
         char **argv = 0;
-        QApplication app(argc, argv);
+        QGuiApplication app(argc, argv);
 
         Coord<2> cellDim(10, 10);
         Palette<double> palette;
@@ -75,8 +75,8 @@ public:
         TS_ASSERT_EQUALS(palette[1.0], Color::YELLOW);
 
         QtWidgetWriter<MyQtTestCell> writer(&MyQtTestCell::temp, palette, cellDim);
-        boost::shared_ptr<QWidget> widget = writer.widget();
-        widget->resize(1200, 900);
+        boost::shared_ptr<QtWidgetWriterHelpers::Window> window = writer.window();
+        window->resize(1200, 900);
 
         Grid<MyQtTestCell> grid(Coord<2>(100, 50));
         for (int y = 0; y < 50; ++y) {
@@ -89,7 +89,7 @@ public:
         }
         writer.stepFinished(grid, 12, WRITER_INITIALIZED);
 
-        QImage& image = writer.widget()->curImage;
+        QImage *image = &window->curImage;
         for (int y = 0; y < 50; ++y) {
             for (int x = 0; x < 100; ++x) {
                 for (int tileY = 0; tileY < cellDim.y(); ++tileY) {
@@ -102,18 +102,19 @@ public:
                         int value = (xReal * xReal + yReal * yReal) * 0.5 * 255;
 
                         // blue
-                        TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 0], 0);
+                        TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 0], 0);
                         // green
-                        TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 1], value);
+                        TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 1], value);
                         // red (account for rounding errors)
-                        TS_ASSERT(image.scanLine(logicalY)[4 * logicalX + 2] >= 254);
-                        TS_ASSERT(image.scanLine(logicalY)[4 * logicalX + 2] <= 255);
+                        TS_ASSERT(image->scanLine(logicalY)[4 * logicalX + 2] >= 254);
+                        TS_ASSERT(image->scanLine(logicalY)[4 * logicalX + 2] <= 255);
                         // alpha
-                        TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 3], 255);
+                        TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 3], 255);
                     }
                 }
             }
         }
+
 #endif
     }
 
@@ -122,13 +123,13 @@ public:
 #ifdef LIBGEODECOMP_WITH_QT5
         int argc = 0;
         char **argv = 0;
-        QApplication app(argc, argv);
+        QGuiApplication app(argc, argv);
 
         Coord<2> cellDim(10, 20);
 
         QtWidgetWriter<MyQtTestCell> writer(&MyQtTestCell::temp, -10.0, 10.0, cellDim);
-        boost::shared_ptr<QWidget> widget = writer.widget();
-        widget->resize(1000, 1000);
+        boost::shared_ptr<QWindow> window = writer.window();
+        window->resize(1000, 1000);
 
         Grid<MyQtTestCell> grid(Coord<2>(10, 20));
         for (int y = 0; y < 20; ++y) {
@@ -141,7 +142,7 @@ public:
         }
         writer.stepFinished(grid, 1234, WRITER_INITIALIZED);
 
-        QImage& image = writer.widget()->curImage;
+        QImage *image = &writer.window()->curImage;
 
 #define CHECK_TILE(X, Y, RED, GREEN, BLUE)                              \
         for (int tileY = 0; tileY < cellDim.y(); ++tileY) {             \
@@ -149,10 +150,10 @@ public:
                 int logicalX = X * cellDim.x() + tileX;                 \
                 int logicalY = Y * cellDim.y() + tileY;                 \
                                                                         \
-                TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 0], BLUE); \
-                TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 1], GREEN); \
-                TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 2], RED); \
-                TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 3], 255); \
+                TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 0], BLUE); \
+                TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 1], GREEN); \
+                TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 2], RED); \
+                TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 3], 255); \
             }                                                           \
         }
 

@@ -181,14 +181,6 @@ template<typename CELL>
 class Selector
 {
 public:
-   #ifdef LIBGEODECOMP_WITH_HPX
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(Selector);
-
-    template<typename ARCHIVE, typename CELL2>
-    friend void hpx::serialization::serialize(
-        ARCHIVE& archive, LibGeoDecomp::Selector<CELL2>& object, const unsigned version);
-#endif
-
     friend class PPMWriterTest;
 
     Selector() :
@@ -487,32 +479,5 @@ class Selector<double> : public SelectorHelpers::PrimitiveSelector<double>
 };
 
 }
-
-#ifdef LIBGEODECOMP_WITH_HPX
-
-HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template<typename CELL>), (LibGeoDecomp::Selector<CELL>));
-HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template<typename CELL>), (LibGeoDecomp::Selector<CELL>));
-
-namespace hpx {
-namespace serialization {
-
-template<typename ARCHIVE, typename CELL>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Selector<CELL>& object, const unsigned version)
-{
-    archive & object.externalSize;
-    archive & object.filter;
-    archive & object.memberName;
-    archive & object.memberOffset;
-
-    std::size_t *buf = reinterpret_cast<std::size_t*>(const_cast<char CELL::**>(&object.memberPointer));
-    archive & *buf;
-
-    archive & object.memberSize;
-}
-
-}
-}
-
-#endif
 
 #endif
