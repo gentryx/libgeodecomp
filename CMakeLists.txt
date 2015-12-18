@@ -88,7 +88,7 @@ find_package(PythonLibs)
 find_package(Ruby)
 find_package(SCOTCH)
 find_package(Silo)
-find_package(Qt5 COMPONENTS OpenGL Gui Core)
+find_package(Qt5 COMPONENTS OpenGL Gui Core Widgets)
 find_package(VisIt)
 
 # if a package was not found it's safer to set the corresponding
