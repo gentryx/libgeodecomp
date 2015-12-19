@@ -4,8 +4,6 @@ dependencies:
     override:
         - sudo apt-get install openmpi-bin
         - cd build && cmake -DWITH_THREADS=false ..
-        - pwd
-        - ls -la
 
 test:
     override:
