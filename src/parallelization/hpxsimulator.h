@@ -13,11 +13,9 @@
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
+#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
-#include <libgeodecomp/parallelization/hpxsimulator/hpxstepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
-#include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
 
 namespace LibGeoDecomp {
 namespace HpxSimulator {

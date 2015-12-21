@@ -12,8 +12,6 @@
 #include <libgeodecomp/storage/displacedgrid.h>
 
 namespace LibGeoDecomp {
-
-
 // fixme: move to LibGeoDecomp namespace
 namespace HpxSimulator {
 
@@ -22,7 +20,11 @@ template <class CELL_TYPE>
 class UpdateGroup
 {
 public:
-    typedef typename LibGeoDecomp::HiParSimulator::Stepper<CELL_TYPE> StepperType;
+    friend class HiParSimulatorTest;
+    friend class UpdateGroupPrototypeTest;
+    friend class UpdateGroupTest;
+
+    typedef HiParSimulator::Stepper<CELL_TYPE> StepperType;
     typedef typename StepperType::Topology Topology;
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
     typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;
@@ -76,8 +78,7 @@ public:
             initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +
             ghostZoneWidth;
 
-        // fixme
-        // We need to create the patch providers first, as the patch
+        // We need to create the patch providers first, as the HPX patch
         // accepters will look up their IDs upon creation:
         PatchProviderVec patchLinkProviders;
         const RegionVecMap& map1 = partitionManager->getOuterGhostZoneFragments();
@@ -133,6 +134,14 @@ public:
         }
         for (std::size_t i = 0; i < patchAcceptersInner.size(); ++i) {
             patchAcceptersInner[i]->setRegion(partitionManager->ownRegion());
+        }
+
+        // notify all PatchProviders of the process' region:
+        for (std::size_t i = 0; i < patchProvidersGhost.size(); ++i) {
+            patchProvidersGhost[i]->setRegion(partitionManager->ownRegion());
+        }
+        for (std::size_t i = 0; i < patchProvidersInner.size(); ++i) {
+            patchProvidersInner[i]->setRegion(partitionManager->ownRegion());
         }
 
         stepper.reset(new STEPPER(
@@ -244,7 +253,6 @@ private:
 };
 
 }
-
 }
 
 #endif

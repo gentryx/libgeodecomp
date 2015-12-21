@@ -1,7 +1,8 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_MPI
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_UPDATEGROUP_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_UPDATEGROUP_H
+
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_MPI
 
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/communication/patchlink.h>
@@ -16,6 +17,7 @@
 #include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
+// fixme: move to LibGeoDecomp namespace
 namespace HiParSimulator {
 
 template<class CELL_TYPE>
@@ -74,8 +76,8 @@ public:
             initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +
             ghostZoneWidth;
 
-        // For conformance with the HPX UpdateGroup, we're creating
-        // the PatchProviders early:
+        // We need to create the patch providers first, as the HPX patch
+        // accepters will look up their IDs upon creation:
         PatchProviderVec patchLinkProviders;
         const RegionVecMap& map1 = partitionManager->getOuterGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = map1.begin(); i != map1.end(); ++i) {
