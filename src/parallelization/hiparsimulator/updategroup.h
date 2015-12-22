@@ -28,7 +28,7 @@ public:
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 
-    typedef Stepper<CELL_TYPE> StepperType;
+    typedef LibGeoDecomp::HiParSimulator::Stepper<CELL_TYPE> StepperType;
     typedef typename StepperType::Topology Topology;
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
     typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;

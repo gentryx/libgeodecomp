@@ -8,7 +8,6 @@
 #include <libgeodecomp/communication/hpxpatchlink.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
-#include <libgeodecomp/parallelization/hpxsimulator/updategroupserver.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 
 namespace LibGeoDecomp {

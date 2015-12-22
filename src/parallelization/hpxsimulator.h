@@ -14,6 +14,8 @@
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
+#include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
 
