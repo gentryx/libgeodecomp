@@ -7,8 +7,13 @@
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/communication/hpxpatchlink.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 #include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/gridtypeselector.h>
+#include <libgeodecomp/storage/patchaccepter.h>
+#include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
 // fixme: move to LibGeoDecomp namespace
@@ -147,30 +152,11 @@ public:
                           partitionManager,
                           this->initializer,
                           patchAcceptersGhost + ghostZoneAccepterLinks,
-                          patchAcceptersInner));
-
-        // the ghostzone receivers may be safely added after
-        // initialization as they're only really needed when the next
-        // ghostzone generation is being received.
-        for (typename PatchProviderVec::iterator i = patchLinkProviders.begin(); i != patchLinkProviders.end(); ++i) {
-            addPatchProvider(*i, StepperType::GHOST);
-        }
-
-        // add external PatchProviders last to allow them to override
-        // the local ghost zone providers (a.k.a. PatchLink::Source).
-        for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
-             i != patchProvidersGhost.end();
-             ++i) {
-            (*i)->setRegion(partitionManager->ownRegion());
-            addPatchProvider(*i, StepperType::GHOST);
-        }
-
-        for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
-             i != patchProvidersInner.end();
-             ++i) {
-            (*i)->setRegion(partitionManager->ownRegion());
-            addPatchProvider(*i, StepperType::INNER_SET);
-        }
+                          patchAcceptersInner,
+                          // add external PatchProviders last to allow them to override
+                          // the local ghost zone providers (a.k.a. PatchLink::Source).
+                          patchLinkProviders + patchProvidersGhost,
+                          patchProvidersInner));
     }
 
     virtual ~UpdateGroup()

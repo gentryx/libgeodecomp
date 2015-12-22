@@ -101,7 +101,6 @@ public:
             }
         }
 
-
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
         // upon creation and we have to send those over to our neighbors.
