@@ -11,7 +11,7 @@
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
+#include <libgeodecomp/parallelization/hiparsimulator/mpiupdategroup.h>
 #include <libgeodecomp/storage/image.h>
 #include <libgeodecomp/storage/patchbuffer.h>
 

@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_UPDATEGROUP_H
-#define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_UPDATEGROUP_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_HPXUPDATEGROUP_H
+#define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_HPXUPDATEGROUP_H
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
@@ -8,6 +8,7 @@
 #include <libgeodecomp/communication/hpxpatchlink.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/parallelization/updategroup.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 #include <libgeodecomp/storage/displacedgrid.h>
@@ -16,12 +17,10 @@
 #include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
-// fixme: move to LibGeoDecomp namespace
-namespace HpxSimulator {
 
 // fixme: can't we reuse the MPI UpdateGroup here?
 template <class CELL_TYPE>
-class UpdateGroup
+class HPXUpdateGroup : public UpdateGroup<CELL_TYPE>
 {
 public:
     friend class HiParSimulatorTest;
@@ -44,7 +43,7 @@ public:
     const static int DIM = Topology::DIM;
 
     template<typename STEPPER>
-    UpdateGroup(
+    HPXUpdateGroup(
         boost::shared_ptr<Partition<DIM> > partition,
         const CoordBox<DIM>& box,
         const unsigned& ghostZoneWidth,
@@ -159,7 +158,7 @@ public:
                           patchProvidersInner));
     }
 
-    virtual ~UpdateGroup()
+    virtual ~HPXUpdateGroup()
     {
         for (typename std::vector<PatchLinkPtr>::iterator i = patchLinks.begin();
              i != patchLinks.end();
@@ -237,7 +236,6 @@ private:
     unsigned rank;
 };
 
-}
 }
 
 #endif

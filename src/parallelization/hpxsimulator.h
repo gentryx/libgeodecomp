@@ -17,7 +17,7 @@
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
-#include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
+#include <libgeodecomp/parallelization/hpxsimulator/hpxupdategroup.h>
 
 namespace LibGeoDecomp {
 namespace HpxSimulator {
@@ -48,7 +48,7 @@ public:
     using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
-    typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
+    typedef HPXUpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
     typedef LibGeoDecomp::HiParSimulator::ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE> ParallelWriterAdapterType;
     typedef LibGeoDecomp::HiParSimulator::SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
@@ -214,7 +214,7 @@ private:
                 0,
                 weights));
 
-        std::vector<hpx::future<boost::shared_ptr<UpdateGroup<CELL_TYPE> > > > updateGroupCreationFutures;
+        std::vector<hpx::future<boost::shared_ptr<UpdateGroupType> > > updateGroupCreationFutures;
         std::size_t rank = hpx::get_locality_id();
 
         for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
@@ -333,7 +333,7 @@ private:
         return ret;
     }
 
-    boost::shared_ptr<UpdateGroup<CELL_TYPE> > createUpdateGroup(
+    boost::shared_ptr<UpdateGroupType> createUpdateGroup(
         std::size_t rank,
         boost::shared_ptr<PARTITION> partition)
     {

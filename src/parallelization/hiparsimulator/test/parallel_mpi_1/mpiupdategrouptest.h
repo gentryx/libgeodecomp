@@ -6,7 +6,7 @@
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
+#include <libgeodecomp/parallelization/hiparsimulator/mpiupdategroup.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
 #include <boost/assign/std/vector.hpp>
@@ -18,12 +18,12 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-class UpdateGroupTest : public CxxTest::TestSuite
+class MPIUpdateGroupTest : public CxxTest::TestSuite
 {
 public:
     typedef ZCurvePartition<3> PartitionType;
     typedef VanillaStepper<TestCell<3>, UpdateFunctorHelpers::ConcurrencyEnableOpenMP> StepperType;
-    typedef UpdateGroup<TestCell<3> > UpdateGroupType;
+    typedef MPIUpdateGroup<TestCell<3> > UpdateGroupType;
     typedef StepperType::GridType GridType;
 
     void setUp()
@@ -73,7 +73,7 @@ private:
     unsigned ghostZoneWidth;
     boost::shared_ptr<PartitionType> partition;
     boost::shared_ptr<Initializer<TestCell<3> > > init;
-    boost::shared_ptr<UpdateGroup<TestCell<3> > > updateGroup;
+    boost::shared_ptr<MPIUpdateGroup<TestCell<3> > > updateGroup;
     boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
 };
 

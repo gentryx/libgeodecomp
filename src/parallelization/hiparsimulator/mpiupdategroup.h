@@ -9,6 +9,7 @@
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/parallelization/updategroup.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 #include <libgeodecomp/storage/displacedgrid.h>
@@ -17,14 +18,16 @@
 #include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
-// fixme: move to LibGeoDecomp namespace
+
 namespace HiParSimulator {
+class HiParSimulatorTest;
+}
 
 template<class CELL_TYPE>
-class UpdateGroup
+class MPIUpdateGroup : public UpdateGroup<CELL_TYPE>
 {
 public:
-    friend class HiParSimulatorTest;
+    friend class LibGeoDecomp::HiParSimulator::HiParSimulatorTest;
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 
@@ -44,7 +47,7 @@ public:
     const static int DIM = Topology::DIM;
 
     template<typename STEPPER>
-    UpdateGroup(
+    MPIUpdateGroup(
         boost::shared_ptr<Partition<DIM> > partition,
         const CoordBox<DIM>& box,
         const unsigned& ghostZoneWidth,
@@ -154,7 +157,7 @@ public:
                           patchProvidersInner));
     }
 
-    virtual ~UpdateGroup()
+    virtual ~MPIUpdateGroup()
     {
         for (typename std::vector<PatchLinkPtr>::iterator i = patchLinks.begin();
              i != patchLinks.end();
@@ -232,7 +235,6 @@ private:
     unsigned rank;
 };
 
-}
 }
 
 #endif

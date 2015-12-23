@@ -11,7 +11,7 @@
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
+#include <libgeodecomp/parallelization/hiparsimulator/mpiupdategroup.h>
 #include <cmath>
 #include <stdexcept>
 #include <boost/make_shared.hpp>
@@ -91,7 +91,7 @@ public:
     using DistributedSimulator<CELL_TYPE>::chronometer;
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef DistributedSimulator<CELL_TYPE> ParentType;
-    typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
+    typedef MPIUpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
     typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE> ParallelWriterAdapterType;
     typedef SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;

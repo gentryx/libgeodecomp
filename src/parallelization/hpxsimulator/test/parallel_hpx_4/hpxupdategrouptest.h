@@ -11,7 +11,7 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
-#include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
+#include <libgeodecomp/parallelization/hpxsimulator/hpxupdategroup.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
 typedef LibGeoDecomp::TestCell<2> TestCell2;
@@ -369,7 +369,7 @@ public:
 
     typedef RecursiveBisectionPartition<2> PartitionType;
     typedef LibGeoDecomp::HiParSimulator::VanillaStepper<TestCell<2>, UpdateFunctorHelpers::ConcurrencyEnableHPX> StepperType;
-    typedef HpxSimulator::UpdateGroup<TestCell<2> > UpdateGroupType;
+    typedef HPXUpdateGroup<TestCell<2> > UpdateGroupType;
     typedef StepperType::GridType GridType;
 
 
