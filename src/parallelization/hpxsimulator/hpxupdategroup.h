@@ -6,41 +6,36 @@
 
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/communication/hpxpatchlink.h>
-#include <libgeodecomp/geometry/partitionmanager.h>
-#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/parallelization/updategroup.h>
-#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
-#include <libgeodecomp/storage/displacedgrid.h>
-#include <libgeodecomp/storage/gridtypeselector.h>
-#include <libgeodecomp/storage/patchaccepter.h>
-#include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
 
 // fixme: can't we reuse the MPI UpdateGroup here?
 template <class CELL_TYPE>
-class HPXUpdateGroup : public UpdateGroup<CELL_TYPE>
+class HPXUpdateGroup : public UpdateGroup<CELL_TYPE, HPXPatchLink>
 {
 public:
     friend class HiParSimulatorTest;
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 
-    typedef HiParSimulator::Stepper<CELL_TYPE> StepperType;
-    typedef typename StepperType::Topology Topology;
-    typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
-    typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::GridType;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchAccepterVec;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchProviderVec;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkPtr;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::RegionVecMap;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::StepperType;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::Topology;
+
+    using UpdateGroup<CELL_TYPE, HPXPatchLink>::partitionManager;
+    using UpdateGroup<CELL_TYPE, HPXPatchLink>::patchLinks;
+    using UpdateGroup<CELL_TYPE, HPXPatchLink>::rank;
+    using UpdateGroup<CELL_TYPE, HPXPatchLink>::stepper;
+    using UpdateGroup<CELL_TYPE, HPXPatchLink>::DIM;
+
     typedef typename StepperType::PatchType PatchType;
     typedef typename StepperType::PatchProviderPtr PatchProviderPtr;
     typedef typename StepperType::PatchAccepterPtr PatchAccepterPtr;
-    typedef boost::shared_ptr<typename LibGeoDecomp::HPXPatchLink<GridType>::Link> PatchLinkPtr;
-    typedef PartitionManager<Topology> PartitionManagerType;
-    typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
-    typedef typename StepperType::PatchAccepterVec PatchAccepterVec;
-    typedef typename StepperType::PatchProviderVec PatchProviderVec;
-
-    const static int DIM = Topology::DIM;
 
     template<typename STEPPER>
     HPXUpdateGroup(
@@ -55,12 +50,9 @@ public:
         PatchProviderVec patchProvidersInner = PatchProviderVec(),
         std::string basename = "/HPXSimulator::UpdateGroup",
         int rank = hpx::get_locality_id()) :
-        ghostZoneWidth(ghostZoneWidth),
-        initializer(initializer),
-        basename(basename),
-        rank(rank)
+        UpdateGroup<CELL_TYPE, HPXPatchLink>(ghostZoneWidth, initializer, rank),
+        basename(basename)
     {
-        partitionManager.reset(new PartitionManagerType());
         partitionManager->resetRegions(
             box,
             partition,
@@ -227,13 +219,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<StepperType> stepper;
-    boost::shared_ptr<PartitionManagerType> partitionManager;
-    std::vector<PatchLinkPtr> patchLinks;
-    unsigned ghostZoneWidth;
-    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     std::string basename;
-    unsigned rank;
 };
 
 }
