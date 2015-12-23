@@ -36,10 +36,6 @@ public:
     using UpdateGroup<CELL_TYPE, PatchLink>::stepper;
     using UpdateGroup<CELL_TYPE, PatchLink>::DIM;
 
-    typedef typename StepperType::PatchType PatchType;
-    typedef typename StepperType::PatchProviderPtr PatchProviderPtr;
-    typedef typename StepperType::PatchAccepterPtr PatchAccepterPtr;
-
     template<typename STEPPER>
     MPIUpdateGroup(
         boost::shared_ptr<Partition<DIM> > partition,
@@ -146,74 +142,6 @@ public:
                           // the local ghost zone providers (a.k.a. PatchLink::Source).
                           patchLinkProviders + patchProvidersGhost,
                           patchProvidersInner));
-    }
-
-    virtual ~MPIUpdateGroup()
-    {
-        for (typename std::vector<PatchLinkPtr>::iterator i = patchLinks.begin();
-             i != patchLinks.end();
-             ++i) {
-            (*i)->cleanup();
-        }
-    }
-
-    const Chronometer& statistics() const
-    {
-        return stepper->statistics();
-    }
-
-    void addPatchProvider(
-        const PatchProviderPtr& patchProvider,
-        const PatchType& patchType)
-    {
-        stepper->addPatchProvider(patchProvider, patchType);
-    }
-
-    void addPatchAccepter(
-        const PatchAccepterPtr& patchAccepter,
-        const PatchType& patchType)
-    {
-        stepper->addPatchAccepter(patchAccepter, patchType);
-    }
-
-    inline void update(int nanoSteps)
-    {
-        stepper->update(nanoSteps);
-    }
-
-    const GridType& grid() const
-    {
-        return stepper->grid();
-    }
-
-    inline virtual std::pair<int, int> currentStep() const
-    {
-        return stepper->currentStep();
-    }
-
-    inline const std::vector<std::size_t>& getWeights() const
-    {
-        return partitionManager->getWeights();
-    }
-
-    inline double computeTimeInner() const
-    {
-        return stepper->computeTimeInner;
-    }
-
-    inline double computeTimeGhost() const
-    {
-        return stepper->computeTimeGhost;
-    }
-
-    inline double patchAcceptersTime() const
-    {
-        return stepper->patchAcceptersTime;
-    }
-
-    inline double patchProvidersTime() const
-    {
-        return stepper->patchAcceptersTime;
     }
 
 private:
