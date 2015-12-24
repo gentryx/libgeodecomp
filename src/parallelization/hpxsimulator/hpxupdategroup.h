@@ -18,11 +18,10 @@ public:
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::GridType;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchAccepterVec;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchProviderVec;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkAccepter;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkProvider;
+    typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchAccepterVec PatchAccepterVec;
+    typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchProviderVec PatchProviderVec;
+    typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkAccepter PatchLinkAccepter;
+    typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkProvider PatchLinkProvider;
 
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::init;
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::rank;
@@ -71,7 +70,7 @@ private:
 
     virtual boost::shared_ptr<PatchLinkAccepter> makePatchLinkAccepter(int target, const Region<DIM>& region)
     {
-        return boost::shared_ptr<typename HPXPatchLink<GridType>::Accepter>(
+        return boost::shared_ptr<PatchLinkAccepter>(
             new typename HPXPatchLink<GridType>::Accepter(
                 region,
                 basename,
@@ -82,7 +81,7 @@ private:
 
     virtual boost::shared_ptr<PatchLinkProvider> makePatchLinkProvider(int source, const Region<DIM>& region)
     {
-        return boost::shared_ptr<typename HPXPatchLink<GridType>::Provider>(
+        return boost::shared_ptr<PatchLinkProvider>(
             new typename HPXPatchLink<GridType>::Provider(
                 region,
                 basename,
