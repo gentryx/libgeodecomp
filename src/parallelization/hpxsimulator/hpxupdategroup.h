@@ -25,7 +25,7 @@ public:
 
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::init;
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::rank;
-    using UpdateGroup<CELL_TYPE, HPXPatchLink>::DIM;
+    const static int DIM = UpdateGroup<CELL_TYPE, PatchLink>::DIM;
 
     template<typename STEPPER>
     HPXUpdateGroup(

@@ -27,9 +27,10 @@ public:
     typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkAccepter PatchLinkAccepter;
     typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkProvider PatchLinkProvider;
 
+
     using UpdateGroup<CELL_TYPE, PatchLink>::init;
     using UpdateGroup<CELL_TYPE, PatchLink>::rank;
-    using UpdateGroup<CELL_TYPE, PatchLink>::DIM;
+    const static int DIM = UpdateGroup<CELL_TYPE, PatchLink>::DIM;
 
     template<typename STEPPER>
     MPIUpdateGroup(
