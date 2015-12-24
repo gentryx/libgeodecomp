@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_UPDATEGROUP_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_UPDATEGROUP_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MPIUPDATEGROUP_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MPIUPDATEGROUP_H
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_MPI
@@ -27,16 +27,9 @@ public:
     using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchProviderVec;
     using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkAccepter;
     using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkProvider;
-    using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkPtr;
-    using typename UpdateGroup<CELL_TYPE, PatchLink>::RegionVecMap;
-    using typename UpdateGroup<CELL_TYPE, PatchLink>::StepperType;
-    using typename UpdateGroup<CELL_TYPE, PatchLink>::Topology;
 
     using UpdateGroup<CELL_TYPE, PatchLink>::init;
-    using UpdateGroup<CELL_TYPE, PatchLink>::partitionManager;
-    using UpdateGroup<CELL_TYPE, PatchLink>::patchLinks;
     using UpdateGroup<CELL_TYPE, PatchLink>::rank;
-    using UpdateGroup<CELL_TYPE, PatchLink>::stepper;
     using UpdateGroup<CELL_TYPE, PatchLink>::DIM;
 
     template<typename STEPPER>
@@ -69,10 +62,11 @@ public:
 private:
     MPILayer mpiLayer;
 
-    std::vector<CoordBox<DIM> > gatherBoundingBoxes(boost::shared_ptr<Partition<DIM> > partition) const
+    std::vector<CoordBox<DIM> > gatherBoundingBoxes(
+        const CoordBox<DIM>& ownBoundingBox,
+        boost::shared_ptr<Partition<DIM> > partition) const
     {
         std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
-        CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         return boundingBoxes;
     }

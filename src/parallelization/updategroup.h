@@ -227,7 +227,9 @@ protected:
                           patchProvidersInner));
     }
 
-    virtual std::vector<CoordBox<DIM> > gatherBoundingBoxes(boost::shared_ptr<Partition<DIM> > partition) const = 0;
+    virtual std::vector<CoordBox<DIM> > gatherBoundingBoxes(
+        const CoordBox<DIM>& ownBoundingBox,
+        boost::shared_ptr<Partition<DIM> > partition) const = 0;
 
     virtual boost::shared_ptr<PatchLinkAccepter> makePatchLinkAccepter(int target, const Region<DIM>& region) = 0;
     virtual boost::shared_ptr<PatchLinkProvider> makePatchLinkProvider(int source, const Region<DIM>& region) = 0;

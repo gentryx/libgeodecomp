@@ -10,7 +10,6 @@
 
 namespace LibGeoDecomp {
 
-// fixme: can't we reuse the MPI UpdateGroup here?
 template <class CELL_TYPE>
 class HPXUpdateGroup : public UpdateGroup<CELL_TYPE, HPXPatchLink>
 {
@@ -24,16 +23,9 @@ public:
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchProviderVec;
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkAccepter;
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkProvider;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkPtr;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::RegionVecMap;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::StepperType;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::Topology;
 
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::init;
-    using UpdateGroup<CELL_TYPE, HPXPatchLink>::partitionManager;
-    using UpdateGroup<CELL_TYPE, HPXPatchLink>::patchLinks;
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::rank;
-    using UpdateGroup<CELL_TYPE, HPXPatchLink>::stepper;
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::DIM;
 
     template<typename STEPPER>
@@ -67,12 +59,13 @@ public:
 private:
     std::string basename;
 
-    std::vector<CoordBox<DIM> > gatherBoundingBoxes(boost::shared_ptr<Partition<DIM> > partition) const
+    std::vector<CoordBox<DIM> > gatherBoundingBoxes(
+        CoordBox<DIM> ownBoundingBox,
+        boost::shared_ptr<Partition<DIM> > partition) const
     {
         std::size_t size = partition->getWeights().size();
         std::string broadcastName = basename + "/boundingBoxes";
         std::vector<CoordBox<DIM> > boundingBoxes;
-        CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
         return HPXReceiver<CoordBox<DIM> >::allGather(ownBoundingBox, rank, size, broadcastName);
     }
 
