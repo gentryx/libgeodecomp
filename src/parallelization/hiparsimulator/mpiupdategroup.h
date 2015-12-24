@@ -25,6 +25,8 @@ public:
     using typename UpdateGroup<CELL_TYPE, PatchLink>::GridType;
     using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchAccepterVec;
     using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchProviderVec;
+    using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkAccepter;
+    using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkProvider;
     using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkPtr;
     using typename UpdateGroup<CELL_TYPE, PatchLink>::RegionVecMap;
     using typename UpdateGroup<CELL_TYPE, PatchLink>::StepperType;
@@ -69,13 +71,8 @@ public:
         const RegionVecMap& map1 = partitionManager->getOuterGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = map1.begin(); i != map1.end(); ++i) {
             if (!i->second.back().empty()) {
-                boost::shared_ptr<typename PatchLink<GridType>::Provider> link(
-                    new typename PatchLink<GridType>::Provider(
-                        i->second.back(),
-                        i->first,
-                        MPILayer::PATCH_LINK,
-                        SerializationBuffer<CELL_TYPE>::cellMPIDataType(),
-                        mpiLayer.communicator()));
+                boost::shared_ptr<PatchLinkProvider> link(
+                    makePatchLinkProvider(i->first, i->second.back()));
                 patchLinkProviders << link;
                 patchLinks << link;
 
@@ -95,13 +92,8 @@ public:
         const RegionVecMap& map2 = partitionManager->getInnerGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = map2.begin(); i != map2.end(); ++i) {
             if (!i->second.back().empty()) {
-                boost::shared_ptr<typename PatchLink<GridType>::Accepter> link(
-                    new typename PatchLink<GridType>::Accepter(
-                        i->second.back(),
-                        i->first,
-                        MPILayer::PATCH_LINK,
-                        SerializationBuffer<CELL_TYPE>::cellMPIDataType(),
-                        mpiLayer.communicator()));
+                boost::shared_ptr<PatchLinkAccepter> link(
+                    makePatchLinkAccepter(i->first, i->second.back()));
                 ghostZoneAccepterLinks << link;
                 patchLinks << link;
 
@@ -150,6 +142,29 @@ private:
         CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         return boundingBoxes;
+    }
+
+    virtual boost::shared_ptr<PatchLinkAccepter> makePatchLinkAccepter(int target, const Region<DIM>& region)
+    {
+        return boost::shared_ptr<typename PatchLink<GridType>::Accepter>(
+            new typename PatchLink<GridType>::Accepter(
+                region,
+                target,
+                MPILayer::PATCH_LINK,
+                SerializationBuffer<CELL_TYPE>::cellMPIDataType(),
+                mpiLayer.communicator()));
+
+    }
+
+    virtual boost::shared_ptr<PatchLinkProvider> makePatchLinkProvider(int source, const Region<DIM>& region)
+    {
+        return boost::shared_ptr<typename PatchLink<GridType>::Provider>(
+            new typename PatchLink<GridType>::Provider(
+                region,
+                source,
+                MPILayer::PATCH_LINK,
+                SerializationBuffer<CELL_TYPE>::cellMPIDataType(),
+                mpiLayer.communicator()));
     }
 };
 

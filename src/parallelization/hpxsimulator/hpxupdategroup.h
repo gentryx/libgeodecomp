@@ -22,6 +22,8 @@ public:
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::GridType;
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchAccepterVec;
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchProviderVec;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkAccepter;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkProvider;
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkPtr;
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::RegionVecMap;
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::StepperType;
@@ -67,12 +69,8 @@ public:
         const RegionVecMap& map1 = partitionManager->getOuterGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = map1.begin(); i != map1.end(); ++i) {
             if (!i->second.back().empty()) {
-                boost::shared_ptr<typename HPXPatchLink<GridType>::Provider> link(
-                    new typename HPXPatchLink<GridType>::Provider(
-                        i->second.back(),
-                        basename,
-                        i->first,
-                        rank));
+                boost::shared_ptr<PatchLinkProvider> link(
+                    makePatchLinkProvider(i->first, i->second.back()));
                 patchLinkProviders << link;
                 patchLinks << link;
 
@@ -92,13 +90,8 @@ public:
         const RegionVecMap& map2 = partitionManager->getInnerGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = map2.begin(); i != map2.end(); ++i) {
             if (!i->second.back().empty()) {
-                // fixme
-                boost::shared_ptr<typename HPXPatchLink<GridType>::Accepter> link(
-                    new typename HPXPatchLink<GridType>::Accepter(
-                        i->second.back(),
-                        basename,
-                        rank,
-                        i->first));
+                boost::shared_ptr<PatchLinkAccepter> link(
+                    makePatchLinkAccepter(i->first, i->second.back()));
                 ghostZoneAccepterLinks << link;
                 patchLinks << link;
 
@@ -149,6 +142,28 @@ private:
         CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
         return HPXReceiver<CoordBox<DIM> >::allGather(ownBoundingBox, rank, size, broadcastName);
     }
+
+    virtual boost::shared_ptr<PatchLinkAccepter> makePatchLinkAccepter(int target, const Region<DIM>& region)
+    {
+        return boost::shared_ptr<typename HPXPatchLink<GridType>::Accepter>(
+            new typename HPXPatchLink<GridType>::Accepter(
+                region,
+                basename,
+                rank,
+                target));
+
+    }
+
+    virtual boost::shared_ptr<PatchLinkProvider> makePatchLinkProvider(int source, const Region<DIM>& region)
+    {
+        return boost::shared_ptr<typename HPXPatchLink<GridType>::Provider>(
+            new typename HPXPatchLink<GridType>::Provider(
+                region,
+                basename,
+                source,
+                rank));
+    }
+
 };
 
 }
