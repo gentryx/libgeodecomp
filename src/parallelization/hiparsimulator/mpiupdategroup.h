@@ -56,10 +56,7 @@ public:
             partition,
             rank,
             ghostZoneWidth);
-        CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
-
-        std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
-        mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
+        std::vector<CoordBox<DIM> > boundingBoxes = gatherBoundingBoxes(partition);
         partitionManager->resetGhostZones(boundingBoxes);
 
         long firstSyncPoint =
@@ -146,6 +143,14 @@ public:
 
 private:
     MPILayer mpiLayer;
+
+    std::vector<CoordBox<DIM> > gatherBoundingBoxes(boost::shared_ptr<Partition<DIM> > partition) const
+    {
+        std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
+        CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
+        mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
+        return boundingBoxes;
+    }
 };
 
 }

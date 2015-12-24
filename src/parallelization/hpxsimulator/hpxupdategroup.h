@@ -54,15 +54,7 @@ public:
             partition,
             rank,
             ghostZoneWidth);
-        CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
-
-        // fixme
-        std::size_t size = partition->getWeights().size();
-        std::string broadcastName = basename + "/boundingBoxes";
-        std::vector<CoordBox<DIM> > boundingBoxes;
-
-        boundingBoxes = HPXReceiver<CoordBox<DIM> >::allGather(ownBoundingBox, rank, size, broadcastName);
-
+        std::vector<CoordBox<DIM> > boundingBoxes = gatherBoundingBoxes(partition);
         partitionManager->resetGhostZones(boundingBoxes);
 
         long firstSyncPoint =
@@ -148,6 +140,15 @@ public:
 
 private:
     std::string basename;
+
+    std::vector<CoordBox<DIM> > gatherBoundingBoxes(boost::shared_ptr<Partition<DIM> > partition) const
+    {
+        std::size_t size = partition->getWeights().size();
+        std::string broadcastName = basename + "/boundingBoxes";
+        std::vector<CoordBox<DIM> > boundingBoxes;
+        CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
+        return HPXReceiver<CoordBox<DIM> >::allGather(ownBoundingBox, rank, size, broadcastName);
+    }
 };
 
 }

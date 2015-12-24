@@ -22,6 +22,8 @@ public:
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
     typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;
     typedef typename PATCH_LINK<GridType>::Link PatchLink;
+    typedef typename PATCH_LINK<GridType>::Accepter PatchLinkAccepter;
+    typedef typename PATCH_LINK<GridType>::Provider PatchLinkProvider;
     typedef boost::shared_ptr<PatchLink> PatchLinkPtr;
     typedef PartitionManager<Topology> PartitionManagerType;
     typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
@@ -119,6 +121,8 @@ protected:
     unsigned ghostZoneWidth;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     unsigned rank;
+
+    virtual std::vector<CoordBox<DIM> > gatherBoundingBoxes(boost::shared_ptr<Partition<DIM> > partition) const = 0;
 };
 
 }
