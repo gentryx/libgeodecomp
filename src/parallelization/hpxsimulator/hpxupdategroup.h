@@ -18,6 +18,7 @@ public:
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 
+    typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::GridType GridType;
     typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchAccepterVec PatchAccepterVec;
     typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchProviderVec PatchProviderVec;
     typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkAccepter PatchLinkAccepter;
@@ -25,7 +26,7 @@ public:
 
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::init;
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::rank;
-    const static int DIM = UpdateGroup<CELL_TYPE, PatchLink>::DIM;
+    const static int DIM = UpdateGroup<CELL_TYPE, HPXPatchLink>::DIM;
 
     template<typename STEPPER>
     HPXUpdateGroup(
