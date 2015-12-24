@@ -60,7 +60,7 @@ private:
     std::string basename;
 
     std::vector<CoordBox<DIM> > gatherBoundingBoxes(
-        CoordBox<DIM> ownBoundingBox,
+        const CoordBox<DIM>& ownBoundingBox,
         boost::shared_ptr<Partition<DIM> > partition) const
     {
         std::size_t size = partition->getWeights().size();

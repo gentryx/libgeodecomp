@@ -152,7 +152,8 @@ protected:
             partition,
             rank,
             ghostZoneWidth);
-        std::vector<CoordBox<DIM> > boundingBoxes = gatherBoundingBoxes(partition);
+        std::vector<CoordBox<DIM> > boundingBoxes =
+            gatherBoundingBoxes(partitionManager->ownRegion().boundingBox(), partition);
         partitionManager->resetGhostZones(boundingBoxes);
 
         long firstSyncPoint =
