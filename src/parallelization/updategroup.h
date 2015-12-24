@@ -44,7 +44,13 @@ public:
         ghostZoneWidth(ghostZoneWidth),
         initializer(initializer),
         rank(rank)
-    {}
+    {
+        // actual initialization is done in init() and can't be done
+        // here as we need to call several virtual functions
+        // implemented in derived classes. these functions will rely
+        // on members which are uninitialized while this c-tor is
+        // running.
+    }
 
     virtual ~UpdateGroup()
     {
@@ -121,6 +127,105 @@ protected:
     unsigned ghostZoneWidth;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     unsigned rank;
+
+    /**
+     * Actual initialization of the UpdateGroup, can't be done in
+     * c-tor as it relies on methods which are purely virtual in this
+     * class and which may/will rely on members in derived classes.
+     * Hence derived classes need to call this function in their
+     * c-tor.
+     */
+    template<typename STEPPER>
+    void init(
+        boost::shared_ptr<Partition<DIM> > partition,
+        const CoordBox<DIM>& box,
+        const unsigned& ghostZoneWidth,
+        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        STEPPER *stepperType,
+        PatchAccepterVec patchAcceptersGhost,
+        PatchAccepterVec patchAcceptersInner,
+        PatchProviderVec patchProvidersGhost,
+        PatchProviderVec patchProvidersInner)
+    {
+        partitionManager->resetRegions(
+            box,
+            partition,
+            rank,
+            ghostZoneWidth);
+        std::vector<CoordBox<DIM> > boundingBoxes = gatherBoundingBoxes(partition);
+        partitionManager->resetGhostZones(boundingBoxes);
+
+        long firstSyncPoint =
+            initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +
+            ghostZoneWidth;
+
+        // We need to create the patch providers first, as the HPX patch
+        // accepters will look up their IDs upon creation:
+        PatchProviderVec patchLinkProviders;
+        const RegionVecMap& map1 = partitionManager->getOuterGhostZoneFragments();
+        for (typename RegionVecMap::const_iterator i = map1.begin(); i != map1.end(); ++i) {
+            if (!i->second.back().empty()) {
+                boost::shared_ptr<PatchLinkProvider> link(
+                    makePatchLinkProvider(i->first, i->second.back()));
+                patchLinkProviders << link;
+                patchLinks << link;
+
+                link->charge(
+                    firstSyncPoint,
+                    PatchProvider<GridType>::infinity(),
+                    ghostZoneWidth);
+
+                link->setRegion(partitionManager->ownRegion());
+            }
+        }
+
+        // we have to hand over a list of all ghostzone senders as the
+        // stepper will perform an initial update of the ghostzones
+        // upon creation and we have to send those over to our neighbors.
+        PatchAccepterVec ghostZoneAccepterLinks;
+        const RegionVecMap& map2 = partitionManager->getInnerGhostZoneFragments();
+        for (typename RegionVecMap::const_iterator i = map2.begin(); i != map2.end(); ++i) {
+            if (!i->second.back().empty()) {
+                boost::shared_ptr<PatchLinkAccepter> link(
+                    makePatchLinkAccepter(i->first, i->second.back()));
+                ghostZoneAccepterLinks << link;
+                patchLinks << link;
+
+                link->charge(
+                    firstSyncPoint,
+                    PatchAccepter<GridType>::infinity(),
+                    ghostZoneWidth);
+
+                link->setRegion(partitionManager->ownRegion());
+            }
+        }
+
+        // notify all PatchAccepters of the process' region:
+        for (std::size_t i = 0; i < patchAcceptersGhost.size(); ++i) {
+            patchAcceptersGhost[i]->setRegion(partitionManager->ownRegion());
+        }
+        for (std::size_t i = 0; i < patchAcceptersInner.size(); ++i) {
+            patchAcceptersInner[i]->setRegion(partitionManager->ownRegion());
+        }
+
+        // notify all PatchProviders of the process' region:
+        for (std::size_t i = 0; i < patchProvidersGhost.size(); ++i) {
+            patchProvidersGhost[i]->setRegion(partitionManager->ownRegion());
+        }
+        for (std::size_t i = 0; i < patchProvidersInner.size(); ++i) {
+            patchProvidersInner[i]->setRegion(partitionManager->ownRegion());
+        }
+
+        stepper.reset(new STEPPER(
+                          partitionManager,
+                          this->initializer,
+                          patchAcceptersGhost + ghostZoneAccepterLinks,
+                          patchAcceptersInner,
+                          // add external PatchProviders last to allow them to override
+                          // the local ghost zone providers (a.k.a. PatchLink::Source).
+                          patchLinkProviders + patchProvidersGhost,
+                          patchProvidersInner));
+    }
 
     virtual std::vector<CoordBox<DIM> > gatherBoundingBoxes(boost::shared_ptr<Partition<DIM> > partition) const = 0;
 

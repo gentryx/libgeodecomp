@@ -29,6 +29,7 @@ public:
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::StepperType;
     using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::Topology;
 
+    using UpdateGroup<CELL_TYPE, HPXPatchLink>::init;
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::partitionManager;
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::patchLinks;
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::rank;
@@ -51,84 +52,16 @@ public:
         UpdateGroup<CELL_TYPE, HPXPatchLink>(ghostZoneWidth, initializer, rank),
         basename(basename)
     {
-        partitionManager->resetRegions(
-            box,
+        init(
             partition,
-            rank,
-            ghostZoneWidth);
-        std::vector<CoordBox<DIM> > boundingBoxes = gatherBoundingBoxes(partition);
-        partitionManager->resetGhostZones(boundingBoxes);
-
-        long firstSyncPoint =
-            initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +
-            ghostZoneWidth;
-
-        // We need to create the patch providers first, as the HPX patch
-        // accepters will look up their IDs upon creation:
-        PatchProviderVec patchLinkProviders;
-        const RegionVecMap& map1 = partitionManager->getOuterGhostZoneFragments();
-        for (typename RegionVecMap::const_iterator i = map1.begin(); i != map1.end(); ++i) {
-            if (!i->second.back().empty()) {
-                boost::shared_ptr<PatchLinkProvider> link(
-                    makePatchLinkProvider(i->first, i->second.back()));
-                patchLinkProviders << link;
-                patchLinks << link;
-
-                link->charge(
-                    firstSyncPoint,
-                    PatchProvider<GridType>::infinity(),
-                    ghostZoneWidth);
-
-                link->setRegion(partitionManager->ownRegion());
-            }
-        }
-
-        // we have to hand over a list of all ghostzone senders as the
-        // stepper will perform an initial update of the ghostzones
-        // upon creation and we have to send those over to our neighbors.
-        PatchAccepterVec ghostZoneAccepterLinks;
-        const RegionVecMap& map2 = partitionManager->getInnerGhostZoneFragments();
-        for (typename RegionVecMap::const_iterator i = map2.begin(); i != map2.end(); ++i) {
-            if (!i->second.back().empty()) {
-                boost::shared_ptr<PatchLinkAccepter> link(
-                    makePatchLinkAccepter(i->first, i->second.back()));
-                ghostZoneAccepterLinks << link;
-                patchLinks << link;
-
-                link->charge(
-                    firstSyncPoint,
-                    PatchAccepter<GridType>::infinity(),
-                    ghostZoneWidth);
-
-                link->setRegion(partitionManager->ownRegion());
-            }
-        }
-
-        // notify all PatchAccepters of the process' region:
-        for (std::size_t i = 0; i < patchAcceptersGhost.size(); ++i) {
-            patchAcceptersGhost[i]->setRegion(partitionManager->ownRegion());
-        }
-        for (std::size_t i = 0; i < patchAcceptersInner.size(); ++i) {
-            patchAcceptersInner[i]->setRegion(partitionManager->ownRegion());
-        }
-
-        // notify all PatchProviders of the process' region:
-        for (std::size_t i = 0; i < patchProvidersGhost.size(); ++i) {
-            patchProvidersGhost[i]->setRegion(partitionManager->ownRegion());
-        }
-        for (std::size_t i = 0; i < patchProvidersInner.size(); ++i) {
-            patchProvidersInner[i]->setRegion(partitionManager->ownRegion());
-        }
-
-        stepper.reset(new STEPPER(
-                          partitionManager,
-                          this->initializer,
-                          patchAcceptersGhost + ghostZoneAccepterLinks,
-                          patchAcceptersInner,
-                          // add external PatchProviders last to allow them to override
-                          // the local ghost zone providers (a.k.a. PatchLink::Source).
-                          patchLinkProviders + patchProvidersGhost,
-                          patchProvidersInner));
+            box,
+            ghostZoneWidth,
+            initializer,
+            stepperType,
+            patchAcceptersGhost,
+            patchAcceptersInner,
+            patchProvidersGhost,
+            patchProvidersInner);
     }
 
 private:
