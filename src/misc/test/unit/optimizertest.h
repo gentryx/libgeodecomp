@@ -285,7 +285,7 @@ public:
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT(((eval.getGlobalMax() - 0,1) < optimizer.getFitness()));
+        TS_ASSERT(((eval.getGlobalMax() - 20) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
@@ -298,7 +298,7 @@ public:
         }
         SimplexOptimizer optimizer(params, 17.0 , 8.0, s);
         params = optimizer(20 ,eval);
-        TS_ASSERT(((eval.getGlobalMax() - 0,1) < optimizer.getFitness()));
+        TS_ASSERT(((eval.getGlobalMax() - 10) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with optimized parameters: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
