@@ -15,6 +15,7 @@
 #include <libgeodecomp/storage/linepointerassembly.h>
 #include <libgeodecomp/storage/linepointerupdatefunctor.h>
 #include <libgeodecomp/storage/updatefunctor.h>
+#include <libgeodecomp/parallelization/openmpsimulator.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
@@ -2532,8 +2533,8 @@ public:
     double performance(std::vector<int> rawDim)
     {
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
-        int maxT = 10;
-        SerialSimulator<LBMSoACell> sim(
+        int maxT = 20;
+        OpenMPSimulator<LBMSoACell> sim(
             new NoOpInitializer<LBMSoACell>(dim, maxT));
 
         double seconds = 0;
