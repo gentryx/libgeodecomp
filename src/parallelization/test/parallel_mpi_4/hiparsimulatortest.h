@@ -17,7 +17,6 @@
 #include <sstream>
 
 using namespace LibGeoDecomp;
-using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 
@@ -62,8 +61,6 @@ private:
     std::size_t domainSize;
     std::size_t cellsSeen;
 };
-
-namespace HiParSimulator {
 
 class HiParSimulatorTest : public CxxTest::TestSuite
 {
@@ -303,5 +300,4 @@ private:
     MemoryWriterType *memoryWriter;
 };
 
-}
 }

@@ -80,7 +80,7 @@ void runSimulation()
 
     CellInitializer *init = new CellInitializer(factor, numSteps);
 
-    HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
+    HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()),
         numSteps,

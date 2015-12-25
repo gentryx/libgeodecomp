@@ -6,16 +6,14 @@
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
+#include <libgeodecomp/parallelization/nesting/vanillastepper.h>
 
 #include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
-using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 class VanillaStepperTest : public CxxTest::TestSuite
 {
@@ -232,5 +230,4 @@ private:
 
 };
 
-}
 }

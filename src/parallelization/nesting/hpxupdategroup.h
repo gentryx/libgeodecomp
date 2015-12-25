@@ -1,12 +1,12 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_HPXUPDATEGROUP_H
-#define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_HPXUPDATEGROUP_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_HPXUPDATEGROUP_H
+#define LIBGEODECOMP_PARALLELIZATION_NESTING_HPXUPDATEGROUP_H
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/communication/hpxpatchlink.h>
-#include <libgeodecomp/parallelization/updategroup.h>
+#include <libgeodecomp/parallelization/nesting/updategroup.h>
 
 namespace LibGeoDecomp {
 

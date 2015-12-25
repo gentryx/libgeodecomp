@@ -104,11 +104,9 @@ public:
     }
 };
 
-typedef
-    HpxSimulator::HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> >
-    SimulatorType;
+typedef HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> > SimulatorType;
 
-typedef LibGeoDecomp::TracingWriter<ConwayCell> TracingWriterType;
+typedef TracingWriter<ConwayCell> TracingWriterType;
 
 int hpx_main()
 {

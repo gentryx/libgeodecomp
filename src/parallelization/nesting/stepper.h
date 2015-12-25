@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEPPER_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEPPER_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_STEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_NESTING_STEPPER_H
 
 #include <boost/shared_ptr.hpp>
 #include <deque>
@@ -7,14 +7,12 @@
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/chronometer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
+#include <libgeodecomp/parallelization/nesting/offsethelper.h>
 #include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 #include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
-// fixme: move to LibGeoDecomp namespace
-namespace HiParSimulator {
 
 /**
  * Abstract interface class. Steppers contain some arbitrary region of
@@ -105,7 +103,6 @@ protected:
     }
 };
 
-}
 }
 
 #endif

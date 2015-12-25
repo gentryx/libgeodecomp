@@ -117,7 +117,7 @@ public:
     }
 };
 
-typedef HpxSimulator::HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> > SimulatorType;
+typedef HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> > SimulatorType;
 
 namespace LibGeoDecomp {
 
@@ -221,7 +221,7 @@ public:
 
     void testWithTestCell2D()
     {
-        typedef HpxSimulator::HpxSimulator<TestCell<2>, RecursiveBisectionPartition<2> > SimulatorType;
+        typedef HpxSimulator<TestCell<2>, RecursiveBisectionPartition<2> > SimulatorType;
         std::vector<double> updateGroupSpeeds(1, 1.0);
         int loadBalancingPeriod = 10;
         int ghostZoneWidth = 1;
@@ -259,7 +259,7 @@ public:
 
     void testWithTestCell3DHeterogeneous()
     {
-        typedef HpxSimulator::HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
         std::size_t rank = hpx::get_locality_id();
         std::vector<hpx::id_type> localities = hpx::find_all_localities();
         outputFrequency = 5;
@@ -300,7 +300,7 @@ public:
 
     void testStepAndGetStep()
     {
-        typedef HpxSimulator::HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
         std::vector<hpx::id_type> localities = hpx::find_all_localities();
         outputFrequency = 5;
         int startStep = 4;

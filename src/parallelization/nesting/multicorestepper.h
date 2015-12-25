@@ -1,14 +1,13 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MULTICORESTEPPER_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MULTICORESTEPPER_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_MULTICORESTEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_NESTING_MULTICORESTEPPER_H
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_THREADS
 
-#include <libgeodecomp/parallelization/hiparsimulator/commonstepper.h>
+#include <libgeodecomp/parallelization/nesting/commonstepper.h>
 #include <libgeodecomp/storage/patchbufferfixed.h>
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 /**
  * MultiCoreStepper is an OpenMP-enabled implementation of the Stepper
@@ -50,7 +49,6 @@ public:
     }
 };
 
-}
 }
 
 #endif

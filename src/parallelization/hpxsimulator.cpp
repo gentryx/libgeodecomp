@@ -4,7 +4,6 @@
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 
 namespace LibGeoDecomp {
-namespace HpxSimulator {
 namespace HpxSimulatorHelpers {
 
 std::map<std::string, hpx::lcos::local::promise<std::vector<double> > > localUpdateGroupSpeeds;
@@ -27,10 +26,9 @@ void setNumberOfUpdateGroups(
 
 }
 }
-}
 
-HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulator::HpxSimulatorHelpers::getUpdateGroupSpeeds, getUpdateGroupSpeeds_action);
-HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulator::HpxSimulatorHelpers::setNumberOfUpdateGroups, setNumberOfUpdateGroups_action);
+HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulatorHelpers::getUpdateGroupSpeeds, getUpdateGroupSpeeds_action);
+HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulatorHelpers::setNumberOfUpdateGroups, setNumberOfUpdateGroups_action);
 
 HPX_REGISTER_BROADCAST_ACTION_DECLARATION(getUpdateGroupSpeeds_action)
 HPX_REGISTER_BROADCAST_ACTION_DECLARATION(setNumberOfUpdateGroups_action)
@@ -39,7 +37,6 @@ HPX_REGISTER_BROADCAST_ACTION(getUpdateGroupSpeeds_action)
 HPX_REGISTER_BROADCAST_ACTION(setNumberOfUpdateGroups_action)
 
 namespace LibGeoDecomp {
-namespace HpxSimulator {
 namespace HpxSimulatorHelpers {
 
 /**
@@ -96,7 +93,6 @@ void gatherAndBroadcastLocalityIndices(
 }
 
 
-}
 }
 }
 

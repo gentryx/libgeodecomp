@@ -1,12 +1,10 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_PARALLELWRITERADAPTER_H
+#define LIBGEODECOMP_PARALLELIZATION_NESTING_PARALLELWRITERADAPTER_H
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 
 namespace LibGeoDecomp {
-// fixme: move to LibGeoDecomp namespace
-namespace HiParSimulator {
 
 template<typename CELL_TYPE, typename PARTITION, typename STEPPER>
 class HiParSimulator;
@@ -95,7 +93,6 @@ private:
     Coord<Topology::DIM> globalGridDimensions;
 };
 
-}
 }
 
 #endif

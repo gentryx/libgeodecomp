@@ -1,11 +1,10 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OFFSETHELPER_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OFFSETHELPER_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_OFFSETHELPER_H
+#define LIBGEODECOMP_PARALLELIZATION_NESTING_OFFSETHELPER_H
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 template<int INDEX, int DIM, typename TOPOLOGY>
 class OffsetHelper
@@ -79,7 +78,6 @@ public:
     }
 };
 
-}
 }
 
 #endif

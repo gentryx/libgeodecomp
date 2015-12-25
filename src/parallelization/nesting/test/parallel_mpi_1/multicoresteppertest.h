@@ -3,14 +3,12 @@
 #include <libgeodecomp.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/multicorestepper.h>
+#include <libgeodecomp/parallelization/nesting/multicorestepper.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
 using namespace LibGeoDecomp;
-using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 class MulticoreStepperTest : public CxxTest::TestSuite
 {
@@ -54,5 +52,4 @@ private:
     boost::shared_ptr<MockPatchAccepter<GridType> > patchAccepter;
 };
 
-}
 }

@@ -13,14 +13,14 @@
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
-#include <libgeodecomp/parallelization/hpxsimulator/hpxupdategroup.h>
+#include <libgeodecomp/parallelization/nesting/eventpoint.h>
+#include <libgeodecomp/parallelization/nesting/hpxupdategroup.h>
+#include <libgeodecomp/parallelization/nesting/parallelwriteradapter.h>
+#include <libgeodecomp/parallelization/nesting/steereradapter.h>
+#include <libgeodecomp/parallelization/nesting/stepper.h>
+#include <libgeodecomp/parallelization/nesting/vanillastepper.h>
 
 namespace LibGeoDecomp {
-namespace HpxSimulator {
 namespace HpxSimulatorHelpers {
 
 void gatherAndBroadcastLocalityIndices(
@@ -32,14 +32,10 @@ void gatherAndBroadcastLocalityIndices(
 
 }
 
-enum EventPoint {LOAD_BALANCING, END};
-typedef std::set<EventPoint> EventSet;
-typedef std::map<long, EventSet> EventMap;
-
 template<
     class CELL_TYPE,
     class PARTITION,
-    class STEPPER=LibGeoDecomp::HiParSimulator::VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableHPX>
+    class STEPPER=LibGeoDecomp::VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableHPX>
 >
 class HpxSimulator : public DistributedSimulator<CELL_TYPE>
 {
@@ -50,8 +46,8 @@ public:
     typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
     typedef HPXUpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
-    typedef LibGeoDecomp::HiParSimulator::ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE> ParallelWriterAdapterType;
-    typedef LibGeoDecomp::HiParSimulator::SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
+    typedef LibGeoDecomp::ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE> ParallelWriterAdapterType;
+    typedef LibGeoDecomp::SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
 
     static const int DIM = Topology::DIM;
 
@@ -357,7 +353,6 @@ private:
 
 };
 
-}
 }
 
 #endif

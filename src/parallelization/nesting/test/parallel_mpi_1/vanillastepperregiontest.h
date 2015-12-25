@@ -1,17 +1,15 @@
 #include <libgeodecomp.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
+#include <libgeodecomp/parallelization/nesting/vanillastepper.h>
 #include <libgeodecomp/storage/patchbuffer.h>
 
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
-using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 typedef std::pair<Region<2>, unsigned> Event;
 
@@ -107,5 +105,4 @@ private:
     }
 };
 
-}
 }

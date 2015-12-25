@@ -4,8 +4,8 @@
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/geometry/region.h>
-#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
+#include <libgeodecomp/parallelization/nesting/stepper.h>
+#include <libgeodecomp/parallelization/nesting/vanillastepper.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/patchaccepter.h>
@@ -17,7 +17,7 @@ template<typename CELL_TYPE, template<typename GRID_TYPE> class PATCH_LINK>
 class UpdateGroup
 {
 public:
-    typedef LibGeoDecomp::HiParSimulator::Stepper<CELL_TYPE> StepperType;
+    typedef LibGeoDecomp::Stepper<CELL_TYPE> StepperType;
     typedef typename StepperType::Topology Topology;
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
     typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;

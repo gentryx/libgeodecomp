@@ -1,14 +1,12 @@
-#include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
+#include <libgeodecomp/parallelization/nesting/offsethelper.h>
 
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
-using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 class OffsetHelperTest : public CxxTest::TestSuite
 {
@@ -46,5 +44,4 @@ public:
     }
 };
 
-}
 }

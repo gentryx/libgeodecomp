@@ -9,7 +9,7 @@
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/misc/chronometer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/parallelization/nesting/stepper.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/testbed/parallelperformancetests/mysimplecell.h>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
@@ -119,7 +119,7 @@ public:
         MPILayer mpiLayer;
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
 
-        typedef typename HiParSimulator::Stepper<CELL_TYPE>::GridType GridType;
+        typedef typename Stepper<CELL_TYPE>::GridType GridType;
 
         CoordBox<3> gridBox(Coord<3>(), dim);
         GridType grid(gridBox, CELL_TYPE(), CELL_TYPE(), dim);

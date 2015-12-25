@@ -1,16 +1,14 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_CUDASTEPPER_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_CUDASTEPPER_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_CUDASTEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_NESTING_CUDASTEPPER_H
 
 #include <libgeodecomp/geometry/cudaregion.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/parallelization/hiparsimulator/commonstepper.h>
+#include <libgeodecomp/parallelization/nesting/commonstepper.h>
 #include <libgeodecomp/storage/cudagrid.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {
-
-namespace HiParSimulator {
 
 namespace CUDAStepperHelpers {
 
@@ -554,7 +552,6 @@ private:
     }
 };
 
-}
 }
 
 #endif

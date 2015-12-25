@@ -9,16 +9,14 @@
 
 namespace LibGeoDecomp {
 
-namespace HiParSimulator {
 class VanillaStepperTest;
-}
 
 template<typename TOPOLOGY>
 class PartitionManager
 {
 public:
     friend class PartitionManagerTest;
-    friend class HiParSimulator::VanillaStepperTest;
+    friend class VanillaStepperTest;
     typedef TOPOLOGY Topology;
     static const int DIM = Topology::DIM;
     typedef std::map<int, std::vector<Region<DIM> > > RegionVecMap;

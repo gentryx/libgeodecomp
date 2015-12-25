@@ -1,11 +1,10 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_VANILLASTEPPER_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_VANILLASTEPPER_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_VANILLASTEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_NESTING_VANILLASTEPPER_H
 
-#include <libgeodecomp/parallelization/hiparsimulator/commonstepper.h>
+#include <libgeodecomp/parallelization/nesting/commonstepper.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 /**
  * As its name implies, the VanillaStepper is the simplest
@@ -214,7 +213,6 @@ private:
     }
 };
 
-}
 }
 
 #endif

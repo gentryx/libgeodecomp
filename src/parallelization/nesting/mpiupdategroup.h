@@ -1,24 +1,22 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MPIUPDATEGROUP_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MPIUPDATEGROUP_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_MPIUPDATEGROUP_H
+#define LIBGEODECOMP_PARALLELIZATION_NESTING_MPIUPDATEGROUP_H
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_MPI
 
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/communication/patchlink.h>
-#include <libgeodecomp/parallelization/updategroup.h>
+#include <libgeodecomp/parallelization/nesting/updategroup.h>
 
 namespace LibGeoDecomp {
 
-namespace HiParSimulator {
 class HiParSimulatorTest;
-}
 
 template<class CELL_TYPE>
 class MPIUpdateGroup : public UpdateGroup<CELL_TYPE, PatchLink>
 {
 public:
-    friend class LibGeoDecomp::HiParSimulator::HiParSimulatorTest;
+    friend class LibGeoDecomp::HiParSimulatorTest;
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 

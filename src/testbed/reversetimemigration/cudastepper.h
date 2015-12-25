@@ -3,13 +3,12 @@
 
 #include <cuda.h>
 
-#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/parallelization/nesting/stepper.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/patchbufferfixed.h>
 #include <libgeodecomp/testbed/reversetimemigration/config.h>
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 #define OFFSET(X, Y, Z) (Z * DIM_X * DIM_Y + Y * DIM_X + X)
 
@@ -124,7 +123,6 @@ private:
     double *devGridNew;
 };
 
-}
 }
 
 #endif

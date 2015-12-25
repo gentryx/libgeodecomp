@@ -1,12 +1,10 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_COMMONSTEPPER_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_COMMONSTEPPER_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_COMMONSTEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_NESTING_COMMONSTEPPER_H
 
-#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/parallelization/nesting/stepper.h>
 #include <libgeodecomp/storage/patchbufferfixed.h>
 
 namespace LibGeoDecomp {
-
-namespace HiParSimulator {
 
 namespace CommonStepperHelpers {
 
@@ -261,7 +259,6 @@ protected:
     }
 };
 
-}
 }
 
 #endif

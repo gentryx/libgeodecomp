@@ -1,5 +1,5 @@
 # LIBDIRS is used to find source files and headers
-set(LIBDIRS communication io geometry geometry/partitions loadbalancer misc parallelization parallelization/hiparsimulator parallelization/hiparsimulator parallelization/hpxsimulator storage)
+set(LIBDIRS communication io geometry geometry/partitions loadbalancer misc parallelization parallelization/nesting storage)
 # AUXDIRS lists auxiliary directories to be included in the main
 # build. They may for instance include additionally libraries to be
 # linked into the main lib.

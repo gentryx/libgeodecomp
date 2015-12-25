@@ -6,15 +6,13 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator/cudastepper.h>
+#include <libgeodecomp/parallelization/nesting/cudastepper.h>
 
 #include <cuda.h>
 
 using namespace LibGeoDecomp;
-using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 class CUDAUpdateTestCell
 {
@@ -94,5 +92,4 @@ public:
     }
 };
 
-}
 }

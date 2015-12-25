@@ -1,7 +1,8 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_MPI
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_H
+
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_MPI
 
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
@@ -9,15 +10,15 @@
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/mpiupdategroup.h>
+#include <libgeodecomp/parallelization/nesting/eventpoint.h>
+#include <libgeodecomp/parallelization/nesting/parallelwriteradapter.h>
+#include <libgeodecomp/parallelization/nesting/steereradapter.h>
+#include <libgeodecomp/parallelization/nesting/mpiupdategroup.h>
 #include <cmath>
 #include <stdexcept>
 #include <boost/make_shared.hpp>
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 namespace HiParSimulatorHelpers {
 
 template<typename PARTITION_TYPE>
@@ -76,10 +77,6 @@ public:
 #endif
 
 }
-
-enum EventPoint {LOAD_BALANCING, END};
-typedef std::set<EventPoint> EventSet;
-typedef std::map<long, EventSet> EventMap;
 
 // fixme: check if code runs with a communicator which is merely a subset of MPI_COMM_WORLD
 template<typename CELL_TYPE, typename PARTITION, typename STEPPER = VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableOpenMP> >
@@ -373,7 +370,6 @@ private:
     }
 };
 
-}
 }
 
 #endif

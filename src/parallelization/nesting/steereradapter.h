@@ -1,11 +1,10 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEERERADAPTER_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEERERADAPTER_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_STEERERADAPTER_H
+#define LIBGEODECOMP_PARALLELIZATION_NESTING_STEERERADAPTER_H
 
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 template<typename GRID_TYPE, typename CELL_TYPE>
 class SteererAdapter : public PatchProvider<GRID_TYPE>
@@ -108,7 +107,6 @@ private:
 
 };
 
-}
 }
 
 #endif

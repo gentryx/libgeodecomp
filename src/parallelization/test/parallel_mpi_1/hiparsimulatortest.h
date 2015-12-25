@@ -15,10 +15,8 @@
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
-using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 class HiParSimulatorTest : public CxxTest::TestSuite
 {
@@ -198,5 +196,4 @@ private:
     MemoryWriterType *memoryWriter;
 };
 
-}
 }

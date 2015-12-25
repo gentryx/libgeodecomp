@@ -5,7 +5,6 @@
 #include <mpi.h>
 
 using namespace LibGeoDecomp;
-using namespace HiParSimulator;
 
 int main(int argc, char *argv[])
 {

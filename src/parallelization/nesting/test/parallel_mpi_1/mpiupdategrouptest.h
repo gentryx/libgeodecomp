@@ -6,17 +6,15 @@
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/parallelization/hiparsimulator/mpiupdategroup.h>
+#include <libgeodecomp/parallelization/nesting/mpiupdategroup.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
 #include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
-using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 class MPIUpdateGroupTest : public CxxTest::TestSuite
 {
@@ -77,5 +75,4 @@ private:
     boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
 };
 
-}
 }

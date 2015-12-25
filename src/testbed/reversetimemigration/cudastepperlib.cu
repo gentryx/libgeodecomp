@@ -3,7 +3,6 @@
 #include <libgeodecomp/testbed/reversetimemigration/cudastepper.h>
 
 using namespace LibGeoDecomp;
-using namespace HiParSimulator;
 
 class RTMCell
 {
