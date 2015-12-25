@@ -44,3 +44,5 @@ src/storage/test/unit/main.cpp
 src/**/test/**/*test.cpp
 src/**/test/**/*test.cu
 src/**/test/**/run_tests.cpp
+
+*~
