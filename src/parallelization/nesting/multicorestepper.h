@@ -8,7 +8,6 @@
 #include <libgeodecomp/storage/patchbufferfixed.h>
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 /**
  * MultiCoreStepper is an OpenMP-enabled implementation of the Stepper
@@ -50,7 +49,6 @@ public:
     }
 };
 
-}
 }
 
 #endif
