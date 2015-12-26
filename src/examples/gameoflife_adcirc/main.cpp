@@ -948,7 +948,7 @@ private:
 
 };
 
-typedef HpxSimulator::HpxSimulator<ContainerCellType, RecursiveBisectionPartition<2> > SimulatorType;
+typedef HpxSimulator<ContainerCellType, RecursiveBisectionPartition<2> > SimulatorType;
 
 void runSimulation()
 {
