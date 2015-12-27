@@ -135,7 +135,7 @@ protected:
             *curGrid,
             newGrid,
             nanoStep,
-            UpdateFunctorHelpers::ConcurrencyEnableOpenMP());
+            UpdateFunctorHelpers::ConcurrencyEnableOpenMP(true));
         std::swap(curGrid, newGrid);
     }
 
