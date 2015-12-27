@@ -4,6 +4,7 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>
+#include <libgeodecomp/storage/updatefunctormacros.h>
 #include <libgeodecomp/misc/apitraits.h>
 
 namespace LibGeoDecomp {
@@ -27,7 +28,7 @@ class Invoke
 public:
     static const int DIM = TOPOLOGY::DIM;
 
-    template<typename ACCESSOR1, typename ACCESSOR2>
+    template<typename ACCESSOR1, typename ACCESSOR2, typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
     void operator()(
         const Streak<DIM>& streak,
         ACCESSOR1& hoodOld,
@@ -35,16 +36,18 @@ public:
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
         const Coord<DIM> *dimensions,
-        int nanoStep) const
+        int nanoStep,
+        const CONCURRENCY_FUNCTOR *concurrencySpec,
+        const ANY_THREADED_UPDATE *modelThreadingSpec) const
     {
         if ((CUR_DIM == 2) && (HIGH == true)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
                 ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == ((*dimensions)[CUR_DIM] - 1))) {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, true>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             } else {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, false>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             }
         }
 
@@ -52,10 +55,10 @@ public:
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
                 ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == 0)) {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, true,  BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             } else {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, false, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             }
         }
 
@@ -63,10 +66,10 @@ public:
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
                 ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == ((*dimensions)[CUR_DIM] - 1))) {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, true,  BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             } else {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, false, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             }
         }
 
@@ -74,10 +77,10 @@ public:
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
                 ((streak.origin[CUR_DIM]+ (*offsetOld)[CUR_DIM]) == 0)) {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, true,  BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             } else {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, false, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             }
         }
     }
@@ -99,7 +102,7 @@ class Invoke<CELL, 0, HIGH, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SO
 public:
     static const int DIM = TOPOLOGY::DIM;
 
-    template<typename ACCESSOR1, typename ACCESSOR2>
+    template<typename ACCESSOR1, typename ACCESSOR2, typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
     void operator()(
         const Streak<DIM>& streak,
         ACCESSOR1& hoodOld,
@@ -107,8 +110,9 @@ public:
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
         const Coord<DIM> *dimensionsNew,
-        int nanoStep) const
-
+        int nanoStep,
+        const CONCURRENCY_FUNCTOR *concurrencySpec,
+        const ANY_THREADED_UPDATE *modelThreadingSpec) const
     {
         // this copy is required to blow our potentially 1D or 2D
         // input coords to 3D, which is required by LibFlatArray.
@@ -218,7 +222,7 @@ public:
  * This class takes over the (tedious) handling of boundary conditions
  * when using a FixedNeighborhood.
  */
-template<typename CELL>
+template<typename CELL, typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
 class FixedNeighborhoodUpdateFunctor
 {
 public:
@@ -230,12 +234,16 @@ public:
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
         const Coord<DIM> *dimensionsNew,
-        int nanoStep) :
-        region(region),
+        int nanoStep,
+        const CONCURRENCY_FUNCTOR *concurrencySpec,
+        const ANY_THREADED_UPDATE *modelThreadingSpec) :
+        myRegion(region),
         offsetOld(offsetOld),
         offsetNew(offsetNew),
         dimensionsNew(dimensionsNew),
-        nanoStep(nanoStep)
+        nanoStep(nanoStep),
+        myConcurrencySpec(concurrencySpec),
+        myModelThreadingSpec(modelThreadingSpec)
     {}
 
     template<typename ACCESSOR1, typename ACCESSOR2>
@@ -243,24 +251,38 @@ public:
         ACCESSOR1& hoodOld,
         ACCESSOR2& hoodNew) const
     {
-        for (typename Region<DIM>::StreakIterator i = region->beginStreak(); i != region->endStreak(); ++i) {
-            FixedNeighborhoodUpdateFunctorHelpers::Invoke<CELL, DIM - 1, true, Topology>()(
-                *i,
-                hoodOld,
-                hoodNew,
-                offsetOld,
-                offsetNew,
-                dimensionsNew,
-                nanoStep);
-        }
+        const Region<DIM> &region = *myRegion;
+        // fixme
+        const CONCURRENCY_FUNCTOR concurrencySpec = *myConcurrencySpec;
+        const ANY_THREADED_UPDATE modelThreadingSpec = *myModelThreadingSpec;
+
+#define LGD_UPDATE_FUNCTOR_BODY                                         \
+        FixedNeighborhoodUpdateFunctorHelpers::Invoke<CELL, DIM - 1, true, Topology>()( \
+            *i,                                                         \
+            hoodOld,                                                    \
+            hoodNew,                                                    \
+            offsetOld,                                                  \
+            offsetNew,                                                  \
+            dimensionsNew,                                              \
+            nanoStep,                                                   \
+            myConcurrencySpec,                                          \
+            myModelThreadingSpec);
+
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+#undef LGD_UPDATE_FUNCTOR_BODY
     }
 
 private:
-    const Region<DIM> *region;
+    const Region<DIM> *myRegion;
     const Coord<DIM> *offsetOld;
     const Coord<DIM> *offsetNew;
     const Coord<DIM> *dimensionsNew;
     int nanoStep;
+    const CONCURRENCY_FUNCTOR *myConcurrencySpec;
+    const ANY_THREADED_UPDATE *myModelThreadingSpec;
 };
 
 }

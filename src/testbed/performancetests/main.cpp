@@ -1395,10 +1395,12 @@ public:
             ScopedTimer t(&seconds);
 
             for (int t = 0; t < maxT; ++t) {
-                typedef UpdateFunctorHelpers::Selector<JacobiCellStreakUpdate>::SoARegionUpdateHelper Updater;
+                typedef UpdateFunctorHelpers::Selector<
+                    JacobiCellStreakUpdate>::SoARegionUpdateHelper<
+                        UpdateFunctorHelpers::ConcurrencyNoP, APITraits::SelectThreadedUpdate<void>::Value> Updater;
 
                 Coord<3> offset(1, 1, 1);
-                Updater updater(&region, &offset, &offset, &box.dimensions, 0);
+                Updater updater(&region, &offset, &offset, &box.dimensions, 0, 0, 0);
                 gridNew->callback(gridOld, updater);
                 std::swap(gridOld, gridNew);
             }
