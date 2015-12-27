@@ -1,6 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/storage/fixedneighborhoodupdatefunctor.h>
 #include <libgeodecomp/storage/soagrid.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 
 using namespace LibGeoDecomp;
 
@@ -84,8 +85,11 @@ public:
         CoordBox<3> boxOld = gridOld.boundingBox();
         Coord<3> offsetOld = -boxOld.origin;
         Coord<3> offsetNew = -boxNew.origin;
-        gridOld.callback(&gridNew, FixedNeighborhoodUpdateFunctor<MySoATestCellWithTwoDoubles>(
-                             &region, &offsetOld, &offsetNew, &boxNew.dimensions, 0));
+        gridOld.callback(&gridNew, FixedNeighborhoodUpdateFunctor<
+                         MySoATestCellWithTwoDoubles,
+                         UpdateFunctorHelpers::ConcurrencyNoP,
+                         APITraits::SelectThreadedUpdate<void>::Value>(
+                             &region, &offsetOld, &offsetNew, &boxNew.dimensions, 0, 0, 0));
 
         for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
             MySoATestCellWithTwoDoubles cell = gridNew.get(*i);
