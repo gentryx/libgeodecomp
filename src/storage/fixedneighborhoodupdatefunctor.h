@@ -1,6 +1,13 @@
 #ifndef LIBGEODECOMP_STORAGE_FIXEDNEIGHBORHOODUPDATEFUNCTOR_H
 #define LIBGEODECOMP_STORAGE_FIXEDNEIGHBORHOODUPDATEFUNCTOR_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/runtime/launch_policy.hpp>
+#include <hpx/parallel/algorithms/for_each.hpp>
+#include <boost/iterator/counting_iterator.hpp>
+#endif
+
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>
