@@ -158,7 +158,10 @@ protected:
                 (*i)->get(
                     &*oldGrid,
                     region,
-                    nanoStep);
+                    partitionManager->getSimulationArea(),
+                    nanoStep,
+                    partitionManager->rank(),
+                    true);
             }
         }
     }
@@ -238,7 +241,13 @@ protected:
 
     inline void restoreRim(bool remove)
     {
-        rimBuffer.get(&*oldGrid, rim(), globalNanoStep(), remove);
+        rimBuffer.get(
+            &*oldGrid,
+            rim(),
+            partitionManager->getSimulationArea(),
+            globalNanoStep(),
+            partitionManager->rank(),
+            remove);
     }
 
     inline void saveKernel()
@@ -254,7 +263,9 @@ protected:
         kernelBuffer.get(
             &*oldGrid,
             getVolatileKernel(),
+            partitionManager->getSimulationArea(),
             globalNanoStep(),
+            partitionManager->rank(),
             true);
     }
 };

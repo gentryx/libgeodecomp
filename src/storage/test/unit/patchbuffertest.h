@@ -16,7 +16,7 @@ public:
 
     void setUp()
     {
-        CoordBox<2> dimensions(Coord<2>(), Coord<2>(7, 5));
+        dimensions = CoordBox<2>(Coord<2>(), Coord<2>(7, 5));
         baseGrid = GridType(dimensions, 0);
         for (int y = 0; y < 5; ++y)
             for (int x = 0; x < 7; ++x)
@@ -66,10 +66,10 @@ public:
         compGrid = zeroGrid;
 
         TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), std::size_t(0));
-        patchBuffer.get(&compGrid, validRegion, 0);
+        patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 0, 0);
         TS_ASSERT_EQUALS(zeroGrid, compGrid);
         TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), std::size_t(2));
-        patchBuffer.get(&compGrid, validRegion, 2);
+        patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 2, 0);
         TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), PatchAccepter<GridType>::infinity());
 
         // check that we can copy out regions multiple times
@@ -80,10 +80,10 @@ public:
             patchBuffer.put(baseGrid, validRegion, i);
         }
         compGrid = zeroGrid;
-        patchBuffer.get(&compGrid, validRegion, 2, false);
+        patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 2, 0, false);
         TS_ASSERT_EQUALS(testGrid1, compGrid);
         compGrid = zeroGrid;
-        patchBuffer.get(&compGrid, validRegion, 2, true);
+        patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 2, 0, true);
         TS_ASSERT_EQUALS(testGrid1, compGrid);
 
         // this is actually ugly: by changing the region, the copy out
@@ -91,7 +91,7 @@ public:
         // storage. but it should just work.
         patchBuffer.region = region2;
         compGrid = zeroGrid;
-        patchBuffer.get(&compGrid, validRegion, 3);
+        patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 3, 0);
         TS_ASSERT_EQUALS(testGrid3, compGrid);
 
         // just another normal retrieval
@@ -101,11 +101,12 @@ public:
             patchBuffer.put(baseGrid, validRegion, i);
         }
         compGrid = zeroGrid;
-        patchBuffer.get(&compGrid, validRegion, 1);
+        patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 1, 0);
         TS_ASSERT_EQUALS(testGrid2, compGrid);
     }
 
 private:
+    CoordBox<2> dimensions;
     GridType baseGrid;
     GridType testGrid1;
     GridType testGrid2;

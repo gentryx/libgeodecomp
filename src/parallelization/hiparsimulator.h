@@ -141,8 +141,6 @@ public:
                 steerers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
-                initializer->gridDimensions(),
-                mpiLayer.rank(),
                 false));
 
         typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
@@ -150,8 +148,6 @@ public:
                 steerers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
-                initializer->gridDimensions(),
-                mpiLayer.rank(),
                 true));
 
         steererAdaptersGhost.push_back(adapterGhost);

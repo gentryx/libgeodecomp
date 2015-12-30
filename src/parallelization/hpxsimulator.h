@@ -110,9 +110,6 @@ public:
                 steerers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
-                initializer->gridDimensions(),
-                // fixme: move this data to get()/put()
-                hpx::get_locality_id(),
                 false));
 
         typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
@@ -120,9 +117,6 @@ public:
                 steerers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
-                initializer->gridDimensions(),
-                // fixme: move this data to get()/put(), remove from HiParSimulator, too
-                hpx::get_locality_id(),
                 true));
 
         steererAdaptersGhost.push_back(adapterGhost);
@@ -141,6 +135,7 @@ public:
                 writers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
+                // fixme: move this data to get()/put(), remove from HiParSimulator, too
                 initializer->gridDimensions(),
                 hpx::get_locality_id(),
                 false));
@@ -149,6 +144,7 @@ public:
                 writers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
+                // fixme: move this data to get()/put(), remove from HiParSimulator, too
                 initializer->gridDimensions(),
                 hpx::get_locality_id(),
                 true));

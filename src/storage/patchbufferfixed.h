@@ -61,7 +61,9 @@ public:
     virtual void get(
         GRID_TYPE2 *destinationGrid,
         const Region<DIM>& patchableRegion,
+        const Coord<DIM>& globalGridDimensions,
         const std::size_t nanoStep,
+        const std::size_t rank,
         const bool remove=true)
     {
         checkNanoStepGet(nanoStep);

@@ -22,15 +22,11 @@ public:
         boost::shared_ptr<Steerer<CELL_TYPE> > steerer,
         const std::size_t firstStep,
         const std::size_t lastStep,
-        Coord<Topology::DIM> globalGridDimensions,
-        std::size_t rank,
         bool lastCall) :
         steerer(steerer),
         firstNanoStep(firstStep * NANO_STEPS),
         lastNanoStep(lastStep   * NANO_STEPS),
-        rank(rank),
-        lastCall(lastCall),
-        globalGridDimensions(globalGridDimensions)
+        lastCall(lastCall)
     {
         std::size_t firstRegularEventStep = firstStep;
         std::size_t period = steerer->getPeriod();
@@ -50,7 +46,9 @@ public:
     virtual void get(
         GRID_TYPE *destinationGrid,
         const Region<DIM>& patchableRegion,
+        const Coord<DIM>& globalGridDimensions,
         const std::size_t globalNanoStep,
+        const std::size_t rank,
         const bool remove = true)
     {
         std::size_t nanoStep = globalNanoStep % NANO_STEPS;
@@ -101,10 +99,7 @@ private:
     boost::shared_ptr<Steerer<CELL_TYPE> > steerer;
     std::size_t firstNanoStep;
     std::size_t lastNanoStep;
-    std::size_t rank;
     bool lastCall;
-    Coord<Topology::DIM> globalGridDimensions;
-
 };
 
 }

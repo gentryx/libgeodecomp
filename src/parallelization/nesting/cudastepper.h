@@ -429,7 +429,9 @@ private:
                 (*i)->get(
                     &*oldGrid,
                     region,
-                    nanoStep);
+                    partitionManager->getSimulationArea(),
+                    nanoStep,
+                    partitionManager->rank());
             }
         }
 

@@ -17,7 +17,7 @@ public:
 
     void setUp()
     {
-        CoordBox<2> dimensions(Coord<2>(), Coord<2>(7, 5));
+        dimensions = CoordBox<2>(Coord<2>(), Coord<2>(7, 5));
         baseGrid = GridType(dimensions, 0);
         for (int y = 0; y < 5; ++y) {
             for (int x = 0; x < 7; ++x) {
@@ -64,7 +64,7 @@ public:
             patchBuffer.put(baseGrid, validRegion, i);
         }
         compGrid = zeroGrid;
-        patchBuffer.get(&compGrid, validRegion, 0);
+        patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 0, 0);
         TS_ASSERT_EQUALS(zeroGrid, compGrid);
 
         // check that we can copy out regions multiple times
@@ -75,16 +75,17 @@ public:
         }
 
         compGrid = zeroGrid;
-        patchBuffer.get(&compGrid, validRegion, 2, false);
+        patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 2, 0, false);
         TS_ASSERT_EQUALS(testGrid1, compGrid);
         compGrid = zeroGrid;
-        patchBuffer.get(&compGrid, validRegion, 2, true);
+        patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 2, 0, true);
         TS_ASSERT_EQUALS(testGrid1, compGrid);
 
-        TS_ASSERT_THROWS(patchBuffer.get(&compGrid, validRegion, 2, true), std::logic_error);
+        TS_ASSERT_THROWS(patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 2, 0, true), std::logic_error);
     }
 
 private:
+    CoordBox<2> dimensions;
     GridType baseGrid;
     GridType testGrid1;
     GridType testGrid2;

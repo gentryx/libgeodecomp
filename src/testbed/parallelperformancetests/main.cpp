@@ -145,7 +145,7 @@ public:
                 ScopedTimer t(&seconds);
 
                 for (int i = 1234; i <= maxNanoStep; i += 1000) {
-                    provider.get(&grid, wholeGridRegion, i, true);
+                    provider.get(&grid, wholeGridRegion, dim, i, 0, true);
                     ++repeats;
                 }
             }

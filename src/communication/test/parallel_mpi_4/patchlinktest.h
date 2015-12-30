@@ -57,9 +57,10 @@ public:
         region2 << Streak<2>(Coord<2>(0, 0), 6);
         region2 << Streak<2>(Coord<2>(4, 1), 5);
 
-        zeroGrid  = GridType(CoordBox<2>(Coord<2>(), Coord<2>(7, 5)), 0);
-        boundingBox.clear();
-        boundingBox << CoordBox<2>(Coord<2>(0, 0), Coord<2>(7, 5));
+        boundingBox = CoordBox<2>(Coord<2>(0, 0), Coord<2>(7, 5));
+        zeroGrid  = GridType(boundingBox, 0);
+        boundingRegion.clear();
+        boundingRegion << boundingBox;
 
         sendGrid1 = markGrid(region1, mpiLayer->rank());
         sendGrid2 = markGrid(region2, mpiLayer->rank());
@@ -92,7 +93,7 @@ public:
                                       MPI_INT));
 
                         acc->pushRequest(nanoStep);
-                        acc->put(sendGrid, boundingBox, nanoStep);
+                        acc->put(sendGrid, boundingRegion, nanoStep);
                         acc->wait();
                     }
 
@@ -108,7 +109,7 @@ public:
 
                         pro->recv(nanoStep);
                         pro->wait();
-                        pro->get(&actual, boundingBox, nanoStep);
+                        pro->get(&actual, boundingRegion, boundingBox.dimensions, nanoStep, receiver);
                         TS_ASSERT_EQUALS(actual, expected);
                     }
                 }
@@ -152,13 +153,13 @@ public:
             GridType mySendGrid = markGrid(region1, mpiLayer->rank() * 10000 + nanoStep * 100);
 
             for (int i = 0; i < mpiLayer->size() - 1; ++i)
-                accepters[i]->put(mySendGrid, boundingBox, nanoStep);
+                accepters[i]->put(mySendGrid, boundingRegion, nanoStep);
 
             for (int i = 0; i < mpiLayer->size() - 1; ++i) {
                 std::size_t senderRank = i >= mpiLayer->rank() ? i + 1 : i;
                 GridType expected = markGrid(region1, senderRank * 10000 + nanoStep * 100);
                 GridType actual = zeroGrid;
-                providers[i]->get(&actual, boundingBox, nanoStep);
+                providers[i]->get(&actual, boundingRegion, boundingBox.dimensions, nanoStep, senderRank);
 
                 TS_ASSERT_EQUALS(actual, expected);
             }
@@ -199,14 +200,14 @@ public:
             GridType mySendGrid = markGrid(region1, mpiLayer->rank() * 10000 + nanoStep * 100);
 
             for (int i = 0; i < mpiLayer->size() - 1; ++i) {
-                accepters[i]->put(mySendGrid, boundingBox, nanoStep);
+                accepters[i]->put(mySendGrid, boundingRegion, nanoStep);
             }
 
             for (int i = 0; i < mpiLayer->size() - 1; ++i) {
                 std::size_t senderRank = i >= mpiLayer->rank() ? i + 1 : i;
                 GridType expected = markGrid(region1, senderRank * 10000 + nanoStep * 100);
                 GridType actual = zeroGrid;
-                providers[i]->get(&actual, boundingBox, nanoStep);
+                providers[i]->get(&actual, boundingRegion, boundingBox.dimensions, nanoStep, senderRank);
 
                 TS_ASSERT_EQUALS(actual, expected);
             }
@@ -264,7 +265,7 @@ public:
             }
 
             for (int i = 0; i < mpiLayer->size(); ++i) {
-                providers[i]->get(&recvGrid, boxRegion, 4);
+                providers[i]->get(&recvGrid, boxRegion, dim, 4, i);
             }
 
             for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
@@ -336,7 +337,7 @@ public:
             }
 
             for (int i = 0; i < mpiLayer->size(); ++i) {
-                providers[i]->get(&recvGrid, boxRegion, 4);
+                providers[i]->get(&recvGrid, boxRegion, dim, 4, i);
             }
 
             for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
@@ -367,7 +368,8 @@ private:
     GridType expected;
     GridType actual;
 
-    Region<2> boundingBox;
+    CoordBox<2> boundingBox;
+    Region<2> boundingRegion;
     Region<2> region1;
     Region<2> region2;
 

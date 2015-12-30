@@ -55,7 +55,7 @@ public:
     {
         partition = newPartition;
         simulationArea = newSimulationArea;
-        rank = newRank;
+        myRank = newRank;
         ghostZoneWidth = newGhostZoneWidth;
         regions.clear();
         outerGhostZoneFragments.clear();
@@ -70,12 +70,12 @@ public:
         CoordBox<DIM> ownBoundingBox = ownExpandedRegion().boundingBox();
 
         for (unsigned i = 0; i < boundingBoxes.size(); ++i) {
-            if (i != rank &&
+            if ((i != myRank) &&
                 boundingBoxes[i].intersects(ownBoundingBox) &&
-                (!(getRegion(rank, ghostZoneWidth) &
-                   getRegion(i,    0)).empty() ||
-                 !(getRegion(i,    ghostZoneWidth) &
-                   getRegion(rank, 0)).empty())) {
+                (!(getRegion(myRank, ghostZoneWidth) &
+                   getRegion(i,      0)).empty() ||
+                 !(getRegion(i,      ghostZoneWidth) &
+                   getRegion(myRank, 0)).empty())) {
                 intersect(i);
             }
         }
@@ -136,12 +136,12 @@ public:
 
     inline const Region<DIM>& ownRegion(unsigned expansionWidth = 0)
     {
-        return regions[rank][expansionWidth];
+        return regions[myRank][expansionWidth];
     }
 
     inline const Region<DIM>& ownExpandedRegion()
     {
-        return regions[rank].back();
+        return regions[myRank].back();
     }
 
     /**
@@ -205,11 +205,21 @@ public:
         return partition->getWeights();
     }
 
+    // fixme: const correctness?
     const Adjacency &adjacency()
     {
         return partition->getAdjacency();
     }
 
+    inline unsigned rank() const
+    {
+        return myRank;
+    }
+
+    inline const Coord<DIM>& getSimulationArea() const
+    {
+        return simulationArea.dimensions;
+    }
 
 private:
     boost::shared_ptr<Partition<DIM> > partition;
@@ -222,7 +232,7 @@ private:
     RegionVecMap innerGhostZoneFragments;
     std::vector<Region<DIM> > ownRims;
     std::vector<Region<DIM> > ownInnerSets;
-    unsigned rank;
+    unsigned myRank;
     unsigned ghostZoneWidth;
     std::vector<CoordBox<DIM> > boundingBoxes;
 
@@ -245,7 +255,7 @@ private:
 
     inline void fillOwnRegion()
     {
-        fillRegion(rank);
+        fillRegion(myRank);
         Region<DIM> surface(
             ownRegion().expandWithTopology(
                 1, simulationArea.dimensions, Topology(), adjacency()) -
@@ -289,8 +299,8 @@ private:
         outerGhosts.resize(getGhostZoneWidth() + 1);
         innerGhosts.resize(getGhostZoneWidth() + 1);
         for (unsigned i = 0; i <= getGhostZoneWidth(); ++i) {
-            outerGhosts[i] = getRegion(rank, i) & getRegion(node, 0);
-            innerGhosts[i] = getRegion(rank, 0) & getRegion(node, i);
+            outerGhosts[i] = getRegion(myRank, i) & getRegion(node, 0);
+            innerGhosts[i] = getRegion(myRank, 0) & getRegion(node, i);
         }
     }
 };

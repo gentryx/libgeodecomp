@@ -41,19 +41,23 @@ public:
     virtual void get(
         GRID_TYPE *destinationGrid,
         const Region<DIM>& patchableRegion,
+        const Coord<DIM>& globalGridDimensions,
         const std::size_t nanoStep,
+        const std::size_t rank,
         const bool remove=true) = 0;
 
 #ifdef LIBGEODECOMP_WITH_HPX
     virtual void get(
         GRID_TYPE *destinationGrid,
         const Region<DIM>& patchableRegion,
+        const Coord<DIM>& globalGridDimensions,
         const std::size_t nanoStep,
+        const std::size_t rank,
         hpx::lcos::local::spinlock& mutex,
         const bool remove=true)
     {
         hpx::lcos::local::spinlock::scoped_lock lock(mutex);
-        this->get(destinationGrid, patchableRegion, nanoStep, remove);
+        this->get(destinationGrid, patchableRegion, globalGridDimensions, nanoStep, rank, remove);
     }
 #endif
 

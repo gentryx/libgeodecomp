@@ -155,7 +155,9 @@ public:
         virtual void get(
             GRID_TYPE *grid,
             const Region<DIM>& patchableRegion,
+            const Coord<DIM>& globalGridDimensions,
             const std::size_t nanoStep,
+            const std::size_t rank,
             const bool remove = true)
         {
             if (storedNanoSteps.empty() || (nanoStep < (min)(storedNanoSteps))) {
