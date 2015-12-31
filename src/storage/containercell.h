@@ -20,7 +20,7 @@ namespace LibGeoDecomp {
  * all neighbors within a certain radius, then BoxCell is a better
  * choice.
  */
-template<class CARGO, std::size_t SIZE, typename KEY = int>
+template<typename CARGO, std::size_t SIZE, typename KEY = int>
 class ContainerCell
 {
 public:
@@ -184,13 +184,11 @@ public:
         }
     }
 
-#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     template<class ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
     {
         ar & ids & cells & numElements;
     }
-#endif
 
     inline const Key *getIDs() const
     {
@@ -210,6 +208,12 @@ private:
         }
     }
 };
+
+template<typename ARCHIVE, typename CARGO, std::size_t SIZE, typename KEY>
+void serialize(ARCHIVE& ar, ContainerCell<CARGO, SIZE, KEY> cargoCell, unsigned v)
+{
+    cargoCell.serialize(ar, v);
+}
 
 }
 
