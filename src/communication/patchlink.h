@@ -126,7 +126,9 @@ public:
         virtual void put(
             const GRID_TYPE& grid,
             const Region<DIM>& /*validRegion*/,
-            const std::size_t nanoStep)
+            const Coord<DIM>& globalGridDimensions,
+            const std::size_t nanoStep,
+            const std::size_t rank)
         {
             if (!checkNanoStepPut(nanoStep)) {
                 return;

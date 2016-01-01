@@ -48,6 +48,10 @@ public:
     typedef typename ParentType::GridType GridType;
     typedef LibGeoDecomp::ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE> ParallelWriterAdapterType;
     typedef LibGeoDecomp::SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
+    typedef typename UpdateGroupType::PatchAccepterVec PatchAccepterVec;
+    typedef typename UpdateGroupType::PatchProviderVec PatchProviderVec;
+    typedef typename UpdateGroupType::PatchAccepterPtr PatchAccepterPtr;
+    typedef typename UpdateGroupType::PatchProviderPtr PatchProviderPtr;
 
     static const int DIM = Topology::DIM;
 
@@ -69,7 +73,8 @@ public:
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
-        basename(basename)
+        basename(basename),
+        rank(hpx::get_locality_id())
     {
         HpxSimulatorHelpers::gatherAndBroadcastLocalityIndices(
             APITraits::SelectSpeedGuide<CELL_TYPE>::value(),
@@ -77,6 +82,14 @@ public:
             &localityIndices,
             basename,
             updateGroupSpeeds);
+
+        for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
+            steererAdaptersGhost[i] = PatchProviderVec();
+            steererAdaptersInner[i] = PatchProviderVec();
+
+            writerAdaptersGhost[i] = PatchAccepterVec();
+            writerAdaptersInner[i] = PatchAccepterVec();
+        }
     }
 
     inline void run()
@@ -102,55 +115,61 @@ public:
 
     virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
     {
-        DistributedSimulator<CELL_TYPE>::addSteerer(steerer);
+        for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
+            // fixme: check events just like writer events
+            boost::shared_ptr<Steerer<CELL_TYPE> > steererSharedPointer(steerer);
 
-        // two adapters needed, just as for the writers
-        typename UpdateGroupType::PatchProviderPtr adapterGhost(
-            new SteererAdapterType(
-                steerers.back(),
-                initializer->startStep(),
-                initializer->maxSteps(),
-                false));
+            // two adapters needed, just as for the writers
+            typename UpdateGroupType::PatchProviderPtr adapterGhost(
+                new SteererAdapterType(
+                    steererSharedPointer,
+                    initializer->startStep(),
+                    initializer->maxSteps(),
+                    false));
 
-        typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
-            new SteererAdapterType(
-                steerers.back(),
-                initializer->startStep(),
-                initializer->maxSteps(),
-                true));
+            typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
+                new SteererAdapterType(
+                    steererSharedPointer,
+                    initializer->startStep(),
+                    initializer->maxSteps(),
+                    true));
 
-        steererAdaptersGhost.push_back(adapterGhost);
-        steererAdaptersInner.push_back(adapterInnerSet);
+            steererAdaptersGhost[i].push_back(adapterGhost);
+            steererAdaptersInner[i].push_back(adapterInnerSet);
+
+            if (i != localityIndices[rank + 1]) {
+                steerer = steerer->clone();
+            }
+        }
     }
 
     virtual void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
-        DistributedSimulator<CELL_TYPE>::addWriter(writer);
+        for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
+            boost::shared_ptr<ParallelWriter<CELL_TYPE> > writerSharedPointer(writer);
+            // we need two adapters as each ParallelWriter needs to be
+            // notified twice: once for the (inner) ghost zone, and once
+            // for the inner set.
+            PatchAccepterPtr adapterGhost(
+                new ParallelWriterAdapterType(
+                    writerSharedPointer,
+                    initializer->startStep(),
+                    initializer->maxSteps(),
+                    false));
+            PatchAccepterPtr adapterInnerSet(
+                new ParallelWriterAdapterType(
+                    writerSharedPointer,
+                    initializer->startStep(),
+                    initializer->maxSteps(),
+                    true));
 
-        // we need two adapters as each ParallelWriter needs to be
-        // notified twice: once for the (inner) ghost zone, and once
-        // for the inner set.
-        typename UpdateGroupType::PatchAccepterPtr adapterGhost(
-            new ParallelWriterAdapterType(
-                writers.back(),
-                initializer->startStep(),
-                initializer->maxSteps(),
-                // fixme: move this data to get()/put(), remove from HiParSimulator, too
-                initializer->gridDimensions(),
-                hpx::get_locality_id(),
-                false));
-        typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
-            new ParallelWriterAdapterType(
-                writers.back(),
-                initializer->startStep(),
-                initializer->maxSteps(),
-                // fixme: move this data to get()/put(), remove from HiParSimulator, too
-                initializer->gridDimensions(),
-                hpx::get_locality_id(),
-                true));
+            writerAdaptersGhost[i].push_back(adapterGhost);
+            writerAdaptersInner[i].push_back(adapterInnerSet);
 
-        writerAdaptersGhost.push_back(adapterGhost);
-        writerAdaptersInner.push_back(adapterInnerSet);
+            if (i != localityIndices[rank + 1]) {
+                writer = writer->clone();
+            }
+        }
     }
 
     std::size_t numUpdateGroups() const
@@ -176,16 +195,16 @@ private:
     unsigned ghostZoneWidth;
     std::string basename;
     EventMap events;
-    PartitionManager<Topology> partitionManager;
 
     std::vector<boost::shared_ptr<UpdateGroupType> > updateGroups;
     std::vector<double> globalUpdateGroupSpeeds;
     std::vector<std::size_t> localityIndices;
+    std::size_t rank;
 
-    typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
-    typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
-    typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
-    typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
+    std::map<std::size_t, typename UpdateGroupType::PatchProviderVec> steererAdaptersGhost;
+    std::map<std::size_t, typename UpdateGroupType::PatchProviderVec> steererAdaptersInner;
+    std::map<std::size_t, typename UpdateGroupType::PatchAccepterVec> writerAdaptersGhost;
+    std::map<std::size_t, typename UpdateGroupType::PatchAccepterVec> writerAdaptersInner;
 
     inline void initSimulation()
     {
@@ -207,17 +226,18 @@ private:
                 weights));
 
         std::vector<hpx::future<boost::shared_ptr<UpdateGroupType> > > updateGroupCreationFutures;
-        std::size_t rank = hpx::get_locality_id();
 
         for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
             updateGroupCreationFutures << hpx::async(&HpxSimulator::createUpdateGroup, this, i, partition);
         }
         updateGroups = hpx::util::unwrapped(std::move(updateGroupCreationFutures));
 
-        writerAdaptersGhost.clear();
-        writerAdaptersInner.clear();
-        steererAdaptersGhost.clear();
-        steererAdaptersInner.clear();
+        for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
+            writerAdaptersGhost[i].clear();
+            writerAdaptersInner[i].clear();
+            steererAdaptersGhost[i].clear();
+            steererAdaptersInner[i].clear();
+        }
 
         initEvents();
     }
@@ -338,15 +358,14 @@ private:
                       ghostZoneWidth,
                       initializer,
                       reinterpret_cast<STEPPER*>(0),
-                      writerAdaptersGhost,
-                      writerAdaptersInner,
-                      steererAdaptersGhost,
-                      steererAdaptersInner,
+                      writerAdaptersGhost[rank],
+                      writerAdaptersInner[rank],
+                      steererAdaptersGhost[rank],
+                      steererAdaptersInner[rank],
                       basename,
                       rank));
         return ret;
     }
-
 };
 
 }

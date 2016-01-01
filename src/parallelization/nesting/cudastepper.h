@@ -392,7 +392,12 @@ private:
              i != patchAccepters[ParentType::INNER_SET].end();
              ++i) {
             if (nanoStep == (*i)->nextRequiredNanoStep()) {
-                (*i)->put(*oldGrid, region, nanoStep);
+                (*i)->put(
+                    *oldGrid,
+                    region,
+                    partitionManager->getSimulationArea(),
+                    nanoStep,
+                    partitionManager->rank());
             }
         }
     }

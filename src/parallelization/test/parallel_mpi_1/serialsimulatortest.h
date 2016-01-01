@@ -33,7 +33,7 @@ public:
 
         init.reset(createInitializer());
         simulator.reset(new SerialSimulator<TestCell<2> >(createInitializer()));
-        events.reset(new MockWriter<>::EventVec);
+        events.reset(new MockWriter<>::EventsStore);
     }
 
     void tearDown()
@@ -103,7 +103,7 @@ public:
         simulator->addWriter(w);
         simulator->run();
 
-        MockWriter<>::EventVec expectedEvents;
+        MockWriter<>::EventsStore expectedEvents;
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, 0, true);
 
         for (unsigned i = startStep + 2; i <= init->maxSteps(); i += 3) {
@@ -124,11 +124,11 @@ public:
         simulator->addWriter(gridWriter1);
 
         simulator->run();
-        MockWriter<>::EventVec events1 = *events;
+        MockWriter<>::EventsStore events1 = *events;
         std::vector<Grid<TestCell<2> > > grids1 = gridWriter1->getGrids();
 
 
-        boost::shared_ptr<MockWriter<>::EventVec> events2(new MockWriter<>::EventVec);
+        boost::shared_ptr<MockWriter<>::EventsStore> events2(new MockWriter<>::EventsStore);
         events->clear();
         MockWriter<> *eventWriter2 = new MockWriter<>(events2);
         MemoryWriter<TestCell<2> > *gridWriter2 =
@@ -153,16 +153,13 @@ public:
         TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(), 0);
 
         sim.step();
-        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
-                            NANO_STEPS_3D);
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(), NANO_STEPS_3D);
 
         sim.nanoStep(0);
-        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
-                            NANO_STEPS_3D + 1);
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(), NANO_STEPS_3D + 1);
 
         sim.run();
-        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
-                            21 * NANO_STEPS_3D);
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(), 21 * NANO_STEPS_3D);
     }
 
     void testSteererCallback()
@@ -210,20 +207,17 @@ public:
         TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(), 0);
 
         sim.step();
-        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(),
-                            NANO_STEPS_3D);
+        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(), NANO_STEPS_3D);
 
         sim.nanoStep(0);
-        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(),
-                            NANO_STEPS_3D + 1);
+        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(), NANO_STEPS_3D + 1);
 
         sim.run();
-        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(),
-                            21 * NANO_STEPS_3D);
+        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(), 21 * NANO_STEPS_3D);
     }
 
 private:
-    boost::shared_ptr<MockWriter<>::EventVec> events;
+    boost::shared_ptr<MockWriter<>::EventsStore> events;
     boost::shared_ptr<SerialSimulator<TestCell<2> > > simulator;
     boost::shared_ptr<Initializer<TestCell<2> > > init;
     unsigned maxSteps;

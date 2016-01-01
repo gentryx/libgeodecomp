@@ -42,7 +42,7 @@ public:
         ghostzZoneWidth = 10;
         s.reset(new SimulatorType(
                     init, 0, loadBalancingPeriod, ghostzZoneWidth));
-        events.reset(new MockWriter<>::EventVec);
+        events.reset(new MockWriter<>::EventsStore);
         mockWriter = new MockWriter<>(events);
         memoryWriter = new MemoryWriterType(outputPeriod);
         s->addWriter(mockWriter);
@@ -95,7 +95,7 @@ public:
     {
         s->step();
 
-        MockWriter<>::EventVec expectedEvents;
+        MockWriter<>::EventsStore expectedEvents;
         expectedEvents << MockWriter<>::Event(20, WRITER_INITIALIZED,   0, false)
                        << MockWriter<>::Event(20, WRITER_INITIALIZED,   0, true )
                        << MockWriter<>::Event(21, WRITER_STEP_FINISHED, 0, false)
@@ -121,7 +121,7 @@ public:
     {
         s->run();
 
-        MockWriter<>::EventVec expectedEvents;
+        MockWriter<>::EventsStore expectedEvents;
         expectedEvents << MockWriter<>::Event(20, WRITER_INITIALIZED,   0, false)
                        << MockWriter<>::Event(20, WRITER_INITIALIZED,   0, true);
         for (int t = 21; t < 200; ++t) {
@@ -192,7 +192,7 @@ private:
     unsigned loadBalancingPeriod;
     unsigned ghostzZoneWidth;
     MockWriter<> *mockWriter;
-    boost::shared_ptr<MockWriter<>::EventVec> events;
+    boost::shared_ptr<MockWriter<>::EventsStore> events;
     MemoryWriterType *memoryWriter;
 };
 

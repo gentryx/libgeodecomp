@@ -61,7 +61,7 @@ public:
         PatchBufferType patchBuffer(region0);
         patchBuffer.pushRequest(0);
         for (int i = 0; i < 4; ++i) {
-            patchBuffer.put(baseGrid, validRegion, i);
+            patchBuffer.put(baseGrid, validRegion, dimensions.dimensions, i, 0);
         }
         compGrid = zeroGrid;
         patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 0, 0);
@@ -71,7 +71,7 @@ public:
         patchBuffer = PatchBufferType(region1);
         patchBuffer.pushRequest(2);
         for (int i = 0; i < 4; ++i) {
-            patchBuffer.put(baseGrid, validRegion, i);
+            patchBuffer.put(baseGrid, validRegion, dimensions.dimensions, i, 0);
         }
 
         compGrid = zeroGrid;

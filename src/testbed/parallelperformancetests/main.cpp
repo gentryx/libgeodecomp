@@ -158,7 +158,7 @@ public:
             accepter.charge(1234, maxNanoStep, 1000);
 
             for (int i = 1234; i <= maxNanoStep; i += 1000) {
-                accepter.put(grid, wholeGridRegion, i);
+                accepter.put(grid, wholeGridRegion, dim, i, 0);
             }
         }
 

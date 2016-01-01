@@ -66,6 +66,63 @@ public:
     bool lastCall;
 };
 
+class ThreadSafeEventsStore
+{
+public:
+    typedef std::vector<MockWriterEvent>::iterator iterator;
+
+    ThreadSafeEventsStore() :
+        insertMutex(new hpx::lcos::local::spinlock())
+    {}
+
+    ThreadSafeEventsStore& operator<<(const MockWriterEvent& event)
+    {
+        hpx::lcos::local::spinlock::scoped_lock l(*insertMutex);
+        delegate[event.rank] << event;
+        return *this;
+    }
+
+    std::size_t size() const
+    {
+        return delegate.size();
+    }
+
+    void clear()
+    {
+        delegate.clear();
+    }
+
+    iterator begin()
+    {
+        return delegate.begin()->second.begin();
+    }
+
+    iterator end()
+    {
+        return delegate.begin()->second.end();
+    }
+
+    const MockWriterEvent& operator[](std::size_t index)
+    {
+        return delegate.begin()->second[index];
+    }
+
+    bool operator==(const ThreadSafeEventsStore& other) const
+    {
+        return delegate == other.delegate;
+    }
+
+    bool operator!=(const ThreadSafeEventsStore& other) const
+    {
+        return !(*this == other);
+    }
+
+    std::map<std::size_t, std::vector<MockWriterEvent> > delegate;
+
+private:
+    boost::shared_ptr<hpx::lcos::local::spinlock> insertMutex;
+};
+
 }
 
 template<typename CELL_TYPE=TestCell<2> >
@@ -75,10 +132,16 @@ class MockWriter :
 {
 public:
     typedef MockWriterHelpers::MockWriterEvent Event;
-    typedef std::vector<Event> EventVec;
+#ifdef LIBGEODECOMP_WITH_HPX
+    typedef MockWriterHelpers::ThreadSafeEventsStore EventsStore;
+#else
+    typedef std::vector<Event> EventsStore;
+#endif
     using Writer<CELL_TYPE>::DIM;
 
-    explicit MockWriter(boost::shared_ptr<EventVec> events, const unsigned& period = 1) :
+    explicit MockWriter(
+        boost::shared_ptr<EventsStore> events,
+        const unsigned& period = 1) :
         Clonable<Writer<CELL_TYPE>, MockWriter>("", period),
         Clonable<ParallelWriter<CELL_TYPE>, MockWriter>("", period),
         events(events)
@@ -110,7 +173,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<MockWriter::EventVec> events;
+    boost::shared_ptr<MockWriter::EventsStore> events;
 
     void stepFinished(unsigned step, WriterEvent event, std::size_t rank, bool lastCall)
 

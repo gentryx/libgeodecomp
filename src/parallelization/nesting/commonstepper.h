@@ -138,7 +138,12 @@ protected:
              i != patchAccepters[patchType].end();
              ++i) {
             if (nanoStep == (*i)->nextRequiredNanoStep()) {
-                (*i)->put(*oldGrid, region, nanoStep);
+                (*i)->put(
+                    *oldGrid,
+                    region,
+                    partitionManager->getSimulationArea(),
+                    nanoStep,
+                    partitionManager->rank());
             }
         }
     }
@@ -236,7 +241,12 @@ protected:
     inline void saveRim(std::size_t nanoStep)
     {
         rimBuffer.pushRequest(nanoStep);
-        rimBuffer.put(*oldGrid, rim(), nanoStep);
+        rimBuffer.put(
+            *oldGrid,
+            rim(),
+            partitionManager->getSimulationArea(),
+            nanoStep,
+            partitionManager->rank());
     }
 
     inline void restoreRim(bool remove)
@@ -253,9 +263,12 @@ protected:
     inline void saveKernel()
     {
         kernelBuffer.pushRequest(globalNanoStep());
-        kernelBuffer.put(*oldGrid,
-                         innerSet(ghostZoneWidth()),
-                         globalNanoStep());
+        kernelBuffer.put(
+            *oldGrid,
+            innerSet(ghostZoneWidth()),
+            partitionManager->getSimulationArea(),
+            globalNanoStep(),
+            partitionManager->rank());
     }
 
     inline void restoreKernel()

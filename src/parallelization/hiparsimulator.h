@@ -166,16 +166,12 @@ public:
                 writers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
-                initializer->gridDimensions(),
-                mpiLayer.rank(),
                 false));
         typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
             new ParallelWriterAdapterType(
                 writers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
-                initializer->gridDimensions(),
-                mpiLayer.rank(),
                 true));
 
         writerAdaptersGhost.push_back(adapterGhost);

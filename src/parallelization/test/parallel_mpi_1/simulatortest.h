@@ -18,7 +18,7 @@ public:
     {
         MockInitializer::events = "";
         MockSimulator::events = "";
-        boost::shared_ptr<MockWriter<>::EventVec> events(new MockWriter<>::EventVec);
+        boost::shared_ptr<MockWriter<>::EventsStore> events(new MockWriter<>::EventsStore);
         {
             MockSimulator sim(new MockInitializer);
             sim.addWriter(new MockWriter<>(events));
@@ -27,7 +27,7 @@ public:
         }
         TS_ASSERT_EQUALS("created, configString: ''\ndeleted\n", MockInitializer::events);
         TS_ASSERT_EQUALS("deleted\n", MockSimulator::events);
-        TS_ASSERT_EQUALS(3, events->size());
+        TS_ASSERT_EQUALS(3, events->end() - events->begin());
         TS_ASSERT_EQUALS(-1, (*events)[0].step);
         TS_ASSERT_EQUALS(-1, (*events)[1].step);
         TS_ASSERT_EQUALS(-1, (*events)[2].step);

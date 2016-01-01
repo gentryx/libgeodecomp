@@ -61,7 +61,7 @@ public:
         TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), PatchAccepter<GridType>::infinity());
 
         for (int i = 0; i < 4; ++i) {
-            patchBuffer.put(baseGrid, validRegion, i);
+            patchBuffer.put(baseGrid, validRegion, dimensions.dimensions, i, 0);
         }
         compGrid = zeroGrid;
 
@@ -77,7 +77,7 @@ public:
         patchBuffer.pushRequest(2);
         patchBuffer.pushRequest(3);
         for (int i = 0; i < 4; ++i) {
-            patchBuffer.put(baseGrid, validRegion, i);
+            patchBuffer.put(baseGrid, validRegion, dimensions.dimensions, i, 0);
         }
         compGrid = zeroGrid;
         patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 2, 0, false);
@@ -98,7 +98,7 @@ public:
         patchBuffer.region = region2;
         patchBuffer.pushRequest(1);
         for (int i = 0; i < 4; ++i) {
-            patchBuffer.put(baseGrid, validRegion, i);
+            patchBuffer.put(baseGrid, validRegion, dimensions.dimensions, i, 0);
         }
         compGrid = zeroGrid;
         patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 1, 0);

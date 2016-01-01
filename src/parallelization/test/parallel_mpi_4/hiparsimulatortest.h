@@ -92,7 +92,7 @@ public:
                     new MockBalancer(),
                     loadBalancingPeriod,
                     ghostZoneWidth));
-        events.reset(new MockWriter<>::EventVec);
+        events.reset(new MockWriter<>::EventsStore);
         mockWriter = new MockWriter<>(events);
         memoryWriter = new MemoryWriterType(outputPeriod);
         sim->addWriter(mockWriter);
@@ -117,7 +117,7 @@ public:
         TS_ASSERT_EQUALS((101 - 20 - 4) * 27, sim->timeToLastEvent());
 
         std::size_t rank = MPILayer().rank();
-        MockWriter<>::EventVec expectedEvents;
+        MockWriter<>::EventsStore expectedEvents;
         expectedEvents << MockWriter<>::Event(20, WRITER_INITIALIZED, rank, false)
                        << MockWriter<>::Event(20, WRITER_INITIALIZED, rank, true);
         for (int t = 21; t < 25; t += 1) {
@@ -295,7 +295,7 @@ private:
     unsigned outputPeriod;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<MockWriter<>::EventVec> events;
+    boost::shared_ptr<MockWriter<>::EventsStore> events;
     MockWriter<> *mockWriter;
     MemoryWriterType *memoryWriter;
 };

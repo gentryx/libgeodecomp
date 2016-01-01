@@ -32,7 +32,9 @@ public:
     virtual void put(
         const GRID_TYPE& grid,
         const Region<DIM>& validRegion,
-        const std::size_t nanoStep) = 0;
+        const Coord<DIM>& globalGridDimensions,
+        const std::size_t nanoStep,
+        const std::size_t rank) = 0;
 
     virtual void setRegion(const Region<DIM>& region)
     {

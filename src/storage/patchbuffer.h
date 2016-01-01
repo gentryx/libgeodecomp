@@ -37,7 +37,9 @@ public:
     virtual void put(
         const GRID_TYPE1& grid,
         const Region<DIM>& /*validRegion*/,
-        const std::size_t nanoStep)
+        const Coord<DIM>& globalGridDimensions,
+        const std::size_t nanoStep,
+        const std::size_t rank)
     {
         // It would be nice to check if validRegion was actually a
         // superset of the region we'll save, but that would be

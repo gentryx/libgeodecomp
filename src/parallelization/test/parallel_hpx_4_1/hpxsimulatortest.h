@@ -130,7 +130,7 @@ public:
         maxTimeSteps = 10;
         rank = hpx::get_locality_id();
         localities = hpx::find_all_localities();
-        events.reset(new MockWriter<>::EventVec);
+        events.reset(new MockWriter<>::EventsStore);
     }
 
     void tearDown()
@@ -166,7 +166,7 @@ public:
 
         sim.run();
 
-        MockWriter<>::EventVec expectedEvents;
+        MockWriter<>::EventsStore expectedEvents;
         int startStep = init->startStep();
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, false);
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, true);
@@ -204,16 +204,22 @@ public:
 
         sim.run();
 
-        MockWriter<>::EventVec expectedEvents;
+        MockWriter<>::EventsStore expectedEvents;
         int startStep = init->startStep();
-        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, false);
-        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, true);
-        for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
-            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, false);
-            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, true);
+
+        std::size_t startRank = (rank + 0) * (rank + 1) / 2;
+        std::size_t endRank   = (rank + 1) * (rank + 2) / 2;
+
+        for (std::size_t groupRank = startRank; groupRank < endRank; ++groupRank) {
+            expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, groupRank, false);
+            expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, groupRank, true);
+            for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
+                expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, groupRank, false);
+                expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, groupRank, true);
+            }
+            expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, false);
+            expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, true);
         }
-        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, false);
-        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, true);
 
         TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
         TS_ASSERT_EQUALS(expectedEvents,       *events);
@@ -242,7 +248,7 @@ public:
 
         sim.run();
 
-        MockWriter<>::EventVec expectedEvents;
+        MockWriter<>::EventsStore expectedEvents;
         int startStep = init->startStep();
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, false);
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, true);
@@ -283,16 +289,21 @@ public:
 
         sim.run();
 
-        MockWriter<>::EventVec expectedEvents;
+        MockWriter<>::EventsStore expectedEvents;
         int startStep = init->startStep();
-        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, false);
-        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, true);
-        for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
-            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, false);
-            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, true);
+        std::size_t startRank = (rank + 0) * (rank + 1) / 2;
+        std::size_t endRank   = (rank + 1) * (rank + 2) / 2;
+
+        for (std::size_t groupRank = startRank; groupRank < endRank; ++groupRank) {
+            expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, groupRank, false);
+            expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, groupRank, true);
+            for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
+                expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, groupRank, false);
+                expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, groupRank, true);
+            }
+            expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, false);
+            expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, true);
         }
-        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, false);
-        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, true);
 
         TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
         TS_ASSERT_EQUALS(expectedEvents,       *events);
@@ -346,7 +357,7 @@ private:
     std::vector<hpx::id_type> localities;
     int outputFrequency;
     int maxTimeSteps;
-    boost::shared_ptr<MockWriter<>::EventVec> events;
+    boost::shared_ptr<MockWriter<>::EventsStore> events;
 };
 
 }

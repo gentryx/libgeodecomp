@@ -30,16 +30,12 @@ public:
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer,
         const std::size_t firstStep,
         const std::size_t lastStep,
-        Coord<Topology::DIM> globalGridDimensions,
-        std::size_t rank,
         bool lastCall) :
         writer(writer),
         firstNanoStep(firstStep * NANO_STEPS),
         lastNanoStep(lastStep   * NANO_STEPS),
         stride(writer->getPeriod() * NANO_STEPS),
-        rank(rank),
-        lastCall(lastCall),
-        globalGridDimensions(globalGridDimensions)
+        lastCall(lastCall)
     {
         pushRequest(firstNanoStep);
         pushRequest(lastNanoStep);
@@ -53,7 +49,10 @@ public:
     virtual void put(
         const GRID_TYPE& grid,
         const Region<GRID_TYPE::DIM>& validRegion,
-        const std::size_t nanoStep)
+        const Coord<GRID_TYPE::DIM>& globalGridDimensions,
+        const std::size_t nanoStep,
+        const std::size_t rank)
+
     {
         if (!checkNanoStepPut(nanoStep)) {
             return;
@@ -88,9 +87,7 @@ private:
     std::size_t firstNanoStep;
     std::size_t lastNanoStep;
     std::size_t stride;
-    std::size_t rank;
     bool lastCall;
-    Coord<Topology::DIM> globalGridDimensions;
 };
 
 }
