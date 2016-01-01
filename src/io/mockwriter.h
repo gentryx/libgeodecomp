@@ -66,6 +66,8 @@ public:
     bool lastCall;
 };
 
+#ifdef LIBGEODECOMP_WITH_HPX
+
 class ThreadSafeEventsStore
 {
 public:
@@ -122,6 +124,8 @@ public:
 private:
     boost::shared_ptr<hpx::lcos::local::spinlock> insertMutex;
 };
+
+#endif
 
 }
 

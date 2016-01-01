@@ -319,7 +319,7 @@ public:
             2701,
             MPI_CHAR);
         accepter.charge(4, 4, 1);
-        accepter.put(sendGrid, boxRegion, 4);
+        accepter.put(sendGrid, boxRegion, dim, 4, mpiLayer->rank());
         accepter.wait();
 
         std::vector<boost::shared_ptr<PatchLink<GridType3>::Provider> > providers;
