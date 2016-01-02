@@ -4,6 +4,7 @@
 #include <boost/assign/std/deque.hpp>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
+#include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
@@ -176,6 +177,42 @@ public:
         }
         expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, false);
         expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, true);
+
+        TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
+        TS_ASSERT_EQUALS(expectedEvents,       *events);
+    }
+
+    void testSteererCallback()
+    {
+        CellInitializer *init = new CellInitializer(maxTimeSteps);
+
+        std::vector<double> updateGroupSpeeds(1, 1.0);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        int steeringPeriod = 7;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererCallback");
+
+        boost::shared_ptr<MockSteerer<ConwayCell>::EventsStore> events(new MockSteerer<ConwayCell>::EventsStore);
+        sim.addSteerer(new MockSteerer<ConwayCell>(steeringPeriod, events));
+
+        sim.run();
+
+        MockSteerer<ConwayCell>::EventsStore expectedEvents;
+        int startStep = init->startStep();
+        expectedEvents << MockSteerer<ConwayCell>::Event(startStep, STEERER_INITIALIZED, rank, false);
+        expectedEvents << MockSteerer<ConwayCell>::Event(startStep, STEERER_INITIALIZED, rank, true);
+        for (unsigned i = startStep + steeringPeriod; i < init->maxSteps(); i += steeringPeriod) {
+            expectedEvents << MockSteerer<ConwayCell>::Event(i, STEERER_NEXT_STEP, rank, false);
+            expectedEvents << MockSteerer<ConwayCell>::Event(i, STEERER_NEXT_STEP, rank, true);
+        }
+        expectedEvents << MockSteerer<ConwayCell>::Event(init->maxSteps(), STEERER_ALL_DONE, rank, false);
+        expectedEvents << MockSteerer<ConwayCell>::Event(init->maxSteps(), STEERER_ALL_DONE, rank, true);
 
         TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
         TS_ASSERT_EQUALS(expectedEvents,       *events);
