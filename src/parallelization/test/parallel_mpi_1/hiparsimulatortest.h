@@ -146,25 +146,24 @@ public:
 
     void testSteererCallback()
     {
-        std::stringstream events;
-        s->addSteerer(new MockSteererType(5, &events));
+        boost::shared_ptr<MockSteererType::EventsStore> events(new MockSteererType::EventsStore);
+        s->addSteerer(new MockSteererType(5, events));
         s->run();
         s.reset();
 
-        std::stringstream expected;
-        expected << "created, period = 5\n"
-                 << "nextStep(" << 20 << ", STEERER_INITIALIZED, 0, 0)\n"
-                 << "nextStep(" << 20 << ", STEERER_INITIALIZED, 0, 1)\n";
+        MockSteererType::EventsStore expected;
+        typedef MockSteererType::Event Event;
+        expected << Event(20, STEERER_INITIALIZED, 0, false)
+                 << Event(20, STEERER_INITIALIZED, 0, true);
         for (int i = 25; i < 200; i += 5) {
-            expected << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 0)\n"
-                     << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 1)\n";
+            expected << Event(i, STEERER_NEXT_STEP, 0, false)
+                     << Event(i, STEERER_NEXT_STEP, 0, true);
         }
+        expected << Event(200, STEERER_ALL_DONE,  0, false)
+                 << Event(200, STEERER_ALL_DONE,  0, true)
+                 << Event(-1,  STEERER_ALL_DONE, -1, true);
 
-        expected << "nextStep(200, STEERER_ALL_DONE, 0, 0)\n"
-                 << "nextStep(200, STEERER_ALL_DONE, 0, 1)\n"
-                 << "deleted\n";
-
-        TS_ASSERT_EQUALS(events.str(), expected.str());
+        TS_ASSERT_EQUALS(*events, expected);
     }
 
     void testSteererFunctionality()

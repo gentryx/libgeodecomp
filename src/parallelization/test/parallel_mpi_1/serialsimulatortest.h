@@ -22,7 +22,7 @@ class SerialSimulatorTest : public CxxTest::TestSuite
 public:
     static const int NANO_STEPS_2D = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
     static const int NANO_STEPS_3D = APITraits::SelectNanoSteps<TestCell<3> >::VALUE;
-    typedef MockSteerer<TestCell<2> > SteererType;
+    typedef MockSteerer<TestCell<2> > MockSteererType;
     typedef GridBase<TestCell<2>, 2> GridBaseType;
 
     void setUp()
@@ -164,24 +164,24 @@ public:
 
     void testSteererCallback()
     {
-        std::stringstream events;
-        simulator->addSteerer(new SteererType(5, &events));
-        std::stringstream expected;
-        expected << "created, period = 5\n";
-        TS_ASSERT_EQUALS(events.str(), expected.str());
+        boost::shared_ptr<MockSteererType::EventsStore> events(new MockSteererType::EventsStore);
+        simulator->addSteerer(new MockSteererType(5, events));
+
+        MockSteererType::EventsStore expectedEvents;
+        expectedEvents << MockSteererType::Event(13, STEERER_INITIALIZED, 0, true);
+        for (std::size_t t = startStep; t < maxSteps; t += 1) {
+            if ((t % 5) == 0) {
+                expectedEvents << MockSteererType::Event(t, STEERER_NEXT_STEP, 0, true);
+            }
+        }
+
+        expectedEvents << MockSteererType::Event(21, STEERER_ALL_DONE,  0, true)
+                       << MockSteererType::Event(-1, STEERER_ALL_DONE, -1, true);
 
         simulator->run();
-        unsigned i = startStep;
-        if (i % 5) {
-            i += 5 - (i % 5);
-        }
-        for (; i < maxSteps; i += 5) {
-            expected << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 1)\n";
-        }
-        expected << "deleted\n";
-
         simulator.reset();
-        TS_ASSERT_EQUALS(events.str(), expected.str());
+
+        TS_ASSERT_EQUALS(*events, expectedEvents);
     }
 
     void testSteererCanTerminateSimulation()

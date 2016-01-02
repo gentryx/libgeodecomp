@@ -173,25 +173,26 @@ public:
 
     void testSteererCallback()
     {
-        std::stringstream events;
-        sim->addSteerer(new MockSteererType(5, &events));
+        boost::shared_ptr<MockSteererType::EventsStore> events(new MockSteererType::EventsStore);
+        sim->addSteerer(new MockSteererType(5, events));
         sim->run();
         sim.reset();
 
-        std::stringstream expected;
-        expected << "created, period = 5\n"
-                 << "nextStep(" << 20 << ", STEERER_INITIALIZED, " << MPILayer().rank() << ", 0)\n"
-                 << "nextStep(" << 20 << ", STEERER_INITIALIZED, " << MPILayer().rank() << ", 1)\n";
-        for (int i = 25; i < 101; i += 5) {
-            expected << "nextStep(" << i << ", STEERER_NEXT_STEP, " << MPILayer().rank() << ", " << "0)\n"
-                     << "nextStep(" << i << ", STEERER_NEXT_STEP, " << MPILayer().rank() << ", " << "1)\n";
+        MockSteererType::EventsStore expected;
+        typedef MockSteererType::Event Event;
+        int rank = MPILayer().rank();
+        expected << Event(20, STEERER_INITIALIZED, rank, false)
+                 << Event(20, STEERER_INITIALIZED, rank, true);
+        for (unsigned i = 25; i < maxSteps; i += 5) {
+            expected << Event(i, STEERER_NEXT_STEP, rank, false)
+                     << Event(i, STEERER_NEXT_STEP, rank, true);
         }
 
-        expected << "nextStep(101, STEERER_ALL_DONE, " << MPILayer().rank() << ", " << "0)\n"
-                 << "nextStep(101, STEERER_ALL_DONE, " << MPILayer().rank() << ", " << "1)\n"
-                 << "deleted\n";
+        expected << Event(101, STEERER_ALL_DONE,  rank, false)
+                 << Event(101, STEERER_ALL_DONE,  rank, true)
+                 << Event(-1,  STEERER_ALL_DONE, -1, true);
 
-        TS_ASSERT_EQUALS(events.str(), expected.str());
+        TS_ASSERT_EQUALS(*events, expected);
     }
 
     void testSteererFunctionality()
