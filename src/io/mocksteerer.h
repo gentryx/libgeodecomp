@@ -123,7 +123,7 @@ private:
 
 }
 
-template<typename CELL_TYPE>
+template<typename CELL_TYPE=TestCell<2> >
 class MockSteerer : public Steerer<CELL_TYPE>
 {
 public:
