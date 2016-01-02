@@ -166,7 +166,7 @@ public:
             writerAdaptersGhost[i].push_back(adapterGhost);
             writerAdaptersInner[i].push_back(adapterInnerSet);
 
-            if (i != localityIndices[rank + 1]) {
+            if ((i + 1) < localityIndices[rank + 1]) {
                 writer = writer->clone();
             }
         }
