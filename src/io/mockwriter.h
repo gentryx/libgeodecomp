@@ -145,7 +145,7 @@ public:
 
     explicit MockWriter(
         boost::shared_ptr<EventsStore> events,
-        const unsigned& period = 1) :
+        unsigned period = 1) :
         Clonable<Writer<CELL_TYPE>, MockWriter>("", period),
         Clonable<ParallelWriter<CELL_TYPE>, MockWriter>("", period),
         events(events)
