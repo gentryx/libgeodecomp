@@ -161,8 +161,17 @@ protected:
         TimeInput t(&chronometer);
 
         for (unsigned i = 0; i < steerers.size(); ++i) {
-            if (stepNum % steerers[i]->getPeriod() == 0) {
-                steerers[i]->nextStep(curGrid, simArea, gridDim, getStep(), event, 0, true, feedback);
+            if ((event != STEERER_NEXT_STEP) ||
+                (stepNum % steerers[i]->getPeriod() == 0)) {
+                steerers[i]->nextStep(
+                    curGrid,
+                    simArea,
+                    gridDim,
+                    getStep(),
+                    event,
+                    0,
+                    true,
+                    feedback);
             }
         }
         // fixme: apply SteererFeedback!
