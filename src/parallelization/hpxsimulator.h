@@ -137,7 +137,7 @@ public:
             steererAdaptersGhost[i].push_back(adapterGhost);
             steererAdaptersInner[i].push_back(adapterInnerSet);
 
-            if (i != localityIndices[rank + 1]) {
+            if ((i + 1) < localityIndices[rank + 1]) {
                 steerer = steerer->clone();
             }
         }
