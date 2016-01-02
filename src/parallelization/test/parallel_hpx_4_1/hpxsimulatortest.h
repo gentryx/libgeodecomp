@@ -228,6 +228,7 @@ public:
         std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
         int loadBalancingPeriod = 10;
         int ghostZoneWidth = 1;
+        int steeringPeriod = 3;
         SimulatorType sim(
             init,
             updateGroupSpeeds,
@@ -239,27 +240,49 @@ public:
         MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(events, outputFrequency);
         sim.addWriter(writer);
 
+        boost::shared_ptr<MockSteerer<ConwayCell>::EventsStore> steererEvents(new MockSteerer<ConwayCell>::EventsStore);
+        sim.addSteerer(new MockSteerer<ConwayCell>(steeringPeriod, steererEvents));
+
         sim.run();
 
-        MockWriter<>::EventsStore expectedEvents;
+        // check writer interaction:
+        MockWriter<ConwayCell>::EventsStore expectedWriterEvents;
         int startStep = init->startStep();
 
         std::size_t startRank = (rank + 0) * (rank + 1) / 2;
         std::size_t endRank   = (rank + 1) * (rank + 2) / 2;
 
         for (std::size_t groupRank = startRank; groupRank < endRank; ++groupRank) {
-            expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, groupRank, false);
-            expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, groupRank, true);
+            expectedWriterEvents << MockWriter<ConwayCell>::Event(startStep, WRITER_INITIALIZED, groupRank, false);
+            expectedWriterEvents << MockWriter<ConwayCell>::Event(startStep, WRITER_INITIALIZED, groupRank, true);
             for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
-                expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, groupRank, false);
-                expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, groupRank, true);
+                expectedWriterEvents << MockWriter<ConwayCell>::Event(i, WRITER_STEP_FINISHED, groupRank, false);
+                expectedWriterEvents << MockWriter<ConwayCell>::Event(i, WRITER_STEP_FINISHED, groupRank, true);
             }
-            expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, false);
-            expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, true);
+            expectedWriterEvents << MockWriter<ConwayCell>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, false);
+            expectedWriterEvents << MockWriter<ConwayCell>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, true);
         }
 
-        TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
-        TS_ASSERT_EQUALS(expectedEvents,       *events);
+        TS_ASSERT_EQUALS(expectedWriterEvents.size(), events->size());
+        TS_ASSERT_EQUALS(expectedWriterEvents,       *events);
+
+        // check steerer interaction:
+        MockSteerer<ConwayCell>::EventsStore expectedSteererEvents;
+        startStep = init->startStep();
+
+        for (std::size_t groupRank = startRank; groupRank < endRank; ++groupRank) {
+            expectedSteererEvents << MockSteerer<ConwayCell>::Event(startStep, STEERER_INITIALIZED, groupRank, false);
+            expectedSteererEvents << MockSteerer<ConwayCell>::Event(startStep, STEERER_INITIALIZED, groupRank, true);
+            for (unsigned i = startStep + steeringPeriod; i < init->maxSteps(); i += steeringPeriod) {
+                expectedSteererEvents << MockSteerer<ConwayCell>::Event(i, STEERER_NEXT_STEP, groupRank, false);
+                expectedSteererEvents << MockSteerer<ConwayCell>::Event(i, STEERER_NEXT_STEP, groupRank, true);
+            }
+            expectedSteererEvents << MockSteerer<ConwayCell>::Event(init->maxSteps(), STEERER_ALL_DONE, groupRank, false);
+            expectedSteererEvents << MockSteerer<ConwayCell>::Event(init->maxSteps(), STEERER_ALL_DONE, groupRank, true);
+        }
+
+        TS_ASSERT_EQUALS(expectedSteererEvents.size(), steererEvents->size());
+        TS_ASSERT_EQUALS(expectedSteererEvents,       *steererEvents);
     }
 
     void testWithTestCell2D()
