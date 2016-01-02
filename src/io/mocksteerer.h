@@ -138,7 +138,7 @@ public:
 #endif
     static const int DIM = Topology::DIM;
 
-    MockSteerer(const unsigned& period, boost::shared_ptr<EventsStore> events)  :
+    MockSteerer(unsigned period, boost::shared_ptr<EventsStore> events)  :
         Steerer<CELL_TYPE>(period),
         events(events)
     {}
@@ -146,6 +146,11 @@ public:
     virtual ~MockSteerer()
     {
         *events << Event(-1, STEERER_ALL_DONE, -1, true);
+    }
+
+    Steerer<CELL_TYPE> *clone()
+    {
+        return new MockSteerer(*this);
     }
 
     virtual void nextStep(
