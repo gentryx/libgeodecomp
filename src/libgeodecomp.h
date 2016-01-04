@@ -10,7 +10,6 @@
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
-#include <libgeodecomp/io/hpxwritercollector.h>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 #endif
 
