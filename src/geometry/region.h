@@ -954,33 +954,15 @@ public:
         return buf.str();
     }
 
-    inline void prettyPrint1D(std::ostream &os, const Coord<2> dimensions, const Coord<2> &resolution = Coord<2>(250, 50)) const
+    // fixme: needs test
+    // fixme: change interface to match prettyPrint()
+    inline void prettyPrint2D(std::ostream& os) const
     {
-        for (int y = 0; y < resolution.y(); ++y) {
-            for (int x = 0; x < resolution.x(); ++x) {
-                int cx = ((float)x / (float)resolution.x()) * dimensions.x();
-                int cy = ((float)y / (float)resolution.y()) * dimensions.y();
-
-                if (count(Coord<1>(cy * dimensions.x() + cx)) > 0) {
-                    os << '#';
-                } else {
-                    os << '.';
-                }
-            }
-            os << '\n';
-        }
-    }
-
-    inline void prettyPrint2D(std::ostream &os, const Coord<2> &resolution = Coord<2>(50, 50)) const
-    {
-        Coord<2> from = boundingBox().origin();
-        Coord<2> dim = boundingBox().dimension();
-        for (int y = 0; y < resolution.y(); ++y) {
-            for (int x = 0; x < resolution.x(); ++x) {
-                int cx = from.x() + ((float)x / (float)resolution.x()) * dim.x();
-                int cy = from.x() + ((float)y / (float)resolution.y()) * dim.y();
-
-                if (count(Coord<2>(cx, cy)) > 0) {
+        Coord<2> from = boundingBox().origin;
+        Coord<2> dim = boundingBox().dimensions;
+        for (int y = 0; y < (from.y() + dim.y()); ++y) {
+            for (int x = 0; x < (from.x() + dim.x()); ++x) {
+                if (count(Coord<2>(x, y)) > 0) {
                     os << '#';
                 } else {
                     os << '.';
