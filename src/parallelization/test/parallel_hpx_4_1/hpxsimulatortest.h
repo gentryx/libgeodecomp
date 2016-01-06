@@ -394,6 +394,127 @@ public:
         sim.run();
     }
 
+
+    void testSteererFunctionality2DWithGhostZoneWidth2()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 2;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth2");
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality2DWithGhostZoneWidth3()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 3;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth3");
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality2DWithGhostZoneWidth4()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 4;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth4");
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality2DWithGhostZoneWidth5()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 5;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth5");
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality2DWithGhostZoneWidth6()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 6;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth6");
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
     void testSteererFunctionality3DWithGhostZoneWidth1()
     {
         typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
@@ -413,6 +534,126 @@ public:
             loadBalancingPeriod,
             ghostZoneWidth,
             "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth1");
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth2()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 2;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth2");
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth3()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 3;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth3");
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth4()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 4;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth4");
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth5()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 5;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth5");
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth6()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 6;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth6");
 
         sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
         sim.run();
