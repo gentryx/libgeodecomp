@@ -7,6 +7,7 @@
 #include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/teststeerer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
@@ -367,6 +368,54 @@ public:
 
         TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
         TS_ASSERT_EQUALS(expectedEvents,       *events);
+    }
+
+    void testSteererFunctionality2DWithGhostZoneWidth1()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth1");
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth1()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth1");
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
     }
 
     void testStepAndGetStep()
