@@ -17,6 +17,7 @@ class PartitionManager
 public:
     friend class PartitionManagerTest;
     friend class VanillaStepperTest;
+
     typedef TOPOLOGY Topology;
     static const int DIM = Topology::DIM;
     typedef std::map<int, std::vector<Region<DIM> > > RegionVecMap;
@@ -257,8 +258,7 @@ private:
     {
         fillRegion(myRank);
         Region<DIM> surface(
-            ownRegion().expandWithTopology(
-                1, simulationArea.dimensions, Topology(), adjacency()) -
+            ownRegion().expandWithTopology(1, simulationArea.dimensions, Topology(), adjacency()) -
             ownRegion());
         Region<DIM> kernel(
             ownRegion() -
@@ -282,14 +282,11 @@ private:
             1, simulationArea.dimensions, Topology(), adjacency());
         for (std::size_t i = 1; i <= getGhostZoneWidth(); ++i) {
             ownInnerSets[i] = ownInnerSets[i - 1] - minuend;
-            minuend = minuend.expandWithTopology(
-                1, simulationArea.dimensions, Topology(), adjacency());
+            minuend = minuend.expandWithTopology(1, simulationArea.dimensions, Topology(), adjacency());
         }
 
-        volatileKernel = ownInnerSets.back() & rim(1) ;
-        innerRim       = ownInnerSets.back() & rim(0) ;
-
-//        ownRegion().prettyPrint1D(std::cout, Coord<2>(1000, 1000));
+        volatileKernel = ownInnerSets.back() & rim(1);
+        innerRim       = ownInnerSets.back() & rim(0);
     }
 
     inline void intersect(unsigned node)
