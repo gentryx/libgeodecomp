@@ -211,6 +211,25 @@ public:
             cycle);
     }
 
+    void testSteererFunctionality3D()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
     void testParallelWriterInvocation()
     {
         unsigned period = 4;
