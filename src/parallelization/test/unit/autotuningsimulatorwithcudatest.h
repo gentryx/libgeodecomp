@@ -8,6 +8,7 @@
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/parallelization/autotuningsimulator.h>
 #include <cuda.h>
+#include <sstream>
 
 using namespace LibGeoDecomp;
 
@@ -194,7 +195,8 @@ public:
             "addWriterTest",
             "SerialSimulation",
             SimFabTestInitializer(dim, maxSteps));
-        ats.addWriter((Writer<SimFabTestCell> *) new TracingWriter<SimFabTestCell>(1,100));
+        std::ostringstream buf;
+        ats.addWriter((Writer<SimFabTestCell> *)new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
         ats.run();
     }
 

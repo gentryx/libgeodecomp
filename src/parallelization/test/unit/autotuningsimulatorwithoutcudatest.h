@@ -1,5 +1,3 @@
-// vim: noai:ts=4:sw=4:expandtab
-
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/mpiiowriter.h>
 #include <libgeodecomp/io/ppmwriter.h>
@@ -14,6 +12,7 @@
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <boost/assign/list_of.hpp>
+#include <sstream>
 
 using namespace LibGeoDecomp;
 
@@ -204,7 +203,8 @@ public:
             "addWriterTest",
             "SerialSimulation",
             SimFabTestInitializer(dim, maxSteps));
-        ats.addWriter((Writer<SimFabTestCell> *) new TracingWriter<SimFabTestCell>(1, 100));
+        std::ostringstream buf;
+        ats.addWriter((Writer<SimFabTestCell> *)new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
         ats.run();
     }
 private:
