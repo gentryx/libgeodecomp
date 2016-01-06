@@ -204,7 +204,7 @@ public:
             "SerialSimulation",
             SimFabTestInitializer(dim, maxSteps));
         std::ostringstream buf;
-        ats.addWriter((Writer<SimFabTestCell> *)new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
+        ats.addWriter(static_cast<Writer<SimFabTestCell> *>(new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
         ats.run();
     }
 private:
@@ -265,7 +265,8 @@ public:
         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToSimulator()")
         CacheBlockingSimulator<SimFabTestCell> *sim =  (
             CacheBlockingSimulator<SimFabTestCell> *)cfab->operator()();
-        sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100));
+        std::ostringstream buf;
+        sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
         sim->run();
         double fitness = cfab->operator()(cfab->parameters());
         LOG(Logger::INFO, "Fitness: " << fitness << std::endl)
@@ -275,7 +276,8 @@ public:
     void testAddWriterToSerialSimulationFactory()
     {
         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToSerialSimulationFactory()")
-        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
+        std::ostringstream buf;
+        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
         fab->addWriter(*writer);
         fab->operator()(fab->parameters());
         delete writer;
@@ -285,7 +287,8 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToCacheBlockingSimulationFactory()")
-        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
+        std::ostringstream buf;
+        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
         cfab->addWriter(*writer);
         cfab->operator()(cfab->parameters());
         delete writer;

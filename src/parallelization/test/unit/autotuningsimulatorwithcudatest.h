@@ -196,7 +196,7 @@ public:
             "SerialSimulation",
             SimFabTestInitializer(dim, maxSteps));
         std::ostringstream buf;
-        ats.addWriter((Writer<SimFabTestCell> *)new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
+        ats.addWriter(static_cast<Writer<SimFabTestCell> *>(new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
         ats.run();
     }
 
@@ -269,7 +269,8 @@ public:
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testAddWriterToSimulator()")
         CacheBlockingSimulator<SimFabTestCell> *sim =  (
             CacheBlockingSimulator<SimFabTestCell> *)cFab->operator()();
-        sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100));
+        std::ostringstream buf;
+        sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
         sim->run();
         double fitness = cFab->operator()(cFab->parameters());
         LOG(Logger::INFO, "Fitness: " << fitness << std::endl)
@@ -278,7 +279,8 @@ public:
     void testAddWriterToSerialSimulationFactory()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testAddWriterToSerialSimulationFactory()")
-        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
+        std::ostringstream buf;
+        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
         fab->addWriter(*writer);
         fab->operator()(fab->parameters());
         delete writer;
@@ -287,7 +289,8 @@ public:
     void testAddWriterToCacheBlockingSimulationFactory()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testAddWriterToCacheBlockingSimulationFactory()")
-        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
+        std::ostringstream buf;
+        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
         cFab->addWriter(*writer);
         cFab->operator()(cFab->parameters());
         delete writer;
@@ -296,7 +299,8 @@ public:
     void testAddWriterToCudaSimulationFactory()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::TestAddWriterToCudaSimulationFactory()")
-        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
+        std::ostringstream buf;
+        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
         cudaFab->addWriter(*writer);
         cudaFab->operator()(cudaFab->parameters());
         delete writer;
