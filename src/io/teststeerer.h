@@ -36,6 +36,11 @@ public:
         lastEvent(STEERER_ALL_DONE)
     {}
 
+    Steerer<TestCell<DIM> > *clone()
+    {
+        return new TestSteerer(*this);
+    }
+
     virtual void nextStep(
         GridType *grid,
         const Region<DIM>& validRegion,
