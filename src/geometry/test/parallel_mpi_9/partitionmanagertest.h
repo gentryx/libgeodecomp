@@ -145,12 +145,12 @@ public:
         unsigned startLine =
             startingLine(layer->rank()) + ghostZoneWidth;
         unsigned endLine   =
-            startingLine(layer->rank()) + ghostZoneWidth * 2 - 1;
+            startingLine(layer->rank()) + ghostZoneWidth * 2;
         expected += fillLines(startLine, endLine);
 
         if (layer->rank() != layer->size() - 1) {
             unsigned startLine =
-                startingLine(layer->rank() + 1) - ghostZoneWidth * 2 + 1;
+                startingLine(layer->rank() + 1) - ghostZoneWidth * 2;
             unsigned endLine   =
                 startingLine(layer->rank() + 1) - ghostZoneWidth;
             expected += fillLines(startLine, endLine);

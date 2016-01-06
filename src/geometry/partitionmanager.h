@@ -285,7 +285,7 @@ private:
             minuend = minuend.expandWithTopology(1, simulationArea.dimensions, Topology(), adjacency());
         }
 
-        volatileKernel = ownInnerSets.back() & rim(1);
+        volatileKernel = ownInnerSets.back() & rim(0);
         innerRim       = ownInnerSets.back() & rim(0);
     }
 

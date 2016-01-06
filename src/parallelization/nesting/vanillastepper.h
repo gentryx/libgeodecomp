@@ -115,7 +115,9 @@ private:
             resetValidGhostZoneWidth();
         }
 
-        notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
+        index = ghostZoneWidth() - validGhostZoneWidth;
+        const Region<DIM>& nextRegion = innerSet(index);
+        notifyPatchProviders(nextRegion, ParentType::INNER_SET, globalNanoStep());
     }
 
     inline void initGrids()
