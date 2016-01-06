@@ -195,7 +195,7 @@ public:
         TS_ASSERT_EQUALS(*events, expected);
     }
 
-    void testSteererFunctionality()
+    void testSteererFunctionalityBasic()
     {
         sim->addSteerer(new TestSteererType(5, 25, 4711 * 27));
         sim->run();
@@ -211,7 +211,7 @@ public:
             cycle);
     }
 
-    void testSteererFunctionality3D()
+    void testSteererFunctionality2DWithGhostZoneWidth1()
     {
         typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
         int maxTimeSteps = 90;
@@ -227,6 +227,215 @@ public:
             ghostZoneWidth);
 
         sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality2DWithGhostZoneWidth2()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 2;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality2DWithGhostZoneWidth3()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 3;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality2DWithGhostZoneWidth4()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 4;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality2DWithGhostZoneWidth5()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 5;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality2DWithGhostZoneWidth6()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 6;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth1()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth2()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 2;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth3()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 3;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth4()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 4;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth5()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 5;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testSteererFunctionality3DWithGhostZoneWidth6()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 6;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
         sim.run();
     }
 
