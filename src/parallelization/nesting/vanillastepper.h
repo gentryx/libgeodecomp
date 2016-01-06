@@ -198,8 +198,6 @@ private:
 
         {
             TimeComputeGhost t(&chronometer);
-            curNanoStep = oldNanoStep;
-            curStep = oldStep;
 
             saveRim(curGlobalNanoStep);
             if (ghostZoneWidth() % 2) {
@@ -207,6 +205,8 @@ private:
             }
 
             // 3: restore grid for kernel update
+            curNanoStep = oldNanoStep;
+            curStep = oldStep;
             restoreRim(true);
             restoreKernel();
         }
