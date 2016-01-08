@@ -9,6 +9,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/storage/fixedarray.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
@@ -71,6 +72,7 @@ public:
             for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
                 cells[i].update(hoodOld, nanoStep);
             }
+            // fixme: woah, avoid these copies!
             gridNew->set(cellStreak, cells.begin());
 
             startX += cellsToUpdate;
