@@ -695,7 +695,7 @@ public:
     }
 
     /**
-     * Is the Coord contained withing the Region?
+     * Is the Coord contained within the Region?
      */
     bool count(const Coord<DIM>& c) const
     {

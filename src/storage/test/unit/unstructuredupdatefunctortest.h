@@ -19,6 +19,7 @@ using namespace LibGeoDecomp;
 using namespace LibFlatArray;
 
 #ifdef LIBGEODECOMP_WITH_CPP14
+
 template<int SIGMA>
 class UnstructuredTestCell
 {
@@ -139,7 +140,7 @@ LIBFLATARRAY_REGISTER_SOA(UnstructuredSoATestCell<150>, ((double)(sum))((double)
 
 namespace LibGeoDecomp {
 
-class UnstructuredUpdateFuncturTest : public CxxTest::TestSuite
+class UnstructuredUpdateFunctorTest : public CxxTest::TestSuite
 {
 public:
     void testBasic()

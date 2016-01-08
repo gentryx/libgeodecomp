@@ -287,10 +287,8 @@ protected:
 template<typename CELL, std::size_t MATRICES,
          typename VALUE_TYPE, int C, int SIGMA>
 class UnstructuredNeighborhood :
-        public UnstructuredNeighborhoodHelpers::
-        UnstructuredNeighborhoodBase<CELL, UnstructuredGrid<CELL, MATRICES,
-                                                            VALUE_TYPE, C, SIGMA>,
-                                     MATRICES, VALUE_TYPE, C, SIGMA, true>
+        public UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<
+    CELL, UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>, MATRICES, VALUE_TYPE, C, SIGMA, true>
 {
 public:
     using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
@@ -312,18 +310,14 @@ public:
 /**
  * Same as above (see doc).
  */
-template<typename CELL, std::size_t MATRICES,
-         typename VALUE_TYPE, int C>
+template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C>
 class UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, 1> :
-        public UnstructuredNeighborhoodHelpers::
-        UnstructuredNeighborhoodBase<CELL, UnstructuredGrid<CELL, MATRICES,
-                                                            VALUE_TYPE, C, 1>,
-                                     MATRICES, VALUE_TYPE, C, 1, false>
+        public UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<
+    CELL, UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1>, MATRICES, VALUE_TYPE, C, 1, false>
 {
 public:
     using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1>;
-    using UnstructuredNeighborhoodHelpers::
-    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, 1, false>::grid;
+    using UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, 1, false>::grid;
 
     inline
     UnstructuredNeighborhood(const Grid& grid, long startX) :
