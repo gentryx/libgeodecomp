@@ -163,6 +163,7 @@ protected:
 
 /**
  * Same as above, except SORT = false which is faster.
+ * fixme: can we avoid sorting by re-arranging indices at insert/sort time?
  */
 template<typename CELL, typename GRID, std::size_t MATRICES,
          typename VALUE_TYPE, int C, int SIGMA>

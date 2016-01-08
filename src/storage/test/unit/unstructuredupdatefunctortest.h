@@ -20,12 +20,18 @@ using namespace LibFlatArray;
 
 #ifdef LIBGEODECOMP_WITH_CPP14
 
-template<int SIGMA>
+class EmptyUnstructuredTestCellAPI
+{};
+
+class DefaultUnstructuredTestCellAPI : public APITraits::HasUpdateLineX
+{};
+
+template<int SIGMA, typename ADDITIONAL_API = DefaultUnstructuredTestCellAPI>
 class UnstructuredTestCell
 {
 public:
     class API :
-        public APITraits::HasUpdateLineX,
+        public ADDITIONAL_API,
         public APITraits::HasUnstructuredTopology,
         public APITraits::HasSellType<double>,
         public APITraits::HasSellMatrices<1>,
@@ -71,6 +77,8 @@ public:
     double sum;
 };
 
+// fixme: unify with UnstructuredTestCell?
+// fixme: move both test cell classes to dedicated file?
 template<int SIGMA>
 class UnstructuredSoATestCell
 {
@@ -143,17 +151,18 @@ namespace LibGeoDecomp {
 class UnstructuredUpdateFunctorTest : public CxxTest::TestSuite
 {
 public:
-    void testBasic()
+    void testBasicSansUpdateLineX()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         Coord<1> dim(DIM);
 
-        UnstructuredTestCell<1> defaultCell(200);
-        UnstructuredTestCell<1> edgeCell(-1);
+        typedef UnstructuredTestCell<1, EmptyUnstructuredTestCellAPI> TestCellType;
+        TestCellType defaultCell(200);
+        TestCellType edgeCell(-1);
 
-        UnstructuredGrid<UnstructuredTestCell<1>, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredGrid<UnstructuredTestCell<1>, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
+        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
+        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
 
         std::vector<Streak<1> > streaks;
         streaks.emplace_back(Coord<1>(10),   30);
@@ -169,7 +178,7 @@ public:
         }
         gridOld.setAdjacency(0, matrix);
 
-        UnstructuredUpdateFunctor<UnstructuredTestCell<1> > functor;
+        UnstructuredUpdateFunctor<TestCellType > functor;
         for (const auto& streak : streaks) {
             functor(streak, gridOld, &gridNew, 0);
         }
@@ -187,17 +196,63 @@ public:
 #endif
     }
 
-    void testBasicWithSIGMA()
+    void testBasicWithUpdateLineX()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         Coord<1> dim(DIM);
 
-        UnstructuredTestCell<128> defaultCell(200);
-        UnstructuredTestCell<128> edgeCell(-1);
+        typedef UnstructuredTestCell<1> TestCellType;
+        TestCellType defaultCell(200);
+        TestCellType edgeCell(-1);
 
-        UnstructuredGrid<UnstructuredTestCell<128>, 1, double, 4, 128> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredGrid<UnstructuredTestCell<128>, 1, double, 4, 128> gridNew(dim, defaultCell, edgeCell);
+        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
+        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
+
+        std::vector<Streak<1> > streaks;
+        streaks.emplace_back(Coord<1>(10),   30);
+        streaks.emplace_back(Coord<1>(40),   60);
+        streaks.emplace_back(Coord<1>(100), 150);
+
+        // adjacency matrix looks like this: 1 0 1 0 1 0 ...
+        std::map<Coord<2>, double> matrix;
+        for (int row = 0; row < DIM; ++row) {
+            for (int col = 0; col < DIM; col += 2) {
+                matrix[Coord<2>(row, col)] = 1;
+            }
+        }
+        gridOld.setAdjacency(0, matrix);
+
+        UnstructuredUpdateFunctor<TestCellType > functor;
+        for (const auto& streak : streaks) {
+            functor(streak, gridOld, &gridNew, 0);
+        }
+
+        for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
+            if (((coord.x() >=  10) && (coord.x() <  30)) ||
+                ((coord.x() >=  40) && (coord.x() <  60)) ||
+                ((coord.x() >= 100) && (coord.x() < 150))) {
+                const double sum = (DIM / 2.0) * 200.0;
+                TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
+            } else {
+                TS_ASSERT_EQUALS(0.0, gridNew.get(coord).sum);
+            }
+        }
+#endif
+    }
+
+    void testBasicWithSigmaButSansUpdateLineX()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        const int DIM = 150;
+        Coord<1> dim(DIM);
+
+        typedef UnstructuredTestCell<128, EmptyUnstructuredTestCellAPI> TestCellType;
+        TestCellType defaultCell(200);
+        TestCellType edgeCell(-1);
+
+        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridOld(dim, defaultCell, edgeCell);
+        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridNew(dim, defaultCell, edgeCell);
 
         std::vector<Streak<1> > streaks;
         streaks.emplace_back(Coord<1>(10),   30);
@@ -219,7 +274,59 @@ public:
         }
         gridOld.setAdjacency(0, matrix);
 
-        UnstructuredUpdateFunctor<UnstructuredTestCell<128> > functor;
+        UnstructuredUpdateFunctor<TestCellType > functor;
+        for (const auto& streak : streaks) {
+            functor(streak, gridOld, &gridNew, 0);
+        }
+
+        for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
+            if (((coord.x() >=  10) && (coord.x() <  30)) ||
+                ((coord.x() >=  40) && (coord.x() <  60)) ||
+                ((coord.x() >= 100) && (coord.x() < 150))) {
+                const double sum = coord.x() * 200.0;
+                TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
+            } else {
+                TS_ASSERT_EQUALS(0.0, gridNew.get(coord).sum);
+            }
+        }
+#endif
+    }
+
+
+    void testBasicWithSigmaAndWithUpdateLineX()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        const int DIM = 150;
+        Coord<1> dim(DIM);
+
+        typedef UnstructuredTestCell<128> TestCellType;
+        TestCellType defaultCell(200);
+        TestCellType edgeCell(-1);
+
+        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridOld(dim, defaultCell, edgeCell);
+        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridNew(dim, defaultCell, edgeCell);
+
+        std::vector<Streak<1> > streaks;
+        streaks.emplace_back(Coord<1>(10),   30);
+        streaks.emplace_back(Coord<1>(40),   60);
+        streaks.emplace_back(Coord<1>(100), 150);
+
+        // adjacency matrix looks like this:
+        // 0
+        // 1
+        // 1 1
+        // 1 1 1
+        // ...
+        // -> force sorting
+        std::map<Coord<2>, double> matrix;
+        for (int row = 0; row < DIM; ++row) {
+            for (int col = 0; col < row; ++col) {
+                matrix[Coord<2>(row, col)] = 1;
+            }
+        }
+        gridOld.setAdjacency(0, matrix);
+
+        UnstructuredUpdateFunctor<TestCellType > functor;
         for (const auto& streak : streaks) {
             functor(streak, gridOld, &gridNew, 0);
         }
