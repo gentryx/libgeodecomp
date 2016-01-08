@@ -129,38 +129,53 @@ public:
     static const int SIGMA = APITraits::SelectSellSigma<CELL>::VALUE;
     static const int DIM = Topology::DIM;
 
-    template<typename GRID1, typename GRID2>
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR>
     void operator()(
         const Streak<DIM>& streak,
         const GRID1& gridOld,
         GRID2 *gridNew,
-        unsigned nanoStep)
+        unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec)
     {
         typedef typename APITraits::SelectSoA<CELL>::Value SoAFlag;
 
         // switch between SoA and non-SoA code
-        soaWrapper(streak, gridOld, gridNew, nanoStep, SoAFlag());
+        soaWrapper(streak, gridOld, gridNew, nanoStep, concurrencySpec, SoAFlag());
     }
 
 private:
-    template<typename HOOD_NEW, typename HOOD_OLD>
-    void apiWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, APITraits::FalseType)
+    template<typename HOOD_NEW, typename HOOD_OLD, typename CONCURRENCY_FUNCTOR>
+    void apiWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, const CONCURRENCY_FUNCTOR& concurrencySpec, APITraits::FalseType)
     {
-        for (int i = hoodOld.index(); i < endX; ++i, ++hoodOld) {
-            hoodNew[i].update(hoodOld, nanoStep);
+        // fixme: manual hack, should use infrastructure from updatefunctormacros.
+        // fixme: also desirable: user-selectable switch for granularity
+        if (concurrencySpec.enableHPX()) {
+            hpx::parallel::for_each(
+                hpx::parallel::par,
+                boost::make_counting_iterator(hoodOld.index()),
+                boost::make_counting_iterator(long(endX)),
+                [&](std::size_t i) {
+                    HOOD_OLD hoodOldMoved = hoodOld;
+                    hoodOldMoved += long(i);
+                    hoodNew[i].update(hoodOldMoved, nanoStep);
+                });
+        } else {
+            for (int i = hoodOld.index(); i < endX; ++i, ++hoodOld) {
+                hoodNew[i].update(hoodOld, nanoStep);
+            }
         }
     }
 
-    template<typename HOOD_NEW, typename HOOD_OLD>
-    void apiWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, APITraits::TrueType)
+    template<typename HOOD_NEW, typename HOOD_OLD, typename CONCURRENCY_FUNCTOR>
+    void apiWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, const CONCURRENCY_FUNCTOR& concurrencySpec, APITraits::TrueType)
     {
         CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
     }
 
-    template<typename GRID1, typename GRID2>
-    void soaWrapper(const Streak<DIM>& streak, const GRID1& gridOld,
-                    GRID2 *gridNew, unsigned nanoStep, APITraits::FalseType)
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR>
+    void soaWrapper(const Streak<DIM>& streak, const GRID1& gridOld, GRID2 *gridNew, unsigned nanoStep, const CONCURRENCY_FUNCTOR& concurrencySpec, APITraits::FalseType)
     {
+        std::cout << "UnstructuredUpdateFunctor(streak: " << streak << ")\n";
         typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
 
         UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
@@ -169,12 +184,11 @@ private:
             hoodNew(*gridNew);
 
         // switch between updateLineX() and update()
-        apiWrapper(hoodNew, streak.endX, hoodOld, nanoStep, UpdateLineXFlag());
+        apiWrapper(hoodNew, streak.endX, hoodOld, nanoStep, concurrencySpec, UpdateLineXFlag());
     }
 
-    template<typename GRID1, typename GRID2>
-    void soaWrapper(const Streak<DIM>& streak, const GRID1& gridOld,
-                    GRID2 *gridNew, unsigned nanoStep, APITraits::TrueType)
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR>
+    void soaWrapper(const Streak<DIM>& streak, const GRID1& gridOld, GRID2 *gridNew, unsigned nanoStep, const CONCURRENCY_FUNCTOR& concurrencySpec, APITraits::TrueType)
     {
         gridOld.callback(gridNew, UnstructuredUpdateFunctorHelpers::
                          UnstructuredGridSoAUpdateHelper<CELL>(gridOld, gridNew,

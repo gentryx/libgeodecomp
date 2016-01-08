@@ -106,6 +106,13 @@ public:
         return tmp;
     }
 
+    // fixme
+    inline
+    void operator+=(long i)
+    {
+        xOffset += i;
+    }
+
     inline
     long index() const
     {
@@ -195,6 +202,13 @@ public:
         UnstructuredNeighborhoodBase tmp(*this);
         operator++();
         return tmp;
+    }
+
+    // fixme
+    inline
+    void operator+=(long i)
+    {
+        xOffset += i;
     }
 
     inline
