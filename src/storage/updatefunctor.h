@@ -245,16 +245,18 @@ public:
         // SelectThreadedUpdate,
         ANY_THREADED_UPDATE modelThreadingSpec)
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            Streak<DIM> sourceStreak(i->origin + sourceOffset,
-                                     i->endX + sourceOffset.x());
-            UnstructuredUpdateFunctor<CELL>()(sourceStreak, gridOld, gridNew, nanoStep, concurrencySpec);
-        }
-// #define LGD_UPDATE_FUNCTOR_BODY                                         \
-//         Streak<DIM> sourceStreak(i->origin + sourceOffset,              \
-//                                  i->endX + sourceOffset.x());           \
-//         UnstructuredUpdateFunctor<CELL>()(                              \
-//             sourceStreak, gridOld, gridNew, nanoStep);                  \
+        // fixme
+        // for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+        //     Streak<DIM> sourceStreak(i->origin + sourceOffset,
+        //                              i->endX + sourceOffset.x());
+        UnstructuredUpdateFunctor<CELL>()(region, gridOld, gridNew, nanoStep, concurrencySpec, modelThreadingSpec);
+        // }
+        // fixme
+// #define LGD_UPDATE_FUNCTOR_BODY                                         
+//         Streak<DIM> sourceStreak(i->origin + sourceOffset,              
+//                                  i->endX + sourceOffset.x());           
+//         UnstructuredUpdateFunctor<CELL>()(                              
+//             sourceStreak, gridOld, gridNew, nanoStep);                  
 //         /**/
 //         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
 //         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
@@ -290,14 +292,20 @@ public:
     {
         return false;
     }
+
+    bool preferFineGrainedParallelism() const
+    {
+        return false;
+    }
 };
 
 class ConcurrencyEnableOpenMP
 {
 public:
     inline
-    explicit ConcurrencyEnableOpenMP(bool updatingGhost) :
-        updatingGhost(updatingGhost)
+    explicit ConcurrencyEnableOpenMP(bool updatingGhost, bool enableFineGrainedParallelism) :
+        updatingGhost(updatingGhost),
+        enableFineGrainedParallelism(enableFineGrainedParallelism)
     {}
 
     bool enableOpenMP() const
@@ -315,8 +323,14 @@ public:
         return !updatingGhost;
     }
 
+    bool preferFineGrainedParallelism() const
+    {
+        return enableFineGrainedParallelism;
+    }
+
 private:
     bool updatingGhost;
+    bool enableFineGrainedParallelism;
 };
 
 class ConcurrencyEnableHPX
@@ -340,6 +354,14 @@ public:
     {
         return false;
     }
+
+    bool preferFineGrainedParallelism() const
+    {
+        return enableFineGrainedParallelism;
+    }
+
+private:
+    bool enableFineGrainedParallelism;
 };
 
 }

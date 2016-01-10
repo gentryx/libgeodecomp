@@ -6,6 +6,13 @@
 
 #include <libflatarray/soa_accessor.hpp>
 
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/async.hpp>
+#include <hpx/parallel/algorithms/for_each.hpp>
+#endif
+
+#include <boost/iterator/counting_iterator.hpp>
+
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/coord.h>
@@ -13,6 +20,7 @@
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
+#include <libgeodecomp/storage/updatefunctormacros.h>
 
 namespace LibGeoDecomp {
 
@@ -37,11 +45,11 @@ public:
     UnstructuredGridSoAUpdateHelper(
         const Grid& gridOld,
         Grid *gridNew,
-        const Streak<DIM>& streak,
+        const Region<DIM>& region,
         unsigned nanoStep) :
         gridOld(gridOld),
         gridNew(gridNew),
-        streak(streak),
+        region(region),
         nanoStep(nanoStep)
     {}
 
@@ -52,63 +60,66 @@ public:
         LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& oldAccessor,
         LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& newAccessor) const
     {
-        // Assumption: Cell has both (updateLineX and update())
+        // fixme: threading!
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            // Assumption: Cell has both (updateLineX and update())
 
-        // loop peeling: streak's start might point to middle of chunks
-        // if so: vectorization cannot be done -> solution: additionally
-        // update the first and last chunk of complete streak scalar by
-        // calling update() instead
-        int startX = streak.origin.x();
-        if ((startX % C) != 0) {
-            UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-                hoodOld(gridOld, startX);
-            const int cellsToUpdate = C - (startX % C);
-            FixedArray<CELL, C> cells;
-            Streak<1> cellStreak(Coord<1>(startX), startX + cellsToUpdate);
+            // loop peeling: streak's start might point to middle of chunks
+            // if so: vectorization cannot be done -> solution: additionally
+            // update the first and last chunk of complete streak scalar by
+            // calling update() instead
+            int startX = i->origin.x();
+            if ((startX % C) != 0) {
+                UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+                    hoodOld(gridOld, startX);
+                const int cellsToUpdate = C - (startX % C);
+                FixedArray<CELL, C> cells;
+                Streak<1> cellStreak(Coord<1>(startX), startX + cellsToUpdate);
 
-            // update SoA grid: copy cells to local buffer, update, copy data back to grid
-            gridNew->get(cellStreak, cells.begin());
-            // call update
-            for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
-                cells[i].update(hoodOld, nanoStep);
+                // update SoA grid: copy cells to local buffer, update, copy data back to grid
+                gridNew->get(cellStreak, cells.begin());
+                // call update
+                for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
+                    cells[i].update(hoodOld, nanoStep);
+                }
+                // fixme: woah, avoid these copies!
+                gridNew->set(cellStreak, cells.begin());
+
+                startX += cellsToUpdate;
             }
-            // fixme: woah, avoid these copies!
-            gridNew->set(cellStreak, cells.begin());
 
-            startX += cellsToUpdate;
-        }
+            // call updateLineX with adjusted indices
+            UnstructuredSoANeighborhood<CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1,
+                                        MATRICES, ValueType, C, SIGMA>
+                hoodOld(oldAccessor, gridOld, startX);
+            UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>
+                hoodNew(newAccessor);
+            const int endX = i->endX / C;
+            CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
 
-        // call updateLineX with adjusted indices
-        UnstructuredSoANeighborhood<CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1,
-                                    MATRICES, ValueType, C, SIGMA>
-            hoodOld(oldAccessor, gridOld, startX);
-        UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>
-            hoodNew(newAccessor);
-        const int endX = streak.endX / C;
-        CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
+            // call scalar updates for last chunk
+            if ((i->endX % C) != 0) {
+                const int cellsToUpdate = i->endX % C;
+                UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+                    hoodOld(gridOld, i->endX - cellsToUpdate);
+                std::array<CELL, C> cells;
+                Streak<1> cellStreak(Coord<1>(i->endX - cellsToUpdate), i->endX);
 
-        // call scalar updates for last chunk
-        if ((streak.endX % C) != 0) {
-            const int cellsToUpdate = streak.endX % C;
-            UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-                hoodOld(gridOld, streak.endX - cellsToUpdate);
-            std::array<CELL, C> cells;
-            Streak<1> cellStreak(Coord<1>(streak.endX - cellsToUpdate), streak.endX);
-
-            // update SoA grid: copy cells to local buffer, update, copy data back to grid
-            gridNew->get(cellStreak, cells.begin());
-            // call update
-            for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
-                cells[i].update(hoodOld, nanoStep);
+                // update SoA grid: copy cells to local buffer, update, copy data back to grid
+                gridNew->get(cellStreak, cells.begin());
+                // call update
+                for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
+                    cells[i].update(hoodOld, nanoStep);
+                }
+                gridNew->set(cellStreak, cells.begin());
             }
-            gridNew->set(cellStreak, cells.begin());
         }
     }
 
 private:
     const Grid& gridOld;
     Grid *gridNew;
-    const Streak<DIM>& streak;
+    const Region<DIM>& region;
     unsigned nanoStep;
 };
 
@@ -129,70 +140,146 @@ public:
     static const int SIGMA = APITraits::SelectSellSigma<CELL>::VALUE;
     static const int DIM = Topology::DIM;
 
-    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR>
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
     void operator()(
-        const Streak<DIM>& streak,
+        const Region<DIM>& region,
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
-        const CONCURRENCY_FUNCTOR& concurrencySpec)
+        const CONCURRENCY_FUNCTOR& concurrencySpec,
+        const ANY_THREADED_UPDATE& modelThreadingSpec)
     {
         typedef typename APITraits::SelectSoA<CELL>::Value SoAFlag;
 
-        // switch between SoA and non-SoA code
-        soaWrapper(streak, gridOld, gridNew, nanoStep, concurrencySpec, SoAFlag());
+        soaWrapper(region, gridOld, gridNew, nanoStep, concurrencySpec, modelThreadingSpec, SoAFlag());
     }
 
-private:
-    template<typename HOOD_NEW, typename HOOD_OLD, typename CONCURRENCY_FUNCTOR>
-    void apiWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, const CONCURRENCY_FUNCTOR& concurrencySpec, APITraits::FalseType)
+
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
+    void apiWrapper(
+        const Region<DIM>& region,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
+        unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec,
+        const ANY_THREADED_UPDATE& modelThreadingSpec,
+        // has cell no updateLineX()?
+        APITraits::FalseType)
     {
+        // HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld,
+        // UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+        //     hoodOld(gridOld, streak.origin.x());
+        // CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+        //     hoodNew(*gridNew);
+
+
+#ifdef LIBGEODECOMP_WITH_HPX
         // fixme: manual hack, should use infrastructure from updatefunctormacros.
         // fixme: also desirable: user-selectable switch for granularity
-        if (concurrencySpec.enableHPX()) {
-            hpx::parallel::for_each(
-                hpx::parallel::par,
-                boost::make_counting_iterator(hoodOld.index()),
-                boost::make_counting_iterator(long(endX)),
-                [&](std::size_t i) {
-                    HOOD_OLD hoodOldMoved = hoodOld;
-                    hoodOldMoved += long(i);
-                    hoodNew[i].update(hoodOldMoved, nanoStep);
-                });
-        } else {
-            for (int i = hoodOld.index(); i < endX; ++i, ++hoodOld) {
-                hoodNew[i].update(hoodOld, nanoStep);
+        if (concurrencySpec.enableHPX() && concurrencySpec.preferFineGrainedParallelism()) {
+            std::vector<hpx::future<void> > updateFutures;
+            for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+                UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOld(gridOld, i->origin.x());
+                CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodNew(*gridNew);
+                int origin = i->origin.x();
+                for (int offset = 0; offset < i->length(); ++offset) {
+                    updateFutures << hpx::async(
+                        [&hoodOld, &hoodNew, origin, offset, nanoStep]() {
+                            UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOldMoved = hoodOld;
+                            hoodOldMoved += long(offset);
+                            hoodNew[origin + offset].update(hoodOldMoved, nanoStep);
+                        });
+                }
             }
+            // hpx::parallel::for_each(
+            //     hpx::parallel::par,
+            //     boost::make_counting_iterator(hoodOld.index()),
+            //     boost::make_counting_iterator(long(endX)),
+            //     [&](std::size_t i) {
+            //         HOOD_OLD hoodOldMoved = hoodOld;
+            //         hoodOldMoved += long(i);
+            //         hoodNew[i].update(hoodOldMoved, nanoStep);
+            //     });
+
+            return;
         }
+#endif
+#define LGD_UPDATE_FUNCTOR_BODY                                         \
+        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>   \
+            hoodOld(gridOld, i->origin.x());                            \
+        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>         \
+            hoodNew(*gridNew);                                          \
+        for (int id = i->origin.x(); id != i->endX; ++id, ++hoodOld) {  \
+            hoodNew[id].update(hoodOld, nanoStep);                      \
+        }                                                               \
+        /**/
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+#undef LGD_UPDATE_FUNCTOR_BODY
     }
 
-    template<typename HOOD_NEW, typename HOOD_OLD, typename CONCURRENCY_FUNCTOR>
-    void apiWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, const CONCURRENCY_FUNCTOR& concurrencySpec, APITraits::TrueType)
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
+    void apiWrapper(
+        const Region<DIM>& region,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
+        unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec,
+        const ANY_THREADED_UPDATE& modelThreadingSpec,
+        // has cell updateLineX()?
+        APITraits::TrueType)
     {
-        CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
+#define LGD_UPDATE_FUNCTOR_BODY                                         \
+        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>   \
+            hoodOld(gridOld, i->origin.x());                            \
+        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>         \
+            hoodNew(*gridNew);                                          \
+        CELL::updateLineX(hoodNew, i->endX, hoodOld, nanoStep);         \
+        /**/
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+#undef LGD_UPDATE_FUNCTOR_BODY
     }
 
-    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR>
-    void soaWrapper(const Streak<DIM>& streak, const GRID1& gridOld, GRID2 *gridNew, unsigned nanoStep, const CONCURRENCY_FUNCTOR& concurrencySpec, APITraits::FalseType)
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
+    void soaWrapper(
+        const Region<DIM>& region,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
+        unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec,
+        const ANY_THREADED_UPDATE& modelThreadingSpec,
+        // has cell no struct-of-arrays format?
+        APITraits::FalseType)
     {
-        std::cout << "UnstructuredUpdateFunctor(streak: " << streak << ")\n";
         typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
-
-        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodOld(gridOld, streak.origin.x());
-        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodNew(*gridNew);
-
         // switch between updateLineX() and update()
-        apiWrapper(hoodNew, streak.endX, hoodOld, nanoStep, concurrencySpec, UpdateLineXFlag());
+        apiWrapper(region, gridOld, gridNew, nanoStep, concurrencySpec, modelThreadingSpec, UpdateLineXFlag());
     }
 
-    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR>
-    void soaWrapper(const Streak<DIM>& streak, const GRID1& gridOld, GRID2 *gridNew, unsigned nanoStep, const CONCURRENCY_FUNCTOR& concurrencySpec, APITraits::TrueType)
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
+    void soaWrapper(
+        const Region<DIM>& region,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
+        unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec,
+        const ANY_THREADED_UPDATE& modelThreadingSpec,
+        // is cell struct-of-arrays-enabled?
+        APITraits::TrueType)
     {
-        gridOld.callback(gridNew, UnstructuredUpdateFunctorHelpers::
-                         UnstructuredGridSoAUpdateHelper<CELL>(gridOld, gridNew,
-                                                               streak, nanoStep));
+        gridOld.callback(
+            gridNew,
+            // fixme: is missing concurrencySpec, modelThreadingSpec
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
+                gridOld,
+                gridNew,
+                region,
+                nanoStep));
     }
 };
 

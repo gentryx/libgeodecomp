@@ -5,6 +5,7 @@
 #include <libgeodecomp/storage/unstructuredupdatefunctor.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
 
 #include <libflatarray/api_traits.hpp>
@@ -164,10 +165,10 @@ public:
         UnstructuredGrid<TestCellType, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
         UnstructuredGrid<TestCellType, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
 
-        std::vector<Streak<1> > streaks;
-        streaks.emplace_back(Coord<1>(10),   30);
-        streaks.emplace_back(Coord<1>(40),   60);
-        streaks.emplace_back(Coord<1>(100), 150);
+        Region<1> region;
+        region << Streak<1>(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(40),   60);
+        region << Streak<1>(Coord<1>(100), 150);
 
         // adjacency matrix looks like this: 1 0 1 0 1 0 ...
         std::map<Coord<2>, double> matrix;
@@ -179,9 +180,10 @@ public:
         gridOld.setAdjacency(0, matrix);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
-        for (const auto& streak : streaks) {
-            functor(streak, gridOld, &gridNew, 0);
-        }
+        UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
+        APITraits::SelectThreadedUpdate<TestCellType>::Value modelThreadingSpec;
+
+        functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
             if (((coord.x() >=  10) && (coord.x() <  30)) ||
@@ -209,10 +211,10 @@ public:
         UnstructuredGrid<TestCellType, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
         UnstructuredGrid<TestCellType, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
 
-        std::vector<Streak<1> > streaks;
-        streaks.emplace_back(Coord<1>(10),   30);
-        streaks.emplace_back(Coord<1>(40),   60);
-        streaks.emplace_back(Coord<1>(100), 150);
+        Region<1> region;
+        region << Streak<1>(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(40),   60);
+        region << Streak<1>(Coord<1>(100), 150);
 
         // adjacency matrix looks like this: 1 0 1 0 1 0 ...
         std::map<Coord<2>, double> matrix;
@@ -224,9 +226,10 @@ public:
         gridOld.setAdjacency(0, matrix);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
-        for (const auto& streak : streaks) {
-            functor(streak, gridOld, &gridNew, 0);
-        }
+        UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
+        APITraits::SelectThreadedUpdate<TestCellType>::Value modelThreadingSpec;
+
+        functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
             if (((coord.x() >=  10) && (coord.x() <  30)) ||
@@ -254,10 +257,10 @@ public:
         UnstructuredGrid<TestCellType, 1, double, 4, 128> gridOld(dim, defaultCell, edgeCell);
         UnstructuredGrid<TestCellType, 1, double, 4, 128> gridNew(dim, defaultCell, edgeCell);
 
-        std::vector<Streak<1> > streaks;
-        streaks.emplace_back(Coord<1>(10),   30);
-        streaks.emplace_back(Coord<1>(40),   60);
-        streaks.emplace_back(Coord<1>(100), 150);
+        Region<1> region;
+        region << Streak<1>(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(40),   60);
+        region << Streak<1>(Coord<1>(100), 150);
 
         // adjacency matrix looks like this:
         // 0
@@ -275,9 +278,10 @@ public:
         gridOld.setAdjacency(0, matrix);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
-        for (const auto& streak : streaks) {
-            functor(streak, gridOld, &gridNew, 0);
-        }
+        UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
+        APITraits::SelectThreadedUpdate<TestCellType>::Value modelThreadingSpec;
+
+        functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
             if (((coord.x() >=  10) && (coord.x() <  30)) ||
@@ -306,10 +310,10 @@ public:
         UnstructuredGrid<TestCellType, 1, double, 4, 128> gridOld(dim, defaultCell, edgeCell);
         UnstructuredGrid<TestCellType, 1, double, 4, 128> gridNew(dim, defaultCell, edgeCell);
 
-        std::vector<Streak<1> > streaks;
-        streaks.emplace_back(Coord<1>(10),   30);
-        streaks.emplace_back(Coord<1>(40),   60);
-        streaks.emplace_back(Coord<1>(100), 150);
+        Region<1> region;
+        region << Streak<1>(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(40),   60);
+        region << Streak<1>(Coord<1>(100), 150);
 
         // adjacency matrix looks like this:
         // 0
@@ -327,9 +331,10 @@ public:
         gridOld.setAdjacency(0, matrix);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
-        for (const auto& streak : streaks) {
-            functor(streak, gridOld, &gridNew, 0);
-        }
+        UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
+        APITraits::SelectThreadedUpdate<TestCellType>::Value modelThreadingSpec;
+
+        functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
             if (((coord.x() >=  10) && (coord.x() <  30)) ||
@@ -356,13 +361,13 @@ public:
         UnstructuredSoAGrid<UnstructuredSoATestCell<1>, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
         UnstructuredSoAGrid<UnstructuredSoATestCell<1>, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
 
-        std::vector<Streak<1> > streaks;
+        Region<1> region;
         // "normal" streak
-        streaks.emplace_back(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(10),   30);
         // loop peeling in first chunk
-        streaks.emplace_back(Coord<1>(37),   60);
+        region << Streak<1>(Coord<1>(37),   60);
         // loop peeling in last chunk
-        streaks.emplace_back(Coord<1>(100), 149);
+        region << Streak<1>(Coord<1>(100), 149);
 
         // adjacency matrix looks like this:
         // 0
@@ -379,9 +384,10 @@ public:
         gridOld.setAdjacency(0, matrix);
 
         UnstructuredUpdateFunctor<UnstructuredSoATestCell<1> > functor;
-        for (const auto& streak : streaks) {
-            functor(streak, gridOld, &gridNew, 0);
-        }
+        UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
+        APITraits::SelectThreadedUpdate<UnstructuredSoATestCell<1> >::Value modelThreadingSpec;
+
+        functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
             if (((coord.x() >=  10) && (coord.x() <  30)) ||
@@ -408,13 +414,13 @@ public:
         UnstructuredSoAGrid<UnstructuredSoATestCell<150>, 1, double, 4, 150> gridOld(dim, defaultCell, edgeCell);
         UnstructuredSoAGrid<UnstructuredSoATestCell<150>, 1, double, 4, 150> gridNew(dim, defaultCell, edgeCell);
 
-        std::vector<Streak<1> > streaks;
+        Region<1> region;
         // "normal" streak
-        streaks.emplace_back(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(10),   30);
         // loop peeling in first chunk
-        streaks.emplace_back(Coord<1>(37),   60);
+        region << Streak<1>(Coord<1>(37),   60);
         // loop peeling in last chunk
-        streaks.emplace_back(Coord<1>(100), 149);
+        region << Streak<1>(Coord<1>(100), 149);
 
         // adjacency matrix looks like this:
         // 0
@@ -431,9 +437,10 @@ public:
         gridOld.setAdjacency(0, matrix);
 
         UnstructuredUpdateFunctor<UnstructuredSoATestCell<150> > functor;
-        for (const auto& streak : streaks) {
-            functor(streak, gridOld, &gridNew, 0);
-        }
+        UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
+        APITraits::SelectThreadedUpdate<UnstructuredSoATestCell<150> >::Value modelThreadingSpec;
+
+        functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
             if (((coord.x() >=  10) && (coord.x() <  30)) ||
