@@ -2951,12 +2951,16 @@ class SparseMatrixVectorMultiplicationVectorized : public CPUBenchmark
 {
 private:
     template<typename CELL, typename GRID>
-    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
-                       GRID *gridNew, unsigned nanoStep)
+    void updateFunctor(
+        const Region<1>& region,
+        const GRID& gridOld,
+        GRID *gridNew,
+        unsigned nanoStep)
     {
-        gridOld.callback(gridNew, UnstructuredUpdateFunctorHelpers::
-                         UnstructuredGridSoAUpdateHelper<CELL>(
-                             gridOld, gridNew, streak, nanoStep));
+        gridOld.callback(
+            gridNew,
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
+                gridOld, gridNew, region, nanoStep));
     }
 
 public:
@@ -2986,10 +2990,11 @@ public:
 
         // 3. call updateFunctor()
         double seconds = 0;
-        Streak<1> streak(Coord<1>(0), size.x());
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), size.x());
         {
             ScopedTimer t(&seconds);
-            updateFunctor<SPMVMSoACell, Grid>(streak, gridOld, &gridNew, 0);
+            updateFunctor<SPMVMSoACell, Grid>(region, gridOld, &gridNew, 0);
         }
 
         if (gridNew.get(Coord<1>(1)).sum == 4711) {
@@ -3012,12 +3017,16 @@ class SparseMatrixVectorMultiplicationVectorizedInf : public CPUBenchmark
 {
 private:
     template<typename CELL, typename GRID>
-    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
+    void updateFunctor(const Region<1>& region, const GRID& gridOld,
                        GRID *gridNew, unsigned nanoStep)
     {
-        gridOld.callback(gridNew, UnstructuredUpdateFunctorHelpers::
-                         UnstructuredGridSoAUpdateHelper<CELL>(
-                             gridOld, gridNew, streak, nanoStep));
+        gridOld.callback(
+            gridNew,
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
+                gridOld,
+                gridNew,
+                region,
+                nanoStep));
     }
 
 public:
@@ -3047,10 +3056,11 @@ public:
 
         // 3. call updateFunctor()
         double seconds = 0;
-        Streak<1> streak(Coord<1>(0), size.x());
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), size.x());
         {
             ScopedTimer t(&seconds);
-            updateFunctor<SPMVMSoACellInf, Grid>(streak, gridOld, &gridNew, 0);
+            updateFunctor<SPMVMSoACellInf, Grid>(region, gridOld, &gridNew, 0);
         }
 
         if (gridNew.get(Coord<1>(1)).sum == 4711) {

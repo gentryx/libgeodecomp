@@ -358,12 +358,13 @@ class SparseMatrixVectorMultiplicationMM : public CPUBenchmark
 private:
     typedef UnstructuredSoAGrid<CELL, 1, double, C, SIGMA> Grid;
 
-    void updateFunctor(const Streak<1>& streak, const Grid& gridOld,
+    void updateFunctor(const Region<1>& region, const Grid& gridOld,
                        Grid *gridNew, unsigned nanoStep)
     {
-        gridOld.callback(gridNew, UnstructuredUpdateFunctorHelpers::
-                         UnstructuredGridSoAUpdateHelper<CELL>(
-                             gridOld, gridNew, streak, nanoStep));
+        gridOld.callback(
+            gridNew,
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
+                gridOld, gridNew, region, nanoStep));
     }
 
 public:
@@ -394,10 +395,11 @@ public:
 
         // 3. call updateFunctor()
         double seconds = 0;
-        Streak<1> streak(Coord<1>(0), size.x());
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), size.x());
         {
             ScopedTimer t(&seconds);
-            updateFunctor(streak, gridOld, &gridNew, 0);
+            updateFunctor(region, gridOld, &gridNew, 0);
         }
 
         if (gridNew.get(Coord<1>(1)).sum == 4711) {
