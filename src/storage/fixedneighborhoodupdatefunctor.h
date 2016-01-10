@@ -258,10 +258,7 @@ public:
         ACCESSOR1& hoodOld,
         ACCESSOR2& hoodNew) const
     {
-        const Region<DIM> &region = *myRegion;
-        // fixme
-        const CONCURRENCY_FUNCTOR concurrencySpec = *myConcurrencySpec;
-        const ANY_THREADED_UPDATE modelThreadingSpec = *myModelThreadingSpec;
+        const Region<DIM>& region = *myRegion;
 
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
         FixedNeighborhoodUpdateFunctorHelpers::Invoke<CELL, DIM - 1, true, Topology>()( \
