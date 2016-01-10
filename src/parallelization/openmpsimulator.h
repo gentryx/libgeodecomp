@@ -42,8 +42,11 @@ public:
     /**
      * creates a OpenMPSimulator with the given initializer.
      */
-    explicit OpenMPSimulator(Initializer<CELL_TYPE> *initializer) :
-        MonolithicSimulator<CELL_TYPE>(initializer)
+    explicit OpenMPSimulator(
+        Initializer<CELL_TYPE> *initializer,
+        bool enableFineGrainedParallelism = false) :
+        MonolithicSimulator<CELL_TYPE>(initializer),
+        enableFineGrainedParallelism(enableFineGrainedParallelism)
     {
         stepNum = initializer->startStep();
         Coord<DIM> dim = initializer->gridBox().dimensions;
@@ -123,6 +126,7 @@ protected:
     GridType *curGrid;
     GridType *newGrid;
     Region<DIM> simArea;
+    bool enableFineGrainedParallelism;
 
     void nanoStep(const unsigned& nanoStep)
     {
@@ -135,7 +139,7 @@ protected:
             *curGrid,
             newGrid,
             nanoStep,
-            UpdateFunctorHelpers::ConcurrencyEnableOpenMP(true));
+            UpdateFunctorHelpers::ConcurrencyEnableOpenMP(true, enableFineGrainedParallelism));
         std::swap(curGrid, newGrid);
     }
 

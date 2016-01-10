@@ -275,7 +275,7 @@ class ConcurrencyNoP
 {
 public:
     inline
-    explicit ConcurrencyNoP(bool /* unused */ = false)
+    explicit ConcurrencyNoP(bool /* unused */ = false, bool /* unused */ = false)
     {}
 
     bool enableOpenMP() const
@@ -337,7 +337,8 @@ class ConcurrencyEnableHPX
 {
 public:
     inline
-    explicit ConcurrencyEnableHPX(bool /* unused */)
+    explicit ConcurrencyEnableHPX(bool /* unused */, bool enableFineGrainedParallelism) :
+        enableFineGrainedParallelism(enableFineGrainedParallelism)
     {}
 
     bool enableOpenMP() const

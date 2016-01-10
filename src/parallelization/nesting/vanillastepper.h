@@ -63,6 +63,7 @@ public:
     using ParentType::rimBuffer;
     using ParentType::kernelBuffer;
     using ParentType::kernelFraction;
+    using ParentType::enableFineGrainedParallelism;
 
     inline VanillaStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
@@ -70,14 +71,16 @@ public:
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
         const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
-        const PatchProviderVec& innerSetPatchProviders = PatchProviderVec()) :
+        const PatchProviderVec& innerSetPatchProviders = PatchProviderVec(),
+        bool enableFineGrainedParallelism = false) :
         ParentType(
             partitionManager,
             initializer,
             ghostZonePatchAccepters,
             innerSetPatchAccepters,
             ghostZonePatchProviders,
-            innerSetPatchProviders)
+            innerSetPatchProviders,
+            enableFineGrainedParallelism)
     {
         initGrids();
     }
@@ -98,7 +101,7 @@ private:
                 *oldGrid,
                 &*newGrid,
                 curNanoStep,
-                CONCURRENCY_SPEC(false));
+                CONCURRENCY_SPEC(false, enableFineGrainedParallelism));
             std::swap(oldGrid, newGrid);
 
             ++curNanoStep;
@@ -182,7 +185,7 @@ private:
                     *oldGrid,
                     &*newGrid,
                     curNanoStep,
-                    CONCURRENCY_SPEC(true));
+                    CONCURRENCY_SPEC(true, enableFineGrainedParallelism));
 
                 ++curNanoStep;
                 if (curNanoStep == NANO_STEPS) {

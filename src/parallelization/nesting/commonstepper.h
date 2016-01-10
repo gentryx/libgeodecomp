@@ -70,10 +70,12 @@ public:
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters  = PatchAccepterVec(),
         const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
-        const PatchProviderVec& innerSetPatchProviders  = PatchProviderVec()) :
+        const PatchProviderVec& innerSetPatchProviders  = PatchProviderVec(),
+        bool enableFineGrainedParallelism = false) :
         Stepper<CELL_TYPE>(
             partitionManager,
-            initializer)
+            initializer),
+        enableFineGrainedParallelism(enableFineGrainedParallelism)
     {
         curStep = initializer->startStep();
         curNanoStep = 0;
@@ -125,6 +127,7 @@ protected:
     PatchBufferType2 rimBuffer;
     PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;
+    bool enableFineGrainedParallelism;
 
     inline void notifyPatchAccepters(
         const Region<DIM>& region,
