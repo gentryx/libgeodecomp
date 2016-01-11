@@ -258,6 +258,8 @@ public:
         ACCESSOR1& hoodOld,
         ACCESSOR2& hoodNew) const
     {
+        const CONCURRENCY_FUNCTOR concurrencySpec = *myConcurrencySpec;
+        const ANY_THREADED_UPDATE modelThreadingSpec = *myModelThreadingSpec;
         const Region<DIM>& region = *myRegion;
 
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
@@ -269,8 +271,8 @@ public:
             offsetNew,                                                  \
             dimensionsNew,                                              \
             nanoStep,                                                   \
-            myConcurrencySpec,                                          \
-            myModelThreadingSpec);
+            concurrencySpec,                                            \
+            modelThreadingSpec);
 
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
