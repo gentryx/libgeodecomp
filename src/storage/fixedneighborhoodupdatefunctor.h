@@ -271,8 +271,8 @@ public:
             offsetNew,                                                  \
             dimensionsNew,                                              \
             nanoStep,                                                   \
-            concurrencySpec,                                            \
-            modelThreadingSpec);
+            &concurrencySpec,                                           \
+            &modelThreadingSpec);
 
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
