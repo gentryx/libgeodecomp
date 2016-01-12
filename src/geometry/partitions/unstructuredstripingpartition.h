@@ -13,7 +13,7 @@ public:
     using Partition<1>::startOffsets;
     using Partition<1>::weights;
 
-    explicit UnstructuredStripingPartition(
+    UnstructuredStripingPartition(
             const Coord<1> origin,
             const Coord<1> /* unused: dimensions */,
             const long offset,
