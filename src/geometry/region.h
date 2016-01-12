@@ -954,22 +954,19 @@ public:
         return buf.str();
     }
 
-    // fixme: needs test
-    // fixme: change interface to match prettyPrint()
-    inline void prettyPrint2D(std::ostream& os) const
+    inline std::string prettyPrint2d() const
     {
-        Coord<2> from = boundingBox().origin;
-        Coord<2> dim = boundingBox().dimensions;
-        for (int y = 0; y < (from.y() + dim.y()); ++y) {
-            for (int x = 0; x < (from.x() + dim.x()); ++x) {
-                if (count(Coord<2>(x, y)) > 0) {
-                    os << '#';
-                } else {
-                    os << '.';
-                }
+        std::ostringstream buf;
+
+        Coord<2> end = boundingBox().origin + boundingBox().dimensions;
+        for (int y = 0; y < end.y(); ++y) {
+            for (int x = 0; x < end.x(); ++x) {
+                buf << ((count(Coord<2>(x, y)) > 0) ? '#' : '.');
             }
-            os << '\n';
+            buf << '\n';
         }
+
+        return buf.str();
     }
 
     inline bool empty() const

@@ -1891,6 +1891,16 @@ public:
         TS_ASSERT_EQUALS(region.endStreak(),              region.streakIteratorOnOrAfter(Coord<2>( 0, 6)));
     }
 
+    void testPrettyPrint2D()
+    {
+        Region<2> r;
+        r << Streak<2>(Coord<2>(2, 2), 10)
+          << Streak<2>(Coord<2>(2, 3), 10)
+          << Streak<2>(Coord<2>(3, 4),  8);
+
+        std::string expected = "\n\n..########\n..########\n\n...#####\n";
+        std::string actual = r.prettyPrint2d();
+    }
 
     void testPrintToBOV()
     {
