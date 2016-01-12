@@ -1032,7 +1032,7 @@ public:
 
     inline std::size_t numPlanes() const
     {
-        return indices[DIM -1].size();
+        return indices[DIM - 1].size();
     }
 
     inline Iterator begin() const
@@ -1117,6 +1117,83 @@ private:
         for (; iterB != endB; ++iterB) {
             ret << *iterB;
         }
+    }
+
+    /**
+     * Yield an iterator to the Streak starting at coord or after.
+     * Useful for dependent lookups (e.g. yield all coordinates whose
+     * y-coordinate equals a certain value).
+     */
+    inline StreakIterator streakIteratorOnOrAfter(Coord<DIM> coord)
+    {
+        Coord<DIM> offsets;
+
+        IndexVectorType::const_iterator iter1 = indices[DIM - 1].begin();
+        IndexVectorType::const_iterator iter2 = indices[DIM - 1].end();
+
+        for (int d = DIM - 1; d >= 0; --d) {
+            IndexVectorType::const_iterator cursor =
+                std::lower_bound(
+                    iter1,
+                    iter2,
+                    std::pair<int, int>(coord[d], 0),
+                    RegionHelpers::RegionCommonHelper::pairCompareFirst);
+            offsets[d] = cursor - indices[d].begin();
+
+            // handle special case: the coordinate we're looking for
+            // is beyond the end of the extents of this Region.
+            if (cursor == indices[d].end()) {
+                return endStreak();
+            }
+
+            // another special case: the current component exceeds all
+            // components in the Region's current level. Solution: dig
+            // down on the current position return the iterator one
+            // past the current position:
+            if (cursor == iter2) {
+                --offsets[d];
+                --d;
+                for (; d >= 0; --d) {
+                    offsets[d] = cursor->first;
+                    cursor = indices[d].begin() + cursor->second - 1;
+                }
+
+                StreakIterator ret = (*this)[offsets];
+                ++ret;
+                return ret;
+            }
+
+            // we have to quit here if we're on the last level as the
+            // following conditionals otherwise yield wrong results:
+            if (d == 0) {
+                iter1 = cursor;
+                break;
+            }
+
+            // handle special case: coord was not found, so we need to
+            // recover the Streak just past it, i.e. the result of
+            // std::lower_bound.
+            if (cursor->first != coord[d]) {
+                --d;
+                for (; d >= 0; --d) {
+                    int localOffset = cursor->second;
+                    offsets[d] = localOffset;
+                    cursor = indices[d].begin() + localOffset;;
+                }
+                return (*this)[offsets];
+            }
+
+            iter1 = indices[d - 1].begin() + cursor->second;
+            if ((cursor       != indices[d].end()) &&
+                ((cursor + 1) != indices[d].end())) {
+                iter2 = indices[d - 1].begin() + (cursor + 1)->second;
+            } else {
+                iter2 = indices[d - 1].end();
+            }
+        }
+
+        offsets[0] = iter1 - indices[0].begin();
+        return (*this)[offsets];
     }
 
     inline static void merge3way(

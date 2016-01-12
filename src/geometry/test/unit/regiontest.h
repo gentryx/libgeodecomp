@@ -1852,6 +1852,46 @@ public:
         TS_ASSERT_EQUALS(region, accumulator);
     }
 
+    void testStreakIteratorOnOrAfter()
+    {
+        Region<2> region;
+        region << Coord<2>(2, 1)
+               << Coord<2>(4, 1)
+               << Coord<2>(3, 1)
+               << Coord<2>(7, 1)
+               << Coord<2>(1, 2)
+               << Coord<2>(2, 2)
+               << Coord<2>(4, 2)
+               << Coord<2>(7, 5)
+               << Coord<2>(8, 5)
+               << Coord<2>(9, 5)
+               << Coord<2>(20, 5);
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>(0, 0)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>(8, 0)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>(0, 1)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>(2, 1)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 1),  8), *region.streakIteratorOnOrAfter(Coord<2>(3, 1)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2), 3), *region.streakIteratorOnOrAfter(Coord<2>(8, 1)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2),  3), *region.streakIteratorOnOrAfter(Coord<2>(0, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2),  3), *region.streakIteratorOnOrAfter(Coord<2>(1, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 4, 2),  5), *region.streakIteratorOnOrAfter(Coord<2>(2, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 4, 2),  5), *region.streakIteratorOnOrAfter(Coord<2>(4, 2)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 5), 10), *region.streakIteratorOnOrAfter(Coord<2>(5, 2)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 5), 10), *region.streakIteratorOnOrAfter(Coord<2>(10, 4)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 5), 10), *region.streakIteratorOnOrAfter(Coord<2>(20, 4)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>(20, 5), 21), *region.streakIteratorOnOrAfter(Coord<2>(20, 5)));
+        TS_ASSERT_EQUALS(region.endStreak(),              region.streakIteratorOnOrAfter(Coord<2>(21, 5)));
+        TS_ASSERT_EQUALS(region.endStreak(),              region.streakIteratorOnOrAfter(Coord<2>( 0, 6)));
+    }
+
+
     void testPrintToBOV()
     {
         // fixme
