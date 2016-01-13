@@ -18,6 +18,48 @@ class RegionTest;
 namespace RegionHelpers {
 
 /**
+ * std::upper_bound() is guaranteed to run in O(log(end - start)), but
+ * not in O(1) if value is not within [start, end). This function adds
+ * those shortcuts to ensure out-of-bounds lookups are fast.
+ */
+template<typename ITERATOR, typename VALUE, typename COMPARATOR>
+inline ITERATOR upperBound(const ITERATOR& start, const ITERATOR& end, const VALUE& value, const COMPARATOR& comparator) {
+    if (start == end) {
+        return end;
+    }
+
+    if (comparator(value, *start)) {
+        return start;
+    }
+
+    if ((start != end) && comparator(*(end - 1), value)) {
+        return end;
+    }
+
+    return std::upper_bound(start, end, value, comparator);
+}
+
+/**
+ * Shortcut for std::lower_bound(). See upper_bound() for rationale.
+ */
+template<typename ITERATOR, typename VALUE, typename COMPARATOR>
+inline ITERATOR lowerBound(const ITERATOR& start, const ITERATOR& end, const VALUE& value, const COMPARATOR& comparator) {
+    if (start == end) {
+        return end;
+    }
+
+    if (comparator(value, *start)) {
+        return start;
+    }
+
+    if ((start != end) && comparator(*(end - 1), value)) {
+        return end;
+    }
+
+    return std::lower_bound(start, end, value, comparator);
+}
+
+/**
  * internal helper class
  */
 class RegionCommonHelper
@@ -135,7 +177,7 @@ public:
         StreakIteratorInitSingleOffset<DIM - 1> delegate(offsetIndex);
         std::size_t newOffset = delegate(streak, iterators, region);
 
-        IndexVectorType::const_iterator upperBound = std::upper_bound(
+        IndexVectorType::const_iterator upperBound = RegionHelpers::upperBound(
             region.indicesBegin(DIM),
             region.indicesEnd(DIM),
             IntPair(0, newOffset),
@@ -1075,7 +1117,7 @@ public:
         IndexVectorType::const_iterator iter2 = indices[DIM - 1].end();
 
         for (int d = DIM - 1; d >= 0; --d) {
-            IndexVectorType::const_iterator cursor = std::lower_bound(
+            IndexVectorType::const_iterator cursor = RegionHelpers::lowerBound(
                 iter1,
                 iter2,
                 std::pair<int, int>(coord[d], 0),
@@ -1450,7 +1492,7 @@ public:
         int c = s.origin[DIM];
         const IndexVectorType& indices = region.indices[DIM];
 
-        IndexVectorType::const_iterator i = std::upper_bound(
+        IndexVectorType::const_iterator i = RegionHelpers::upperBound(
             indices.begin() + start,
             indices.begin() + end,
             IntPair(c, 0),
@@ -1509,7 +1551,7 @@ public:
             return false;
         }
 
-        IndexVectorType::const_iterator cursor = std::upper_bound(
+        IndexVectorType::const_iterator cursor = RegionHelpers::upperBound(
             indices.begin() + start,
             indices.begin() + end,
             curStreak,
@@ -1552,7 +1594,7 @@ public:
         int c = s.origin[DIM];
         IndexVectorType& indices = region->indices[DIM];
 
-        IndexVectorType::iterator i = std::upper_bound(
+        IndexVectorType::iterator i = RegionHelpers::upperBound(
             indices.begin() + start,
             indices.begin() + end,
             IntPair(c, 0),
@@ -1632,7 +1674,7 @@ public:
         IntPair curStreak(s.origin.x(), s.endX);
         IndexVectorType& indices = region->indices[0];
 
-        IndexVectorType::iterator cursor = std::upper_bound(
+        IndexVectorType::iterator cursor = RegionHelpers::upperBound(
             indices.begin() + start,
             indices.begin() + end,
             curStreak,
@@ -1714,7 +1756,7 @@ public:
         int c = s.origin[DIM];
         IndexVectorType& indices = region->indices[DIM];
 
-        IndexVectorType::iterator i = std::upper_bound(
+        IndexVectorType::iterator i = RegionHelpers::upperBound(
             indices.begin() + start,
             indices.begin() + end,
             IntPair(c, 0),
@@ -1789,7 +1831,7 @@ public:
         // c. We can't really use lower_bound() as this doesn't
         // replace the < operator by >= but rather by <=, which is
         // IMO really sick...
-        IndexVectorType::iterator cursor = std::upper_bound(
+        IndexVectorType::iterator cursor = RegionHelpers::upperBound(
             indices.begin() + start,
             indices.begin() + end,
             IntPair(c, 0),
