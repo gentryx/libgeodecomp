@@ -37,7 +37,7 @@ protected:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    inline void incRemainder(const IndexVectorType::iterator& start, const IndexVectorType::iterator& end, const int& inserts)
+    inline void incRemainder(const IndexVectorType::iterator& start, const IndexVectorType::iterator& end, int inserts)
     {
         if (inserts == 0) {
             return;
@@ -1446,7 +1446,7 @@ public:
     }
 
     template<int MY_DIM>
-    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, const int& end)
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, int start, int end)
     {
         int c = s.origin[DIM];
         const IndexVectorType& indices = region.indices[DIM];
@@ -1503,7 +1503,7 @@ public:
     }
 
     template<int MY_DIM>
-    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, int end)
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, int start, int end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
         const IndexVectorType& indices = region.indices[0];
@@ -1547,7 +1547,7 @@ public:
     }
 
     template<int MY_DIM>
-    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, const int& end)
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
     {
         int c = s.origin[DIM];
         IndexVectorType& indices = region->indices[DIM];
@@ -1708,7 +1708,7 @@ public:
      * inserted streaks (may be negative).
      */
     template<int MY_DIM>
-    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, const int& end)
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
     {
         int c = s.origin[DIM];
         IndexVectorType& indices = region->indices[DIM];
@@ -1779,7 +1779,7 @@ public:
     }
 
     template<int MY_DIM>
-    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, int end)
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
     {
         int c = s.origin[0];
         IndexVectorType& indices = region->indices[0];
