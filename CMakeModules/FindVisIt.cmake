@@ -1,6 +1,6 @@
 # - Tries to find VisIt
 # You may define VisIt_ROOT to hint at the install location. Once done this will define
-#  VisIt_FOUND - VisIt is installed
+#  VISIT_FOUND - VisIt is installed
 #  VisIt_INCLUDE_DIRS - Directories where VisIt headers can be found
 #  VisIt_LIBRARIES - Libraries required by VisIt headers
 
@@ -26,8 +26,8 @@ find_library(VisIt_LIBRARIES simV2  HINTS ${VisIt_CANDIDATES} PATH_SUFFIXES ${Vi
 
 find_package_handle_standard_args(VisIt DEFAULT_MSG VisIt_INCLUDE_DIRS VisIt_LIBRARIES)
 
-set(VisIt_FOUND ${VISIT_FOUND} CACHE BOOL "")
+set(VISIT_FOUND ${VISIT_FOUND} CACHE BOOL "")
 set(VisIt_INCLUDE_DIRS ${VisIt_INCLUDE_DIRS} CACHE FILEPATH "")
 set(VisIt_LIBRARIES ${VisIt_LIBRARIES} CACHE FILEPATH "")
 
-mark_as_advanced(VisIt_FOUND VisIt_INCLUDE_DIRS VisIt_LIBRARIES)
+mark_as_advanced(VISIT_FOUND VisIt_INCLUDE_DIRS VisIt_LIBRARIES)
