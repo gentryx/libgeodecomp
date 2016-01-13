@@ -23,8 +23,7 @@ public:
         region += buf;
     }
 
-    // fixme: spelling
-    inline void getNeightbors(int node, std::vector<int> *neighbors) {
+    inline void getNeighbors(int node, std::vector<int> *neighbors) {
         CoordBox<2> box = region.boundingBox();
         int minX = box.origin.x();
         int maxX = minX + box.dimensions.x();

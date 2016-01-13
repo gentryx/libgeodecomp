@@ -29,28 +29,28 @@ public:
         std::vector<int> expected;
         std::vector<int> actual;
         expected << 0 << 2 << 4 << 6;
-        adjacency.getNeightbors(0, &actual);
+        adjacency.getNeighbors(0, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
         expected.clear();
         actual.clear();
-        adjacency.getNeightbors(1, &actual);
+        adjacency.getNeighbors(1, &actual);
         TS_ASSERT_EQUALS(expected, actual);
-        adjacency.getNeightbors(2, &actual);
+        adjacency.getNeighbors(2, &actual);
         TS_ASSERT_EQUALS(expected, actual);
-        adjacency.getNeightbors(4, &actual);
+        adjacency.getNeighbors(4, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
         expected.clear();
         actual.clear();
         expected << 0 << 9;
-        adjacency.getNeightbors(3, &actual);
+        adjacency.getNeighbors(3, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
         expected.clear();
         actual.clear();
         expected << 1 << 2 << 3;
-        adjacency.getNeightbors(5, &actual);
+        adjacency.getNeighbors(5, &actual);
         TS_ASSERT_EQUALS(expected, actual);
     }
 
@@ -77,40 +77,40 @@ public:
         std::vector<int> actual;
         std::vector<int> expected;
 
-        adjacency.getNeightbors(0, &actual);
+        adjacency.getNeighbors(0, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
-        adjacency.getNeightbors(1, &actual);
+        adjacency.getNeighbors(1, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
         expected << 0 << 1 << 5 << 8;
-        adjacency.getNeightbors(2, &actual);
+        adjacency.getNeighbors(2, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
         actual.clear();
         expected.clear();
-        adjacency.getNeightbors(3, &actual);
+        adjacency.getNeighbors(3, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
         expected << 3 << 4 << 5 << 9;
-        adjacency.getNeightbors(4, &actual);
+        adjacency.getNeighbors(4, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
         actual.clear();
         expected.clear();
-        adjacency.getNeightbors(5, &actual);
+        adjacency.getNeighbors(5, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
-        adjacency.getNeightbors(6, &actual);
+        adjacency.getNeighbors(6, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
         expected << 13;
-        adjacency.getNeightbors(7, &actual);
+        adjacency.getNeighbors(7, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
         actual.clear();
         expected.clear();
-        adjacency.getNeightbors(8, &actual);
+        adjacency.getNeighbors(8, &actual);
         TS_ASSERT_EQUALS(expected, actual);
 
     }
