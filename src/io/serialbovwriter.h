@@ -63,30 +63,36 @@ public:
             return;
         }
 
-        writeHeader(step, grid.dimensions());
-        writeRegion(step, grid);
+        std::string filename1 = filename(step, "bov");
+        std::string filename2 = filename(step, "data");
+        writeHeader(filename1, filename2, step, grid.dimensions(), brickletDim, selector);
+        writeRegion(filename2, grid, brickletDim, selector);
     }
 
 private:
     Selector<CELL_TYPE> selector;
     Coord<3> brickletDim;
 
-    std::string filename(unsigned step, const std::string& suffix) const
+    std::string filename(unsigned step, const std::string& suffix)
     {
         std::ostringstream buf;
-        buf
-            << prefix << "."
+        buf << prefix << "."
             << std::setfill('0') << std::setw(5) << step
             << "." << suffix;
 
         return buf.str();
     }
 
-    void writeHeader(unsigned step, const Coord<DIM>& dimensions)
+    static void writeHeader(
+        std::string filenameBoV,
+        std::string filenameData,
+        int step,
+        const Coord<DIM>& dimensions,
+        const Coord<3>& brickletDim,
+        const Selector<CELL_TYPE>& selector)
     {
         std::ofstream file;
-
-        file.open(filename(step, "bov").c_str());
+        file.open(filenameBoV.c_str());
 
         // BOV only accepts 3D data, so we'll have to inflate 1D
         // and 2D dimensions.
@@ -99,7 +105,7 @@ private:
         Coord<3> bricDim = (brickletDim == Coord<3>()) ? bovDim : brickletDim;
 
         file << "TIME: " << step << "\n"
-             << "DATA_FILE: " << filename(step, "data") << "\n"
+             << "DATA_FILE: " << filenameData << "\n"
              << "DATA_SIZE: "
              << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
              << "DATA_FORMAT: " << selector.typeName() << "\n"
@@ -117,12 +123,14 @@ private:
     }
 
     template<typename GRID_TYPE>
-    void writeRegion(
-        unsigned step,
-        const GRID_TYPE& grid)
+    static void writeRegion(
+        std::string filename,
+        const GRID_TYPE& grid,
+        const Coord<3>& brickletDim,
+        const Selector<CELL_TYPE>& selector)
     {
         std::ofstream file;
-        file.open(filename(step, "data").c_str(), std::ios::binary);
+        file.open(filename.c_str(), std::ios::binary);
         if (!file.good()) {
             throw std::runtime_error("could not open output file");
         }
