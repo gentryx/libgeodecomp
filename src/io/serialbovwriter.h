@@ -12,19 +12,15 @@
 namespace LibGeoDecomp {
 
 /**
- * writes simulation snapshots compatible with VisIt's Brick of Values
- * (BOV) format using one file per partition. Uses a selector which maps a cell to a
- * primitive data type so that it can be fed into VisIt.
+ * This class writes simulation snapshots compatible with VisIt's
+ * Brick of Values (BOV) format using one file per partition. Uses a
+ * selector which maps a cell to a primitive data type so that it can
+ * be fed into VisIt.
  */
 template<typename CELL_TYPE>
 class SerialBOVWriter : public Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >
 {
 public:
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(SerialBOVWriter)
-
-    friend class PolymorphicSerialization;
-    friend class BoostSerialization;
-    friend class HPXSerialization;
     friend class SerialBOVWriterTest;
 
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
@@ -35,11 +31,10 @@ public:
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
-    explicit
     SerialBOVWriter(
-        const Selector<CELL_TYPE>& selector = Selector<CELL_TYPE>(),
-        const std::string& prefix = "serial_bov_writer_output",
-        const unsigned period = 1,
+        const Selector<CELL_TYPE>& selector,
+        const std::string& prefix,
+        const unsigned period,
         const Coord<3>& brickletDim = Coord<3>()) :
         Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >(prefix, period),
         selector(selector),
