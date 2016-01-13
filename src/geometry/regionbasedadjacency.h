@@ -9,13 +9,22 @@ namespace LibGeoDecomp {
 class RegionBasedAdjacency
 {
 public:
-    inline
-    void insert(int from, int to) {
+    inline void insert(int from, int to) {
         region << Coord<2>(to, from);
     }
 
-    inline
-    void getNeightbors(int node, std::vector<int> *neighbors) {
+    inline void insert(int from, std::vector<int> to) {
+        std::sort(to.begin(), to.end());
+        Region<2> buf;
+        for (std::vector<int>::const_iterator i = to.begin(); i != to.end(); ++i) {
+            buf << Coord<2>(*i, from);
+        }
+
+        region += buf;
+    }
+
+    // fixme: spelling
+    inline void getNeightbors(int node, std::vector<int> *neighbors) {
         CoordBox<2> box = region.boundingBox();
         int minX = box.origin.x();
         int maxX = minX + box.dimensions.x();
