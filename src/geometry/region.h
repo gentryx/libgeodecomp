@@ -778,8 +778,8 @@ public:
 #endif
 #endif
 
-        geometryCacheTainted = true;
         RegionHelpers::RegionInsertHelper<DIM - 1>()(this, s);
+        geometryCacheTainted = true;
         return *this;
     }
 
