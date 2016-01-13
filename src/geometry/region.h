@@ -1062,60 +1062,6 @@ public:
         return indices[dim].end();
     }
 
-private:
-    IndexVectorType indices[DIM];
-    mutable CoordBox<DIM> myBoundingBox;
-    mutable std::size_t mySize;
-    mutable bool geometryCacheTainted;
-
-#define LIBGEODECOMP_REGION_ADVANCE_ITERATOR(ITERATOR, END)     \
-            if (*ITERATOR != lastInsert) {         \
-                ret << *ITERATOR;                  \
-                lastInsert = *ITERATOR;            \
-            }                                      \
-            ++ITERATOR;                            \
-            if (ITERATOR == END) {                 \
-                break;                             \
-            }
-
-    inline static void merge2way(
-        Region& ret,
-        const StreakIterator& beginA, const StreakIterator& endA,
-        const StreakIterator& beginB, const StreakIterator& endB)
-    {
-        if (beginA == endA) {
-            for (StreakIterator i = beginB; i != endB; ++i) {
-                ret << *i;
-            }
-            return;
-        }
-        if (beginB == endB) {
-            for (StreakIterator i = beginA; i != endA; ++i) {
-                ret << *i;
-            }
-            return;
-        }
-
-        StreakIterator iterA = beginA;
-        StreakIterator iterB = beginB;
-        Streak<DIM> lastInsert;
-
-        for (;;) {
-            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(*iterA, *iterB)) {
-                LIBGEODECOMP_REGION_ADVANCE_ITERATOR(iterA, endA);
-            } else {
-                LIBGEODECOMP_REGION_ADVANCE_ITERATOR(iterB, endB);
-            }
-        }
-
-        for (; iterA != endA; ++iterA) {
-            ret << *iterA;
-        }
-        for (; iterB != endB; ++iterB) {
-            ret << *iterB;
-        }
-    }
-
     /**
      * Yield an iterator to the Streak starting at coord or after.
      * Useful for dependent lookups (e.g. yield all coordinates whose
@@ -1191,6 +1137,60 @@ private:
 
         offsets[0] = iter1 - indices[0].begin();
         return (*this)[offsets];
+    }
+
+private:
+    IndexVectorType indices[DIM];
+    mutable CoordBox<DIM> myBoundingBox;
+    mutable std::size_t mySize;
+    mutable bool geometryCacheTainted;
+
+#define LIBGEODECOMP_REGION_ADVANCE_ITERATOR(ITERATOR, END)     \
+            if (*ITERATOR != lastInsert) {         \
+                ret << *ITERATOR;                  \
+                lastInsert = *ITERATOR;            \
+            }                                      \
+            ++ITERATOR;                            \
+            if (ITERATOR == END) {                 \
+                break;                             \
+            }
+
+    inline static void merge2way(
+        Region& ret,
+        const StreakIterator& beginA, const StreakIterator& endA,
+        const StreakIterator& beginB, const StreakIterator& endB)
+    {
+        if (beginA == endA) {
+            for (StreakIterator i = beginB; i != endB; ++i) {
+                ret << *i;
+            }
+            return;
+        }
+        if (beginB == endB) {
+            for (StreakIterator i = beginA; i != endA; ++i) {
+                ret << *i;
+            }
+            return;
+        }
+
+        StreakIterator iterA = beginA;
+        StreakIterator iterB = beginB;
+        Streak<DIM> lastInsert;
+
+        for (;;) {
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(*iterA, *iterB)) {
+                LIBGEODECOMP_REGION_ADVANCE_ITERATOR(iterA, endA);
+            } else {
+                LIBGEODECOMP_REGION_ADVANCE_ITERATOR(iterB, endB);
+            }
+        }
+
+        for (; iterA != endA; ++iterA) {
+            ret << *iterA;
+        }
+        for (; iterB != endB; ++iterB) {
+            ret << *iterB;
+        }
     }
 
     inline static void merge3way(
