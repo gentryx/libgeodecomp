@@ -1854,41 +1854,136 @@ public:
 
     void testStreakIteratorOnOrAfter()
     {
+        // fill region
         Region<2> region;
-        region << Coord<2>(2, 1)
-               << Coord<2>(4, 1)
-               << Coord<2>(3, 1)
-               << Coord<2>(7, 1)
-               << Coord<2>(1, 2)
-               << Coord<2>(2, 2)
-               << Coord<2>(4, 2)
-               << Coord<2>(7, 5)
-               << Coord<2>(8, 5)
-               << Coord<2>(9, 5)
+        region << Coord<2>( 2, 1)
+               << Coord<2>( 4, 1)
+               << Coord<2>( 3, 1)
+               << Coord<2>( 7, 1)
+               << Coord<2>( 1, 2)
+               << Coord<2>( 2, 2)
+               << Coord<2>( 4, 2)
+               << Coord<2>(-2, 4)
+               << Coord<2>( 7, 5)
+               << Coord<2>( 8, 5)
+               << Coord<2>( 9, 5)
                << Coord<2>(20, 5);
 
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>(0, 0)));
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>(8, 0)));
+        // check individual points
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>( 0, 0)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>( 8, 0)));
 
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>(0, 1)));
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>(2, 1)));
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 1),  8), *region.streakIteratorOnOrAfter(Coord<2>(3, 1)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>( 0, 1)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>( 2, 1)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 1),  8), *region.streakIteratorOnOrAfter(Coord<2>( 3, 1)));
 
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2), 3), *region.streakIteratorOnOrAfter(Coord<2>(8, 1)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2),  3), *region.streakIteratorOnOrAfter(Coord<2>( 8, 1)));
 
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2),  3), *region.streakIteratorOnOrAfter(Coord<2>(0, 2)));
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2),  3), *region.streakIteratorOnOrAfter(Coord<2>(1, 2)));
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 4, 2),  5), *region.streakIteratorOnOrAfter(Coord<2>(2, 2)));
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 4, 2),  5), *region.streakIteratorOnOrAfter(Coord<2>(4, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2),  3), *region.streakIteratorOnOrAfter(Coord<2>( 0, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2),  3), *region.streakIteratorOnOrAfter(Coord<2>( 1, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 4, 2),  5), *region.streakIteratorOnOrAfter(Coord<2>( 2, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 4, 2),  5), *region.streakIteratorOnOrAfter(Coord<2>( 4, 2)));
 
-        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 5), 10), *region.streakIteratorOnOrAfter(Coord<2>(5, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>(-2, 4), -1), *region.streakIteratorOnOrAfter(Coord<2>(-5, 3)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>(-2, 4), -1), *region.streakIteratorOnOrAfter(Coord<2>( 5, 3)));
 
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>(-2, 4), -1), *region.streakIteratorOnOrAfter(Coord<2>(-5, 4)));
         TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 5), 10), *region.streakIteratorOnOrAfter(Coord<2>(10, 4)));
         TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 5), 10), *region.streakIteratorOnOrAfter(Coord<2>(20, 4)));
 
         TS_ASSERT_EQUALS(Streak<2>(Coord<2>(20, 5), 21), *region.streakIteratorOnOrAfter(Coord<2>(20, 5)));
         TS_ASSERT_EQUALS(region.endStreak(),              region.streakIteratorOnOrAfter(Coord<2>(21, 5)));
         TS_ASSERT_EQUALS(region.endStreak(),              region.streakIteratorOnOrAfter(Coord<2>( 0, 6)));
+
+        // check functionality of iterators
+        std::vector<int> actual;
+        std::vector<int> expected;
+        Region<2>::StreakIterator start = region.streakIteratorOnOrAfter(Coord<2>(-100, 0));
+        Region<2>::StreakIterator end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 0));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 1));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 1));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        expected << 2
+                 << 3
+                 << 4
+                 << 7;
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 2));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 2));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        expected << 1
+                 << 2
+                 << 4;
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 3));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 3));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 4));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 4));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        expected << -2;
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 5));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 5));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        expected << 7
+                 << 8
+                 << 9
+                 << 20;
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 6));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 6));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        TS_ASSERT_EQUALS(actual, expected);
     }
 
     void testPrettyPrint2D()
