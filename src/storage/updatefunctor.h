@@ -303,7 +303,7 @@ class ConcurrencyEnableOpenMP
 {
 public:
     inline
-    explicit ConcurrencyEnableOpenMP(bool updatingGhost, bool enableFineGrainedParallelism) :
+    ConcurrencyEnableOpenMP(bool updatingGhost, bool enableFineGrainedParallelism) :
         updatingGhost(updatingGhost),
         enableFineGrainedParallelism(enableFineGrainedParallelism)
     {}
@@ -337,7 +337,7 @@ class ConcurrencyEnableHPX
 {
 public:
     inline
-    explicit ConcurrencyEnableHPX(bool /* unused */, bool enableFineGrainedParallelism) :
+    ConcurrencyEnableHPX(bool /* unused */, bool enableFineGrainedParallelism) :
         enableFineGrainedParallelism(enableFineGrainedParallelism)
     {}
 
