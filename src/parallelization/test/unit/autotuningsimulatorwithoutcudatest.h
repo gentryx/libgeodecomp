@@ -60,7 +60,7 @@ public:
 class SimFabTestInitializer : public SimpleInitializer<SimFabTestCell>
 {
 public:
-    SimFabTestInitializer(Coord<3> gridDimensions = Coord<3>(100,100,100), unsigned timeSteps = 100) :
+    explicit SimFabTestInitializer(Coord<3> gridDimensions = Coord<3>(100,100,100), unsigned timeSteps = 100) :
         SimpleInitializer<SimFabTestCell>(gridDimensions, timeSteps)
     {}
 
