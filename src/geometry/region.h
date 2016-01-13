@@ -135,11 +135,11 @@ public:
         StreakIteratorInitSingleOffset<DIM - 1> delegate(offsetIndex);
         std::size_t newOffset = delegate(streak, iterators, region);
 
-        IndexVectorType::const_iterator upperBound =
-            std::upper_bound(region.indicesBegin(DIM),
-                             region.indicesEnd(DIM),
-                             IntPair(0, newOffset),
-                             RegionHelpers::RegionCommonHelper::pairCompareSecond);
+        IndexVectorType::const_iterator upperBound = std::upper_bound(
+            region.indicesBegin(DIM),
+            region.indicesEnd(DIM),
+            IntPair(0, newOffset),
+            RegionHelpers::RegionCommonHelper::pairCompareSecond);
         iterators[DIM] = upperBound - 1;
         newOffset =  iterators[DIM] - region.indicesBegin(DIM);
 
@@ -1075,12 +1075,11 @@ public:
         IndexVectorType::const_iterator iter2 = indices[DIM - 1].end();
 
         for (int d = DIM - 1; d >= 0; --d) {
-            IndexVectorType::const_iterator cursor =
-                std::lower_bound(
-                    iter1,
-                    iter2,
-                    std::pair<int, int>(coord[d], 0),
-                    RegionHelpers::RegionCommonHelper::pairCompareFirst);
+            IndexVectorType::const_iterator cursor = std::lower_bound(
+                iter1,
+                iter2,
+                std::pair<int, int>(coord[d], 0),
+                RegionHelpers::RegionCommonHelper::pairCompareFirst);
             offsets[d] = cursor - indices[d].begin();
 
             // handle special case: the coordinate we're looking for
@@ -1451,12 +1450,11 @@ public:
         int c = s.origin[DIM];
         const IndexVectorType& indices = region.indices[DIM];
 
-        IndexVectorType::const_iterator i =
-            std::upper_bound(
-                indices.begin() + start,
-                indices.begin() + end,
-                IntPair(c, 0),
-                RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::const_iterator i = std::upper_bound(
+            indices.begin() + start,
+            indices.begin() + end,
+            IntPair(c, 0),
+            RegionCommonHelper::pairCompareFirst);
 
         int nextLevelStart = 0;
         int nextLevelEnd = 0;
@@ -1511,9 +1509,11 @@ public:
             return false;
         }
 
-        IndexVectorType::const_iterator cursor =
-            std::upper_bound(indices.begin() + start, indices.begin() + end,
-                             curStreak, RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::const_iterator cursor = std::upper_bound(
+            indices.begin() + start,
+            indices.begin() + end,
+            curStreak,
+            RegionCommonHelper::pairCompareFirst);
         // This will yield the streak AFTER the current origin
         // c. We can't really use lower_bound() as this doesn't
         // replace the < operator by >= but rather by <=, which is
@@ -1552,12 +1552,11 @@ public:
         int c = s.origin[DIM];
         IndexVectorType& indices = region->indices[DIM];
 
-        IndexVectorType::iterator i =
-            std::upper_bound(
-                indices.begin() + start,
-                indices.begin() + end,
-                IntPair(c, 0),
-                RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::iterator i = std::upper_bound(
+            indices.begin() + start,
+            indices.begin() + end,
+            IntPair(c, 0),
+            RegionCommonHelper::pairCompareFirst);
 
         int nextLevelStart = 0;
         int nextLevelEnd = 0;
@@ -1633,9 +1632,11 @@ public:
         IntPair curStreak(s.origin.x(), s.endX);
         IndexVectorType& indices = region->indices[0];
 
-        IndexVectorType::iterator cursor =
-            std::upper_bound(indices.begin() + start, indices.begin() + end,
-                             curStreak, RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::iterator cursor = std::upper_bound(
+            indices.begin() + start,
+            indices.begin() + end,
+            curStreak,
+            RegionCommonHelper::pairCompareFirst);
         // This will yield the streak AFTER the current origin
         // c. We can't really use lower_bound() as this doesn't
         // replace the < operator by >= but rather by <=, which is
@@ -1713,12 +1714,11 @@ public:
         int c = s.origin[DIM];
         IndexVectorType& indices = region->indices[DIM];
 
-        IndexVectorType::iterator i =
-            std::upper_bound(
-                indices.begin() + start,
-                indices.begin() + end,
-                IntPair(c, 0),
-                RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::iterator i = std::upper_bound(
+            indices.begin() + start,
+            indices.begin() + end,
+            IntPair(c, 0),
+            RegionCommonHelper::pairCompareFirst);
 
         // key is not present, so no need to remove it
         if (i == (indices.begin() + start)) {
@@ -1789,12 +1789,12 @@ public:
         // c. We can't really use lower_bound() as this doesn't
         // replace the < operator by >= but rather by <=, which is
         // IMO really sick...
-        IndexVectorType::iterator cursor =
-            std::upper_bound(
-                indices.begin() + start,
-                indices.begin() + end,
-                IntPair(c, 0),
-                RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::iterator cursor = std::upper_bound(
+            indices.begin() + start,
+            indices.begin() + end,
+            IntPair(c, 0),
+            RegionCommonHelper::pairCompareFirst);
+
         if (cursor != (indices.begin() + start)) {
             // ...so we resort to landing one past the streak we're
             // searching and moving back afterwards:
