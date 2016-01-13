@@ -37,7 +37,7 @@ public:
 
     template<typename INITIALIZER>
     AutoTuningSimulator(INITIALIZER initializer):
-        simulationSteps(10)
+        optimizationSteps(10)
     {
         addNewSimulation("SerialSimulation",
             "SerialSimulation",
@@ -163,7 +163,7 @@ public:
 
     void setSimulationSteps(unsigned steps)
     {
-        simulationSteps = steps;
+        optimizationSteps = steps;
     }
 
     void setParameters(SimulationParameters params, std::string name)
@@ -199,7 +199,7 @@ public:
 
             OPTIMIZER_TYPE optimizer(iter->second->parameters);
             iter->second->parameters = optimizer(
-                simulationSteps,
+                optimizationSteps,
                 *iter->second->simulationFactory);
             iter->second->fitness = optimizer.getFitness();
 
@@ -212,7 +212,7 @@ public:
 
 private:
     std::map<const std::string, SimulationPtr> simulations;
-    unsigned simulationSteps; // maximum number of Steps for the optimizer
+    unsigned optimizationSteps; // maximum number of Steps for the optimizer
     std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > parallelWriters;
     std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
     std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
