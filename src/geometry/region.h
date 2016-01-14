@@ -791,9 +791,16 @@ public:
 
     inline Region& operator<<(const CoordBox<DIM>& box)
     {
-        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
-            *this << *i;
+        Region buf;
+        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak();
+             i != box.endStreak();
+             ++i) {
+            buf << *i;
         }
+
+        Region mergeBuf;
+        merge2way(mergeBuf, beginStreak(), endStreak(), buf.beginStreak(), buf.endStreak());
+        swap(*this, mergeBuf);
 
         return *this;
     }
@@ -823,9 +830,13 @@ public:
 
     inline Region& operator>>(const CoordBox<DIM>& box)
     {
-        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
-            *this >> *i;
+        Region boxRegion;
+        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak();
+             i != box.endStreak();
+             ++i) {
+            boxRegion << *i;
         }
+        *this -= boxRegion;
 
         return *this;
     }
@@ -833,7 +844,7 @@ public:
     inline void operator-=(const Region& other)
     {
         Region newValue = *this - other;
-        *this = newValue;
+        std::swap(newValue, *this);
     }
 
     /**
