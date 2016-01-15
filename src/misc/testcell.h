@@ -203,8 +203,8 @@ public:
         }
 
         Stencils::RepeatCuda<STENCIL::VOLUME,
-                         TestCellHelpers::CheckNeighbor,
-                         STENCIL>()(&isValid, this, neighborhood);
+                             TestCellHelpers::CheckNeighbor,
+                             STENCIL>()(&isValid, this, neighborhood);
 
         if (nanoStep >= NANO_STEPS) {
 #ifndef __CUDACC__
