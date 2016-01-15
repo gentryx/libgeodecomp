@@ -28,7 +28,6 @@
 #include <libgeodecomp/io/plotter.h>
 #include <libgeodecomp/misc/quickpalette.h>
 #include <libgeodecomp/geometry/region.h>
-#include <libgeodecomp/io/serialbovwriter.h>
 #include <libgeodecomp/storage/simplearrayfilter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
@@ -234,15 +233,6 @@ public:
         archive & object.mySize;
     }
 
-    template<typename ARCHIVE, typename CELL_TYPE>
-    inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned /*version*/)
-    {
-        archive & hpx::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, SerialBOVWriter<CELL_TYPE > > >(object);
-        archive & object.brickletDim;
-        archive & object.selector;
-    }
-
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned /*version*/)
@@ -335,8 +325,6 @@ HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL_TYPE, typenam
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::ParallelWriter<CELL_TYPE>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, class CELL_PLOTTER>), (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>));
 HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL, class CELL_PLOTTER>), (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>));
-HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::SerialBOVWriter<CELL_TYPE>));
-HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::SerialBOVWriter<CELL_TYPE>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename PALETTE>), (LibGeoDecomp::SimpleCellPlotterHelpers::CellToColor<CELL, MEMBER, PALETTE>));
 HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL, typename MEMBER, typename PALETTE>), (LibGeoDecomp::SimpleCellPlotterHelpers::CellToColor<CELL, MEMBER, PALETTE>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::SimpleInitializer<CELL_TYPE>));
@@ -494,12 +482,6 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::QuickPalette<VALUE>& object, cons
 
 template<class ARCHIVE, int DIM>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsigned version)
-{
-    HPXSerialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned version)
 {
     HPXSerialization::serialize(archive, object, version);
 }

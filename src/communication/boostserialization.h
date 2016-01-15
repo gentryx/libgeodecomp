@@ -26,7 +26,6 @@
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/quickpalette.h>
 #include <libgeodecomp/geometry/region.h>
-#include <libgeodecomp/io/serialbovwriter.h>
 #include <libgeodecomp/storage/simplearrayfilter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
@@ -213,15 +212,6 @@ public:
         archive & object.indices;
         archive & object.myBoundingBox;
         archive & object.mySize;
-    }
-
-    template<typename ARCHIVE, typename CELL_TYPE>
-    inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned /*version*/)
-    {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, SerialBOVWriter<CELL_TYPE > > >(object);
-        archive & object.brickletDim;
-        archive & object.selector;
     }
 
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
@@ -428,12 +418,6 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::QuickPalette<VALUE>& object, cons
 
 template<class ARCHIVE, int DIM>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsigned version)
-{
-    BoostSerialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned version)
 {
     BoostSerialization::serialize(archive, object, version);
 }
