@@ -6,6 +6,7 @@
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/io/varstepinitializerproxy.h>
 #include <libgeodecomp/io/logger.h>
 #include <cfloat>
 
@@ -35,25 +36,25 @@ public:
 
     typedef boost::shared_ptr<Simulation> SimulationPtr;
 
-    template<typename INITIALIZER>
-    AutoTuningSimulator(INITIALIZER initializer):
-        optimizationSteps(10)
+    AutoTuningSimulator(Initializer<CELL_TYPE> *initializer):
+        optimizationSteps(10),
+        varStepInitializer(initializer)
     {
         addNewSimulation("SerialSimulation",
             "SerialSimulation",
-            initializer);
+            varStepInitializer);
 
 #ifdef LIBGEODECOMP_WITH_THREADS
         addNewSimulation("CacheBlockingSimulation",
             "CacheBlockingSimulation",
-            initializer);
+            varStepInitializer);
 #endif
 
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
         addNewSimulation("CudaSimulation",
             "CudaSimulation",
-            initializer);
+            varStepInitializer);
 #endif
 #endif
     }
@@ -76,11 +77,17 @@ public:
         steerers.push_back(boost::shared_ptr<Steerer<CELL_TYPE> >(steerer));
     }
 
-    template<typename INITIALIZER>
-    void addNewSimulation(std::string name, std::string typeOfSimulation, INITIALIZER initializer)
+    void addNewSimulation(std::string name, std::string typeOfSimulation)
+    {
+        addNewSimulation(name, typeOfSimulation, varStepInitializer);
+    }
+private:
+    void addNewSimulation(std::string name,
+        std::string typeOfSimulation,
+        VarStepInitializerProxy<CELL_TYPE> &initializer)
     {
         if (typeOfSimulation == "SerialSimulation") {
-            SimFactoryPtr simFac_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
+            SimFactoryPtr simFac_p(new SerialSimulationFactory<CELL_TYPE>(&initializer));
             SimulationPtr sim_p(new Simulation(
                     typeOfSimulation,
                     simFac_p,
@@ -91,7 +98,7 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_THREADS
         if (typeOfSimulation == "CacheBlockingSimulation") {
-            SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
+            SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(&initializer));
             SimulationPtr sim_p(new Simulation(
                     typeOfSimulation,
                     simFac_p,
@@ -104,7 +111,7 @@ public:
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
          if (typeOfSimulation == "CudaSimulation") {
-            SimFactoryPtr simFac_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
+            SimFactoryPtr simFac_p(new CudaSimulationFactory<CELL_TYPE>(&initializer));
             SimulationPtr sim_p(new Simulation(
                     typeOfSimulation,
                     simFac_p,
@@ -117,7 +124,7 @@ public:
 
         throw std::invalid_argument("SimulationFactory::addNewSimulation(): unknown simulator type");
     }
-
+public:
     void deleteAllSimulations()
     {
         simulations.clear();
@@ -213,6 +220,7 @@ public:
 private:
     std::map<const std::string, SimulationPtr> simulations;
     unsigned optimizationSteps; // maximum number of Steps for the optimizer
+    VarStepInitializerProxy<CELL_TYPE> varStepInitializer;
     std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > parallelWriters;
     std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
     std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
