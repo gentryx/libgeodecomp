@@ -37,7 +37,7 @@ class ParallelStripingSimulatorTest : public CxxTest::TestSuite
 {
 public:
     typedef GridBase<TestCell<2>, 2> GridBaseType;
-    typedef TestSteerer<2 > TestSteererType;
+    typedef TestSteerer<2> TestSteererType;
 
     void setUp()
     {
