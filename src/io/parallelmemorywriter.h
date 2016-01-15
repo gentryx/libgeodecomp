@@ -98,7 +98,7 @@ public:
         return grids[i];
     }
 
-    std::map<unsigned, GridType> getGrids()
+    std::map<unsigned, GridType>& getGrids()
     {
         return grids;
     }
