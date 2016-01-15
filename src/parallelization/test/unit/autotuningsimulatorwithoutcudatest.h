@@ -87,11 +87,11 @@ public:
     void tearDown()
     {}
 
-    void xtestBasicPatternOptimized()
+    void testBasicPatternOptimized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::TestBasicPatternOptimized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
         ats.setSimulationSteps(10);
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
@@ -106,7 +106,7 @@ public:
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testBasicSimplexOptimized()")
         AutoTuningSimulator<SimFabTestCell, SimplexOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
         ats.setSimulationSteps(10);
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
@@ -122,15 +122,14 @@ public:
 #ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
         ats.deleteAllSimulations();
         SimulationParameters params;
         params.addParameter("WavefrontWidth", 1, 300);
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
         ats.addNewSimulation("1.CacheBlockingSimulator",
-            "CacheBlockingSimulation",
-            SimFabTestInitializer(dim,maxSteps));
+            "CacheBlockingSimulation");
         ats.setParameters(params, "1.CacheBlockingSimulator");
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
@@ -148,7 +147,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "AutotuningSimulatorTest:test:ManuallyParameterized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
 
         SimulationParameters params;
         params.addParameter("WavefrontWidth", 1, 300);
@@ -172,7 +171,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "AutotuningSimulatorTest:testInvalidArguments()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
         // This test don't test SimulationParameters!!!!
         SimulationParameters params;
         params.addParameter("WavefrontWidth", 1, 300);
@@ -181,8 +180,7 @@ public:
 
         TS_ASSERT_THROWS(
             ats.addNewSimulation("1.CacheBlockingSimulator",
-                                 "CachBlockingSimulation",
-                                 SimFabTestInitializer(dim,maxSteps)),
+                                 "CachBlockingSimulation"),
             std::invalid_argument);
         TS_ASSERT_THROWS(
             ats.setParameters(params, "1.CacheBlockingSimulator"),
@@ -197,12 +195,11 @@ public:
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testAddWriter()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
         ats.deleteAllSimulations();
         ats.addNewSimulation(
             "addWriterTest",
-            "SerialSimulation",
-            SimFabTestInitializer(dim, maxSteps));
+            "SerialSimulation");
         std::ostringstream buf;
         ats.addWriter(static_cast<Writer<SimFabTestCell> *>(new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
         ats.run();
@@ -212,6 +209,9 @@ private:
     unsigned maxSteps;
 };
 
+#include <libgeodecomp/io/clonableinitializer.h>
+#include <libgeodecomp/io/varstepinitializerproxy.h>
+
 class SimulationFactoryTest : public CxxTest::TestSuite
 {
 
@@ -220,18 +220,20 @@ public:
     {
         dim = Coord<3>(100,100,100);
         maxSteps = 100;
+		initializerProxy = new VarStepInitializerProxy<SimFabTestCell>(new SimFabTestInitializer(dim,maxSteps));
 #ifdef LIBGEODECOMP_WITH_THREADS
         cfab = new CacheBlockingSimulationFactory<SimFabTestCell>(
-                    SimFabTestInitializer(dim, maxSteps));
+                    initializerProxy);
 #endif
-        fab = new SerialSimulationFactory<SimFabTestCell>(
-                    SimFabTestInitializer(dim, maxSteps));
+		fab = new SerialSimulationFactory<SimFabTestCell>(
+                    initializerProxy);
     }
 
     void tearDown()
     {
         delete cfab;
         delete fab;
+		delete initializerProxy;
     }
 
     void testBasic()
@@ -298,6 +300,8 @@ public:
 private:
     Coord<3> dim;
     unsigned maxSteps;
-    SimulationFactory<SimFabTestCell> *fab;
+    VarStepInitializerProxy<SimFabTestCell> *initializerProxy;
+	ClonableInitializer<SimFabTestCell> *initializerClonable;
+	SimulationFactory<SimFabTestCell> *fab;
     SimulationFactory<SimFabTestCell> *cfab;
 };
