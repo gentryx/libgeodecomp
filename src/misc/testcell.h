@@ -52,6 +52,20 @@ public:
     typedef Topologies::Torus<3>::Topology Topology;
 };
 
+template<int DIM>
+class NanoSteps
+{
+public:
+    static const int NANO_STEPS = 27;
+};
+
+template<>
+class NanoSteps<3>
+{
+public:
+    static const int NANO_STEPS = 3;
+};
+
 /**
  * We'll use this class to enble debug output on host code and disable
  * it on CUDA devices (where std::cout isn't available).
@@ -116,7 +130,7 @@ public:
     friend class HPXSerialization;
 
     static const int DIMENSIONS = DIM;
-    static const unsigned NANO_STEPS = 27;
+    static const unsigned NANO_STEPS = TestCellHelpers::NanoSteps<DIM>::NANO_STEPS;
 
     class API :
         public ADDITIONAL_API,
