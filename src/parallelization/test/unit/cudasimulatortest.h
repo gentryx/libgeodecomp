@@ -95,11 +95,11 @@ public:
 
     void test2dCube()
     {
-        Coord<2> dim(421, 351);
+        Coord<2> dim(121, 151);
         int numSteps = 21;
         CudaSimulator<TestCell2dCube> sim(new TestInitializer2dCube(dim, numSteps));
 
-        TestWriter<TestCell2dCube> *writer = new TestWriter<TestCell2dCube>(1, 0, numSteps);
+        TestWriter<TestCell2dCube> *writer = new TestWriter<TestCell2dCube>(8, 0, numSteps);
         sim.addWriter(writer);
 
         sim.run();
