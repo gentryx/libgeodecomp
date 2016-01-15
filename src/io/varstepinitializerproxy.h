@@ -2,8 +2,12 @@
 #ifndef LIBGEODECOMP_IO_VARSTEPINITIALIZERPROXY_H
 #define LIBGEODECOMP_IO_VARSTEPINITIALIZERPROXY_H
 
+#include <memory>
+
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/io/clonableinitializer.h>
+
 /**
  * The VarStepInitializerProxy is a class to rig the max Steps.
  * It provide the possibility to change the max steps of an exiting
@@ -11,20 +15,15 @@
  */
 namespace LibGeoDecomp {
 template<typename CELL>
-class VarStepInitializerProxy: public Initializer<CELL>
+class VarStepInitializerProxy: public Initializer<CELL>, ClonableInitializer<CELL>
 {
 public:
-    //friend class PolymorphicSerialization;
-    //friend class BoostSerialization;
-    //friend class HPXSerialization;
-
-    //TODO i don't no, is this ok?
     typedef typename Initializer<CELL>::Topology Topology;
     const static int DIM = Topology::DIM;
 
 VarStepInitializerProxy(Initializer<CELL> *proxyObj):
      Initializer<CELL>(),
-     proxyObj(proxyObj),
+     proxyObj(std::shared_ptr<Initializer<CELL> >(proxyObj)),
      newMaxSteps(proxyObj->maxSteps())
 {}
 
@@ -37,15 +36,17 @@ void setMaxSteps(unsigned steps){
 /**
  * This funktion returns the raw Value of steps to do
  */
-unsigned getMaxSteps()
+unsigned getMaxSteps() const
 {
     return newMaxSteps;
 }
 
+//------------------- inherited funktions from Initializer ------------------
 virtual void grid(GridBase<CELL,DIM> *target) override
 {
     proxyObj->grid(target);
 }
+
 virtual Coord<DIM> gridDimensions() const override
 {
     return proxyObj->gridDimensions();
@@ -75,10 +76,23 @@ virtual Adjacency getAdjacency() const override
     return proxyObj->getAdjacency();
 }
 
+//--------------- inherited funktions from Clonableinitializer --------------
+virtual ClonableInitializer<CELL> *clone() const override
+{
+    return new VarStepInitializerProxy<CELL>(*this);
+}
+
 private:
-    // TODO where is the correct point to delete proxyObj
-    // TODO use an smart pointer and make it clonable...
-    Initializer<CELL> *proxyObj;
+
+/**
+ * Copy-ctor is hidden, use clone()!
+ */
+VarStepInitializerProxy(VarStepInitializerProxy<CELL>& o)
+    :proxyObj(o.proxyObj),
+    newMaxSteps(o.newMaxSteps)
+{}
+
+    std::shared_ptr<Initializer<CELL> > proxyObj;
     unsigned newMaxSteps;
 }; // VarStepInitializerProxy
 } // namespace LibGeoDecomp
