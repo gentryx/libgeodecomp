@@ -220,12 +220,12 @@ public:
     {
         dim = Coord<3>(100,100,100);
         maxSteps = 100;
-		initializerProxy = new VarStepInitializerProxy<SimFabTestCell>(new SimFabTestInitializer(dim,maxSteps));
+        initializerProxy = new VarStepInitializerProxy<SimFabTestCell>(new SimFabTestInitializer(dim,maxSteps));
 #ifdef LIBGEODECOMP_WITH_THREADS
         cfab = new CacheBlockingSimulationFactory<SimFabTestCell>(
                     initializerProxy);
 #endif
-		fab = new SerialSimulationFactory<SimFabTestCell>(
+        fab = new SerialSimulationFactory<SimFabTestCell>(
                     initializerProxy);
     }
 
@@ -233,7 +233,7 @@ public:
     {
         delete cfab;
         delete fab;
-		delete initializerProxy;
+        delete initializerProxy;
     }
 
     void testBasic()
@@ -301,7 +301,7 @@ private:
     Coord<3> dim;
     unsigned maxSteps;
     VarStepInitializerProxy<SimFabTestCell> *initializerProxy;
-	ClonableInitializer<SimFabTestCell> *initializerClonable;
-	SimulationFactory<SimFabTestCell> *fab;
+    ClonableInitializer<SimFabTestCell> *initializerClonable;
+    SimulationFactory<SimFabTestCell> *fab;
     SimulationFactory<SimFabTestCell> *cfab;
 };
