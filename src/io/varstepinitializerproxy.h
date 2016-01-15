@@ -8,6 +8,8 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/clonableinitializer.h>
 
+using  boost::shared_ptr;
+
 /**
  * The VarStepInitializerProxy is a class to rig the max Steps.
  * It provide the possibility to change the max steps of an exiting
@@ -15,15 +17,15 @@
  */
 namespace LibGeoDecomp {
 template<typename CELL>
-class VarStepInitializerProxy: public Initializer<CELL>, ClonableInitializer<CELL>
+class VarStepInitializerProxy: public /*Initializer<CELL>,*/ ClonableInitializer<CELL>
 {
 public:
     typedef typename Initializer<CELL>::Topology Topology;
     const static int DIM = Topology::DIM;
 
 VarStepInitializerProxy(Initializer<CELL> *proxyObj):
-     Initializer<CELL>(),
-     proxyObj(std::shared_ptr<Initializer<CELL> >(proxyObj)),
+     ClonableInitializer<CELL>(),
+     proxyObj(shared_ptr<Initializer<CELL> >(proxyObj)),
      newMaxSteps(proxyObj->maxSteps())
 {}
 
@@ -40,7 +42,6 @@ unsigned getMaxSteps() const
 {
     return newMaxSteps;
 }
-
 //------------------- inherited funktions from Initializer ------------------
 virtual void grid(GridBase<CELL,DIM> *target) override
 {
@@ -82,17 +83,14 @@ virtual ClonableInitializer<CELL> *clone() const override
     return new VarStepInitializerProxy<CELL>(*this);
 }
 
-private:
 
-/**
- * Copy-ctor is hidden, use clone()!
- */
-VarStepInitializerProxy(VarStepInitializerProxy<CELL>& o)
-    :proxyObj(o.proxyObj),
-    newMaxSteps(o.newMaxSteps)
+private:
+VarStepInitializerProxy(VarStepInitializerProxy<CELL>* o)
+    :proxyObj(o->proxyObj),
+    newMaxSteps(o->newMaxSteps)
 {}
 
-    std::shared_ptr<Initializer<CELL> > proxyObj;
+    shared_ptr<Initializer<CELL> > proxyObj;
     unsigned newMaxSteps;
 }; // VarStepInitializerProxy
 } // namespace LibGeoDecomp
