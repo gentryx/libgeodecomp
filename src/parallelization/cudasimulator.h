@@ -318,7 +318,8 @@ public:
         Coord<3> blockSize = Coord<3>(128, (DIM < 3) ? 1 : 4, 1)) :
         MonolithicSimulator<CELL_TYPE>(initializer),
         blockSize(blockSize),
-        ioGrid(&grid, CoordBox<DIM>())
+        ioGrid(&grid, CoordBox<DIM>()),
+        hasCurrentGridOnHost(true)
     {
         stepNum = initializer->startStep();
 
@@ -357,6 +358,7 @@ public:
      */
     virtual void step()
     {
+        // fixme: test steerer application, ensure grid gets copied to host and back to device
         // notify all registered Steerers
         for(unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
@@ -370,9 +372,6 @@ public:
         }
 
         ++stepNum;
-
-        cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
-        CUDAUtil::checkForError();
 
         bool lastStep = (stepNum == initializer->maxSteps());
         WriterEvent event = lastStep ? WRITER_ALL_DONE : WRITER_STEP_FINISHED;
@@ -392,8 +391,10 @@ public:
 
     const typename Simulator<CELL_TYPE>::GridType *getGrid()
     {
-        // fixme: only copy back if required by writers
-        cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
+        if (!hasCurrentGridOnHost) {
+            cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
+            hasCurrentGridOnHost = true;
+        }
         return &ioGrid;
     }
 
@@ -438,6 +439,7 @@ private:
     int baseAddress;
     int byteSize;
     Region<DIM> simArea;
+    bool hasCurrentGridOnHost;
 
     using MonolithicSimulator<CELL_TYPE>::initializer;
     using MonolithicSimulator<CELL_TYPE>::steerers;
@@ -448,6 +450,7 @@ private:
     void nanoStep(const unsigned nanoStep)
     {
         nanoStepImpl(nanoStep, typename APITraits::SelectSoA<CELL_TYPE>::Value());
+        hasCurrentGridOnHost = false;
     }
 
     /**
