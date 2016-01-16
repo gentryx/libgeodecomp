@@ -33,7 +33,7 @@ VarStepInitializerProxy(Initializer<CELL> *proxyObj):
  * change the maxSteps to a new value
  */
 void setMaxSteps(unsigned steps){
-    maxSteps = steps;
+    newMaxSteps = steps;
 }
 /**
  * This funktion returns the raw Value of steps to do
@@ -41,6 +41,13 @@ void setMaxSteps(unsigned steps){
 unsigned getMaxSteps() const
 {
     return newMaxSteps;
+}
+/**
+ * This funktion returns a shared_ptr to the original Initializer
+ */
+shared_ptr<Initializer<CELL> > getInitializer()
+{
+    return proxyObj;
 }
 //------------------- inherited funktions from Initializer ------------------
 virtual void grid(GridBase<CELL,DIM> *target) override
@@ -82,7 +89,6 @@ virtual ClonableInitializer<CELL> *clone() const override
 {
     return new VarStepInitializerProxy<CELL>(*this);
 }
-
 
 private:
 VarStepInitializerProxy(VarStepInitializerProxy<CELL>* o)
