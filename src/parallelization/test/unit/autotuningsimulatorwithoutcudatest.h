@@ -236,6 +236,32 @@ public:
         delete initializerProxy;
     }
 
+    void testVarStepInitializerProxy()
+    {
+        LOG(Logger::INFO, "SimulationFactoryTest::testVarStepInitializerProxy()")
+        unsigned maxSteps = initializerProxy->maxSteps();
+        double oldFitness = DBL_MIN;
+        double aktFitness = 0.0;
+        for(unsigned i = 10; i < maxSteps; i*=2){
+            LOG(Logger::DBG, "setMaxSteps("<<i<<")")
+            initializerProxy->setMaxSteps(i);
+            LOG(Logger::DBG,"i: "<< i << " maxSteps(): "
+                << initializerProxy->maxSteps() << " getMaxSteps(): "
+                << initializerProxy->getMaxSteps())
+            TS_ASSERT_EQUALS(i,initializerProxy->maxSteps());
+            TS_ASSERT_EQUALS(i,initializerProxy->getMaxSteps());
+            aktFitness = cfab->operator()(cfab->parameters());
+            LOG(Logger::DBG, "Fitness: " << aktFitness)
+            TS_ASSERT(oldFitness > aktFitness);
+            oldFitness = aktFitness;
+        }
+        LOG(Logger::DBG, "getInitializer()->maxSteps(): "
+                        << initializerProxy->getInitializer()->maxSteps()
+                        << " \"initial\" maxSteps: " << maxSteps)
+        TS_ASSERT_EQUALS(initializerProxy->getInitializer()->maxSteps()
+                        , maxSteps);
+    }
+
     void testBasic()
     {
         LOG(Logger::INFO, "SimulationFactoryTest::testBasic")
@@ -256,7 +282,7 @@ public:
             cfab->parameters()["WavefrontWidth"].setValue(100);
             cfab->parameters()["WavefrontHeight"].setValue(40);
             double fitness = cfab->operator()(cfab->parameters());
-            LOG(Logger::INFO,  i << " fitness: " << fitness )
+            LOG(Logger::INFO, i << " fitness: " << fitness )
         }
 #endif
     }
