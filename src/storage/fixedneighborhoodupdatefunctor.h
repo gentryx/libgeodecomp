@@ -264,7 +264,7 @@ public:
 
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
         ACCESSOR1 hoodOldCopy = hoodOld;                                \
-        ACCESSOR1 hoodNewCopy = hoodNew;                                \
+        ACCESSOR2 hoodNewCopy = hoodNew;                                \
         FixedNeighborhoodUpdateFunctorHelpers::Invoke<CELL, DIM - 1, true, Topology>()( \
             *i,                                                         \
             hoodOldCopy,                                                \
