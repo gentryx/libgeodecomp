@@ -220,11 +220,13 @@ public:
 
     void testStructOfArraysTestCell()
     {
-        int steps = 5;
-        Coord<3> dim(10, 15, 5);
-        CoordBox<3> box(Coord<3>(), dim);
         typedef TestCellSoA TestCellType;
         typedef SoAGrid<TestCellType, Topologies::Cube<3>::Topology> GridType;
+
+        int timeSteps = 5;
+        int nanoSteps = TestCellType::NANO_STEPS;
+        Coord<3> dim(10, 15, 5);
+        CoordBox<3> box(Coord<3>(), dim);
 
         TestInitializer<TestCellType> init(dim);
         GridType gridA(box);
@@ -238,15 +240,17 @@ public:
         GridType *gridNew = &gridB;
 
 
-        for (int s = 0; s < steps; ++s) {
-            UpdateFunctor<TestCellType>()(region, Coord<3>(), Coord<3>(), *gridOld, gridNew, s);
-            int cycle = init.startStep() * TestCellType::NANO_STEPS + s;
+        for (int t = 0; t < timeSteps; ++t) {
+            for (int s = 0; s < nanoSteps; ++s) {
+                UpdateFunctor<TestCellType>()(region, Coord<3>(), Coord<3>(), *gridOld, gridNew, s);
+                int cycle = (init.startStep() + t) * TestCellType::NANO_STEPS + s;
 
-            TS_ASSERT_TEST_GRID2(GridType, *gridOld, cycle, );
-            cycle += 1;
-            TS_ASSERT_TEST_GRID2(GridType, *gridNew, cycle, );
+                TS_ASSERT_TEST_GRID2(GridType, *gridOld, cycle, );
+                cycle += 1;
+                TS_ASSERT_TEST_GRID2(GridType, *gridNew, cycle, );
 
-            std::swap(gridOld, gridNew);
+                std::swap(gridOld, gridNew);
+            }
         }
     }
 
