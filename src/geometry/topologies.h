@@ -82,10 +82,10 @@ private:
     __host__ __device__
     inline int wrap(int x, int dim)
     {
-        if (unlikely(x < 0)) {
+        if (LGD_UNLIKELY(x < 0)) {
             return x + dim;
         }
-        if (unlikely(x >= 0)) {
+        if (LGD_UNLIKELY(x >= 0)) {
             return x - dim;
         }
         return x;
