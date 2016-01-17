@@ -206,8 +206,7 @@ public:
         return partition->getWeights();
     }
 
-    // fixme: const correctness?
-    const Adjacency &adjacency()
+    const Adjacency& adjacency() const
     {
         return partition->getAdjacency();
     }
