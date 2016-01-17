@@ -12,7 +12,20 @@
 #pragma warning (disable: 2304)
 #endif
 
+#ifdef __GNUC__
+#ifdef __CUDACC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
+#endif
+
 #include <QtWidgets/QApplication>
+
+#ifdef __GNUC__
+#ifdef __CUDACC__
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #ifdef __ICC
 #pragma warning pop
