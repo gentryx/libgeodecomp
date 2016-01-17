@@ -281,18 +281,14 @@ public:
         }
 
         /**
-         * Finds the triangle in  curTria, in which the coordinate
-         * with position  remainder is located. Returns true if
-         * recursion is necessary to check the resulting sub triangle.
+         * Finds the triangle in curTria, in which the coordinate with
+         * position remainder is located. Returns true if recursion is
+         * necessary to check the resulting sub triangle.
          */
         inline bool traceTriangle(const Triangle& curTria, unsigned *remainder)
         {
             if (!hasTrivialDimensions(curTria.dimensions) && !isCached(curTria.dimensions)) {
                 skipSubTriangles(curTria, remainder);
-                // fixme: refactor skipSubTriangles to return a
-                // triangle (and work on a reference triangle), and
-                // use recursion here to improve code readability and
-                // make data flow explicit.
                 return true;
             } else {
                 if (hasTrivialDimensions(curTria.dimensions)) {
@@ -305,8 +301,8 @@ public:
         }
 
         /**
-         * Finds the sub triangle of  curTria, in which the position
-         * on the SFC  remainder resides.
+         * Finds the sub triangle of curTria, in which the position on
+         * the SFC remainder resides.
          */
         inline void skipSubTriangles(const Triangle& curTria, unsigned *remainder)
         {
@@ -374,7 +370,6 @@ public:
             return cachedTriangleCoordsIterator >= cachedTriangleCoordsEnd;
         }
 
-        // fixme call by reference is too ugly, refactor please
         static inline void nextSubTriangle(Triangle *triangle)
         {
             newOriginAndDimensions(&triangle->origin, &triangle->dimensions, triangle->type, triangle->counter);
