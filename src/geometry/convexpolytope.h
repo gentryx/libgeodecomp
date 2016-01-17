@@ -167,10 +167,13 @@ public:
             min = cutPoints[i].min(min);
         }
         COORD delta = max - min;
-        // fixme
-        Coord<DIM> minInt(min[0], min[1]);
-        Coord<DIM> dltInt(delta[0], delta[1]);
-        myBoundingBox = CoordBox<DIM>(minInt, dltInt);
+        Coord<DIM> minInt;
+        Coord<DIM> deltaInt;
+        for (int i = 0; i < DIM; ++i) {
+            minInt[i] = min[i];
+            deltaInt[i] = delta[i];
+        }
+        myBoundingBox = CoordBox<DIM>(minInt, deltaInt);
 
         int hits = 0;
         for (std::size_t i = 0; i < SAMPLES; ++i) {
