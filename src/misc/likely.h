@@ -20,12 +20,17 @@
  */
 
 /* safety guard for now, add a configure check in the future */
-#if ( defined(__GNUC__) && (__GNUC__ >= 3) ) || defined(__IBMC__) || defined(__INTEL_COMPILER) || defined(__clang__)
-#  define LGD_UNLIKELY(X_) __builtin_expect(!!(X_),0)
-#  define LGD_LIKELY(X_)   __builtin_expect(!!(X_),1)
-#else
+#ifdef __CUDACC__
 #  define LGD_UNLIKELY(X_) (X_)
 #  define LGD_LIKELY(X_)   (X_)
+#else
+#  if ( defined(__GNUC__) && (__GNUC__ >= 3) ) || defined(__IBMC__) || defined(__INTEL_COMPILER) || defined(__clang__)
+#    define LGD_UNLIKELY(X_) __builtin_expect(!!(X_),0)
+#    define LGD_LIKELY(X_)   __builtin_expect(!!(X_),1)
+#  else
+#    define LGD_UNLIKELY(X_) (X_)
+#    define LGD_LIKELY(X_)   (X_)
+#  endif
 #endif
 
 #endif
