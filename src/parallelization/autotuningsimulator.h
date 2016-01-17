@@ -10,6 +10,7 @@
 #include <libgeodecomp/io/logger.h>
 #include <cfloat>
 
+#define LIBGEODECOMP_DEBUG_LEVEL 4
 namespace LibGeoDecomp{
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
@@ -186,6 +187,43 @@ public:
     void run()
     {
        runTest();
+    }
+
+    unsigned normalizeSteps(double goal, unsigned start = 5)
+    {
+        LOG(Logger::INFO, "normalizeSteps")
+        if (! isInMap("SerialSimulation")){
+            // FIXME Maybe an exzeption can be the heavy way!
+            LOG(Logger::WARN,
+                "AutoTuningSimulator::normalizeSteps(): no SerialSimulation available!")
+            return 0;
+        }
+        if (start == 0) {
+            LOG(Logger::WARN, "normalizeSteps is called with start = 0, this set start to default!")
+            start = 5;
+        }
+        //TODO Ist es notwendig hier die Writer und steer schon hinzuzufügen?
+        SimFactoryPtr factory = simulations["SerialSimulation"]->simulationFactory;
+        unsigned steps = start;
+        unsigned oldSteps = start;
+        varStepInitializer.setMaxSteps(1);
+        double variance = factory->operator()(simulations["SerialSimulation"]->parameters);
+        double fitness = DBL_MAX;
+        do {
+            varStepInitializer.setMaxSteps(steps);
+            fitness = factory->operator()(simulations["SerialSimulation"]->parameters);
+            oldSteps = steps;
+            LOG(Logger::DBG, "steps: " << steps)
+            steps = ((double) steps / fitness) * (double)goal;
+            if (steps < 1){
+                steps =1;
+            }
+            LOG(Logger::DBG, "new calculated steps: " << steps)
+            LOG(Logger::DBG, "fitness: " << fitness << " goal: " << goal)
+        } while((!(fitness > goal + variance && fitness < goal - variance ))
+             && (!(oldSteps <= 1 && fitness > goal)));
+
+        return oldSteps;
     }
 
     void runTest()

@@ -101,6 +101,13 @@ public:
             << ats.getFitness(*iter)<< std::endl
             << ats.getSimulationParameters(*iter))
     }
+	void testNormalizeSteps()
+	{
+		LOG(Logger::INFO, "testNormalizeSteps()")
+        AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
+            new SimFabTestInitializer(dim, maxSteps));
+		unsigned steps = ats.normalizeSteps(-0.4,19);
+	}
 
     void testBasicSimplexOptimized()
     {
