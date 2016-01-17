@@ -21,8 +21,7 @@ public:
      * MPI process, identified by its rank.
      */
     inline Partition(
-        // fixme: drop offset and bounding box from all partitions in favor of simulation region specifier?
-        const long& offset,
+        const long offset,
         const std::vector<std::size_t>& weights) :
         weights(weights)
     {
