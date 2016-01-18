@@ -85,9 +85,10 @@ private:
         if (LGD_UNLIKELY(x < 0)) {
             return x + dim;
         }
-        if (LGD_UNLIKELY(x >= 0)) {
+        if (LGD_UNLIKELY(x >= dim)) {
             return x - dim;
         }
+
         return x;
     }
 };
