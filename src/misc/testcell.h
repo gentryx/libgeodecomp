@@ -294,8 +294,13 @@ public:
                      << "Invalid Neighbor at " << relativeLoc << ":\n"
                      << other.toString()
                      << "--------------" << "\n";
-#endif
             return false;
+#else
+            // this is a dirty hack to circumvent buggy code
+            // generation in CUDA 7.5 for GF108. If not enabled
+            // CudaSimulatorTest::test1dTorus() will fail.
+            return true;
+#endif
         }
 
         bool otherShouldBeEdge = !inBounds(pos + relativeLoc);
