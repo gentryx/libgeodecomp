@@ -36,18 +36,18 @@ public:
     typedef boost::shared_ptr<Simulation> SimulationPtr;
 
     template<typename INITIALIZER>
-    AutoTuningSimulator(INITIALIZER initializer):
+    AutoTuningSimulator(INITIALIZER initializer) :
         simulationSteps(10)
     {
         addNewSimulation("SerialSimulation",
             "SerialSimulation",
             initializer);
 
-#ifdef LIBGEODECOMP_WITH_THREADS
-        addNewSimulation("CacheBlockingSimulation",
-            "CacheBlockingSimulation",
-            initializer);
-#endif
+// #ifdef LIBGEODECOMP_WITH_THREADS
+//         addNewSimulation("CacheBlockingSimulation",
+//             "CacheBlockingSimulation",
+//             initializer);
+// #endif
 
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
@@ -89,17 +89,17 @@ public:
             return;
         }
 
-#ifdef LIBGEODECOMP_WITH_THREADS
-        if (typeOfSimulation == "CacheBlockingSimulation") {
-            SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
-            SimulationPtr sim_p(new Simulation(
-                    typeOfSimulation,
-                    simFac_p,
-                    simFac_p->parameters()));
-            simulations[name] = sim_p;
-            return;
-        }
-#endif
+// #ifdef LIBGEODECOMP_WITH_THREADS
+//         if (typeOfSimulation == "CacheBlockingSimulation") {
+//             SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
+//             SimulationPtr sim_p(new Simulation(
+//                     typeOfSimulation,
+//                     simFac_p,
+//                     simFac_p->parameters()));
+//             simulations[name] = sim_p;
+//             return;
+//         }
+// #endif
 
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
