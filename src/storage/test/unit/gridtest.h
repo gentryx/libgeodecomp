@@ -109,13 +109,13 @@ public:
         Coord<3> dim(3, 4, 5);
         Grid<double, Topologies::Torus<3>::Topology > g(dim);
         g.getEdgeCell() = -1;
-        g[Coord<3>(2, 1, 1)] = 1;
-        g[Coord<3>(-1, 27, -2)] = 5;
+        g[Coord<3>( 2, 1,  1)] = 1;
+        g[Coord<3>(-1, 7, -2)] = 5;
 
         TS_ASSERT_EQUALS(dim, g.getDimensions());
         TS_ASSERT_EQUALS(-1, g.getEdgeCell());
         TS_ASSERT_EQUALS(1, g[Coord<3>(-1, 1, 1)]);
-        TS_ASSERT_EQUALS(5, g[Coord<3>(2, 3, 3)]);
+        TS_ASSERT_EQUALS(5, g[Coord<3>( 2, 3, 3)]);
     }
 
     void testOperatorEqual1()
@@ -377,7 +377,7 @@ public:
         TS_ASSERT_EQUALS(g[Coord<2>( 0, -1)], 30);
         TS_ASSERT_EQUALS(g[Coord<2>( 3,  0)],  0);
         TS_ASSERT_EQUALS(g[Coord<2>(-1,  0)],  2);
-        TS_ASSERT_EQUALS(g[Coord<2>(47, 69)], 12);
+        TS_ASSERT_EQUALS(g[Coord<2>( 5,  5)], 12);
     }
 
     void testFill3d()
