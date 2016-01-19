@@ -12,6 +12,7 @@
 
 #include <mpi.h>
 #include <ptscotch.h>
+#include <chrono>
 
 #ifdef SCOTCH_PTHREAD
 #error can only use ptscotch if compiled without SCOTCH_PTHREAD
@@ -27,7 +28,7 @@ public:
     using Partition<DIM>::startOffsets;
     using Partition<DIM>::weights;
 
-    explicit PTScotchDistributedPartition(
+    PTScotchDistributedPartition(
             const Coord<DIM> &origin,
             const Coord<DIM> &dimensions,
             const long &offset,
@@ -36,16 +37,38 @@ public:
         Partition<DIM>(offset, weights),
         origin(origin),
         dimensions(dimensions),
-        adjacency(adjacency)
+        numPartitions(weights.size())
     {
-        int cells = dimensions.prod();
-        start = (float)MPILayer().rank() / MPILayer().size() * cells;
-        end = (float)(MPILayer().rank() + 1) / MPILayer().size() * cells;
+        this->adjacency = adjacency;
 
+        getStartEnd(MPILayer().rank(), start, end);
         localCells = end - start;
-        std::cout << "local cells: " << localCells << std::endl;
-
         buildRegions();
+    }
+
+    PTScotchDistributedPartition(
+            const Coord<DIM> &origin,
+            const Coord<DIM> &dimensions,
+            const long &offset,
+            const std::vector<std::size_t> &weights,
+            Adjacency &&adjacency) :
+        Partition<DIM>(offset, weights),
+        origin(origin),
+        dimensions(dimensions),
+        numPartitions(weights.size())
+    {
+        this->adjacency = std::move(adjacency);
+
+        getStartEnd(MPILayer().rank(), start, end);
+        localCells = end - start;
+        buildRegions();
+    }
+
+    void getStartEnd(int rank, size_t &start, size_t &end)
+    {
+        size_t cells = dimensions.prod();
+        start = (float)rank / numPartitions * cells;
+        end = (float)(rank + 1) / numPartitions * cells;
     }
 
     Region<DIM> getRegion(const std::size_t node) const override
@@ -53,37 +76,47 @@ public:
         return regions.at(node);
     }
 
-    virtual const Adjacency &getAdjacency() const override
-    {
-        return adjacency;
-    }
-
 private:
     Coord<DIM> origin;
     Coord<DIM> dimensions;
-    SCOTCH_Num localCells;
-    int start, end;
+    SCOTCH_Num localCells = 0;
+    size_t start = 0, end = 0;
+    size_t numPartitions = 0;
     std::vector<Region<DIM> > regions;
-    Adjacency adjacency;
-
 
     void buildRegions()
     {
         std::vector<SCOTCH_Num> indices(localCells);
-        initIndices(indices);
-        regions.resize(weights.size());
-        createRegions(indices);
+
+        {
+            auto start = std::chrono::system_clock::now();
+            initIndices(indices);
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (std::chrono::system_clock::now() - start);
+            std::cout << "partitioning duration: " << duration.count() << std::endl;
+        }
+
+        regions.resize(numPartitions);
+
+        {
+            auto start = std::chrono::system_clock::now();
+            createRegions(indices);
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (std::chrono::system_clock::now() - start);
+            std::cout << "region creation duration: " << duration.count() << std::endl;
+
+        }
     }
 
     void initIndices(std::vector<SCOTCH_Num> &indices)
     {
+        std::cout << "partitioning ..." << std::endl;
+
         // create 2D grid
         SCOTCH_Dgraph graph;
         int error = SCOTCH_dgraphInit(&graph, MPILayer().communicator());
 
         SCOTCH_Num numEdges = 0;
 
-        for (auto &p : adjacency)
+        for (auto &p : this->adjacency)
         {
             numEdges += p.second.size();
         }
@@ -96,16 +129,13 @@ private:
         {
             verttabGra[i] = currentEdge;
 
-            for (int other : adjacency[start + i])
+            for (int other : this->adjacency[start + i])
             {
                 edgetabGra[currentEdge++] = other;
             }
         }
 
         numEdges = currentEdge;
-
-        std::cout << "local cells: " << localCells << std::endl;
-        std::cout << "local edges: " << numEdges << std::endl;
 
         verttabGra[localCells] = currentEdge;
 
@@ -132,7 +162,7 @@ private:
         error = SCOTCH_stratInit(straptr);
         if (error) std::cout << "SCOTCH_stratInit error: " << error << std::endl;
 
-        error = SCOTCH_dgraphPart(&graph, weights.size(), straptr, &indices[0]);
+        error = SCOTCH_dgraphPart(&graph, numPartitions, straptr, &indices[0]);
         if (error) std::cout << "SCOTCH_graphMap error: " << error << std::endl;
 
         SCOTCH_dgraphExit(&graph);
@@ -143,66 +173,67 @@ private:
 
     void createRegions(const std::vector<SCOTCH_Num> &indices)
     {
-        std::cout << "building regions on " << MPILayer().rank() << std::endl;
-        std::stringstream ss;
-
-        std::vector<Region<1>> partialRegions(weights.size());
-
-        ss << "rank " << MPILayer().rank() << " indices: ";
-        for (int i = 0; i < localCells; ++i)
+        // regions won't be complete after partitioning, fragments of different regions
+        // will end up on different nodes and they have to be synchronized.
+        // build partial regions
+        std::vector<Region<1>> partials(numPartitions);
+        for (int i = 0; i < indices.size(); ++i)
         {
-            ss << "(" << indices[i] << "," << (start + i) << ") ";
-
-            partialRegions.at(indices[i]) << Coord<1>(start + i);
+            partials.at(indices[i]) << Coord<1>(start + i);
         }
+        regions = partials;
 
-        std::cout << ss.str() << std::endl;
-
-        // to all ranks
-        for (size_t j = 0; j < weights.size(); ++j)
+        // send partial regions to all other nodes so they can build the complete regions
+        size_t numIndices = indices.size();
+        for (size_t j = 0; j < numPartitions; ++j)
         {
-            // send all regions
-            for (unsigned int i = 0; i < partialRegions.size(); ++i)
+            if (j != MPILayer().rank()) // dont send own regions to self
             {
-                MPILayer().sendRegion(partialRegions[i], j);
+                // send all partial regions
+                for (size_t k = 0; k < numPartitions; ++k)
+                {
+                    MPILayer().sendRegion(partials.at(k), j);
+                }
+            }
+            else
+            {
+                // regions will be received from all ranks except self
+                for (int i = 0; i < numPartitions; ++i)
+                {
+                    if (i == j) continue; // we won't receive regions from ourself
+
+                    // receive parts & build up own regions
+                    for (size_t k = 0; k < numPartitions; ++k)
+                    {
+                        Region<1> received;
+                        MPILayer().recvRegion(&received, i);
+
+                        // add the region to ourself
+                        regions.at(k) += received;
+                    }
+                }
             }
         }
 
-        for (size_t j = 0; j < weights.size(); ++j)
-        {
-            // receive all regions
-            for (unsigned int i = 0; i < partialRegions.size(); ++i)
-            {
-                Region<1> add;
-                MPILayer().recvRegion(&add, j);
-                regions[i] += add;
-            }
-        }
-
-        std::cout << regions.at(MPILayer().rank()) << std::endl;
-        std::cout << std::flush;
+        // pretty print regions. those should all be the same in the end
+#if 1
+#ifdef GRID_SIZE
         MPILayer().barrier();
 
-#ifdef GRID_SIZE
-        for (unsigned int i = 0; i < MPILayer().size(); ++i)
+        for (int i = 0; i < MPILayer().size(); ++i)
         {
             if (MPILayer().rank() == i)
             {
+                std::cout << "regions of rank " << i << ": " << std::endl;
                 std::stringstream ss;
-
-                for (unsigned j = 0; j < regions.size(); ++j)
-                {
-                    ss << i << ": region #" << j << ": " << std::endl;
-                    regions[j].prettyPrint1D(ss, Coord<2>(GRID_SIZE, GRID_SIZE));
-                    ss << std::endl;
-                }
-
+                Region<1>::prettyPrint1D(ss, regions, Coord<2>(GRID_SIZE, GRID_SIZE), Coord<2>(16, 10));
                 std::cout << ss.str() << std::endl;
             }
 
             MPILayer().barrier();
         }
 #endif // GRID_SIZE
+#endif // 0
 
     }
 
