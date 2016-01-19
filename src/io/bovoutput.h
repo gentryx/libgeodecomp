@@ -25,39 +25,37 @@ public:
         const std::string& filenameBOV,
         const std::string& filenameData,
         int step,
-        const Coord<DIM>& dimensions,
+        const CoordBox<DIM>& boundingBox,
         const Coord<3>& brickletDim,
         const Selector<CELL_TYPE>& selector)
     {
         std::ofstream file;
         file.open(filenameBOV.c_str());
         if (!file) {
-            throw std::runtime_error("BOVOutput::writeHeader() could not open file " + filenameBOV)
+            throw std::runtime_error("BOVOutput::writeHeader() could not open file " + filenameBOV);
         }
 
         // BOV only accepts 3D data, so we'll have to inflate 1D
         // and 2D dimensions.
-        Coord<DIM> c = dimensions;
         Coord<3> bovDim = Coord<3>::diagonal(1);
+        Coord<3> bovOrigin;
         for (int i = 0; i < DIM; ++i) {
-            bovDim[i] = c[i];
+            bovDim[i] = boundingBox.dimensions[i];
+            bovOrigin[i] = boundingBox.origin[i];
         }
 
         Coord<3> bricDim = (brickletDim == Coord<3>()) ? bovDim : brickletDim;
 
         file << "TIME: " << step << "\n"
              << "DATA_FILE: " << filenameData << "\n"
-             << "DATA_SIZE: "
-             << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
+             << "DATA_SIZE: " << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
              << "DATA_FORMAT: " << selector.typeName() << "\n"
              << "VARIABLE: " << selector.name() << "\n"
              << "DATA_ENDIAN: LITTLE\n"
-             << "BRICK_ORIGIN: 0 0 0\n"
-             << "BRICK_SIZE: "
-             << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
+             << "BRICK_ORIGIN: " << bovOrigin.x() << " " << bovOrigin.y() << " " << bovOrigin.z() << "\n"
+             << "BRICK_SIZE: " << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
              << "DIVIDE_BRICK: true\n"
-             << "DATA_BRICKLETS: "
-             << bricDim.x() << " " << bricDim.y() << " " << bricDim.z() << "\n"
+             << "DATA_BRICKLETS: " << bricDim.x() << " " << bricDim.y() << " " << bricDim.z() << "\n"
              << "DATA_COMPONENTS: " << selector.arity() << "\n";
 
         file.close();
@@ -72,7 +70,7 @@ public:
         std::ofstream file;
         file.open(filename.c_str(), std::ios::binary);
         if (!file.good()) {
-            throw std::runtime_error("could not open output file");
+            throw std::runtime_error("BOVOutput::writeGrid() could not open output file " + filename);
         }
 
         std::vector<char> buffer;
@@ -99,20 +97,42 @@ public:
         file.close();
     }
 
+    template<typename ITER1, typename ITER2>
     static void writeRegion(
         const std::string& prefix,
         const std::string& variableName,
-        const Coord<DIM>& dim,
+        const CoordBox<DIM>& boundingBox,
+        const ITER1& start,
+        const ITER2& end,
         int value = 1,
         int time = 0)
     {
+        std::string filenameBOV = prefix + ".bov";
+        std::string filenameData = prefix + ".data";
         writeHeader(
-            prefix + ".bov",
-            prefix + ".data",
+            filenameBOV,
+            filenameData,
             time,
-            dim,
-            dim,
+            boundingBox,
+            boundingBox.dimensions,
             Selector<float>(variableName));
+
+        std::ofstream file;
+        file.open(filenameData.c_str(), std::ios::binary);
+        if (!file.good()) {
+            throw std::runtime_error("BOVOutput::writeRegion() could not open output file " + filenameData);
+        }
+
+        ITER1 regionIter = start;
+        for (typename CoordBox<DIM>::Iterator i = boundingBox.begin(); i != boundingBox.end(); ++i) {
+            float num = 0;
+            if (*i == *regionIter) {
+                num = value;
+                ++regionIter;
+            }
+            file << num;
+        }
+        // fixme: test this
     }
 };
 

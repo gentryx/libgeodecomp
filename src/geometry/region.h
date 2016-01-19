@@ -1028,10 +1028,7 @@ public:
 
     inline void printToBOV(const std::string& prefix, const std::string& variableName = "region", int value = 1, int time = 0) const
     {
-        Coord<DIM> dim = boundingBox().origin + boundingBox().dimensions;
-        BOVOutput<float, DIM>::writeRegion(prefix, variableName, dim, value, time);
-
-        // fixme: write grid
+        BOVOutput<float, DIM>::writeRegion(prefix, variableName, boundingBox(), begin(), end(), value, time);
     }
 
     inline bool empty() const

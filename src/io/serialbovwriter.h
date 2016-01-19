@@ -60,8 +60,8 @@ public:
 
         std::string filename1 = filename(step, "bov");
         std::string filename2 = filename(step, "data");
-        BOVOutput<CELL_TYPE, DIM>::writeHeader(filename1, filename2, step, grid.dimensions(), brickletDim, selector);
-        BOVOutput<CELL_TYPE, DIM>::writeGrid(filename2, grid, brickletDim, selector);
+        BOVOutput<CELL_TYPE, DIM>::writeHeader(filename1, filename2, step, grid.boundingBox(), brickletDim, selector);
+        BOVOutput<CELL_TYPE, DIM>::writeGrid(filename2, grid, selector);
     }
 
 private:
