@@ -21,6 +21,49 @@
 
 namespace LibGeoDecomp {
 
+inline void prettyPrint(std::ostream &os, const std::vector<Region<1>> regions, const Coord<2> dimensions, const Coord<2> &resolution = Coord<2>(16, 16))
+{
+    for (int y = 0; y < resolution.y(); ++y) {
+        for (unsigned int i = 0; i < regions.size(); ++i)
+        {
+            const Region<1> &region = regions[i];
+
+            for (int x = 0; x < resolution.x(); ++x) {
+                int cx = ((float)x / (float)resolution.x()) * dimensions.x();
+                int cy = ((float)y / (float)resolution.y()) * dimensions.y();
+
+                if (region.count(Coord<1>(cy * dimensions.x() + cx)) > 0) {
+                    os << '#';
+                } else {
+                    os << '.';
+                }
+            }
+
+            os << ' ';
+        }
+        os << '\n';
+    }
+}
+
+inline void prettyPrint(std::ostream &os, const Region<2> region, const Coord<2> &resolution = Coord<2>(50, 50))
+{
+    Coord<2> from = region.boundingBox().origin;
+    Coord<2> dim = region.boundingBox().dimensions;
+    for (int y = 0; y < resolution.y(); ++y) {
+        for (int x = 0; x < resolution.x(); ++x) {
+            int cx = from.x() + ((float)x / (float)resolution.x()) * dim.x();
+            int cy = from.x() + ((float)y / (float)resolution.y()) * dim.y();
+
+            if (region.count(Coord<2>(cx, cy)) > 0) {
+                os << '#';
+            } else {
+                os << '.';
+            }
+        }
+        os << '\n';
+    }
+}
+
 template<int DIM>
 class PTScotchDistributedPartition : public Partition<DIM>
 {
@@ -216,8 +259,8 @@ private:
         }
 
         // pretty print regions. those should all be the same in the end
-#if 1
-#ifdef GRID_SIZE
+
+#if defined(PTSCOTCH_PARTITION_PRETTY_PRINT_GRID_SIZE)
         MPILayer().barrier();
 
         for (int i = 0; i < MPILayer().size(); ++i)
@@ -226,14 +269,13 @@ private:
             {
                 std::cout << "regions of rank " << i << ": " << std::endl;
                 std::stringstream ss;
-                Region<1>::prettyPrint1D(ss, regions, Coord<2>(GRID_SIZE, GRID_SIZE), Coord<2>(16, 10));
+                prettyPrint(ss, regions, Coord<2>(PTSCOTCH_PARTITION_PRETTY_PRINT_GRID_SIZE, PTSCOTCH_PARTITION_PRETTY_PRINT_GRID_SIZE), Coord<2>(16, 10));
                 std::cout << ss.str() << std::endl;
             }
 
             MPILayer().barrier();
         }
-#endif // GRID_SIZE
-#endif // 0
+#endif // PTSCOTCH_PARTITION_PRETTY_PRINT_GRID_SIZE
 
     }
 
