@@ -1,7 +1,7 @@
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/chronometer.h>
-#include <libgeodecomp/storage/grid.h>
+#include <libgeodecomp/storage/displacedgrid.h>
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/filesystem.hpp>
@@ -2015,30 +2015,46 @@ public:
         files << prefix + ".bov"
               << prefix + ".data";
 
-        Region<3> r;
-        r << Streak<3>(Coord<3>(10, 10, 10), 20)
-          << CoordBox<3>(Coord<3>(10, 20, 30), Coord<3>(20, 40, 60));
-        r.printToBOV(prefix, "region123");
+        Region<3> region;
+        region << Streak<3>(Coord<3>(11, 12, 13), 20)
+               << CoordBox<3>(Coord<3>(10, 20, 30), Coord<3>(20, 40, 60));
+        region.printToBOV(prefix, "region123", 47.11);
 
         std::stringstream expected;
         expected << "TIME: " << 0 << "\n"
                  << "DATA_FILE: " << prefix << ".data\n"
-                 << "DATA_SIZE: 30 60 90\n"
+                 << "DATA_SIZE: 20 48 77\n"
                  << "DATA_FORMAT: FLOAT\n"
                  << "VARIABLE: region123\n"
                  << "DATA_ENDIAN: LITTLE\n"
-                 << "BRICK_ORIGIN: 0 0 0\n"
-                 << "BRICK_SIZE: 30 60 90\n"
+                 << "BRICK_ORIGIN: 10 12 13\n"
+                 << "BRICK_SIZE: 20 48 77\n"
                  << "DIVIDE_BRICK: true\n"
-                 << "DATA_BRICKLETS: 30 60 90\n"
+                 << "DATA_BRICKLETS: 20 48 77\n"
                  << "DATA_COMPONENTS: 1\n";
 
-        // std::string actual = readHeader(prefix + ".bov");
-        // TS_ASSERT_EQUALS(actual, expected.str());
+        std::string actual = readHeader(prefix + ".bov");
+        TS_ASSERT_EQUALS(actual, expected.str());
 
-        Coord<3> dim(30, 60, 90);
-        // Grid<float, Topologies::Cube<3>::Topology> grid = readGrid(prefix + ".data", dim);
-        // std::cout << "grid: " << grid.boundingBox() << "\n";
+        Coord<3> origin(10, 12, 13);
+        Coord<3> dim(20, 48, 77);
+        DisplacedGrid<float, Topologies::Cube<3>::Topology> grid = readGrid(prefix + ".data", CoordBox<3>(origin, dim));
+
+        Region<3> remainder;
+        remainder << CoordBox<3>(origin, dim);
+        remainder -= region;
+
+        for (Region<3>::Iterator i = remainder.begin(); i != remainder.end(); ++i) {
+            TS_ASSERT_EQUALS(grid[*i], float(0));
+            if (grid[*i] != float(0)) {
+                std::cout << "grid[" << *i << "] = " << grid[*i] << "\n";
+                return;
+            }
+        }
+
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_EQUALS(grid[*i], float(47.11));
+        }
     }
 
 private:
@@ -2070,14 +2086,16 @@ private:
         return Coord<2>(1000, 50);
     }
 
-    Grid<float, Topologies::Cube<3>::Topology> readGrid(
+    DisplacedGrid<float, Topologies::Cube<3>::Topology> readGrid(
         const std::string& filename,
-        const Coord<3>& dimensions)
+        const CoordBox<3>& boundingBox)
     {
-        Grid<float, Topologies::Cube<3>::Topology> ret(dimensions);
+        DisplacedGrid<float, Topologies::Cube<3>::Topology> ret(boundingBox);
         std::ifstream file(filename.c_str());
         TS_ASSERT(file);
-        file.read(reinterpret_cast<char*>(&ret[Coord<3>()]), dimensions.prod() * sizeof(double));
+
+        // fixme
+        // file.read(reinterpret_cast<char*>(&ret[boundingBox.origin]), boundingBox.dimensions.prod() * sizeof(float));
 
         return ret;
     }

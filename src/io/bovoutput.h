@@ -132,7 +132,6 @@ public:
             }
             file << num;
         }
-        // fixme: test this
     }
 };
 
