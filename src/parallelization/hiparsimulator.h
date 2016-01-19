@@ -56,7 +56,7 @@ public:
     }
 };
 
-#ifdef WITH_SCOTCH
+#ifdef LIBGEODECOMP_WITH_SCOTCH
 template<int DIM>
 class PartitionBuilder<PTScotchUnstructuredPartition<DIM> >
 {
