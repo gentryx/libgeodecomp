@@ -1,12 +1,12 @@
 #ifndef LIBGEODECOMP_IO_SERIALBOVWRITER_H
 #define LIBGEODECOMP_IO_SERIALBOVWRITER_H
 
+#include <libgeodecomp/io/bovoutput.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
 
 #include <iomanip>
 #include <iostream>
-#include <fstream>
 #include <stdexcept>
 
 namespace LibGeoDecomp {
@@ -17,13 +17,13 @@ namespace LibGeoDecomp {
  * selector which maps a cell to a primitive data type so that it can
  * be fed into VisIt.
  */
-template<typename CELL_TYPE>
+template<typename CELL_TYPE, typename TOPOLOGY = typename APITraits::SelectTopology<CELL_TYPE>::Value>
 class SerialBOVWriter : public Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >
 {
 public:
     friend class SerialBOVWriterTest;
 
-    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef TOPOLOGY Topology;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
     static const int DIM = Topology::DIM;
@@ -60,8 +60,8 @@ public:
 
         std::string filename1 = filename(step, "bov");
         std::string filename2 = filename(step, "data");
-        writeHeader(filename1, filename2, step, grid.dimensions(), brickletDim, selector);
-        writeRegion(filename2, grid, brickletDim, selector);
+        BOVOUTPUT<DIM>::writeHeader(filename1, filename2, step, grid.dimensions(), brickletDim, selector);
+        BOVOUTPUT<DIM>::writeRegion(filename2, grid, brickletDim, selector);
     }
 
 private:
@@ -76,82 +76,6 @@ private:
             << "." << suffix;
 
         return buf.str();
-    }
-
-    static void writeHeader(
-        std::string filenameBoV,
-        std::string filenameData,
-        int step,
-        const Coord<DIM>& dimensions,
-        const Coord<3>& brickletDim,
-        const Selector<CELL_TYPE>& selector)
-    {
-        std::ofstream file;
-        file.open(filenameBoV.c_str());
-
-        // BOV only accepts 3D data, so we'll have to inflate 1D
-        // and 2D dimensions.
-        Coord<DIM> c = dimensions;
-        Coord<3> bovDim = Coord<3>::diagonal(1);
-        for (int i = 0; i < DIM; ++i) {
-            bovDim[i] = c[i];
-        }
-
-        Coord<3> bricDim = (brickletDim == Coord<3>()) ? bovDim : brickletDim;
-
-        file << "TIME: " << step << "\n"
-             << "DATA_FILE: " << filenameData << "\n"
-             << "DATA_SIZE: "
-             << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
-             << "DATA_FORMAT: " << selector.typeName() << "\n"
-             << "VARIABLE: " << selector.name() << "\n"
-             << "DATA_ENDIAN: LITTLE\n"
-             << "BRICK_ORIGIN: 0 0 0\n"
-             << "BRICK_SIZE: "
-             << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
-             << "DIVIDE_BRICK: true\n"
-             << "DATA_BRICKLETS: "
-             << bricDim.x() << " " << bricDim.y() << " " << bricDim.z() << "\n"
-             << "DATA_COMPONENTS: " << selector.arity() << "\n";
-
-        file.close();
-    }
-
-    template<typename GRID_TYPE>
-    static void writeRegion(
-        std::string filename,
-        const GRID_TYPE& grid,
-        const Coord<3>& brickletDim,
-        const Selector<CELL_TYPE>& selector)
-    {
-        std::ofstream file;
-        file.open(filename.c_str(), std::ios::binary);
-        if (!file.good()) {
-            throw std::runtime_error("could not open output file");
-        }
-
-        std::vector<char> buffer;
-        Coord<DIM> dimensions = grid.dimensions();
-        std::size_t length = dimensions.x();
-        std::size_t byteSize = length * selector.sizeOfExternal();
-        buffer.resize(byteSize);
-
-        CoordBox<DIM> boundingBox = grid.boundingBox();
-        for (typename CoordBox<DIM>::StreakIterator i = boundingBox.beginStreak();
-             i != boundingBox.endStreak();
-             ++i) {
-            Streak<DIM> s(*i);
-
-            Region<DIM> tempRegion;
-            tempRegion << s;
-            grid.saveMemberUnchecked(&buffer[0], MemoryLocation::HOST, selector, tempRegion);
-
-            file.write(
-                &buffer[0],
-                byteSize);
-        }
-
-        file.close();
     }
 };
 
