@@ -8,7 +8,7 @@
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/partitions/ptscotchunstructuredpartition.h>
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
-#include <libgeodecomp/geometry/partitions/ptscotchdistributedpartition.h>
+#include <libgeodecomp/geometry/partitions/distributedptscotchunstructuredpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/nesting/eventpoint.h>
@@ -91,15 +91,15 @@ public:
 };
 
 template<int DIM>
-class PartitionBuilder<PTScotchDistributedPartition<DIM> >
+class PartitionBuilder<DistributedPTScotchUnstructuredPartition<DIM> >
 {
 public:
-    boost::shared_ptr<PTScotchDistributedPartition<DIM >> operator()(
+    boost::shared_ptr<DistributedPTScotchUnstructuredPartition<DIM >> operator()(
         const CoordBox<DIM>& box,
         const std::vector<std::size_t>& weights,
         const Adjacency& adjacency)
     {
-        return boost::make_shared<PTScotchDistributedPartition<DIM> >(
+        return boost::make_shared<DistributedPTScotchUnstructuredPartition<DIM> >(
             box.origin,
             box.dimensions,
             0,
@@ -107,12 +107,12 @@ public:
             adjacency);
     }
 #ifdef LIBGEODECOMP_WITH_CPP14
-    boost::shared_ptr<PTScotchDistributedPartition<DIM >> operator()(
+    boost::shared_ptr<DistributedPTScotchUnstructuredPartition<DIM >> operator()(
         const CoordBox<DIM>& box,
         const std::vector<std::size_t>& weights,
         Adjacency&& adjacency)
     {
-        return boost::make_shared<PTScotchDistributedPartition<DIM> >(
+        return boost::make_shared<DistributedPTScotchUnstructuredPartition<DIM> >(
             box.origin,
             box.dimensions,
             0,

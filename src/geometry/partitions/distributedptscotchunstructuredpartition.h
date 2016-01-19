@@ -1,6 +1,6 @@
 
-#ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PTSCOTCHDISTRIBUTEDPARTITION_H
-#define LIBGEODECOMP_GEOMETRY_PARTITIONS_PTSCOTCHDISTRIBUTEDPARTITION_H
+#ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_DISTRIBUTEDPTSCOTCHUNSTRUCTUREDPARTITION_H
+#define LIBGEODECOMP_GEOMETRY_PARTITIONS_DISTRIBUTEDPTSCOTCHUNSTRUCTUREDPARTITION_H
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/partitions/partition.h>
@@ -65,13 +65,13 @@ inline void prettyPrint(std::ostream &os, const Region<2> region, const Coord<2>
 }
 
 template<int DIM>
-class PTScotchDistributedPartition : public Partition<DIM>
+class DistributedPTScotchUnstructuredPartition : public Partition<DIM>
 {
 public:
     using Partition<DIM>::startOffsets;
     using Partition<DIM>::weights;
 
-    PTScotchDistributedPartition(
+    DistributedPTScotchUnstructuredPartition(
             const Coord<DIM> &origin,
             const Coord<DIM> &dimensions,
             const long &offset,
@@ -89,7 +89,7 @@ public:
         buildRegions();
     }
 
-    PTScotchDistributedPartition(
+    DistributedPTScotchUnstructuredPartition(
             const Coord<DIM> &origin,
             const Coord<DIM> &dimensions,
             const long &offset,
