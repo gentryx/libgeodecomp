@@ -1,14 +1,14 @@
 #ifndef LIBGEODECOMP_GEOMETRY_ADJACENCY_H
 #define LIBGEODECOMP_GEOMETRY_ADJACENCY_H
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 #include <libgeodecomp/geometry/coord.h>
 
 namespace LibGeoDecomp {
 
-typedef std::map<int, std::vector<int> > Adjacency;
+typedef std::unordered_map<int, std::vector<int> > Adjacency;
 
 template<typename T>
 Adjacency MakeAdjacency(const std::map<Coord<2>, T> &weights)
