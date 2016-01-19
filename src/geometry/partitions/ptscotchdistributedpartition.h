@@ -1,5 +1,4 @@
 
-
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PTSCOTCHDISTRIBUTEDPARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_PTSCOTCHDISTRIBUTEDPARTITION_H
 
@@ -93,26 +92,14 @@ private:
         SCOTCH_Num *edgetabGra = new SCOTCH_Num[numEdges];
 
         int currentEdge = 0;
-        for (int k = 0; k < MPILayer().size(); ++k)
+        for (int i = 0; i < localCells; ++i)
         {
-            if (MPILayer().rank() == k)
+            verttabGra[i] = currentEdge;
+
+            for (int other : adjacency[start + i])
             {
-                for (int i = 0; i < localCells; ++i)
-                {
-                    verttabGra[i] = currentEdge;
-
-                    for (int other : adjacency[start + i])
-                    {
-                        std::stringstream ss;
-                        ss << MPILayer().rank() << ": edge from " << start + i << " to " << other;
-                        std::cout << ss.str() << std::endl;
-
-                        edgetabGra[currentEdge++] = other;
-                    }
-                }
+                edgetabGra[currentEdge++] = other;
             }
-
-            MPILayer().barrier();
         }
 
         numEdges = currentEdge;
@@ -120,23 +107,22 @@ private:
         std::cout << "local cells: " << localCells << std::endl;
         std::cout << "local edges: " << numEdges << std::endl;
 
-
         verttabGra[localCells] = currentEdge;
 
         int ierr = 0;
         error = SCOTCH_dgraphBuild(&graph,
-                0,          // c++ starts counting at 0
-                localCells,   // number of local vertices
-                localCells,   // number of maximum local vertices to be created
-                verttabGra, // vertex data
-                nullptr,    //
-                nullptr,
-                nullptr,
-                numEdges,
-                numEdges,
-                edgetabGra,
-                nullptr,
-                nullptr);
+                0,              // c++ starts counting at 0
+                localCells,     // number of local vertices
+                localCells,     // number of maximum local vertices to be created
+                verttabGra,     // vertex data
+                nullptr,        // these are some ghost zone
+                nullptr,        // and other hints that are optional, so -> nullptr
+                nullptr,        //
+                numEdges,       // number of local edges
+                numEdges,       // number of maximum local edges to be created
+                edgetabGra,     // edge data
+                nullptr,        // more optional data/hints
+                nullptr);       //
         if (error) std::cout << "SCOTCH_graphBuild error: " << error << ", ierr: " << ierr << std::endl;
 
         error = SCOTCH_dgraphCheck(&graph);
@@ -158,43 +144,63 @@ private:
     void createRegions(const std::vector<SCOTCH_Num> &indices)
     {
         std::cout << "building regions on " << MPILayer().rank() << std::endl;
+        std::stringstream ss;
+
+        std::vector<Region<1>> partialRegions(weights.size());
+
+        ss << "rank " << MPILayer().rank() << " indices: ";
         for (int i = 0; i < localCells; ++i)
         {
-            regions[indices[i]] << Coord<1>(start + i);
+            ss << "(" << indices[i] << "," << (start + i) << ") ";
+
+            partialRegions.at(indices[i]) << Coord<1>(start + i);
         }
 
-        for (unsigned int i = 0; i < regions.size(); ++i)
+        std::cout << ss.str() << std::endl;
+
+        // to all ranks
+        for (size_t j = 0; j < weights.size(); ++j)
         {
-            if (i == MPILayer().rank())
+            // send all regions
+            for (unsigned int i = 0; i < partialRegions.size(); ++i)
             {
-                for (unsigned int j = 0; j < regions.size(); ++j)
-                {
-                    // send all other regions to their respective owners (except to self)
-                    if (i != j)
-                    {
-                        MPILayer().sendRegion(regions[j], j);
-                    }
-                }
-            }
-            else
-            {
-                // receive all other regions
-                Region<1> add;
-                MPILayer().recvRegion(&add, i);
-                regions[MPILayer().rank()] += add;
+                MPILayer().sendRegion(partialRegions[i], j);
             }
         }
+
+        for (size_t j = 0; j < weights.size(); ++j)
+        {
+            // receive all regions
+            for (unsigned int i = 0; i < partialRegions.size(); ++i)
+            {
+                Region<1> add;
+                MPILayer().recvRegion(&add, j);
+                regions[i] += add;
+            }
+        }
+
+        std::cout << regions.at(MPILayer().rank()) << std::endl;
+        std::cout << std::flush;
+        MPILayer().barrier();
 
 #ifdef GRID_SIZE
-        if (MPILayer().rank() == 0)
+        for (unsigned int i = 0; i < MPILayer().size(); ++i)
         {
-            std::cout << "regions: " << std::endl;
-            for (auto &region : regions)
+            if (MPILayer().rank() == i)
             {
-                region.prettyPrint1D(std::cout, Coord<2>(GRID_SIZE, GRID_SIZE));
-                std::cout << std::endl;
-                std::cout << std::endl;
+                std::stringstream ss;
+
+                for (unsigned j = 0; j < regions.size(); ++j)
+                {
+                    ss << i << ": region #" << j << ": " << std::endl;
+                    regions[j].prettyPrint1D(ss, Coord<2>(GRID_SIZE, GRID_SIZE));
+                    ss << std::endl;
+                }
+
+                std::cout << ss.str() << std::endl;
             }
+
+            MPILayer().barrier();
         }
 #endif // GRID_SIZE
 
