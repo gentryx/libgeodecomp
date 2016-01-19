@@ -20,7 +20,9 @@ template<typename CELL_TYPE, int DIM>
 class BOVOutput
 {
 public:
+
     static void writeHeader(
+        // fixme: coding style
         std::string filenameBoV,
         std::string filenameData,
         int step,
@@ -60,7 +62,7 @@ public:
     }
 
     template<typename GRID_TYPE>
-    static void writeRegion(
+    static void writeGrid(
         std::string filename,
         const GRID_TYPE& grid,
         // fixme: drop this
@@ -95,6 +97,22 @@ public:
         }
 
         file.close();
+    }
+
+    static void writeRegion(
+        const std::string& prefix,
+        const std::string& variableName,
+        const Coord<DIM>& dim,
+        int value = 1,
+        int time = 0)
+    {
+        writeHeader(
+            prefix + ".bov",
+            prefix + ".data",
+            time,
+            dim,
+            dim,
+            Selector<float>(variableName));
     }
 };
 

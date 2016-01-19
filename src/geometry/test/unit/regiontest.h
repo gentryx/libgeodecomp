@@ -1,8 +1,10 @@
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/storage/grid.h>
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace boost::assign;
@@ -53,6 +55,15 @@ public:
         bigInsertOrdered = transform(s);
         bigInsertShuffled = bigInsertOrdered;
         std::random_shuffle(bigInsertShuffled.begin(), bigInsertShuffled.end());
+
+        files.clear();
+    }
+
+    void tearDown()
+    {
+        for (std::size_t i = 0; i < files.size(); ++i) {
+            boost::filesystem::remove(files[i]);
+        }
     }
 
     void testExpandWithAdjacency()
@@ -1997,15 +2008,44 @@ public:
         std::string actual = r.prettyPrint2d();
     }
 
-    void testPrintToBOV()
+    void testPrintToBOV3D()
     {
-        // fixme
+        std::string prefix = "region_3d";
+
+        files << prefix + ".bov"
+              << prefix + ".data";
+
+        Region<3> r;
+        r << Streak<3>(Coord<3>(10, 10, 10), 20)
+          << CoordBox<3>(Coord<3>(10, 20, 30), Coord<3>(20, 40, 60));
+        r.printToBOV(prefix, "region123");
+
+        std::stringstream expected;
+        expected << "TIME: " << 0 << "\n"
+                 << "DATA_FILE: " << prefix << ".data\n"
+                 << "DATA_SIZE: 30 60 90\n"
+                 << "DATA_FORMAT: FLOAT\n"
+                 << "VARIABLE: region123\n"
+                 << "DATA_ENDIAN: LITTLE\n"
+                 << "BRICK_ORIGIN: 0 0 0\n"
+                 << "BRICK_SIZE: 30 60 90\n"
+                 << "DIVIDE_BRICK: true\n"
+                 << "DATA_BRICKLETS: 30 60 90\n"
+                 << "DATA_COMPONENTS: 1\n";
+
+        // std::string actual = readHeader(prefix + ".bov");
+        // TS_ASSERT_EQUALS(actual, expected.str());
+
+        Coord<3> dim(30, 60, 90);
+        // Grid<float, Topologies::Cube<3>::Topology> grid = readGrid(prefix + ".data", dim);
+        // std::cout << "grid: " << grid.boundingBox() << "\n";
     }
 
 private:
     Region<2> c;
     CoordVector bigInsertOrdered;
     CoordVector bigInsertShuffled;
+    std::vector<std::string> files;
 
     CoordVector transform(const std::vector<std::string>& shape)
     {
@@ -2028,6 +2068,36 @@ private:
     Coord<2> benchDim() const
     {
         return Coord<2>(1000, 50);
+    }
+
+    Grid<float, Topologies::Cube<3>::Topology> readGrid(
+        const std::string& filename,
+        const Coord<3>& dimensions)
+    {
+        Grid<float, Topologies::Cube<3>::Topology> ret(dimensions);
+        std::ifstream file(filename.c_str());
+        TS_ASSERT(file);
+        file.read(reinterpret_cast<char*>(&ret[Coord<3>()]), dimensions.prod() * sizeof(double));
+
+        return ret;
+    }
+
+    std::string readHeader(std::string filename)
+    {
+        std::string ret;
+        std::ifstream file(filename.c_str());
+        TS_ASSERT(file);
+
+        while (true) {
+            char c;
+            file.get(c);
+            if (file.eof()) {
+                break;
+            }
+            ret += c;
+        }
+
+        return ret;
     }
 };
 
