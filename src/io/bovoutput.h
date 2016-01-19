@@ -22,9 +22,8 @@ class BOVOutput
 public:
 
     static void writeHeader(
-        // fixme: coding style
-        std::string filenameBoV,
-        std::string filenameData,
+        const std::string& filenameBoV,
+        const std::string& filenameData,
         int step,
         const Coord<DIM>& dimensions,
         const Coord<3>& brickletDim,
@@ -63,10 +62,8 @@ public:
 
     template<typename GRID_TYPE>
     static void writeGrid(
-        std::string filename,
+        const std::string& filename,
         const GRID_TYPE& grid,
-        // fixme: drop this
-        const Coord<3>& brickletDim,
         const Selector<CELL_TYPE>& selector)
     {
         std::ofstream file;
