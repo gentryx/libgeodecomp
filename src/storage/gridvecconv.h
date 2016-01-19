@@ -181,6 +181,29 @@ private:
         }
     }
 
+    template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE, typename BOOST_SERIALIZATION_TYPE>
+    static void gridToVector(
+        const UnstructuredSoAGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid,
+        std::vector<char> *vec,
+        const REGION_TYPE& region,
+        const APITraits::TrueType&,
+        const BOOST_SERIALIZATION_TYPE&)
+    {
+        std::size_t regionSize =
+            region.size() *
+            UnstructuredSoAGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>::AGGREGATED_MEMBER_SIZE;
+
+        if (vec->size() != regionSize) {
+            throw std::logic_error("region doesn't match raw vector's size");
+        }
+
+        if(vec->size() == 0) {
+            return;
+        }
+
+        grid.saveRegion(&(*vec)[0], region);
+    }
+
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE>
     static void gridToVector(
@@ -316,33 +339,27 @@ private:
         }
     }
 
-    template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE>
+    template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE, typename BOOST_SERIALIZATION_TYPE>
     static void vectorToGrid(
         const std::vector<char>& vec,
         UnstructuredSoAGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA> *grid,
         const REGION_TYPE& region,
-        const APITraits::FalseType&,
-        const APITraits::FalseType&)
+        const APITraits::TrueType&,
+        const BOOST_SERIALIZATION_TYPE&)
     {
-        if (vec.size() != region.size()) {
-            throw std::logic_error("vector doesn't match region's size");
+        std::size_t regionSize =
+            region.size() *
+            UnstructuredSoAGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>::AGGREGATED_MEMBER_SIZE;
+
+        if (vec.size() != regionSize) {
+            throw std::logic_error("raw vector doesn't match region's size");
         }
 
         if(vec.size() == 0) {
             return;
         }
 
-        const CELL_TYPE *source = &vec[0];
-
-        for (typename REGION_TYPE::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-            unsigned length = i->length();
-            const CELL_TYPE *end = source + length;
-            CELL_TYPE *dest = &((*grid)[i->origin]);
-            std::copy(source, end, dest);
-            source = end;
-        }
+        grid->loadRegion(&vec[0], region);
     }
 #endif
 };
