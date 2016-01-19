@@ -1026,7 +1026,11 @@ public:
         return buf.str();
     }
 
-    inline void printToBOV(const std::string& prefix, const std::string& variableName = "region", int value = 1, int time = 0) const
+    inline void printToBOV(
+        const std::string& prefix,
+        const std::string& variableName = "region",
+        float value = 1,
+        int time = 0) const
     {
         BOVOutput<float, DIM>::writeRegion(prefix, variableName, boundingBox(), begin(), end(), value, time);
     }
