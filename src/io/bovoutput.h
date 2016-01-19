@@ -22,7 +22,7 @@ class BOVOutput
 public:
 
     static void writeHeader(
-        const std::string& filenameBoV,
+        const std::string& filenameBOV,
         const std::string& filenameData,
         int step,
         const Coord<DIM>& dimensions,
@@ -30,7 +30,10 @@ public:
         const Selector<CELL_TYPE>& selector)
     {
         std::ofstream file;
-        file.open(filenameBoV.c_str());
+        file.open(filenameBOV.c_str());
+        if (!file) {
+            throw std::runtime_error("BOVOutput::writeHeader() could not open file " + filenameBOV)
+        }
 
         // BOV only accepts 3D data, so we'll have to inflate 1D
         // and 2D dimensions.
