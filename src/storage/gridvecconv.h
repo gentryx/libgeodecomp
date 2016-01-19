@@ -5,6 +5,7 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/archive/binary_oarchive.hpp>
@@ -290,6 +291,35 @@ private:
     static void vectorToGrid(
         const std::vector<CELL_TYPE>& vec,
         UnstructuredGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA> *grid,
+        const REGION_TYPE& region,
+        const APITraits::FalseType&,
+        const APITraits::FalseType&)
+    {
+        if (vec.size() != region.size()) {
+            throw std::logic_error("vector doesn't match region's size");
+        }
+
+        if(vec.size() == 0) {
+            return;
+        }
+
+        const CELL_TYPE *source = &vec[0];
+
+        for (typename REGION_TYPE::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+            unsigned length = i->length();
+            const CELL_TYPE *end = source + length;
+            CELL_TYPE *dest = &((*grid)[i->origin]);
+            std::copy(source, end, dest);
+            source = end;
+        }
+    }
+
+    template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE>
+    static void vectorToGrid(
+        const std::vector<char>& vec,
+        UnstructuredSoAGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA> *grid,
         const REGION_TYPE& region,
         const APITraits::FalseType&,
         const APITraits::FalseType&)

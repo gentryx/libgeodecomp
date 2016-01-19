@@ -93,7 +93,7 @@ public:
         for (std::size_t i = 0; i < innerSetPatchProviders.size(); ++i) {
             addPatchProvider(innerSetPatchProviders[i], ParentType::INNER_SET);
         }
-}
+    }
 
     inline virtual void update(std::size_t nanoSteps)
     {

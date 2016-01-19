@@ -117,7 +117,8 @@ public:
     explicit UnstructuredSoAGrid(
         const Coord<DIM>& dim = Coord<DIM>(),
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
-        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
+        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
+        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
         elements(dim.x(), 1, 1),
         edgeElement(edgeElement),
         dimension(dim)
@@ -142,7 +143,8 @@ public:
     explicit
     UnstructuredSoAGrid(const CoordBox<DIM> box,
                         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
-                        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
+                        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
+                        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
         elements(box.dimensions.x(), 1, 1),
         edgeElement(edgeElement),
         dimension(box.dimensions)
