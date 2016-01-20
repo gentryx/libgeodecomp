@@ -3,15 +3,9 @@
 
 namespace {
 
-/**
- * Internal helper class
- */
 template<typename COMPONENT>
 class hpx_plugin_exporter_factory;
 
-/**
- * Internal helper class
- */
 template<typename COMPONENT>
 class init_registry_factory_static;
 

@@ -45,6 +45,7 @@ public:
 };
 
 // fixme: inspect resulting PTX of this implementation and benchmark the code
+
 template<typename CELL_TYPE, typename TOPOLOGY, int DIM>
 class SimpleHood;
 

@@ -12,9 +12,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * Forward declaration.
- */
 template<typename CELL_TYPE>
 class DistributedSimulator;
 

@@ -24,9 +24,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * just a forward-declaration
- */
 template<typename CELL, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
 class SoAGrid;
 

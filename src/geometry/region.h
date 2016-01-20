@@ -11,15 +11,9 @@
 
 namespace LibGeoDecomp {
 
-/**
- * Forward declaration.
- */
 template<typename CELL_TYPE, int DIM>
 class BOVOutput;
 
-/**
- * Unit test class
- */
 class RegionTest;
 
 namespace RegionHelpers {
@@ -432,21 +426,12 @@ public:
     }
 };
 
-/**
- * internal helper class
- */
 template<int DIM>
 class RegionLookupHelper;
 
-/**
- * internal helper class
- */
 template<int DIM>
 class RegionInsertHelper;
 
-/**
- * internal helper class
- */
 template<int DIM>
 class RegionRemoveHelper;
 

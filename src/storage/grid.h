@@ -20,9 +20,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * Forward declaration, both classes depend on each other
- */
 template<typename CELL_TYPE, typename GRID_TYPE>
 class CoordMap;
 
@@ -70,6 +67,7 @@ public:
 
 /**
  * see above
+ * fixme: replace this by coordbox streak iteration
  */
 template<>
 class FillCoordBox<3>

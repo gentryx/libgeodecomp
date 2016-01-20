@@ -22,9 +22,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * Forward-declaration to resolve cyclic dependency
- */
 class APITraits;
 
 namespace SelectorHelpers {

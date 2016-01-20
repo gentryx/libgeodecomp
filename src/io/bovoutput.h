@@ -9,9 +9,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * Forward declaration
- */
 template<int DIM>
 class Region;
 

@@ -121,15 +121,9 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_MPI
 
-/**
- * see below
- */
 template<typename MEMBER, int FLAG>
 class GetMPIDatatype0;
 
-/**
- * see below
- */
 template<typename MEMBER, int FLAG>
 class GetMPIDatatype1;
 

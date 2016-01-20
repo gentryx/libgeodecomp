@@ -40,9 +40,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * Forward declaration
- */
 class QtWidgetWriterTest;
 
 namespace QtWidgetWriterHelpers {

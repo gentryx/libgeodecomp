@@ -12,9 +12,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * Forward declaration
- */
 class PPMWriterTest;
 
 namespace SimpleCellPlotterHelpers {
