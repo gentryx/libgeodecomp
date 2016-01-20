@@ -60,14 +60,14 @@ public:
 class SimFabTestInitializer : public SimpleInitializer<SimFabTestCell>
 {
 public:
-    SimFabTestInitializer(Coord<3> gridDimensions = Coord<3>(100,100,100), unsigned timeSteps = 100) :
-        SimpleInitializer<SimFabTestCell>(gridDimensions, timeSteps)
+    SimFabTestInitializer(Coord<3> gridDimensions = Coord<3>(100,100,100),
+            unsigned timeSteps = 100)
+        : SimpleInitializer<SimFabTestCell>(gridDimensions, timeSteps)
     {}
 
     virtual void grid(GridBase<SimFabTestCell, 3> *target)
     {
         int counter = 0;
-
         CoordBox<3> box = target->boundingBox();
         for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
             target->set(*i, SimFabTestCell(++counter));
@@ -101,13 +101,36 @@ public:
             << ats.getFitness(*iter)<< std::endl
             << ats.getSimulationParameters(*iter))
     }
-	void testNormalizeSteps()
-	{
-		LOG(Logger::INFO, "testNormalizeSteps()")
+    void testNormalizeSteps()
+    {
+        const double goal = -0.4d;
+        LOG(Logger::INFO, "testNormalizeSteps()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
-		unsigned steps = ats.normalizeSteps(-0.4,19);
-	}
+
+        unsigned steps = ats.normalizeSteps(goal);
+        unsigned originalSteps = steps;
+        LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << ") is: " << steps)
+
+        AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats2(
+            new SimFabTestInitializer(dim, maxSteps));
+
+        unsigned startValue = steps / 2;
+        if (startValue < 2){
+            startValue =2;
+        }
+        steps = ats2.normalizeSteps(goal,startValue);
+        LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << " ,"
+                    << startValue << ") is: " << steps)
+        // TODO MAYBE the following ASSERTs in this test are to strong or
+        // depends to much on the System, where the test is running
+        TS_ASSERT( steps <= originalSteps + 5 && steps >= originalSteps - 5 );
+        startValue = steps + (steps / 2);
+        steps = ats2.normalizeSteps(goal,startValue);
+        LOG(Logger:DBG, "Result of nomalizeSteps(" << goal << " ,"
+                    << startValue << ") is: " << steps)
+        TS_ASSERT( steps <= originalSteps + 5 && steps >= originalSteps - 5);
+    }
 
     void testBasicSimplexOptimized()
     {

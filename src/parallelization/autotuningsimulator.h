@@ -194,12 +194,13 @@ public:
         LOG(Logger::INFO, "normalizeSteps")
         if (! isInMap("SerialSimulation")){
             // FIXME Maybe an exzeption can be the heavy way!
-            LOG(Logger::WARN,
-                "AutoTuningSimulator::normalizeSteps(): no SerialSimulation available!")
+            LOG(Logger::WARN, "AutoTuningSimulator::normalizeSteps(): no "
+                        << "SerialSimulation available!")
             return 0;
         }
         if (start == 0) {
-            LOG(Logger::WARN, "normalizeSteps is called with start = 0, this set start to default!")
+            LOG(Logger::WARN, "normalizeSteps is called with start = 0, "
+                        << "this set start to default!")
             start = 5;
         }
         //TODO Ist es notwendig hier die Writer und steer schon hinzuzufügen?
