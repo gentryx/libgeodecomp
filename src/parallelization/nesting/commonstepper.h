@@ -8,12 +8,13 @@ namespace LibGeoDecomp {
 
 namespace CommonStepperHelpers {
 
+// fixme: merge this with common stepper?
 class AdjacencySetter
 {
 public:
 #ifdef LIBGEODECOMP_WITH_CPP14
     template<typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
-    AdjacencySetter(UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA> &grid, const Adjacency &adjacency)
+    AdjacencySetter(UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid, const Adjacency& adjacency)
     {
         std::map<Coord<2>, double> containerAdjacency;
 
@@ -33,12 +34,18 @@ public:
 #endif
 
     template<typename CONTAINER>
-    AdjacencySetter(CONTAINER &, const Adjacency &) { }
+    AdjacencySetter(CONTAINER &, const Adjacency &)
+    { }
 
 };
 
 }
 
+/**
+ * This class bundles functionality which is commonly required within
+ * Stepper implementations, but not necessarily part of a Stepper's
+ * public interface.
+ */
 template<typename CELL_TYPE>
 class CommonStepper : public Stepper<CELL_TYPE>
 {

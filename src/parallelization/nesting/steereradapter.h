@@ -6,6 +6,12 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Ths adapter is used to interface a Steerer with a Stepper. To the
+ * Stepper this class appears like a PatchProvider. This allows us to
+ * do computational steering with hierarchical Simulators (e.g.
+ * HPXSimulator and HiParSimulator).
+ */
 template<typename GRID_TYPE, typename CELL_TYPE>
 class SteererAdapter : public PatchProvider<GRID_TYPE>
 {

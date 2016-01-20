@@ -13,6 +13,15 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * The purpose of the UpdateGroup is to set up the basic building
+ * blocks for a Simulator which implements LibGeoDecomp's hierarchical
+ * parallelization for tightly coupled simulations. To be more
+ * specific: this class sets up the PartitionManager (which decides
+ * the domain decompotition) and, based on that, the PatchLinks (for
+ * ghost zone communication) and the Stepper (which handles the actual
+ * updates of the local subdomain).
+ */
 template<typename CELL_TYPE, template<typename GRID_TYPE> class PATCH_LINK>
 class UpdateGroup
 {

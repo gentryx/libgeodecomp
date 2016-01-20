@@ -12,6 +12,10 @@ namespace LibGeoDecomp {
 
 class HiParSimulatorTest;
 
+/**
+ * This is an implementation of the UpdateGroup for MPI-based
+ * hiearchical Simulators, e.g. the HiParSimulator.
+ */
 template<class CELL_TYPE>
 class MPIUpdateGroup : public UpdateGroup<CELL_TYPE, PatchLink>
 {

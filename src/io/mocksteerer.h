@@ -131,6 +131,10 @@ private:
 
 }
 
+/**
+ * Like MockWriter, this class records all calls to its Writer
+ * interface. Useful when testing new Simulators.
+ */
 template<typename CELL_TYPE=TestCell<2> >
 class MockSteerer : public Steerer<CELL_TYPE>
 {
