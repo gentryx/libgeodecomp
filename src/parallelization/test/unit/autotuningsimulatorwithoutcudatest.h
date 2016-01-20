@@ -127,7 +127,7 @@ public:
         TS_ASSERT( steps <= originalSteps + 5 && steps >= originalSteps - 5 );
         startValue = steps + (steps / 2);
         steps = ats2.normalizeSteps(goal,startValue);
-        LOG(Logger:DBG, "Result of nomalizeSteps(" << goal << " ,"
+        LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << " ,"
                     << startValue << ") is: " << steps)
         TS_ASSERT( steps <= originalSteps + 5 && steps >= originalSteps - 5);
     }
