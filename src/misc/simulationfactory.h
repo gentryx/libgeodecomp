@@ -96,6 +96,12 @@ protected:
     std::vector<boost::shared_ptr<Steerer<CELL> > > steerers;
 };
 
+/**
+ * This helper class will manufacture SerialSimulators, used by our
+ * auto-tuning infrastructure.
+ *
+ * fixme: move factories to dedicated files
+ */
 template<typename CELL>
 class SerialSimulationFactory : public SimulationFactory<CELL>
 {

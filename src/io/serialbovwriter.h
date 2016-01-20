@@ -79,8 +79,6 @@ private:
     }
 };
 
-class Serialization;
-
 }
 
 #endif

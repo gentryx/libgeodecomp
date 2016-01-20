@@ -2,18 +2,6 @@
 #define LIBGEODECOMP_IO_SILOWRITER_H
 
 #include <libgeodecomp/config.h>
-
-namespace LibGeoDecomp {
-
-/**
- * forward declaration required to let class Serialization function
- * properly even if building without Silo.
- */
-template<typename CELL>
-class SiloWriter;
-
-}
-
 #ifdef LIBGEODECOMP_WITH_SILO
 
 #include <libgeodecomp/io/logger.h>
@@ -24,16 +12,6 @@ class SiloWriter;
 
 #include <silo.h>
 #include <typeinfo>
-
-namespace boost {
-
-namespace serialization {
-
-class access;
-
-}
-
-}
 
 namespace LibGeoDecomp {
 
@@ -199,9 +177,6 @@ template<typename CELL>
 class SiloWriter : public Clonable<Writer<CELL>, SiloWriter<CELL> >
 {
 public:
-    friend class Serialization;
-    friend class boost::serialization::access;
-
     template<typename SILO_WRITER, typename COLLECTION_INTERFACE>
     friend class SiloWriterHelpers::SelectorContainerImplementation;
 

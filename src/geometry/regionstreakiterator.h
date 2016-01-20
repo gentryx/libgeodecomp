@@ -9,6 +9,10 @@ namespace LibGeoDecomp {
 
 namespace RegionStreakIteratorHelpers {
 
+/**
+ * Recursively compares two iterators' components; useful for deciding
+ * which iterator preceeds the other.
+ */
 template<int DIM>
 class Compare
 {
@@ -28,6 +32,9 @@ public:
     }
 };
 
+/**
+ * See above.
+ */
 template<>
 class Compare<0>
 {
@@ -45,6 +52,13 @@ public:
 
 }
 
+/**
+ * Iterates Streak-wise through a Region. This is often preferable to
+ * a Coordinate-wise iteration as this (combined with an additional
+ * inner loop for iteration through the Streak) reduces the effective
+ * overhead. It also preserves the original runlenght coding within
+ * the Region.
+ */
 template<int DIM, typename REGION>
 class RegionStreakIterator : public std::iterator<std::forward_iterator_tag, const Streak<DIM> >
 {

@@ -7,6 +7,13 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Decomposes an unstructured grid by simply grouping coordinates by
+ * their numerical ID. This naive strategy will be inefficient for
+ * almost all grids, but is useful for some debugging purpoeses. Users
+ * are advised to use partitions based on actual graph partitioners,
+ * e.g. the PTScotchUnstructuredPartition.
+ */
 class UnstructuredStripingPartition : public Partition<1>
 {
 public:
@@ -14,10 +21,10 @@ public:
     using Partition<1>::weights;
 
     UnstructuredStripingPartition(
-            const Coord<1> origin,
-            const Coord<1> /* unused: dimensions */,
-            const long offset,
-            const std::vector<std::size_t>& weights) :
+        const Coord<1> origin,
+        const Coord<1> /* unused: dimensions */,
+        const long offset,
+        const std::vector<std::size_t>& weights) :
         Partition<1>(origin.x() + offset, weights)
     {}
 

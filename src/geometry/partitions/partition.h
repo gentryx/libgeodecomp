@@ -6,6 +6,12 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * The base class for all domain decomposition schemes. By having all
+ * these schemes implement a common interface, we can easily swap
+ * those out and test multiple so each application can use that scheme
+ * which matches the requirements of hardware, model and data best.
+ */
 template<int DIM>
 class Partition
 {

@@ -15,6 +15,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Another space-filling curve, this one is based on a zip-zag pattern
+ * (hence the name) and produces almost rectangular, albeit not
+ * necessarily connected, subdomains.
+ */
 template<int DIMENSIONS>
 class ZCurvePartition : public SpaceFillingCurve<DIMENSIONS>
 {

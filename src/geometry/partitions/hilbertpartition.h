@@ -12,6 +12,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * An implementation of Hilbert's space-filling curve (SFC). It's
+ * limited to 2D and we suggest the use of the ZCurvePartition anyway
+ * as it typically yields better results.
+ */
 class HilbertPartition : public SpaceFillingCurve<2>
 {
     friend class HilbertPartitionTest;

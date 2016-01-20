@@ -9,8 +9,12 @@
 
 namespace LibGeoDecomp {
 
-class VanillaStepperTest;
-
+/**
+ * The PartitionManager maintains the Regions which describe a node's
+ * subdomain (as defined by a Partition) and the inner and outer ghost
+ * regions (halos) which are used for synchronization with neighboring
+ * subdomains.
+ */
 template<typename TOPOLOGY>
 class PartitionManager
 {

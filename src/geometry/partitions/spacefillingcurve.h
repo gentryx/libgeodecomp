@@ -9,6 +9,11 @@ namespace LibGeoDecomp {
 
 enum SpaceFillingCurveSublevelState {TRIVIAL, CACHED};
 
+/**
+ * This base class for space-filling curves (SFCs) in LibGeoDecomp
+ * aggregates some common functionality to reduce code duplication.
+ * It's not useful by itself, only by the classes inheriting from it.
+ */
 template<int DIM>
 class SpaceFillingCurve : public Partition<DIM>
 {

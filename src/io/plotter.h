@@ -17,6 +17,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This class renders a 2D grid of cells by stitching together the 2D
+ * tiles generated per cell by the CELL_PLOTTER. Useful for generating
+ * output images in a Writer, e.g. PPMWriter.
+ */
 template<typename CELL, class CELL_PLOTTER = SimpleCellPlotter<CELL> >
 class Plotter
 {

@@ -9,6 +9,12 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Implements a domain decomposition scheme based on block stripes,
+ * hence the name. Spatial coordinates are simple ordered linearly via
+ * their components. Technically this is a non-continuous space
+ * filling curve.
+ */
 template<int DIMENSIONS>
 class StripingPartition : public SpaceFillingCurve<DIMENSIONS>
 {

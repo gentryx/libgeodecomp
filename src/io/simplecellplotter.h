@@ -12,25 +12,23 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward declaration
+ */
 class PPMWriterTest;
-class HPXSerialization;
 
 namespace SimpleCellPlotterHelpers {
 
+/**
+ * Converts a cell to color, based on a user-supplied palette and
+ * user-selected data field of the cell. Useful of a Writer should
+ * generate images colored by a certain aspect (e.g. temperature) of
+ * the simulation model.
+ */
 template<typename CELL, typename MEMBER, typename PALETTE>
 class CellToColor : public Filter<CELL, MEMBER, Color>
 {
 public:
-#ifdef LIBGEODECOMP_WITH_HPX
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(CellToColor);
-#endif
-
-    friend class PolymorphicSerialization;
-    friend class BoostSerialization;
-    friend class HPXSerialization;
-    friend class LibGeoDecomp::HPXSerialization;
-    friend class LibGeoDecomp::PPMWriterTest;
-
     explicit
     CellToColor(const PALETTE& palette = PALETTE()) :
         palette(palette)
@@ -100,8 +98,6 @@ template<typename CELL_TYPE>
 class SimpleCellPlotter
 {
 public:
-    friend class BoostSerialization;
-    friend class HPXSerialization;
     friend class PPMWriterTest;
 
     template<typename MEMBER, typename PALETTE>

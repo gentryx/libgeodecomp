@@ -8,6 +8,10 @@ namespace LibGeoDecomp {
 
 namespace MockSteererHelpers {
 
+/**
+ * Internal helper class which records a single invocation of the
+ * MockWriter's interface.
+ */
 class MockSteererEvent
 {
 public:
@@ -62,6 +66,10 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_HPX
 
+/**
+ * Records events received by the MockWriter for later inspection.
+ * Obviously strives to be thread-safe, at least while recording.
+ */
 class ThreadSafeEventsStore
 {
 public:

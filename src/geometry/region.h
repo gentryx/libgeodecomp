@@ -11,6 +11,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward declaration.
+ */
 template<typename CELL_TYPE, int DIM>
 class BOVOutput;
 

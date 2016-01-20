@@ -19,6 +19,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * see below
+ */
 template<typename VALUETYPE, int C, int SIGMA>
 class SellCSigmaSparseMatrixContainer;
 
