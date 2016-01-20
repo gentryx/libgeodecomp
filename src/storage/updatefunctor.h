@@ -241,7 +241,7 @@ public:
         // SelectUpdateLineX
         ANY_API,
         // SelectTopology
-        TopologiesHelpers::UnstructuredTopology,
+        Topologies::Unstructured::Topology,
         // SelectThreadedUpdate,
         ANY_THREADED_UPDATE modelThreadingSpec)
     {
