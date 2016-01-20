@@ -14,10 +14,6 @@
 #include <libgeodecomp/communication/typemaps.h>
 #endif
 
-#ifndef LIBGEODECOMP_WITH_HPX
-#define HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(FOO)
-#endif
-
 namespace LibGeoDecomp {
 
 namespace FilterHelpers {
@@ -207,9 +203,6 @@ template<typename CELL, typename MEMBER, typename EXTERNAL>
 class Filter : public FilterBase<CELL>
 {
 public:
-    friend class PolymorphicSerialization;
-    friend class BoostSerialization;
-    friend class HPXSerialization;
     friend class PPMWriterTest;
 
     std::size_t sizeOf() const

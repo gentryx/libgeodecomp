@@ -6,7 +6,6 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
@@ -25,13 +24,6 @@ class TracingWriter :
         public Clonable<ParallelWriter<CELL_TYPE>, TracingWriter<CELL_TYPE> >
 {
 public:
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(TracingWriter)
-
-#ifdef LIBGEODECOMP_WITH_HPX
-    template<typename ARCHIVE, typename CELL_TYPE2>
-    friend void hpx::serialization::serialize(ARCHIVE&, TracingWriter<CELL_TYPE2>&, const unsigned);
-#endif
-
     using Writer<CELL_TYPE>::NANO_STEPS;
 
     typedef boost::posix_time::ptime Time;
@@ -148,31 +140,5 @@ private:
 };
 
 }
-
-#ifdef LIBGEODECOMP_WITH_HPX
-namespace hpx {
-namespace serialization {
-
-template<typename ARCHIVE, typename CELL_TYPE>
-inline
-static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned /*version*/)
-{
-    archive & hpx::serialization::base_object<LibGeoDecomp::Clonable<LibGeoDecomp::ParallelWriter<CELL_TYPE >, LibGeoDecomp::TracingWriter<CELL_TYPE > > >(object);
-    archive & hpx::serialization::base_object<LibGeoDecomp::Clonable<LibGeoDecomp::Writer<CELL_TYPE >, LibGeoDecomp::TracingWriter<CELL_TYPE > > >(object);
-    archive & object.lastStep;
-    archive & object.maxSteps;
-    archive & object.outputRank;
-    std::string str = to_iso_string(object.startTime);
-    archive & str;
-    object.startTime = boost::posix_time::from_iso_string(str);
-}
-
-}
-}
-
-HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::TracingWriter<CELL_TYPE>));
-HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::TracingWriter<CELL_TYPE>));
-#endif
-
 
 #endif

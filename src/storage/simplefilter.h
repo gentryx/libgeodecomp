@@ -14,9 +14,6 @@ template<typename CELL, typename MEMBER, typename EXTERNAL>
 class SimpleFilter : public Filter<CELL, MEMBER, EXTERNAL>
 {
 public:
-    friend class BoostSerialization;
-    friend class HPXSerialization;
-
     virtual void load(
         const EXTERNAL& source,
         MEMBER *target) = 0;

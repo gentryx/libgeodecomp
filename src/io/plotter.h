@@ -26,28 +26,11 @@ template<typename CELL, class CELL_PLOTTER = SimpleCellPlotter<CELL> >
 class Plotter
 {
 public:
-#ifdef LIBGEODECOMP_WITH_HPX
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(Plotter);
-
-    template<typename ARCHIVE, typename TARGET>
-    static Plotter *create(ARCHIVE& archive, TARGET */*unused*/)
-    {
-        Plotter *ret = new Plotter(
-            Coord<2>(1, 1),
-            CELL_PLOTTER(
-                static_cast<int CELL:: *>(0),
-                QuickPalette<int>(0, 0)));
-        archive & *ret;
-        return ret;
-    }
-#endif
-
-    friend class PolymorphicSerialization;
-    friend class HPXSerialization;
     friend class PPMWriterTest;
 
-    Plotter(const Coord<2>& cellDim,
-            const CELL_PLOTTER& cellPlotter) :
+    Plotter(
+        const Coord<2>& cellDim,
+        const CELL_PLOTTER& cellPlotter) :
 	cellDim(cellDim),
         cellPlotter(cellPlotter)
     {}
@@ -101,11 +84,9 @@ public:
         return cellDim;
     }
 
-    Coord<2> calcImageDim(const Coord<2> gridDim)
+    Coord<2> calcImageDim(const Coord<2>& gridDim)
     {
-        return Coord<2>(
-            cellDim.x() * gridDim.x(),
-            cellDim.y() * gridDim.y());
+        return cellDim.scale(gridDim);
     }
 
 private:
@@ -114,12 +95,5 @@ private:
 };
 
 }
-
-#ifdef LIBGEODECOMP_WITH_HPX
-HPX_SERIALIZATION_WITH_CUSTOM_CONSTRUCTOR_TEMPLATE(
-    (template<typename CELL, typename CELL_PLOTTER>),
-    (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>),
-    (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>::create))
-#endif
 
 #endif
