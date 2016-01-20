@@ -74,8 +74,7 @@ public:
 
             region << Coord<1>(1);
 
-            Adjacency adjacency =
-            {
+            Adjacency adjacency = {
                 std::make_pair(1, std::vector<int>{2, 3}),
                 std::make_pair(2, std::vector<int>{4, 5, 6}),
             };
@@ -2094,9 +2093,7 @@ private:
         std::ifstream file(filename.c_str());
         TS_ASSERT(file);
 
-        // fixme
-        // file.read(reinterpret_cast<char*>(&ret[boundingBox.origin]), boundingBox.dimensions.prod() * sizeof(float));
-
+        file.read(reinterpret_cast<char*>(&ret[boundingBox.origin]), boundingBox.dimensions.prod() * sizeof(float));
         return ret;
     }
 

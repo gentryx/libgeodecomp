@@ -104,7 +104,7 @@ public:
         const CoordBox<DIM>& boundingBox,
         const ITER1& start,
         const ITER2& end,
-        int value = 1,
+        float value = 1.0,
         int time = 0)
     {
         std::string filenameBOV = prefix + ".bov";
@@ -130,7 +130,8 @@ public:
                 num = value;
                 ++regionIter;
             }
-            file << num;
+
+            file.write(reinterpret_cast<char*>(&num), sizeof(float));
         }
     }
 };
