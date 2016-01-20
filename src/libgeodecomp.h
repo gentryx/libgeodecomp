@@ -32,6 +32,7 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
+#include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/color.h>

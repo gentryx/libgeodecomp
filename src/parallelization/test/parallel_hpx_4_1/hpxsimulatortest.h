@@ -8,6 +8,7 @@
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/teststeerer.h>
+#include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
