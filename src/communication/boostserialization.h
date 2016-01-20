@@ -27,8 +27,6 @@
 #include <libgeodecomp/misc/quickpalette.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/storage/simplearrayfilter.h>
-#include <libgeodecomp/io/simplecellplotter.h>
-#include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/storage/simplefilter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/steerer.h>
@@ -221,21 +219,6 @@ public:
         archive & boost::serialization::base_object<LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY > >(object);
     }
 
-    template<typename ARCHIVE, typename CELL_TYPE>
-    inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotter<CELL_TYPE>& object, const unsigned /*version*/)
-    {
-        archive & object.cellToColorSelector;
-    }
-
-    template<typename ARCHIVE, typename CELL, typename MEMBER, typename PALETTE>
-    inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotterHelpers::CellToColor<CELL, MEMBER, PALETTE>& object, const unsigned /*version*/)
-    {
-        archive & boost::serialization::base_object<LibGeoDecomp::Filter<CELL, MEMBER, Color > >(object);
-        archive & object.palette;
-    }
-
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned /*version*/)
@@ -424,18 +407,6 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsign
 
 template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
 void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
-{
-    BoostSerialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotter<CELL_TYPE>& object, const unsigned version)
-{
-    BoostSerialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL, typename MEMBER, typename PALETTE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotterHelpers::CellToColor<CELL, MEMBER, PALETTE>& object, const unsigned version)
 {
     BoostSerialization::serialize(archive, object, version);
 }
