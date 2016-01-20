@@ -10,6 +10,109 @@
 
 namespace LibGeoDecomp {
 
+namespace FilterBaseHelpers {
+
+/**
+ * We're intentionally giving only few specializations for this helper
+ * as it's mostly meant to be used with VisIt's BOV format, and this
+ * is only defined on three types.
+ */
+template<typename MEMBER>
+class GetTypeName
+{
+public:
+    std::string operator()() const
+    {
+        throw std::invalid_argument("no string representation known for member type");
+    }
+};
+
+/**
+ * see above
+ */
+template<>
+class GetTypeName<bool>
+{
+public:
+    std::string operator()() const
+    {
+        return "BYTE";
+    }
+};
+
+/**
+ * see above
+ */
+template<>
+class GetTypeName<char>
+{
+public:
+    std::string operator()() const
+    {
+        return "BYTE";
+    }
+};
+
+/**
+ * see above
+ */
+template<>
+class GetTypeName<float>
+{
+public:
+    std::string operator()() const
+    {
+        return "FLOAT";
+    }
+};
+
+/**
+ * see above
+ */
+template<>
+class GetTypeName<double>
+{
+public:
+    std::string operator()() const
+    {
+        return "DOUBLE";
+    }
+};
+
+/**
+ * see above
+ */
+template<>
+class GetTypeName<int>
+{
+public:
+    std::string operator()() const
+    {
+        return "INT";
+    }
+};
+
+/**
+ * see above
+ */
+template<>
+class GetTypeName<long>
+{
+public:
+    std::string operator()() const
+    {
+        return "LONG";
+    }
+};
+
+}
+
+template<typename CELL>
+std::string filterBasePrimitiveTypeName()
+{
+    return FilterBaseHelpers::GetTypeName<CELL>()();
+}
+
 /**
  * Base class for adding user-defined data filters to a Selector.
  * This can be used to do on-the-fly data extraction, scale

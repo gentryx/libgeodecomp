@@ -38,7 +38,7 @@ public:
 
     virtual std::string typeName() const
     {
-        return FilterHelpers::GetTypeName<EXTERNAL>()();
+        return filterBasePrimitiveTypeName<EXTERNAL>();
     }
 
     virtual int arity() const

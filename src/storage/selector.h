@@ -95,8 +95,7 @@ public:
 
     std::string typeName() const
     {
-        // fixme: using filterhelpers from here is ugly
-        return FilterHelpers::GetTypeName<CELL>()();
+        return filterBasePrimitiveTypeName<CELL>();
     }
 
     const std::string name() const
