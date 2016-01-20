@@ -9,6 +9,8 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
+#include <hpx/runtime/serialization/array.hpp>
+#include <hpx/runtime/serialization/serialize.hpp>
 #endif
 
 // For Intel MPI we need to source mpi.h before stdio.h:
