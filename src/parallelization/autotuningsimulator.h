@@ -186,7 +186,14 @@ public:
 
     void run()
     {
-       runTest();
+       if(normalizeSteps(-0.1)){
+           runTest();
+       }
+       runBestToCompletion();
+    }
+
+    void runBestToCompletion()
+    {
     }
 
     unsigned normalizeSteps(double goal, unsigned start = 5)
