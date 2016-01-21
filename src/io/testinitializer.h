@@ -20,8 +20,8 @@ public:
 
     explicit TestInitializer(
         const Coord<DIM>& dim = defaultDimensions(Coord<DIM>()),
-        const unsigned& maxSteps = defaultTimeSteps(Coord<DIM>()),
-        const unsigned& startStep = 0) :
+        const unsigned maxSteps = defaultTimeSteps(Coord<DIM>()),
+        const unsigned startStep = 0) :
         dimensions(dim),
         maximumSteps(maxSteps),
         step1(startStep)
@@ -55,11 +55,6 @@ public:
     unsigned startStep() const
     {
         return step1;
-    }
-
-    std::string dump()
-    {
-        return "foo";
     }
 
 private:
