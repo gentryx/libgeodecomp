@@ -16,6 +16,12 @@ public:
         public APITraits::HasNanoSteps<13>
     {};
 
+    inline explicit UnstructuredTestCell(int id = -1, int cycle = -1, bool isValid = false) :
+        id(id),
+        cycle(cycle),
+        isValid(isValid)
+    {}
+
     template<typename HOOD>
     void update(const HOOD& hood, int nanoStep)
     {
@@ -50,12 +56,12 @@ public:
         ++cycle;
     }
 
-private:
     int id;
     int cycle;
     bool isValid;
     std::map<int, double> expectedNeighborWeights;
 
+private:
     template<typename CELL>
     void checkNeighbor(const int otherID, const CELL& otherCell)
     {
