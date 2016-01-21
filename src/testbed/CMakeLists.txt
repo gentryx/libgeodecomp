@@ -1,5 +1,6 @@
 lgd_generate_sourcelists("./")
 
+add_subdirectory(hpxperformancetests)
 add_subdirectory(jacobituning)
 add_subdirectory(parallelperformancetests)
 add_subdirectory(performancetests)
