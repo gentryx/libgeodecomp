@@ -555,20 +555,6 @@ public:
 
     }
 
-    template<class ARCHIVE, typename CELL_TYPE>
-    void serialize(ARCHIVE& archive, const unsigned version)
-    {
-        archive
-            & hpx::serialization::base_object<SimpleInitializer<ContainerCellType> >(*this)
-            & meshDir
-            & maxDiameter
-            & minCoord
-            & maxCoord
-            & quadrantOrigin
-            & quadrantDim;
-    }
-
-
 private:
     std::string meshDir;
     double maxDiameter;
@@ -941,7 +927,7 @@ typedef HpxSimulator<ContainerCellType, RecursiveBisectionPartition<2> > Simulat
 
 void runSimulation()
 {
-    // Hardcoded link to the directory
+    // fixme: hardcoded link to the directory
     std::string prunedDirname("/home/gentryx/repositories/adcirclgd/meshes/hurricane_isabel_test_case_v50_99_10/");
 
     // Hardcoded number of simulation steps
