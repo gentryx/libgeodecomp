@@ -261,8 +261,11 @@ private:
     {
         fillRegion(myRank);
         Region<DIM> surface(
-            ownRegion().expandWithTopology(1, simulationArea.dimensions, Topology(), adjacency()) -
-            ownRegion());
+            ownRegion().expandWithTopology(
+                1,
+                simulationArea.dimensions,
+                Topology(),
+                adjacency()) - ownRegion());
         Region<DIM> kernel(
             ownRegion() -
             surface.expandWithTopology(
