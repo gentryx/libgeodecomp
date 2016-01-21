@@ -94,6 +94,7 @@ public:
         return matrices[matrixID];
     }
 
+    inline
     SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>&
     getAdjacency(std::size_t const matrixID)
     {

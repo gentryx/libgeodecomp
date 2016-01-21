@@ -38,6 +38,15 @@ public:
             }
             TS_ASSERT_EQUALS(expected, cell.expectedNeighborWeights);
         }
+
+        auto weights = grid.getAdjacency(0);
+        for (int i = 0; i < 100; ++i) {
+            auto sparseRow = weights.getRow(i);
+
+            // fixme:
+            // TS_ASSERT_EQUALS(sparseRow.size(), i + 1);
+            // fixme: check weights
+        }
     }
 };
 
