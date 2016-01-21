@@ -2,17 +2,6 @@
 #include <hpx/hpx_init.hpp>
 #include <libgeodecomp.h>
 
-// fixme
-// #include <iostream>
-// #include <fstream>
-// #include <stdexcept>
-// #include <vector>
-// #include <string>
-// #include <iomanip>
-// #include <sstream>
-// #include <math.h>
-// #include <boost/assign/std/vector.hpp>
-
 #include <libgeodecomp/examples/gameoflife_adcirc/hull.h>
 
 using namespace boost::assign;
