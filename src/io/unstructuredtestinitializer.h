@@ -14,6 +14,8 @@ template<class TEST_CELL = UnstructuredTestCell<> >
 class UnstructuredTestInitializer : public Initializer<TEST_CELL>
 {
 public:
+    using Initializer<TEST_CELL>::NANO_STEPS;
+
     UnstructuredTestInitializer(
         int dim,
         unsigned maxSteps,
@@ -25,24 +27,37 @@ public:
 
     virtual void grid(GridBase<TEST_CELL, 1> *ret)
     {
-        // fixme: needs test
+        int cycle = NANO_STEPS * firstStep;
+        CoordBox<1> boundingBox = ret->boundingBox();
+
+        for (CoordBox<1>::Iterator i = boundingBox.begin(); i != boundingBox.end(); ++i) {
+            TEST_CELL cell(i->x(), cycle, true);
+
+            int startNeighbors = i->x() + 1;
+            int numNeighbors   = i->x() + 1;
+            int endNeighbors   = startNeighbors + numNeighbors;
+
+            for (int j = startNeighbors; j != endNeighbors; ++j) {
+                int actualNeighbor = j % dim;
+                cell.expectedNeighborWeights[actualNeighbor] = actualNeighbor + 0.1;
+            }
+
+            ret->set(*i, cell);
+        }
     }
 
     Coord<1> gridDimensions() const
     {
-        // fixme: needs test
         return Coord<1>(dim);
     }
 
     unsigned maxSteps() const
     {
-        // fixme: needs test
         return lastStep;
     }
 
     unsigned startStep() const
     {
-        // fixme: needs test
         return firstStep;
     }
 
