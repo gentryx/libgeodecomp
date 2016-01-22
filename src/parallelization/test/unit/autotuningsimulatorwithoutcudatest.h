@@ -153,7 +153,7 @@ public:
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
-        ats.deleteAllSimulations();
+        //ats.deleteAllSimulations();
         SimulationParameters params;
         params.addParameter("WavefrontWidth", 1, 300);
         params.addParameter("WavefrontHeight", 1, 300);
@@ -228,7 +228,7 @@ public:
             new SimFabTestInitializer(dim, maxSteps));
         ats.deleteAllSimulations();
         ats.addNewSimulation(
-            "addWriterTest",
+            "SerialSimulation",
             "SerialSimulation");
         std::ostringstream buf;
         ats.addWriter(static_cast<Writer<SimFabTestCell> *>(new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
