@@ -1,3 +1,4 @@
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/io/unstructuredtestinitializer.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 
@@ -10,6 +11,7 @@ class UnstructuredTestInitializerTest : public CxxTest::TestSuite
 public:
     void testBasic()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredTestInitializer<> initializer(
             100,
             50,
@@ -47,6 +49,7 @@ public:
             // TS_ASSERT_EQUALS(sparseRow.size(), i + 1);
             // fixme: check weights
         }
+#endif
     }
 };
 
