@@ -61,7 +61,8 @@ public:
     }
 
     ~AutoTuningSimulator()
-    {}
+    {
+    }
 
     void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
@@ -186,14 +187,39 @@ public:
 
     void run()
     {
-       if(normalizeSteps(-0.1)){
+       if(normalizeSteps(-0.25)){
            runTest();
+       }else{
+           throw std::logic_error(
+            "normalizeSteps in AutotuningSimulator::run() faild, no optimization is done!");
        }
-       runBestToCompletion();
+       std::string best = getBestSim();
+       runToCompletion(best);
     }
 
-    void runBestToCompletion()
+    std::string getBestSim()
     {
+        std::string bestSimulation;
+        double tmpFitness = DBL_MAX;
+        typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
+        for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
+            if (iter->second->fitness < tmpFitness){
+                tmpFitness = iter->second->fitness;
+                bestSimulation = iter->first;
+            }
+        }
+        LOG(Logger::DBG, "bestSimulation: " << bestSimulation)
+        return bestSimulation;
+    }
+
+    void runToCompletion(std::string optimizerName)
+    {
+        if ( ! isInMap(optimizerName))
+            throw std::invalid_argument(
+                "AutotuningSimulator<...>::runToCompletion() get invalid optimizerName");
+        shared_ptr<Initializer<CELL_TYPE>> originalInitializer = varStepInitializer.getInitializer();
+        varStepInitializer.setMaxSteps(originalInitializer->maxSteps());
+        simulations[optimizerName]->simulationFactory->operator()(simulations[optimizerName]->parameters);
     }
 
     unsigned normalizeSteps(double goal, unsigned start = 5)
@@ -210,7 +236,6 @@ public:
                         << "this set start to default!")
             start = 5;
         }
-        //TODO Ist es notwendig hier die Writer und steer schon hinzuzufügen?
         SimFactoryPtr factory = simulations["SerialSimulation"]->simulationFactory;
         unsigned steps = start;
         unsigned oldSteps = start;
@@ -237,6 +262,7 @@ public:
     void runTest()
     {
         typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
+        //TODO herausziehen der Addxy Funktionen in separate Funktion?
 
         for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
             LOG(Logger::DBG, iter->first);
