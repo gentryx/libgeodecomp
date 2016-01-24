@@ -10,15 +10,22 @@
 
 namespace LibGeoDecomp {
 
-template<typename CELL, int DIM>
+template<typename CELL, int DIM, typename WEIGHT_TYPE>
 class ProxyGrid;
 
 /**
  * This is an abstract base class for all grid classes. It's generic
- * because all methods are virtual, but not very efficient -- for the
- * same reason.
+ * because all methods are virtual, but single element access is not
+ * very efficient -- for the same reason. Fast bulk access to members
+ * of the cells is granted by saveMember()/loadMember().
+ *
+ * CELLTYPE is the type of the grid's elements. DIMENSIONS is the
+ * dimensionality of the regular grid, not the extent. Unstructured
+ * grids have a DIMENSIONALITY of 1. WEIGHT_TYPE is relevant only for
+ * unstructured grids and determines the type of the edge weights
+ * stored with the adjacency.
  */
-template<typename CELL, int DIMENSIONS>
+template<typename CELL, int DIMENSIONS, typename WEIGHT_TYPE = double>
 class GridBase
 {
 public:
@@ -42,7 +49,6 @@ public:
     {
         return boundingBox().dimensions;
     }
-
 
     bool operator==(const GridBase<CELL, DIMENSIONS>& other) const
     {
@@ -118,6 +124,17 @@ public:
         }
 
         loadMemberImplementation(reinterpret_cast<const char*>(source), sourceLocation, selector, region);
+    }
+
+    /**
+     * Through this function the weights of the edges on unstructured
+     * grids can be set. Unavailable on regular grids.
+     *
+     * fixme: type of matrix is terrible
+     */
+    virtual void setWeights(std::size_t matrixID, const std::map<Coord<2>, WEIGHT_TYPE>& matrix)
+    {
+        throw std::logic_error("edge weights cannot be set on this grid type");
     }
 
 protected:
