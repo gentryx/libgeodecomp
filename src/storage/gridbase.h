@@ -29,7 +29,7 @@ template<typename CELL, int DIMENSIONS, typename WEIGHT_TYPE = double>
 class GridBase
 {
 public:
-    friend class ProxyGrid<CELL, DIMENSIONS>;
+    friend class ProxyGrid<CELL, DIMENSIONS, WEIGHT_TYPE>;
 
     typedef CELL CellType;
     const static int DIM = DIMENSIONS;

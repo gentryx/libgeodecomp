@@ -132,7 +132,7 @@ private:
                                    "Did you forget to specify HasSoA apitrait?");
         }
 
-        const auto& matrix = soaGrid->getAdjacency(matrixID);
+        const auto& matrix = soaGrid->getWeights(matrixID);
         // fixme: we'll need to rework this api at some later point of time as a
         //        writer should treat the grid as read-only'
         soaGrid->callback(SellSortingWriterHelpers::

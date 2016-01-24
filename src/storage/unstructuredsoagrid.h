@@ -180,23 +180,21 @@ public:
     }
 
     inline
-    void setAdjacency(std::size_t matrixID, const std::map<Coord<2>, VALUE_TYPE>& matrix)
+    void setWeights(std::size_t matrixID, const std::map<Coord<2>, VALUE_TYPE>& matrix)
     {
         assert(matrixID < MATRICES);
         matrices[matrixID].initFromMatrix(matrix);
     }
 
     inline
-    const SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>&
-    getAdjacency(std::size_t const matrixID) const
+    const SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>& getWeights(std::size_t const matrixID) const
     {
         assert(matrixID < MATRICES);
         return matrices[matrixID];
     }
 
     inline
-    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>&
-    getAdjacency(std::size_t const matrixID)
+    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>& getWeights(std::size_t const matrixID)
     {
         assert(matrixID < MATRICES);
         return matrices[matrixID];
@@ -211,9 +209,9 @@ public:
     {
         if (y < 0 || y >= dimension.x()) {
             return getEdgeElement();
-        } else {
-            return get(y);
         }
+
+        return get(y);
     }
 
     inline ELEMENT_TYPE operator[](const Coord<DIM>& coord) const
