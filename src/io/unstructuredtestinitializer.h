@@ -29,6 +29,7 @@ public:
     {
         int cycle = NANO_STEPS * firstStep;
         CoordBox<1> boundingBox = ret->boundingBox();
+        std::map<Coord<2>, double> weights;
 
         for (CoordBox<1>::Iterator i = boundingBox.begin(); i != boundingBox.end(); ++i) {
             TEST_CELL cell(i->x(), cycle, true);
@@ -39,11 +40,15 @@ public:
 
             for (int j = startNeighbors; j != endNeighbors; ++j) {
                 int actualNeighbor = j % dim;
-                cell.expectedNeighborWeights[actualNeighbor] = actualNeighbor + 0.1;
+                double edgeWeight = actualNeighbor + 0.1;
+                cell.expectedNeighborWeights[actualNeighbor] = edgeWeight;
+                weights[Coord<2>(i->x(), actualNeighbor)] = edgeWeight;
             }
 
             ret->set(*i, cell);
         }
+
+        ret->setWeights(0, weights);
     }
 
     Coord<1> gridDimensions() const
