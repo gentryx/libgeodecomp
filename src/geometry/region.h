@@ -696,7 +696,7 @@ public:
                  streak != newCoords.endStreak();
                  ++streak) {
                 for (int x = streak->origin.x(); x < streak->endX; ++x) {
-                    ADJACENCY::const_iterator it = adjacency.find(x);
+                    typename ADJACENCY::const_iterator it = adjacency.find(x);
                     if (it == adjacency.end()) {
                         continue;
                     }
