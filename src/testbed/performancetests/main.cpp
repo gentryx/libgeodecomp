@@ -407,14 +407,23 @@ public:
             int id = i->first;
             const ConvexPolytope<Coord<2> > element = i->second;
 
-            addNeighbors(&adjacency[id], element.getLimits());
+            addNeighbors(adjacency, id, element.getLimits());
         }
 
         // III. Fill Region
+        // fixme: I don't fully understand the code with skipCells below,
+        // this may very well be easier solved.
+        typedef std::map<int, std::vector<int> > MapAdjacency;
+
+        MapAdjacency mapAdjacency;
+        for (Region<2>::Iterator it = adjacency.getRegion().begin(); it != adjacency.getRegion().end(); ++it) {
+            mapAdjacency[it->x()].push_back(it->y());
+        }
+
         Region<1> r;
         int counter = 0;
         bool select = true;
-        for (Adjacency::iterator i = adjacency.begin(); i != adjacency.end(); ++i) {
+        for (MapAdjacency::iterator i = mapAdjacency.begin(); i != mapAdjacency.end(); ++i) {
             ++counter;
             if (counter >= skipCells) {
                 counter = 0;
@@ -529,11 +538,11 @@ private:
         return true;
     }
 
-    template<typename VECTOR, typename LIMITS>
-    void addNeighbors(VECTOR *vec, const LIMITS& limits)
+    template<typename LIMITS>
+    void addNeighbors(Adjacency &adjacency, int from, const LIMITS& limits)
     {
         for (typename LIMITS::const_iterator i = limits.begin(); i != limits.end(); ++i) {
-            (*vec) << i->neighborID;
+            adjacency.insert(from, i->neighborID);
         }
     }
 };

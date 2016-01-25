@@ -57,6 +57,7 @@ public:
     }
 };
 
+#ifdef LIBGEODECOMP_WITH_CPP14
 #ifdef LIBGEODECOMP_WITH_SCOTCH
 template<int DIM>
 class PartitionBuilder<PTScotchUnstructuredPartition<DIM> >
@@ -74,7 +75,7 @@ public:
             weights,
             adjacency);
     }
-#ifdef LIBGEODECOMP_WITH_CPP14
+
     boost::shared_ptr<PTScotchUnstructuredPartition<DIM >> operator()(
         const CoordBox<DIM>& box,
         const std::vector<std::size_t>& weights,
@@ -87,7 +88,6 @@ public:
             weights,
             std::move(adjacency));
     }
-#endif // LIBGEODECOMP_WITH_CPP14
 };
 
 template<int DIM>
@@ -106,7 +106,7 @@ public:
             weights,
             adjacency);
     }
-#ifdef LIBGEODECOMP_WITH_CPP14
+
     boost::shared_ptr<DistributedPTScotchUnstructuredPartition<DIM >> operator()(
         const CoordBox<DIM>& box,
         const std::vector<std::size_t>& weights,
@@ -119,10 +119,10 @@ public:
             weights,
             std::move(adjacency));
     }
-#endif // LIBGEODECOMP_WITH_CPP14
 };
 
 #endif
+#endif // LIBGEODECOMP_WITH_CPP14
 
 }
 

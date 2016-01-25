@@ -13,14 +13,16 @@ Adjacency MakeAdjacency(const std::map<Coord<2>, T> &weights)
 {
     Adjacency result;
 
-    for (auto &p : weights) {
+    for (typename std::map<Coord<2>, T>::const_iterator it = weights.begin();
+        it != weights.end(); ++it) {
+
         // ptscotch doesn't like edges from nodes to themselves
-        if (p.first.x() == p.first.y()) {
+        if (it->first.x() == it->first.y()) {
             continue;
         }
 
-        result.insert(p.first.x(), p.first.y());
-        result.insert(p.first.y(), p.first.x());
+        result.insert(it->first.x(), it->first.y());
+        result.insert(it->first.y(), it->first.x());
     }
 
     return result;

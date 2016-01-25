@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_GEOMETRY_REGIONBASEDADJACENCY_H
 
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <boost/shared_ptr.hpp>
 
 namespace LibGeoDecomp {
 
@@ -53,7 +54,7 @@ public:
     const Region<2> &getRegion() const {return *region;}
 
 private:
-    std::shared_ptr<Region<2>> region;
+    boost::shared_ptr<Region<2> > region;
 };
 
 }
