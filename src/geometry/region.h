@@ -1,7 +1,6 @@
 #ifndef LIBGEODECOMP_GEOMETRY_REGION_H
 #define LIBGEODECOMP_GEOMETRY_REGION_H
 
-#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/regionstreakiterator.h>
 #include <libgeodecomp/geometry/streak.h>
@@ -654,21 +653,22 @@ public:
         return ret;
     }
 
-    template<typename TOPOLOGY>
+    template<typename TOPOLOGY, typename ADJACENCY>
     inline Region expandWithTopology(
         const unsigned& width,
         const Coord<DIM>& globalDimensions,
         TOPOLOGY topology,
-        const Adjacency& adjacency) const
+        const ADJACENCY& adjacency) const
     {
         return expandWithTopology(width, globalDimensions, topology);
     }
 
+    template<typename ADJACENCY>
     inline Region expandWithTopology(
         const unsigned& width,
         const Coord<DIM>& /* unused: globalDimensions */,
         Topologies::Unstructured::Topology /* used just for overload */,
-        const Adjacency& adjacency) const
+        const ADJACENCY& adjacency) const
     {
         return expandWithAdjacency(width, adjacency);
     }
@@ -677,9 +677,10 @@ public:
      * does the same as expand, but reads adjacent indices out of
      * an adjacency list
      */
+    template<typename ADJACENCY>
     inline Region expandWithAdjacency(
         const unsigned& width,
-        const Adjacency& adjacency) const
+        const ADJACENCY& adjacency) const
     {
         // expanding with adjacency only works on unstructured, i.e. 1-dimensional grids
         Region<1> ret = *this;
@@ -695,7 +696,7 @@ public:
                  streak != newCoords.endStreak();
                  ++streak) {
                 for (int x = streak->origin.x(); x < streak->endX; ++x) {
-                    Adjacency::const_iterator it = adjacency.find(x);
+                    ADJACENCY::const_iterator it = adjacency.find(x);
                     if (it == adjacency.end()) {
                         continue;
                     }
