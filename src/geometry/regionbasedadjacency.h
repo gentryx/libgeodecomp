@@ -51,7 +51,15 @@ public:
      */
     void getNeighbors(int node, std::vector<int> *neighbors) const;
 
-    const Region<2> &getRegion() const {return *region;}
+    /**
+     * Retrieves the number of edges in the adjacency
+     */
+    std::size_t size() const;
+
+    const Region<2>& getRegion() const
+    {
+        return *region;
+    }
 
 private:
     boost::shared_ptr<Region<2> > region;

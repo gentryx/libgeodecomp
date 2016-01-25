@@ -9,7 +9,7 @@ namespace LibGeoDecomp {
 typedef RegionBasedAdjacency Adjacency;
 
 template<typename T>
-Adjacency MakeAdjacency(const std::map<Coord<2>, T> &weights)
+Adjacency MakeAdjacency(const std::map<Coord<2>, T>& weights)
 {
     Adjacency result;
 

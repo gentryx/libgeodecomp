@@ -18,20 +18,19 @@ public:
     {
         std::map<Coord<2>, double> containerAdjacency;
 
-        for (auto &coord : adjacency.getRegion())
-        {
+        for (auto& coord : adjacency.getRegion()) {
             int from = coord.y();
             int to = coord.x();
 
             containerAdjacency[Coord<2>(from, to)] = 1.0;
         }
 
-        grid.setAdjacency(0, containerAdjacency);
+        grid.setWeights(0, containerAdjacency);
     }
 #endif
 
     template<typename CONTAINER>
-    AdjacencySetter(CONTAINER &, const Adjacency &)
+    AdjacencySetter(CONTAINER& , const Adjacency& )
     { }
 
 };

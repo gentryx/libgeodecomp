@@ -21,10 +21,12 @@
 
 namespace LibGeoDecomp {
 
+namespace DistributedPTScotchUnstructuredPartitionHelpers {
+
 inline void prettyPrint(
             std::ostream& os,
             const std::vector<Region<1>> regions,
-            const Coord<2> dimensions,
+            const Coord<2>& dimensions,
             const Coord<2>& resolution = Coord<2>(16, 16))
 {
     for (int y = 0; y < resolution.y(); ++y) {
@@ -68,6 +70,8 @@ inline void prettyPrint(
         }
         os << '\n';
     }
+}
+
 }
 
 template<int DIM>
@@ -148,12 +152,7 @@ private:
         SCOTCH_Dgraph graph;
         int error = SCOTCH_dgraphInit(&graph, MPILayer().communicator());
 
-        SCOTCH_Num numEdges = 0;
-
-        // ok, this is SUPER ugly
-        for (auto& p : this->adjacency.getRegion()) {
-            numEdges ++;
-        }
+        SCOTCH_Num numEdges = this->adjacency.size();
 
         std::vector<int> neighbors;
 
@@ -259,7 +258,7 @@ private:
                 // pretty printing to stream first so the output won't
                 // get messed up by multithreaded output
                 std::stringstream ss;
-                prettyPrint(
+                DistributedPTScotchUnstructuredPartitionHelpers::prettyPrint(
                         ss,
                         regions,
                         Coord<2>(

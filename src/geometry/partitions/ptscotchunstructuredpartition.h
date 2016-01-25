@@ -79,19 +79,12 @@ private:
         SCOTCH_Graph graph;
         int error = SCOTCH_graphInit(&graph);
 
-        SCOTCH_Num numEdges = 0;
-
-        // ok, this is SUPER ugly
-        for (auto& p : this->adjacency.getRegion()) {
-            numEdges ++;
-        }
+        SCOTCH_Num numEdges = this->adjacency.size();
 
         std::vector<int> neighbors;
 
-        SCOTCH_Num *verttabGra;
-        SCOTCH_Num *edgetabGra;
-        verttabGra = new SCOTCH_Num[numCells + 1];
-        edgetabGra = new SCOTCH_Num[numEdges];
+        SCOTCH_Num *verttabGra = new SCOTCH_Num[numCells + 1];
+        SCOTCH_Num *edgetabGra = new SCOTCH_Num[numEdges];
 
         int currentEdge = 0;
         for (int i = 0; i < numCells; ++i) {

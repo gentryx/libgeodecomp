@@ -539,7 +539,7 @@ private:
     }
 
     template<typename LIMITS>
-    void addNeighbors(Adjacency &adjacency, int from, const LIMITS& limits)
+    void addNeighbors(Adjacency& adjacency, int from, const LIMITS& limits)
     {
         for (typename LIMITS::const_iterator i = limits.begin(); i != limits.end(); ++i) {
             adjacency.insert(from, i->neighborID);

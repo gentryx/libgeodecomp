@@ -11,11 +11,13 @@ RegionBasedAdjacency::RegionBasedAdjacency() :
 
 }
 
-void RegionBasedAdjacency::insert(int from, int to) {
+void RegionBasedAdjacency::insert(int from, int to)
+{
     (*region) << Coord<2>(to, from);
 }
 
-void RegionBasedAdjacency::insert(int from, std::vector<int> to) {
+void RegionBasedAdjacency::insert(int from, std::vector<int> to)
+{
     std::sort(to.begin(), to.end());
     Region<2> buf;
     for (std::vector<int>::const_iterator i = to.begin(); i != to.end(); ++i) {
@@ -25,7 +27,8 @@ void RegionBasedAdjacency::insert(int from, std::vector<int> to) {
     (*region) += buf;
 }
 
-void RegionBasedAdjacency::getNeighbors(int node, std::vector<int> *neighbors) const {
+void RegionBasedAdjacency::getNeighbors(int node, std::vector<int> *neighbors) const
+{
     neighbors->clear();
 
     CoordBox<2> box = region->boundingBox();
@@ -39,6 +42,11 @@ void RegionBasedAdjacency::getNeighbors(int node, std::vector<int> *neighbors) c
             (*neighbors) << j;
         }
     }
+}
+
+std::size_t RegionBasedAdjacency::size() const
+{
+    return region->size();
 }
 
 }
