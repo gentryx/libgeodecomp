@@ -569,6 +569,10 @@ public:
         return myBoundingBox;
     }
 
+    /**
+     * Returns the number of individual coordinates stored in this
+     * Region. For the number of Streaks see numStreaks().
+     */
     inline std::size_t size() const
     {
         if (geometryCacheTainted) {
@@ -582,6 +586,11 @@ public:
         return boundingBox().dimensions;
     }
 
+    /**
+     * Returns in how many Streaks the run-length compression of the
+     * coordinate set in this Region results in. For the number of
+     * Coords see size().
+     */
     inline std::size_t numStreaks() const
     {
         return indices[0].size();
