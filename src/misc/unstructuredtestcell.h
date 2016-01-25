@@ -62,6 +62,12 @@ public:
             isValid = false;
         }
 
+        if (expectedNeighborWeights.size() != std::size_t(id + 1)) {
+            OUTPUT() << "UnstructuredTestCell error: id " << id
+                     << " has a bad weights set\n";
+            isValid = false;
+        }
+
         if (!isValid) {
             OUTPUT() << "UnstructuredTestCell error: id " << id << " is invalid\n";
         }
@@ -81,7 +87,6 @@ private:
         if (otherCell.id != otherID) {
             OUTPUT() << "UnstructuredTestCell error: other cell has ID " << otherCell.id
                      << ", but expected ID " << otherID << "\n";
-            // fixme: needs test
             isValid = false;
         }
 
@@ -89,14 +94,12 @@ private:
             OUTPUT() << "UnstructuredTestCell error: other cell on ID " << otherCell.id
                      << " is in cycle " << otherCell.cycleCounter
                      << ", but expected " << cycleCounter << "\n";
-            // fixme: needs test
             isValid = false;
         }
 
         if (!otherCell.isValid) {
             OUTPUT() << "UnstructuredTestCell error: other cell on ID " << otherCell.id
                      << " is invalid\n";
-            // fixme: needs test
             isValid = false;
         }
     }

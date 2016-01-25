@@ -91,6 +91,52 @@ public:
 #endif
     }
 
+    void testIDChecking()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
+        // sabotage ID
+        grid1[Coord<1>(40)].id += 1;
+
+        for (int x = 0; x < 200; ++x, ++hood) {
+            grid2[Coord<1>(x)].update(hood, 0);
+        }
+
+        for (int x = 0; x < 200; ++x, ++hood) {
+            bool flag = true;
+            // determining affected neighbors is slightly more complicated here:
+            if (((x >= 20) && (x <= 40)) || (x >= 120)) {
+                flag = false;
+            }
+
+            TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
+        }
+#endif
+    }
+
+    void testValidityChecking()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
+        // sabotage validity bit
+        grid1[Coord<1>(40)].isValid = false;
+
+        for (int x = 0; x < 200; ++x, ++hood) {
+            grid2[Coord<1>(x)].update(hood, 0);
+        }
+
+        for (int x = 0; x < 200; ++x, ++hood) {
+            bool flag = true;
+            // determining affected neighbors is slightly more complicated here:
+            if (((x >= 20) && (x <= 40)) || (x >= 120)) {
+                flag = false;
+            }
+
+            TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
+        }
+#endif
+    }
+
 
 
 private:
