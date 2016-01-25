@@ -8,9 +8,11 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/teststeerer.h>
 #include <libgeodecomp/io/testwriter.h>
+#include <libgeodecomp/io/unstructuredtestinitializer.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/misc/unstructuredtestcell.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 
 using namespace LibGeoDecomp;
@@ -232,6 +234,33 @@ public:
 
         sim.run();
         TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(), 21 * NANO_STEPS_3D);
+    }
+
+    void testUnstructured()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        // fixme: test soa and different values for C and Sigma
+        typedef UnstructuredTestCell<> TestCellType;
+        int startStep = 7;
+        int endStep = 20;
+
+        SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep));
+        sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCell<> TestCellType;
+        int startStep = 7;
+        int endStep = 20;
+
+        SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep));
+        sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
+        sim.run();
+#endif
     }
 
 private:
