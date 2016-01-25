@@ -59,7 +59,6 @@ public:
             OUTPUT() << "UnstructuredTestCell error: id " << id
                      << " saw bad nano step " << nanoStep
                      << " (expected: " << expectedNanoStep << ")\n";
-            // fixme: needs test
             isValid = false;
         }
 
