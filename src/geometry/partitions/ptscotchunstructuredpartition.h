@@ -81,18 +81,13 @@ private:
 
         SCOTCH_Num numEdges = 0;
 
-#ifdef USE_MAP_ADJACENCY
-        for (auto& p : this->adjacency) {
-            numEdges += p.second.size();
-        }
-#else
         // ok, this is SUPER ugly
         for (auto& p : this->adjacency.getRegion()) {
             numEdges ++;
         }
 
         std::vector<int> neighbors;
-#endif // USE_MAP_ADJACENCY
+
         SCOTCH_Num *verttabGra;
         SCOTCH_Num *edgetabGra;
         verttabGra = new SCOTCH_Num[numCells + 1];
@@ -102,16 +97,10 @@ private:
         for (int i = 0; i < numCells; ++i) {
             verttabGra[i] = currentEdge;
 
-#ifdef USE_MAP_ADJACENCY
-            for (int other : this->adjacency[i]) {
-                edgetabGra[currentEdge++] = other;
-            }
-#else
             this->adjacency.getNeighbors(i,& neighbors);
             for (int other : neighbors) {
                 edgetabGra[currentEdge++] = other;
             }
-#endif // USE_MAP_ADJACENCY
         }
 
         verttabGra[numCells] = currentEdge;

@@ -17,17 +17,6 @@ public:
     {
         std::map<Coord<2>, double> containerAdjacency;
 
-#ifdef USE_MAP_ADJACENCY
-        for (auto &p : adjacency)
-        {
-            int from = p.first;
-
-            for (int to : p.second)
-            {
-                containerAdjacency[Coord<2>(from, to)] = 1.0;
-            }
-        }
-#else
         for (auto &coord : adjacency.getRegion())
         {
             int from = coord.y();
@@ -35,7 +24,7 @@ public:
 
             containerAdjacency[Coord<2>(from, to)] = 1.0;
         }
-#endif
+
         grid.setAdjacency(0, containerAdjacency);
     }
 #endif

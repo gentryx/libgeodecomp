@@ -684,9 +684,8 @@ public:
         Region<1> ret = *this;
         Region<1> newCoords = *this;
 
-#ifndef USE_MAP_ADJACENCY
+        // neighbors vector is defined outside of the loop to avoid reallocations
         std::vector<int> neighbors;
-#endif // USE_MAP_ADJACENCY
 
         for (unsigned pass = 0; pass < width; ++pass) {
             Region add;
@@ -698,15 +697,8 @@ public:
                  streak != newCoords.endStreak();
                  ++streak) {
                 for (int x = streak->origin.x(); x < streak->endX; ++x) {
-#ifdef USE_MAP_ADJACENCY
-                    Adjacency::const_iterator it = adjacency.find(x);
-                    if (it == adjacency.end()) {
-                        continue;
-                    }
-                    const std::vector<int>& neighbors = it->second;
-#else
                     adjacency.getNeighbors(x, &neighbors);
-#endif // USE_MAP_ADJACENCY
+
                     for (std::vector<int>::const_iterator i = neighbors.begin(); i != neighbors.end(); ++i) {
                         Coord<DIM> c(*i);
                         if (ret.count(c) == 0) {

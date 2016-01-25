@@ -150,18 +150,12 @@ private:
 
         SCOTCH_Num numEdges = 0;
 
-#ifdef USE_MAP_ADJACENCY
-        for (auto& p : this->adjacency) {
-            numEdges += p.second.size();
-        }
-#else
         // ok, this is SUPER ugly
         for (auto& p : this->adjacency.getRegion()) {
             numEdges ++;
         }
 
         std::vector<int> neighbors;
-#endif // USE_MAP_ADJACENCY
 
         SCOTCH_Num *verttabGra = new SCOTCH_Num[localCells + 1];
         SCOTCH_Num *edgetabGra = new SCOTCH_Num[numEdges];
@@ -170,20 +164,12 @@ private:
         for (int i = 0; i < localCells; ++i) {
             verttabGra[i] = currentEdge;
 
-#ifdef USE_MAP_ADJACENCY
-            for (int other : this->adjacency[start + i]) {
-                edgetabGra[currentEdge++] = other;
-            }
-#else
             this->adjacency.getNeighbors(start + i,& neighbors);
             for (int other : neighbors) {
                 assert(currentEdge < numEdges);
                 edgetabGra[currentEdge++] = other;
             }
-
-#endif // USE_MAP_ADJACENCY
         }
-
 
         numEdges = currentEdge;
 
@@ -282,7 +268,6 @@ private:
                         Coord<2>(16, 10));
                 LOG(DBG, "regions of rank " << i << ": ");
                 LOG(DBG, ss.str());
-                std::cout << ss.str() << std::endl;
             }
 
             MPILayer().barrier();
