@@ -24,11 +24,11 @@ public:
     using Partition<DIM>::weights;
 
     PTScotchUnstructuredPartition(
-            const Coord<DIM> &origin,
-            const Coord<DIM> &dimensions,
-            const long &offset,
-            const std::vector<std::size_t> &weights,
-            const Adjacency &adjacency) :
+            const Coord<DIM>& origin,
+            const Coord<DIM>& dimensions,
+            const long offset,
+            const std::vector<std::size_t>& weights,
+            const Adjacency& adjacency) :
         Partition<DIM>(offset, weights),
         origin(origin),
         dimensions(dimensions),
@@ -39,11 +39,11 @@ public:
     }
 
     PTScotchUnstructuredPartition(
-            const Coord<DIM> &origin,
-            const Coord<DIM> &dimensions,
-            const long &offset,
-            const std::vector<std::size_t> &weights,
-            Adjacency &&adjacency) :
+            const Coord<DIM>& origin,
+            const Coord<DIM>& dimensions,
+            const long offset,
+            const std::vector<std::size_t>& weights,
+            Adjacency&& adjacency) :
         Partition<DIM>(offset, weights),
         origin(origin),
         dimensions(dimensions),
@@ -67,18 +67,13 @@ private:
     void buildRegions()
     {
         std::vector<SCOTCH_Num> indices(numCells);
-
-        auto start = std::chrono::system_clock::now();
         initIndices(indices);
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (std::chrono::system_clock::now() - start);
-        std::cout << "duration: " << duration.count() << std::endl;
-
 
         regions.resize(weights.size());
         createRegions(indices);
     }
 
-    void initIndices(std::vector<SCOTCH_Num> &indices)
+    void initIndices(std::vector<SCOTCH_Num>& indices)
     {
         // create 2D grid
         SCOTCH_Graph graph;
@@ -86,30 +81,43 @@ private:
 
         SCOTCH_Num numEdges = 0;
 
-        for (auto &p : this->adjacency)
-        {
+#ifdef USE_MAP_ADJACENCY
+        for (auto& p : this->adjacency) {
             numEdges += p.second.size();
         }
+#else
+        // ok, this is SUPER ugly
+        for (auto& p : this->adjacency.getRegion()) {
+            numEdges ++;
+        }
 
+        std::vector<int> neighbors;
+#endif // USE_MAP_ADJACENCY
         SCOTCH_Num *verttabGra;
         SCOTCH_Num *edgetabGra;
         verttabGra = new SCOTCH_Num[numCells + 1];
         edgetabGra = new SCOTCH_Num[numEdges];
 
         int currentEdge = 0;
-        for (int i = 0; i < numCells; ++i)
-        {
+        for (int i = 0; i < numCells; ++i) {
             verttabGra[i] = currentEdge;
 
-            for (int other : this->adjacency[i])
-            {
+#ifdef USE_MAP_ADJACENCY
+            for (int other : this->adjacency[i]) {
                 edgetabGra[currentEdge++] = other;
             }
+#else
+            this->adjacency.getNeighbors(i,& neighbors);
+            for (int other : neighbors) {
+                edgetabGra[currentEdge++] = other;
+            }
+#endif // USE_MAP_ADJACENCY
         }
 
         verttabGra[numCells] = currentEdge;
 
-        error = SCOTCH_graphBuild(&graph,
+        error = SCOTCH_graphBuild(
+                &graph,
                 0,
                 numCells,
                 verttabGra,
@@ -119,17 +127,25 @@ private:
                 numEdges,
                 edgetabGra,
                 nullptr);
-        if (error) std::cout << "SCOTCH_graphBuild error: " << error << std::endl;
+        if (error) {
+            LOG(ERROR, "SCOTCH_graphBuild error: " << error);
+        }
 
         error = SCOTCH_graphCheck(&graph);
-        if (error) std::cout << "SCOTCH_graphCheck error: " << error << std::endl;
+        if (error) {
+            LOG(ERROR, "SCOTCH_graphCheck error: " << error);
+        }
 
         SCOTCH_Strat *straptr = SCOTCH_stratAlloc();
         error = SCOTCH_stratInit(straptr);
-        if (error) std::cout << "SCOTCH_stratInit error: " << error << std::endl;
+        if (error) {
+            LOG(ERROR, "SCOTCH_stratInit error: " << error);
+        }
 
-        error = SCOTCH_graphPart(&graph, weights.size(), straptr, &indices[0]);
-        if (error) std::cout << "SCOTCH_graphMap error: " << error << std::endl;
+        error = SCOTCH_graphPart(&graph, weights.size(), straptr,& indices[0]);
+        if (error) {
+            LOG(ERROR, "SCOTCH_graphMap error: " << error);
+        }
 
         SCOTCH_graphExit(&graph);
         SCOTCH_stratExit(straptr);
@@ -137,23 +153,19 @@ private:
         delete[] edgetabGra;
     }
 
-    void createRegions(const std::vector<SCOTCH_Num> &indices)
+    void createRegions(const std::vector<SCOTCH_Num>& indices)
     {
-        std::cout << "building regions on " << MPILayer().rank() << std::endl;
-        for (int i = 0; i < numCells; ++i)
-        {
+        for (int i = 0; i < numCells; ++i) {
             regions[indices[i]] << Coord<1>(i);
         }
 
 #if 0
-        if (MPILayer().rank() == 0)
-        {
-            std::cout << "regions: " << std::endl;
-            for (auto &region : regions)
-            {
-                region.prettyPrint1D(std::cout, Coord<2>(2000, 2000), Coord<2>(8, 8));
-                std::cout << std::endl;
-                std::cout << std::endl;
+        if (MPILayer().rank() == 0) {
+            LOG(DBG, "regions: ");
+            for (auto& region : regions) {
+                stringstream ss;
+                region.prettyPrint1D(ss, Coord<2>(2000, 2000), Coord<2>(8, 8));
+                LOG(DBG, ss.str());
             }
         }
 #endif

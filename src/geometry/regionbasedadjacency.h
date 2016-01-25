@@ -1,10 +1,12 @@
 #ifndef LIBGEODECOMP_GEOMETRY_REGIONBASEDADJACENCY_H
 #define LIBGEODECOMP_GEOMETRY_REGIONBASEDADJACENCY_H
 
-#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
+
+template<int DIM>
+class Region;
 
 /**
  * This class can store the adjacency list/matrix of a directed graph.
@@ -30,46 +32,28 @@ namespace LibGeoDecomp {
 class RegionBasedAdjacency
 {
 public:
+    RegionBasedAdjacency();
+
     /**
      * Insert a single edge (from, to) to the graph
      */
-    inline void insert(int from, int to) {
-        region << Coord<2>(to, from);
-    }
+    void insert(int from, int to);
 
     /**
      * Insert all pairs (from, x) with x \in to, to the graph. We sort
      * parameter to to ensure fast, linear inserts.
      */
-    inline void insert(int from, std::vector<int> to) {
-        std::sort(to.begin(), to.end());
-        Region<2> buf;
-        for (std::vector<int>::const_iterator i = to.begin(); i != to.end(); ++i) {
-            buf << Coord<2>(*i, from);
-        }
-
-        region += buf;
-    }
+    void insert(int from, std::vector<int> to);
 
     /**
      * Returns all x \in V with (node, x) \in E.
      */
-    inline void getNeighbors(int node, std::vector<int> *neighbors) {
-        CoordBox<2> box = region.boundingBox();
-        int minX = box.origin.x();
-        int maxX = minX + box.dimensions.x();
+    void getNeighbors(int node, std::vector<int> *neighbors) const;
 
-        for (Region<2>::StreakIterator i = region.streakIteratorOnOrAfter(Coord<2>(minX, node));
-             i != region.streakIteratorOnOrAfter(Coord<2>(maxX, node));
-             ++i) {
-            for (int j = i->origin.x(); j < i->endX; ++j) {
-                (*neighbors) << j;
-            }
-        }
-    }
+    const Region<2> &getRegion() const {return *region;}
 
 private:
-    Region<2> region;
+    std::shared_ptr<Region<2>> region;
 };
 
 }

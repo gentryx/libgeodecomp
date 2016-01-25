@@ -17,17 +17,25 @@ public:
     {
         std::map<Coord<2>, double> containerAdjacency;
 
-        for (Adjacency::const_iterator it = adjacency.begin(); it != adjacency.end(); ++it)
+#ifdef USE_MAP_ADJACENCY
+        for (auto &p : adjacency)
         {
-            int from = it->first;
+            int from = p.first;
 
-            for (Adjacency::mapped_type::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+            for (int to : p.second)
             {
-                int to = *it2;
                 containerAdjacency[Coord<2>(from, to)] = 1.0;
             }
         }
+#else
+        for (auto &coord : adjacency.getRegion())
+        {
+            int from = coord.y();
+            int to = coord.x();
 
+            containerAdjacency[Coord<2>(from, to)] = 1.0;
+        }
+#endif
         grid.setAdjacency(0, containerAdjacency);
     }
 #endif
