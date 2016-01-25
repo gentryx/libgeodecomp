@@ -21,7 +21,11 @@
 
 namespace LibGeoDecomp {
 
-inline void prettyPrint(std::ostream& os, const std::vector<Region<1>> regions, const Coord<2> dimensions, const Coord<2>& resolution = Coord<2>(16, 16))
+inline void prettyPrint(
+            std::ostream& os,
+            const std::vector<Region<1>> regions,
+            const Coord<2> dimensions,
+            const Coord<2>& resolution = Coord<2>(16, 16))
 {
     for (int y = 0; y < resolution.y(); ++y) {
         for (unsigned int i = 0; i < regions.size(); ++i) {
@@ -44,7 +48,10 @@ inline void prettyPrint(std::ostream& os, const std::vector<Region<1>> regions, 
     }
 }
 
-inline void prettyPrint(std::ostream& os, const Region<2>& region, const Coord<2>& resolution = Coord<2>(50, 50))
+inline void prettyPrint(
+            std::ostream& os,
+            const Region<2>& region,
+            const Coord<2>& resolution = Coord<2>(50, 50))
 {
     Coord<2> from = region.boundingBox().origin;
     Coord<2> dim = region.boundingBox().dimensions;
@@ -259,24 +266,23 @@ private:
             }
         }
 
-        // pretty print regions. those should all be the same in the end
-
 #if defined(PTSCOTCH_PARTITION_PRETTY_PRINT_GRID_SIZE)
-        MPILayer().barrier();
-
+        // pretty print regions. those should all be the same in the end
         for (int i = 0; i < MPILayer().size(); ++i) {
             if (MPILayer().rank() == i) {
-                // pretty printing to stream first so the output won't get messed up by multithreaded output
+                // pretty printing to stream first so the output won't
+                // get messed up by multithreaded output
                 std::stringstream ss;
                 prettyPrint(
                         ss,
                         regions,
                         Coord<2>(
-                                 PTSCOTCH_PARTITION_PRETTY_PRINT_GRID_SIZE,
-                                 PTSCOTCH_PARTITION_PRETTY_PRINT_GRID_SIZE),
+                            PTSCOTCH_PARTITION_PRETTY_PRINT_GRID_SIZE,
+                            PTSCOTCH_PARTITION_PRETTY_PRINT_GRID_SIZE),
                         Coord<2>(16, 10));
                 LOG(DBG, "regions of rank " << i << ": ");
                 LOG(DBG, ss.str());
+                std::cout << ss.str() << std::endl;
             }
 
             MPILayer().barrier();
