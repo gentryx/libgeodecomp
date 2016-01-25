@@ -29,8 +29,6 @@ void RegionBasedAdjacency::insert(int from, std::vector<int> to)
 
 void RegionBasedAdjacency::getNeighbors(int node, std::vector<int> *neighbors) const
 {
-    neighbors->clear();
-
     CoordBox<2> box = region->boundingBox();
     int minX = box.origin.x();
     int maxX = minX + box.dimensions.x();

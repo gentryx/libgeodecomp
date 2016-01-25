@@ -81,33 +81,34 @@ private:
 
         SCOTCH_Num numEdges = this->adjacency.size();
 
-        std::vector<int> neighbors;
+        std::vector<SCOTCH_Num> verttabGra;
+        std::vector<SCOTCH_Num> edgetabGra;
 
-        SCOTCH_Num *verttabGra = new SCOTCH_Num[numCells + 1];
-        SCOTCH_Num *edgetabGra = new SCOTCH_Num[numEdges];
+        verttabGra.reserve(numCells + 1);
+        edgetabGra.reserve(numEdges);
 
         int currentEdge = 0;
         for (int i = 0; i < numCells; ++i) {
-            verttabGra[i] = currentEdge;
+            verttabGra.push_back(currentEdge);
 
-            this->adjacency.getNeighbors(i,& neighbors);
-            for (int other : neighbors) {
-                edgetabGra[currentEdge++] = other;
-            }
+            std::size_t before = edgetabGra.size();
+            this->adjacency.getNeighbors(i, &edgetabGra);
+
+            currentEdge += edgetabGra.size() - before;
         }
 
-        verttabGra[numCells] = currentEdge;
+        verttabGra.push_back(currentEdge);
 
         error = SCOTCH_graphBuild(
                 &graph,
                 0,
                 numCells,
-                verttabGra,
+                &verttabGra[0],
                 nullptr,
                 nullptr,
                 nullptr,
                 numEdges,
-                edgetabGra,
+                &edgetabGra[0],
                 nullptr);
         if (error) {
             LOG(ERROR, "SCOTCH_graphBuild error: " << error);
@@ -131,8 +132,6 @@ private:
 
         SCOTCH_graphExit(&graph);
         SCOTCH_stratExit(straptr);
-        delete[] verttabGra;
-        delete[] edgetabGra;
     }
 
     void createRegions(const std::vector<SCOTCH_Num>& indices)

@@ -689,6 +689,7 @@ public:
                  streak != newCoords.endStreak();
                  ++streak) {
                 for (int x = streak->origin.x(); x < streak->endX; ++x) {
+                    neighbors.clear();
                     adjacency.getNeighbors(x, &neighbors);
 
                     for (std::vector<int>::const_iterator i = neighbors.begin(); i != neighbors.end(); ++i) {

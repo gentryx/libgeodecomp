@@ -154,38 +154,38 @@ private:
 
         SCOTCH_Num numEdges = this->adjacency.size();
 
-        std::vector<int> neighbors;
+        std::vector<SCOTCH_Num> verttabGra;
+        std::vector<SCOTCH_Num> edgetabGra;
 
-        SCOTCH_Num *verttabGra = new SCOTCH_Num[localCells + 1];
-        SCOTCH_Num *edgetabGra = new SCOTCH_Num[numEdges];
+        verttabGra.reserve(localCells + 1);
+        edgetabGra.reserve(numEdges);
 
         int currentEdge = 0;
         for (int i = 0; i < localCells; ++i) {
-            verttabGra[i] = currentEdge;
+            verttabGra.push_back(currentEdge);
 
-            this->adjacency.getNeighbors(start + i,& neighbors);
-            for (int other : neighbors) {
-                assert(currentEdge < numEdges);
-                edgetabGra[currentEdge++] = other;
-            }
+            std::size_t before = edgetabGra.size();
+            this->adjacency.getNeighbors(start + i, &edgetabGra);
+
+            currentEdge += edgetabGra.size() - before;
         }
 
         numEdges = currentEdge;
 
-        verttabGra[localCells] = currentEdge;
+        verttabGra.push_back(currentEdge);
 
         error = SCOTCH_dgraphBuild(
                 &graph,
                 0,              // c++ starts counting at 0
                 localCells,     // number of local vertices
                 localCells,     // number of maximum local vertices to be created
-                verttabGra,     // vertex data
+                &verttabGra[0], // vertex data
                 nullptr,        // these are some ghost zone
                 nullptr,        // and other hints that are optional, so -> nullptr
                 nullptr,        //
                 numEdges,       // number of local edges
                 numEdges,       // number of maximum local edges to be created
-                edgetabGra,     // edge data
+                &edgetabGra[0], // edge data
                 nullptr,        // more optional data/hints
                 nullptr);       //
         if (error) {
@@ -210,8 +210,6 @@ private:
 
         SCOTCH_dgraphExit(&graph);
         SCOTCH_stratExit(straptr);
-        delete[] verttabGra;
-        delete[] edgetabGra;
     }
 
     void createRegions(const std::vector<SCOTCH_Num>& indices)
