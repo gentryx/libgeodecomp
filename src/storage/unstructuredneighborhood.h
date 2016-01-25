@@ -52,6 +52,8 @@ public:
         return std::make_pair(matrix.columnVec()[index],
                               matrix.valuesVec()[index]);
     }
+    // fixme: not pretty: no operator-> available. should we implement
+    // Iterator::operator-> and return a pseudo-pair?
 
 private:
     const Matrix& matrix;

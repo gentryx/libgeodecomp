@@ -1,7 +1,6 @@
 #ifndef LIBGEODECOMP_GEOMETRY_REGION_H
 #define LIBGEODECOMP_GEOMETRY_REGION_H
 
-#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/regionstreakiterator.h>
 #include <libgeodecomp/geometry/streak.h>
@@ -569,6 +568,10 @@ public:
         return myBoundingBox;
     }
 
+    /**
+     * Returns the number of individual coordinates stored in this
+     * Region. For the number of Streaks see numStreaks().
+     */
     inline std::size_t size() const
     {
         if (geometryCacheTainted) {
@@ -582,6 +585,11 @@ public:
         return boundingBox().dimensions;
     }
 
+    /**
+     * Returns in how many Streaks the run-length compression of the
+     * coordinate set in this Region results in. For the number of
+     * Coords see size().
+     */
     inline std::size_t numStreaks() const
     {
         return indices[0].size();
@@ -645,21 +653,22 @@ public:
         return ret;
     }
 
-    template<typename TOPOLOGY>
+    template<typename TOPOLOGY, typename ADJACENCY>
     inline Region expandWithTopology(
         const unsigned& width,
         const Coord<DIM>& globalDimensions,
         TOPOLOGY topology,
-        const Adjacency& adjacency) const
+        const ADJACENCY& adjacency) const
     {
         return expandWithTopology(width, globalDimensions, topology);
     }
 
+    template<typename ADJACENCY>
     inline Region expandWithTopology(
         const unsigned& width,
         const Coord<DIM>& /* unused: globalDimensions */,
         Topologies::Unstructured::Topology /* used just for overload */,
-        const Adjacency& adjacency) const
+        const ADJACENCY& adjacency) const
     {
         return expandWithAdjacency(width, adjacency);
     }
@@ -668,9 +677,10 @@ public:
      * does the same as expand, but reads adjacent indices out of
      * an adjacency list
      */
+    template<typename ADJACENCY>
     inline Region expandWithAdjacency(
         const unsigned& width,
-        const Adjacency& adjacency) const
+        const ADJACENCY& adjacency) const
     {
         // expanding with adjacency only works on unstructured, i.e. 1-dimensional grids
         Region<1> ret = *this;

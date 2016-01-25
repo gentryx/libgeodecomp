@@ -49,6 +49,8 @@ public:
         }
 
         ret->setWeights(0, weights);
+
+        ret->setEdge(TEST_CELL(-1, 0, true, true));
     }
 
     Coord<1> gridDimensions() const

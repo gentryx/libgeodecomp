@@ -102,8 +102,8 @@
         bool ollKorrect = true;                                         \
         std::ostringstream message;                                     \
                                                                         \
-        TS_ASSERT(assertGrid.getEdge().isEdgeCell);                     \
-        if (!assertGrid.getEdge().isEdgeCell) {                         \
+        TS_ASSERT(assertGrid.getEdge().edgeCell());                     \
+        if (!assertGrid.getEdge().edgeCell()) {                         \
             ollKorrect = false;                                         \
             message << "edgeCell isn't an edgeCell\n";                  \
         }                                                               \
@@ -114,10 +114,12 @@
         CoordBox<_GRID_TYPE::DIM> box = assertGrid.boundingBox();       \
         for (TYPENAME CoordBox<_GRID_TYPE::DIM>::Iterator i = box.begin(); i != box.end(); ++i) { \
             bool flagValid   = assertGrid.get(*i).valid();              \
-            bool flagEdge    = (assertGrid.get(*i).isEdgeCell == false); \
+            bool flagEdge    = (assertGrid.get(*i).edgeCell() == false); \
             bool flagCounter = (assertGrid.get(*i).cycleCounter == expectedCycle); \
-            message << "actual: " << (assertGrid.get(*i).cycleCounter)  \
-                    << " expected: " << expectedCycle << "\n";          \
+            if (assertGrid.get(*i).cycleCounter != expectedCycle) {     \
+                message << "actual: " << (assertGrid.get(*i).cycleCounter) \
+                        << " expected: " << expectedCycle << "\n";      \
+            }                                                           \
             TS_ASSERT(flagValid);                                       \
             TS_ASSERT(flagEdge);                                        \
             TS_ASSERT(flagCounter);                                     \
@@ -146,7 +148,7 @@
         unsigned expectedCycle = _EXPECTED_CYCLE;                       \
         bool ollKorrect = true;                                         \
                                                                         \
-        ollKorrect &= assertGrid.getEdge().isEdgeCell;                  \
+        ollKorrect &= assertGrid.getEdge().edgeCell();                  \
         ollKorrect &= assertGrid.getEdge().valid();                     \
         Region<_GRID_TYPE::DIM>::Iterator end = assertRegion.end();     \
         for (Region<_GRID_TYPE::DIM>::Iterator i = assertRegion.begin(); i != end; ++i) { \
@@ -154,7 +156,7 @@
             if (!flag) {                                                \
                 std::cout << "TestCell not valid\n";                    \
             }                                                           \
-            flag &= (assertGrid.get(*i).isEdgeCell == false);           \
+            flag &= (assertGrid.get(*i).edgeCell() == false);           \
             if (!flag) {                                                \
                 std::cout << "TestCell claims to be edge cell\n";       \
             }                                                           \

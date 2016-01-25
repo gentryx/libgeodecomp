@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 
+#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 

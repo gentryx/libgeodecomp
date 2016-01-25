@@ -182,9 +182,14 @@ public:
         isEdgeCell = !inBounds(pos);
     }
 
-    const bool& valid() const
+    bool valid() const
     {
         return isValid;
+    }
+
+    bool edgeCell() const
+    {
+        return isEdgeCell;
     }
 
     __host__ __device__
