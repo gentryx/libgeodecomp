@@ -29,7 +29,7 @@ public:
             UnstructuredTestCell<> cell = grid.get(Coord<1>(i));
 
             TS_ASSERT_EQUALS(cell.id, i);
-            TS_ASSERT_EQUALS(cell.cycle, expectedCycle);
+            TS_ASSERT_EQUALS(cell.cycleCounter, expectedCycle);
             TS_ASSERT_EQUALS(cell.isValid, true);
             TS_ASSERT_EQUALS(cell.expectedNeighborWeights.size(), i + 1);
 

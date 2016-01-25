@@ -16,11 +16,25 @@ public:
         public APITraits::HasNanoSteps<13>
     {};
 
-    inline explicit UnstructuredTestCell(int id = -1, int cycle = -1, bool isValid = false) :
+    const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<UnstructuredTestCell>::VALUE;
+
+    inline explicit
+    UnstructuredTestCell(int id = -1, unsigned cycleCounter = 0, bool isValid = false, bool isEdgeCell = false) :
         id(id),
-        cycle(cycle),
-        isValid(isValid)
+        cycleCounter(cycleCounter),
+        isValid(isValid),
+        isEdgeCell(isEdgeCell)
     {}
+
+    bool valid() const
+    {
+        return isValid;
+    }
+
+    bool edgeCell() const
+    {
+        return isEdgeCell;
+    }
 
     template<typename HOOD>
     void update(const HOOD& hood, int nanoStep)
@@ -29,19 +43,19 @@ public:
         std::map<int, double> actualNeighborWeights;
 
         for (typename HOOD::Iterator i = hood.begin(); i != hood.end(); ++i) {
-            checkNeighbor(i->first, hood[i->first]);
-            actualNeighborWeights[i->first] = i->second;
+            checkNeighbor((*i).first, hood[(*i).first]);
+            actualNeighborWeights[(*i).first] = (*i).second;
         }
 
         if (expectedNeighborWeights != actualNeighborWeights) {
             OUTPUT() << "UnstructuredTestCell error: id " << id
-                     << "is not valid on cycle " << cycle
+                     << "is not valid on cycle " << cycleCounter
                      << ", nanoStep: " << nanoStep << "\n";
             // fixme: needs test
             isValid = false;
         }
 
-        int expectedNanoStep = cycle % APITraits::SelectNanoSteps<UnstructuredTestCell>::VALUE;
+        int expectedNanoStep = cycleCounter % APITraits::SelectNanoSteps<UnstructuredTestCell>::VALUE;
         if (expectedNanoStep != nanoStep) {
             OUTPUT() << "UnstructuredTestCell error: id " << id
                      << " saw bad nano step " << nanoStep
@@ -53,12 +67,13 @@ public:
         if (!isValid) {
             OUTPUT() << "UnstructuredTestCell error: id " << id << "is invalid\n";
         }
-        ++cycle;
+        ++cycleCounter;
     }
 
     int id;
-    int cycle;
+    unsigned cycleCounter;
     bool isValid;
+    bool isEdgeCell;
     std::map<int, double> expectedNeighborWeights;
 
 private:
@@ -72,10 +87,10 @@ private:
             isValid = false;
         }
 
-        if (otherCell.cycle != cycle) {
+        if (otherCell.cycleCounter != cycleCounter) {
             OUTPUT() << "UnstructuredTestCell error: other cell on ID " << otherCell.id
-                     << " is in cycle " << otherCell.cycle
-                     << ", but expected " << cycle << "\n";
+                     << " is in cycle " << otherCell.cycleCounter
+                     << ", but expected " << cycleCounter << "\n";
             // fixme: needs test
             isValid = false;
         }
