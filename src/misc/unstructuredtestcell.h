@@ -49,9 +49,8 @@ public:
 
         if (expectedNeighborWeights != actualNeighborWeights) {
             OUTPUT() << "UnstructuredTestCell error: id " << id
-                     << "is not valid on cycle " << cycleCounter
+                     << " is not valid on cycle " << cycleCounter
                      << ", nanoStep: " << nanoStep << "\n";
-            // fixme: needs test
             isValid = false;
         }
 
@@ -65,7 +64,7 @@ public:
         }
 
         if (!isValid) {
-            OUTPUT() << "UnstructuredTestCell error: id " << id << "is invalid\n";
+            OUTPUT() << "UnstructuredTestCell error: id " << id << " is invalid\n";
         }
         ++cycleCounter;
     }
