@@ -50,7 +50,7 @@ class FindUndocumentedClasses < TestBase
 
     ret = 0
 
-    content.scan(/\n\n(#{template_pattern})?class (\w+)/) do
+    content.scan(/\n\n(#{template_pattern})?class (\w+)[^;]*$/) do
       log "#{filename}: found undocumented class »#{$6}«"
       ret += 1
     end

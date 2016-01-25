@@ -96,12 +96,6 @@ public:
             }
         }
     }
-
-    template <class ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & hpx::serialization::base_object<SimpleInitializer<ConwayCell> >(*this);
-    }
 };
 
 typedef HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> > SimulatorType;
@@ -115,18 +109,13 @@ int hpx_main()
 
         SimulatorType sim(
             init,
-            std::vector<double>(1, 1.0), // number an relative speed of update groups
+            // number an relative speed of update groups:
+            std::vector<double>(1, 1.0),
             new TracingBalancer(new OozeBalancer()),
-            100, // load balancing period
-            1 // ghost zone width
-            );
-
-        // fixme
-        // int outputFrequency = 1;
-        // sim.addWriter(
-        //     new HpxWriterCollectorType(
-        //         sink
-        //     ));
+            // load balancing period:
+            100,
+            // ghost zone width:
+            1);
 
         sim.addWriter(
             new TracingWriterType(

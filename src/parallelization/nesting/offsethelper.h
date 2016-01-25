@@ -6,6 +6,31 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This class tries to find an offset so that the bounding box of a
+ * subdomain in a simulation space with periodic boundary conditions
+ * is minimized. Example: consider the 10x5 grid pictured below. We
+ * assume that the model uses periodic boundary conditions.
+ *
+ *   0123456789
+ *   ----------
+ * 0|XX........
+ * 1|XX........
+ * 2|..........
+ * 3|..........
+ * 4|.......XXX
+ *
+ * The subdomain marked by 7 "X" could be stored in such a 10x5 grid,
+ * but that would be wasteful. Rearragement of the offsets would allow
+ * us the layout sketched out below:
+ *
+ *   78901
+ *   -----
+ * 4|XXX..
+ * 0|...XX
+ * 1|...XX
+ *
+ */
 template<int INDEX, int DIM, typename TOPOLOGY>
 class OffsetHelper
 {
@@ -49,6 +74,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<int DIM, typename TOPOLOGY>
 class OffsetHelper<-1, DIM, TOPOLOGY>
 {
@@ -62,6 +90,9 @@ public:
     {}
 };
 
+/**
+ * see above
+ */
 template<int INDEX, int DIM>
 class OffsetHelper<INDEX, DIM, Topologies::Unstructured::Topology>
 {

@@ -2,6 +2,7 @@
 #include <hpx/hpx.hpp>
 #include <libgeodecomp/communication/hpxpatchlink.h>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
+#include <libgeodecomp/storage/soagrid.h>
 
 using namespace LibGeoDecomp;
 

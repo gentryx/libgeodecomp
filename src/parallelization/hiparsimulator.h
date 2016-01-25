@@ -22,6 +22,7 @@
 namespace LibGeoDecomp {
 namespace HiParSimulatorHelpers {
 
+// fixme: can we eliminate these classes?
 template<typename PARTITION_TYPE>
 class PartitionBuilder
 {
@@ -40,6 +41,7 @@ public:
     }
 };
 
+// fixme: can we eliminate these classes?
 template<>
 class PartitionBuilder<UnstructuredStripingPartition>
 {
@@ -59,6 +61,8 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_CPP14
 #ifdef LIBGEODECOMP_WITH_SCOTCH
+
+// fixme: can we eliminate these classes?
 template<int DIM>
 class PartitionBuilder<PTScotchUnstructuredPartition<DIM> >
 {
@@ -126,7 +130,17 @@ public:
 
 }
 
-// fixme: check if code runs with a communicator which is merely a subset of MPI_COMM_WORLD
+/**
+ * The HiParSimulator implements our hierarchical parallelization
+ * algorithm which delivers best-of-breed latency hiding (wide ghost
+ * zones combined with overlapping communication and calculation)
+ * while remaining flexible with regard to the domain decomposition
+ * method. It can combine different types of parallelization: MPI for
+ * inter-node or inter-NUMA-domain communication and OpenMP and/or
+ * CUDA for local paralelism.
+ *
+ * fixme: check if code runs with a communicator which is merely a subset of MPI_COMM_WORLD
+ */
 template<typename CELL_TYPE, typename PARTITION, typename STEPPER = VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableOpenMP> >
 class HiParSimulator : public DistributedSimulator<CELL_TYPE>
 {

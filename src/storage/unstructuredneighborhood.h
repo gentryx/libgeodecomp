@@ -143,7 +143,7 @@ public:
     inline
     Iterator begin()
     {
-        const auto& matrix = grid.getAdjacency(currentMatrixID);
+        const auto& matrix = grid.getWeights(currentMatrixID);
         currentChunk = matrix.realRowToSortedVec()[xOffset] / C;
         chunkOffset  = matrix.realRowToSortedVec()[xOffset] % C;
         int index    = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
@@ -153,7 +153,7 @@ public:
     inline
     const Iterator end()
     {
-        const auto& matrix = grid.getAdjacency(currentMatrixID);
+        const auto& matrix = grid.getWeights(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
         const int realRow = matrix.realRowToSortedVec()[xOffset];
         index += C * matrix.rowLengthVec()[realRow];
@@ -241,7 +241,7 @@ public:
     inline
     Iterator begin() const
     {
-        const auto& matrix = grid.getAdjacency(currentMatrixID);
+        const auto& matrix = grid.getWeights(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
         return Iterator(matrix, index);
     }
@@ -249,7 +249,7 @@ public:
     inline
     const Iterator end() const
     {
-        const auto& matrix = grid.getAdjacency(currentMatrixID);
+        const auto& matrix = grid.getWeights(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
         index += C * matrix.rowLengthVec()[xOffset];
         return Iterator(matrix, index);

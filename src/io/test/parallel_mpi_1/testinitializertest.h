@@ -109,11 +109,6 @@ public:
     {
         TS_ASSERT_EQUALS((int)init.startStep(), 9);
     }
-
-    void testDump()
-    {
-        TS_ASSERT_EQUALS(init.dump(), "foo");
-    }
 };
 
 }

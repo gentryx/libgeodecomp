@@ -52,6 +52,10 @@ public:
     typedef Topologies::Torus<3>::Topology Topology;
 };
 
+/**
+ * Helper class to let TestCell request different numbers of time stes
+ * depending on its dimensionality.
+ */
 template<int DIM>
 class NanoSteps
 {
@@ -59,6 +63,9 @@ public:
     static const int NANO_STEPS = 27;
 };
 
+/**
+ * see above
+ */
 template<>
 class NanoSteps<3>
 {

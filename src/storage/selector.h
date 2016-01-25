@@ -22,9 +22,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * Forward-declaration to resolve cyclic dependency
- */
 class APITraits;
 
 namespace SelectorHelpers {
@@ -78,15 +75,29 @@ template<typename CELL>
 class PrimitiveSelector
 {
 public:
+    PrimitiveSelector(const std::string& variableName = "primitiveType") :
+        variableName(variableName)
+    {}
+
     template<typename MEMBER>
     void operator()(const CELL *source, MEMBER *target, const std::size_t length) const
     {
         std::copy(source, source + length, target);
     }
 
+    int arity() const
+    {
+        return 1;
+    }
+
+    std::string typeName() const
+    {
+        return filterBasePrimitiveTypeName<CELL>();
+    }
+
     const std::string name() const
     {
-        return "primitiveType";
+        return variableName;
     }
 
 #ifdef LIBGEODECOMP_WITH_MPI
@@ -155,6 +166,9 @@ public:
     // intentionally leaving our copyStreak() as it should only be
     // called by SoAGrid, which isn't defined for primitive types
     // anyway.
+
+private:
+    std::string variableName;
 };
 
 }
@@ -436,6 +450,10 @@ private:
 template<>
 class Selector<char> : public SelectorHelpers::PrimitiveSelector<char>
 {
+public:
+    Selector(const std::string name = "primitiveType") :
+        SelectorHelpers::PrimitiveSelector<char>(name)
+    {}
 };
 
 /**
@@ -444,6 +462,10 @@ class Selector<char> : public SelectorHelpers::PrimitiveSelector<char>
 template<>
 class Selector<unsigned char> : public SelectorHelpers::PrimitiveSelector<unsigned char>
 {
+public:
+    Selector(const std::string name = "primitiveType") :
+        SelectorHelpers::PrimitiveSelector<unsigned char>(name)
+    {}
 };
 
 /**
@@ -452,6 +474,10 @@ class Selector<unsigned char> : public SelectorHelpers::PrimitiveSelector<unsign
 template<>
 class Selector<int> : public SelectorHelpers::PrimitiveSelector<int>
 {
+public:
+    Selector(const std::string name = "primitiveType") :
+        SelectorHelpers::PrimitiveSelector<int>(name)
+    {}
 };
 
 /**
@@ -460,6 +486,10 @@ class Selector<int> : public SelectorHelpers::PrimitiveSelector<int>
 template<>
 class Selector<unsigned> : public SelectorHelpers::PrimitiveSelector<unsigned>
 {
+public:
+    Selector(const std::string name = "primitiveType") :
+        SelectorHelpers::PrimitiveSelector<unsigned>(name)
+    {}
 };
 
 /**
@@ -468,6 +498,10 @@ class Selector<unsigned> : public SelectorHelpers::PrimitiveSelector<unsigned>
 template<>
 class Selector<float> : public SelectorHelpers::PrimitiveSelector<float>
 {
+public:
+    Selector(const std::string name = "primitiveType") :
+        SelectorHelpers::PrimitiveSelector<float>(name)
+    {}
 };
 
 /**
@@ -476,6 +510,10 @@ class Selector<float> : public SelectorHelpers::PrimitiveSelector<float>
 template<>
 class Selector<double> : public SelectorHelpers::PrimitiveSelector<double>
 {
+public:
+    Selector(const std::string name = "primitiveType") :
+        SelectorHelpers::PrimitiveSelector<double>(name)
+    {}
 };
 
 }

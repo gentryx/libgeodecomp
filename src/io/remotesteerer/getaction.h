@@ -7,6 +7,10 @@ namespace LibGeoDecomp {
 
 namespace RemoteSteererHelpers {
 
+/**
+ * Returns the value of the specified member of the cell at the
+ * specified coordinate.
+ */
 template<typename CELL_TYPE>
 class GetAction : public PassThroughAction<CELL_TYPE>
 {

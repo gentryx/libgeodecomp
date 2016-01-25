@@ -10,8 +10,8 @@ namespace LibGeoDecomp {
  * helpful if, e.g., a Simulator is internally padding a grid but this
  * implementation details shouldn't be given up to every initializer.
  */
-template<typename CELL, int DIM>
-class ProxyGrid : public GridBase<CELL, DIM>
+template<typename CELL, int DIM, typename WEIGHT_TYPE = double>
+class ProxyGrid : public GridBase<CELL, DIM, WEIGHT_TYPE>
 {
 public:
     ProxyGrid(GridBase<CELL, DIM> *delegate, const CoordBox<DIM>& viewBox) :

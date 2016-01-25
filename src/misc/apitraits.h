@@ -869,7 +869,7 @@ public:
     /**
      * Indicates that the model has particles or features other
      * entities that can be represented by a point mesh. As an
-     * example, the SiloWriter can then dump that mash to an archive.
+     * example, the SiloWriter can then dump that mesh to an archive.
      * See the Voronoi example for instructions on how to use this
      * feature.
      */

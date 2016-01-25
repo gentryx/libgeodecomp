@@ -2820,20 +2820,19 @@ public:
         size(dim.x())
     {}
 
-    virtual void grid(GridBase<CELL, 1> *ret)
+    virtual void grid(GridBase<CELL, 1> *grid)
     {
         // setup sparse matrix
-        GRID *grid = dynamic_cast<GRID *>(ret);
-        std::map<Coord<2>, ValueType> adjacency;
+        std::map<Coord<2>, ValueType> weights;
 
         // setup matrix: ~1 % non zero entries
         for (int row = 0; row < size; ++row) {
             for (int col = 0; col < size / 100; ++col) {
-                adjacency[Coord<2>(row, col * 100)] = 5.0;
+                weights[Coord<2>(row, col * 100)] = 5.0;
             }
         }
 
-        grid->setAdjacency(0, adjacency);
+        grid->setWeights(0, weights);
 
         // setup rhs: not needed, since the grid is intialized with default cells
         // default value of SPMVMCell is 8.0
@@ -2859,12 +2858,12 @@ class SellMatrixInitializer : public CPUBenchmark
         const Coord<1> dim1d(dim.x());
         const int size = dim.x();
         UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> grid(dim1d);
-        std::map<Coord<2>, ValueType> adjacency;
+        std::map<Coord<2>, ValueType> weights;
 
         // setup matrix: ~1 % non zero entries
         for (int row = 0; row < size; ++row) {
             for (int col = 0; col < size / 100; ++col) {
-                adjacency[Coord<2>(row, col * 100)] = 5.0;
+                weights[Coord<2>(row, col * 100)] = 5.0;
             }
         }
 
@@ -2872,7 +2871,7 @@ class SellMatrixInitializer : public CPUBenchmark
         {
             ScopedTimer t(&seconds);
 
-            grid.setAdjacency(0, adjacency);
+            grid.setWeights(0, weights);
         }
 
         if (grid.get(Coord<1>(1)).sum == 4711) {
@@ -3143,7 +3142,7 @@ public:
         init.grid(&gridOld);
 
         // 3. native kernel
-        const Matrix& matrix = gridOld.getAdjacency(0);
+        const Matrix& matrix = gridOld.getWeights(0);
         const ValueType *values = matrix.valuesVec().data();
         const int *cl = matrix.chunkLengthVec().data();
         const int *cs = matrix.chunkOffsetVec().data();

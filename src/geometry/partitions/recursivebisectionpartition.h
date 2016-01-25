@@ -7,6 +7,12 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This class implements a recursive weighted coordinate bisection. It
+ * yields perfectly rectangular domains which can be acutely tuned to
+ * match load profiles, but small changes in the load vector may lead
+ * to huge communication volumes for rebalanciation.
+ */
 template<int DIM>
 class RecursiveBisectionPartition : public Partition<DIM>
 {

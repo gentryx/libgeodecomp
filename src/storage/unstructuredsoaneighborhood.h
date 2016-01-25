@@ -134,14 +134,14 @@ public:
     inline
     Iterator begin() const
     {
-        const auto& matrix = grid.getAdjacency(currentMatrixID);
+        const auto& matrix = grid.getWeights(currentMatrixID);
         return Iterator(matrix, matrix.chunkOffsetVec()[currentChunk]);
     }
 
     inline
     const Iterator end() const
     {
-        const auto& matrix = grid.getAdjacency(currentMatrixID);
+        const auto& matrix = grid.getWeights(currentMatrixID);
         return Iterator(matrix, matrix.chunkOffsetVec()[currentChunk + 1]);
     }
 

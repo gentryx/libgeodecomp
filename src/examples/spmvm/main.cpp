@@ -72,19 +72,17 @@ public:
         : SimpleInitializer<Cell>(Coord<1>(100), steps)
     {}
 
-    virtual void grid(GridBase<Cell, 1> *ret)
+    virtual void grid(GridBase<Cell, 1> *grid)
     {
         // setup diagonal matrix, one neighbor per cell
-        Grid *grid = dynamic_cast<Grid *>(ret);
-
-        std::map<Coord<2>, ValueType> adjacency;
+        std::map<Coord<2>, ValueType> weights;
 
         for (int i = 0; i < 100; ++i) {
             grid->set(Coord<1>(i), Cell(static_cast<double>(i) + 0.1));
-            adjacency[Coord<2>(i, i)] = static_cast<ValueType>(i) + 0.1;
+            weights[Coord<2>(i, i)] = static_cast<ValueType>(i) + 0.1;
         }
 
-        grid->setAdjacency(0, adjacency);
+        grid->setWeights(0, weights);
     }
 };
 
@@ -105,11 +103,10 @@ public:
         size(size), rhsFile(rhsFile), matrixFile(matrixFile)
     {}
 
-    virtual void grid(GridBase<Cell, 1> *ret)
+    virtual void grid(GridBase<Cell, 1> *grid)
     {
         // read rhs and matrix from file
-        Grid *grid = dynamic_cast<Grid *>(ret);
-        std::map<Coord<2>, ValueType> adjacency;
+        std::map<Coord<2>, ValueType> weights;
         std::ifstream rhsIfs;
         std::ifstream matrixIfs;
 
@@ -143,7 +140,7 @@ public:
                     throw std::logic_error("Failed to read data from matrix");
                 }
                 if (tmp != 0.0) {
-                    adjacency[Coord<2>(row, col)] = tmp;
+                    weights[Coord<2>(row, col)] = tmp;
                 }
             }
         }
@@ -151,7 +148,7 @@ public:
         rhsIfs.close();
         matrixIfs.close();
 
-        grid->setAdjacency(0, adjacency);
+        grid->setWeights(0, weights);
     }
 };
 

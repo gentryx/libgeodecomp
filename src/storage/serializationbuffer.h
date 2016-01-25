@@ -38,6 +38,9 @@ public:
 #endif
 };
 
+/**
+ * see above
+ */
 template<typename CELL>
 class Implementation<CELL, typename CELL::API::SupportsSoA, void>
 {
@@ -65,6 +68,9 @@ public:
 #endif
 };
 
+/**
+ * see above
+ */
 template<typename CELL>
 class Implementation<CELL, void, typename CELL::API::SupportsBoostSerialization>
 {

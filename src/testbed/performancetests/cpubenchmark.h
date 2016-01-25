@@ -5,6 +5,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Base class for all performance tests that run on the CPU (as
+ * opposed to the GPU).
+ */
 class CPUBenchmark : public LibFlatArray::cpu_benchmark
 {};
 

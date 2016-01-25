@@ -12,6 +12,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Utility class which bundles common MPI-based input/output code.
+ */
 template<
     typename CELL_TYPE,
     typename TOPOLOGY = typename APITraits::SelectTopology<CELL_TYPE>::Value

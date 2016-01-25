@@ -14,6 +14,9 @@ namespace LibGeoDecomp {
 
 namespace MockWriterHelpers {
 
+/**
+ * internal helper class
+ */
 class MockWriterEvent
 {
 public:
@@ -68,6 +71,10 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_HPX
 
+/**
+ * Internal helper class, records events received by a writer; for use
+ * in unit test.
+ */
 class ThreadSafeEventsStore
 {
 public:
@@ -129,6 +136,12 @@ private:
 
 }
 
+/**
+ * This class implements the Writer interface, but simply records all
+ * calls it receives so that unit tests can later evaluate the
+ * correctness. Useful to check that a given Simulator basically
+ * adheres to the required interface.
+ */
 template<typename CELL_TYPE=TestCell<2> >
 class MockWriter :
         public Clonable<Writer<        CELL_TYPE>, MockWriter<CELL_TYPE> >,

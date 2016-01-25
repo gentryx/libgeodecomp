@@ -23,9 +23,6 @@ namespace LibGeoDecomp {
 class OozeBalancer : public LoadBalancer
 {
 public:
-    friend class PolymorphicSerialization;
-    friend class BoostSerialization;
-    friend class HPXSerialization;
     friend class OozeBalancerTest1;
     friend class OozeBalancerTest2;
 
@@ -38,8 +35,7 @@ public:
      * quotient of the Golden Ratio and Eulers Number is believed to
      * be optimal for most applications.
      */
-    explicit OozeBalancer(
-        double newLoadWeight = GOLDEN_RATIO / EULERS_NUMBER);
+    explicit OozeBalancer(double newLoadWeight = GOLDEN_RATIO / EULERS_NUMBER);
 
     virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads);
 

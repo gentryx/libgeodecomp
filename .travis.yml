@@ -25,4 +25,5 @@ before_script:
 
 script:
     - make
+    - make -j2 tests
     - make check

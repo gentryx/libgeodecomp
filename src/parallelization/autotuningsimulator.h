@@ -11,6 +11,12 @@
 
 namespace LibGeoDecomp{
 
+/**
+ * This Simulator makes use of LibGeoDecomp's parameter optimization
+ * facilities to select the most efficient Simulator implementation
+ * and suitable parameters for the given simulation model and
+ * hardware.
+ */
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 class AutoTuningSimulator
 {

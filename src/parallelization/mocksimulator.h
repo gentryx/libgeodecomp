@@ -7,6 +7,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Test class which records some of its API calls. Used for unit tests.
+ */
 class MockSimulator : public MonolithicSimulator<TestCell<2> >
 {
 public:

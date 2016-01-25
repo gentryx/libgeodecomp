@@ -9,8 +9,7 @@ OozeBalancer::OozeBalancer(double newLoadWeight) :
     newLoadWeight(newLoadWeight)
 {
     if (newLoadWeight < 0 || newLoadWeight > 1) {
-        throw std::invalid_argument(
-                "bad loadWeight in OozeBalancer constructor");
+        throw std::invalid_argument("bad loadWeight in OozeBalancer constructor");
     }
 }
 

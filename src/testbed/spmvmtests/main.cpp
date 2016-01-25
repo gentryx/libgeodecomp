@@ -306,13 +306,12 @@ public:
         size(dim.x())
     {}
 
-    virtual void grid(GridBase<CELL, 1> *ret)
+    virtual void grid(GridBase<CELL, 1> *grid)
     {
         // setup sparse matrix
-        GRID *grid = dynamic_cast<GRID *>(ret);
-        std::map<Coord<2>, double> adjacency;
+        std::map<Coord<2>, double> weights;
 
-        // read matrix into adjacency (this may take some time ...)
+        // read matrix into weights (this may take some time ...)
         // using this C API provided by matrix market
         MM_typecode matcode;
         int M, N, nz;
@@ -340,12 +339,12 @@ public:
             if (fscanf(f, "%d %d %lg\n", &m, &n, &tmp) != 3) {
                 throw std::logic_error("Failed to parse mtx format");
             }
-            adjacency[Coord<2>(m - 1, n - 1)] = tmp;
+            weights[Coord<2>(m - 1, n - 1)] = tmp;
         }
 
         fclose(f);
 
-        grid->setAdjacency(0, adjacency);
+        grid->setWeights(0, weights);
 
         // setup rhs: not needed, since the grid is intialized with default cells
         // default value of SPMVMCell is 8.0
@@ -477,7 +476,7 @@ public:
         init.grid(&gridOld);
 
         // 3. native kernel
-        const Matrix& matrix = gridOld.getAdjacency(0);
+        const Matrix& matrix = gridOld.getWeights(0);
         const double *values = matrix.valuesVec().data();
         const int *cl = matrix.chunkLengthVec().data();
         const int *cs = matrix.chunkOffsetVec().data();
@@ -583,7 +582,7 @@ public:
         init.grid(&gridOld);
 
         // 3. native kernel
-        const Matrix& matrix = gridOld.getAdjacency(0);
+        const Matrix& matrix = gridOld.getWeights(0);
         const double *values = matrix.valuesVec().data();
         const int *cl = matrix.chunkLengthVec().data();
         const int *cs = matrix.chunkOffsetVec().data();

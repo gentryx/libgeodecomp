@@ -7,12 +7,13 @@
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/selector.h>
 
 namespace LibGeoDecomp {
 
-/**
- * Unit test class
- */
+template<typename CELL_TYPE, int DIM>
+class BOVOutput;
+
 class RegionTest;
 
 namespace RegionHelpers {
@@ -425,21 +426,12 @@ public:
     }
 };
 
-/**
- * internal helper class
- */
 template<int DIM>
 class RegionLookupHelper;
 
-/**
- * internal helper class
- */
 template<int DIM>
 class RegionInsertHelper;
 
-/**
- * internal helper class
- */
 template<int DIM>
 class RegionRemoveHelper;
 
@@ -1019,6 +1011,15 @@ public:
         }
 
         return buf.str();
+    }
+
+    inline void printToBOV(
+        const std::string& prefix,
+        const std::string& variableName = "region",
+        float value = 1,
+        int time = 0) const
+    {
+        BOVOutput<float, DIM>::writeRegion(prefix, variableName, boundingBox(), begin(), end(), value, time);
     }
 
     inline bool empty() const
@@ -1930,5 +1931,7 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 }
 
 }
+
+#include <libgeodecomp/io/bovoutput.h>
 
 #endif

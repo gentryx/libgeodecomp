@@ -7,9 +7,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * Forward declaration to break cyclic dependency
- */
 template<typename CELL_TYPE, typename TOPOLOGY>
 class Grid;
 

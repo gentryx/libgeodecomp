@@ -176,7 +176,9 @@ public:
 #ifdef LIBGEODECOMP_WITH_HPX
         // fixme: manual hack, should use infrastructure from updatefunctormacros.
         // fixme: also desirable: user-selectable switch for granularity
-        if (concurrencySpec.enableHPX() && concurrencySpec.preferFineGrainedParallelism()) {
+        // fixme: hotfix for zach
+        if (concurrencySpec.enableHPX()) {
+        // if (concurrencySpec.enableHPX() && concurrencySpec.preferFineGrainedParallelism()) {
             std::vector<hpx::future<void> > updateFutures;
             for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
                 UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOld(gridOld, i->origin.x());
@@ -191,6 +193,8 @@ public:
                         });
                 }
             }
+
+            hpx::lcos::wait_all(std::move(updateFutures));
             // hpx::parallel::for_each(
             //     hpx::parallel::par,
             //     boost::make_counting_iterator(hoodOld.index()),

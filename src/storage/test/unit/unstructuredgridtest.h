@@ -176,14 +176,14 @@ public:
 #endif
     }
 
-    void testAdjacencyMatrix()
+    void testWeightsMatrix()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 128;
         UnstructuredGrid<int, 2, double, 4, 1> *grid =
             new UnstructuredGrid<int, 2, double, 4, 1>(Coord<1>(DIM));
-        std::map<Coord<2>,double> adjacenc0;
-        std::map<Coord<2>,double> adjacenc1;
+        std::map<Coord<2>,double> weights0;
+        std::map<Coord<2>,double> weights1;
         std::map<Coord<2>,double> rawMatrix0;
         std::map<Coord<2>,double> rawMatrix1;
         SellCSigmaSparseMatrixContainer<double,4,1> matrix0 (DIM);
@@ -192,28 +192,28 @@ public:
         for (int i = 0; i < DIM; ++i) {
             grid->set(Coord<1>(i), i);
 
-            adjacenc0  [Coord<2>(i,abs(i*57)     %DIM)] = i   /DIM;
-            adjacenc0  [Coord<2>(i,abs(i*57 + 75)%DIM)] = i*57/DIM;
-            adjacenc0  [Coord<2>(i,abs(i*57 - 7 )%DIM)] = i*7 /DIM;
-            rawMatrix0 [Coord<2>(i,abs(i*57)     %DIM)] = i   /DIM;
-            rawMatrix0 [Coord<2>(i,abs(i*57 + 75)%DIM)] = i*57/DIM;
-            rawMatrix0 [Coord<2>(i,abs(i*57 - 7 )%DIM)] = i*7 /DIM;
+            weights0[  Coord<2>(i,abs(i*57)      % DIM)] =  i      / DIM;
+            weights0[  Coord<2>(i,abs(i*57 + 75) % DIM)] =  i * 57 / DIM;
+            weights0[  Coord<2>(i,abs(i*57 - 7 ) % DIM)] =  i *  7 / DIM;
+            rawMatrix0[Coord<2>(i,abs(i*57)      % DIM)] =  i      / DIM;
+            rawMatrix0[Coord<2>(i,abs(i*57 + 75) % DIM)] =  i * 57 / DIM;
+            rawMatrix0[Coord<2>(i,abs(i*57 - 7 ) % DIM)] =  i * 7  / DIM;
 
-            adjacenc1  [Coord<2>(i,abs(i*57)     %DIM)] = -i   /DIM;
-            adjacenc1  [Coord<2>(i,abs(i*57 + 75)%DIM)] = -i*57/DIM;
-            adjacenc1  [Coord<2>(i,abs(i*57 - 7 )%DIM)] = -i*7 /DIM;
-            rawMatrix1 [Coord<2>(i,abs(i*57)     %DIM)] = -i   /DIM;
-            rawMatrix1 [Coord<2>(i,abs(i*57 + 75)%DIM)] = -i*57/DIM;
-            rawMatrix1 [Coord<2>(i,abs(i*57 - 7 )%DIM)] = -i*7 /DIM;
+            weights1[  Coord<2>(i,abs(i*57)      % DIM)] = -i      / DIM;
+            weights1[  Coord<2>(i,abs(i*57 + 75) % DIM)] = -i * 57 / DIM;
+            weights1[  Coord<2>(i,abs(i*57 - 7 ) % DIM)] = -i *  7 / DIM;
+            rawMatrix1[Coord<2>(i,abs(i*57)      % DIM)] = -i      / DIM;
+            rawMatrix1[Coord<2>(i,abs(i*57 + 75) % DIM)] = -i * 57 / DIM;
+            rawMatrix1[Coord<2>(i,abs(i*57 - 7 ) % DIM)] = -i *  7 / DIM;
         }
 
         matrix0.initFromMatrix(rawMatrix0);
         matrix1.initFromMatrix(rawMatrix1);
-        grid->setAdjacency(0, adjacenc0);
-        grid->setAdjacency(1, adjacenc1);
+        grid->setWeights(0, weights0);
+        grid->setWeights(1, weights1);
 
-        TS_ASSERT_EQUALS(matrix0, grid->getAdjacency(0));
-        TS_ASSERT_EQUALS(matrix1, grid->getAdjacency(1));
+        TS_ASSERT_EQUALS(matrix0, grid->getWeights(0));
+        TS_ASSERT_EQUALS(matrix1, grid->getWeights(1));
 
         delete grid;
 #endif

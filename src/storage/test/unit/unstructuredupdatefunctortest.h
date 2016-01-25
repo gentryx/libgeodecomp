@@ -170,14 +170,14 @@ public:
         region << Streak<1>(Coord<1>(40),   60);
         region << Streak<1>(Coord<1>(100), 150);
 
-        // adjacency matrix looks like this: 1 0 1 0 1 0 ...
+        // weights matrix looks like this: 1 0 1 0 1 0 ...
         std::map<Coord<2>, double> matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < DIM; col += 2) {
                 matrix[Coord<2>(row, col)] = 1;
             }
         }
-        gridOld.setAdjacency(0, matrix);
+        gridOld.setWeights(0, matrix);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -216,14 +216,14 @@ public:
         region << Streak<1>(Coord<1>(40),   60);
         region << Streak<1>(Coord<1>(100), 150);
 
-        // adjacency matrix looks like this: 1 0 1 0 1 0 ...
+        // weights matrix looks like this: 1 0 1 0 1 0 ...
         std::map<Coord<2>, double> matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < DIM; col += 2) {
                 matrix[Coord<2>(row, col)] = 1;
             }
         }
-        gridOld.setAdjacency(0, matrix);
+        gridOld.setWeights(0, matrix);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -262,7 +262,7 @@ public:
         region << Streak<1>(Coord<1>(40),   60);
         region << Streak<1>(Coord<1>(100), 150);
 
-        // adjacency matrix looks like this:
+        // weights matrix looks like this:
         // 0
         // 1
         // 1 1
@@ -275,7 +275,7 @@ public:
                 matrix[Coord<2>(row, col)] = 1;
             }
         }
-        gridOld.setAdjacency(0, matrix);
+        gridOld.setWeights(0, matrix);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -315,7 +315,7 @@ public:
         region << Streak<1>(Coord<1>(40),   60);
         region << Streak<1>(Coord<1>(100), 150);
 
-        // adjacency matrix looks like this:
+        // weights matrix looks like this:
         // 0
         // 1
         // 1 1
@@ -328,7 +328,7 @@ public:
                 matrix[Coord<2>(row, col)] = 1;
             }
         }
-        gridOld.setAdjacency(0, matrix);
+        gridOld.setWeights(0, matrix);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -369,7 +369,7 @@ public:
         // loop peeling in last chunk
         region << Streak<1>(Coord<1>(100), 149);
 
-        // adjacency matrix looks like this:
+        // weights matrix looks like this:
         // 0
         // 1
         // 1 1
@@ -381,7 +381,7 @@ public:
                 matrix[Coord<2>(row, col)] = 1;
             }
         }
-        gridOld.setAdjacency(0, matrix);
+        gridOld.setWeights(0, matrix);
 
         UnstructuredUpdateFunctor<UnstructuredSoATestCell<1> > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -422,7 +422,7 @@ public:
         // loop peeling in last chunk
         region << Streak<1>(Coord<1>(100), 149);
 
-        // adjacency matrix looks like this:
+        // weights matrix looks like this:
         // 0
         // 1
         // 1 1
@@ -434,7 +434,7 @@ public:
                 matrix[Coord<2>(row, col)] = 1;
             }
         }
-        gridOld.setAdjacency(0, matrix);
+        gridOld.setWeights(0, matrix);
 
         UnstructuredUpdateFunctor<UnstructuredSoATestCell<150> > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;

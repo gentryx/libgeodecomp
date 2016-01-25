@@ -5,6 +5,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Test class used for avaluation of communication performance.
+ */
 class MySimpleCell
 {
 public:

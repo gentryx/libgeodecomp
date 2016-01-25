@@ -7,10 +7,6 @@
 #include <mpi.h>
 #endif
 
-#ifndef LIBGEODECOMP_WITH_HPX
-#define HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(FOO)
-#endif
-
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <string>
 #include <stdexcept>
@@ -36,9 +32,6 @@ template<typename CELL_TYPE>
 class Writer
 {
 public:
-    friend class PolymorphicSerialization;
-    friend class BoostSerialization;
-    friend class HPXSerialization;
     friend class WriterTest;
 
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;

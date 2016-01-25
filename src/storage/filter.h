@@ -14,10 +14,6 @@
 #include <libgeodecomp/communication/typemaps.h>
 #endif
 
-#ifndef LIBGEODECOMP_WITH_HPX
-#define HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(FOO)
-#endif
-
 namespace LibGeoDecomp {
 
 namespace FilterHelpers {
@@ -121,15 +117,9 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_MPI
 
-/**
- * see below
- */
 template<typename MEMBER, int FLAG>
 class GetMPIDatatype0;
 
-/**
- * see below
- */
 template<typename MEMBER, int FLAG>
 class GetMPIDatatype1;
 
@@ -202,99 +192,6 @@ public:
 
 #endif
 
-/**
- * We're intentionally giving only few specializations for this helper
- * as it's mostly meant to be used with VisIt's BOV format, and this
- * is only defined on tree types.
- */
-template<typename MEMBER>
-class GetTypeName
-{
-public:
-    std::string operator()() const
-    {
-        throw std::invalid_argument("no string representation known for member type");
-    }
-};
-
-/**
- * see above
- */
-template<>
-class GetTypeName<bool>
-{
-public:
-    std::string operator()() const
-    {
-        return "BYTE";
-    }
-};
-
-/**
- * see above
- */
-template<>
-class GetTypeName<char>
-{
-public:
-    std::string operator()() const
-    {
-        return "BYTE";
-    }
-};
-
-/**
- * see above
- */
-template<>
-class GetTypeName<float>
-{
-public:
-    std::string operator()() const
-    {
-        return "FLOAT";
-    }
-};
-
-/**
- * see above
- */
-template<>
-class GetTypeName<double>
-{
-public:
-    std::string operator()() const
-    {
-        return "DOUBLE";
-    }
-};
-
-/**
- * see above
- */
-template<>
-class GetTypeName<int>
-{
-public:
-    std::string operator()() const
-    {
-        return "INT";
-    }
-};
-
-/**
- * see above
- */
-template<>
-class GetTypeName<long>
-{
-public:
-    std::string operator()() const
-    {
-        return "LONG";
-    }
-};
-
 }
 
 /**
@@ -306,9 +203,6 @@ template<typename CELL, typename MEMBER, typename EXTERNAL>
 class Filter : public FilterBase<CELL>
 {
 public:
-    friend class PolymorphicSerialization;
-    friend class BoostSerialization;
-    friend class HPXSerialization;
     friend class PPMWriterTest;
 
     std::size_t sizeOf() const
@@ -332,7 +226,7 @@ public:
 
     virtual std::string typeName() const
     {
-        return FilterHelpers::GetTypeName<EXTERNAL>()();
+        return filterBasePrimitiveTypeName<EXTERNAL>();
     }
 
     virtual int arity() const

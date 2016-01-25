@@ -12,9 +12,15 @@ namespace LibGeoDecomp {
 
 namespace CUDAStepperHelpers {
 
+/**
+ * Internal helper class
+ */
 template<int DIM>
 class LoadAbsoluteCoord;
 
+/**
+ * see above
+ */
 template<>
 class LoadAbsoluteCoord<2>
 {
@@ -29,6 +35,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class LoadAbsoluteCoord<3>
 {
@@ -45,9 +54,16 @@ public:
 };
 
 // fixme: inspect resulting PTX of this implementation and benchmark the code
+
+/**
+ * A simple/stupid implementation of a neighborhood object for CUDA.
+ */
 template<typename CELL_TYPE, typename TOPOLOGY, int DIM>
 class SimpleHood;
 
+/**
+ * see above
+ */
 template<typename CELL_TYPE, typename TOPOLOGY>
 class SimpleHood<CELL_TYPE, TOPOLOGY, 2>
 {
@@ -110,6 +126,9 @@ private:
     const CELL_TYPE *edgeCell;
 };
 
+/**
+ * see above
+ */
 template<typename CELL_TYPE, typename TOPOLOGY>
 class SimpleHood<CELL_TYPE, TOPOLOGY, 3>
 {

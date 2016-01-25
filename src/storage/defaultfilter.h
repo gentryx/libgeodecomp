@@ -1,12 +1,7 @@
 #ifndef LIBGEODECOMP_STORAGE_DEFAULTFILTER_H
 #define LIBGEODECOMP_STORAGE_DEFAULTFILTER_H
 
-#include <libgeodecomp/config.h>
 #include <libgeodecomp/storage/filter.h>
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_HPX
-#include <hpx/runtime/serialization/serialize.hpp>
-#endif
 
 namespace LibGeoDecomp {
 
@@ -18,12 +13,6 @@ template<typename CELL, typename MEMBER, typename EXTERNAL>
 class DefaultFilter : public Filter<CELL, MEMBER, EXTERNAL>
 {
 public:
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(DefaultFilter)
-
-    friend class PolymorphicSerialization;
-    friend class BoostSerialization;
-    friend class HPXSerialization;
-
     void copyStreakInImpl(
         const EXTERNAL *source,
         MemoryLocation::Location sourceLocation,

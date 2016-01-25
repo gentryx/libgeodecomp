@@ -241,7 +241,7 @@ public:
         // SelectUpdateLineX
         ANY_API,
         // SelectTopology
-        TopologiesHelpers::UnstructuredTopology,
+        Topologies::Unstructured::Topology,
         // SelectThreadedUpdate,
         ANY_THREADED_UPDATE modelThreadingSpec)
     {
@@ -299,6 +299,11 @@ public:
     }
 };
 
+/**
+ * Unsurprisingly, this class requests the UpdateFunctor to use OpenMP
+ * for parallelization. Flags can optionally steer the granularity and
+ * dynamics of load distribution among the threads.
+ */
 class ConcurrencyEnableOpenMP
 {
 public:
@@ -333,6 +338,9 @@ private:
     bool enableFineGrainedParallelism;
 };
 
+/**
+ * Like its counterpart for OpenMP, this class requests an HPX-based parallel update.
+ */
 class ConcurrencyEnableHPX
 {
 public:

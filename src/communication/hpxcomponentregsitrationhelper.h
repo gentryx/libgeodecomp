@@ -2,14 +2,12 @@
 #define LIBGEODECOMP_COMMUNICATION_HPXCOMPONENTREGSITRATIONHELPER_H
 
 namespace {
+
 template<typename COMPONENT>
 class hpx_plugin_exporter_factory;
 
 template<typename COMPONENT>
 class init_registry_factory_static;
-
-template<typename T>
-class hpx_plugin_exporter_registry;
 
 }
 

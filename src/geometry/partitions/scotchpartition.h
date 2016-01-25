@@ -11,6 +11,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Decomposes a regular grid with the help of Scotch. This implies the
+ * re-creation of the grid's inherent graph, so memory consumption is
+ * high, but so is the quality of the decomposition.
+ */
 template<int DIM>
 class ScotchPartition : public Partition<DIM>
 {
