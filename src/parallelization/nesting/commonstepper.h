@@ -18,23 +18,19 @@ public:
     {
         std::map<Coord<2>, double> containerAdjacency;
 
-        for (Adjacency::const_iterator it = adjacency.begin(); it != adjacency.end(); ++it)
-        {
-            int from = it->first;
+        for (auto& coord : adjacency.getRegion()) {
+            int from = coord.y();
+            int to = coord.x();
 
-            for (Adjacency::mapped_type::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
-            {
-                int to = *it2;
-                containerAdjacency[Coord<2>(from, to)] = 1.0;
-            }
+            containerAdjacency[Coord<2>(from, to)] = 1.0;
         }
 
-        grid.setAdjacency(0, containerAdjacency);
+        grid.setWeights(0, containerAdjacency);
     }
 #endif
 
     template<typename CONTAINER>
-    AdjacencySetter(CONTAINER &, const Adjacency &)
+    AdjacencySetter(CONTAINER& , const Adjacency& )
     { }
 
 };
@@ -100,7 +96,7 @@ public:
         for (std::size_t i = 0; i < innerSetPatchProviders.size(); ++i) {
             addPatchProvider(innerSetPatchProviders[i], ParentType::INNER_SET);
         }
-}
+    }
 
     inline virtual void update(std::size_t nanoSteps)
     {

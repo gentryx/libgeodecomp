@@ -686,6 +686,9 @@ public:
         Region<1> ret = *this;
         Region<1> newCoords = *this;
 
+        // neighbors vector is defined outside of the loop to avoid reallocations
+        std::vector<int> neighbors;
+
         for (unsigned pass = 0; pass < width; ++pass) {
             Region add;
 
@@ -696,12 +699,9 @@ public:
                  streak != newCoords.endStreak();
                  ++streak) {
                 for (int x = streak->origin.x(); x < streak->endX; ++x) {
-                    typename ADJACENCY::const_iterator it = adjacency.find(x);
-                    if (it == adjacency.end()) {
-                        continue;
-                    }
+                    neighbors.clear();
+                    adjacency.getNeighbors(x, &neighbors);
 
-                    const std::vector<int>& neighbors = it->second;
                     for (std::vector<int>::const_iterator i = neighbors.begin(); i != neighbors.end(); ++i) {
                         Coord<DIM> c(*i);
                         if (ret.count(c) == 0) {

@@ -74,10 +74,9 @@ public:
 
             region << Coord<1>(1);
 
-            Adjacency adjacency = {
-                std::make_pair(1, std::vector<int>{2, 3}),
-                std::make_pair(2, std::vector<int>{4, 5, 6}),
-            };
+            Adjacency adjacency;
+            adjacency.insert(1, std::vector<int>{2, 3});
+            adjacency.insert(2, std::vector<int>{4, 5, 6});
 
             Region<1> expanded1 = region.expandWithAdjacency(1, adjacency);
             TS_ASSERT_EQUALS(1, expanded1.count(Coord<1>(1)));
@@ -112,11 +111,9 @@ public:
             region << Coord<1>(1);
             region << Coord<1>(2);
 
-            Adjacency adjacency =
-            {
-                std::make_pair(1, std::vector<int>{2, 3, 7, 8}),
-                std::make_pair(2, std::vector<int>{4, 5, 6}),
-            };
+            Adjacency adjacency;
+            adjacency.insert(1, std::vector<int>{2, 3, 7, 8});
+            adjacency.insert(2, std::vector<int>{4, 5, 6});
 
             Region<1> expanded1 = region.expandWithAdjacency(1, adjacency);
             for(int i = 1; i <= 8; ++i)

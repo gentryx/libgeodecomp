@@ -114,10 +114,13 @@ class UnstructuredSoAGrid : public GridBase<ELEMENT_TYPE, 1>
 public:
     const static int DIM = 1;
 
+    static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<ELEMENT_TYPE>::VALUE;
+
     explicit UnstructuredSoAGrid(
         const Coord<DIM>& dim = Coord<DIM>(),
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
-        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
+        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
+        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
         elements(dim.x(), 1, 1),
         edgeElement(edgeElement),
         dimension(dim)
@@ -142,7 +145,8 @@ public:
     explicit
     UnstructuredSoAGrid(const CoordBox<DIM> box,
                         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
-                        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
+                        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
+                        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
         elements(box.dimensions.x(), 1, 1),
         edgeElement(edgeElement),
         dimension(box.dimensions)
@@ -349,6 +353,35 @@ public:
     void callback(UnstructuredSoAGrid *newGrid, FUNCTOR functor) const
     {
         elements.callback(&newGrid->elements, functor);
+    }
+
+    void saveRegion(char *target, const Region<DIM>& region) const
+    {
+        char *dataIterator = target;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+            Streak<DIM> s = *i;
+            std::size_t length = s.length();
+            int x = s.origin.x();
+            elements.save(x, 0, 0, dataIterator, length);
+            dataIterator += length * AGGREGATED_MEMBER_SIZE;
+        }
+    }
+
+    void loadRegion(const char *source, const Region<DIM>& region)
+    {
+        const char *dataIterator = source;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+            Streak<DIM> s = *i;
+            std::size_t length = s.length();
+            elements.load(s.origin.x(), 0, 0, dataIterator, length);
+            dataIterator += length * AGGREGATED_MEMBER_SIZE;
+        }
     }
 
 protected:
