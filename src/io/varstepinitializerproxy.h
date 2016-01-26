@@ -17,7 +17,7 @@ using  boost::shared_ptr;
  */
 namespace LibGeoDecomp {
 template<typename CELL>
-class VarStepInitializerProxy: public /*Initializer<CELL>,*/ ClonableInitializer<CELL>
+class VarStepInitializerProxy : public ClonableInitializer<CELL>
 {
 public:
     typedef typename Initializer<CELL>::Topology Topology;

@@ -187,14 +187,15 @@ public:
 
     void run()
     {
-       if(normalizeSteps(-0.25)){
-           runTest();
-       }else{
-           throw std::logic_error(
+        prepareSimulations();
+        if(normalizeSteps(-0.25)){
+            runTest();
+        }else{
+            throw std::logic_error(
             "normalizeSteps in AutotuningSimulator::run() faild, no optimization is done!");
-       }
-       std::string best = getBestSim();
-       runToCompletion(best);
+        }
+        std::string best = getBestSim();
+        runToCompletion(best);
     }
 
     std::string getBestSim()
@@ -262,8 +263,23 @@ public:
     void runTest()
     {
         typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
-        //TODO herausziehen der Addxy Funktionen in separate Funktion?
+        for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
+            OPTIMIZER_TYPE optimizer(iter->second->parameters);
+            iter->second->parameters = optimizer(
+                optimizationSteps,
+                *iter->second->simulationFactory);
+            iter->second->fitness = optimizer.getFitness();
 
+            LOG(Logger::DBG, "Result of the " << iter->second->simulationType
+                << ": " << iter->second->fitness << std::endl
+                << "new Parameters:"<< std::endl << iter->second->parameters
+                << std::endl);
+        }
+    }
+
+    void prepareSimulations()
+    {
+        typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
         for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
             LOG(Logger::DBG, iter->first);
             for (unsigned i = 0; i < writers.size(); ++i) {
@@ -275,17 +291,6 @@ public:
             for (unsigned i = 0; i < steerers.size(); ++i) {
                 iter->second->simulationFactory->addSteerer(*steerers[i].get()->clone());
             }
-
-            OPTIMIZER_TYPE optimizer(iter->second->parameters);
-            iter->second->parameters = optimizer(
-                optimizationSteps,
-                *iter->second->simulationFactory);
-            iter->second->fitness = optimizer.getFitness();
-
-            LOG(Logger::DBG, "Result of the " << iter->second->simulationType
-                << ": " << iter->second->fitness << std::endl
-                << "new Parameters:"<< std::endl << iter->second->parameters
-                << std::endl);
         }
     }
 
