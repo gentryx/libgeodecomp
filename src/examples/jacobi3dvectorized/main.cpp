@@ -32,11 +32,11 @@ public:
     template<typename NEIGHBORHOOD>
     static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, const int nanoStep)
     {
-        LIBFLATARRAY_LOOP_PEELER(double, 16, long, x, endX, updateLineImplmentation, target, hood, nanoStep);
+        LIBFLATARRAY_LOOP_PEELER(double, 16, long, x, endX, updateLineImplementation, target, hood, nanoStep);
     }
 
     template<typename DOUBLE, typename NEIGHBORHOOD>
-    static void updateLineImplmentation(
+    static void updateLineImplementation(
         long *x,
         long endX,
         Cell *target,
