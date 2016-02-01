@@ -290,7 +290,7 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runToCompletion(std::string
     if ( ! isInMap(optimizerName))
         throw std::invalid_argument(
             "AutotuningSimulator<...>::runToCompletion() get invalid optimizerName");
-    shared_ptr<Initializer<CELL_TYPE>> originalInitializer = varStepInitializer.getInitializer();
+    shared_ptr<Initializer<CELL_TYPE> > originalInitializer = varStepInitializer.getInitializer();
     varStepInitializer.setMaxSteps(originalInitializer->maxSteps());
     simulations[optimizerName]->simulationFactory->operator()(simulations[optimizerName]->parameters);
 }
