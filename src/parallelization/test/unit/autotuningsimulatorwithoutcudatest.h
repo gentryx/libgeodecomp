@@ -261,7 +261,9 @@ public:
 
     void tearDown()
     {
+#ifdef LIBGEODECOMP_WITH_THREADS
         delete cfab;
+#endif
         delete fab;
         delete initializerProxy;
     }
@@ -280,7 +282,7 @@ public:
                 << initializerProxy->getMaxSteps())
             TS_ASSERT_EQUALS(i,initializerProxy->maxSteps());
             TS_ASSERT_EQUALS(i,initializerProxy->getMaxSteps());
-            aktFitness = cfab->operator()(cfab->parameters());
+            aktFitness = fab->operator()(fab->parameters());
             LOG(Logger::DBG, "Fitness: " << aktFitness)
             TS_ASSERT(oldFitness > aktFitness);
             oldFitness = aktFitness;
@@ -359,5 +361,7 @@ private:
     VarStepInitializerProxy<SimFabTestCell> *initializerProxy;
     ClonableInitializer<SimFabTestCell> *initializerClonable;
     SimulationFactory<SimFabTestCell> *fab;
+#ifdef LIBGEODECOMP_WITH_THREADS
     SimulationFactory<SimFabTestCell> *cfab;
+#endif
 };
