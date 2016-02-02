@@ -96,11 +96,13 @@ public:
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
         for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++)
+            iter != names.end(); iter++){
             LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
             << ats.getFitness(*iter)<< std::endl
             << ats.getSimulationParameters(*iter))
+        }
     }
+
     void testNormalizeSteps()
     {
         const double goal = -0.4d;
@@ -117,7 +119,7 @@ public:
 
         unsigned startValue = steps / 2;
         if (startValue < 2){
-            startValue =2;
+            startValue = 2;
         }
         steps = ats2.normalizeSteps(goal,startValue);
         LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << " ,"
@@ -141,10 +143,11 @@ public:
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
         for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++)
+            iter != names.end(); iter++){
             LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
             << ats.getFitness(*iter)<< std::endl
             << ats.getSimulationParameters(*iter))
+        }
     }
 
     void testAddOwnSimulations()
@@ -153,7 +156,6 @@ public:
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
-        //ats.deleteAllSimulations();
         SimulationParameters params;
         params.addParameter("WavefrontWidth", 1, 300);
         params.addParameter("WavefrontHeight", 1, 300);
@@ -207,7 +209,7 @@ public:
         params.addParameter("WavefrontWidth", 1, 300);
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
-
+        // The e in CacheBlockingSimlator is missing...
         TS_ASSERT_THROWS(
             ats.addNewSimulation("1.CacheBlockingSimulator",
                                  "CachBlockingSimulation"),
@@ -252,11 +254,9 @@ public:
         maxSteps = 100;
         initializerProxy = new VarStepInitializerProxy<SimFabTestCell>(new SimFabTestInitializer(dim,maxSteps));
 #ifdef LIBGEODECOMP_WITH_THREADS
-        cfab = new CacheBlockingSimulationFactory<SimFabTestCell>(
-                    initializerProxy);
+        cfab = new CacheBlockingSimulationFactory<SimFabTestCell>(initializerProxy);
 #endif
-        fab = new SerialSimulationFactory<SimFabTestCell>(
-                    initializerProxy);
+        fab = new SerialSimulationFactory<SimFabTestCell>(initializerProxy);
     }
 
     void tearDown()
@@ -274,7 +274,7 @@ public:
         unsigned maxSteps = initializerProxy->maxSteps();
         double oldFitness = DBL_MIN;
         double aktFitness = 0.0;
-        for(unsigned i = 10; i < maxSteps; i*=2){
+        for(unsigned i = 10; i < maxSteps; i*=2) {
             LOG(Logger::DBG, "setMaxSteps("<<i<<")")
             initializerProxy->setMaxSteps(i);
             LOG(Logger::DBG,"i: "<< i << " maxSteps(): "
@@ -297,8 +297,7 @@ public:
     void testBasic()
     {
         LOG(Logger::INFO, "SimulationFactoryTest::testBasic")
-        for (int i =1;i<=2;i++)
-        {
+        for (int i =1;i<=2;i++) {
             Simulator<SimFabTestCell> *sim = fab->operator()();
             sim->run();
             delete sim;
@@ -359,7 +358,6 @@ private:
     Coord<3> dim;
     unsigned maxSteps;
     VarStepInitializerProxy<SimFabTestCell> *initializerProxy;
-    ClonableInitializer<SimFabTestCell> *initializerClonable;
     SimulationFactory<SimFabTestCell> *fab;
 #ifdef LIBGEODECOMP_WITH_THREADS
     SimulationFactory<SimFabTestCell> *cfab;
