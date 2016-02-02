@@ -12,7 +12,7 @@
 
 using namespace LibGeoDecomp;
 
-namespace LibGeoDecomp {
+namespace LibGeoDecomp{
 
 class SimFabTestCell
 {
@@ -55,6 +55,7 @@ public:
     double temp;
 };
 
+
 class SimFabTestInitializer : public SimpleInitializer<SimFabTestCell>
 {
 public:
@@ -89,31 +90,65 @@ public:
     {
         LOG(Logger::INFO, "AutotuningSimulatorWithCudaTest::TestBasicPatternOptimized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
         ats.setSimulationSteps(10);
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
 
-        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
+        for (std::vector<std::string>::iterator iter = names.begin();
+            iter != names.end(); iter++) {
             LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
                 << ats.getFitness(*iter)<< std::endl
                 << ats.getSimulationParameters(*iter));
         }
     }
 
+    void testNormalizeSteps()
+    {
+        const double goal = -0.4;
+        LOG(Logger::INFO, "testNormalizeSteps()")
+        AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
+            new SimFabTestInitializer(dim, maxSteps));
+
+        unsigned steps = ats.normalizeSteps(goal);
+        unsigned originalSteps = steps;
+        LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << ") is: " << steps)
+
+        AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats2(
+            new SimFabTestInitializer(dim, maxSteps));
+
+        unsigned startValue = steps / 2;
+        if (startValue < 2){
+            startValue = 2;
+        }
+        steps = ats2.normalizeSteps(goal,startValue);
+        LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << " ,"
+                    << startValue << ") is: " << steps)
+        // TODO MAYBE the following ASSERTs in this test are to strong and
+        // depends to much on the System, where the test is running
+        TS_ASSERT( steps <= originalSteps + 5 && steps >= originalSteps - 5 );
+        startValue = steps + (steps / 2);
+        steps = ats2.normalizeSteps(goal,startValue);
+        LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << " ,"
+                    << startValue << ") is: " << steps)
+        TS_ASSERT( steps <= originalSteps + 5 && steps >= originalSteps - 5);
+    }
+
+
     void testBasicSimplexOptimized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testBasicSimplexOptimized()")
         AutoTuningSimulator<SimFabTestCell, SimplexOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
         ats.setSimulationSteps(10);
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
 
-        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
+        for (std::vector<std::string>::iterator iter = names.begin(); 
+            iter != names.end(); iter++) {
             LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
                 << ats.getFitness(*iter)<< std::endl
-                << ats.getSimulationParameters(*iter));
+                << ats.getSimulationParameters(*iter))
         }
     }
 
@@ -121,16 +156,15 @@ public:
     {
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
         ats.deleteAllSimulations();
         SimulationParameters params;
-        params.addParameter("WavefrontWidth", 1, 300);
-        params.addParameter("WavefrontHeight", 1, 300);
-        params.addParameter("PipelineLength", 1, 25);
-        ats.addNewSimulation("1.CacheBlockingSimulator",
-            "CacheBlockingSimulation",
-            SimFabTestInitializer(dim,maxSteps));
-        ats.setParameters(params, "1.CacheBlockingSimulator");
+        params.addParameter("BlockDimX", 1, 128);
+        params.addParameter("BlockDimY", 1, 8);
+        params.addParameter("BlockDimZ", 1, 8);
+        ats.addNewSimulation("1.CudaSimulator",
+            "CudaSimulation");
+        ats.setParameters(params, "1.CudaSimulator");
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
 
@@ -145,14 +179,14 @@ public:
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest:test:ManuallyParameterized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
 
         SimulationParameters params;
-        params.addParameter("WavefrontWidth", 1, 300);
-        params.addParameter("WavefrontHeight", 1, 300);
-        params.addParameter("PipelineLength", 1, 25);
+        params.addParameter("BlockDimX", 1, 64);
+        params.addParameter("BlockDimY", 1, 6);
+        params.addParameter("BlockDimZ", 1, 6);
 
-        ats.setParameters(params, "CacheBlockingSimulation");
+        ats.setParameters(params, "CudaSimulation");
         ats.run();
 
         std::vector<std::string> names = ats.getSimulationNames();
@@ -168,16 +202,16 @@ public:
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest:testInvalidArguments()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
         // This test don't test SimulationParameters!!!!
         SimulationParameters params;
-        params.addParameter("WavefrontWidth", 1, 300);
-        params.addParameter("WavefrontHeight", 1, 300);
-        params.addParameter("PipelineLength", 1, 25);
-        TS_ASSERT_THROWS(ats.addNewSimulation("1.CacheBlockingSimulator",
-            "CachBlockingSimulation",
-            SimFabTestInitializer(dim,maxSteps)), std::invalid_argument);
-        TS_ASSERT_THROWS(ats.setParameters(params, "1.CacheBlockingSimulator"),
+        params.addParameter("BlockDimX", 1, 64);
+        params.addParameter("BlockDimY", 1, 6);
+        params.addParameter("BlockDimZ", 1, 6);
+        // A JuliaSimulator is not valid
+        TS_ASSERT_THROWS(ats.addNewSimulation("1.CudaSimulator",
+            "JuliaSimulation"), std::invalid_argument);
+        TS_ASSERT_THROWS(ats.setParameters(params, "1.CudaSimulator"),
             std::invalid_argument);
         TS_ASSERT_THROWS(ats.getFitness("NoSimulator"), std::invalid_argument);
         TS_ASSERT_THROWS(ats.getSimulationParameters("NoSimulator"), std::invalid_argument);
@@ -189,12 +223,11 @@ public:
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testAddWriter()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            SimFabTestInitializer(dim, maxSteps));
+            new SimFabTestInitializer(dim, maxSteps));
         ats.deleteAllSimulations();
         ats.addNewSimulation(
-            "addWriterTest",
             "SerialSimulation",
-            SimFabTestInitializer(dim, maxSteps));
+            "SerialSimulation");
         std::ostringstream buf;
         ats.addWriter(static_cast<Writer<SimFabTestCell> *>(new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
         ats.run();
@@ -206,8 +239,7 @@ private:
 
 };
 
-
-
+#include <libgeodecomp/io/varstepinitializerproxy.h>
 
 class SimulationFactoryWithCudaTest : public CxxTest::TestSuite
 {
@@ -216,18 +248,49 @@ public:
     {
         dim = Coord<3>(100,100,100);
         maxSteps = 100;
-        cudaFab = new CudaSimulationFactory<SimFabTestCell>(SimFabTestInitializer(dim, maxSteps));
-        cFab = new CacheBlockingSimulationFactory<SimFabTestCell>(
-                    SimFabTestInitializer(dim, maxSteps));
-        fab = new SerialSimulationFactory<SimFabTestCell>(
-                    SimFabTestInitializer(dim, maxSteps));
+        initializerProxy = new VarStepInitializerProxy<SimFabTestCell>(
+                            new SimFabTestInitializer(dim,maxSteps));
+cudaFab = new CudaSimulationFactory<SimFabTestCell>(initializerProxy);
+#ifdef LIBGEODECOMP_WITH_THREADS
+        cFab = new CacheBlockingSimulationFactory<SimFabTestCell>(initializerProxy);
+#endif
+        fab = new SerialSimulationFactory<SimFabTestCell>(initializerProxy);
     }
 
     void tearDown()
     {
         delete cudaFab;
         delete fab;
+#ifdef LIBGEODECOMP_WITH_THREADS
         delete cFab;
+#endif
+        delete initializerProxy;
+    }
+
+    void testVarStepInitializerProxy()
+    {
+        LOG(Logger::INFO, "SimulationFactoryTest::testVarStepInitializerProxy()")
+        unsigned maxSteps = initializerProxy->maxSteps();
+        double oldFitness = DBL_MIN;
+        double aktFitness = 0.0;
+        for (unsigned i = 10; i < maxSteps; i*=2) {
+            LOG(Logger::DBG, "setMaxSteps("<<i<<")")
+            initializerProxy->setMaxSteps(i);
+            LOG(Logger::DBG,"i: "<< i << " maxSteps(): "
+                << initializerProxy->maxSteps() << " getMaxSteps(): "
+                << initializerProxy->getMaxSteps())
+            TS_ASSERT_EQUALS(i,initializerProxy->maxSteps());
+            TS_ASSERT_EQUALS(i,initializerProxy->getMaxSteps());
+            aktFitness = fab->operator()(fab->parameters());
+            LOG(Logger::DBG, "Fitness: " << aktFitness)
+            TS_ASSERT(oldFitness > aktFitness);
+            oldFitness = aktFitness;
+        }
+        LOG(Logger::DBG, "getInitializer()->maxSteps(): "
+                        << initializerProxy->getInitializer()->maxSteps()
+                        << " \"initial\" maxSteps: " << maxSteps)
+        TS_ASSERT_EQUALS(initializerProxy->getInitializer()->maxSteps()
+                        , maxSteps);
     }
 
     void testBasic()
@@ -242,6 +305,7 @@ public:
 
     void testCacheBlockingFitness()
     {
+#ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testCacheBlockingFitness()")
         for (int i = 1; i <= 2; i++) {
             cFab->parameters()["PipelineLength"].setValue(1);
@@ -250,6 +314,7 @@ public:
             double fitness = cFab->operator()(cFab->parameters());
             LOG(Logger::INFO,  i << " fitness: " << fitness );
         }
+#endif
     }
 
     void testCudaFitness()
@@ -266,14 +331,16 @@ public:
 
     void testAddWriterToSimulator()
     {
+#ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testAddWriterToSimulator()")
-        CacheBlockingSimulator<SimFabTestCell> *sim =  (
-            CacheBlockingSimulator<SimFabTestCell> *)cFab->operator()();
+        CacheBlockingSimulator<SimFabTestCell> *sim =  
+                (CacheBlockingSimulator<SimFabTestCell> *)cFab->operator()();
         std::ostringstream buf;
         sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
         sim->run();
         double fitness = cFab->operator()(cFab->parameters());
         LOG(Logger::INFO, "Fitness: " << fitness << std::endl)
+#endif
     }
 
     void testAddWriterToSerialSimulationFactory()
@@ -288,12 +355,15 @@ public:
 
     void testAddWriterToCacheBlockingSimulationFactory()
     {
-        LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testAddWriterToCacheBlockingSimulationFactory()")
+#ifdef LIBGEODECOMP_WITH_THREADS
+        LOG(Logger::INFO, "SimulationFactoryWithCudaTest"
+            << "::testAddWriterToCacheBlockingSimulationFactory()")
         std::ostringstream buf;
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
         cFab->addWriter(*writer);
         cFab->operator()(cFab->parameters());
         delete writer;
+#endif
     }
 
     void testAddWriterToCudaSimulationFactory()
@@ -309,7 +379,10 @@ public:
 private:
     Coord<3> dim;
     unsigned maxSteps;
-    SimulationFactory<SimFabTestCell> *cudaFab, *fab, *cFab;
+    VarStepInitializerProxy<SimFabTestCell> *initializerProxy;
+    SimulationFactory<SimFabTestCell> *fab, *cudaFab;
+#ifdef LIBGEODECOMP_WITH_THREADS
+    SimulationFactory<SimFabTestCell> *cfab;
+#endif
 };
-
-}
+} // namespace LibGeoDecomp
