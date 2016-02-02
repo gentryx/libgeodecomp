@@ -88,7 +88,11 @@ private:
     std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > parallelWriters;
     std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
     std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
- 
+
+    /**
+     * fitnessGoal must be negative, the autotuning is searching for a Maximum.
+     */
+    static const double fitnessGoal = -1.0; 
     /**
      * If some missconfiguration is happned the defaultInitializerSteps will be used.
      */
@@ -257,11 +261,11 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::run()
 {
     prepareSimulations();
-    if(normalizeSteps(-0.25)){
+    if(normalizeSteps(fitnessGoal)){
         runTest();
     }else{
         LOG(Logger::WARN,"normalize Steps was not successful, a default value is used!")
-        varStepInitializer.setMaxSteps(5);
+        varStepInitializer.setMaxSteps(defaultInitializerSteps);
         runTest();
     }
     std::string best = getBestSim();
