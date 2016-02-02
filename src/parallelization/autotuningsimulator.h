@@ -272,10 +272,10 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 std::string AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getBestSim()
 {
 std::string bestSimulation;
-double tmpFitness = DBL_MAX;
+double tmpFitness = -1 * DBL_MAX;
 typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
 for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
-    if (iter->second->fitness < tmpFitness){
+    if (iter->second->fitness > tmpFitness){
         tmpFitness = iter->second->fitness;
         bestSimulation = iter->first;
     }
