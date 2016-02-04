@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 Andreas Schäfer
+ * Copyright 2014-2016 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,17 +12,8 @@
 #include <boost/preprocessor/comparison/less.hpp>
 #include <boost/preprocessor/if.hpp>
 #include <boost/preprocessor/seq.hpp>
+#include <libflatarray/detail/generic_destruct.hpp>
 #include <libflatarray/detail/soa_array_member_copy_helper.hpp>
-
-
-// this fixes compilation for non-cuda builds
-#ifndef __host__
-#define __host__
-#endif
-
-#ifndef __device__
-#define __device__
-#endif
 
 #define LIBFLATARRAY_INDEX(X, Y, Z, DIM_X, DIM_Y, DIM_Z, INDEX) \
     (INDEX + Z * (DIM_X * DIM_Y) + Y * DIM_X + X)
@@ -243,6 +234,72 @@
         LIBFLATARRAY_COPY_SOA_MEMBER_ARRAY_OUT(      MEMBER_INDEX, CELL, MEMBER), \
         LIBFLATARRAY_COPY_SOA_ARRAY_MEMBER_ARRAY_OUT(MEMBER_INDEX, CELL, MEMBER))
 
+#define LIBFLATARRAY_COPY_SOA_MEMBER(MEMBER_INDEX, CELL, MEMBER)        \
+    {                                                                   \
+        std::copy(                                                      \
+            &(other.BOOST_PP_SEQ_ELEM(1, MEMBER)()),                    \
+            &(other.BOOST_PP_SEQ_ELEM(1, MEMBER)()) + count,            \
+            &(this->BOOST_PP_SEQ_ELEM(1, MEMBER)()));                   \
+    }
+
+#define LIBFLATARRAY_COPY_SOA_ARRAY_MEMBER(MEMBER_INDEX, CELL, MEMBER)  \
+    {                                                                   \
+        for (int i = 0; i < LIBFLATARRAY_ARRAY_ARITY(MEMBER); ++i) {    \
+            std::copy(                                                  \
+                &(other.BOOST_PP_SEQ_ELEM(1, MEMBER)()[i]),             \
+                &(other.BOOST_PP_SEQ_ELEM(1, MEMBER)()[i]) + count,     \
+                &(this->BOOST_PP_SEQ_ELEM(1, MEMBER)()[i]));            \
+        }                                                               \
+    }
+
+#define LIBFLATARRAY_COPY_SOA_GENERIC_MEMBER(MEMBER_INDEX, CELL, MEMBER) \
+    LIBFLATARRAY_ARRAY_CONDITIONAL(                                     \
+        MEMBER,                                                         \
+        LIBFLATARRAY_COPY_SOA_MEMBER(      MEMBER_INDEX, CELL, MEMBER), \
+        LIBFLATARRAY_COPY_SOA_ARRAY_MEMBER(MEMBER_INDEX, CELL, MEMBER))
+
+
+#define LIBFLATARRAY_INIT_SOA_MEMBER(MEMBER_INDEX, CELL, MEMBER)  \
+    {                                                                   \
+        BOOST_PP_SEQ_ELEM(0, MEMBER) *instance =                        \
+            &(this->BOOST_PP_SEQ_ELEM(1, MEMBER)());                    \
+        new (instance) BOOST_PP_SEQ_ELEM(0, MEMBER)();                  \
+    }
+
+#define LIBFLATARRAY_INIT_SOA_ARRAY_MEMBER(MEMBER_INDEX, CELL, MEMBER) \
+    {                                                                   \
+        for (int i = 0; i < LIBFLATARRAY_ARRAY_ARITY(MEMBER); ++i) {    \
+            new (&(this->BOOST_PP_SEQ_ELEM(1, MEMBER)()[i])) BOOST_PP_SEQ_ELEM(0, MEMBER)(); \
+        }                                                               \
+    }
+
+#define LIBFLATARRAY_INIT_SOA_GENERIC_MEMBER(MEMBER_INDEX, CELL, MEMBER) \
+    LIBFLATARRAY_ARRAY_CONDITIONAL(                                     \
+        MEMBER,                                                         \
+        LIBFLATARRAY_INIT_SOA_MEMBER(      MEMBER_INDEX, CELL, MEMBER), \
+        LIBFLATARRAY_INIT_SOA_ARRAY_MEMBER(MEMBER_INDEX, CELL, MEMBER))
+
+#define LIBFLATARRAY_DESTROY_SOA_MEMBER_ARRAY(MEMBER_INDEX, CELL, MEMBER)  \
+    {                                                                   \
+        BOOST_PP_SEQ_ELEM(0, MEMBER) *instance =                        \
+            &(this->BOOST_PP_SEQ_ELEM(1, MEMBER)());                    \
+        detail::flat_array::generic_destruct(instance);                 \
+    }
+
+#define LIBFLATARRAY_DESTROY_SOA_ARRAY_MEMBER_ARRAY(MEMBER_INDEX, CELL, MEMBER) \
+    {                                                                   \
+        for (int i = 0; i < LIBFLATARRAY_ARRAY_ARITY(MEMBER); ++i) {    \
+            detail::flat_array::generic_destruct(                       \
+                &(this->BOOST_PP_SEQ_ELEM(1, MEMBER)()[i]));            \
+        }                                                               \
+    }
+
+#define LIBFLATARRAY_DESTROY_SOA_GENERIC_MEMBER(MEMBER_INDEX, CELL, MEMBER) \
+    LIBFLATARRAY_ARRAY_CONDITIONAL(                                     \
+        MEMBER,                                                         \
+        LIBFLATARRAY_DESTROY_SOA_MEMBER_ARRAY(      MEMBER_INDEX, CELL, MEMBER), \
+        LIBFLATARRAY_DESTROY_SOA_ARRAY_MEMBER_ARRAY(MEMBER_INDEX, CELL, MEMBER))
+
 #define LIBFLATARRAY_CASE_DIM_X(SIZE_INDEX, UNUSED, SIZE)            \
     if (dim_x <= SIZE) {                                             \
         bind_size_y<CELL, SIZE>(                                     \
@@ -259,7 +316,7 @@
 
 #define LIBFLATARRAY_CASE_DIM_Z(SIZE_INDEX, UNUSED, SIZE)               \
     if (dim_z <= SIZE) {                                                \
-        soa_accessor<CELL, DIM_X, DIM_Y, SIZE, 0>  accessor(            \
+        LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, SIZE, 0>  accessor( \
             data, 0);                                                   \
         functor(accessor);                                              \
         return;                                                         \
@@ -267,7 +324,7 @@
 
 #define LIBFLATARRAY_CASE_DIM_MAX_3D(SIZE_INDEX, UNUSED, SIZE)          \
     if (max <= SIZE) {                                                  \
-        soa_accessor<CELL, SIZE, SIZE, SIZE, 0>  accessor(              \
+        LibFlatArray::soa_accessor<CELL, SIZE, SIZE, SIZE, 0>  accessor( \
             data, 0);                                                   \
         functor(accessor);                                              \
         return;                                                         \
@@ -275,7 +332,7 @@
 
 #define LIBFLATARRAY_CASE_DIM_MAX_2D(SIZE_INDEX, UNUSED, SIZE)          \
     if (max <= SIZE) {                                                  \
-        soa_accessor<CELL, SIZE, SIZE, 1, 0>  accessor(                 \
+        LibFlatArray::soa_accessor<CELL, SIZE, SIZE, 1, 0>  accessor(   \
             data, 0);                                                   \
         functor(accessor);                                              \
         return;                                                         \
