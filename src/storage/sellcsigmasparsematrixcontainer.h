@@ -246,6 +246,7 @@ public:
         static_assert(SIGMA >= 1, "SIGMA should be greater or equal to 1!");
     }
 
+    // fixme: kill this code
     // lhs = A   x rhs
     // tmp = val x b
     void matVecMul(std::vector<VALUETYPE>& lhs, std::vector<VALUETYPE>& rhs)
@@ -314,10 +315,10 @@ public:
 
     inline bool operator==(const SellCSigmaSparseMatrixContainer& other) const
     {
-        return (dimension   == other.dimension  &&
-                values      == other.values     &&
-                column      == other.column     &&
-                chunkLength == other.chunkLength);
+        return ((dimension   == other.dimension)  &&
+                (values      == other.values)     &&
+                (column      == other.column)     &&
+                (chunkLength == other.chunkLength));
     }
 
     template<int O_C, int O_SIGMA>

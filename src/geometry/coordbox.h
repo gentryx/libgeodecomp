@@ -28,7 +28,6 @@ public:
     class StreakIterator;
     typedef Coord<DIM> CoordType;
 
-    // fixme: add template parameter to choose between Coord and FloatCoord
     Coord<DIM> origin;
     Coord<DIM> dimensions;
 

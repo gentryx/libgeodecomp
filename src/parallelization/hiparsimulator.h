@@ -8,6 +8,7 @@
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/partitions/ptscotchunstructuredpartition.h>
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
+#include <libgeodecomp/geometry/partitions/distributedptscotchunstructuredpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/nesting/eventpoint.h>
@@ -21,6 +22,7 @@
 namespace LibGeoDecomp {
 namespace HiParSimulatorHelpers {
 
+// fixme: can we eliminate these classes?
 template<typename PARTITION_TYPE>
 class PartitionBuilder
 {
@@ -39,6 +41,7 @@ public:
     }
 };
 
+// fixme: can we eliminate these classes?
 template<>
 class PartitionBuilder<UnstructuredStripingPartition>
 {
@@ -56,7 +59,10 @@ public:
     }
 };
 
-#ifdef WITH_SCOTCH
+#ifdef LIBGEODECOMP_WITH_CPP14
+#ifdef LIBGEODECOMP_WITH_SCOTCH
+
+// fixme: can we eliminate these classes?
 template<int DIM>
 class PartitionBuilder<PTScotchUnstructuredPartition<DIM> >
 {
@@ -73,12 +79,68 @@ public:
             weights,
             adjacency);
     }
+
+    boost::shared_ptr<PTScotchUnstructuredPartition<DIM >> operator()(
+        const CoordBox<DIM>& box,
+        const std::vector<std::size_t>& weights,
+        Adjacency&& adjacency)
+    {
+        return boost::make_shared<PTScotchUnstructuredPartition<DIM> >(
+            box.origin,
+            box.dimensions,
+            0,
+            weights,
+            std::move(adjacency));
+    }
 };
+
+template<int DIM>
+class PartitionBuilder<DistributedPTScotchUnstructuredPartition<DIM> >
+{
+public:
+    boost::shared_ptr<DistributedPTScotchUnstructuredPartition<DIM >> operator()(
+        const CoordBox<DIM>& box,
+        const std::vector<std::size_t>& weights,
+        const Adjacency& adjacency)
+    {
+        return boost::make_shared<DistributedPTScotchUnstructuredPartition<DIM> >(
+            box.origin,
+            box.dimensions,
+            0,
+            weights,
+            adjacency);
+    }
+
+    boost::shared_ptr<DistributedPTScotchUnstructuredPartition<DIM >> operator()(
+        const CoordBox<DIM>& box,
+        const std::vector<std::size_t>& weights,
+        Adjacency&& adjacency)
+    {
+        return boost::make_shared<DistributedPTScotchUnstructuredPartition<DIM> >(
+            box.origin,
+            box.dimensions,
+            0,
+            weights,
+            std::move(adjacency));
+    }
+};
+
 #endif
+#endif // LIBGEODECOMP_WITH_CPP14
 
 }
 
-// fixme: check if code runs with a communicator which is merely a subset of MPI_COMM_WORLD
+/**
+ * The HiParSimulator implements our hierarchical parallelization
+ * algorithm which delivers best-of-breed latency hiding (wide ghost
+ * zones combined with overlapping communication and calculation)
+ * while remaining flexible with regard to the domain decomposition
+ * method. It can combine different types of parallelization: MPI for
+ * inter-node or inter-NUMA-domain communication and OpenMP and/or
+ * CUDA for local paralelism.
+ *
+ * fixme: check if code runs with a communicator which is merely a subset of MPI_COMM_WORLD
+ */
 template<typename CELL_TYPE, typename PARTITION, typename STEPPER = VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableOpenMP> >
 class HiParSimulator : public DistributedSimulator<CELL_TYPE>
 {

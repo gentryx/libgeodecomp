@@ -184,6 +184,24 @@ public:
         TS_ASSERT_EQUALS(*events, expectedEvents);
     }
 
+    void test1dTorus()
+    {
+        typedef TestCell<1, Stencils::Moore<1, 1>, Topologies::Torus<1>::Topology,
+                 TestCellHelpers::EmptyAPI, TestCellHelpers::NoOutput> TestCell1dTorus;
+        typedef TestInitializer<TestCell1dTorus> TestInitializer1dTorus;
+
+        Coord<1> dim(666);
+        int startStep = 40;
+        int endStep = 70;
+        SerialSimulator<TestCell1dTorus> sim(new TestInitializer1dTorus(dim, endStep, startStep));
+
+        TestWriter<TestCell1dTorus> *writer = new TestWriter<TestCell1dTorus>(3, startStep, endStep);
+        sim.addWriter(writer);
+
+        sim.run();
+        TS_ASSERT(writer->allEventsDone());
+    }
+
     void testSteererCanTerminateSimulation()
     {
         unsigned eventStep = 15;

@@ -1,7 +1,6 @@
 #ifndef LIBGEODECOMP_IO_SIMPLEINITIALIZER_H
 #define LIBGEODECOMP_IO_SIMPLEINITIALIZER_H
 
-#include <libgeodecomp/config.h>
 #include <libgeodecomp/io/initializer.h>
 
 namespace LibGeoDecomp {
@@ -14,10 +13,6 @@ template<typename CELL_TYPE>
 class SimpleInitializer : public Initializer<CELL_TYPE>
 {
 public:
-    friend class PolymorphicSerialization;
-    friend class BoostSerialization;
-    friend class HPXSerialization;
-
     typedef typename Initializer<CELL_TYPE>::Topology Topology;
     const static int DIM = Topology::DIM;
 

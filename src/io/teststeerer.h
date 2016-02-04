@@ -24,10 +24,10 @@ public:
     using Steerer<TestCell<DIM> >::region;
 
     TestSteerer(
-        const unsigned& period,
-        const unsigned& eventStep,
-        const unsigned& cycleOffset,
-        const unsigned& terminalStep = 1000000)  :
+        unsigned period,
+        unsigned eventStep,
+        unsigned cycleOffset,
+        unsigned terminalStep = 1000000)  :
         Steerer<TestCell<DIM> >(period),
         eventStep(eventStep),
         cycleOffset(cycleOffset),

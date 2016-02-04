@@ -13,6 +13,12 @@
 #define LIBGEODECOMP_DEBUG_LEVEL 4
 namespace LibGeoDecomp{
 
+/**
+ * This Simulator makes use of LibGeoDecomp's parameter optimization
+ * facilities to select the most efficient Simulator implementation
+ * and suitable parameters for the given simulation model and
+ * hardware.
+ */
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 class AutoTuningSimulator
 {
@@ -92,7 +98,7 @@ private:
     /**
      * fitnessGoal must be negative, the autotuning is searching for a Maximum.
      */
-    static const double fitnessGoal = -1.0; 
+    static constexpr  double fitnessGoal = -1.0; 
     /**
      * If some missconfiguration is happned the defaultInitializerSteps will be used.
      */

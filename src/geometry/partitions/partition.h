@@ -1,11 +1,18 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 
+#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
 
+/**
+ * The base class for all domain decomposition schemes. By having all
+ * these schemes implement a common interface, we can easily swap
+ * those out and test multiple so each application can use that scheme
+ * which matches the requirements of hardware, model and data best.
+ */
 template<int DIM>
 class Partition
 {
@@ -21,8 +28,7 @@ public:
      * MPI process, identified by its rank.
      */
     inline Partition(
-        // fixme: drop offset and bounding box from all partitions in favor of simulation region specifier?
-        const long& offset,
+        const long offset,
         const std::vector<std::size_t>& weights) :
         weights(weights)
     {

@@ -263,10 +263,12 @@ public:
         const Region<DIM>& region = *myRegion;
 
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
+        ACCESSOR1 hoodOldCopy = hoodOld;                                \
+        ACCESSOR2 hoodNewCopy = hoodNew;                                \
         FixedNeighborhoodUpdateFunctorHelpers::Invoke<CELL, DIM - 1, true, Topology>()( \
             *i,                                                         \
-            hoodOld,                                                    \
-            hoodNew,                                                    \
+            hoodOldCopy,                                                \
+            hoodNewCopy,                                                \
             offsetOld,                                                  \
             offsetNew,                                                  \
             dimensionsNew,                                              \

@@ -1,8 +1,10 @@
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/storage/displacedgrid.h>
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace boost::assign;
@@ -53,6 +55,15 @@ public:
         bigInsertOrdered = transform(s);
         bigInsertShuffled = bigInsertOrdered;
         std::random_shuffle(bigInsertShuffled.begin(), bigInsertShuffled.end());
+
+        files.clear();
+    }
+
+    void tearDown()
+    {
+        for (std::size_t i = 0; i < files.size(); ++i) {
+            boost::filesystem::remove(files[i]);
+        }
     }
 
     void testExpandWithAdjacency()
@@ -63,11 +74,9 @@ public:
 
             region << Coord<1>(1);
 
-            Adjacency adjacency =
-            {
-                std::make_pair(1, std::vector<int>{2, 3}),
-                std::make_pair(2, std::vector<int>{4, 5, 6}),
-            };
+            Adjacency adjacency;
+            adjacency.insert(1, std::vector<int>{2, 3});
+            adjacency.insert(2, std::vector<int>{4, 5, 6});
 
             Region<1> expanded1 = region.expandWithAdjacency(1, adjacency);
             TS_ASSERT_EQUALS(1, expanded1.count(Coord<1>(1)));
@@ -102,11 +111,9 @@ public:
             region << Coord<1>(1);
             region << Coord<1>(2);
 
-            Adjacency adjacency =
-            {
-                std::make_pair(1, std::vector<int>{2, 3, 7, 8}),
-                std::make_pair(2, std::vector<int>{4, 5, 6}),
-            };
+            Adjacency adjacency;
+            adjacency.insert(1, std::vector<int>{2, 3, 7, 8});
+            adjacency.insert(2, std::vector<int>{4, 5, 6});
 
             Region<1> expanded1 = region.expandWithAdjacency(1, adjacency);
             for(int i = 1; i <= 8; ++i)
@@ -1852,15 +1859,205 @@ public:
         TS_ASSERT_EQUALS(region, accumulator);
     }
 
-    void testPrintToBOV()
+    void testStreakIteratorOnOrAfter()
     {
-        // fixme
+        // fill region
+        Region<2> region;
+        region << Coord<2>( 2, 1)
+               << Coord<2>( 4, 1)
+               << Coord<2>( 3, 1)
+               << Coord<2>( 7, 1)
+               << Coord<2>( 1, 2)
+               << Coord<2>( 2, 2)
+               << Coord<2>( 4, 2)
+               << Coord<2>(-2, 4)
+               << Coord<2>( 7, 5)
+               << Coord<2>( 8, 5)
+               << Coord<2>( 9, 5)
+               << Coord<2>(20, 5);
+
+        // check individual points
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>( 0, 0)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>( 8, 0)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>( 0, 1)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 2, 1),  5), *region.streakIteratorOnOrAfter(Coord<2>( 2, 1)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 1),  8), *region.streakIteratorOnOrAfter(Coord<2>( 3, 1)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2),  3), *region.streakIteratorOnOrAfter(Coord<2>( 8, 1)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2),  3), *region.streakIteratorOnOrAfter(Coord<2>( 0, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 1, 2),  3), *region.streakIteratorOnOrAfter(Coord<2>( 1, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 4, 2),  5), *region.streakIteratorOnOrAfter(Coord<2>( 2, 2)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 4, 2),  5), *region.streakIteratorOnOrAfter(Coord<2>( 4, 2)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>(-2, 4), -1), *region.streakIteratorOnOrAfter(Coord<2>(-5, 3)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>(-2, 4), -1), *region.streakIteratorOnOrAfter(Coord<2>( 5, 3)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>(-2, 4), -1), *region.streakIteratorOnOrAfter(Coord<2>(-5, 4)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 5), 10), *region.streakIteratorOnOrAfter(Coord<2>(10, 4)));
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>( 7, 5), 10), *region.streakIteratorOnOrAfter(Coord<2>(20, 4)));
+
+        TS_ASSERT_EQUALS(Streak<2>(Coord<2>(20, 5), 21), *region.streakIteratorOnOrAfter(Coord<2>(20, 5)));
+        TS_ASSERT_EQUALS(region.endStreak(),              region.streakIteratorOnOrAfter(Coord<2>(21, 5)));
+        TS_ASSERT_EQUALS(region.endStreak(),              region.streakIteratorOnOrAfter(Coord<2>( 0, 6)));
+
+        // check functionality of iterators
+        std::vector<int> actual;
+        std::vector<int> expected;
+        Region<2>::StreakIterator start = region.streakIteratorOnOrAfter(Coord<2>(-100, 0));
+        Region<2>::StreakIterator end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 0));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 1));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 1));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        expected << 2
+                 << 3
+                 << 4
+                 << 7;
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 2));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 2));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        expected << 1
+                 << 2
+                 << 4;
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 3));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 3));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 4));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 4));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        expected << -2;
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 5));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 5));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        expected << 7
+                 << 8
+                 << 9
+                 << 20;
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        start = region.streakIteratorOnOrAfter(Coord<2>(-100, 6));
+        end   = region.streakIteratorOnOrAfter(Coord<2>( 100, 6));
+        for (Region<2>::StreakIterator i = start; i != end; ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                actual << j;
+            }
+        }
+        TS_ASSERT_EQUALS(actual, expected);
+    }
+
+    void testPrettyPrint2D()
+    {
+        Region<2> r;
+        r << Streak<2>(Coord<2>(2, 2), 10)
+          << Streak<2>(Coord<2>(2, 3), 10)
+          << Streak<2>(Coord<2>(3, 4),  8);
+
+        std::string expected = "\n\n..########\n..########\n\n...#####\n";
+        std::string actual = r.prettyPrint2d();
+    }
+
+    void testPrintToBOV3D()
+    {
+        std::string prefix = "region_3d";
+
+        files << prefix + ".bov"
+              << prefix + ".data";
+
+        Region<3> region;
+        region << Streak<3>(Coord<3>(11, 12, 13), 20)
+               << CoordBox<3>(Coord<3>(10, 20, 30), Coord<3>(20, 40, 60));
+        region.printToBOV(prefix, "region123", 47.11);
+
+        std::stringstream expected;
+        expected << "TIME: " << 0 << "\n"
+                 << "DATA_FILE: " << prefix << ".data\n"
+                 << "DATA_SIZE: 20 48 77\n"
+                 << "DATA_FORMAT: FLOAT\n"
+                 << "VARIABLE: region123\n"
+                 << "DATA_ENDIAN: LITTLE\n"
+                 << "BRICK_ORIGIN: 10 12 13\n"
+                 << "BRICK_SIZE: 20 48 77\n"
+                 << "DIVIDE_BRICK: true\n"
+                 << "DATA_BRICKLETS: 20 48 77\n"
+                 << "DATA_COMPONENTS: 1\n";
+
+        std::string actual = readHeader(prefix + ".bov");
+        TS_ASSERT_EQUALS(actual, expected.str());
+
+        Coord<3> origin(10, 12, 13);
+        Coord<3> dim(20, 48, 77);
+        DisplacedGrid<float, Topologies::Cube<3>::Topology> grid = readGrid(prefix + ".data", CoordBox<3>(origin, dim));
+
+        Region<3> remainder;
+        remainder << CoordBox<3>(origin, dim);
+        remainder -= region;
+
+        for (Region<3>::Iterator i = remainder.begin(); i != remainder.end(); ++i) {
+            TS_ASSERT_EQUALS(grid[*i], float(0));
+            if (grid[*i] != float(0)) {
+                std::cout << "grid[" << *i << "] = " << grid[*i] << "\n";
+                return;
+            }
+        }
+
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_EQUALS(grid[*i], float(47.11));
+        }
     }
 
 private:
     Region<2> c;
     CoordVector bigInsertOrdered;
     CoordVector bigInsertShuffled;
+    std::vector<std::string> files;
 
     CoordVector transform(const std::vector<std::string>& shape)
     {
@@ -1883,6 +2080,36 @@ private:
     Coord<2> benchDim() const
     {
         return Coord<2>(1000, 50);
+    }
+
+    DisplacedGrid<float, Topologies::Cube<3>::Topology> readGrid(
+        const std::string& filename,
+        const CoordBox<3>& boundingBox)
+    {
+        DisplacedGrid<float, Topologies::Cube<3>::Topology> ret(boundingBox);
+        std::ifstream file(filename.c_str());
+        TS_ASSERT(file);
+
+        file.read(reinterpret_cast<char*>(&ret[boundingBox.origin]), boundingBox.dimensions.prod() * sizeof(float));
+        return ret;
+    }
+
+    std::string readHeader(std::string filename)
+    {
+        std::string ret;
+        std::ifstream file(filename.c_str());
+        TS_ASSERT(file);
+
+        while (true) {
+            char c;
+            file.get(c);
+            if (file.eof()) {
+                break;
+            }
+            ret += c;
+        }
+
+        return ret;
     }
 };
 

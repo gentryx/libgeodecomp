@@ -69,14 +69,14 @@ public:
     typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
     typedef ParallelMemoryWriter<TestCell<2> > MemoryWriterType;
     typedef MockSteerer<TestCell<2> > MockSteererType;
-    typedef TestSteerer<2 > TestSteererType;
+    typedef TestSteerer<2> TestSteererType;
 
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
 
     void setUp()
     {
-        int width = 131;
-        int height = 241;
+        int width = 51;
+        int height = 111;
         dim = Coord<2>(width, height);
         maxSteps = 101;
         firstStep = 20;
@@ -128,7 +128,7 @@ public:
 
         for (int t = 20; t < 25; t += outputPeriod) {
             int globalNanoStep = t * NANO_STEPS;
-            MemoryWriterType::GridMap grids = memoryWriter->getGrids();
+            MemoryWriterType::GridMap& grids = memoryWriter->getGrids();
             TS_ASSERT_TEST_GRID(
                 MemoryWriterType::GridType,
                 grids[t],
@@ -143,7 +143,7 @@ public:
 
         for (unsigned t = firstStep; t < maxSteps; t += outputPeriod) {
             unsigned globalNanoStep = t * NANO_STEPS;
-            MemoryWriterType::GridMap grids = memoryWriter->getGrids();
+            MemoryWriterType::GridMap& grids = memoryWriter->getGrids();
             TS_ASSERT_TEST_GRID(
                 MemoryWriterType::GridType,
                 grids[t],
@@ -164,7 +164,7 @@ public:
         if (MPILayer().rank() == 0) {
             std::string expectedEvents;
             for (int i = 0; i < 2; ++i) {
-                expectedEvents += "balance() [7892, 7893, 7893, 7893] [1, 1, 1, 1]\n";
+                expectedEvents += "balance() [1415, 1415, 1415, 1416] [1, 1, 1, 1]\n";
             }
 
             TS_ASSERT_EQUALS(expectedEvents, MockBalancer::events);

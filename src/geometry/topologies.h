@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/misc/likely.h>
 
 namespace LibGeoDecomp {
 
@@ -81,12 +82,11 @@ private:
     __host__ __device__
     inline int wrap(int x, int dim)
     {
-        // fixme: drop this conditional as it's more expensive than the additional addition?
-        if (x < 0) {
-            return (x + dim) % dim;
+        if (LGD_UNLIKELY(x < 0)) {
+            return x + dim;
         }
-        if (x >= dim) {
-            return x % dim;
+        if (LGD_UNLIKELY(x >= dim)) {
+            return x - dim;
         }
 
         return x;
@@ -305,12 +305,6 @@ public:
     }
 };
 
-class UnstructuredTopology
-{
-public:
-    static const int DIM = 1;
-};
-
 }
 
 /**
@@ -339,8 +333,13 @@ public:
     class Unstructured
     {
     public:
-        typedef TopologiesHelpers::UnstructuredTopology Topology;
+        class Topology
+        {
+        public:
+            static const int DIM = 1;
+        };
     };
+
 };
 
 }

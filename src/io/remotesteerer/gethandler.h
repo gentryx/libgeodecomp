@@ -9,6 +9,9 @@ namespace LibGeoDecomp {
 
 namespace RemoteSteererHelpers {
 
+/**
+ * Translates an accessor to a Handler. Like any handler, this runs on a simulation node.
+ */
 template<typename CELL_TYPE, typename MEMBER_TYPE>
 class GetHandler : public Handler<CELL_TYPE>
 {

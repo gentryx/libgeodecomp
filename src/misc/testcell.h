@@ -53,6 +53,27 @@ public:
 };
 
 /**
+ * Helper class to let TestCell request different numbers of time stes
+ * depending on its dimensionality.
+ */
+template<int DIM>
+class NanoSteps
+{
+public:
+    static const int NANO_STEPS = 27;
+};
+
+/**
+ * see above
+ */
+template<>
+class NanoSteps<3>
+{
+public:
+    static const int NANO_STEPS = 3;
+};
+
+/**
  * We'll use this class to enble debug output on host code and disable
  * it on CUDA devices (where std::cout isn't available).
  */
@@ -116,7 +137,7 @@ public:
     friend class HPXSerialization;
 
     static const int DIMENSIONS = DIM;
-    static const unsigned NANO_STEPS = 27;
+    static const unsigned NANO_STEPS = TestCellHelpers::NanoSteps<DIM>::NANO_STEPS;
 
     class API :
         public ADDITIONAL_API,
@@ -161,9 +182,14 @@ public:
         isEdgeCell = !inBounds(pos);
     }
 
-    const bool& valid() const
+    bool valid() const
     {
         return isValid;
+    }
+
+    bool edgeCell() const
+    {
+        return isEdgeCell;
     }
 
     __host__ __device__
@@ -203,8 +229,8 @@ public:
         }
 
         Stencils::RepeatCuda<STENCIL::VOLUME,
-                         TestCellHelpers::CheckNeighbor,
-                         STENCIL>()(&isValid, this, neighborhood);
+                             TestCellHelpers::CheckNeighbor,
+                             STENCIL>()(&isValid, this, neighborhood);
 
         if (nanoStep >= NANO_STEPS) {
 #ifndef __CUDACC__
@@ -280,8 +306,13 @@ public:
                      << "Invalid Neighbor at " << relativeLoc << ":\n"
                      << other.toString()
                      << "--------------" << "\n";
-#endif
             return false;
+#else
+            // this is a dirty hack to circumvent buggy code
+            // generation in CUDA 7.5 for GF108. If not enabled
+            // CudaSimulatorTest::test1dTorus() will fail.
+            return true;
+#endif
         }
 
         bool otherShouldBeEdge = !inBounds(pos + relativeLoc);

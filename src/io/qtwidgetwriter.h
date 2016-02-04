@@ -16,10 +16,23 @@
 #pragma warning (disable: 2304)
 #endif
 
+#ifdef __GNUC__
+#ifdef __CUDACC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
+#endif
+
 #include <QtGui/QBackingStore>
 #include <QtGui/QPainter>
 #include <QtGui/QResizeEvent>
 #include <QtGui/QWindow>
+
+#ifdef __GNUC__
+#ifdef __CUDACC__
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #ifdef __ICC
 #pragma warning pop
@@ -27,9 +40,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * Forward declaration
- */
 class QtWidgetWriterTest;
 
 namespace QtWidgetWriterHelpers {

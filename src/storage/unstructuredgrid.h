@@ -24,27 +24,26 @@ namespace LibGeoDecomp {
 /**
  * A grid type for irregular structures
  */
-template<typename ELEMENT_TYPE, std::size_t MATRICES=1,
-         typename VALUE_TYPE=double, int C=64, int SIGMA=1>
-class UnstructuredGrid : public GridBase<ELEMENT_TYPE, 1>
+template<typename ELEMENT_TYPE, std::size_t MATRICES = 1, typename WEIGHT_TYPE = double, int C = 64, int SIGMA = 1>
+class UnstructuredGrid : public GridBase<ELEMENT_TYPE, 1, WEIGHT_TYPE>
 {
 public:
-    typedef std::vector<std::pair<ELEMENT_TYPE, VALUE_TYPE> > NeighborList;
-    typedef typename std::vector<std::pair<ELEMENT_TYPE, VALUE_TYPE> >::iterator NeighborListIterator;
+    typedef std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> > NeighborList;
+    typedef typename std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> >::iterator NeighborListIterator;
     const static int DIM = 1;
 
     explicit UnstructuredGrid(
         const Coord<DIM>& dim = Coord<DIM>(),
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
-        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
+        const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
         elements(dim.x(), defaultElement),
         edgeElement(edgeElement),
         dimension(dim)
     {
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
-                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dim.x());
+                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C ,SIGMA>(dim.x());
         }
     }
 
@@ -53,21 +52,18 @@ public:
         const CoordBox<DIM> box,
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
-        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
+        const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
         elements(box.dimensions.x(), defaultElement),
         edgeElement(edgeElement),
         dimension(box.dimensions)
     {
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
-                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dimension.x());
+                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(dimension.x());
         }
     }
 
-    template<typename O_ELEMENT_TYPE>
-    UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>&
-    operator=(const UnstructuredGrid<O_ELEMENT_TYPE, MATRICES, VALUE_TYPE,
-                                     C, SIGMA> & other)
+    UnstructuredGrid& operator=(const UnstructuredGrid& other)
     {
         elements = other.elements;
         edgeElement = other.edgeElement;
@@ -80,22 +76,21 @@ public:
         return *this;
     }
 
-    void setAdjacency(std::size_t matrixID, const std::map<Coord<2>, VALUE_TYPE>& matrix)
+    void setWeights(std::size_t matrixID, const std::map<Coord<2>, WEIGHT_TYPE>& matrix)
     {
         assert(matrixID < MATRICES);
         matrices[matrixID].initFromMatrix(matrix);
     }
 
     inline
-    const SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>&
-    getAdjacency(std::size_t const matrixID) const
+    const SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>& getWeights(const std::size_t matrixID) const
     {
         assert(matrixID < MATRICES);
         return matrices[matrixID];
     }
 
-    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>&
-    getAdjacency(std::size_t const matrixID)
+    inline
+    SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>& getWeights(const std::size_t matrixID)
     {
         assert(matrixID < MATRICES);
         return matrices[matrixID];
@@ -115,7 +110,7 @@ public:
 
         if (boundingBox().inBounds(center)) {
             neighborhood.push_back(std::make_pair(*this[center], -1));
-            std::vector<std::pair<int, VALUE_TYPE> > neighbor =
+            std::vector<std::pair<int, WEIGHT_TYPE> > neighbor =
                 matrices[0].getRow(center.x());
 
             for (NeighborListIterator it = neighbor.begin();
@@ -195,13 +190,13 @@ public:
         }
 
         CoordBox<DIM> box = boundingBox();
-        for (typename CoordBox<DIM>::Iterator i = box.begin();
-             i != box.end(); ++i) {
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             if ((*this)[*i] != other.get(*i)) {
                 return false;
             }
         }
 
+        // fixme: check weights
         return true;
     }
 
@@ -229,8 +224,7 @@ public:
                     << (*this)[*i] << "\n"
                     << "neighbor: ";
 
-            std::vector<std::pair<int, VALUE_TYPE> > neighbor =
-                matrices[0].getRow(index++);
+            std::vector<std::pair<int, WEIGHT_TYPE> > neighbor = matrices[0].getRow(index++);
             message << neighbor;
         }
 
@@ -297,8 +291,7 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region) const
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-                i != region.endStreak(); ++i) {
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             selector.copyMemberOut(&(*this)[i->origin], MemoryLocation::HOST, target, targetLocation, i->length());
             target += selector.sizeOfExternal() * i->length();
         }
@@ -310,8 +303,7 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region)
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak(); ++i) {
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             selector.copyMemberIn(source, sourceLocation, &(*this)[i->origin], MemoryLocation::HOST, i->length());
             source += selector.sizeOfExternal() * i->length();
         }
@@ -320,15 +312,15 @@ protected:
 private:
     std::vector<ELEMENT_TYPE> elements;
     // TODO wrapper for different types of sell c sigma containers
-    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> matrices[MATRICES];
+    SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA> matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;
 };
 
-template<typename _CharT, typename _Traits, typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
+template<typename _CharT, typename _Traits, typename ELEMENT_TYPE, std::size_t MATRICES, typename WEIGHT_TYPE, int C, int SIGMA>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid)
+           const LibGeoDecomp::UnstructuredGrid<ELEMENT_TYPE, MATRICES, WEIGHT_TYPE, C, SIGMA>& grid)
 {
     __os << grid.toString();
     return __os;

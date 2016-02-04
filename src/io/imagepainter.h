@@ -6,6 +6,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Adapter class which exhibits an interface compatible with a (very
+ * limited) Qt pen.
+ */
 class ImagePainter
 {
 public:

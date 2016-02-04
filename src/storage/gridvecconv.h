@@ -5,6 +5,7 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/archive/binary_oarchive.hpp>
@@ -24,9 +25,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- * just a forward-declaration
- */
 template<typename CELL, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
 class SoAGrid;
 
@@ -180,6 +178,29 @@ private:
         }
     }
 
+    template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE, typename BOOST_SERIALIZATION_TYPE>
+    static void gridToVector(
+        const UnstructuredSoAGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid,
+        std::vector<char> *vec,
+        const REGION_TYPE& region,
+        const APITraits::TrueType&,
+        const BOOST_SERIALIZATION_TYPE&)
+    {
+        std::size_t regionSize =
+            region.size() *
+            UnstructuredSoAGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>::AGGREGATED_MEMBER_SIZE;
+
+        if (vec->size() != regionSize) {
+            throw std::logic_error("region doesn't match raw vector's size");
+        }
+
+        if(vec->size() == 0) {
+            return;
+        }
+
+        grid.saveRegion(&(*vec)[0], region);
+    }
+
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE>
     static void gridToVector(
@@ -313,6 +334,29 @@ private:
             std::copy(source, end, dest);
             source = end;
         }
+    }
+
+    template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE, typename BOOST_SERIALIZATION_TYPE>
+    static void vectorToGrid(
+        const std::vector<char>& vec,
+        UnstructuredSoAGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA> *grid,
+        const REGION_TYPE& region,
+        const APITraits::TrueType&,
+        const BOOST_SERIALIZATION_TYPE&)
+    {
+        std::size_t regionSize =
+            region.size() *
+            UnstructuredSoAGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>::AGGREGATED_MEMBER_SIZE;
+
+        if (vec.size() != regionSize) {
+            throw std::logic_error("raw vector doesn't match region's size");
+        }
+
+        if(vec.size() == 0) {
+            return;
+        }
+
+        grid->loadRegion(&vec[0], region);
     }
 #endif
 };

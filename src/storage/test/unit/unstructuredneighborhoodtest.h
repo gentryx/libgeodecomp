@@ -64,18 +64,18 @@ public:
         grid[2] = MyCell(2.5);
         grid[3] = MyCell(3.5);
 
-        // init adjacency
+        // init weights
         // matrix:
         // 1 0 0 0
         // 0 2 0 0
         // 0 0 3 0
         // 0 0 0 4
-        std::map<Coord<2>, double> adjacency;
-        adjacency[Coord<2>(0, 0)] = 1;
-        adjacency[Coord<2>(1, 1)] = 2;
-        adjacency[Coord<2>(2, 2)] = 3;
-        adjacency[Coord<2>(3, 3)] = 4;
-        grid.setAdjacency(0, adjacency);
+        std::map<Coord<2>, double> weights;
+        weights[Coord<2>(0, 0)] = 1;
+        weights[Coord<2>(1, 1)] = 2;
+        weights[Coord<2>(2, 2)] = 3;
+        weights[Coord<2>(3, 3)] = 4;
+        grid.setWeights(0, weights);
 
         // init neighborhood
         UnstructuredNeighborhood<MyCell, 1, double, 1, 1> nb(grid, 0);
@@ -115,7 +115,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredGrid<MyCell, 1, double, 1, 1> grid(Coord<1>(8), MyCell(), MyCell());
 
-        // init adjacency
+        // init weights
         // matrix:
         // 0 0 0 0 0 0 0 0
         // 0 2 0 3 7 6 4 0
@@ -125,13 +125,13 @@ public:
         // 0 0 0 0 0 0 0 0
         // 0 0 0 0 0 0 0 0
         // 0 0 0 0 0 0 0 0
-        std::map<Coord<2>, double> adjacency;
-        adjacency[Coord<2>(1, 1)] = 2;
-        adjacency[Coord<2>(1, 3)] = 3;
-        adjacency[Coord<2>(1, 4)] = 7;
-        adjacency[Coord<2>(1, 5)] = 6;
-        adjacency[Coord<2>(1, 6)] = 4;
-        grid.setAdjacency(0, adjacency);
+        std::map<Coord<2>, double> weights;
+        weights[Coord<2>(1, 1)] = 2;
+        weights[Coord<2>(1, 3)] = 3;
+        weights[Coord<2>(1, 4)] = 7;
+        weights[Coord<2>(1, 5)] = 6;
+        weights[Coord<2>(1, 6)] = 4;
+        grid.setWeights(0, weights);
 
         // init neighborhood
         UnstructuredNeighborhood<MyCell, 1, double, 1, 1> nb(grid, 0);

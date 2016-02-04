@@ -1,5 +1,3 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_MPI
 #include <libgeodecomp/parallelization/mocksimulator.h>
 
 /**
@@ -16,5 +14,3 @@ namespace LibGeoDecomp {
 std::string MockSimulator::events;
 
 }
-
-#endif

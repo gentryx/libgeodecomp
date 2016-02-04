@@ -9,8 +9,12 @@
 
 namespace LibGeoDecomp {
 
-class VanillaStepperTest;
-
+/**
+ * The PartitionManager maintains the Regions which describe a node's
+ * subdomain (as defined by a Partition) and the inner and outer ghost
+ * regions (halos) which are used for synchronization with neighboring
+ * subdomains.
+ */
 template<typename TOPOLOGY>
 class PartitionManager
 {
@@ -206,8 +210,7 @@ public:
         return partition->getWeights();
     }
 
-    // fixme: const correctness?
-    const Adjacency &adjacency()
+    const Adjacency& adjacency() const
     {
         return partition->getAdjacency();
     }
@@ -258,8 +261,11 @@ private:
     {
         fillRegion(myRank);
         Region<DIM> surface(
-            ownRegion().expandWithTopology(1, simulationArea.dimensions, Topology(), adjacency()) -
-            ownRegion());
+            ownRegion().expandWithTopology(
+                1,
+                simulationArea.dimensions,
+                Topology(),
+                adjacency()) - ownRegion());
         Region<DIM> kernel(
             ownRegion() -
             surface.expandWithTopology(

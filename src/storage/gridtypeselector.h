@@ -45,8 +45,7 @@ public:
  * see above.
  */
 template<typename CELL_TYPE, bool TOPOLOGICALLY_CORRECT>
-class GridTypeSelector<CELL_TYPE, TopologiesHelpers::UnstructuredTopology,
-                       TOPOLOGICALLY_CORRECT, APITraits::FalseType>
+class GridTypeSelector<CELL_TYPE, Topologies::Unstructured::Topology, TOPOLOGICALLY_CORRECT, APITraits::FalseType>
 {
 private:
     typedef typename APITraits::SelectSellType<CELL_TYPE>::Value ValueType;
@@ -61,8 +60,7 @@ public:
  * see above.
  */
 template<typename CELL_TYPE, bool TOPOLOGICALLY_CORRECT>
-class GridTypeSelector<CELL_TYPE, TopologiesHelpers::UnstructuredTopology,
-                       TOPOLOGICALLY_CORRECT, APITraits::TrueType>
+class GridTypeSelector<CELL_TYPE, Topologies::Unstructured::Topology, TOPOLOGICALLY_CORRECT, APITraits::TrueType>
 {
 private:
     typedef typename APITraits::SelectSellType<CELL_TYPE>::Value ValueType;

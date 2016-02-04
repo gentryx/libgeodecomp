@@ -10,6 +10,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This implementation of UpdateGroup is used by the HPXSimulator.
+ * This means that the ghost zone (halo) communication is handled by
+ * HPX-based PatchLinks.
+ */
 template <class CELL_TYPE>
 class HPXUpdateGroup : public UpdateGroup<CELL_TYPE, HPXPatchLink>
 {

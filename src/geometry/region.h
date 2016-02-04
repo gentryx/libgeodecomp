@@ -1,21 +1,63 @@
 #ifndef LIBGEODECOMP_GEOMETRY_REGION_H
 #define LIBGEODECOMP_GEOMETRY_REGION_H
 
-#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/regionstreakiterator.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/selector.h>
 
 namespace LibGeoDecomp {
 
-/**
- * Unit test class
- */
+template<typename CELL_TYPE, int DIM>
+class BOVOutput;
+
 class RegionTest;
 
 namespace RegionHelpers {
+
+/**
+ * std::upper_bound() is guaranteed to run in O(log(end - start)), but
+ * not in O(1) if value is not within [start, end). This function adds
+ * those shortcuts to ensure out-of-bounds lookups are fast.
+ */
+template<typename ITERATOR, typename VALUE, typename COMPARATOR>
+inline ITERATOR upperBound(const ITERATOR& start, const ITERATOR& end, const VALUE& value, const COMPARATOR& comparator) {
+    if (start == end) {
+        return end;
+    }
+
+    if (comparator(value, *start)) {
+        return start;
+    }
+
+    if ((start != end) && comparator(*(end - 1), value)) {
+        return end;
+    }
+
+    return std::upper_bound(start, end, value, comparator);
+}
+
+/**
+ * Shortcut for std::lower_bound(). See upper_bound() for rationale.
+ */
+template<typename ITERATOR, typename VALUE, typename COMPARATOR>
+inline ITERATOR lowerBound(const ITERATOR& start, const ITERATOR& end, const VALUE& value, const COMPARATOR& comparator) {
+    if (start == end) {
+        return end;
+    }
+
+    if (comparator(value, *start)) {
+        return start;
+    }
+
+    if ((start != end) && comparator(*(end - 1), value)) {
+        return end;
+    }
+
+    return std::lower_bound(start, end, value, comparator);
+}
 
 /**
  * internal helper class
@@ -37,7 +79,7 @@ protected:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    inline void incRemainder(const IndexVectorType::iterator& start, const IndexVectorType::iterator& end, const int& inserts)
+    inline void incRemainder(const IndexVectorType::iterator& start, const IndexVectorType::iterator& end, int inserts)
     {
         if (inserts == 0) {
             return;
@@ -135,11 +177,11 @@ public:
         StreakIteratorInitSingleOffset<DIM - 1> delegate(offsetIndex);
         std::size_t newOffset = delegate(streak, iterators, region);
 
-        IndexVectorType::const_iterator upperBound =
-            std::upper_bound(region.indicesBegin(DIM),
-                             region.indicesEnd(DIM),
-                             IntPair(0, newOffset),
-                             RegionHelpers::RegionCommonHelper::pairCompareSecond);
+        IndexVectorType::const_iterator upperBound = RegionHelpers::upperBound(
+            region.indicesBegin(DIM),
+            region.indicesEnd(DIM),
+            IntPair(0, newOffset),
+            RegionHelpers::RegionCommonHelper::pairCompareSecond);
         iterators[DIM] = upperBound - 1;
         newOffset =  iterators[DIM] - region.indicesBegin(DIM);
 
@@ -383,21 +425,12 @@ public:
     }
 };
 
-/**
- * internal helper class
- */
 template<int DIM>
 class RegionLookupHelper;
 
-/**
- * internal helper class
- */
 template<int DIM>
 class RegionInsertHelper;
 
-/**
- * internal helper class
- */
 template<int DIM>
 class RegionRemoveHelper;
 
@@ -535,6 +568,10 @@ public:
         return myBoundingBox;
     }
 
+    /**
+     * Returns the number of individual coordinates stored in this
+     * Region. For the number of Streaks see numStreaks().
+     */
     inline std::size_t size() const
     {
         if (geometryCacheTainted) {
@@ -548,6 +585,11 @@ public:
         return boundingBox().dimensions;
     }
 
+    /**
+     * Returns in how many Streaks the run-length compression of the
+     * coordinate set in this Region results in. For the number of
+     * Coords see size().
+     */
     inline std::size_t numStreaks() const
     {
         return indices[0].size();
@@ -611,21 +653,22 @@ public:
         return ret;
     }
 
-    template<typename TOPOLOGY>
+    template<typename TOPOLOGY, typename ADJACENCY>
     inline Region expandWithTopology(
         const unsigned& width,
         const Coord<DIM>& globalDimensions,
         TOPOLOGY topology,
-        const Adjacency& adjacency) const
+        const ADJACENCY& adjacency) const
     {
         return expandWithTopology(width, globalDimensions, topology);
     }
 
+    template<typename ADJACENCY>
     inline Region expandWithTopology(
         const unsigned& width,
         const Coord<DIM>& /* unused: globalDimensions */,
         Topologies::Unstructured::Topology /* used just for overload */,
-        const Adjacency& adjacency) const
+        const ADJACENCY& adjacency) const
     {
         return expandWithAdjacency(width, adjacency);
     }
@@ -634,13 +677,17 @@ public:
      * does the same as expand, but reads adjacent indices out of
      * an adjacency list
      */
+    template<typename ADJACENCY>
     inline Region expandWithAdjacency(
         const unsigned& width,
-        const Adjacency& adjacency) const
+        const ADJACENCY& adjacency) const
     {
         // expanding with adjacency only works on unstructured, i.e. 1-dimensional grids
         Region<1> ret = *this;
         Region<1> newCoords = *this;
+
+        // neighbors vector is defined outside of the loop to avoid reallocations
+        std::vector<int> neighbors;
 
         for (unsigned pass = 0; pass < width; ++pass) {
             Region add;
@@ -652,12 +699,9 @@ public:
                  streak != newCoords.endStreak();
                  ++streak) {
                 for (int x = streak->origin.x(); x < streak->endX; ++x) {
-                    Adjacency::const_iterator it = adjacency.find(x);
-                    if (it == adjacency.end()) {
-                        continue;
-                    }
+                    neighbors.clear();
+                    adjacency.getNeighbors(x, &neighbors);
 
-                    const std::vector<int>& neighbors = it->second;
                     for (std::vector<int>::const_iterator i = neighbors.begin(); i != neighbors.end(); ++i) {
                         Coord<DIM> c(*i);
                         if (ret.count(c) == 0) {
@@ -736,8 +780,8 @@ public:
 #endif
 #endif
 
-        geometryCacheTainted = true;
         RegionHelpers::RegionInsertHelper<DIM - 1>()(this, s);
+        geometryCacheTainted = true;
         return *this;
     }
 
@@ -749,9 +793,16 @@ public:
 
     inline Region& operator<<(const CoordBox<DIM>& box)
     {
-        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
-            *this << *i;
+        Region buf;
+        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak();
+             i != box.endStreak();
+             ++i) {
+            buf << *i;
         }
+
+        Region mergeBuf;
+        merge2way(mergeBuf, beginStreak(), endStreak(), buf.beginStreak(), buf.endStreak());
+        swap(*this, mergeBuf);
 
         return *this;
     }
@@ -781,9 +832,13 @@ public:
 
     inline Region& operator>>(const CoordBox<DIM>& box)
     {
-        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
-            *this >> *i;
+        Region boxRegion;
+        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak();
+             i != box.endStreak();
+             ++i) {
+            boxRegion << *i;
         }
+        *this -= boxRegion;
 
         return *this;
     }
@@ -791,7 +846,7 @@ public:
     inline void operator-=(const Region& other)
     {
         Region newValue = *this - other;
-        *this = newValue;
+        std::swap(newValue, *this);
     }
 
     /**
@@ -954,22 +1009,28 @@ public:
         return buf.str();
     }
 
-    // fixme: needs test
-    // fixme: change interface to match prettyPrint()
-    inline void prettyPrint2D(std::ostream& os) const
+    inline std::string prettyPrint2d() const
     {
-        Coord<2> from = boundingBox().origin;
-        Coord<2> dim = boundingBox().dimensions;
-        for (int y = 0; y < (from.y() + dim.y()); ++y) {
-            for (int x = 0; x < (from.x() + dim.x()); ++x) {
-                if (count(Coord<2>(x, y)) > 0) {
-                    os << '#';
-                } else {
-                    os << '.';
-                }
+        std::ostringstream buf;
+
+        Coord<2> end = boundingBox().origin + boundingBox().dimensions;
+        for (int y = 0; y < end.y(); ++y) {
+            for (int x = 0; x < end.x(); ++x) {
+                buf << ((count(Coord<2>(x, y)) > 0) ? '#' : '.');
             }
-            os << '\n';
+            buf << '\n';
         }
+
+        return buf.str();
+    }
+
+    inline void printToBOV(
+        const std::string& prefix,
+        const std::string& variableName = "region",
+        float value = 1,
+        int time = 0) const
+    {
+        BOVOutput<float, DIM>::writeRegion(prefix, variableName, boundingBox(), begin(), end(), value, time);
     }
 
     inline bool empty() const
@@ -1032,7 +1093,7 @@ public:
 
     inline std::size_t numPlanes() const
     {
-        return indices[DIM -1].size();
+        return indices[DIM - 1].size();
     }
 
     inline Iterator begin() const
@@ -1063,6 +1124,82 @@ public:
     inline IndexVectorType::const_iterator indicesEnd(std::size_t dim) const
     {
         return indices[dim].end();
+    }
+
+    /**
+     * Yield an iterator to the Streak starting at coord or after.
+     * Useful for dependent lookups (e.g. yield all coordinates whose
+     * y-coordinate equals a certain value).
+     */
+    inline StreakIterator streakIteratorOnOrAfter(Coord<DIM> coord)
+    {
+        Coord<DIM> offsets;
+
+        IndexVectorType::const_iterator iter1 = indices[DIM - 1].begin();
+        IndexVectorType::const_iterator iter2 = indices[DIM - 1].end();
+
+        for (int d = DIM - 1; d >= 0; --d) {
+            IndexVectorType::const_iterator cursor = RegionHelpers::lowerBound(
+                iter1,
+                iter2,
+                std::pair<int, int>(coord[d], 0),
+                RegionHelpers::RegionCommonHelper::pairCompareFirst);
+            offsets[d] = cursor - indices[d].begin();
+
+            // handle special case: the coordinate we're looking for
+            // is beyond the end of the extents of this Region.
+            if (cursor == indices[d].end()) {
+                return endStreak();
+            }
+
+            // another special case: the current component exceeds all
+            // components in the Region's current level. Solution: dig
+            // down on the current position return the iterator one
+            // past the current position:
+            if (cursor == iter2) {
+                --offsets[d];
+                --d;
+                for (; d >= 0; --d) {
+                    offsets[d] = cursor->first;
+                    cursor = indices[d].begin() + cursor->second - 1;
+                }
+
+                StreakIterator ret = (*this)[offsets];
+                ++ret;
+                return ret;
+            }
+
+            // we have to quit here if we're on the last level as the
+            // following conditionals otherwise yield wrong results:
+            if (d == 0) {
+                iter1 = cursor;
+                break;
+            }
+
+            // handle special case: coord was not found, so we need to
+            // recover the Streak just past it, i.e. the result of
+            // std::lower_bound.
+            if (cursor->first != coord[d]) {
+                --d;
+                for (; d >= 0; --d) {
+                    int localOffset = cursor->second;
+                    offsets[d] = localOffset;
+                    cursor = indices[d].begin() + localOffset;;
+                }
+                return (*this)[offsets];
+            }
+
+            iter1 = indices[d - 1].begin() + cursor->second;
+            if ((cursor       != indices[d].end()) &&
+                ((cursor + 1) != indices[d].end())) {
+                iter2 = indices[d - 1].begin() + (cursor + 1)->second;
+            } else {
+                iter2 = indices[d - 1].end();
+            }
+        }
+
+        offsets[0] = iter1 - indices[0].begin();
+        return (*this)[offsets];
     }
 
 private:
@@ -1372,17 +1509,16 @@ public:
     }
 
     template<int MY_DIM>
-    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, const int& end)
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, int start, int end)
     {
         int c = s.origin[DIM];
         const IndexVectorType& indices = region.indices[DIM];
 
-        IndexVectorType::const_iterator i =
-            std::upper_bound(
-                indices.begin() + start,
-                indices.begin() + end,
-                IntPair(c, 0),
-                RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::const_iterator i = RegionHelpers::upperBound(
+            indices.begin() + start,
+            indices.begin() + end,
+            IntPair(c, 0),
+            RegionCommonHelper::pairCompareFirst);
 
         int nextLevelStart = 0;
         int nextLevelEnd = 0;
@@ -1429,7 +1565,7 @@ public:
     }
 
     template<int MY_DIM>
-    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, int end)
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, int start, int end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
         const IndexVectorType& indices = region.indices[0];
@@ -1437,9 +1573,11 @@ public:
             return false;
         }
 
-        IndexVectorType::const_iterator cursor =
-            std::upper_bound(indices.begin() + start, indices.begin() + end,
-                             curStreak, RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::const_iterator cursor = RegionHelpers::upperBound(
+            indices.begin() + start,
+            indices.begin() + end,
+            curStreak,
+            RegionCommonHelper::pairCompareFirst);
         // This will yield the streak AFTER the current origin
         // c. We can't really use lower_bound() as this doesn't
         // replace the < operator by >= but rather by <=, which is
@@ -1473,17 +1611,16 @@ public:
     }
 
     template<int MY_DIM>
-    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, const int& end)
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
     {
         int c = s.origin[DIM];
         IndexVectorType& indices = region->indices[DIM];
 
-        IndexVectorType::iterator i =
-            std::upper_bound(
-                indices.begin() + start,
-                indices.begin() + end,
-                IntPair(c, 0),
-                RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::iterator i = RegionHelpers::upperBound(
+            indices.begin() + start,
+            indices.begin() + end,
+            IntPair(c, 0),
+            RegionCommonHelper::pairCompareFirst);
 
         int nextLevelStart = 0;
         int nextLevelEnd = 0;
@@ -1559,9 +1696,11 @@ public:
         IntPair curStreak(s.origin.x(), s.endX);
         IndexVectorType& indices = region->indices[0];
 
-        IndexVectorType::iterator cursor =
-            std::upper_bound(indices.begin() + start, indices.begin() + end,
-                             curStreak, RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::iterator cursor = RegionHelpers::upperBound(
+            indices.begin() + start,
+            indices.begin() + end,
+            curStreak,
+            RegionCommonHelper::pairCompareFirst);
         // This will yield the streak AFTER the current origin
         // c. We can't really use lower_bound() as this doesn't
         // replace the < operator by >= but rather by <=, which is
@@ -1634,17 +1773,16 @@ public:
      * inserted streaks (may be negative).
      */
     template<int MY_DIM>
-    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, const int& end)
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
     {
         int c = s.origin[DIM];
         IndexVectorType& indices = region->indices[DIM];
 
-        IndexVectorType::iterator i =
-            std::upper_bound(
-                indices.begin() + start,
-                indices.begin() + end,
-                IntPair(c, 0),
-                RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::iterator i = RegionHelpers::upperBound(
+            indices.begin() + start,
+            indices.begin() + end,
+            IntPair(c, 0),
+            RegionCommonHelper::pairCompareFirst);
 
         // key is not present, so no need to remove it
         if (i == (indices.begin() + start)) {
@@ -1705,7 +1843,7 @@ public:
     }
 
     template<int MY_DIM>
-    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, int end)
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
     {
         int c = s.origin[0];
         IndexVectorType& indices = region->indices[0];
@@ -1715,12 +1853,12 @@ public:
         // c. We can't really use lower_bound() as this doesn't
         // replace the < operator by >= but rather by <=, which is
         // IMO really sick...
-        IndexVectorType::iterator cursor =
-            std::upper_bound(
-                indices.begin() + start,
-                indices.begin() + end,
-                IntPair(c, 0),
-                RegionCommonHelper::pairCompareFirst);
+        IndexVectorType::iterator cursor = RegionHelpers::upperBound(
+            indices.begin() + start,
+            indices.begin() + end,
+            IntPair(c, 0),
+            RegionCommonHelper::pairCompareFirst);
+
         if (cursor != (indices.begin() + start)) {
             // ...so we resort to landing one past the streak we're
             // searching and moving back afterwards:
@@ -1804,5 +1942,7 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 }
 
 }
+
+#include <libgeodecomp/io/bovoutput.h>
 
 #endif

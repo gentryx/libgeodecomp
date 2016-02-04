@@ -5,6 +5,12 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * One of the most used decompostition techniques in computer
+ * simulations. It yields cuboid subdomains, but can't handle load
+ * balancing (neither static nor dynamic). General advice is to use
+ * the RecursiveBisectionPartition or the ZCurvePartition instead.
+ */
 template<int DIM>
 class CheckerboardingPartition : public Partition<DIM>
 {

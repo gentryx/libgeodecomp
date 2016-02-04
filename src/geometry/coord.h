@@ -9,6 +9,8 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
+#include <hpx/runtime/serialization/array.hpp>
+#include <hpx/runtime/serialization/serialize.hpp>
 #endif
 
 // For Intel MPI we need to source mpi.h before stdio.h:
@@ -39,7 +41,20 @@
 #pragma warning (disable: 2304)
 #endif
 
+#ifdef __GNUC__
+#ifdef __CUDACC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
+#endif
+
 #include <QtCore/QSize>
+
+#ifdef __GNUC__
+#ifdef __CUDACC__
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #ifdef __ICC
 #pragma warning pop

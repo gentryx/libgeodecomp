@@ -79,12 +79,15 @@ class AutotuningSimulatorWithCudaTest : public CxxTest::TestSuite
 public:
     void setUp()
     {
-        dim = Coord<3>(100,100,100);
+        std::cout << "AutotuningSimulatorWithCudaTest start\n";
+        dim = Coord<3>(25, 25, 25);
         maxSteps = 20;
     }
 
     void tearDown()
-    {}
+    {
+        std::cout << "AutotuningSimulatorWithCudaTest end\n";
+    }
 
     void testBasicPatternOptimized()
     {
@@ -216,7 +219,6 @@ public:
         TS_ASSERT_THROWS(ats.getFitness("NoSimulator"), std::invalid_argument);
         TS_ASSERT_THROWS(ats.getSimulationParameters("NoSimulator"), std::invalid_argument);
         TS_ASSERT_THROWS(ats.setParameters(params, "NoSimulator"), std::invalid_argument);
-
     }
 
     void testAddWriter()
@@ -370,7 +372,7 @@ cudaFab = new CudaSimulationFactory<SimFabTestCell>(initializerProxy);
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::TestAddWriterToCudaSimulationFactory()")
         std::ostringstream buf;
-        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
+        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(10, 100, 0, buf);
         cudaFab->addWriter(*writer);
         cudaFab->operator()(cudaFab->parameters());
         delete writer;
