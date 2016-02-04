@@ -4,6 +4,8 @@
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/io/clonableinitializer.h>
+#include <libgeodecomp/io/varstepinitializerproxy.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/misc/simplexoptimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
@@ -96,7 +98,7 @@ public:
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
         for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++){
+            iter != names.end(); iter++) {
             LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
             << ats.getFitness(*iter)<< std::endl
             << ats.getSimulationParameters(*iter))
@@ -118,7 +120,7 @@ public:
             new SimFabTestInitializer(dim, maxSteps));
 
         unsigned startValue = steps / 2;
-        if (startValue < 2){
+        if (startValue < 2) {
             startValue = 2;
         }
         steps = ats2.normalizeSteps(goal,startValue);
@@ -143,7 +145,7 @@ public:
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
         for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++){
+            iter != names.end(); iter++) {
             LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
             << ats.getFitness(*iter)<< std::endl
             << ats.getSimulationParameters(*iter))
@@ -232,7 +234,8 @@ public:
             "SerialSimulation",
             "SerialSimulation");
         std::ostringstream buf;
-        ats.addWriter(static_cast<Writer<SimFabTestCell> *>(new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
+        ats.addWriter(static_cast<Writer<SimFabTestCell> *>( 
+                new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
         ats.run();
     }
 private:
@@ -240,8 +243,6 @@ private:
     unsigned maxSteps;
 };
 
-#include <libgeodecomp/io/clonableinitializer.h>
-#include <libgeodecomp/io/varstepinitializerproxy.h>
 
 class SimulationFactoryTest : public CxxTest::TestSuite
 {
@@ -251,7 +252,8 @@ public:
     {
         dim = Coord<3>(100,100,100);
         maxSteps = 100;
-        initializerProxy = new VarStepInitializerProxy<SimFabTestCell>(new SimFabTestInitializer(dim,maxSteps));
+        initializerProxy = new VarStepInitializerProxy<SimFabTestCell>(
+                new SimFabTestInitializer(dim,maxSteps));
 #ifdef LIBGEODECOMP_WITH_THREADS
         cfab = new CacheBlockingSimulationFactory<SimFabTestCell>(initializerProxy);
 #endif

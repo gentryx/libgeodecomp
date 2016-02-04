@@ -2,6 +2,7 @@
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/io/varstepinitializerproxy.h>
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/misc/simplexoptimizer.h>
@@ -121,7 +122,7 @@ public:
             new SimFabTestInitializer(dim, maxSteps));
 
         unsigned startValue = steps / 2;
-        if (startValue < 2){
+        if (startValue < 2) {
             startValue = 2;
         }
         steps = ats2.normalizeSteps(goal,startValue);
@@ -241,7 +242,6 @@ private:
 
 };
 
-#include <libgeodecomp/io/varstepinitializerproxy.h>
 
 class SimulationFactoryWithCudaTest : public CxxTest::TestSuite
 {
@@ -252,7 +252,7 @@ public:
         maxSteps = 100;
         initializerProxy = new VarStepInitializerProxy<SimFabTestCell>(
                             new SimFabTestInitializer(dim,maxSteps));
-cudaFab = new CudaSimulationFactory<SimFabTestCell>(initializerProxy);
+        cudaFab = new CudaSimulationFactory<SimFabTestCell>(initializerProxy);
 #ifdef LIBGEODECOMP_WITH_THREADS
         cFab = new CacheBlockingSimulationFactory<SimFabTestCell>(initializerProxy);
 #endif

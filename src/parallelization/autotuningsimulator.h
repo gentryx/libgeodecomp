@@ -10,8 +10,7 @@
 #include <libgeodecomp/io/logger.h>
 #include <cfloat>
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
-namespace LibGeoDecomp{
+namespace LibGeoDecomp {
 
 /**
  * This Simulator makes use of LibGeoDecomp's parameter optimization
@@ -209,8 +208,7 @@ std::vector<std::string> AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimu
 {
     std::vector<std::string> result;
     typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
-    for (IterType iter = simulations.begin(); iter != simulations.end(); iter++)
-    {
+    for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
         result.push_back(iter->first);
     }
     return result;
@@ -219,7 +217,7 @@ std::vector<std::string> AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimu
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 std::string AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulatorType(std::string simulationName)
 {
-    if (isInMap(simulationName)){
+    if (isInMap(simulationName)) {
         return simulations[simulationName]->simulationType;
     } else {
         throw std::invalid_argument("getSimulatorType(simulationName)) get invalid simulationName");
@@ -229,7 +227,7 @@ std::string AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulatorType(std
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 double AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getFitness(std::string simulationName)
 {
-    if (isInMap(simulationName)){
+    if (isInMap(simulationName)) {
         return simulations[simulationName]->fitness;
     } else {
         throw std::invalid_argument("getFitness(simulationName) get invalid simulationName");
@@ -239,7 +237,7 @@ double AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getFitness(std::string si
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 SimulationParameters AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulationParameters(std::string simulationName)
 {
-    if (isInMap(simulationName)){
+    if (isInMap(simulationName)) {
         return simulations[simulationName]->parameters;
     } else {
         throw std::invalid_argument("getSimulationParameters(simulationName) get invalid simulationName");
@@ -267,9 +265,9 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::run()
 {
     prepareSimulations();
-    if(normalizeSteps(fitnessGoal)){
+    if (normalizeSteps(fitnessGoal)) {
         runTest();
-    }else{
+    } else {
         LOG(Logger::WARN,"normalize Steps was not successful, a default value is used!")
         varStepInitializer.setMaxSteps(defaultInitializerSteps);
         runTest();
@@ -285,7 +283,7 @@ std::string bestSimulation;
 double tmpFitness = -1 * DBL_MAX;
 typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
 for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
-    if (iter->second->fitness > tmpFitness){
+    if (iter->second->fitness > tmpFitness) {
         tmpFitness = iter->second->fitness;
         bestSimulation = iter->first;
     }
@@ -297,9 +295,10 @@ return bestSimulation;
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runToCompletion(std::string optimizerName)
 {
-    if ( ! isInMap(optimizerName))
+    if ( ! isInMap(optimizerName)) {
         throw std::invalid_argument(
             "AutotuningSimulator<...>::runToCompletion() get invalid optimizerName");
+    }
     shared_ptr<Initializer<CELL_TYPE> > originalInitializer = varStepInitializer.getInitializer();
     varStepInitializer.setMaxSteps(originalInitializer->maxSteps());
     simulations[optimizerName]->simulationFactory->operator()(simulations[optimizerName]->parameters);
@@ -309,7 +308,7 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double goal, unsigned start)
 {
     LOG(Logger::INFO, "normalizeSteps")
-    if (! isInMap("SerialSimulation")){
+    if (! isInMap("SerialSimulation")) {
         // FIXME Maybe an exception can be the heavy way!
         LOG(Logger::WARN, "AutoTuningSimulator::normalizeSteps(): no "
                     << "SerialSimulation available!")
@@ -332,14 +331,13 @@ unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double g
         oldSteps = steps;
         LOG(Logger::DBG, "steps: " << steps)
         steps = ((double) steps / fitness) * (double)goal;
-        if (steps < 1){
+        if (steps < 1) {
             steps =1;
         }
         LOG(Logger::DBG, "new calculated steps: " << steps)
         LOG(Logger::DBG, "fitness: " << fitness << " goal: " << goal)
     } while((!(fitness > goal + variance && fitness < goal - variance ))
          && (!(oldSteps <= 1 && fitness > goal)));
-
     return oldSteps;
 }
 
@@ -382,7 +380,7 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::prepareSimulations()
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
     bool AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::isInMap(const std::string name)const
 {
-    if (simulations.find(name) == simulations.end()){
+    if (simulations.find(name) == simulations.end()) {
         return false;
     } else {
         return true;
