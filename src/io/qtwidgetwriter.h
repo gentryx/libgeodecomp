@@ -109,7 +109,8 @@ public:
 
     void swapImages()
     {
-        std::swap(curImage, bufImage);
+        using std::swap;
+        swap(curImage, bufImage);
     }
 
 private:

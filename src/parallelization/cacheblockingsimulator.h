@@ -186,6 +186,7 @@ private:
 
     void hop()
     {
+        using std::swap;
         TimeTotal t(&chronometer);
 
         CoordBox<DIM - 1> frameBox = frames.boundingBox();
@@ -202,7 +203,7 @@ private:
             }
         }
 
-        std::swap(curGrid, newGrid);
+        swap(curGrid, newGrid);
         int curNanoStep = nanoStep + pipelineLength;
         stepNum += curNanoStep / NANO_STEPS;
         nanoStep = curNanoStep % NANO_STEPS;

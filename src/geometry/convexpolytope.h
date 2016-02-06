@@ -294,12 +294,15 @@ private:
 
     COORD cutPoint(EquationType eq1, EquationType eq2) const
     {
+        using std::swap;
+
         if (eq1.dir[1] == 0) {
             if (eq2.dir[1] == 0) {
                 // throw std::invalid_argument("both lines are vertical")
                 return farAway<2>();
             }
-            std::swap(eq1, eq2);
+
+            swap(eq1, eq2);
         }
 
         COORD dir1 = turnLeft90(eq1.dir);

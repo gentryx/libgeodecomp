@@ -126,9 +126,10 @@ public:
 
     void testStaticDataHandling()
     {
+        using std::swap;
         typedef APITraits::SelectStaticData<MyFancyDummyCell>::Value StaticData;
         StaticData data(12.34);
-        std::swap(MyFancyDummyCell::staticData, data);
+        swap(MyFancyDummyCell::staticData, data);
         TS_ASSERT_EQUALS(12.34, MyFancyDummyCell::staticData);
     }
 

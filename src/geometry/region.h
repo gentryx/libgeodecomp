@@ -845,8 +845,9 @@ public:
 
     inline void operator-=(const Region& other)
     {
+        using std::swap;
         Region newValue = *this - other;
-        std::swap(newValue, *this);
+        swap(newValue, *this);
     }
 
     /**

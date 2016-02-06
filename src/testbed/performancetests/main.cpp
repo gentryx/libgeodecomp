@@ -1384,6 +1384,7 @@ public:
 
     double performance(std::vector<int> rawDim)
     {
+        using std::swap;
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         typedef SoAGrid<
             JacobiCellStreakUpdate,
@@ -1411,7 +1412,7 @@ public:
                 Coord<3> offset(1, 1, 1);
                 Updater updater(&region, &offset, &offset, &box.dimensions, 0, 0, 0);
                 gridNew->callback(gridOld, updater);
-                std::swap(gridOld, gridNew);
+                swap(gridOld, gridNew);
             }
         }
 

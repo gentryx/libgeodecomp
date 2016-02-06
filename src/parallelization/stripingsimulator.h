@@ -165,7 +165,8 @@ private:
 
     void swapGrids()
     {
-        std::swap(curStripe, newStripe);
+        using std::swap;
+        swap(curStripe, newStripe);
     }
 
     /**
