@@ -30,7 +30,7 @@ public:
         public APITraits::HasNanoSteps<2>
     {};
 
-    explicit Cell(const int& direction = FREE, const int& border = 0, const int rate = 5) :
+    explicit Cell(int direction = FREE, int border = 0, const int rate = 5) :
         direction(direction),
         border(border),
         rate(rate)

@@ -111,7 +111,7 @@ public:
     {}
 
     template<class NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& neighbors, const int& nanoStep)
+    void update(const NEIGHBORHOOD& neighbors, int nanoStep)
     {
         *this = neighbors[FixedCoord<0, 0>()];
 
@@ -359,7 +359,7 @@ public:
     private:
         bool inCircle(const Coord<2>& point,
                       const Coord<2>& center,
-                      const int& diameter,
+                      int diameter,
                       const double& xScale = 1.0)
         {
             Coord<2> delta = center - point;

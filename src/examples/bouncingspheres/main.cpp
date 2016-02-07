@@ -82,7 +82,7 @@ public:
     typedef MyAPI API;
 
     explicit Sphere(
-        const int& myID = 0,
+        int myID = 0,
         const FloatCoord<3>& myPos = FloatCoord<3>(),
         const FloatCoord<3>& myVel = FloatCoord<3>()) :
         id(myID),

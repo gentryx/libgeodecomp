@@ -90,13 +90,13 @@ public:
     static const int DIM = 1;
 
     __host__ __device__
-    static Coord<1> diagonal(const int& nx)
+    static Coord<1> diagonal(int nx)
     {
         return Coord<1>(nx);
     }
 
     __host__ __device__
-    inline explicit Coord(const int& nx=0)
+    inline explicit Coord(int nx=0)
     {
         c[0] = nx;
     }
@@ -154,19 +154,19 @@ public:
     }
 
     __host__ __device__
-    const int& x() const
+    int x() const
     {
         return c[0];
     }
 
     __host__ __device__
-    inline int& operator[](const int& i)
+    inline int& operator[](int i)
     {
         return c[i];
     }
 
     __host__ __device__
-    inline const int& operator[](const int& i) const
+    inline int operator[](int i) const
     {
         return c[i];
     }
@@ -220,7 +220,7 @@ public:
     }
 
     __host__ __device__
-    inline Coord operator*(const int& scale) const
+    inline Coord operator*(int scale) const
     {
         return Coord(scale * x());
     }
@@ -232,7 +232,7 @@ public:
     }
 
     __host__ __device__
-    inline Coord operator/(const int& divisor) const
+    inline Coord operator/(int divisor) const
     {
         return Coord(x()/ divisor);
     }
@@ -244,13 +244,13 @@ public:
     }
 
     __host__ __device__
-    inline const int& prod() const
+    inline int prod() const
     {
         return x();
     }
 
     __host__ __device__
-    inline const int& sum() const
+    inline int sum() const
     {
         return x();
     }
@@ -309,13 +309,13 @@ public:
     static const int DIM = 2;
 
     __host__ __device__
-    static Coord<2> diagonal(const int& nx)
+    static Coord<2> diagonal(int nx)
     {
         return Coord<2>(nx, nx);
     }
 
     __host__ __device__
-    inline explicit Coord(const int& nx=0, const int& ny=0)
+    inline explicit Coord(int nx=0, int ny=0)
     {
         c[0] = nx;
         c[1] = ny;
@@ -386,7 +386,7 @@ public:
     }
 
     __host__ __device__
-    const int& x() const
+    int x() const
     {
         return c[0];
     }
@@ -398,19 +398,19 @@ public:
     }
 
     __host__ __device__
-    const int& y() const
+    int y() const
     {
         return c[1];
     }
 
     __host__ __device__
-    inline int& operator[](const int& i)
+    inline int& operator[](int i)
     {
         return c[i];
     }
 
     __host__ __device__
-    inline const int& operator[](const int& i) const
+    inline int operator[](int i) const
     {
         return c[i];
     }
@@ -466,7 +466,7 @@ public:
     }
 
     __host__ __device__
-    inline Coord operator*(const int& scale) const
+    inline Coord operator*(int scale) const
     {
         return Coord(scale * x(), scale * y());
     }
@@ -478,7 +478,7 @@ public:
     }
 
     __host__ __device__
-    inline Coord operator/(const int& divisor) const
+    inline Coord operator/(int divisor) const
     {
         return Coord(x()/ divisor, y() / divisor);
     }
@@ -558,13 +558,13 @@ public:
     static const int DIM = 3;
 
     __host__ __device__
-    static Coord<3> diagonal(const int& nx)
+    static Coord<3> diagonal(int nx)
     {
         return Coord<3>(nx, nx, nx);
     }
 
     __host__ __device__
-    inline explicit Coord(const int& nx=0, const int& ny=0, const int& nz=0)
+    inline explicit Coord(int nx=0, int ny=0, int nz=0)
     {
         c[0] = nx;
         c[1] = ny;
@@ -637,7 +637,7 @@ public:
     }
 
     __host__ __device__
-    const int& x() const
+    int x() const
     {
         return c[0];
     }
@@ -649,7 +649,7 @@ public:
     }
 
     __host__ __device__
-    const int& y() const
+    int y() const
     {
         return c[1];
     }
@@ -661,19 +661,19 @@ public:
     }
 
     __host__ __device__
-    const int& z() const
+    int z() const
     {
         return c[2];
     }
 
     __host__ __device__
-    inline int& operator[](const int& i)
+    inline int& operator[](int i)
     {
         return c[i];
     }
 
     __host__ __device__
-    inline const int& operator[](const int& i) const
+    inline int operator[](int i) const
     {
         return c[i];
     }
@@ -734,7 +734,7 @@ public:
     }
 
     __host__ __device__
-    inline Coord operator*(const int& scale) const
+    inline Coord operator*(int scale) const
     {
         return Coord(scale * x(), scale * y(), scale * z());
     }
@@ -746,7 +746,7 @@ public:
     }
 
     __host__ __device__
-    inline Coord operator/(const int& divisor) const
+    inline Coord operator/(int divisor) const
     {
         return Coord(x() / divisor,
                      y() / divisor,

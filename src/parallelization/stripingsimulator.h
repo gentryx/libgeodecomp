@@ -390,14 +390,14 @@ private:
         updateRegion(innerRegion, nanoStep);
     }
 
-    Region<DIM> fillRegion(const int& startRow, const int& endRow)
+    Region<DIM> fillRegion(int startRow, int endRow)
     {
         Region<DIM> ret;
         ret << boundingBox(startRow, endRow);
         return ret;
     }
 
-    void initRegions(const int& startRow, const int& endRow)
+    void initRegions(int startRow, int endRow)
     {
         region      = fillRegion(startRow, endRow);
         innerRegion = fillRegion(startRow + ghostHeightUpper, endRow - ghostHeightLower);

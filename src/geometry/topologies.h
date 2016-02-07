@@ -292,7 +292,7 @@ public:
      * this when you need to set dim at runtime. In every other case
      * WrapsAxis<DIM>::VALUE is the prefered way of checking.
      */
-    static bool wrapsAxis(const int& dim)
+    static bool wrapsAxis(int dim)
     {
         if (dim == 0) {
             return WrapsAxis<0>::VALUE;

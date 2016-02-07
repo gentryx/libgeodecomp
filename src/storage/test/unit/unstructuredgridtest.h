@@ -18,7 +18,7 @@ public:
         val(val)
     {}
 
-    int& operator()(const int& newVal)
+    int& operator()(int newVal)
     {
         val = newVal;
         return val;

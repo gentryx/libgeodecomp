@@ -408,8 +408,8 @@ public:
         static inline void newOriginAndDimensions(
             Coord<2> *curOri,
             Coord<2> *curDim,
-            const int& curType,
-            const int& curCounter)
+            int curType,
+            int curCounter)
         {
             int leftHalf =  curDim->x() / 2;
             int rightHalf = curDim->x() - leftHalf;
@@ -423,14 +423,14 @@ public:
         }
 
         static inline Coord<2> newOrigin(
-            const int& curType,
-            const int& curCounter,
-            const int& leftHalf,
-            const int& rightHalf,
-            const int& upperHalf,
-            const int& lowerHalf,
-            const int& x,
-            const int& y)
+            int curType,
+            int curCounter,
+            int leftHalf,
+            int rightHalf,
+            int upperHalf,
+            int lowerHalf,
+            int x,
+            int y)
         {
             switch (curCounter) {
             case 0:

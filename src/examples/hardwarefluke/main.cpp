@@ -34,7 +34,7 @@ private:
 class BuggyCellInitializer : public SimpleInitializer<BuggyCell>
 {
 public:
-    explicit BuggyCellInitializer(std::string infile, const int& steps=10000) :
+    explicit BuggyCellInitializer(std::string infile, int steps=10000) :
         SimpleInitializer<BuggyCell>(readDim(infile), steps),
         filename(infile)
     {}

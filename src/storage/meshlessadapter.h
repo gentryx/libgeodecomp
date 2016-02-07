@@ -60,7 +60,7 @@ public:
         return c;
     }
 
-    inline void insert(CoordListGrid *grid, const FloatCoord<DIM>& pos, const int& id) const
+    inline void insert(CoordListGrid *grid, const FloatCoord<DIM>& pos, int id) const
     {
         Coord<2> c = posToCoord(pos);
         (*grid)[c].push_back(std::make_pair(pos, id));

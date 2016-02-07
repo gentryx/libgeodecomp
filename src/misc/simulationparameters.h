@@ -121,7 +121,7 @@ public:
         throw std::logic_error("illegal assignment from bool");
     }
 
-    virtual void operator=(const int& other)
+    virtual void operator=(int other)
     {
         throw std::logic_error("illegal assignment from int");
     }
@@ -146,7 +146,7 @@ public:
         return false;
     }
 
-    virtual bool operator==(const int& other) const
+    virtual bool operator==(int other) const
     {
         return false;
     }

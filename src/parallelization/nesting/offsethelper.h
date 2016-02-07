@@ -40,7 +40,7 @@ public:
         Coord<DIM> *dimensions,
         const CoordBox<DIM>& ownBoundingBox,
         const CoordBox<DIM>& simulationArea,
-        const int& ghostZoneWidth)
+        int ghostZoneWidth)
     {
         (*offset)[INDEX] = 0;
         if (TOPOLOGY::template WrapsAxis<INDEX>::VALUE) {
@@ -86,7 +86,7 @@ public:
         Coord<DIM> *dimensions,
         const CoordBox<DIM>& ownBoundingBox,
         const CoordBox<DIM>& simulationArea,
-        const int& ghostZoneWidth)
+        int ghostZoneWidth)
     {}
 };
 
@@ -102,7 +102,7 @@ public:
         Coord<DIM> *dimensions,
         const CoordBox<DIM>& ownBoundingBox,
         const CoordBox<DIM>& simulationArea,
-        const int& ghostZoneWidth)
+        int ghostZoneWidth)
     {
         *offset = ownBoundingBox.origin;
         *dimensions = simulationArea.dimensions;

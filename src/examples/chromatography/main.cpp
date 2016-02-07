@@ -49,7 +49,7 @@ Coord<2> FarAway(-1, -1);
 class ID
 {
 public:
-    explicit ID(const Coord<2>& containerCoord=FarAway, const int& index=-1) :
+    explicit ID(const Coord<2>& containerCoord=FarAway, int index=-1) :
         container(containerCoord),
         num(index)
     {}
@@ -92,7 +92,7 @@ public:
     }
 
     template<class CONTAINER>
-    void update(CONTAINER *container, const int& nanoStep)
+    void update(CONTAINER *container, int nanoStep)
     {
         *this = container->cell(id);
 
@@ -540,9 +540,9 @@ private:
     }
 
     void addCoal(Grid<ContainerCell> *grid,
-                 const int& centerX,
-                 const int& centerY,
-                 const int& maxRadius)
+                 int centerX,
+                 int centerY,
+                 int maxRadius)
     {
         int spacing = 1.3 * ELEMENT_SPACING;
 
@@ -552,9 +552,9 @@ private:
     }
 
     void addCircle(Grid<ContainerCell> *grid,
-                   const int& centerX,
-                   const int& centerY,
-                   const int& radius,
+                   int centerX,
+                   int centerY,
+                   int radius,
                    const State& state)
     {
         const double  PI = 3.14159265;
@@ -652,8 +652,8 @@ private:
     }
 
     void addFluxCell(Grid<ContainerCell> *grid,
-                     const int& x,
-                     const int& y,
+                     int x,
+                     int y,
                      const double influxes[SUBSTANCES],
                      const double& efflux)
     {
@@ -662,15 +662,15 @@ private:
 
 
     void addLiquidCell(Grid<ContainerCell> *grid,
-                       const int& x,
-                       const int& y)
+                       int x,
+                       int y)
     {
         addCell(grid, Coord<2>(x, y), ZERO_INFLUXES, 0, LIQUID);
     }
 
     void addSolidCell(Grid<ContainerCell> *grid,
-                      const int& x,
-                      const int& y)
+                      int x,
+                      int y)
     {
         addCell(grid, Coord<2>(x, y), ZERO_INFLUXES, 0, SOLID);
     }
@@ -744,7 +744,7 @@ private:
 
     template<typename GRID_TYPE>
     void writePointMesh(DBfile *dbfile, const GRID_TYPE& grid,
-                        const int& n)
+                        int n)
     {
         int dim = 2;
         std::vector<float> x;
@@ -765,7 +765,7 @@ private:
 
     template<typename GRID_TYPE>
     void writeZoneMesh(DBfile *dbfile, const GRID_TYPE& grid,
-                       const int& n)
+                       int n)
     {
         int dim = 2;
         std::vector<float> x;
@@ -809,7 +809,7 @@ private:
 
     template<typename GRID_TYPE>
     void writeSuperGrid(DBfile *dbfile, const GRID_TYPE& grid,
-                        const int& n)
+                        int n)
     {
         int dim = 2;
         std::vector<float> x;
@@ -830,7 +830,7 @@ private:
     }
 
     template<typename GRID_TYPE>
-    void writeVars(DBfile *dbfile, const GRID_TYPE& grid, const int& n)
+    void writeVars(DBfile *dbfile, const GRID_TYPE& grid, int n)
     {
         CoordBox<2> box = grid.boundingBox();
 
@@ -869,7 +869,7 @@ private:
     }
 
     template<typename GRID_TYPE>
-    void output(const GRID_TYPE& grid, const int& time)
+    void output(const GRID_TYPE& grid, int time)
     {
         std::ostringstream filename;
         filename << prefix << "." << std::setfill('0') << std::setw(5)

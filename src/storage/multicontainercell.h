@@ -126,7 +126,7 @@ public:
                                                                         \
         template<class NEIGHBORHOOD>                                    \
         inline void update(const NEIGHBORHOOD& hood,                    \
-                           const int& nanoStep)                         \
+                           int nanoStep)                                \
         {                                                               \
             *this = hood[LibGeoDecomp::Coord<DIM>()];                   \
             MultiNeighborhoodAdapter<NEIGHBORHOOD> multiHood(&hood);    \
