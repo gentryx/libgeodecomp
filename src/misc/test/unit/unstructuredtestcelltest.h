@@ -4,6 +4,8 @@
 #include <libgeodecomp/misc/unstructuredtestcell.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 
 using namespace LibGeoDecomp;
 
@@ -13,7 +15,7 @@ class UnstructuredTestCellTest : public CxxTest::TestSuite
 {
 public:
 #ifdef LIBGEODECOMP_WITH_CPP14
-    typedef UnstructuredTestCell<TestCellHelpers::NoOutput> TestCellType;
+    typedef UnstructuredTestCell<UnstructuredTestCellHelpers::EmptyAPI, TestCellHelpers::NoOutput> TestCellType;
     typedef UnstructuredGrid<TestCellType> TestGridType;
 #endif
 
@@ -134,6 +136,35 @@ public:
 
             TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
         }
+#endif
+    }
+
+    void testSoA()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA TestCellType;
+        typedef UnstructuredSoAGrid<TestCellType, 1, double, 32, 1> TestGridType;
+
+        UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
+        TestGridType grid1 = TestGridType(Coord<1>(340));
+        TestGridType grid2 = TestGridType(Coord<1>(340));
+        init.grid(&grid1);
+        init.grid(&grid2);
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 340);
+        UnstructuredUpdateFunctor<TestCellType>()(
+            region,
+            grid1,
+            &grid2,
+            0,
+            UpdateFunctorHelpers::ConcurrencyNoP(),
+            APITraits::SelectThreadedUpdate<TestCellType>::Value());
+
+        int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
+        int expectedCycle2 = expectedCycle1 + 1;
+        TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
+        TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
 #endif
     }
 

@@ -3,18 +3,43 @@
 
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/testcell.h>
+#include <libflatarray/macros.hpp>
 
 namespace LibGeoDecomp {
 
-// fixme: needs UnstructuredSoATestCell, too
-template<typename OUTPUT = TestCellHelpers::StdOutput>
+namespace UnstructuredTestCellHelpers {
+
+/**
+ * We'll use UnstructuredTestCell with different API specs. This empty
+ * one doesn't add anything to the default.
+ */
+class EmptyAPI
+{};
+
+/**
+ * Struct of Arrays is another important dimension of the test range.
+ */
+class SoAAPI :
+        public APITraits::HasSoA,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasSellC<32>,
+        public APITraits::HasSellSigma<1>
+{};
+
+}
+
+template<typename ADDITIONAL_API = UnstructuredTestCellHelpers::EmptyAPI, typename OUTPUT = TestCellHelpers::StdOutput>
 class UnstructuredTestCell
 {
 public:
     class API :
+        public ADDITIONAL_API,
         public APITraits::HasUnstructuredTopology,
         public APITraits::HasNanoSteps<13>
-    {};
+    {
+    public:
+        LIBFLATARRAY_CUSTOM_SIZES((16)(32)(64)(128)(256)(512)(1024), (1), (1))
+    };
 
     const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<UnstructuredTestCell>::VALUE;
 
@@ -74,6 +99,16 @@ public:
         ++cycleCounter;
     }
 
+    template<typename HOOD_OLD, typename HOOD_NEW>
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
+    {
+        for (; hoodOld.index() < indexEnd; ++hoodOld, ++hoodNew) {
+            UnstructuredTestCell cell;
+            cell.update(hoodOld, nanoStep);
+            hoodNew << cell;
+        }
+    }
+
     int id;
     unsigned cycleCounter;
     bool isValid;
@@ -105,6 +140,18 @@ private:
     }
 };
 
+typedef std::map<int, double> WeightsMap;
+typedef UnstructuredTestCell<UnstructuredTestCellHelpers::SoAAPI> UnstructuredTestCellSoA;
+
 }
+
+LIBFLATARRAY_REGISTER_SOA(
+    LibGeoDecomp::UnstructuredTestCellSoA,
+    ((int)(id))
+    ((unsigned)(cycleCounter))
+    ((bool)(isValid))
+    ((bool)(isEdgeCell))
+    ((LibGeoDecomp::WeightsMap)(expectedNeighborWeights))
+                          )
 
 #endif
