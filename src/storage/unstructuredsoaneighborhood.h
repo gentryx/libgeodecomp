@@ -179,6 +179,19 @@ public:
         return &accessor;
     }
 
+    inline
+    UnstructuredSoANeighborhoodNew& operator++()
+    {
+        ++accessor;
+        return *this;
+    }
+
+    inline
+    void operator<<(const CELL& cell)
+    {
+        accessor << cell;
+    }
+
 private:
     SoAAccessor& accessor;      /**< accessor to new grid */
 };
