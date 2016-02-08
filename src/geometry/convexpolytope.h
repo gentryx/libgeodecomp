@@ -204,7 +204,7 @@ public:
      * integration. Few samples are used, so this method is highly
      * inaccurate.
      */
-    const double& getVolume() const
+    double getVolume() const
     {
         return area;
     }
@@ -219,7 +219,7 @@ public:
         return limits;
     }
 
-    const double& getDiameter() const
+    double getDiameter() const
     {
         return diameter;
     }

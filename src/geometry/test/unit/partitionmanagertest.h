@@ -201,9 +201,9 @@ private:
     PartitionManager<Topologies::Cube<2>::Topology> partitionManager;
 
     std::vector<CoordBox<2> > fakeBoundingBoxes(
-        const unsigned& offset,
-        const unsigned& size,
-        const unsigned& ghostZoneWidth,
+        unsigned offset,
+        unsigned size,
+        unsigned ghostZoneWidth,
         const std::vector<std::size_t>& weights,
         const boost::shared_ptr<StripingPartition<2> > partition)
     {
@@ -232,8 +232,8 @@ private:
     template<class PARTITION>
     void checkRegion(
         const Region<2>& region,
-        const unsigned& start,
-        const unsigned& end,
+        unsigned start,
+        unsigned end,
         const boost::shared_ptr<PARTITION> partition)
     {
         std::vector<Coord<2> > expected;

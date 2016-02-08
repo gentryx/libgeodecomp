@@ -134,7 +134,7 @@ private:
         }
 
         typedef NEIGHBORS<I> DIR;
-        const double& influence = INFLUENCES[I];
+        double influence = INFLUENCES[I];
 
         *fluxFlow = (DIR::X * from.velocityX + DIR::Y * from.velocityY) *
             influence * from.quantity;
@@ -156,7 +156,7 @@ private:
     {
         typedef NEIGHBORS<I> DIR;
         const Cell& other = neighbors[DIR()];
-        const double& length = LENGTHS[I];
+        double length = LENGTHS[I];
 
         double fluxFlow;
         double fluxPressure;
@@ -360,7 +360,7 @@ public:
         bool inCircle(const Coord<2>& point,
                       const Coord<2>& center,
                       int diameter,
-                      const double& xScale = 1.0)
+                      double xScale = 1.0)
         {
             Coord<2> delta = center - point;
             double dist = delta.x() * delta.x() * xScale +

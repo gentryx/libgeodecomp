@@ -20,7 +20,7 @@ public:
         DistributedSimulator<TestCell<2> >(init)
     {}
 
-    void setStep(const unsigned& step)
+    void setStep(unsigned step)
     {
         stepNum = step;
     }

@@ -194,7 +194,7 @@ private:
     unsigned offset;
     unsigned ghostZoneWidth;
 
-    unsigned startingLine(const unsigned& node)
+    unsigned startingLine(unsigned node)
     {
         unsigned ret = offset;
         for (unsigned i = 0; i < node; ++i) {
@@ -204,7 +204,7 @@ private:
         return ret / dimensions.x();
     }
 
-    Region<2> fillLines(const unsigned& startLine, const unsigned& endLine)
+    Region<2> fillLines(unsigned startLine, unsigned endLine)
     {
         Region<2> ret;
         for (unsigned row = startLine; row < endLine; ++row) {

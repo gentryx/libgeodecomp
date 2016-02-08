@@ -26,7 +26,7 @@ public:
         return ret;
     }
 
-    void update(const CoordMap<ConwayCell>& neighborhood, const unsigned&)
+    void update(const CoordMap<ConwayCell>& neighborhood, unsigned)
     {
         int livingNeighbors = countLivingNeighbors(neighborhood);
         alive = neighborhood[Coord<2>(0, 0)].alive;

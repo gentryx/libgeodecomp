@@ -171,8 +171,8 @@ public:
     TestCell(
         const Coord<DIM>& pos,
         const Coord<DIM>& gridDim,
-        const unsigned& cycleCounter = 0,
-        const double& testValue = defaultValue()) :
+        unsigned cycleCounter = 0,
+        double testValue = defaultValue()) :
         pos(pos),
         dimensions(Coord<DIM>(), gridDim),
         cycleCounter(cycleCounter),
@@ -215,7 +215,7 @@ public:
 
     template<typename COORD_MAP>
     __host__ __device__
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    void update(const COORD_MAP& neighborhood, unsigned nanoStep)
     {
         // initialize Cell by copying from previous state
         *this = TestCell(neighborhood[FixedCoord<0, 0, 0>()]);

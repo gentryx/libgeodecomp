@@ -82,14 +82,14 @@ private:
     MPI_Comm comm;
     MPI_Datatype datatype;
 
-    std::string filename(const unsigned& step, const std::string& suffix) const
+    std::string filename(unsigned step, const std::string& suffix) const
     {
         std::ostringstream buf;
         buf << prefix << "." << std::setfill('0') << std::setw(5) << step << "." << suffix;
         return buf.str();
     }
 
-    void writeHeader(const unsigned& step, const Coord<DIM>& dimensions)
+    void writeHeader(unsigned step, const Coord<DIM>& dimensions)
     {
         MPI_File file = mpiio.openFileForWrite(
             filename(step, "bov"), comm);
@@ -132,7 +132,7 @@ private:
 
     template<typename GRID_TYPE>
     void writeRegion(
-        const unsigned& step,
+        unsigned step,
         const Coord<DIM>& dimensions,
         const GRID_TYPE& grid,
         const Region<DIM>& region)

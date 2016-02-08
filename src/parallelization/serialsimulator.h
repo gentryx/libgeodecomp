@@ -127,7 +127,7 @@ protected:
     GridType *newGrid;
     Region<DIM> simArea;
 
-    void nanoStep(const unsigned& nanoStep)
+    void nanoStep(unsigned nanoStep)
     {
         using std::swap;
         TimeCompute t(&chronometer);

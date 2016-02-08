@@ -98,7 +98,7 @@ public:
         std::size_t rank,
         bool lastCall) = 0;
 
-    const unsigned& getPeriod() const
+    unsigned getPeriod() const
     {
         return period;
     }

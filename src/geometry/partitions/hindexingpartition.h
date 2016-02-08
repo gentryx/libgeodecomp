@@ -75,10 +75,10 @@ public:
     {
     public:
         explicit Triangle(
-            const unsigned& type=0,
+            unsigned type=0,
             const Coord<2>& dimensions=Coord<2>(0, 0),
             const Coord<2>& origin=Coord<2>(0, 0),
-            const unsigned& counter=0) :
+            unsigned counter=0) :
             counter(counter),
             type(type),
             dimensions(dimensions),
@@ -132,7 +132,7 @@ public:
          * start at position  pos according to the SFC
          * linearization.
          */
-        inline Iterator(const Coord<2>& _origin, const Coord<2>& dimensions, const unsigned& pos=0) :
+        inline Iterator(const Coord<2>& _origin, const Coord<2>& dimensions, unsigned pos=0) :
             SpaceFillingCurve<2>::Iterator(_origin, false)
         {
             unsigned remainder = pos;
@@ -164,7 +164,7 @@ public:
          */
         inline Iterator(
             const Coord<2>& origin,
-            const unsigned& initType,
+            unsigned initType,
             const Coord<2>& dimensions) :
             SpaceFillingCurve<2>::Iterator(origin, false)
         {
@@ -254,7 +254,7 @@ public:
             }
         }
 
-        inline void digDownCached(const Triangle& triangle, const unsigned& counter=0)
+        inline void digDownCached(const Triangle& triangle, unsigned counter=0)
         {
             sublevelState = CACHED;
             cachedTriangleOrigin = triangle.origin;
@@ -263,7 +263,7 @@ public:
             cachedTriangleCoordsEnd = &coords[0] + coords.size();
         }
 
-        inline void digDownTrivial(const Triangle& triangle, const unsigned& counter=0)
+        inline void digDownTrivial(const Triangle& triangle, unsigned counter=0)
         {
             sublevelState = TRIVIAL;
             cursor = triangle.origin;
@@ -473,7 +473,7 @@ public:
             throw std::invalid_argument("bad curType or curCounter");
         }
 
-        static inline Coord<2> subtriangleDimensions(const Coord<2>& dimensions, const unsigned& type)
+        static inline Coord<2> subtriangleDimensions(const Coord<2>& dimensions, unsigned type)
         {
             Triangle t(type, dimensions);
             nextSubTriangle(&t);
@@ -485,7 +485,7 @@ public:
             return triangleLength(triangle.dimensions, triangle.type);
         }
 
-        static inline unsigned triangleLength(const Coord<2>& dimensions, const unsigned& type)
+        static inline unsigned triangleLength(const Coord<2>& dimensions, unsigned type)
         {
             if (hasTrivialDimensions(dimensions))
             {
@@ -547,7 +547,7 @@ public:
             (*this)[startOffsets[node + 1]]);
     }
 
-    inline Iterator operator[](const unsigned& pos) const
+    inline Iterator operator[](unsigned pos) const
     {
         return Iterator(origin, dimensions, pos);
     }

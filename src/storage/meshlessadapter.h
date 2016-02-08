@@ -233,7 +233,7 @@ public:
         return ret;
     }
 
-    const double& getBoxSize() const
+    double getBoxSize() const
     {
         return boxSize;
     }

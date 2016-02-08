@@ -38,7 +38,7 @@ public:
         inline Square(
             const Coord<DIM>& origin,
             const Coord<DIM> dimensions,
-            const unsigned& quadrant) :
+            unsigned quadrant) :
             origin(origin),
             dimensions(dimensions),
             quadrant(quadrant)
@@ -72,7 +72,7 @@ public:
         inline Iterator(
             const Coord<DIM>& origin,
             const Coord<DIM>& dimensions,
-            const unsigned& pos = 0) :
+            unsigned pos = 0) :
             SpaceFillingCurve<DIM>::Iterator(origin, false)
         {
             squareStack.push_back(Square(origin, dimensions, 0));
@@ -150,7 +150,7 @@ public:
         inline void digDownTrivial(
             const Coord<DIM>& origin,
             const Coord<DIM>& dimensions,
-            const unsigned& offset)
+            unsigned offset)
         {
             sublevelState = TRIVIAL;
             cursor = origin;
@@ -170,7 +170,7 @@ public:
         inline void digDownCached(
             const Coord<DIM>& origin,
             const Coord<DIM>& dimensions,
-            const unsigned& offset)
+            unsigned offset)
         {
             sublevelState = CACHED;
             CoordVector& coords = (*ZCurvePartition<DIM>::coordsCache)[dimensions];
@@ -180,7 +180,7 @@ public:
             cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
         }
 
-        inline void digDownRecursion(const unsigned& offset, Square currentSquare)
+        inline void digDownRecursion(unsigned offset, Square currentSquare)
         {
             const Coord<DIM>& dimensions = currentSquare.dimensions;
             Coord<DIM> halfDimensions = dimensions / 2;
@@ -285,7 +285,7 @@ public:
         dimensions(dimensions)
     {}
 
-    inline Iterator operator[](const unsigned& i) const
+    inline Iterator operator[](unsigned i) const
     {
         return Iterator(origin, dimensions, i);
     }

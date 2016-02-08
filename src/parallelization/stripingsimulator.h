@@ -53,7 +53,7 @@ public:
     explicit StripingSimulator(
         Initializer<CELL_TYPE> *initializer,
         LoadBalancer *balancer = 0,
-        const unsigned& loadBalancingPeriod = 1):
+        unsigned loadBalancingPeriod = 1):
         DistributedSimulator<CELL_TYPE>(initializer),
         balancer(balancer),
         partitions(partition(initializer->gridDimensions()[DIM - 1], MPILayer().size())),
@@ -70,7 +70,7 @@ public:
     explicit StripingSimulator(
         const boost::shared_ptr<Initializer<CELL_TYPE> >& initializer,
         LoadBalancer *balancer = 0,
-        const unsigned& loadBalancingPeriod = 1):
+        unsigned loadBalancingPeriod = 1):
         DistributedSimulator<CELL_TYPE>(initializer),
         balancer(balancer),
         partitions(partition(initializer->gridDimensions()[DIM - 1], MPILayer().size())),
@@ -124,7 +124,7 @@ public:
         handleOutput(WRITER_ALL_DONE);
     }
 
-    inline const unsigned& getLoadBalancingPeriod() const
+    inline unsigned getLoadBalancingPeriod() const
     {
         return loadBalancingPeriod;
     }
@@ -218,7 +218,7 @@ private:
         redistributeGrid(oldPartitions, newPartitions);
     }
 
-    void nanoStep(const unsigned& nanoStep)
+    void nanoStep(unsigned nanoStep)
     {
         TimeTotal t(&chronometer);
 
@@ -299,8 +299,8 @@ private:
      * in the 2d case) runs from start to end.
      */
     CoordBox<DIM> boundingBox(
-        const unsigned& start,
-        const unsigned& end)
+        unsigned start,
+        unsigned end)
     {
         int height = std::max((int)(end - start), 0);
         Coord<DIM> startCorner;
@@ -311,7 +311,7 @@ private:
         return CoordBox<DIM>(startCorner, dim);
     }
 
-    void updateRegion(const Region<DIM> &region, const unsigned& nanoStep)
+    void updateRegion(const Region<DIM> &region, unsigned nanoStep)
     {
         UpdateFunctor<CELL_TYPE>()(
             region,
@@ -325,7 +325,7 @@ private:
     /**
      * the methods below are just used to structurize the nanoStep() method.
      */
-    void updateInnerGhostRegion(const unsigned& nanoStep)
+    void updateInnerGhostRegion(unsigned nanoStep)
     {
         TimeComputeGhost t(&chronometer);
 
@@ -383,7 +383,7 @@ private:
         }
     }
 
-    void updateInside(const unsigned& nanoStep)
+    void updateInside(unsigned nanoStep)
     {
         TimeComputeInner t(&chronometer);
 

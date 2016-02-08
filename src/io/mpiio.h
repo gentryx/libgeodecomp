@@ -82,8 +82,8 @@ public:
     void writeRegion(
         const GRID_TYPE& grid,
         const Coord<DIM>& dimensions,
-        const unsigned& step,
-        const unsigned& maxSteps,
+        unsigned step,
+        unsigned maxSteps,
         const std::string& filename,
         const Region<DIM>& region,
         const MPI_Datatype& mpiDatatype = Typemaps::lookup<CELL_TYPE>(),

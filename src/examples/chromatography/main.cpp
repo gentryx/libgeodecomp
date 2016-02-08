@@ -70,7 +70,7 @@ public:
 
     explicit MyCell(const Coord<2>& center=FarAway, const ID& _id=ID(),
          const double presetInfluxes[SUBSTANCES] = ZERO_INFLUXES,
-         const double& efflux = 0,
+         double efflux = 0,
          const State& state = LIQUID) :
         state(state),
         efflux(efflux),
@@ -263,7 +263,7 @@ public:
 
     void pushNeighbor(
         const ID& id,
-        const double& length,
+        double length,
         const FloatCoord<2>& dir)
     {
         if (numNeighbors >= MAX_NEIGHBORS) {
@@ -393,7 +393,7 @@ public:
         return cells + numCells;
     }
 
-    void update(const CoordMapType& neighborhood, const unsigned& nanoStep)
+    void update(const CoordMapType& neighborhood, unsigned nanoStep)
     {
         neighbors = &neighborhood;
         for (std::size_t i = 0; i < numCells; ++i) {
@@ -417,7 +417,7 @@ class ChromoInitializer : public SimpleInitializer<ContainerCell>, VoronoiMesher
 public:
     ChromoInitializer(
         const Coord<2>& dim,
-        const unsigned& steps) :
+        unsigned steps) :
         SimpleInitializer<ContainerCell>(dim, steps),
         VoronoiMesher<ContainerCell>(dim, FloatCoord<2>(CELL_SPACING, CELL_SPACING), ELEMENT_SPACING)
     {}
@@ -655,7 +655,7 @@ private:
                      int x,
                      int y,
                      const double influxes[SUBSTANCES],
-                     const double& efflux)
+                     double efflux)
     {
         addCell(grid, Coord<2>(x, y), influxes, efflux, LIQUID);
     }
@@ -689,7 +689,7 @@ private:
     void addCell(Grid<ContainerCell> *grid,
                  const Coord<2>& center,
                  const double influxes[SUBSTANCES],
-                 const double& efflux,
+                 double efflux,
                  const State& state)
     {
         if (!checkForCollision(*grid, center)) {
@@ -719,7 +719,7 @@ private:
 class ChromoWriter : public Clonable<Writer<ContainerCell>, ChromoWriter>
 {
 public:
-    explicit ChromoWriter(const unsigned& period = 1) :
+    explicit ChromoWriter(unsigned period = 1) :
         Clonable<Writer<ContainerCell>, ChromoWriter>("chromo", period)
     {}
 

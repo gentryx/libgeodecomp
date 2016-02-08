@@ -595,7 +595,7 @@ public:
         return indices[0].size();
     }
 
-    inline Region expand(const unsigned& width=1) const
+    inline Region expand(unsigned width=1) const
     {
         return expand(Coord<DIM>::diagonal(width));
     }
@@ -632,7 +632,7 @@ public:
      */
     template<typename TOPOLOGY>
     inline Region expandWithTopology(
-        const unsigned& width,
+        unsigned width,
         const Coord<DIM>& globalDimensions,
         TOPOLOGY /* unused */) const
     {
@@ -655,7 +655,7 @@ public:
 
     template<typename TOPOLOGY, typename ADJACENCY>
     inline Region expandWithTopology(
-        const unsigned& width,
+        unsigned width,
         const Coord<DIM>& globalDimensions,
         TOPOLOGY topology,
         const ADJACENCY& adjacency) const
@@ -665,7 +665,7 @@ public:
 
     template<typename ADJACENCY>
     inline Region expandWithTopology(
-        const unsigned& width,
+        unsigned width,
         const Coord<DIM>& /* unused: globalDimensions */,
         Topologies::Unstructured::Topology /* used just for overload */,
         const ADJACENCY& adjacency) const
@@ -679,7 +679,7 @@ public:
      */
     template<typename ADJACENCY>
     inline Region expandWithAdjacency(
-        const unsigned& width,
+        unsigned width,
         const ADJACENCY& adjacency) const
     {
         // expanding with adjacency only works on unstructured, i.e. 1-dimensional grids

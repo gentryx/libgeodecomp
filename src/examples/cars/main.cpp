@@ -37,7 +37,7 @@ public:
     {}
 
     // fixme: shorten by decomposition
-    void update(const CoordMap<Cell>& neighborhood, const unsigned& nanoStep)
+    void update(const CoordMap<Cell>& neighborhood, unsigned nanoStep)
     {
         *this = neighborhood[Coord<2>(0, 0)];
 

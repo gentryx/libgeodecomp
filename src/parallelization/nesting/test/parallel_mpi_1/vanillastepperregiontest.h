@@ -21,7 +21,7 @@ public:
     virtual void get(
         GRID_TYPE2& destinationGrid,
         const Region<2>& patchRegion,
-        const unsigned& nanoStep)
+        unsigned nanoStep)
     {
         events.push_back(Event(patchRegion, nanoStep));
         PatchBuffer<GRID_TYPE1, GRID_TYPE2>::get(
@@ -94,8 +94,8 @@ private:
     boost::shared_ptr<StepperType> stepper;
 
     void checkInnerSet(
-        const unsigned& shrink,
-        const unsigned& expectedStep)
+        unsigned shrink,
+        unsigned expectedStep)
     {
         TS_ASSERT_TEST_GRID_REGION(
             GridType,

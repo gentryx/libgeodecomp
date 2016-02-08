@@ -81,7 +81,7 @@ public:
      */
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) = 0;
 
-    const unsigned& getPeriod() const
+    unsigned getPeriod() const
     {
         return period;
     }

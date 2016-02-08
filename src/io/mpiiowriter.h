@@ -69,7 +69,7 @@ private:
     MPI_Datatype datatype;
     MPIIO<CELL_TYPE> mpiio;
 
-    std::string filename(const unsigned& step) const
+    std::string filename(unsigned step) const
     {
         std::ostringstream buf;
         buf << prefix << std::setfill('0') << std::setw(5) << step << ".mpiio";

@@ -1030,7 +1030,7 @@ public:
 
     NoOpInitializer(
         const Coord<3>& dimensions,
-        const unsigned& steps) :
+        unsigned steps) :
         SimpleInitializer<CELL>(dimensions, steps)
     {}
 
@@ -2122,7 +2122,7 @@ public:
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
 
-    inline explicit LBMSoACell(const double& v=1.0, const State& s=LIQUID) :
+    inline explicit LBMSoACell(double v=1.0, const State& s=LIQUID) :
         C(v),
         N(0),
         E(0),
@@ -2165,7 +2165,7 @@ public:
 
 
 //     template<typename COORD_MAP>
-//     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+//     void update(const COORD_MAP& neighborhood, unsigned nanoStep)
 //     {
 //         *this = neighborhood[FixedCoord<0, 0>()];
 

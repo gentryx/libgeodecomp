@@ -120,7 +120,7 @@ public:
         bool lastCall,
         SteererFeedback *feedback) = 0;
 
-    const unsigned& getPeriod() const
+    unsigned getPeriod() const
     {
         return period;
     }

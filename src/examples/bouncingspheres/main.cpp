@@ -297,7 +297,7 @@ private:
 class GasInitializer : public SimpleInitializer<Container>
 {
 public:
-    GasInitializer(const Coord<3>& dimensions, const unsigned& steps) :
+    GasInitializer(const Coord<3>& dimensions, unsigned steps) :
         SimpleInitializer<Container>(dimensions, steps)
     {}
 

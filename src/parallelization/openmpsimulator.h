@@ -128,7 +128,7 @@ protected:
     Region<DIM> simArea;
     bool enableFineGrainedParallelism;
 
-    void nanoStep(const unsigned& nanoStep)
+    void nanoStep(unsigned nanoStep)
     {
         using std::swap;
         TimeCompute t(&chronometer);
