@@ -239,7 +239,7 @@ public:
     void testUnstructured()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        // fixme: test soa and different values for C and Sigma
+        // fixme: test soa and different values for C and Sigma and different threading strategies
         typedef UnstructuredTestCell<> TestCellType;
         int startStep = 7;
         int endStep = 20;
