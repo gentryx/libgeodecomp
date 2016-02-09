@@ -261,9 +261,6 @@ public:
 
         void recvFirstPart(APITraits::FalseType)
         {
-            // fixme: benchmark whether this could be done more
-            // efficiently with MPI_Iprobe (to detect the message
-            // size)
             mpiLayer.recv(&dataSize, source, 1, tag, MPI_INT);
         }
 
