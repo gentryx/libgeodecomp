@@ -6,13 +6,27 @@
 namespace LibGeoDecomp {
 namespace HpxSimulatorHelpers {
 
+hpx::lcos::local::spinlock mapMutex;
+std::map<std::string, hpx::lcos::local::promise<void> > initPromise;
 std::map<std::string, hpx::lcos::local::promise<std::vector<double> > > localUpdateGroupSpeeds;
 std::map<std::string, hpx::lcos::local::promise<std::vector<double> > > myGlobalUpdateGroupSpeeds;
 std::map<std::string, hpx::lcos::local::promise<std::vector<std::size_t> > > myLocalityIndices;
 
 hpx::future<std::vector<double> > getUpdateGroupSpeeds(const std::string& basename)
 {
-    return localUpdateGroupSpeeds[basename].get_future();
+    // Wait on everyone to initialize localUpdateGroupSpeeds, myGlobalUpdateGroupSpeeds
+    // and myLocalityInidices
+    hpx::future<void> initFuture;
+    {
+        boost::lock_guard<hpx::lcos::local::spinlock> lock(mapMutex);
+        initFuture = initPromise[basename].get_future();
+    }
+    return initFuture.then(
+        [basename](hpx::future<void>) -> hpx::future<std::vector<double> >
+        {
+            return localUpdateGroupSpeeds[basename].get_future();
+        }
+    );
 }
 
 void setNumberOfUpdateGroups(
@@ -62,6 +76,15 @@ void gatherAndBroadcastLocalityIndices(
     }
 
     localUpdateGroupSpeeds[basename].set_value(correctedUpdateGroupSpeeds);
+    hpx::future<std::vector<double> > myGlobalUpdateGroupSpeedsFuture
+        = myGlobalUpdateGroupSpeeds[basename].get_future();
+    hpx::future<std::vector<std::size_t> > myLocalityIndicesFuture
+        = myLocalityIndices[basename].get_future();
+    // We are now save to proceed ...
+    {
+        boost::lock_guard<hpx::lcos::local::spinlock> lock(mapMutex);
+        initPromise[basename].set_value();
+    }
 
     if (hpx::get_locality_id() == 0) {
         std::vector<std::vector<double> > tempGlobalUpdateGroupSpeeds =
@@ -88,8 +111,8 @@ void gatherAndBroadcastLocalityIndices(
             indices);
     }
 
-    *globalUpdateGroupSpeeds = myGlobalUpdateGroupSpeeds[basename].get_future().get();
-    *localityIndices = myLocalityIndices[basename].get_future().get();
+    *globalUpdateGroupSpeeds = myGlobalUpdateGroupSpeedsFuture.get();
+    *localityIndices = myLocalityIndicesFuture.get();
 }
 
 
