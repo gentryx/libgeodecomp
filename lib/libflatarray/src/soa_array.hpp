@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Andreas Schäfer
+ * Copyright 2014, 2016 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -37,12 +37,54 @@ public:
     inline
     __host__ __device__
     explicit soa_array(int elements = 0, const CELL& value = CELL()) :
-        elements(elements),
-        index(0)
+        elements(elements)
     {
-        for (soa_accessor<CELL, SIZE, 0, 0, 0> accessor(data, 0); accessor.index < elements; accessor += 1) {
+        construct_all_instances();
+        for (soa_accessor<CELL, SIZE, 1, 1, 0> accessor(data, 0); accessor.index < elements; accessor += 1) {
             accessor << value;
         }
+    }
+
+    template<int OTHER_SIZE>
+    inline
+    soa_array(soa_array<CELL, OTHER_SIZE>& other)
+    {
+        construct_all_instances();
+        copy_in(other);
+    }
+
+
+    template<int OTHER_SIZE>
+    inline
+    soa_array(const soa_array<CELL, OTHER_SIZE>& other)
+    {
+        construct_all_instances();
+        copy_in(other);
+    }
+
+    inline
+    ~soa_array()
+    {
+        for (soa_accessor<CELL, SIZE, 1, 1, 0> accessor(data, 0); accessor.index < MY_SIZE; accessor += 1) {
+            accessor.destroy_members();
+        }
+
+    }
+
+    template<int OTHER_SIZE>
+    inline
+    soa_array& operator=(soa_array<CELL, OTHER_SIZE>& other)
+    {
+        copy_in(other);
+        return *this;
+    }
+
+    template<int OTHER_SIZE>
+    inline
+    soa_array& operator=(const soa_array<CELL, OTHER_SIZE>& other)
+    {
+        copy_in(other);
+        return *this;
     }
 
     inline
@@ -94,15 +136,44 @@ public:
 
     inline
     __host__ __device__
-    size_t size() const
+    std::size_t size() const
     {
         return elements;
     }
 
-    char data[BYTE_SIZE];
+    char *get_data()
+    {
+        return data;
+    }
+
+    std::size_t byte_size() const
+    {
+        return elements * aggregated_member_size<CELL>::VALUE;
+    }
+
 private:
     int elements;
-    int index;
+    char data[BYTE_SIZE];
+
+    inline
+    void construct_all_instances()
+    {
+        for (soa_accessor<CELL, SIZE, 1, 1, 0> accessor(data, 0); accessor.index < MY_SIZE; accessor += 1) {
+            accessor.construct_members();
+        }
+    }
+
+    template<int OTHER_SIZE>
+    inline
+    void copy_in(const soa_array<CELL, OTHER_SIZE>& other)
+    {
+        if (other.size() > SIZE) {
+            throw std::out_of_range("insufficient capacity for assignment (other soa_array too large)");
+        }
+
+        at(0).copy_members(other[0], other.size());
+        elements = other.size();
+    }
 };
 
 }

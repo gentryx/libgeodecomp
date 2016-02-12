@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 - 2015 Andreas Schäfer
+ * Copyright 2013-2016 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -9,6 +9,7 @@
 #include <iostream>
 #include <typeinfo>
 #include <libflatarray/flat_array.hpp>
+#include <map>
 #include <vector>
 
 #include "test.hpp"
@@ -314,6 +315,36 @@ LIBFLATARRAY_REGISTER_SOA(
     ((float)(vel)(3))
     ((int)(state)))
 
+class DestructionCounterClass
+{
+public:
+    static std::size_t count;
+
+    ~DestructionCounterClass()
+    {
+        ++count;
+    }
+};
+
+std::size_t DestructionCounterClass::count = 0;
+
+class CellWithNonTrivialMembers
+{
+public:
+    typedef std::map<int, std::vector<double> > MapType;
+    int id;
+    MapType map;
+    MapType maps[4];
+    DestructionCounterClass destructCounter;
+};
+
+LIBFLATARRAY_REGISTER_SOA(
+    CellWithNonTrivialMembers,
+    ((int)(id))
+    ((CellWithNonTrivialMembers::MapType)(map))
+    ((CellWithNonTrivialMembers::MapType)(maps)(4))
+    ((DestructionCounterClass)(destructCounter)))
+
 class MultiplyVelocityArrayStyle
 {
 public:
@@ -603,7 +634,7 @@ ADD_TEST(TestDualCallback)
     testDualCallback<CopyTemperatureNativeStyle>();
 }
 
-ADD_TEST(TestAssignment)
+ADD_TEST(TestAssignment1)
 {
     soa_grid<HeatedGameOfLifeCell> gridOld(20, 30, 40);
     soa_grid<HeatedGameOfLifeCell> gridNew(70, 60, 50);
@@ -621,6 +652,126 @@ ADD_TEST(TestAssignment)
     BOOST_TEST(gridOld.dim_y == gridNew.dim_y);
     BOOST_TEST(gridOld.dim_z == gridNew.dim_z);
     BOOST_TEST(gridOld.my_byte_size == gridNew.my_byte_size);
+}
+
+ADD_TEST(TestAssignment2)
+{
+    soa_grid<HeatedGameOfLifeCell> grid1(20, 10, 1);
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            grid1.set(x, y, 0, HeatedGameOfLifeCell(y * 100 + x, true));
+        }
+    }
+
+    soa_grid<HeatedGameOfLifeCell> grid2;
+    grid2 = grid1;
+
+    // overwrite old grid to ensure both are still separate
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            grid1.set(x, y, 0, HeatedGameOfLifeCell(-1, false));
+        }
+    }
+
+    BOOST_TEST(grid1.get_dim_x() == 20);
+    BOOST_TEST(grid1.get_dim_y() == 10);
+    BOOST_TEST(grid1.get_dim_z() ==  1);
+
+    BOOST_TEST(grid2.get_dim_x() == 20);
+    BOOST_TEST(grid2.get_dim_y() == 10);
+    BOOST_TEST(grid2.get_dim_z() ==  1);
+
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            HeatedGameOfLifeCell cell = grid2.get(x, y, 0);
+            BOOST_TEST(cell == HeatedGameOfLifeCell(y * 100 + x, true));
+            cell = grid1.get(x, y, 0);
+            BOOST_TEST(cell == HeatedGameOfLifeCell(-1, false));
+        }
+    }
+}
+
+ADD_TEST(TestAssignment3)
+{
+    soa_grid<HeatedGameOfLifeCell> grid1(20, 10, 1);
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            grid1.set(x, y, 0, HeatedGameOfLifeCell(y * 100 + x, true));
+        }
+    }
+
+    const soa_grid<HeatedGameOfLifeCell>& grid_reference(grid1);
+    soa_grid<HeatedGameOfLifeCell> grid2;
+    grid2 = grid_reference;
+
+    // overwrite old grid to ensure both are still separate
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            grid1.set(x, y, 0, HeatedGameOfLifeCell(-1, false));
+        }
+    }
+
+    BOOST_TEST(grid1.get_dim_x() == 20);
+    BOOST_TEST(grid1.get_dim_y() == 10);
+    BOOST_TEST(grid1.get_dim_z() ==  1);
+
+    BOOST_TEST(grid2.get_dim_x() == 20);
+    BOOST_TEST(grid2.get_dim_y() == 10);
+    BOOST_TEST(grid2.get_dim_z() ==  1);
+
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            HeatedGameOfLifeCell cell = grid2.get(x, y, 0);
+            BOOST_TEST(cell == HeatedGameOfLifeCell(y * 100 + x, true));
+            cell = grid1.get(x, y, 0);
+            BOOST_TEST(cell == HeatedGameOfLifeCell(-1, false));
+        }
+    }
+}
+
+ADD_TEST(TestAssignment4)
+{
+    soa_grid<CellWithNonTrivialMembers> grid1(100, 50, 1);
+    for (int y = 0; y < 50; ++y) {
+        for (int x = 0; x < 100; ++x) {
+            CellWithNonTrivialMembers dummy;
+            dummy.map[y].push_back(x);
+            grid1.set(x, y, 0, dummy);
+        }
+    }
+
+    soa_grid<CellWithNonTrivialMembers> grid2(10, 20, 1);
+    grid2 = grid1;
+
+    // overwrite old grid to ensure both are still separate
+    for (int y = 0; y < 50; ++y) {
+        for (int x = 0; x < 100; ++x) {
+            CellWithNonTrivialMembers dummy;
+            dummy.map[y].push_back(-1);
+            dummy.map[y].push_back(-2);
+            grid1.set(x, y, 0, dummy);
+        }
+    }
+
+    BOOST_TEST(grid1.get_dim_x() == 100);
+    BOOST_TEST(grid1.get_dim_y() ==  50);
+    BOOST_TEST(grid1.get_dim_z() ==   1);
+
+    BOOST_TEST(grid2.get_dim_x() == 100);
+    BOOST_TEST(grid2.get_dim_y() ==  50);
+    BOOST_TEST(grid2.get_dim_z() ==   1);
+
+    for (int y = 0; y < 50; ++y) {
+        for (int x = 0; x < 100; ++x) {
+            CellWithNonTrivialMembers cell = grid2.get(x, y, 0);
+            BOOST_TEST(cell.map[y].size() == 1);
+            BOOST_TEST(cell.map[y][0] == x);
+            cell = grid1.get(x, y, 0);
+            BOOST_TEST(cell.map[y].size() == 2);
+            BOOST_TEST(cell.map[y][0] == -1);
+            BOOST_TEST(cell.map[y][1] == -2);
+        }
+    }
 }
 
 ADD_TEST(TestSwap)
@@ -650,7 +801,8 @@ ADD_TEST(TestSwap)
         }
     }
 
-    std::swap(gridOld, gridNew);
+    using std::swap;
+    swap(gridOld, gridNew);
 
     for (long z = 0; z < dim_z; ++z) {
         for (long y = 0; y < dim_y; ++y) {
@@ -902,6 +1054,164 @@ ADD_TEST(TestArrayMemberLoadSave)
             double expected = j * 1000 + i;
             double actual = storeA[j * 3 + i];
             BOOST_TEST(expected == actual);
+        }
+    }
+}
+
+ADD_TEST(TestNonTrivialMembers)
+{
+    CellWithNonTrivialMembers cell1;
+    CellWithNonTrivialMembers cell2;
+    cell1.map[5] = std::vector<double>(4711, 47.11);
+    cell2.map[7] = std::vector<double>( 666, 66.66);
+    {
+        // fill memory with non-zero values...
+        soa_grid<HeatedGameOfLifeCell> grid1(63, 63, 120);
+        std::fill(grid1.get_data(), grid1.get_data() + grid1.byte_size(), char(1));
+    }
+    int counter = DestructionCounterClass::count;
+    {
+        soa_grid<CellWithNonTrivialMembers> grid1(3, 4, 5);
+        // ...so that deallocation of memory upon assignment of maps
+        // here will fail. Memory initialized to 0 might make the maps
+        // inside not run free() at all). The effect would be that the
+        // code "accidentally" works.
+        grid1.set(1, 1, 1, cell1);
+        grid1.set(1, 1, 1, cell2);
+    }
+    // ensure d-tor got called
+    size_t expected = 3 * 4 * 5 + counter;
+    BOOST_TEST(expected == DestructionCounterClass::count);
+}
+
+ADD_TEST(TestNonTrivialMembers2)
+{
+    CellWithNonTrivialMembers cell1;
+    cell1.map[5] = std::vector<double>(4711, 47.11);
+    CellWithNonTrivialMembers cell2;
+    cell1.map[7] = std::vector<double>(666, 1.1);
+    {
+        soa_grid<CellWithNonTrivialMembers> grid1(3, 3, 3);
+        soa_grid<CellWithNonTrivialMembers> grid2(3, 3, 3);
+
+        grid1.set(1, 1, 1, cell1);
+        grid2 = grid1;
+        // this ensures no bit-wise copy was done in the assignment
+        // above. It it had been done then the two copy assignments
+        // below would cause a double free error below:
+        grid1.set(1, 1, 1, cell2);
+        grid2.set(1, 1, 1, cell2);
+    }
+}
+
+ADD_TEST(TestNonTrivialMembers3)
+{
+    CellWithNonTrivialMembers cell1;
+    cell1.map[5] = std::vector<double>(4711, 47.11);
+    CellWithNonTrivialMembers cell2;
+    cell1.map[7] = std::vector<double>(666, 1.1);
+    {
+        soa_grid<CellWithNonTrivialMembers> grid1(3, 3, 3);
+        grid1.set(1, 1, 1, cell1);
+        soa_grid<CellWithNonTrivialMembers> grid2(grid1);
+
+        // this ensures no bit-wise copy was done in the assignment
+        // above. It it had been done then the two copy assignments
+        // below would cause a double free error below:
+        grid1.set(1, 1, 1, cell2);
+        grid2.set(1, 1, 1, cell2);
+    }
+}
+
+ADD_TEST(TestNonTrivialMembers4)
+{
+    CellWithNonTrivialMembers cell1;
+    cell1.map[5] = std::vector<double>(4711, 47.11);
+    CellWithNonTrivialMembers cell2;
+    cell1.map[7] = std::vector<double>(666, 1.1);
+    {
+        soa_grid<CellWithNonTrivialMembers> grid1(3, 3, 3);
+        const soa_grid<CellWithNonTrivialMembers>& grid_const_ref(grid1);
+        grid1.set(1, 1, 1, cell1);
+        soa_grid<CellWithNonTrivialMembers> grid2(grid_const_ref);
+
+        // this ensures no bit-wise copy was done in the assignment
+        // above. It it had been done then the two copy assignments
+        // below would cause a double free error below:
+        grid1.set(1, 1, 1, cell2);
+        grid2.set(1, 1, 1, cell2);
+    }
+}
+
+ADD_TEST(TestCopyConstructor1)
+{
+    soa_grid<HeatedGameOfLifeCell> grid1(20, 10, 1);
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            grid1.set(x, y, 0, HeatedGameOfLifeCell(y * 100 + x, true));
+        }
+    }
+
+    soa_grid<HeatedGameOfLifeCell> grid2(grid1);
+
+    // overwrite old grid to ensure both are still separate
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            grid1.set(x, y, 0, HeatedGameOfLifeCell(-1, false));
+        }
+    }
+
+    BOOST_TEST(grid1.get_dim_x() == 20);
+    BOOST_TEST(grid1.get_dim_y() == 10);
+    BOOST_TEST(grid1.get_dim_z() ==  1);
+
+    BOOST_TEST(grid2.get_dim_x() == 20);
+    BOOST_TEST(grid2.get_dim_y() == 10);
+    BOOST_TEST(grid2.get_dim_z() ==  1);
+
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            HeatedGameOfLifeCell cell = grid2.get(x, y, 0);
+            BOOST_TEST(cell == HeatedGameOfLifeCell(y * 100 + x, true));
+            cell = grid1.get(x, y, 0);
+            BOOST_TEST(cell == HeatedGameOfLifeCell(-1, false));
+        }
+    }
+}
+
+ADD_TEST(TestCopyConstructor2)
+{
+    soa_grid<HeatedGameOfLifeCell> grid1(20, 10, 1);
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            grid1.set(x, y, 0, HeatedGameOfLifeCell(y * 100 + x, true));
+        }
+    }
+
+    const soa_grid<HeatedGameOfLifeCell>& grid_temp(grid1);
+    soa_grid<HeatedGameOfLifeCell> grid2(grid_temp);
+
+    // overwrite old grid to ensure both are still separate
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            grid1.set(x, y, 0, HeatedGameOfLifeCell(-1, false));
+        }
+    }
+
+    BOOST_TEST(grid1.get_dim_x() == 20);
+    BOOST_TEST(grid1.get_dim_y() == 10);
+    BOOST_TEST(grid1.get_dim_z() ==  1);
+
+    BOOST_TEST(grid2.get_dim_x() == 20);
+    BOOST_TEST(grid2.get_dim_y() == 10);
+    BOOST_TEST(grid2.get_dim_z() ==  1);
+
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            HeatedGameOfLifeCell cell = grid2.get(x, y, 0);
+            BOOST_TEST(cell == HeatedGameOfLifeCell(y * 100 + x, true));
+            cell = grid1.get(x, y, 0);
+            BOOST_TEST(cell == HeatedGameOfLifeCell(-1, false));
         }
     }
 }
