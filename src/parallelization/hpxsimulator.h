@@ -6,7 +6,9 @@
 
 #include <hpx/config.hpp>
 #include <hpx/runtime/serialization/set.hpp>
+#include <hpx/runtime/serialization/string.hpp>
 #include <hpx/runtime/serialization/vector.hpp>
+#include <hpx/include/lcos.hpp>
 #include <hpx/lcos/broadcast.hpp>
 
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
