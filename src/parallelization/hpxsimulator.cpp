@@ -6,13 +6,27 @@
 namespace LibGeoDecomp {
 namespace HpxSimulatorHelpers {
 
+hpx::lcos::local::spinlock mapMutex;
+std::map<std::string, hpx::lcos::local::promise<void> > initPromise;
 std::map<std::string, hpx::lcos::local::promise<std::vector<double> > > localUpdateGroupSpeeds;
 std::map<std::string, hpx::lcos::local::promise<std::vector<double> > > myGlobalUpdateGroupSpeeds;
 std::map<std::string, hpx::lcos::local::promise<std::vector<std::size_t> > > myLocalityIndices;
 
-std::vector<double> getUpdateGroupSpeeds(const std::string& basename)
+hpx::future<std::vector<double> > getUpdateGroupSpeeds(const std::string& basename)
 {
-    return localUpdateGroupSpeeds[basename].get_future().get();
+    // Wait on everyone to initialize localUpdateGroupSpeeds, myGlobalUpdateGroupSpeeds
+    // and myLocalityInidices
+    hpx::future<void> initFuture;
+    {
+        boost::lock_guard<hpx::lcos::local::spinlock> lock(mapMutex);
+        initFuture = initPromise[basename].get_future();
+    }
+    return initFuture.then(
+        [basename](hpx::future<void>) -> hpx::future<std::vector<double> >
+        {
+            return localUpdateGroupSpeeds[basename].get_future();
+        }
+    );
 }
 
 void setNumberOfUpdateGroups(
@@ -31,10 +45,10 @@ HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulatorHelpers::getUpdateGroupSpeeds, getUpd
 HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulatorHelpers::setNumberOfUpdateGroups, setNumberOfUpdateGroups_action);
 
 HPX_REGISTER_BROADCAST_ACTION_DECLARATION(getUpdateGroupSpeeds_action)
-HPX_REGISTER_BROADCAST_ACTION_DECLARATION(setNumberOfUpdateGroups_action)
+HPX_REGISTER_BROADCAST_APPLY_ACTION_DECLARATION(setNumberOfUpdateGroups_action)
 
 HPX_REGISTER_BROADCAST_ACTION(getUpdateGroupSpeeds_action)
-HPX_REGISTER_BROADCAST_ACTION(setNumberOfUpdateGroups_action)
+HPX_REGISTER_BROADCAST_APPLY_ACTION(setNumberOfUpdateGroups_action)
 
 namespace LibGeoDecomp {
 namespace HpxSimulatorHelpers {
@@ -62,6 +76,15 @@ void gatherAndBroadcastLocalityIndices(
     }
 
     localUpdateGroupSpeeds[basename].set_value(correctedUpdateGroupSpeeds);
+    hpx::future<std::vector<double> > myGlobalUpdateGroupSpeedsFuture
+        = myGlobalUpdateGroupSpeeds[basename].get_future();
+    hpx::future<std::vector<std::size_t> > myLocalityIndicesFuture
+        = myLocalityIndices[basename].get_future();
+    // We are now save to proceed ...
+    {
+        boost::lock_guard<hpx::lcos::local::spinlock> lock(mapMutex);
+        initPromise[basename].set_value();
+    }
 
     if (hpx::get_locality_id() == 0) {
         std::vector<std::vector<double> > tempGlobalUpdateGroupSpeeds =
@@ -81,15 +104,15 @@ void gatherAndBroadcastLocalityIndices(
         }
         indices << indexSum;
 
-        hpx::lcos::broadcast<setNumberOfUpdateGroups_action>(
+        hpx::lcos::broadcast_apply<setNumberOfUpdateGroups_action>(
             localities,
             basename,
             flattenedUpdateGroupSpeeds,
-            indices).get();
+            indices);
     }
 
-    *globalUpdateGroupSpeeds = myGlobalUpdateGroupSpeeds[basename].get_future().get();
-    *localityIndices = myLocalityIndices[basename].get_future().get();
+    *globalUpdateGroupSpeeds = myGlobalUpdateGroupSpeedsFuture.get();
+    *localityIndices = myLocalityIndicesFuture.get();
 }
 
 
