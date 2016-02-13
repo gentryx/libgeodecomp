@@ -86,6 +86,7 @@ public:
     UnstructuredSoANeighborhood(const SoAAccessor& acc, const Grid& grid, long startX) :
         grid(grid),
         currentChunk(startX / C),
+        currentMatrixID(0),
         accessor(acc)
     {}
 
