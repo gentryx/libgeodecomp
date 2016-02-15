@@ -36,9 +36,12 @@ public:
     RegionBasedAdjacency();
     RegionBasedAdjacency(const RegionBasedAdjacency &other);
     RegionBasedAdjacency &operator=(const RegionBasedAdjacency &other);
+    virtual ~RegionBasedAdjacency() {}
+
+#ifdef LIBGEODECOMP_WITH_CPP14
     RegionBasedAdjacency(RegionBasedAdjacency &&other) = default;
     RegionBasedAdjacency &operator=(RegionBasedAdjacency &&other) = default;
-    virtual ~RegionBasedAdjacency() {}
+#endif // LIBGEODECOMP_WITH_CPP14
 
     /**
      * Insert a single edge (from, to) to the graph
