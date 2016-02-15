@@ -9,9 +9,9 @@ namespace LibGeoDecomp {
 typedef RegionBasedAdjacency Adjacency;
 
 template<typename T>
-Adjacency MakeAdjacency(const std::map<Coord<2>, T>& weights)
+boost::shared_ptr<Adjacency> MakeAdjacency(const std::map<Coord<2>, T>& weights)
 {
-    Adjacency result;
+    boost::shared_ptr<Adjacency> result = boost::make_shared<Adjacency>();
 
     for (typename std::map<Coord<2>, T>::const_iterator it = weights.begin();
         it != weights.end(); ++it) {
@@ -21,8 +21,8 @@ Adjacency MakeAdjacency(const std::map<Coord<2>, T>& weights)
             continue;
         }
 
-        result.insert(it->first.x(), it->first.y());
-        result.insert(it->first.y(), it->first.x());
+        result->insert(it->first.x(), it->first.y());
+        result->insert(it->first.y(), it->first.x());
     }
 
     return result;

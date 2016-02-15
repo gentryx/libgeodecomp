@@ -94,9 +94,9 @@ public:
         Random::seed(index);
     }
 
-    virtual Adjacency getAdjacency() const
+    virtual boost::shared_ptr<Adjacency> getAdjacency() const
     {
-        return Adjacency();
+        return boost::make_shared<Adjacency>();
     }
 };
 

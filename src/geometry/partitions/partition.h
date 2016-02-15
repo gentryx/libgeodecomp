@@ -30,7 +30,8 @@ public:
     inline Partition(
         const long offset,
         const std::vector<std::size_t>& weights) :
-        weights(weights)
+        weights(weights),
+        adjacency(new Adjacency())
     {
         startOffsets.resize(weights.size() + 1);
         startOffsets[0] = offset;
@@ -49,7 +50,7 @@ public:
 
     virtual Region<DIM> getRegion(const std::size_t node) const = 0;
 
-    virtual const Adjacency& getAdjacency() const
+    virtual boost::shared_ptr<Adjacency> getAdjacency() const
     {
         return adjacency;
     }
@@ -57,7 +58,7 @@ public:
 protected:
     std::vector<std::size_t> weights;
     std::vector<std::size_t> startOffsets;
-    Adjacency adjacency;
+    boost::shared_ptr<Adjacency> adjacency;
 };
 
 }

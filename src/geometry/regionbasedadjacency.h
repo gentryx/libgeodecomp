@@ -34,27 +34,32 @@ class RegionBasedAdjacency
 {
 public:
     RegionBasedAdjacency();
+    RegionBasedAdjacency(const RegionBasedAdjacency &other);
+    RegionBasedAdjacency &operator=(const RegionBasedAdjacency &other);
+    RegionBasedAdjacency(RegionBasedAdjacency &&other) = default;
+    RegionBasedAdjacency &operator=(RegionBasedAdjacency &&other) = default;
+    virtual ~RegionBasedAdjacency() {}
 
     /**
      * Insert a single edge (from, to) to the graph
      */
-    void insert(int from, int to);
+    virtual void insert(int from, int to);
 
     /**
      * Insert all pairs (from, x) with x \in to, to the graph. We sort
      * parameter to to ensure fast, linear inserts.
      */
-    void insert(int from, std::vector<int> to);
+    virtual void insert(int from, std::vector<int> to);
 
     /**
      * Returns all x \in V with (node, x) \in E.
      */
-    void getNeighbors(int node, std::vector<int> *neighbors) const;
+    virtual void getNeighbors(int node, std::vector<int> *neighbors) const;
 
     /**
      * Retrieves the number of edges in the adjacency
      */
-    std::size_t size() const;
+    virtual std::size_t size() const;
 
     const Region<2>& getRegion() const
     {

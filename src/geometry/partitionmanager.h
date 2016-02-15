@@ -212,7 +212,7 @@ public:
 
     const Adjacency& adjacency() const
     {
-        return partition->getAdjacency();
+        return *partition->getAdjacency();
     }
 
     inline unsigned rank() const

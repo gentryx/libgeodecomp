@@ -86,31 +86,13 @@ public:
             const Coord<DIM>& dimensions,
             const long offset,
             const std::vector<std::size_t>& weights,
-            const Adjacency& adjacency) :
+            boost::shared_ptr<Adjacency> adjacency) :
         Partition<DIM>(offset, weights),
         origin(origin),
         dimensions(dimensions),
         numPartitions(weights.size())
     {
         this->adjacency = adjacency;
-
-        getStartEnd(MPILayer().rank(), &start, &end);
-        localCells = end - start;
-        buildRegions();
-    }
-
-    DistributedPTScotchUnstructuredPartition(
-            const Coord<DIM>& origin,
-            const Coord<DIM>& dimensions,
-            const long offset,
-            const std::vector<std::size_t>& weights,
-            Adjacency&& adjacency) :
-        Partition<DIM>(offset, weights),
-        origin(origin),
-        dimensions(dimensions),
-        numPartitions(weights.size())
-    {
-        this->adjacency = std::move(adjacency);
 
         getStartEnd(MPILayer().rank(), &start, &end);
         localCells = end - start;
@@ -152,7 +134,7 @@ private:
         SCOTCH_Dgraph graph;
         int error = SCOTCH_dgraphInit(&graph, MPILayer().communicator());
 
-        SCOTCH_Num numEdges = this->adjacency.size();
+        SCOTCH_Num numEdges = this->adjacency->size();
 
         std::vector<SCOTCH_Num> verttabGra;
         std::vector<SCOTCH_Num> edgetabGra;
@@ -165,7 +147,7 @@ private:
             verttabGra.push_back(currentEdge);
 
             std::size_t before = edgetabGra.size();
-            this->adjacency.getNeighbors(start + i, &edgetabGra);
+            this->adjacency->getNeighbors(start + i, &edgetabGra);
 
             currentEdge += edgetabGra.size() - before;
         }
@@ -265,6 +247,9 @@ private:
                         Coord<2>(16, 10));
                 LOG(DBG, "regions of rank " << i << ": ");
                 LOG(DBG, ss.str());
+
+                std::cout << ss.str() << std::endl;
+
             }
 
             MPILayer().barrier();

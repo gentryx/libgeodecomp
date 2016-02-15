@@ -197,9 +197,9 @@ protected:
         notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST,     globalNanoStep());
         notifyPatchProviders(partitionManager->ownRegion(),   ParentType::INNER_SET, globalNanoStep());
 
-        Adjacency adjacency = initializer->getAdjacency();
-        CommonStepperHelpers::AdjacencySetter(*oldGrid, adjacency);
-        CommonStepperHelpers::AdjacencySetter(*newGrid, adjacency);
+        boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency();
+        CommonStepperHelpers::AdjacencySetter(*oldGrid, *adjacency);
+        CommonStepperHelpers::AdjacencySetter(*newGrid, *adjacency);
         newGrid->setEdge(oldGrid->getEdge());
 
         resetValidGhostZoneWidth();
