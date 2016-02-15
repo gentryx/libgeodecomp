@@ -2,7 +2,7 @@
 #ifndef LIBGEODECOMP_MISC_SIMULATIONFACTORY_H
 #define LIBGEODECOMP_MISC_SIMULATIONFACTORY_H
 
-#include <libgeodecomp/io/clonableinitializerwrapper.h>
+#include <libgeodecomp/io/clonableinitializer.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
@@ -25,14 +25,12 @@ template<typename CELL>
 class SimulationFactory : public Optimizer::Evaluator
 {
 public:
-    template<typename INITIALIZER>
-    SimulationFactory(INITIALIZER initializer) :
-        initializer(ClonableInitializerWrapper<INITIALIZER>::wrap(initializer))
+    SimulationFactory(ClonableInitializer<CELL> *initializer) :
+        initializer(initializer)
     {}
 
     virtual ~SimulationFactory()
     {
-        delete initializer;
     }
 
     void addWriter(const ParallelWriter<CELL>& writer)
@@ -107,8 +105,7 @@ class SerialSimulationFactory : public SimulationFactory<CELL>
 {
 public:
 
-    template<typename INITIALIZER>
-    SerialSimulationFactory(INITIALIZER initializer):
+    SerialSimulationFactory(ClonableInitializer<CELL> *initializer):
         SimulationFactory<CELL>(initializer)
     {
         // Serial Simulation has no Parameters to optimize
@@ -135,8 +132,7 @@ template<typename CELL>
 class CacheBlockingSimulationFactory : public SimulationFactory<CELL>
 {
 public:
-    template<typename INITIALIZER>
-    CacheBlockingSimulationFactory<CELL>(INITIALIZER initializer):
+    CacheBlockingSimulationFactory<CELL>(ClonableInitializer<CELL> *initializer):
         SimulationFactory<CELL>(initializer)
     {
         SimulationFactory<CELL>::parameterSet.addParameter("WavefrontWidth", 10, 1000);
@@ -174,8 +170,7 @@ template<typename CELL>
 class CudaSimulationFactory : public SimulationFactory<CELL>
 {
 public:
-    template<typename INITIALIZER>
-    CudaSimulationFactory<CELL>(INITIALIZER initializer):
+    CudaSimulationFactory<CELL>(ClonableInitializer<CELL> *initializer):
         SimulationFactory<CELL>(initializer)
     {
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimX", 1, 128);
