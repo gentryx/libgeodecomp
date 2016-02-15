@@ -89,7 +89,7 @@ public:
 void runSimulation()
 {
     std::cout << "runSimulation" << std::endl;
-    AutoTuningSimulator<Cell,PatternOptimizer> autoSim(CellInitializer(1,500));
+    AutoTuningSimulator<Cell,PatternOptimizer> autoSim(new CellInitializer(1, 500));
     autoSim.setSimulationSteps(20);
     autoSim.run();
 
@@ -98,7 +98,7 @@ void runSimulation()
         std::cout << "Factory Name: " << *iter << " Fitness: " << autoSim.getFitness(*iter) << std::endl
                   << autoSim.getSimulationParameters(*iter)<< std::endl;
     }
-    
+
 
     // HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
     //     init,
