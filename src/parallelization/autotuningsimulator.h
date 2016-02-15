@@ -2,6 +2,10 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_AUTOTUNINGSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_AUTOTUNINGSIMULATOR_H
 
+#include <libgeodecomp/config.h>
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/misc/simulationparameters.h>
@@ -97,7 +101,7 @@ private:
     /**
      * fitnessGoal must be negative, the autotuning is searching for a Maximum.
      */
-    static constexpr  double fitnessGoal = -1.0; 
+    static constexpr double fitnessGoal = -1.0;
     /**
      * If some missconfiguration is happned the defaultInitializerSteps will be used.
      */
@@ -388,5 +392,7 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
     }
 }
 } // namespace LibGeoDecomp
+
+#endif
 
 #endif

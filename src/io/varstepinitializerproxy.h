@@ -3,11 +3,13 @@
 #define LIBGEODECOMP_IO_VARSTEPINITIALIZERPROXY_H
 
 #include <memory>
-
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/clonableinitializer.h>
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+
+// fixme: don't pollute global namespace
 using  boost::shared_ptr;
 
 /**
@@ -99,6 +101,10 @@ VarStepInitializerProxy(VarStepInitializerProxy<CELL>* o)
     shared_ptr<Initializer<CELL> > proxyObj;
     unsigned newMaxSteps;
 }; // VarStepInitializerProxy
+
 } // namespace LibGeoDecomp
-#endif // LIBGEODECOMP_IO_VARSTEPINITIALIZERPROXY_H
+
+#endif
+
+#endif
 

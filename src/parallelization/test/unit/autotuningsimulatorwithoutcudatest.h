@@ -93,6 +93,8 @@ public:
     {
         // fixme
         return;
+
+#ifdef LIBGEODECOMP_WITH_CPP14
         LOG(Logger::INFO, "AutotuningSimulatorTest::testBasicPatternOptimized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
@@ -105,6 +107,7 @@ public:
             << ats.getFitness(*iter)<< std::endl
             << ats.getSimulationParameters(*iter))
         }
+#endif
     }
 
     void testNormalizeSteps()
@@ -112,6 +115,7 @@ public:
         // fixme
         return;
 
+#ifdef LIBGEODECOMP_WITH_CPP14
         const double goal = -0.4d;
         LOG(Logger::INFO, "AutotuningSimulatorTest::testNormalizeSteps()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -139,6 +143,7 @@ public:
         LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << " ,"
                     << startValue << ") is: " << steps)
         TS_ASSERT( steps <= originalSteps + 5 && steps >= originalSteps - 5);
+#endif
     }
 
     void testBasicSimplexOptimized()
@@ -146,6 +151,7 @@ public:
         // fixme
         return;
 
+#ifdef LIBGEODECOMP_WITH_CPP14
         LOG(Logger::INFO, "AutotuningSimulatorTest::testBasicSimplexOptimized()")
         AutoTuningSimulator<SimFabTestCell, SimplexOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
@@ -158,6 +164,7 @@ public:
             << ats.getFitness(*iter)<< std::endl
             << ats.getSimulationParameters(*iter))
         }
+#endif
     }
 
     void testAddOwnSimulations()
@@ -166,6 +173,7 @@ public:
         return;
 
 #ifdef LIBGEODECOMP_WITH_THREADS
+#ifdef LIBGEODECOMP_WITH_CPP14
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
@@ -184,6 +192,7 @@ public:
         //         << ats.getSimulationParameters(*iter));
         // }
 #endif
+#endif
     }
 
     void testManuallyParamterized()
@@ -192,6 +201,7 @@ public:
         return;
 
 #ifdef LIBGEODECOMP_WITH_THREADS
+#ifdef LIBGEODECOMP_WITH_CPP14
         LOG(Logger::INFO, "AutotuningSimulatorTest:test:ManuallyParameterized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
@@ -211,11 +221,13 @@ public:
                 << ats.getSimulationParameters(*iter));
         }
 #endif
+#endif
     }
 
     void testInvalidArguments()
     {
 #ifdef LIBGEODECOMP_WITH_THREADS
+#ifdef LIBGEODECOMP_WITH_CPP14
         LOG(Logger::INFO, "AutotuningSimulatorTest:testInvalidArguments()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
@@ -236,10 +248,12 @@ public:
         TS_ASSERT_THROWS(ats.getSimulationParameters("NoSimulator"), std::invalid_argument);
         TS_ASSERT_THROWS(ats.setParameters(params, "NoSimulator"), std::invalid_argument);
 #endif
+#endif
     }
 
     void testAddWriter()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         LOG(Logger::INFO, "AutotuningSimulatorTest::testAddWriter()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
@@ -251,7 +265,9 @@ public:
         ats.addWriter(static_cast<Writer<SimFabTestCell> *>(
                 new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
         ats.run();
+#endif
     }
+
 private:
     Coord<3> dim;
     unsigned maxSteps;
@@ -264,6 +280,7 @@ class SimulationFactoryTest : public CxxTest::TestSuite
 public:
     void setUp()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         dim = Coord<3>(100,100,100);
         maxSteps = 100;
         initializerProxy = new VarStepInitializerProxy<SimFabTestCell>(
@@ -272,19 +289,23 @@ public:
         cfab = new CacheBlockingSimulationFactory<SimFabTestCell>(initializerProxy);
 #endif
         fab = new SerialSimulationFactory<SimFabTestCell>(initializerProxy);
+#endif
     }
 
     void tearDown()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
 #ifdef LIBGEODECOMP_WITH_THREADS
         delete cfab;
 #endif
         delete fab;
         delete initializerProxy;
+#endif
     }
 
     void testVarStepInitializerProxy()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         LOG(Logger::INFO, "SimulationFactoryTest::testVarStepInitializerProxy()")
         unsigned maxSteps = initializerProxy->maxSteps();
         double oldFitness = DBL_MIN;
@@ -307,6 +328,7 @@ public:
                         << " \"initial\" maxSteps: " << maxSteps)
         TS_ASSERT_EQUALS(initializerProxy->getInitializer()->maxSteps()
                         , maxSteps);
+#endif
     }
 
     void testBasic()
@@ -314,12 +336,14 @@ public:
         // fixme
         return;
 
+#ifdef LIBGEODECOMP_WITH_CPP14
         LOG(Logger::INFO, "SimulationFactoryTest::testBasic")
         for (int i =1;i<=2;i++) {
             Simulator<SimFabTestCell> *sim = fab->operator()();
             sim->run();
             delete sim;
         }
+#endif
     }
 
     void testCacheBlockingFitness()
@@ -327,6 +351,7 @@ public:
         // fixme
         return;
 
+#ifdef LIBGEODECOMP_WITH_CPP14
 #ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "SimulationFactoryTest::testCacheBlockingFitness()")
         for (int i = 1; i <= 2; ++i) {
@@ -337,10 +362,12 @@ public:
             LOG(Logger::INFO, i << " fitness: " << fitness )
         }
 #endif
+#endif
     }
 
     void testAddWriterToSimulator()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         // fixme: disabled tests based on CacheBlockingSimulator due to segfault in that Simulator
         // #ifdef LIBGEODECOMP_WITH_THREADS
         //         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToSimulator()")
@@ -352,20 +379,24 @@ public:
         //         double fitness = cfab->operator()(cfab->parameters());
         //         LOG(Logger::INFO, "Fitness: " << fitness << std::endl)
         // #endif
+#endif
     }
 
     void testAddWriterToSerialSimulationFactory()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToSerialSimulationFactory()")
         std::ostringstream buf;
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
         fab->addWriter(*writer);
         fab->operator()(fab->parameters());
         delete writer;
+#endif
     }
 
     void testAddWriterToCacheBlockingSimulationFactory()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         // fixme: disabled tests based on CacheBlockingSimulator due to segfault in that Simulator
         // #ifdef LIBGEODECOMP_WITH_THREADS
         //         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToCacheBlockingSimulationFactory()")
@@ -375,14 +406,17 @@ public:
         //         cfab->operator()(cfab->parameters());
         //         delete writer;
         // #endif
+#endif
     }
 
 private:
+#ifdef LIBGEODECOMP_WITH_CPP14
     Coord<3> dim;
     unsigned maxSteps;
     VarStepInitializerProxy<SimFabTestCell> *initializerProxy;
     SimulationFactory<SimFabTestCell> *fab;
 #ifdef LIBGEODECOMP_WITH_THREADS
     SimulationFactory<SimFabTestCell> *cfab;
+#endif
 #endif
 };
