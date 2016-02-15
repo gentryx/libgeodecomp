@@ -44,7 +44,7 @@ const SimplexOptimizer::SimplexVertex operator+(
 
 const SimplexOptimizer::SimplexVertex operator+(
          const SimplexOptimizer::SimplexVertex& a,
-         const double& b)
+         double b)
 {
     SimplexOptimizer::SimplexVertex result(a);
     for (std::size_t i = 0; i < a.size(); ++i) {
@@ -90,7 +90,7 @@ const SimplexOptimizer::SimplexVertex operator*(
 
 const SimplexOptimizer::SimplexVertex operator*(
         const SimplexOptimizer::SimplexVertex& a,
-        const double& b)
+        double b)
 {
     SimplexOptimizer::SimplexVertex result(a);
     for (std::size_t i = 0; i < a.size(); ++i) {

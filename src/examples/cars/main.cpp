@@ -30,14 +30,14 @@ public:
         public APITraits::HasNanoSteps<2>
     {};
 
-    explicit Cell(const int& direction = FREE, const int& border = 0, const int rate = 5) :
+    explicit Cell(int direction = FREE, int border = 0, const int rate = 5) :
         direction(direction),
         border(border),
         rate(rate)
     {}
 
     // fixme: shorten by decomposition
-    void update(const CoordMap<Cell>& neighborhood, const unsigned& nanoStep)
+    void update(const CoordMap<Cell>& neighborhood, unsigned nanoStep)
     {
         *this = neighborhood[Coord<2>(0, 0)];
 

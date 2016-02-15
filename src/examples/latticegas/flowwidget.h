@@ -68,7 +68,7 @@ private:
 
         for (unsigned y = 0; y < image.height(); ++y) {
             for (unsigned x = 0; x < image.width(); ++x) {
-                const unsigned& val = ((unsigned*)image.scanLine(0))[y* image.width() + x];
+                unsigned val = ((unsigned*)image.scanLine(0))[y* image.width() + x];
                 unsigned char r = (val >> 16) & 0xff;
                 unsigned char g = (val >>  8) & 0xff;
                 unsigned char b = (val >>  0) & 0xff;

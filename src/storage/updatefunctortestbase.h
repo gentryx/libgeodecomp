@@ -26,6 +26,7 @@ public:
 
     void testSimple(int steps)
     {
+        using std::swap;
         Coord<DIM> dim;
         for (int d = 0; d < DIM; ++d) {
             dim[d] = d * 5 + 10;
@@ -48,12 +49,13 @@ public:
             cycle += 1;
             TS_ASSERT_TEST_GRID2(GridType, gridNew, cycle, typename);
 
-            std::swap(gridOld, gridNew);
+            swap(gridOld, gridNew);
         }
     }
 
     void testSplittedTraversal(int steps)
     {
+        using std::swap;
         Coord<DIM> dim;
         for (int d = 0; d < DIM; ++d) {
             dim[d] = d * 5 + 10;
@@ -93,7 +95,7 @@ public:
             cycle += 1;
             TS_ASSERT_TEST_GRID2(GridType, gridNew, cycle, typename);
 
-            std::swap(gridOld, gridNew);
+            swap(gridOld, gridNew);
         }
     }
 

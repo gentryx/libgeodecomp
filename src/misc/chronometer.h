@@ -218,7 +218,7 @@ public:
         reset();
     }
 
-    inline const double& operator[](int intervalID) const
+    inline double operator[](int intervalID) const
     {
         return totalTimes[intervalID];
     }

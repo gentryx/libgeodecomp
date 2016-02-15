@@ -33,7 +33,7 @@ public:
     class Square
     {
     public:
-        inline Square(const Coord<2>& origin, const Coord<2> dimensions, const unsigned& quadrant, const Form& form) :
+        inline Square(const Coord<2>& origin, const Coord<2> dimensions, unsigned quadrant, const Form& form) :
             origin(origin),
             dimensions(dimensions),
             quadrant(quadrant),
@@ -64,7 +64,7 @@ public:
         inline Iterator(
             const Coord<2>& origin,
             const Coord<2>& dimensions,
-            const unsigned& pos=0,
+            unsigned pos=0,
             const Form& form=LL_TO_LR) :
             SpaceFillingCurve<2>::Iterator(origin, false)
         {
@@ -129,7 +129,7 @@ public:
             digDown(0);
         }
 
-        inline void digDown(const unsigned& offset)
+        inline void digDown(unsigned offset)
         {
             if (squareStack.empty()) {
                 throw std::logic_error("cannot descend from empty squares stack");
@@ -157,7 +157,7 @@ public:
         inline void digDownTrivial(
             const Coord<2>& origin,
             const Coord<2>& dimensions,
-            const unsigned& offset)
+            unsigned offset)
         {
             sublevelState = TRIVIAL;
             cursor = origin;
@@ -175,7 +175,7 @@ public:
         inline void digDownCached(
             const Coord<2>& origin,
             const Coord<2>& dimensions,
-            const unsigned& offset,
+            unsigned offset,
             const Form& form)
         {
             sublevelState = CACHED;
@@ -188,7 +188,7 @@ public:
         }
 
         inline void digDownRecursion(
-            const unsigned& offset,
+            unsigned offset,
             Square currentSquare)
         {
             const Coord<2>& origin = currentSquare.origin;
@@ -308,7 +308,7 @@ public:
         dimensions(dimensions)
     {}
 
-    inline Iterator operator[](const unsigned& i) const
+    inline Iterator operator[](unsigned i) const
     {
         return Iterator(origin, dimensions, i);
     }

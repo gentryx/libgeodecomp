@@ -128,8 +128,9 @@ protected:
     Region<DIM> simArea;
     bool enableFineGrainedParallelism;
 
-    void nanoStep(const unsigned& nanoStep)
+    void nanoStep(unsigned nanoStep)
     {
+        using std::swap;
         TimeCompute t(&chronometer);
 
         UpdateFunctor<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableOpenMP>()(
@@ -140,7 +141,7 @@ protected:
             newGrid,
             nanoStep,
             UpdateFunctorHelpers::ConcurrencyEnableOpenMP(true, enableFineGrainedParallelism));
-        std::swap(curGrid, newGrid);
+        swap(curGrid, newGrid);
     }
 
     /**

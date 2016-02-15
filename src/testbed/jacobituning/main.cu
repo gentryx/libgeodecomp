@@ -25,7 +25,7 @@ public:
     template<typename NEIGHBORHOOD>
     __device__
     __host__
-    void update(const NEIGHBORHOOD& hood, const unsigned& nanoStep)
+    void update(const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
         temp = (hood[FixedCoord< 0,  0, -1>()].temp +
                 hood[FixedCoord< 0, -1,  0>()].temp +

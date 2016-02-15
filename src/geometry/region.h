@@ -595,7 +595,7 @@ public:
         return indices[0].size();
     }
 
-    inline Region expand(const unsigned& width=1) const
+    inline Region expand(unsigned width=1) const
     {
         return expand(Coord<DIM>::diagonal(width));
     }
@@ -632,7 +632,7 @@ public:
      */
     template<typename TOPOLOGY>
     inline Region expandWithTopology(
-        const unsigned& width,
+        unsigned width,
         const Coord<DIM>& globalDimensions,
         TOPOLOGY /* unused */) const
     {
@@ -655,7 +655,7 @@ public:
 
     template<typename TOPOLOGY, typename ADJACENCY>
     inline Region expandWithTopology(
-        const unsigned& width,
+        unsigned width,
         const Coord<DIM>& globalDimensions,
         TOPOLOGY topology,
         const ADJACENCY& adjacency) const
@@ -665,7 +665,7 @@ public:
 
     template<typename ADJACENCY>
     inline Region expandWithTopology(
-        const unsigned& width,
+        unsigned width,
         const Coord<DIM>& /* unused: globalDimensions */,
         Topologies::Unstructured::Topology /* used just for overload */,
         const ADJACENCY& adjacency) const
@@ -679,12 +679,15 @@ public:
      */
     template<typename ADJACENCY>
     inline Region expandWithAdjacency(
-        const unsigned& width,
+        unsigned width,
         const ADJACENCY& adjacency) const
     {
         // expanding with adjacency only works on unstructured, i.e. 1-dimensional grids
         Region<1> ret = *this;
         Region<1> newCoords = *this;
+
+        // neighbors vector is defined outside of the loop to avoid reallocations
+        std::vector<int> neighbors;
 
         for (unsigned pass = 0; pass < width; ++pass) {
             Region add;
@@ -696,12 +699,9 @@ public:
                  streak != newCoords.endStreak();
                  ++streak) {
                 for (int x = streak->origin.x(); x < streak->endX; ++x) {
-                    typename ADJACENCY::const_iterator it = adjacency.find(x);
-                    if (it == adjacency.end()) {
-                        continue;
-                    }
+                    neighbors.clear();
+                    adjacency.getNeighbors(x, &neighbors);
 
-                    const std::vector<int>& neighbors = it->second;
                     for (std::vector<int>::const_iterator i = neighbors.begin(); i != neighbors.end(); ++i) {
                         Coord<DIM> c(*i);
                         if (ret.count(c) == 0) {
@@ -845,8 +845,9 @@ public:
 
     inline void operator-=(const Region& other)
     {
+        using std::swap;
         Region newValue = *this - other;
-        std::swap(newValue, *this);
+        swap(newValue, *this);
     }
 
     /**

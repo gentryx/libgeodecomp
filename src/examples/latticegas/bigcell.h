@@ -6,19 +6,19 @@
 class BigCell
 {
 public:
-    __device__ __host__ Cell& operator[](const int& y)
+    __device__ __host__ Cell& operator[](int y)
     {
         return cells[y];
     }
 
-    __device__ __host__ const Cell& operator[](const int& y) const
+    __device__ __host__ const Cell& operator[](int y) const
     {
         return cells[y];
     }
 
     __device__  __host__ void update(
         SimParams *simParams,
-        const int& t,
+        int t,
         const BigCell *up, const BigCell *same, const BigCell *down)
     {
         cells[0].update(

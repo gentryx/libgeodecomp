@@ -33,7 +33,7 @@ public:
     {}
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    void update(const COORD_MAP& neighborhood, unsigned nanoStep)
     {
         *this = neighborhood[Coord<2>( 0, 0 )];
 

@@ -33,7 +33,7 @@ public:
     typedef double ValueType;
     static const int DIM = 1;
 
-    static inline FloatCoord<1> diagonal(const double& x)
+    static inline FloatCoord<1> diagonal(double x)
     {
         return FloatCoord<1>(x);
     }
@@ -122,7 +122,7 @@ public:
     }
 
     inline
-    FloatCoord<1> operator/(const double& s) const
+    FloatCoord<1> operator/(double s) const
     {
         return FloatCoord<1>(c[0] / s);
     }
@@ -143,7 +143,7 @@ public:
     }
 
     inline
-    FloatCoord<1> operator*(const double& s) const
+    FloatCoord<1> operator*(double s) const
     {
         return FloatCoord<1>(c[0] * s);
     }
@@ -181,7 +181,7 @@ public:
         return c[i];
     }
 
-    inline const double& operator[](const int i) const
+    inline double operator[](const int i) const
     {
         return c[i];
     }
@@ -193,12 +193,12 @@ public:
         return FloatCoord(c[0] * other[0]);
     }
 
-    inline const double& prod() const
+    inline double prod() const
     {
         return c[0];
     }
 
-    inline const double& sum() const
+    inline double sum() const
     {
         return c[0];
     }
@@ -251,7 +251,7 @@ public:
     typedef double ValueType;
     static const int DIM = 2;
 
-    static inline FloatCoord<2> diagonal(const double& x)
+    static inline FloatCoord<2> diagonal(double x)
     {
         return FloatCoord<2>(x, x);
     }
@@ -355,7 +355,7 @@ public:
     }
 
     inline
-    FloatCoord<2> operator/(const double& s) const
+    FloatCoord<2> operator/(double s) const
     {
         return FloatCoord<2>(
             c[0] / s,
@@ -420,7 +420,7 @@ public:
         return c[i];
     }
 
-    inline const double& operator[](const int i) const
+    inline double operator[](const int i) const
     {
         return c[i];
     }
@@ -495,7 +495,7 @@ public:
     typedef double ValueType;
     static const int DIM = 3;
 
-    static inline FloatCoord<3> diagonal(const double& x)
+    static inline FloatCoord<3> diagonal(double x)
     {
         return FloatCoord<3>(x, x, x);
     }
@@ -611,7 +611,7 @@ public:
     }
 
     inline
-    FloatCoord<3> operator/(const double& s) const
+    FloatCoord<3> operator/(double s) const
     {
         return FloatCoord<3>(
             c[0] / s,
@@ -680,7 +680,7 @@ public:
         return c[i];
     }
 
-    inline const double& operator[](const int i) const
+    inline double operator[](const int i) const
     {
         return c[i];
     }

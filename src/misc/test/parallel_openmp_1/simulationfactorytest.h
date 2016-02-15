@@ -23,7 +23,7 @@ public:
 
     template<typename COORD_MAP>
     __host__
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    void update(const COORD_MAP& neighborhood, unsigned nanoStep)
     {
         temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
                 neighborhood[FixedCoord< 0, -1,  0>()].temp +
@@ -35,7 +35,7 @@ public:
 
     template<typename COORD_MAP>
     __device__
-    void updateCuda(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    void updateCuda(const COORD_MAP& neighborhood, unsigned nanoStep)
     {
         temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
                 neighborhood[FixedCoord< 0, -1,  0>()].temp +

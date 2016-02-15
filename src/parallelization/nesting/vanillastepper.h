@@ -88,6 +88,7 @@ public:
 private:
     inline void update1()
     {
+        using std::swap;
         TimeTotal t(&chronometer);
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = innerSet(index);
@@ -102,7 +103,7 @@ private:
                 &*newGrid,
                 curNanoStep,
                 CONCURRENCY_SPEC(false, enableFineGrainedParallelism));
-            std::swap(oldGrid, newGrid);
+            swap(oldGrid, newGrid);
 
             ++curNanoStep;
             if (curNanoStep == NANO_STEPS) {
@@ -151,6 +152,7 @@ private:
      */
     inline void updateGhost()
     {
+        using std::swap;
         {
             TimeComputeGhost t(&chronometer);
 
@@ -193,7 +195,7 @@ private:
                     curStep++;
                 }
 
-                std::swap(oldGrid, newGrid);
+                swap(oldGrid, newGrid);
 
                 ++curGlobalNanoStep;
             }
@@ -206,7 +208,7 @@ private:
 
             saveRim(curGlobalNanoStep);
             if (ghostZoneWidth() % 2) {
-                std::swap(oldGrid, newGrid);
+                swap(oldGrid, newGrid);
             }
 
             // 3: restore grid for kernel update

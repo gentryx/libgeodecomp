@@ -20,7 +20,7 @@ public:
     {}
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighbors, const unsigned& nanoStep)
+    void update(const COORD_MAP& neighbors, unsigned nanoStep)
     {
         int buf = (neighbors[Coord<2>(0, -1)].val + neighbors[Coord<2>(-1, 0)].val +
                     neighbors[Coord<2>(1,  0)].val + neighbors[Coord<2>( 0, 1)].val);
@@ -34,7 +34,7 @@ private:
 class BuggyCellInitializer : public SimpleInitializer<BuggyCell>
 {
 public:
-    explicit BuggyCellInitializer(std::string infile, const int& steps=10000) :
+    explicit BuggyCellInitializer(std::string infile, int steps=10000) :
         SimpleInitializer<BuggyCell>(readDim(infile), steps),
         filename(infile)
     {}

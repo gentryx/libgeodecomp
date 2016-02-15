@@ -148,7 +148,7 @@ protected:
     void init(
         boost::shared_ptr<Partition<DIM> > partition,
         const CoordBox<DIM>& box,
-        const unsigned& ghostZoneWidth,
+        unsigned ghostZoneWidth,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         STEPPER *stepperType,
         PatchAccepterVec patchAcceptersGhost,

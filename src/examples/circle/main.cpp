@@ -73,7 +73,7 @@ private:
         }
     }
 
-    void turnSolidifying(const CircleCell& other, const int& deltaX, const int& deltaY)
+    void turnSolidifying(const CircleCell& other, int deltaX, int deltaY)
     {
         state = SOLIDIFYING;
         relativeCenter = other.relativeCenter;

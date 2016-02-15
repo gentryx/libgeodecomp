@@ -100,7 +100,7 @@ OozeBalancer::WeightVec OozeBalancer::balance(
 }
 
 
-inline double frac(const double& d)
+inline double frac(double d)
 {
     double f = d - (long long)d;
     if (f < 0) {

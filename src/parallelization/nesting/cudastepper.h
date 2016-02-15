@@ -328,6 +328,8 @@ private:
 
     inline void update1()
     {
+        using std::swap;
+
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = innerSet(index);
         {
@@ -350,8 +352,8 @@ private:
                 region.size(),
                 oldDeviceGrid->boundingBox());
 
-            std::swap(oldDeviceGrid, newDeviceGrid);
-            std::swap(oldGrid, newGrid);
+            swap(oldDeviceGrid, newDeviceGrid);
+            swap(oldGrid, newGrid);
 
             ++curNanoStep;
             if (curNanoStep == NANO_STEPS) {
@@ -505,6 +507,7 @@ private:
      */
     inline void updateGhost()
     {
+        using std::swap;
         {
             TimeComputeGhost t(&chronometer);
 
@@ -547,7 +550,7 @@ private:
                     curStep++;
                 }
 
-                std::swap(oldGrid, newGrid);
+                swap(oldGrid, newGrid);
 
                 ++curGlobalNanoStep;
             }
@@ -563,7 +566,7 @@ private:
             // fixme: we don't need this any longer, as the kernel is handled on the device
             // saveRim(curGlobalNanoStep);
             if (ghostZoneWidth() % 2) {
-                std::swap(oldGrid, newGrid);
+                swap(oldGrid, newGrid);
             }
 
             // 3: restore grid for kernel update

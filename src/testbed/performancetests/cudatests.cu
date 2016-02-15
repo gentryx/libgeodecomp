@@ -500,6 +500,7 @@ public:
 template<template<int A, int B, int C> class KERNEL, int DIM_X, int DIM_Y, int DIM_Z>
 double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
 {
+    using std::swap;
     std::size_t size = DIM_X * DIM_Y * (DIM_Z + 4) * KERNEL<0, 0, 0>::size();
     std::size_t bytesize = size * sizeof(double);
 
@@ -530,7 +531,7 @@ double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
 
         for (int t = 0; t < repeats; ++t) {
             KERNEL<DIM_X, DIM_Y, DIM_Z>::run(dimGrid, dimBlock, dimX, dimY, dimZ, devGridOld, devGridNew);
-            std::swap(devGridOld, devGridNew);
+            swap(devGridOld, devGridNew);
         }
         cudaDeviceSynchronize();
     }

@@ -101,7 +101,7 @@ private:
     inline void splitBox(
         CoordBox<DIM> *newBoxes,
         const CoordBox<DIM>& oldBox,
-        const double& ratio) const
+        double ratio) const
     {
         newBoxes[0] = oldBox;
         newBoxes[1] = oldBox;

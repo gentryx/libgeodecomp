@@ -377,7 +377,7 @@ private:
     boost::shared_ptr<PatchProviderType> pro;
     boost::shared_ptr<MPILayer> mpiLayer;
 
-    GridType markGrid(const Region<2>& region, const int& id)
+    GridType markGrid(const Region<2>& region, int id)
     {
         GridType ret = zeroGrid;
 

@@ -54,10 +54,11 @@ public:
 
     StringVec retrieveSteeringRequests()
     {
+        using std::swap;
         LOG(DBG, "Pipe::retrieveSteeringRequests()");
         StringVec requests;
         boost::lock_guard<boost::mutex> lock(mutex);
-        std::swap(requests, steeringRequests);
+        swap(requests, steeringRequests);
         LOG(DBG, "  retrieveSteeringRequests yields " << requests.size());
         if (requests.size() > 0) {
             LOG(DBG, "  steeringRequests: " << requests);
@@ -75,10 +76,11 @@ public:
 
     StringVec retrieveSteeringFeedback()
     {
+        using std::swap;
         LOG(DBG, "Pipe::retrieveSteeringFeedback()");
         StringVec feedback;
         boost::lock_guard<boost::mutex> lock(mutex);
-        std::swap(feedback, steeringFeedback);
+        swap(feedback, steeringFeedback);
         LOG(DBG, "  retrieveSteeringFeedback yields " << feedback.size());
         LOG(DBG, "  retrieveSteeringFeedback is " << feedback);
         return feedback;

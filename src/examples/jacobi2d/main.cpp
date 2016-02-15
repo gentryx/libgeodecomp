@@ -22,7 +22,7 @@ public:
     {}
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    void update(const COORD_MAP& neighborhood, unsigned nanoStep)
     {
         temp = (neighborhood[Coord<2>( 0, -1)].temp +
                 neighborhood[Coord<2>(-1,  0)].temp +

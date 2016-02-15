@@ -407,14 +407,23 @@ public:
             int id = i->first;
             const ConvexPolytope<Coord<2> > element = i->second;
 
-            addNeighbors(&adjacency[id], element.getLimits());
+            addNeighbors(adjacency, id, element.getLimits());
         }
 
         // III. Fill Region
+        // fixme: I don't fully understand the code with skipCells below,
+        // this may very well be easier solved.
+        typedef std::map<int, std::vector<int> > MapAdjacency;
+
+        MapAdjacency mapAdjacency;
+        for (Region<2>::Iterator it = adjacency.getRegion().begin(); it != adjacency.getRegion().end(); ++it) {
+            mapAdjacency[it->x()].push_back(it->y());
+        }
+
         Region<1> r;
         int counter = 0;
         bool select = true;
-        for (Adjacency::iterator i = adjacency.begin(); i != adjacency.end(); ++i) {
+        for (MapAdjacency::iterator i = mapAdjacency.begin(); i != mapAdjacency.end(); ++i) {
             ++counter;
             if (counter >= skipCells) {
                 counter = 0;
@@ -529,11 +538,11 @@ private:
         return true;
     }
 
-    template<typename VECTOR, typename LIMITS>
-    void addNeighbors(VECTOR *vec, const LIMITS& limits)
+    template<typename LIMITS>
+    void addNeighbors(Adjacency& adjacency, int from, const LIMITS& limits)
     {
         for (typename LIMITS::const_iterator i = limits.begin(); i != limits.end(); ++i) {
-            (*vec) << i->neighborID;
+            adjacency.insert(from, i->neighborID);
         }
     }
 };
@@ -1021,7 +1030,7 @@ public:
 
     NoOpInitializer(
         const Coord<3>& dimensions,
-        const unsigned& steps) :
+        unsigned steps) :
         SimpleInitializer<CELL>(dimensions, steps)
     {}
 
@@ -1375,6 +1384,7 @@ public:
 
     double performance(std::vector<int> rawDim)
     {
+        using std::swap;
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         typedef SoAGrid<
             JacobiCellStreakUpdate,
@@ -1402,7 +1412,7 @@ public:
                 Coord<3> offset(1, 1, 1);
                 Updater updater(&region, &offset, &offset, &box.dimensions, 0, 0, 0);
                 gridNew->callback(gridOld, updater);
-                std::swap(gridOld, gridNew);
+                swap(gridOld, gridNew);
             }
         }
 
@@ -2112,7 +2122,7 @@ public:
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
 
-    inline explicit LBMSoACell(const double& v=1.0, const State& s=LIQUID) :
+    inline explicit LBMSoACell(double v=1.0, const State& s=LIQUID) :
         C(v),
         N(0),
         E(0),
@@ -2155,7 +2165,7 @@ public:
 
 
 //     template<typename COORD_MAP>
-//     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+//     void update(const COORD_MAP& neighborhood, unsigned nanoStep)
 //     {
 //         *this = neighborhood[FixedCoord<0, 0>()];
 

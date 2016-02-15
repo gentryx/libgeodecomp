@@ -7,6 +7,7 @@
 #endif
 
 #include <hpx/include/components.hpp>
+#include <hpx/include/lcos.hpp>
 #include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
@@ -62,6 +63,20 @@ public:
         return ids;
     }
 
+    virtual ~HPXReceiver()
+    {}
+
+    void receive(std::size_t step, Cargo&& val)
+    {
+        buffer.store_received(step, std::forward<Cargo>(val));
+    }
+    HPX_DEFINE_COMPONENT_ACTION(HPXReceiver, receive, receiveAction);
+
+    hpx::future<Cargo> get(std::size_t step)
+    {
+        return buffer.receive(step);
+    }
+
     static std::vector<CARGO> allGather(
         const CARGO& data,
         std::size_t rank,
@@ -82,20 +97,6 @@ public:
         }
 
         return std::move(vec);
-    }
-
-    virtual ~HPXReceiver()
-    {}
-
-    void receive(std::size_t step, Cargo&& val)
-    {
-        buffer.store_received(step, std::forward<Cargo>(val));
-    }
-    HPX_DEFINE_COMPONENT_ACTION(HPXReceiver, receive, receiveAction);
-
-    hpx::future<Cargo> get(std::size_t step)
-    {
-        return buffer.receive(step);
     }
 
 private:

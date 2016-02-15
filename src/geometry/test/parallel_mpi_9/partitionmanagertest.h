@@ -49,14 +49,17 @@ public:
 
     void testOuterAndInnerGhostZoneFragments()
     {
+        using std::swap;
+
         for (int i = 0; i < layer->size(); ++i) {
             if ((i == layer->rank() - 1) || (i == layer->rank() + 1)) {
                 std::vector<Region<2> > outerFragments;
                 std::vector<Region<2> > innerFragments;
 
                 unsigned startLine = startingLine(i);
-                if (i == layer->rank() - 1)
+                if (i == layer->rank() - 1) {
                     startLine = startingLine(i + 1);
+                }
                 for (unsigned width = 0; width <= ghostZoneWidth; ++width) {
                     Region<2> outerFragment, innerFragment;
                     for (unsigned g = 0; g < width; ++g) {
@@ -69,8 +72,9 @@ public:
                     innerFragments.push_back(innerFragment);
                 }
                 // reverse for lower neighbor
-                if (i == layer->rank() + 1)
-                    std::swap(outerFragments, innerFragments);
+                if (i == layer->rank() + 1) {
+                    swap(outerFragments, innerFragments);
+                }
 
                 TS_ASSERT_EQUALS(outerFragments,
                                  manager.getOuterGhostZoneFragments()[i]);
@@ -90,8 +94,9 @@ public:
 
         startLine = startingLine(layer->rank()) - ghostZoneWidth;
         endLine   = startingLine(layer->rank() + 1) + ghostZoneWidth;
-        if (layer->rank() == layer->size() - 1)
+        if (layer->rank() == layer->size() - 1) {
             endLine -= ghostZoneWidth;
+        }
         Region<2> expectedOwnExpandedRegion = fillLines(startLine, endLine);
         TS_ASSERT_EQUALS(expectedOwnExpandedRegion, manager.ownExpandedRegion());
     }
@@ -118,8 +123,9 @@ public:
         for (unsigned i = 0; i <= ghostZoneWidth; ++i) {
             unsigned startLine = startingLine(layer->rank()) + i;
             unsigned endLine   = startingLine(layer->rank() + 1) - i;
-            if (layer->rank() == layer->size() - 1)
+            if (layer->rank() == layer->size() - 1) {
                 endLine += i;
+            }
             TS_ASSERT_EQUALS(fillLines(startLine, endLine), manager.innerSet(i));
         }
     }
@@ -188,21 +194,23 @@ private:
     unsigned offset;
     unsigned ghostZoneWidth;
 
-    unsigned startingLine(const unsigned& node)
+    unsigned startingLine(unsigned node)
     {
         unsigned ret = offset;
         for (unsigned i = 0; i < node; ++i) {
             ret += weights[i];
         }
+
         return ret / dimensions.x();
     }
 
-    Region<2> fillLines(const unsigned& startLine, const unsigned& endLine)
+    Region<2> fillLines(unsigned startLine, unsigned endLine)
     {
         Region<2> ret;
         for (unsigned row = startLine; row < endLine; ++row) {
             ret << Streak<2>(Coord<2>(0, row), dimensions.x());
         }
+
         return ret;
     }
 };

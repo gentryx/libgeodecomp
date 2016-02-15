@@ -358,6 +358,7 @@ public:
      */
     virtual void step()
     {
+        using std::swap;
         // fixme: test steerer application, ensure grid gets copied to host and back to device
         // notify all registered Steerers
         for(unsigned i = 0; i < steerers.size(); ++i) {
@@ -368,7 +369,7 @@ public:
 
         for (unsigned i = 0; i < APITraits::SelectNanoSteps<CELL_TYPE>::VALUE; ++i) {
             nanoStep(i);
-            std::swap(devGridOld, devGridNew);
+            swap(devGridOld, devGridNew);
         }
 
         ++stepNum;

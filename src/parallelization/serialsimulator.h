@@ -127,12 +127,13 @@ protected:
     GridType *newGrid;
     Region<DIM> simArea;
 
-    void nanoStep(const unsigned& nanoStep)
+    void nanoStep(unsigned nanoStep)
     {
+        using std::swap;
         TimeCompute t(&chronometer);
 
         UpdateFunctor<CELL_TYPE>()(simArea, Coord<DIM>(), Coord<DIM>(), *curGrid, newGrid, nanoStep);
-        std::swap(curGrid, newGrid);
+        swap(curGrid, newGrid);
     }
 
     /**

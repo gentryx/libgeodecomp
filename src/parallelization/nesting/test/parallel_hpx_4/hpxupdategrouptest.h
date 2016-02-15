@@ -438,9 +438,9 @@ private:
     boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
 
     std::vector<std::size_t> genWeights(
-        const unsigned& width,
-        const unsigned& height,
-        const unsigned& size)
+        unsigned width,
+        unsigned height,
+        unsigned size)
     {
         std::vector<std::size_t> ret(size);
         unsigned totalSize = width * height;
@@ -451,7 +451,7 @@ private:
         return ret;
     }
 
-    long pos(const unsigned& i, const unsigned& size, const unsigned& totalSize)
+    long pos(unsigned i, unsigned size, unsigned totalSize)
     {
         return i * totalSize / size;
     }

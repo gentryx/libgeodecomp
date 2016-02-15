@@ -59,7 +59,7 @@ public:
             (*this)[startOffsets[node + 1]]);
     }
 
-    Iterator operator[](const unsigned& pos) const
+    Iterator operator[](unsigned pos) const
     {
         Coord<DIM> cursor = dimensions.indexToCoord(pos) + origin;
         return Iterator(origin, cursor, dimensions);

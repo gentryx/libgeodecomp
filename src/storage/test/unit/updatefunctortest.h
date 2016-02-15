@@ -220,6 +220,7 @@ public:
 
     void testStructOfArraysTestCell()
     {
+        using std::swap;
         typedef TestCellSoA TestCellType;
         typedef SoAGrid<TestCellType, Topologies::Cube<3>::Topology> GridType;
 
@@ -249,7 +250,7 @@ public:
                 cycle += 1;
                 TS_ASSERT_TEST_GRID2(GridType, *gridNew, cycle, );
 
-                std::swap(gridOld, gridNew);
+                swap(gridOld, gridNew);
             }
         }
     }

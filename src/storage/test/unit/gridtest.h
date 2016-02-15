@@ -352,7 +352,7 @@ public:
         TS_ASSERT_EQUALS(g[Coord<2>(-1,  0)], 11);
     }
 
-    inline int trans(const int& x, const int& dimension)
+    inline int trans(int x, int dimension)
     {
         return (x + dimension) % dimension;
     }

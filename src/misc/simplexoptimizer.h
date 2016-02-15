@@ -86,7 +86,7 @@ const SimplexOptimizer::SimplexVertex operator-(
 const SimplexOptimizer::SimplexVertex operator*(
         const SimplexOptimizer::SimplexVertex& a, const SimplexOptimizer::SimplexVertex& b);
 const SimplexOptimizer::SimplexVertex operator*(
-        const SimplexOptimizer::SimplexVertex& a, const double& b);
+        const SimplexOptimizer::SimplexVertex& a, double b);
 
 } // namespace LibGeoDecomp
 

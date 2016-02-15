@@ -155,7 +155,7 @@ public:
         Position destinations[7];
     };
 
-    inline Cell(const State& newState=liquid, const int& k=-1, const int& val=1) :
+    inline Cell(const State& newState=liquid, int k=-1, int val=1) :
         state(newState)
     {
         for (int i = 0; i < 7; ++i)
@@ -172,7 +172,7 @@ public:
     }
 
     __device__ __host__ inline const Cell& getNeighbor(
-        const int& source,
+        int source,
         const Cell& ulCell,
         const Cell& urCell,
         const Cell& lCell,
@@ -203,7 +203,7 @@ public:
 
     __device__ __host__ inline void update(
         SimParams *simParams,
-        const int& t,
+        int t,
         const Cell& ulCell,
         const Cell& urCell,
         const Cell& lCell,
@@ -351,7 +351,7 @@ public:
         return state;
     }
 
-    __device__ __host__ inline const char& operator[](const int& i) const
+    __device__ __host__ inline const char& operator[](int i) const
     {
         return particles[i];
     }
@@ -378,7 +378,7 @@ public:
         initRand();
     }
 
-    static void addPattern(const Pattern *p, const int& num)
+    static void addPattern(const Pattern *p, int num)
     {
         for (int angle = 0; angle < 6; ++angle) {
             for (int offset = 0; offset < num; ++offset) {
@@ -396,7 +396,7 @@ public:
         }
     }
 
-    static void addFinalPattern(const int& offset, const Pattern& p)
+    static void addFinalPattern(int offset, const Pattern& p)
     {
         for (int i = 0; i < 7; ++i)
             simParamsHost.transportTable[p.getFlowState()][offset][i] = p.getDest(i);
@@ -608,8 +608,8 @@ private:
         }
     }
 
-    static void fillIn(const int& flowState,
-                       const int& rand,
+    static void fillIn(int flowState,
+                       int rand,
                        const char& ul,
                        const char& ur,
                        const char& l,

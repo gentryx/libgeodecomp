@@ -207,8 +207,8 @@ private:
     boost::shared_ptr<MPILayer> mpiLayer;
 
     void checkInnerSet(
-        const unsigned& shrink,
-        const unsigned& expectedStep)
+        unsigned shrink,
+        unsigned expectedStep)
     {
         TS_ASSERT_TEST_GRID_REGION(
             StepperType::GridType,
@@ -218,8 +218,8 @@ private:
     }
 
     void checkRim(
-        const unsigned& shrink,
-        const unsigned& expectedStep)
+        unsigned shrink,
+        unsigned expectedStep)
     {
         TS_ASSERT_TEST_GRID_REGION(
             StepperType::GridType,

@@ -82,7 +82,7 @@ public:
     typedef MyAPI API;
 
     explicit Sphere(
-        const int& myID = 0,
+        int myID = 0,
         const FloatCoord<3>& myPos = FloatCoord<3>(),
         const FloatCoord<3>& myVel = FloatCoord<3>()) :
         id(myID),
@@ -297,7 +297,7 @@ private:
 class GasInitializer : public SimpleInitializer<Container>
 {
 public:
-    GasInitializer(const Coord<3>& dimensions, const unsigned& steps) :
+    GasInitializer(const Coord<3>& dimensions, unsigned steps) :
         SimpleInitializer<Container>(dimensions, steps)
     {}
 

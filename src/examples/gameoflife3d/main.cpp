@@ -37,7 +37,7 @@ public:
     }
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned&)
+    void update(const COORD_MAP& neighborhood, unsigned)
     {
         int livingNeighbors = countLivingNeighbors(neighborhood);
         alive = neighborhood[Coord<3>(0, 0, 0)].alive;

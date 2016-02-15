@@ -28,7 +28,7 @@ public:
         center(center),
         simSpaceDim(simSpaceDim),
         area(simSpaceDim.prod()),
-        diameter(*std::max_element(&simSpaceDim[0], &simSpaceDim[0] + 2))
+        diameter(simSpaceDim.maxElement())
     {
         limits << EquationType(COORD(center[0], 0),              COORD( 0,  1))
                << EquationType(COORD(0, center[1]),              COORD( 1,  0))
@@ -204,7 +204,7 @@ public:
      * integration. Few samples are used, so this method is highly
      * inaccurate.
      */
-    const double& getVolume() const
+    double getVolume() const
     {
         return area;
     }
@@ -219,7 +219,7 @@ public:
         return limits;
     }
 
-    const double& getDiameter() const
+    double getDiameter() const
     {
         return diameter;
     }
@@ -294,12 +294,15 @@ private:
 
     COORD cutPoint(EquationType eq1, EquationType eq2) const
     {
+        using std::swap;
+
         if (eq1.dir[1] == 0) {
             if (eq2.dir[1] == 0) {
                 // throw std::invalid_argument("both lines are vertical")
                 return farAway<2>();
             }
-            std::swap(eq1, eq2);
+
+            swap(eq1, eq2);
         }
 
         COORD dir1 = turnLeft90(eq1.dir);
