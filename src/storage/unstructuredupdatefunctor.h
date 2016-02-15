@@ -89,21 +89,12 @@ public:
             }
 
             // call updateLineX with adjusted indices
+            UnstructuredSoANeighborhood<CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1,
+                                        MATRICES, ValueType, C, SIGMA>
+                hoodOld(oldAccessor, gridOld, startX);
 
-            // fixme:
-            // UnstructuredSoANeighborhood<CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1,
-            //                             MATRICES, ValueType, C, SIGMA>
-            //     hoodOld(oldAccessor, gridOld, startX);
-
-            UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-                hoodOld(gridOld, startX);
-
-
-            UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(newAccessor);
-            // fixme
-            // const int endX = i->endX / C;
-            int endX = i->endX;
-            CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
+            UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessor);
+            CELL::updateLineX(hoodNew, i->endX, hoodOld, nanoStep);
 
             // call scalar updates for last chunk
             if ((i->endX % C) != 0) {
