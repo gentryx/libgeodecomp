@@ -146,8 +146,8 @@ public:
         typedef UnstructuredSoAGrid<TestCellType, 1, double, 32, 1> TestGridType;
 
         UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
-        TestGridType grid1 = TestGridType(Coord<1>(340));
-        TestGridType grid2 = TestGridType(Coord<1>(340));
+        TestGridType grid1 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
+        TestGridType grid2 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
         init.grid(&grid1);
         init.grid(&grid2);
 

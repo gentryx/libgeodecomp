@@ -65,47 +65,43 @@ public:
     void update(const HOOD& hood, int nanoStep)
     {
         *this = hood[hood.index()];
-        std::map<int, double> actualNeighborWeights;
-
-        for (typename HOOD::Iterator i = hood.begin(); i != hood.end(); ++i) {
-            checkNeighbor((*i).first, hood[(*i).first]);
-            actualNeighborWeights[(*i).first] = (*i).second;
-        }
-
-        if (expectedNeighborWeights != actualNeighborWeights) {
-            OUTPUT() << "UnstructuredTestCell error: id " << id
-                     << " is not valid on cycle " << cycleCounter
-                     << ", nanoStep: " << nanoStep << "\n";
-            isValid = false;
-        }
-
-        int expectedNanoStep = cycleCounter % APITraits::SelectNanoSteps<UnstructuredTestCell>::VALUE;
-        if (expectedNanoStep != nanoStep) {
-            OUTPUT() << "UnstructuredTestCell error: id " << id
-                     << " saw bad nano step " << nanoStep
-                     << " (expected: " << expectedNanoStep << ")\n";
-            isValid = false;
-        }
-
-        if (expectedNeighborWeights.size() != std::size_t(id + 1)) {
-            OUTPUT() << "UnstructuredTestCell error: id " << id
-                     << " has a bad weights set\n";
-            isValid = false;
-        }
-
-        if (!isValid) {
-            OUTPUT() << "UnstructuredTestCell error: id " << id << " is invalid\n";
-        }
-        ++cycleCounter;
+        verify(hood.begin(), hood.end(), hood, nanoStep);
     }
 
     template<typename HOOD_OLD, typename HOOD_NEW>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
     {
-        for (; hoodOld.index() < indexEnd; ++hoodOld, ++hoodNew) {
-            UnstructuredTestCell cell;
-            cell.update(hoodOld, nanoStep);
-            hoodNew << cell;
+        // fixme: index is actually the index in the chunkVector, not necessarily a cell id :-(
+        for (;hoodOld.index() < indexEnd / HOOD_OLD::ARITY; ++hoodOld) {
+            // assemble weight maps:
+            std::vector<std::map<int, double> > weights(HOOD_OLD::ARITY);
+            for (typename HOOD_OLD::Iterator i = hoodOld.begin(); i != hoodOld.end(); ++i) {
+                const int *columnPointer = (*i).first;
+                const double *weightPointer = (*i).second;
+
+                for (int i = 0; i < HOOD_OLD::ARITY; ++i) {
+                    // ignore 0-padding
+                    if ((columnPointer[i] != 0) || (weightPointer[i] != 0.0)) {
+                        weights[i][columnPointer[i]] = weightPointer[i];
+                    }
+                }
+            }
+
+            // we need to create actual cells so we can call
+            // member functions. users would not do this (because
+            // it's slow), but it's good for testing.
+            std::vector<UnstructuredTestCell> cells;
+            for (int i = 0; i < HOOD_OLD::ARITY; ++i) {
+                int index = hoodOld.index() * HOOD_OLD::ARITY + i;
+                cells << hoodOld[index];
+                cells.back().verify(weights[i].begin(), weights[i].end(), hoodOld, nanoStep);
+            }
+
+            // copy back to new grid:
+            for (int i = 0; i < HOOD_OLD::ARITY; ++i) {
+                hoodNew << cells[i];
+                ++hoodNew;
+            }
         }
     }
 
@@ -137,6 +133,46 @@ private:
                      << " is invalid\n";
             isValid = false;
         }
+    }
+
+    template<typename ITERATOR1, typename ITERATOR2, typename HOOD>
+    void verify(const ITERATOR1& begin, const ITERATOR2& end, const HOOD& hood, int nanoStep)
+    {
+        std::map<int, double> actualNeighborWeights;
+
+        for (ITERATOR1 i = begin; i != end; ++i) {
+            checkNeighbor((*i).first, hood[(*i).first]);
+            actualNeighborWeights[(*i).first] = (*i).second;
+        }
+
+        if (expectedNeighborWeights != actualNeighborWeights) {
+            OUTPUT() << "UnstructuredTestCell error: id " << id
+                     << " is not valid on cycle " << cycleCounter
+                     << ", nanoStep: " << nanoStep << "\n"
+                     << "  expected weights: " << expectedNeighborWeights << "\n"
+                     << "  got weights: " << actualNeighborWeights << "\n";
+            isValid = false;
+        }
+
+        int expectedNanoStep = cycleCounter % APITraits::SelectNanoSteps<UnstructuredTestCell>::VALUE;
+        if (expectedNanoStep != nanoStep) {
+            OUTPUT() << "UnstructuredTestCell error: id " << id
+                     << " saw bad nano step " << nanoStep
+                     << " (expected: " << expectedNanoStep << ")\n";
+            isValid = false;
+        }
+
+        if (expectedNeighborWeights.size() != std::size_t(id + 1)) {
+            OUTPUT() << "UnstructuredTestCell error: id " << id
+                     << " has a bad weights set\n";
+            isValid = false;
+        }
+
+        if (!isValid) {
+            OUTPUT() << "UnstructuredTestCell error: id " << id << " is invalid\n";
+        }
+        ++cycleCounter;
+
     }
 };
 
