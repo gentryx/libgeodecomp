@@ -1132,7 +1132,7 @@ public:
      * Useful for dependent lookups (e.g. yield all coordinates whose
      * y-coordinate equals a certain value).
      */
-    inline StreakIterator streakIteratorOnOrAfter(Coord<DIM> coord)
+    inline StreakIterator streakIteratorOnOrAfter(Coord<DIM> coord) const
     {
         Coord<DIM> offsets;
 
