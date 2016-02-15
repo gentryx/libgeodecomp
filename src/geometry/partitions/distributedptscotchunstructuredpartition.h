@@ -247,9 +247,6 @@ private:
                         Coord<2>(16, 10));
                 LOG(DBG, "regions of rank " << i << ": ");
                 LOG(DBG, ss.str());
-
-                std::cout << ss.str() << std::endl;
-
             }
 
             MPILayer().barrier();
