@@ -61,7 +61,7 @@ public:
 
     virtual double operator()(const SimulationParameters& params)
     {
-        LOG(Logger::DBG, "SimulationFactory::operator(params)")
+        LOG(Logger::DBG, "SimulationFactory::operator(params)");
         Simulator<CELL> *sim = buildSimulator(initializer->clone(), params);
         LOG(Logger::DBG, "sim get buildSimulator(initializer->clone(), params)")
         Chronometer chrono;

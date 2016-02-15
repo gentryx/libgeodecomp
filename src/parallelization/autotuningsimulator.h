@@ -18,7 +18,7 @@ namespace LibGeoDecomp {
  * and suitable parameters for the given simulation model and
  * hardware.
  */
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+template<typename CELL_TYPE, typename OPTIMIZER_TYPE>
 class AutoTuningSimulator
 {
 public:
@@ -334,8 +334,9 @@ unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double g
         if (steps < 1) {
             steps =1;
         }
-        LOG(Logger::DBG, "new calculated steps: " << steps)
-        LOG(Logger::DBG, "fitness: " << fitness << " goal: " << goal)
+        LOG(Logger::DBG, "new calculated steps: " << steps);
+        LOG(Logger::DBG, "fitness: " << fitness << " goal: " << goal);
+        LOG(Logger::DBG, "variance: " << variance);
     } while((!(fitness > goal + variance && fitness < goal - variance ))
          && (!(oldSteps <= 1 && fitness > goal)));
     return oldSteps;
