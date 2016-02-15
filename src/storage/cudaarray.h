@@ -24,9 +24,6 @@ public:
         size(size),
         dataPointer(LibFlatArray::cuda_allocator<ELEMENT_TYPE>().allocate(size))
     {
-        LOG(WARN, "initialization of CUDAArray from single element is SLOW,"
-            " better initialize by copying from std::vector");
-
         for (std::size_t i = 0; i < size; ++i) {
             cudaMemcpy(dataPointer + i, &defaultValue, sizeof(ELEMENT_TYPE), cudaMemcpyHostToDevice);
         }
