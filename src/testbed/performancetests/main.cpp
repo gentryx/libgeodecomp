@@ -2978,7 +2978,7 @@ public:
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
-        const Coord<1> size(dim.x());
+        const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
         Grid gridOld(size);
         Grid gridNew(size);
 
@@ -2990,7 +2990,7 @@ public:
         // 3. call updateFunctor()
         double seconds = 0;
         Region<1> region;
-        region << Streak<1>(Coord<1>(0), size.x());
+        region << Streak<1>(Coord<1>(0), size.dimensions.x());
         {
             ScopedTimer t(&seconds);
             updateFunctor<SPMVMSoACell, Grid>(region, gridOld, &gridNew, 0);
@@ -3001,7 +3001,7 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double numOps = 2. * (size.dimensions.x() / 100) * (size.dimensions.x());
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3044,7 +3044,7 @@ public:
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACellInf, MATRICES, ValueType, C, SIGMA> Grid;
-        const Coord<1> size(dim.x());
+        const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
         Grid gridOld(size);
         Grid gridNew(size);
 
@@ -3056,7 +3056,7 @@ public:
         // 3. call updateFunctor()
         double seconds = 0;
         Region<1> region;
-        region << Streak<1>(Coord<1>(0), size.x());
+        region << Streak<1>(Coord<1>(0), size.dimensions.x());
         {
             ScopedTimer t(&seconds);
             updateFunctor<SPMVMSoACellInf, Grid>(region, gridOld, &gridNew, 0);
@@ -3067,7 +3067,7 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double numOps = 2. * (size.dimensions.x() / 100) * (size.dimensions.x());
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3123,7 +3123,7 @@ public:
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
         typedef SellCSigmaSparseMatrixContainer<ValueType, C, SIGMA> Matrix;
-        const Coord<1> size(dim.x());
+        const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
         Grid gridOld(size);
         Grid gridNew(size);
 
@@ -3141,7 +3141,7 @@ public:
         ValueType *rhsPtr; // = hoodOld.valuePtr;
         ValueType *resPtr; // = hoodNew.sumPtr;
         gridOld.callback(&gridNew, GetPointer<SPMVMSoACell, ValueType>(&resPtr, &rhsPtr));
-        const int rowsPadded = ((size.x() - 1) / C + 1) * C;
+        const int rowsPadded = ((size.dimensions.x() - 1) / C + 1) * C;
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -3169,7 +3169,7 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double numOps = 2. * (size.dimensions.x() / 100) * (size.dimensions.x());
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
