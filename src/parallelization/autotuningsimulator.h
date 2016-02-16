@@ -29,7 +29,8 @@ public:
     typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
     class Simulation{
     public:
-        Simulation(std::string name,
+        Simulation(
+            const std::string& name,
             SimFactoryPtr simFactory,
             SimulationParameters param,
             double fit = DBL_MAX):
@@ -38,6 +39,7 @@ public:
             parameters(param),
             fitness(fit)
         {}
+
         std::string simulationType;
         SimFactoryPtr simulationFactory;
         SimulationParameters parameters;
@@ -46,9 +48,11 @@ public:
 
     typedef boost::shared_ptr<Simulation> SimulationPtr;
 
+    // fixme: check public interface
     AutoTuningSimulator(Initializer<CELL_TYPE> *initializer);
 
-    ~AutoTuningSimulator() {}
+    ~AutoTuningSimulator()
+    {}
 
     void addWriter(ParallelWriter<CELL_TYPE> *writer);
 
@@ -56,27 +60,27 @@ public:
 
     void addSteerer(const Steerer<CELL_TYPE> *steerer);
 
-    void addNewSimulation(std::string name, std::string typeOfSimulation);
+    void addNewSimulation(const std::string& name, const std::string& typeOfSimulation);
 
     void deleteAllSimulations();
 
     std::vector<std::string> getSimulationNames();
 
-    std::string getSimulatorType(std::string simulationName);
+    std::string getSimulatorType(const std::string& simulationName);
 
-    double getFitness(std::string simulationName);
+    double getFitness(const std::string& simulationName);
 
-    SimulationParameters getSimulationParameters(std::string simulationName);
+    SimulationParameters getSimulationParameters(const std::string& simulationName);
 
     void setSimulationSteps(unsigned steps);
 
-    void setParameters(SimulationParameters params, std::string name);
+    void setParameters(const SimulationParameters& params, const std::string& name);
 
     void run();
 
     std::string getBestSim();
 
-    void runToCompletion(std::string optimizerName);
+    void runToCompletion(const std::string& optimizerName);
 
     unsigned normalizeSteps(double goal, unsigned start = defaultInitializerSteps);
 
@@ -85,9 +89,10 @@ public:
     void prepareSimulations();
 
 private:
-    void addNewSimulation(std::string name,
-        std::string typeOfSimulation,
-        VarStepInitializerProxy<CELL_TYPE> &initializer);
+    void addNewSimulation(
+        const std::string& name,
+        const std::string& typeOfSimulation,
+        VarStepInitializerProxy<CELL_TYPE> *initializer);
 
     bool isInMap(const std::string name)const;
 
@@ -113,21 +118,15 @@ AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::AutoTuningSimulator(Initializer<
     optimizationSteps(10),
     varStepInitializer(initializer)
 {
-    addNewSimulation("SerialSimulation",
-        "SerialSimulation",
-        varStepInitializer);
+    addNewSimulation("SerialSimulation", "SerialSimulation", &varStepInitializer);
 
 #ifdef LIBGEODECOMP_WITH_THREADS
-    addNewSimulation("CacheBlockingSimulation",
-        "CacheBlockingSimulation",
-        varStepInitializer);
+    addNewSimulation("CacheBlockingSimulation", "CacheBlockingSimulation", &varStepInitializer);
 #endif
 
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
-    addNewSimulation("CudaSimulation",
-        "CudaSimulation",
-        varStepInitializer);
+    addNewSimulation("CudaSimulation", "CudaSimulation", &varStepInitializer);
 #endif
 #endif
 }
@@ -152,18 +151,21 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addSteerer(const Steerer<CE
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(std::string name, std::string typeOfSimulation)
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
+    const std::string& name,
+    const std::string& typeOfSimulation)
 {
-    addNewSimulation(name, typeOfSimulation, varStepInitializer);
+    addNewSimulation(name, typeOfSimulation, &varStepInitializer);
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(std::string name,
-    std::string typeOfSimulation,
-    VarStepInitializerProxy<CELL_TYPE> &initializer)
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
+    const std::string& name,
+    const std::string& typeOfSimulation,
+    VarStepInitializerProxy<CELL_TYPE> *initializer)
 {
     if (typeOfSimulation == "SerialSimulation") {
-        SimFactoryPtr simFac_p(new SerialSimulationFactory<CELL_TYPE>(&initializer));
+        SimFactoryPtr simFac_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
         SimulationPtr sim_p(new Simulation(
                 typeOfSimulation,
                 simFac_p,
@@ -174,7 +176,7 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(std::strin
 
 #ifdef LIBGEODECOMP_WITH_THREADS
     if (typeOfSimulation == "CacheBlockingSimulation") {
-        SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(&initializer));
+        SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
         SimulationPtr sim_p(new Simulation(
                 typeOfSimulation,
                 simFac_p,
@@ -187,7 +189,7 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(std::strin
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
      if (typeOfSimulation == "CudaSimulation") {
-        SimFactoryPtr simFac_p(new CudaSimulationFactory<CELL_TYPE>(&initializer));
+        SimFactoryPtr simFac_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
         SimulationPtr sim_p(new Simulation(
                 typeOfSimulation,
                 simFac_p,
@@ -219,7 +221,7 @@ std::vector<std::string> AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimu
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-std::string AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulatorType(std::string simulationName)
+std::string AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulatorType(const std::string& simulationName)
 {
     if (isInMap(simulationName)) {
         return simulations[simulationName]->simulationType;
@@ -229,7 +231,7 @@ std::string AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulatorType(std
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-double AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getFitness(std::string simulationName)
+double AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getFitness(const std::string& simulationName)
 {
     if (isInMap(simulationName)) {
         return simulations[simulationName]->fitness;
@@ -239,7 +241,7 @@ double AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getFitness(std::string si
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-SimulationParameters AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulationParameters(std::string simulationName)
+SimulationParameters AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulationParameters(const std::string& simulationName)
 {
     if (isInMap(simulationName)) {
         return simulations[simulationName]->parameters;
@@ -255,13 +257,12 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::setSimulationSteps(unsigned
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::setParameters(SimulationParameters params, std::string name)
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::setParameters(const SimulationParameters& params, const std::string& name)
 {
     if (isInMap(name)) {
         simulations[name]->parameters = params;
     } else {
-        throw std::invalid_argument(
-            "AutotuningSimulatro<...>::setParameters(params,name) get invalid name");
+        throw std::invalid_argument("AutotuningSimulatro<...>::setParameters(params,name) get invalid name");
     }
 }
 
@@ -297,7 +298,7 @@ return bestSimulation;
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runToCompletion(std::string optimizerName)
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runToCompletion(const std::string& optimizerName)
 {
     if ( ! isInMap(optimizerName)) {
         throw std::invalid_argument("AutotuningSimulator<...>::runToCompletion() get invalid optimizerName");

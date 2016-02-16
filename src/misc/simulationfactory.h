@@ -30,8 +30,7 @@ public:
     {}
 
     virtual ~SimulationFactory()
-    {
-    }
+    {}
 
     void addWriter(const ParallelWriter<CELL>& writer)
     {
@@ -86,6 +85,7 @@ protected:
         Initializer<CELL> *initializer,
         const SimulationParameters& params) const = 0;
 
+    // fixme: should be freed, replace by shared_pointer?
     ClonableInitializer<CELL> *initializer;
     SimulationParameters parameterSet;
     std::vector<boost::shared_ptr<ParallelWriter<CELL> > > parallelWriters;
@@ -105,19 +105,22 @@ class SerialSimulationFactory : public SimulationFactory<CELL>
 {
 public:
 
-    SerialSimulationFactory(ClonableInitializer<CELL> *initializer):
+    SerialSimulationFactory(ClonableInitializer<CELL> *initializer) :
         SimulationFactory<CELL>(initializer)
     {
         // Serial Simulation has no Parameters to optimize
     }
 
-    virtual ~SerialSimulationFactory(){}
+    virtual ~SerialSimulationFactory()
+    {}
+
 protected:
 
     virtual Simulator<CELL> *buildSimulator(
         Initializer<CELL> *initializer,
         const SimulationParameters& params) const
     {
+        // fixme: we should clone here
         SerialSimulator<CELL> *sim = new SerialSimulator<CELL>(initializer);
         for (unsigned i = 0; i < SimulationFactory<CELL>::writers.size(); ++i)
             sim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
@@ -139,7 +142,7 @@ public:
         SimulationFactory<CELL>::parameterSet.addParameter("WavefrontHeight",10, 1000);
         SimulationFactory<CELL>::parameterSet.addParameter("PipelineLength",  1, 30);
     }
-    virtual ~CacheBlockingSimulationFactory(){}
+
 protected:
     virtual Simulator<CELL> *buildSimulator(
         Initializer<CELL> *initializer,
@@ -170,15 +173,13 @@ template<typename CELL>
 class CudaSimulationFactory : public SimulationFactory<CELL>
 {
 public:
-    CudaSimulationFactory<CELL>(ClonableInitializer<CELL> *initializer):
+    CudaSimulationFactory<CELL>(ClonableInitializer<CELL> *initializer) :
         SimulationFactory<CELL>(initializer)
     {
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimX", 1, 128);
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimY", 1,   8);
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimZ", 1,   8);
     }
-
-    virtual ~CudaSimulationFactory(){}
 
     virtual double operator()(const SimulationParameters& params)
     {
@@ -224,8 +225,10 @@ protected:
 
     }
 };
-#endif // LIBGEODECOMP_WITH_CUDA
-#endif // __CUDACC__
-}//namespace LibGeoDecomp
+
+#endif
+#endif
+
+}
 
 #endif
