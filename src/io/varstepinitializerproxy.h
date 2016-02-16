@@ -9,9 +9,6 @@
 
 #ifdef LIBGEODECOMP_WITH_CPP14
 
-// fixme: don't pollute global namespace
-using  boost::shared_ptr;
-
 /**
  * The VarStepInitializerProxy is a class to rig the max Steps.
  * It provide the possibility to change the max steps of an exiting
@@ -27,7 +24,7 @@ public:
 
 VarStepInitializerProxy(Initializer<CELL> *proxyObj):
      ClonableInitializer<CELL>(),
-     proxyObj(shared_ptr<Initializer<CELL> >(proxyObj)),
+     proxyObj(boost::shared_ptr<Initializer<CELL> >(proxyObj)),
      newMaxSteps(proxyObj->maxSteps())
 {}
 
@@ -47,7 +44,7 @@ unsigned getMaxSteps() const
 /**
  * This funktion returns a shared_ptr to the original Initializer
  */
-shared_ptr<Initializer<CELL> > getInitializer()
+boost::shared_ptr<Initializer<CELL> > getInitializer()
 {
     return proxyObj;
 }
@@ -98,7 +95,7 @@ VarStepInitializerProxy(VarStepInitializerProxy<CELL>* o)
     newMaxSteps(o->newMaxSteps)
 {}
 
-    shared_ptr<Initializer<CELL> > proxyObj;
+    boost::shared_ptr<Initializer<CELL> > proxyObj;
     unsigned newMaxSteps;
 }; // VarStepInitializerProxy
 
