@@ -116,7 +116,7 @@ public:
         return;
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-        const double goal = -0.4d;
+        const double goal = -0.4;
         LOG(Logger::INFO, "AutotuningSimulatorTest::testNormalizeSteps()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
