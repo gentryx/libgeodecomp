@@ -17,7 +17,7 @@ namespace LibGeoDecomp{
  * and suitable parameters for the given simulation model and
  * hardware.
  */
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+template<typename CELL_TYPE, typename OPTIMIZER_TYPE>
 class AutoTuningSimulator
 {
 public:
