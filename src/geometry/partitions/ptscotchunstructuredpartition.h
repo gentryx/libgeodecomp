@@ -28,28 +28,13 @@ public:
             const Coord<DIM>& dimensions,
             const long offset,
             const std::vector<std::size_t>& weights,
-            const Adjacency& adjacency) :
+            boost::shared_ptr<Adjacency> adjacency) :
         Partition<DIM>(offset, weights),
         origin(origin),
         dimensions(dimensions),
         numCells(dimensions.prod())
     {
         this->adjacency = adjacency;
-        buildRegions();
-    }
-
-    PTScotchUnstructuredPartition(
-            const Coord<DIM>& origin,
-            const Coord<DIM>& dimensions,
-            const long offset,
-            const std::vector<std::size_t>& weights,
-            Adjacency&& adjacency) :
-        Partition<DIM>(offset, weights),
-        origin(origin),
-        dimensions(dimensions),
-        numCells(dimensions.prod())
-    {
-        this->adjacency = std::move(adjacency);
         buildRegions();
     }
 
@@ -79,7 +64,7 @@ private:
         SCOTCH_Graph graph;
         int error = SCOTCH_graphInit(&graph);
 
-        SCOTCH_Num numEdges = this->adjacency.size();
+        SCOTCH_Num numEdges = this->adjacency->size();
 
         std::vector<SCOTCH_Num> verttabGra;
         std::vector<SCOTCH_Num> edgetabGra;
@@ -92,7 +77,7 @@ private:
             verttabGra.push_back(currentEdge);
 
             std::size_t before = edgetabGra.size();
-            this->adjacency.getNeighbors(i, &edgetabGra);
+            this->adjacency->getNeighbors(i, &edgetabGra);
 
             currentEdge += edgetabGra.size() - before;
         }

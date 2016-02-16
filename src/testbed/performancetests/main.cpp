@@ -401,7 +401,7 @@ public:
         std::map<int, ConvexPolytope<Coord<2> > > cells = mapIDs(rawCells, idStreakLength);
 
         // II. Extract Adjacency List from Cells
-        Adjacency adjacency;
+        RegionBasedAdjacency adjacency;
 
         for (std::map<int, ConvexPolytope<Coord<2> > >::iterator  i = cells.begin(); i != cells.end(); ++i) {
             int id = i->first;

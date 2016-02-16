@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_GEOMETRY_REGIONBASEDADJACENCY_H
 
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/geometry/adjacency.h>
 #include <boost/shared_ptr.hpp>
 
 namespace LibGeoDecomp {
@@ -30,10 +31,18 @@ class Region;
  * well as constants for linear merges were 10x worse. That was a show
  * stopper.
  */
-class RegionBasedAdjacency
+class RegionBasedAdjacency : public Adjacency
 {
 public:
     RegionBasedAdjacency();
+    RegionBasedAdjacency(const RegionBasedAdjacency &other);
+    RegionBasedAdjacency &operator=(const RegionBasedAdjacency &other);
+    virtual ~RegionBasedAdjacency() {}
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    RegionBasedAdjacency(RegionBasedAdjacency &&other) = default;
+    RegionBasedAdjacency &operator=(RegionBasedAdjacency &&other) = default;
+#endif // LIBGEODECOMP_WITH_CPP14
 
     /**
      * Insert a single edge (from, to) to the graph

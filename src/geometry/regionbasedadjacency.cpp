@@ -11,6 +11,19 @@ RegionBasedAdjacency::RegionBasedAdjacency() :
 
 }
 
+RegionBasedAdjacency::RegionBasedAdjacency(const RegionBasedAdjacency &other) :
+    region(new Region<2>(*other.region))
+{
+
+}
+
+RegionBasedAdjacency &RegionBasedAdjacency::operator=(const RegionBasedAdjacency &other)
+{
+    *region = *other.region;
+    return *this;
+}
+
+
 void RegionBasedAdjacency::insert(int from, int to)
 {
     (*region) << Coord<2>(to, from);

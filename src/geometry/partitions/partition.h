@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 
-#include <libgeodecomp/geometry/adjacency.h>
+#include <libgeodecomp/geometry/regionbasedadjacency.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
@@ -30,7 +30,8 @@ public:
     inline Partition(
         const long offset,
         const std::vector<std::size_t>& weights) :
-        weights(weights)
+        weights(weights),
+        adjacency(new RegionBasedAdjacency())
     {
         startOffsets.resize(weights.size() + 1);
         startOffsets[0] = offset;
@@ -49,7 +50,7 @@ public:
 
     virtual Region<DIM> getRegion(const std::size_t node) const = 0;
 
-    virtual const Adjacency& getAdjacency() const
+    virtual boost::shared_ptr<Adjacency> getAdjacency() const
     {
         return adjacency;
     }
@@ -57,7 +58,7 @@ public:
 protected:
     std::vector<std::size_t> weights;
     std::vector<std::size_t> startOffsets;
-    Adjacency adjacency;
+    boost::shared_ptr<Adjacency> adjacency;
 };
 
 }
