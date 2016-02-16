@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 
-#include <libgeodecomp/geometry/adjacency.h>
+#include <libgeodecomp/geometry/regionbasedadjacency.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
@@ -31,7 +31,7 @@ public:
         const long offset,
         const std::vector<std::size_t>& weights) :
         weights(weights),
-        adjacency(new Adjacency())
+        adjacency(new RegionBasedAdjacency())
     {
         startOffsets.resize(weights.size() + 1);
         startOffsets[0] = offset;

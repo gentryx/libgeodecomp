@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_GEOMETRY_REGIONBASEDADJACENCY_H
 
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/geometry/adjacency.h>
 #include <boost/shared_ptr.hpp>
 
 namespace LibGeoDecomp {
@@ -30,7 +31,7 @@ class Region;
  * well as constants for linear merges were 10x worse. That was a show
  * stopper.
  */
-class RegionBasedAdjacency
+class RegionBasedAdjacency : public Adjacency
 {
 public:
     RegionBasedAdjacency();
@@ -46,23 +47,23 @@ public:
     /**
      * Insert a single edge (from, to) to the graph
      */
-    virtual void insert(int from, int to);
+    void insert(int from, int to);
 
     /**
      * Insert all pairs (from, x) with x \in to, to the graph. We sort
      * parameter to to ensure fast, linear inserts.
      */
-    virtual void insert(int from, std::vector<int> to);
+    void insert(int from, std::vector<int> to);
 
     /**
      * Returns all x \in V with (node, x) \in E.
      */
-    virtual void getNeighbors(int node, std::vector<int> *neighbors) const;
+    void getNeighbors(int node, std::vector<int> *neighbors) const;
 
     /**
      * Retrieves the number of edges in the adjacency
      */
-    virtual std::size_t size() const;
+    std::size_t size() const;
 
     const Region<2>& getRegion() const
     {

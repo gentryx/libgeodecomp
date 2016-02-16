@@ -6,37 +6,6 @@
 
 namespace LibGeoDecomp {
 
-namespace CommonStepperHelpers {
-
-// fixme: merge this with common stepper?
-class AdjacencySetter
-{
-public:
-#ifdef LIBGEODECOMP_WITH_CPP14
-    template<typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
-    AdjacencySetter(UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid, const Adjacency& adjacency)
-    {
-        std::map<Coord<2>, double> containerAdjacency;
-
-        for (auto& coord : adjacency.getRegion()) {
-            int from = coord.y();
-            int to = coord.x();
-
-            containerAdjacency[Coord<2>(from, to)] = 1.0;
-        }
-
-        grid.setWeights(0, containerAdjacency);
-    }
-#endif
-
-    template<typename CONTAINER>
-    AdjacencySetter(CONTAINER& , const Adjacency& )
-    { }
-
-};
-
-}
-
 /**
  * This class bundles functionality which is commonly required within
  * Stepper implementations, but not necessarily part of a Stepper's
@@ -197,9 +166,6 @@ protected:
         notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST,     globalNanoStep());
         notifyPatchProviders(partitionManager->ownRegion(),   ParentType::INNER_SET, globalNanoStep());
 
-        boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency();
-        CommonStepperHelpers::AdjacencySetter(*oldGrid, *adjacency);
-        CommonStepperHelpers::AdjacencySetter(*newGrid, *adjacency);
         newGrid->setEdge(oldGrid->getEdge());
 
         resetValidGhostZoneWidth();

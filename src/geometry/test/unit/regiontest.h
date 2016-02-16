@@ -74,7 +74,7 @@ public:
 
             region << Coord<1>(1);
 
-            Adjacency adjacency;
+            RegionBasedAdjacency adjacency;
             adjacency.insert(1, std::vector<int>{2, 3});
             adjacency.insert(2, std::vector<int>{4, 5, 6});
 
@@ -111,7 +111,7 @@ public:
             region << Coord<1>(1);
             region << Coord<1>(2);
 
-            Adjacency adjacency;
+            RegionBasedAdjacency adjacency;
             adjacency.insert(1, std::vector<int>{2, 3, 7, 8});
             adjacency.insert(2, std::vector<int>{4, 5, 6});
 
@@ -1272,7 +1272,7 @@ public:
             2,
             Coord<2>(20, 20),
             Topologies::Torus<2>::Topology(),
-            Adjacency());
+            RegionBasedAdjacency());
 
         Region<2> expected;
         expected << Streak<2>(Coord<2>(0,   0), 20)

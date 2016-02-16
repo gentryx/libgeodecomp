@@ -2,16 +2,38 @@
 #define LIBGEODECOMP_GEOMETRY_ADJACENCY_H
 
 #include <libgeodecomp/geometry/coord.h>
-#include <libgeodecomp/geometry/regionbasedadjacency.h>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 namespace LibGeoDecomp {
 
-typedef RegionBasedAdjacency Adjacency;
 
-template<typename T>
-boost::shared_ptr<Adjacency> MakeAdjacency(const std::map<Coord<2>, T>& weights)
+class Adjacency
 {
-    boost::shared_ptr<Adjacency> result = boost::make_shared<Adjacency>();
+public:
+    virtual ~Adjacency() {}
+
+    /**
+     * Insert a single edge (from, to) to the graph
+     */
+    virtual void insert(int from, int to) = 0;
+
+    /**
+     * Returns all x \in V with (node, x) \in E.
+     */
+    virtual void getNeighbors(int node, std::vector<int> *neighbors) const = 0;
+
+    /**
+     * Retrieves the number of edges in the adjacency
+     */
+    virtual std::size_t size() const = 0;
+
+};
+
+template<typename ADJACENCY, typename T>
+boost::shared_ptr<ADJACENCY> MakeAdjacency(const std::map<Coord<2>, T>& weights)
+{
+    boost::shared_ptr<ADJACENCY> result = boost::make_shared<ADJACENCY>();
 
     for (typename std::map<Coord<2>, T>::const_iterator it = weights.begin();
         it != weights.end(); ++it) {
