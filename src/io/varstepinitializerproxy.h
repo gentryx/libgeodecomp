@@ -81,7 +81,7 @@ virtual unsigned maxSteps() const override
     return proxyObj->startStep() + newMaxSteps;
 }
 
-virtual Adjacency getAdjacency() const override
+virtual boost::shared_ptr<Adjacency> getAdjacency() const override
 {
     return proxyObj->getAdjacency();
 }
