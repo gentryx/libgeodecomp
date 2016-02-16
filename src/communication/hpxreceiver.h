@@ -11,18 +11,23 @@
 #include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/stringops.h>
 
 #define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CARGO)                      \
     typedef LibGeoDecomp::HPXReceiver<CARGO>::receiveAction DummyReceiver_ ## CARGO ## _ReceiveAction; \
     HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
     HPX_REGISTER_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction);     \
+    HPX_REGISTER_BROADCAST_APPLY_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
+    HPX_REGISTER_BROADCAST_APPLY_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
     typedef hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> > receiver_type_ ## CARGO; \
     HPX_REGISTER_COMPONENT(receiver_type_ ## CARGO , DummyReceiver_ ## CARGO); \
                                                                         \
     typedef LibGeoDecomp::HPXReceiver<std::vector<CARGO> >::receiveAction DummyReceiver_vector_ ## CARGO ## _ReceiveAction; \
     HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
     HPX_REGISTER_ACTION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction);     \
+    HPX_REGISTER_BROADCAST_APPLY_ACTION_DECLARATION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
+    HPX_REGISTER_BROADCAST_APPLY_ACTION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
     typedef hpx::components::simple_component<LibGeoDecomp::HPXReceiver<std::vector<CARGO>> > receiver_type_vector_ ## CARGO; \
     HPX_REGISTER_COMPONENT(receiver_type_vector_ ## CARGO , DummyReceiver_vector_ ## CARGO);
 
@@ -37,9 +42,17 @@ public:
 
     static hpx::future<boost::shared_ptr<HPXReceiver> > make(const std::string& name, std::size_t rank = 0)
     {
-        hpx::id_type id = hpx::new_<HPXReceiver>(hpx::find_here()).get();
-        hpx::register_with_basename(name, id, rank).get();
-        return hpx::get_ptr<HPXReceiver>(id);
+        return hpx::new_<HPXReceiver>(hpx::find_here()).then(
+            [name, rank](hpx::future<hpx::id_type> idFuture)
+            {
+                hpx::id_type id = idFuture.get();
+                hpx::future<bool> f = hpx::register_with_basename(name, id, rank);
+                return f.then(
+                    [id](hpx::future<bool>)
+                    {
+                        return hpx::get_ptr<HPXReceiver>(id);
+                    });
+            });
     }
 
     static hpx::future<hpx::id_type> find(const std::string& name)
@@ -83,14 +96,24 @@ public:
         std::size_t size,
         const std::string& name)
     {
-        auto receiver = HPXReceiver<CARGO>::make(name, rank).get();
-        std::vector<hpx::future<hpx::id_type> > futures = HPXReceiver<CARGO>::find_all(name, size);
-        std::vector<hpx::id_type> ids = hpx::util::unwrapped(std::move(futures));
+        hpx::future<boost::shared_ptr<HPXReceiver> > receiverFuture = hpx::dataflow(
+            [rank, data](
+                hpx::future<boost::shared_ptr<HPXReceiver> > receiverFuture,
+                std::vector<hpx::future<hpx::id_type> > idsFuture
+            )
+            {
+                hpx::lcos::broadcast_apply<typename HPXReceiver::receiveAction>(
+                    hpx::util::unwrapped(idsFuture), rank, data);
+                return receiverFuture.get();
+            },
+            HPXReceiver<CARGO>::make(name, rank),
+            HPXReceiver<CARGO>::find_all(name, size)
+        );
+
         std::vector<CARGO> vec;
         vec.reserve(size);
 
-        hpx::future<void> future = hpx::lcos::broadcast<typename HPXReceiver::receiveAction>(ids, rank, data);
-        future.wait();
+        auto receiver = receiverFuture.get();
 
         for (std::size_t i = 0; i < size; ++i) {
             vec << receiver->get(i).get();
