@@ -333,7 +333,7 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_THREADS
 #ifdef LIBGEODECOMP_WITH_CPP14
-        CacheBlockingSimulator<SimFabTestCell> *sim = cFab->operator()();
+        MonolithicSimulator<SimFabTestCell> *sim = dynamic_cast<MonolithicSimulator<SimFabTestCell>*>((*cFab)());
         std::ostringstream buf;
         sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
         sim->run();
