@@ -71,11 +71,6 @@ public:
     void run();
 
 private:
-    /**
-     * If some missconfiguration is happned the defaultInitializerSteps will be used.
-     */
-    static const unsigned defaultInitializerSteps = 5;
-
     std::map<const std::string, SimulationPtr> simulations;
     unsigned optimizationSteps; // maximum number of Steps for the optimizer
     VarStepInitializerProxy<CELL_TYPE> varStepInitializer;
@@ -98,7 +93,7 @@ private:
 
     void runToCompletion(const std::string& optimizerName);
 
-    unsigned normalizeSteps(double goal, unsigned start = defaultInitializerSteps);
+    unsigned normalizeSteps(double goal, unsigned startStepNum);
 
     void runTest();
 
@@ -210,9 +205,12 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::run()
 {
     // fitnessGoal must be negative, the autotuning is searching for a Maximum.
     double fitnessGoal = -1.0;
+    // default number of steps to simulate when normalizing test
+    // duration or if normalization fails.
+    unsigned defaultInitializerSteps = 5;
 
     prepareSimulations();
-    if (normalizeSteps(fitnessGoal)) {
+    if (normalizeSteps(fitnessGoal, defaultInitializerSteps)) {
         runTest();
     } else {
         LOG(Logger::WARN,"normalize Steps was not successful, a default value is used!")
@@ -252,21 +250,19 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runToCompletion(const std::
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double goal, unsigned start)
+unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double goal, unsigned startStepNum)
 {
     LOG(Logger::INFO, "normalizeSteps")
     if (!isInMap("SerialSimulation")) {
         throw std::logic_error("Can't normalize steps as SerialSimulation is missing");
     }
 
-    if (start == 0) {
-        LOG(Logger::WARN, "normalizeSteps is called with start = 0, "
-                    << "this set start to default!")
-        start = defaultInitializerSteps;
+    if (startStepNum == 0) {
+        throw std::invalid_argument("startSteps needs to be grater than zero");
     }
     SimFactoryPtr factory = simulations["SerialSimulation"]->simulationFactory;
-    unsigned steps = start;
-    unsigned oldSteps = start;
+    unsigned steps = startStepNum;
+    unsigned oldSteps = startStepNum;
     varStepInitializer.setMaxSteps(1);
     double variance = factory->operator()(simulations["SerialSimulation"]->parameters);
     double fitness = DBL_MAX;
