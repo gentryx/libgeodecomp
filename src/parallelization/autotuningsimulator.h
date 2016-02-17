@@ -70,13 +70,19 @@ public:
 
     void run();
 
-    unsigned normalizeSteps(double goal, unsigned start = defaultInitializerSteps);
-
-    void runTest();
-
-    void prepareSimulations();
-
 private:
+    /**
+     * If some missconfiguration is happned the defaultInitializerSteps will be used.
+     */
+    static const unsigned defaultInitializerSteps = 5;
+
+    std::map<const std::string, SimulationPtr> simulations;
+    unsigned optimizationSteps; // maximum number of Steps for the optimizer
+    VarStepInitializerProxy<CELL_TYPE> varStepInitializer;
+    std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > parallelWriters;
+    std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
+    std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
+
     // fixme: why pass a string here and not a SimFactory instance? also: parameters and SimFactory should be added simultaneously
     void addNewSimulation(const std::string& name, const std::string& typeOfSimulation);
     void setParameters(const SimulationParameters& params, const std::string& name);
@@ -92,22 +98,11 @@ private:
 
     void runToCompletion(const std::string& optimizerName);
 
+    unsigned normalizeSteps(double goal, unsigned start = defaultInitializerSteps);
 
-    std::map<const std::string, SimulationPtr> simulations;
-    unsigned optimizationSteps; // maximum number of Steps for the optimizer
-    VarStepInitializerProxy<CELL_TYPE> varStepInitializer;
-    std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > parallelWriters;
-    std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
-    std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
+    void runTest();
 
-    /**
-     * fitnessGoal must be negative, the autotuning is searching for a Maximum.
-     */
-    static constexpr double fitnessGoal = -1.0;
-    /**
-     * If some missconfiguration is happned the defaultInitializerSteps will be used.
-     */
-    static const unsigned defaultInitializerSteps = 5;
+    void prepareSimulations();
 };
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
@@ -213,6 +208,9 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::setParameters(const Simulat
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::run()
 {
+    // fitnessGoal must be negative, the autotuning is searching for a Maximum.
+    double fitnessGoal = -1.0;
+
     prepareSimulations();
     if (normalizeSteps(fitnessGoal)) {
         runTest();
