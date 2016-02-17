@@ -89,8 +89,7 @@ public:
 void runSimulation()
 {
     std::cout << "runSimulation" << std::endl;
-    AutoTuningSimulator<Cell,PatternOptimizer> autoSim(new CellInitializer(1, 500));
-    autoSim.setSimulationSteps(20);
+    AutoTuningSimulator<Cell,PatternOptimizer> autoSim(new CellInitializer(1, 500), 20);
     autoSim.run();
 
     // std::vector<std::string> simulations = autoSim.getSimulationNames();

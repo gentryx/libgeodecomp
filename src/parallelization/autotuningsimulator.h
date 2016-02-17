@@ -60,7 +60,7 @@ public:
     typedef boost::shared_ptr<Simulation> SimulationPtr;
 
     // fixme: check public interface
-    AutoTuningSimulator(Initializer<CELL_TYPE> *initializer);
+    AutoTuningSimulator(Initializer<CELL_TYPE> *initializer, unsigned optimizationSteps = 10);
 
     void addWriter(ParallelWriter<CELL_TYPE> *writer);
 
@@ -68,15 +68,7 @@ public:
 
     void addSteerer(const Steerer<CELL_TYPE> *steerer);
 
-    void setSimulationSteps(unsigned steps);
-
-    void setParameters(const SimulationParameters& params, const std::string& name);
-
     void run();
-
-    std::string getBestSim();
-
-    void runToCompletion(const std::string& optimizerName);
 
     unsigned normalizeSteps(double goal, unsigned start = defaultInitializerSteps);
 
@@ -85,7 +77,9 @@ public:
     void prepareSimulations();
 
 private:
+    // fixme: why pass a string here and not a SimFactory instance? also: parameters and SimFactory should be added simultaneously
     void addNewSimulation(const std::string& name, const std::string& typeOfSimulation);
+    void setParameters(const SimulationParameters& params, const std::string& name);
 
     void addNewSimulation(
         const std::string& name,
@@ -93,6 +87,11 @@ private:
         VarStepInitializerProxy<CELL_TYPE> *initializer);
 
     bool isInMap(const std::string name)const;
+
+    std::string getBestSim();
+
+    void runToCompletion(const std::string& optimizerName);
+
 
     std::map<const std::string, SimulationPtr> simulations;
     unsigned optimizationSteps; // maximum number of Steps for the optimizer
@@ -109,11 +108,11 @@ private:
      * If some missconfiguration is happned the defaultInitializerSteps will be used.
      */
     static const unsigned defaultInitializerSteps = 5;
-}; //AutoTunigSimulator
+};
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::AutoTuningSimulator(Initializer<CELL_TYPE> *initializer):
-    optimizationSteps(10),
+AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::AutoTuningSimulator(Initializer<CELL_TYPE> *initializer, unsigned optimizationSteps):
+    optimizationSteps(optimizationSteps),
     varStepInitializer(initializer)
 {
     addNewSimulation("SerialSimulation", "SerialSimulation", &varStepInitializer);
@@ -156,7 +155,6 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
     addNewSimulation(name, typeOfSimulation, &varStepInitializer);
 }
 
-// fixme: why pass a string here and not a SimFactory instance?
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
     const std::string& name,
@@ -200,12 +198,6 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
 #endif
 
     throw std::invalid_argument("SimulationFactory::addNewSimulation(): unknown simulator type");
-}
-
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::setSimulationSteps(unsigned steps)
-{
-    optimizationSteps = steps;
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
