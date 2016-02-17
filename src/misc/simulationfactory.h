@@ -42,7 +42,7 @@ public:
         writers.push_back(boost::shared_ptr<Writer<CELL> >(writer.clone()));
     }
 
-    void addSteerer(Steerer<CELL>& steerer) //FIXME why is const on steerer not working?
+    void addSteerer(const Steerer<CELL>& steerer)
     {
         steerers.push_back(boost::shared_ptr<Steerer<CELL> >(steerer.clone()));
     }
