@@ -93,11 +93,11 @@ void runSimulation()
     autoSim.setSimulationSteps(20);
     autoSim.run();
 
-    std::vector<std::string> simulations = autoSim.getSimulationNames();
-    for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
-        std::cout << "Factory Name: " << *iter << " Fitness: " << autoSim.getFitness(*iter) << std::endl
-                  << autoSim.getSimulationParameters(*iter)<< std::endl;
-    }
+    // std::vector<std::string> simulations = autoSim.getSimulationNames();
+    // for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
+    //     std::cout << "Factory Name: " << *iter << " Fitness: " << autoSim.getFitness(*iter) << std::endl
+    //               << autoSim.getSimulationParameters(*iter)<< std::endl;
+    // }
 
 
     // HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(

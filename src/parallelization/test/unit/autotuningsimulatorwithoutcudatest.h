@@ -18,6 +18,8 @@
 
 using namespace LibGeoDecomp;
 
+namespace LibGeoDecomp {
+
 class SimFabTestCell
 {
 public:
@@ -100,13 +102,6 @@ public:
             new SimFabTestInitializer(dim, maxSteps));
         ats.setSimulationSteps(10);
         ats.run();
-        std::vector<std::string> names = ats.getSimulationNames();
-        for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++) {
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
-            << ats.getFitness(*iter)<< std::endl
-            << ats.getSimulationParameters(*iter))
-        }
 #endif
     }
 
@@ -157,13 +152,6 @@ public:
             new SimFabTestInitializer(dim, maxSteps));
         ats.setSimulationSteps(10);
         ats.run();
-        std::vector<std::string> names = ats.getSimulationNames();
-        for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++) {
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
-            << ats.getFitness(*iter)<< std::endl
-            << ats.getSimulationParameters(*iter))
-        }
 #endif
     }
 
@@ -185,12 +173,6 @@ public:
             "CacheBlockingSimulation");
         ats.setParameters(params, "1.CacheBlockingSimulator");
         ats.run();
-        std::vector<std::string> names = ats.getSimulationNames();
-        // for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
-        //     LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
-        //         << ats.getFitness(*iter)<< std::endl
-        //         << ats.getSimulationParameters(*iter));
-        // }
 #endif
 #endif
     }
@@ -213,13 +195,6 @@ public:
 
         ats.setParameters(params, "CacheBlockingSimulation");
         ats.run();
-
-        std::vector<std::string> names = ats.getSimulationNames();
-        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
-                << ats.getFitness(*iter)<< std::endl
-                << ats.getSimulationParameters(*iter));
-        }
 #endif
 #endif
     }
@@ -244,8 +219,6 @@ public:
         TS_ASSERT_THROWS(
             ats.setParameters(params, "1.CacheBlockingSimulator"),
             std::invalid_argument);
-        TS_ASSERT_THROWS(ats.getFitness("NoSimulator"), std::invalid_argument);
-        TS_ASSERT_THROWS(ats.getSimulationParameters("NoSimulator"), std::invalid_argument);
         TS_ASSERT_THROWS(ats.setParameters(params, "NoSimulator"), std::invalid_argument);
 #endif
 #endif
@@ -257,7 +230,7 @@ public:
         LOG(Logger::INFO, "AutotuningSimulatorTest::testAddWriter()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
-        ats.deleteAllSimulations();
+        ats.simulations.clear();
         ats.addNewSimulation(
             "SerialSimulation",
             "SerialSimulation");
@@ -410,13 +383,19 @@ public:
     }
 
 private:
+
 #ifdef LIBGEODECOMP_WITH_CPP14
     Coord<3> dim;
     unsigned maxSteps;
     VarStepInitializerProxy<SimFabTestCell> *initializerProxy;
     SimulationFactory<SimFabTestCell> *fab;
+
 #ifdef LIBGEODECOMP_WITH_THREADS
     SimulationFactory<SimFabTestCell> *cfab;
 #endif
+
 #endif
+
 };
+
+}

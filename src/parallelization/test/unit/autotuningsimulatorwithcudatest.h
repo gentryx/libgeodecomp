@@ -101,14 +101,6 @@ public:
             new SimFabTestInitializer(dim, maxSteps));
         ats.setSimulationSteps(10);
         ats.run();
-        std::vector<std::string> names = ats.getSimulationNames();
-
-        for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++) {
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
-                << ats.getFitness(*iter)<< std::endl
-                << ats.getSimulationParameters(*iter));
-        }
 #endif
     }
 
@@ -160,14 +152,6 @@ public:
             new SimFabTestInitializer(dim, maxSteps));
         ats.setSimulationSteps(10);
         ats.run();
-        std::vector<std::string> names = ats.getSimulationNames();
-
-        for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++) {
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
-                << ats.getFitness(*iter)<< std::endl
-                << ats.getSimulationParameters(*iter))
-        }
 #endif
     }
 
@@ -180,7 +164,7 @@ public:
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
-        ats.deleteAllSimulations();
+        ats.simulations.clear();
         SimulationParameters params;
         params.addParameter("BlockDimX", 1, 128);
         params.addParameter("BlockDimY", 1, 8);
@@ -189,13 +173,6 @@ public:
             "CudaSimulation");
         ats.setParameters(params, "1.CudaSimulator");
         ats.run();
-        std::vector<std::string> names = ats.getSimulationNames();
-
-        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
-                << ats.getFitness(*iter)<< std::endl
-                << ats.getSimulationParameters(*iter));
-        }
 #endif
     }
 
@@ -216,14 +193,6 @@ public:
 
         ats.setParameters(params, "CudaSimulation");
         ats.run();
-
-        std::vector<std::string> names = ats.getSimulationNames();
-
-        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
-                << ats.getFitness(*iter)<< std::endl
-                << ats.getSimulationParameters(*iter));
-        }
 #endif
     }
 
@@ -246,8 +215,6 @@ public:
             "JuliaSimulation"), std::invalid_argument);
         TS_ASSERT_THROWS(ats.setParameters(params, "1.CudaSimulator"),
             std::invalid_argument);
-        TS_ASSERT_THROWS(ats.getFitness("NoSimulator"), std::invalid_argument);
-        TS_ASSERT_THROWS(ats.getSimulationParameters("NoSimulator"), std::invalid_argument);
         TS_ASSERT_THROWS(ats.setParameters(params, "NoSimulator"), std::invalid_argument);
 #endif
     }
@@ -261,7 +228,7 @@ public:
         LOG(Logger::INFO, "AutotuningSimulatorTest::testAddWriter()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
-        ats.deleteAllSimulations();
+        ats.simulations.clear();
         ats.addNewSimulation(
             "SerialSimulation",
             "SerialSimulation");

@@ -16,6 +16,32 @@
 
 namespace LibGeoDecomp {
 
+namespace AutoTuningSimulatorHelpers {
+
+template<typename CELL_TYPE>
+class Simulation{
+public:
+    typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
+
+    Simulation(
+        const std::string& name,
+        SimFactoryPtr simFactory,
+        SimulationParameters param,
+        double fit = DBL_MAX):
+        simulationType(name),
+        simulationFactory(simFactory),
+        parameters(param),
+        fitness(fit)
+    {}
+
+    std::string simulationType;
+    SimFactoryPtr simulationFactory;
+    SimulationParameters parameters;
+    double fitness;
+};
+
+}
+
 /**
  * This Simulator makes use of LibGeoDecomp's parameter optimization
  * facilities to select the most efficient Simulator implementation
@@ -26,51 +52,21 @@ template<typename CELL_TYPE, typename OPTIMIZER_TYPE>
 class AutoTuningSimulator
 {
 public:
+    friend class AutotuningSimulatorTest;
+    friend class AutotuningSimulatorWithCudaTest;
+
+    typedef AutoTuningSimulatorHelpers::Simulation<CELL_TYPE>  Simulation;
     typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
-    class Simulation{
-    public:
-        Simulation(
-            const std::string& name,
-            SimFactoryPtr simFactory,
-            SimulationParameters param,
-            double fit = DBL_MAX):
-            simulationType(name),
-            simulationFactory(simFactory),
-            parameters(param),
-            fitness(fit)
-        {}
-
-        std::string simulationType;
-        SimFactoryPtr simulationFactory;
-        SimulationParameters parameters;
-        double fitness;
-    };
-
     typedef boost::shared_ptr<Simulation> SimulationPtr;
 
     // fixme: check public interface
     AutoTuningSimulator(Initializer<CELL_TYPE> *initializer);
-
-    ~AutoTuningSimulator()
-    {}
 
     void addWriter(ParallelWriter<CELL_TYPE> *writer);
 
     void addWriter(Writer<CELL_TYPE> *writer);
 
     void addSteerer(const Steerer<CELL_TYPE> *steerer);
-
-    void addNewSimulation(const std::string& name, const std::string& typeOfSimulation);
-
-    void deleteAllSimulations();
-
-    std::vector<std::string> getSimulationNames();
-
-    std::string getSimulatorType(const std::string& simulationName);
-
-    double getFitness(const std::string& simulationName);
-
-    SimulationParameters getSimulationParameters(const std::string& simulationName);
 
     void setSimulationSteps(unsigned steps);
 
@@ -89,6 +85,8 @@ public:
     void prepareSimulations();
 
 private:
+    void addNewSimulation(const std::string& name, const std::string& typeOfSimulation);
+
     void addNewSimulation(
         const std::string& name,
         const std::string& typeOfSimulation,
@@ -158,6 +156,7 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
     addNewSimulation(name, typeOfSimulation, &varStepInitializer);
 }
 
+// fixme: why pass a string here and not a SimFactory instance?
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
     const std::string& name,
@@ -201,53 +200,6 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
 #endif
 
     throw std::invalid_argument("SimulationFactory::addNewSimulation(): unknown simulator type");
-}
-
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::deleteAllSimulations()
-{
-    simulations.clear();
-}
-
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-std::vector<std::string> AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulationNames()
-{
-    std::vector<std::string> result;
-    typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
-    for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
-        result.push_back(iter->first);
-    }
-    return result;
-}
-
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-std::string AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulatorType(const std::string& simulationName)
-{
-    if (isInMap(simulationName)) {
-        return simulations[simulationName]->simulationType;
-    } else {
-        throw std::invalid_argument("getSimulatorType(simulationName)) get invalid simulationName");
-    }
-}
-
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-double AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getFitness(const std::string& simulationName)
-{
-    if (isInMap(simulationName)) {
-        return simulations[simulationName]->fitness;
-    } else {
-        throw std::invalid_argument("getFitness(simulationName) get invalid simulationName");
-    }
-}
-
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-SimulationParameters AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getSimulationParameters(const std::string& simulationName)
-{
-    if (isInMap(simulationName)) {
-        return simulations[simulationName]->parameters;
-    } else {
-        throw std::invalid_argument("getSimulationParameters(simulationName) get invalid simulationName");
-    }
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
@@ -313,12 +265,10 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double goal, unsigned start)
 {
     LOG(Logger::INFO, "normalizeSteps")
-    if (! isInMap("SerialSimulation")) {
-        // FIXME Maybe an exception can be the heavy way!
-        LOG(Logger::WARN, "AutoTuningSimulator::normalizeSteps(): no "
-                    << "SerialSimulation available!")
-        return 0;
+    if (!isInMap("SerialSimulation")) {
+        throw std::logic_error("Can't normalize steps as SerialSimulation is missing");
     }
+
     if (start == 0) {
         LOG(Logger::WARN, "normalizeSteps is called with start = 0, "
                     << "this set start to default!")
