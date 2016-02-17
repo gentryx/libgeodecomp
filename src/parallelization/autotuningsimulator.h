@@ -59,7 +59,6 @@ public:
     typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
     typedef boost::shared_ptr<Simulation> SimulationPtr;
 
-    // fixme: check public interface
     AutoTuningSimulator(Initializer<CELL_TYPE> *initializer, unsigned optimizationSteps = 10);
 
     void addWriter(ParallelWriter<CELL_TYPE> *writer);
@@ -87,8 +86,6 @@ private:
         const std::string& typeOfSimulation,
         VarStepInitializerProxy<CELL_TYPE> *initializer);
 
-    bool isInMap(const std::string name)const;
-
     std::string getBestSim();
 
     void runToCompletion(const std::string& optimizerName);
@@ -98,6 +95,15 @@ private:
     void runTest();
 
     void prepareSimulations();
+
+    SimulationPtr getSimulation(const std::string& simulatorName)
+    {
+        if (simulations.find(simulatorName) == simulations.end()) {
+            throw std::invalid_argument("AutoTuningSimulator could not find simulatorName in registry of factories")
+        }
+
+        return simulations[simulatorName];
+    }
 };
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
@@ -193,11 +199,7 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::setParameters(const SimulationParameters& params, const std::string& name)
 {
-    if (isInMap(name)) {
-        simulations[name]->parameters = params;
-    } else {
-        throw std::invalid_argument("AutotuningSimulatro<...>::setParameters(params,name) get invalid name");
-    }
+    getSimulation(name)->parameters = params;
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
@@ -210,13 +212,12 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::run()
     unsigned defaultInitializerSteps = 5;
 
     prepareSimulations();
-    if (normalizeSteps(fitnessGoal, defaultInitializerSteps)) {
-        runTest();
-    } else {
-        LOG(Logger::WARN,"normalize Steps was not successful, a default value is used!")
+    if (!normalizeSteps(fitnessGoal, defaultInitializerSteps)) {
+        LOG(Logger::WARN, "normalize Steps was not successful, default step number will be used");
         varStepInitializer.setMaxSteps(defaultInitializerSteps);
-        runTest();
     }
+
+    runTest();
     std::string best = getBestSim();
     runToCompletion(best);
 }
@@ -240,35 +241,29 @@ return bestSimulation;
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runToCompletion(const std::string& optimizerName)
 {
-    if ( ! isInMap(optimizerName)) {
-        throw std::invalid_argument("AutotuningSimulator<...>::runToCompletion() get invalid optimizerName");
-    }
-
     boost::shared_ptr<Initializer<CELL_TYPE> > originalInitializer = varStepInitializer.getInitializer();
     varStepInitializer.setMaxSteps(originalInitializer->maxSteps());
-    simulations[optimizerName]->simulationFactory->operator()(simulations[optimizerName]->parameters);
+    (*getSimulation(optimizerName)->simulationFactory)(simulations[optimizerName]->parameters);
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double goal, unsigned startStepNum)
 {
     LOG(Logger::INFO, "normalizeSteps")
-    if (!isInMap("SerialSimulation")) {
-        throw std::logic_error("Can't normalize steps as SerialSimulation is missing");
-    }
-
     if (startStepNum == 0) {
         throw std::invalid_argument("startSteps needs to be grater than zero");
     }
-    SimFactoryPtr factory = simulations["SerialSimulation"]->simulationFactory;
+
+    SimulationPtr simulation = getSimulation("SerialSimulation");
+    SimFactoryPtr factory = simulation->simulationFactory;
     unsigned steps = startStepNum;
     unsigned oldSteps = startStepNum;
     varStepInitializer.setMaxSteps(1);
-    double variance = factory->operator()(simulations["SerialSimulation"]->parameters);
+    double variance = (*simulation)(factory->parameters);
     double fitness = DBL_MAX;
     do {
         varStepInitializer.setMaxSteps(steps);
-        fitness = factory->operator()(simulations["SerialSimulation"]->parameters);
+        fitness = (*factory)(simulation->parameters);
         oldSteps = steps;
         LOG(Logger::DBG, "steps: " << steps)
         steps = ((double) steps / fitness) * (double)goal;
@@ -280,6 +275,7 @@ unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double g
         LOG(Logger::DBG, "variance: " << variance);
     } while((!(fitness > goal + variance && fitness < goal - variance ))
          && (!(oldSteps <= 1 && fitness > goal)));
+
     return oldSteps;
 }
 
@@ -287,6 +283,7 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runTest()
 {
     typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
+
     for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
         OPTIMIZER_TYPE optimizer(iter->second->parameters);
         iter->second->parameters = optimizer(
@@ -305,30 +302,25 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::prepareSimulations()
 {
     typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
+
     for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
         LOG(Logger::DBG, iter->first);
+
         for (unsigned i = 0; i < writers.size(); ++i) {
             iter->second->simulationFactory->addWriter(*writers[i].get()->clone());
         }
+
         for (unsigned i = 0; i < parallelWriters.size(); ++i) {
             iter->second->simulationFactory->addWriter(*parallelWriters[i].get()->clone());
         }
+
         for (unsigned i = 0; i < steerers.size(); ++i) {
             iter->second->simulationFactory->addSteerer(*steerers[i].get()->clone());
         }
     }
 }
 
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-    bool AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::isInMap(const std::string name)const
-{
-    if (simulations.find(name) == simulations.end()) {
-        return false;
-    } else {
-        return true;
-    }
 }
-} // namespace LibGeoDecomp
 
 #endif
 
