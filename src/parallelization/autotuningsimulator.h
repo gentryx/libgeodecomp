@@ -99,7 +99,7 @@ private:
     SimulationPtr getSimulation(const std::string& simulatorName)
     {
         if (simulations.find(simulatorName) == simulations.end()) {
-            throw std::invalid_argument("AutoTuningSimulator could not find simulatorName in registry of factories")
+            throw std::invalid_argument("AutoTuningSimulator could not find simulatorName in registry of factories");
         }
 
         return simulations[simulatorName];
@@ -259,7 +259,7 @@ unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double g
     unsigned steps = startStepNum;
     unsigned oldSteps = startStepNum;
     varStepInitializer.setMaxSteps(1);
-    double variance = (*simulation)(factory->parameters);
+    double variance = (*simulation->simulationFactory)(factory->parameters());
     double fitness = DBL_MAX;
     do {
         varStepInitializer.setMaxSteps(steps);

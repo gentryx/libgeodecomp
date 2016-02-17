@@ -115,7 +115,7 @@ public:
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
 
-        unsigned steps = ats.normalizeSteps(goal);
+        unsigned steps = ats.normalizeSteps(goal, 5);
         unsigned originalSteps = steps;
         LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << ") is: " << steps)
 
@@ -133,7 +133,7 @@ public:
         // depends to much on the System, where the test is running
         TS_ASSERT( steps <= originalSteps + 5 && steps >= originalSteps - 5 );
         startValue = steps + (steps / 2);
-        steps = ats2.normalizeSteps(goal,startValue);
+        steps = ats2.normalizeSteps(goal, startValue);
         LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << " ,"
                     << startValue << ") is: " << steps)
         TS_ASSERT( steps <= originalSteps + 5 && steps >= originalSteps - 5);
@@ -248,6 +248,7 @@ private:
 };
 
 
+// fixme: split into separate files
 class SimulationFactoryTest : public CxxTest::TestSuite
 {
 

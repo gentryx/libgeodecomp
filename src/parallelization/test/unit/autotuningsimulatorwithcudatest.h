@@ -114,7 +114,7 @@ public:
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
 
-        unsigned steps = ats.normalizeSteps(goal);
+        unsigned steps = ats.normalizeSteps(goal, 5);
         unsigned originalSteps = steps;
         LOG(Logger::DBG, "Result of nomalizeSteps(" << goal << ") is: " << steps)
 
@@ -243,6 +243,7 @@ private:
 };
 
 
+// fixme: split into separate files
 class SimulationFactoryWithCudaTest : public CxxTest::TestSuite
 {
 public:

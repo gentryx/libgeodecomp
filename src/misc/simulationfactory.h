@@ -90,7 +90,6 @@ protected:
     SimulationParameters parameterSet;
     std::vector<boost::shared_ptr<ParallelWriter<CELL> > > parallelWriters;
     std::vector<boost::shared_ptr<Writer<CELL> > > writers;
-    // FIXME: Something need to be done with the parallelWriters in subclasses!
     std::vector<boost::shared_ptr<Steerer<CELL> > > steerers;
 };
 
