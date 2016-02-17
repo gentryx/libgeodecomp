@@ -258,8 +258,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         dim = Coord<3>(100,100,100);
         maxSteps = 100;
-        initializerProxy = new VarStepInitializerProxy<SimFabTestCell>(
-                new SimFabTestInitializer(dim,maxSteps));
+        initializerProxy.reset(new VarStepInitializerProxy<SimFabTestCell>(
+                                   new SimFabTestInitializer(dim,maxSteps)));
 #ifdef LIBGEODECOMP_WITH_THREADS
         cfab = new CacheBlockingSimulationFactory<SimFabTestCell>(initializerProxy);
 #endif
@@ -274,7 +274,6 @@ public:
         delete cfab;
 #endif
         delete fab;
-        delete initializerProxy;
 #endif
     }
 
@@ -389,7 +388,7 @@ private:
 #ifdef LIBGEODECOMP_WITH_CPP14
     Coord<3> dim;
     unsigned maxSteps;
-    VarStepInitializerProxy<SimFabTestCell> *initializerProxy;
+    boost::shared_ptr< VarStepInitializerProxy<SimFabTestCell> > initializerProxy;
     SimulationFactory<SimFabTestCell> *fab;
 
 #ifdef LIBGEODECOMP_WITH_THREADS

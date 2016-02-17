@@ -47,6 +47,7 @@ public:
     /**
      * This function returns a shared_ptr to the original Initializer
      */
+    // fixme: drop this
     boost::shared_ptr<Initializer<CELL> > getInitializer()
     {
         return proxyObj;

@@ -72,7 +72,7 @@ public:
 private:
     std::map<const std::string, SimulationPtr> simulations;
     unsigned optimizationSteps; // maximum number of Steps for the optimizer
-    VarStepInitializerProxy<CELL_TYPE> varStepInitializer;
+    boost::shared_ptr<VarStepInitializerProxy<CELL_TYPE> > varStepInitializer;
     std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > parallelWriters;
     std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
     std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
@@ -80,11 +80,6 @@ private:
     // fixme: why pass a string here and not a SimFactory instance? also: parameters and SimFactory should be added simultaneously
     void addNewSimulation(const std::string& name, const std::string& typeOfSimulation);
     void setParameters(const SimulationParameters& params, const std::string& name);
-
-    void addNewSimulation(
-        const std::string& name,
-        const std::string& typeOfSimulation,
-        VarStepInitializerProxy<CELL_TYPE> *initializer);
 
     std::string getBestSim();
 
@@ -109,17 +104,17 @@ private:
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::AutoTuningSimulator(Initializer<CELL_TYPE> *initializer, unsigned optimizationSteps):
     optimizationSteps(optimizationSteps),
-    varStepInitializer(initializer)
+    varStepInitializer(new VarStepInitializerProxy<CELL_TYPE>(initializer))
 {
-    addNewSimulation("SerialSimulation", "SerialSimulation", &varStepInitializer);
+    addNewSimulation("SerialSimulation", "SerialSimulation");
 
 #ifdef LIBGEODECOMP_WITH_THREADS
-    addNewSimulation("CacheBlockingSimulation", "CacheBlockingSimulation", &varStepInitializer);
+    addNewSimulation("CacheBlockingSimulation", "CacheBlockingSimulation");
 #endif
 
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
-    addNewSimulation("CudaSimulation", "CudaSimulation", &varStepInitializer);
+    addNewSimulation("CudaSimulation", "CudaSimulation");
 #endif
 #endif
 }
@@ -148,17 +143,9 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
     const std::string& name,
     const std::string& typeOfSimulation)
 {
-    addNewSimulation(name, typeOfSimulation, &varStepInitializer);
-}
-
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
-    const std::string& name,
-    const std::string& typeOfSimulation,
-    VarStepInitializerProxy<CELL_TYPE> *initializer)
-{
+    // fixme: if we already have specialized factories, we should not have this additional manual type switch
     if (typeOfSimulation == "SerialSimulation") {
-        SimFactoryPtr simFac_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
+        SimFactoryPtr simFac_p(new SerialSimulationFactory<CELL_TYPE>(varStepInitializer));
         SimulationPtr sim_p(new Simulation(
                 typeOfSimulation,
                 simFac_p,
@@ -169,7 +156,7 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
 
 #ifdef LIBGEODECOMP_WITH_THREADS
     if (typeOfSimulation == "CacheBlockingSimulation") {
-        SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
+        SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(varStepInitializer));
         SimulationPtr sim_p(new Simulation(
                 typeOfSimulation,
                 simFac_p,
@@ -182,7 +169,7 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
      if (typeOfSimulation == "CudaSimulation") {
-        SimFactoryPtr simFac_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
+        SimFactoryPtr simFac_p(new CudaSimulationFactory<CELL_TYPE>(varStepInitializer));
         SimulationPtr sim_p(new Simulation(
                 typeOfSimulation,
                 simFac_p,
@@ -214,7 +201,7 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::run()
     prepareSimulations();
     if (!normalizeSteps(fitnessGoal, defaultInitializerSteps)) {
         LOG(Logger::WARN, "normalize Steps was not successful, default step number will be used");
-        varStepInitializer.setMaxSteps(defaultInitializerSteps);
+        varStepInitializer->setMaxSteps(defaultInitializerSteps);
     }
 
     runTest();
@@ -241,8 +228,9 @@ return bestSimulation;
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runToCompletion(const std::string& optimizerName)
 {
-    boost::shared_ptr<Initializer<CELL_TYPE> > originalInitializer = varStepInitializer.getInitializer();
-    varStepInitializer.setMaxSteps(originalInitializer->maxSteps());
+    // fixme: rework this
+    boost::shared_ptr<Initializer<CELL_TYPE> > originalInitializer = varStepInitializer->getInitializer();
+    varStepInitializer->setMaxSteps(originalInitializer->maxSteps());
     (*getSimulation(optimizerName)->simulationFactory)(simulations[optimizerName]->parameters);
 }
 
@@ -258,11 +246,11 @@ unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double g
     SimFactoryPtr factory = simulation->simulationFactory;
     unsigned steps = startStepNum;
     unsigned oldSteps = startStepNum;
-    varStepInitializer.setMaxSteps(1);
+    varStepInitializer->setMaxSteps(1);
     double variance = (*simulation->simulationFactory)(factory->parameters());
     double fitness = DBL_MAX;
     do {
-        varStepInitializer.setMaxSteps(steps);
+        varStepInitializer->setMaxSteps(steps);
         fitness = (*factory)(simulation->parameters);
         oldSteps = steps;
         LOG(Logger::DBG, "steps: " << steps)
