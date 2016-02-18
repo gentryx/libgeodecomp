@@ -87,7 +87,7 @@ public:
 #endif
     }
 
-    void testAddOwnSimulations()
+    void testAddOwnSimulationsForCudaSim()
     {
         // fixme
         return;
@@ -109,7 +109,7 @@ public:
 #endif
     }
 
-    void testManuallyParamterized()
+    void testManuallyParamterizedCudaSim()
     {
         // fixme
         return;
@@ -128,7 +128,7 @@ public:
 #endif
     }
 
-    void testInvalidArguments()
+    void testInvalidArgumentsForCudaSim()
     {
         // fixme
         return;

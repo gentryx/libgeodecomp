@@ -15,7 +15,7 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class AutotuningSimulatorTest : public CxxTest::TestSuite
+class AutotuningSimulatorWithoutCudaTest : public CxxTest::TestSuite
 {
 public:
     void setUp()
@@ -86,7 +86,7 @@ public:
 #endif
     }
 
-    void testAddOwnSimulations()
+    void testAddOwnSimulationsForCacheBlockingSim()
     {
         // fixme
         return;
@@ -107,7 +107,7 @@ public:
 #endif
     }
 
-    void testManuallyParamterized()
+    void testManuallyParamterizedCacheBlockingSim()
     {
         // fixme
         return;
@@ -128,7 +128,7 @@ public:
 #endif
     }
 
-    void testInvalidArguments()
+    void testInvalidArgumentsForCacheBlockingSim()
     {
         // fixme
         return;
