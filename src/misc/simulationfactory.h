@@ -95,8 +95,7 @@ protected:
     void addSteerers(MonolithicSimulator<CELL> *simulator) const
     {
         for (typename SteerersVec::const_iterator i = steerers.begin(); i != steerers.end(); ++i) {
-            // fixme: we should clone here
-            simulator->addSteerer(&**i);
+            simulator->addSteerer((*i)->clone());
         }
     }
 
