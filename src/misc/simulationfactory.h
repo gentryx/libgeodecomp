@@ -25,6 +25,13 @@ template<typename CELL>
 class SimulationFactory : public Optimizer::Evaluator
 {
 public:
+    friend class SimulationFactoryWithoutCudaTest;
+    friend class SimulationFactoryWithCudaTest;
+
+    typedef std::vector<boost::shared_ptr<ParallelWriter<CELL> > > ParallelWritersVec;
+    typedef std::vector<boost::shared_ptr<Writer<CELL> > > WritersVec;
+    typedef std::vector<boost::shared_ptr<Steerer<CELL> > > SteerersVec;
+
     SimulationFactory(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
         initializer(initializer)
     {}
@@ -76,20 +83,44 @@ public:
         return chrono.interval<TimeCompute>() * -1.0;
     }
 
-    SimulationParameters& parameters()
+    const SimulationParameters& parameters() const
     {
         return parameterSet;
     }
+
 protected:
+    boost::shared_ptr<ClonableInitializer<CELL> > initializer;
+    SimulationParameters parameterSet;
+    ParallelWritersVec parallelWriters;
+    WritersVec writers;
+    SteerersVec steerers;
+
     virtual Simulator<CELL> *buildSimulator(
         boost::shared_ptr<ClonableInitializer<CELL> > initializer,
         const SimulationParameters& params) const = 0;
 
-    boost::shared_ptr<ClonableInitializer<CELL> > initializer;
-    SimulationParameters parameterSet;
-    std::vector<boost::shared_ptr<ParallelWriter<CELL> > > parallelWriters;
-    std::vector<boost::shared_ptr<Writer<CELL> > > writers;
-    std::vector<boost::shared_ptr<Steerer<CELL> > > steerers;
+    void addSteerers(MonolithicSimulator<CELL> *simulator) const
+    {
+        for (typename SteerersVec::const_iterator i = steerers.begin(); i != steerers.end(); ++i) {
+            // fixme: we should clone here
+            simulator->addSteerer(&**i);
+        }
+    }
+
+    void addWriters(MonolithicSimulator<CELL> *simulator) const
+    {
+        for (typename WritersVec::const_iterator i = writers.begin(); i != writers.end(); ++i) {
+            // fixme: we should clone here
+            simulator->addWriter(&**i);
+        }
+    }
+    void addWriters(DistributedSimulator<CELL> *simulator) const
+    {
+        for (typename ParallelWritersVec::const_iterator i = parallelWriters.begin(); i != parallelWriters.end(); ++i) {
+            // fixme: we should clone here
+            simulator->addWriter(&**i);
+        }
+    }
 };
 
 /**
@@ -102,6 +133,9 @@ template<typename CELL>
 class SerialSimulationFactory : public SimulationFactory<CELL>
 {
 public:
+    using SimulationFactory<CELL>::addSteerers;
+    using SimulationFactory<CELL>::addWriters;
+
     SerialSimulationFactory(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
         SimulationFactory<CELL>(initializer)
     {
@@ -119,13 +153,8 @@ protected:
     {
         SerialSimulator<CELL> *sim = new SerialSimulator<CELL>(initializer->clone());
 
-        for (unsigned i = 0; i < SimulationFactory<CELL>::writers.size(); ++i) {
-            sim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
-        }
-
-        for (unsigned i = 0; i < SimulationFactory<CELL>::steerers.size(); ++i) {
-            sim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
-        }
+        addWriters(sim);
+        addSteerers(sim);
 
         return sim;
     }
@@ -136,6 +165,9 @@ template<typename CELL>
 class CacheBlockingSimulationFactory : public SimulationFactory<CELL>
 {
 public:
+    using SimulationFactory<CELL>::addSteerers;
+    using SimulationFactory<CELL>::addWriters;
+
     CacheBlockingSimulationFactory<CELL>(boost::shared_ptr<ClonableInitializer<CELL> > initializer):
         SimulationFactory<CELL>(initializer)
     {
@@ -159,14 +191,9 @@ protected:
                 pipelineLength,
                 wavefrontDim);
 
-        // fixme: use for_each loop
-        for(unsigned i = 0; i < SimulationFactory<CELL>::writers.size(); ++i) {
-            sim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
-        }
+        addWriters(sim);
+        addSteerers(sim);
 
-        for (unsigned i = 0; i < SimulationFactory<CELL>::steerers.size(); ++i) {
-            sim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
-        }
         return sim;
     }
 };
@@ -178,6 +205,9 @@ template<typename CELL>
 class CudaSimulationFactory : public SimulationFactory<CELL>
 {
 public:
+    using SimulationFactory<CELL>::addSteerers;
+    using SimulationFactory<CELL>::addWriters;
+
     CudaSimulationFactory<CELL>(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
         SimulationFactory<CELL>(initializer)
     {
@@ -216,20 +246,11 @@ protected:
         boost::shared_ptr<ClonableInitializer<CELL> > initializer,
         const SimulationParameters& params) const
     {
-        LOG(Logger::DBG, "enter CudaSimulationFactory::build()")
-            Coord<3> blockSize(params["BlockDimX"], params["BlockDimY"], params["BlockDimZ"]);
-        LOG(Logger::DBG, "generate new CudaSimulator");
-        CudaSimulator<CELL> * sim = new CudaSimulator<CELL>(initializer->clone(), blockSize);
-        LOG(Logger::DBG, "addWriters");
+        Coord<3> blockSize(params["BlockDimX"], params["BlockDimY"], params["BlockDimZ"]);
+        CudaSimulator<CELL> *sim = new CudaSimulator<CELL>(initializer->clone(), blockSize);
 
-        for (unsigned i = 0; i < SimulationFactory<CELL>::writers.size(); ++i) {
-            sim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
-        }
-
-        LOG(Logger::DBG, "addSteers");
-        for (unsigned i = 0; i < SimulationFactory<CELL>::steerers.size(); ++i) {
-            sim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
-        }
+        addWriters(sim);
+        addSteerers(sim);
 
         return sim;
     }

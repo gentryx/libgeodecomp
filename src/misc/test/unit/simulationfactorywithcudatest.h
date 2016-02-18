@@ -55,7 +55,7 @@ public:
                 << initializerProxy->getMaxSteps())
             TS_ASSERT_EQUALS(i,initializerProxy->maxSteps());
             TS_ASSERT_EQUALS(i,initializerProxy->getMaxSteps());
-            aktFitness = fab->operator()(fab->parameters());
+            aktFitness = fab->operator()(fab->parameterSet);
             LOG(Logger::DBG, "Fitness: " << aktFitness)
             TS_ASSERT(oldFitness > aktFitness);
             oldFitness = aktFitness;
@@ -89,10 +89,10 @@ public:
 #ifdef LIBGEODECOMP_WITH_THREADS
 #ifdef LIBGEODECOMP_WITH_CPP14
         for (int i = 1; i <= 2; ++i) {
-            cFab->parameters()["PipelineLength"].setValue(1);
-            cFab->parameters()["WavefrontWidth"].setValue(100);
-            cFab->parameters()["WavefrontHeight"].setValue(40);
-            double fitness = cFab->operator()(cFab->parameters());
+            cFab->parameterSet["PipelineLength"].setValue(1);
+            cFab->parameterSet["WavefrontWidth"].setValue(100);
+            cFab->parameterSet["WavefrontHeight"].setValue(40);
+            double fitness = cFab->operator()(cFab->parameterSet);
         }
 #endif
 #endif
@@ -105,10 +105,10 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_CPP14
         for (int i = 1; i <=2; ++i) {
-            cudaFab->parameters()["BlockDimX"].setValue(15);
-            cudaFab->parameters()["BlockDimY"].setValue(6);
-            cudaFab->parameters()["BlockDimZ"].setValue(6);
-            double fitness = cudaFab->operator()(cudaFab->parameters());
+            cudaFab->parameterSet["BlockDimX"].setValue(15);
+            cudaFab->parameterSet["BlockDimY"].setValue(6);
+            cudaFab->parameterSet["BlockDimZ"].setValue(6);
+            double fitness = cudaFab->operator()(cudaFab->parameterSet);
         }
 #endif
     }
@@ -124,7 +124,7 @@ public:
         std::ostringstream buf;
         sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
         sim->run();
-        double fitness = cFab->operator()(cFab->parameters());
+        double fitness = cFab->operator()(cFab->parameterSet);
 #endif
 #endif
     }
@@ -138,7 +138,7 @@ public:
         std::ostringstream buf;
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
         fab->addWriter(*writer);
-        fab->operator()(fab->parameters());
+        fab->operator()(fab->parameterSet);
         delete writer;
 #endif
     }
@@ -153,7 +153,7 @@ public:
         std::ostringstream buf;
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
         cFab->addWriter(*writer);
-        cFab->operator()(cFab->parameters());
+        cFab->operator()(cFab->parameterSet);
         delete writer;
 #endif
 #endif
@@ -167,7 +167,7 @@ public:
         std::ostringstream buf;
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(10, 100, 0, buf);
         cudaFab->addWriter(*writer);
-        cudaFab->operator()(cudaFab->parameters());
+        cudaFab->operator()(cudaFab->parameterSet);
         delete writer;
 #endif
     }
