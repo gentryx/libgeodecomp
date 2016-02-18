@@ -1,9 +1,9 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/logger.h>
-#include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/varstepinitializerproxy.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
+#include <libgeodecomp/misc/simfabtestmodel.h>
 #include <libgeodecomp/misc/simplexoptimizer.h>
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/misc/simulationparameters.h>
@@ -14,65 +14,6 @@
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
-
-class SimFabTestCell
-{
-public:
-    class API :
-        public APITraits::HasFixedCoordsOnlyUpdate,
-        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public APITraits::HasTorusTopology<3>,
-        public APITraits::HasSeparateCUDAUpdate,
-        public APITraits::HasPredefinedMPIDataType<double>
-    {};
-
-    inline explicit SimFabTestCell(double v = 0) : temp(v)
-    {}
-
-    template<typename COORD_MAP>
-    __host__
-    void update(const COORD_MAP& neighborhood, unsigned nanoStep)
-    {
-        temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
-                neighborhood[FixedCoord< 0, -1,  0>()].temp +
-                neighborhood[FixedCoord<-1,  0,  0>()].temp +
-                neighborhood[FixedCoord< 1,  0,  0>()].temp +
-                neighborhood[FixedCoord< 0,  1,  0>()].temp +
-                neighborhood[FixedCoord< 0,  0,  1>()].temp) * (1.0 / 6.0);
-    }
-
-    template<typename COORD_MAP>
-    __device__
-    void updateCuda(const COORD_MAP& neighborhood, unsigned nanoStep)
-    {
-        temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
-                neighborhood[FixedCoord< 0, -1,  0>()].temp +
-                neighborhood[FixedCoord<-1,  0,  0>()].temp +
-                neighborhood[FixedCoord< 1,  0,  0>()].temp +
-                neighborhood[FixedCoord< 0,  1,  0>()].temp +
-                neighborhood[FixedCoord< 0,  0,  1>()].temp) * (1.0 / 6.0);
-    }
-
-    double temp;
-};
-
-class SimFabTestInitializer : public SimpleInitializer<SimFabTestCell>
-{
-public:
-    SimFabTestInitializer(Coord<3> gridDimensions = Coord<3>(100, 100, 100), unsigned timeSteps = 100) :
-        SimpleInitializer<SimFabTestCell>(gridDimensions, timeSteps)
-    {}
-
-    virtual void grid(GridBase<SimFabTestCell, 3> *target)
-    {
-        int counter = 0;
-        CoordBox<3> box = target->boundingBox();
-
-        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
-            target->set(*i, SimFabTestCell(++counter));
-        }
-    }
-};
 
 class AutotuningSimulatorTest : public CxxTest::TestSuite
 {
