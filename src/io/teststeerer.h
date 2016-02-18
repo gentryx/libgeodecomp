@@ -36,7 +36,7 @@ public:
         lastEvent(STEERER_ALL_DONE)
     {}
 
-    Steerer<TestCell<DIM> > *clone()
+    Steerer<TestCell<DIM> > *clone() const
     {
         return new TestSteerer(*this);
     }
