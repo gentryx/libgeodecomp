@@ -2,6 +2,9 @@
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/varstepinitializerproxy.h>
 #include <libgeodecomp/misc/simfabtestmodel.h>
+#include <libgeodecomp/misc/cacheblockingsimulationfactory.h>
+#include <libgeodecomp/misc/cudasimulationfactory.h>
+#include <libgeodecomp/misc/serialsimulationfactory.h>
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <cuda.h>
 

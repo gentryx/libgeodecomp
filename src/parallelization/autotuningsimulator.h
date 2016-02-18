@@ -1,4 +1,3 @@
-// vim: noai:ts=4:sw=4:expandtab
 #ifndef LIBGEODECOMP_PARALLELIZATION_AUTOTUNINGSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_AUTOTUNINGSIMULATOR_H
 
@@ -7,7 +6,9 @@
 #ifdef LIBGEODECOMP_WITH_CPP14
 
 #include <libgeodecomp/misc/optimizer.h>
-#include <libgeodecomp/misc/simulationfactory.h>
+#include <libgeodecomp/misc/cacheblockingsimulationfactory.h>
+#include <libgeodecomp/misc/cudasimulationfactory.h>
+#include <libgeodecomp/misc/serialsimulationfactory.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/io/varstepinitializerproxy.h>
