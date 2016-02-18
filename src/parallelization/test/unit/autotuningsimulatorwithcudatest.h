@@ -5,7 +5,6 @@
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/misc/simfabtestmodel.h>
 #include <libgeodecomp/misc/simplexoptimizer.h>
-#include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/parallelization/autotuningsimulator.h>
 #include <boost/assign/list_of.hpp>
@@ -16,6 +15,11 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+/**
+ * The tests in this class are virtially identical to the ones running
+ * without CUDA. This duplication is acceptable as the same code may
+ * behave differently in the presence of CUDA.
+ */
 class AutotuningSimulatorWithCudaTest : public CxxTest::TestSuite
 {
 public:
@@ -173,188 +177,6 @@ public:
 private:
     Coord<3> dim;
     unsigned maxSteps;
-};
-
-
-// fixme: split into separate files
-class SimulationFactoryWithCudaTest : public CxxTest::TestSuite
-{
-public:
-    void setUp()
-    {
-#ifdef LIBGEODECOMP_WITH_CPP14
-        dim = Coord<3>(100,100,100);
-        maxSteps = 100;
-        initializerProxy.reset(new VarStepInitializerProxy<SimFabTestCell>(
-                                   new SimFabTestInitializer(dim,maxSteps)));
-        cudaFab = new CudaSimulationFactory<SimFabTestCell>(initializerProxy);
-#ifdef LIBGEODECOMP_WITH_THREADS
-        cFab = new CacheBlockingSimulationFactory<SimFabTestCell>(initializerProxy);
-#endif
-        fab = new SerialSimulationFactory<SimFabTestCell>(initializerProxy);
-#endif
-    }
-
-    void tearDown()
-    {
-#ifdef LIBGEODECOMP_WITH_CPP14
-        delete cudaFab;
-        delete fab;
-#ifdef LIBGEODECOMP_WITH_THREADS
-        delete cFab;
-#endif
-#endif
-    }
-
-    void testVarStepInitializerProxy()
-    {
-        // fixme
-        return;
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-        unsigned maxSteps = initializerProxy->maxSteps();
-        double oldFitness = DBL_MIN;
-        double aktFitness = 0.0;
-        for (unsigned i = 10; i < maxSteps; i *= 2) {
-            LOG(Logger::DBG, "setMaxSteps("<<i<<")")
-            initializerProxy->setMaxSteps(i);
-            LOG(Logger::DBG,"i: "<< i << " maxSteps(): "
-                << initializerProxy->maxSteps() << " getMaxSteps(): "
-                << initializerProxy->getMaxSteps())
-            TS_ASSERT_EQUALS(i,initializerProxy->maxSteps());
-            TS_ASSERT_EQUALS(i,initializerProxy->getMaxSteps());
-            aktFitness = fab->operator()(fab->parameters());
-            LOG(Logger::DBG, "Fitness: " << aktFitness)
-            TS_ASSERT(oldFitness > aktFitness);
-            oldFitness = aktFitness;
-        }
-        LOG(Logger::DBG, "getInitializer()->maxSteps(): "
-                        << initializerProxy->getInitializer()->maxSteps()
-                        << " \"initial\" maxSteps: " << maxSteps)
-        TS_ASSERT_EQUALS(initializerProxy->getInitializer()->maxSteps(), maxSteps);
-#endif
-    }
-
-    void testBasic()
-    {
-        // fixme
-        return;
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-        for (int i = 1; i <= 2; ++i) {
-            Simulator<SimFabTestCell> *sim = fab->operator()();
-            sim->run();
-            delete sim;
-        }
-#endif
-    }
-
-    void testCacheBlockingFitness()
-    {
-        // fixme
-        return;
-
-#ifdef LIBGEODECOMP_WITH_THREADS
-#ifdef LIBGEODECOMP_WITH_CPP14
-        for (int i = 1; i <= 2; ++i) {
-            cFab->parameters()["PipelineLength"].setValue(1);
-            cFab->parameters()["WavefrontWidth"].setValue(100);
-            cFab->parameters()["WavefrontHeight"].setValue(40);
-            double fitness = cFab->operator()(cFab->parameters());
-        }
-#endif
-#endif
-    }
-
-    void testCudaFitness()
-    {
-        // fixme
-        return;
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-        for (int i = 1; i <=2; ++i) {
-            cudaFab->parameters()["BlockDimX"].setValue(15);
-            cudaFab->parameters()["BlockDimY"].setValue(6);
-            cudaFab->parameters()["BlockDimZ"].setValue(6);
-            double fitness = cudaFab->operator()(cudaFab->parameters());
-        }
-#endif
-    }
-
-    void testAddWriterToSimulator()
-    {
-        // fixme
-        return;
-
-#ifdef LIBGEODECOMP_WITH_THREADS
-#ifdef LIBGEODECOMP_WITH_CPP14
-        MonolithicSimulator<SimFabTestCell> *sim = dynamic_cast<MonolithicSimulator<SimFabTestCell>*>((*cFab)());
-        std::ostringstream buf;
-        sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
-        sim->run();
-        double fitness = cFab->operator()(cFab->parameters());
-#endif
-#endif
-    }
-
-    void testAddWriterToSerialSimulationFactory()
-    {
-        // fixme
-        return;
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-        std::ostringstream buf;
-        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
-        fab->addWriter(*writer);
-        fab->operator()(fab->parameters());
-        delete writer;
-#endif
-    }
-
-    void testAddWriterToCacheBlockingSimulationFactory()
-    {
-        // fixme
-        return;
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-#ifdef LIBGEODECOMP_WITH_THREADS
-        std::ostringstream buf;
-        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
-        cFab->addWriter(*writer);
-        cFab->operator()(cFab->parameters());
-        delete writer;
-#endif
-#endif
-    }
-
-    void testAddWriterToCudaSimulationFactory()
-    {
-        // fixme
-        return;
-#ifdef LIBGEODECOMP_WITH_CPP14
-        std::ostringstream buf;
-        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(10, 100, 0, buf);
-        cudaFab->addWriter(*writer);
-        cudaFab->operator()(cudaFab->parameters());
-        delete writer;
-#endif
-    }
-
-private:
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-    Coord<3> dim;
-    unsigned maxSteps;
-    boost::shared_ptr<VarStepInitializerProxy<SimFabTestCell> > initializerProxy;
-    SimulationFactory<SimFabTestCell> *fab;
-    SimulationFactory<SimFabTestCell> *cudaFab;
-
-#ifdef LIBGEODECOMP_WITH_THREADS
-    SimulationFactory<SimFabTestCell> *cFab;
-#endif
-
-#endif
-
 };
 
 }

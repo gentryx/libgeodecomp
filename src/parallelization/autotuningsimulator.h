@@ -52,7 +52,7 @@ template<typename CELL_TYPE, typename OPTIMIZER_TYPE>
 class AutoTuningSimulator
 {
 public:
-    friend class AutotuningSimulatorTest;
+    friend class AutotuningSimulatorWithoutCudaTest;
     friend class AutotuningSimulatorWithCudaTest;
 
     typedef AutoTuningSimulatorHelpers::Simulation<CELL_TYPE>  Simulation;

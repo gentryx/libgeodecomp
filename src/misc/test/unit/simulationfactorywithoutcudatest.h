@@ -1,0 +1,160 @@
+#include <cxxtest/TestSuite.h>
+#include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/io/varstepinitializerproxy.h>
+#include <libgeodecomp/misc/simfabtestmodel.h>
+#include <libgeodecomp/misc/simulationfactory.h>
+
+using namespace LibGeoDecomp;
+
+namespace LibGeoDecomp {
+
+class SimulationFactoryWithoutCudaTest : public CxxTest::TestSuite
+{
+public:
+    void setUp()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        dim = Coord<3>(100,100,100);
+        maxSteps = 100;
+        initializerProxy.reset(new VarStepInitializerProxy<SimFabTestCell>(
+                                   new SimFabTestInitializer(dim,maxSteps)));
+#ifdef LIBGEODECOMP_WITH_THREADS
+        cFab = new CacheBlockingSimulationFactory<SimFabTestCell>(initializerProxy);
+#endif
+        fab = new SerialSimulationFactory<SimFabTestCell>(initializerProxy);
+#endif
+    }
+
+    void tearDown()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        delete fab;
+#ifdef LIBGEODECOMP_WITH_THREADS
+        delete cFab;
+#endif
+#endif
+    }
+
+    void testVarStepInitializerProxy()
+    {
+        // fixme
+        return;
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+        unsigned maxSteps = initializerProxy->maxSteps();
+        double oldFitness = DBL_MIN;
+        double aktFitness = 0.0;
+        for (unsigned i = 10; i < maxSteps; i *= 2) {
+            LOG(Logger::DBG, "setMaxSteps("<<i<<")")
+            initializerProxy->setMaxSteps(i);
+            LOG(Logger::DBG,"i: "<< i << " maxSteps(): "
+                << initializerProxy->maxSteps() << " getMaxSteps(): "
+                << initializerProxy->getMaxSteps())
+            TS_ASSERT_EQUALS(i,initializerProxy->maxSteps());
+            TS_ASSERT_EQUALS(i,initializerProxy->getMaxSteps());
+            aktFitness = fab->operator()(fab->parameters());
+            LOG(Logger::DBG, "Fitness: " << aktFitness)
+            TS_ASSERT(oldFitness > aktFitness);
+            oldFitness = aktFitness;
+        }
+        LOG(Logger::DBG, "getInitializer()->maxSteps(): "
+                        << initializerProxy->getInitializer()->maxSteps()
+                        << " \"initial\" maxSteps: " << maxSteps)
+        TS_ASSERT_EQUALS(initializerProxy->getInitializer()->maxSteps(), maxSteps);
+#endif
+    }
+
+    void testBasic()
+    {
+        // fixme
+        return;
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+        for (int i = 1; i <= 2; ++i) {
+            Simulator<SimFabTestCell> *sim = fab->operator()();
+            sim->run();
+            delete sim;
+        }
+#endif
+    }
+
+    void testCacheBlockingFitness()
+    {
+        // fixme
+        return;
+
+#ifdef LIBGEODECOMP_WITH_THREADS
+#ifdef LIBGEODECOMP_WITH_CPP14
+        for (int i = 1; i <= 2; ++i) {
+            cFab->parameters()["PipelineLength"].setValue(1);
+            cFab->parameters()["WavefrontWidth"].setValue(100);
+            cFab->parameters()["WavefrontHeight"].setValue(40);
+            double fitness = cFab->operator()(cFab->parameters());
+        }
+#endif
+#endif
+    }
+
+    void testAddWriterToSimulator()
+    {
+        // fixme
+        return;
+
+#ifdef LIBGEODECOMP_WITH_THREADS
+#ifdef LIBGEODECOMP_WITH_CPP14
+        MonolithicSimulator<SimFabTestCell> *sim = dynamic_cast<MonolithicSimulator<SimFabTestCell>*>((*cFab)());
+        std::ostringstream buf;
+        sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100, 0, buf));
+        sim->run();
+        double fitness = cFab->operator()(cFab->parameters());
+#endif
+#endif
+    }
+
+    void testAddWriterToSerialSimulationFactory()
+    {
+        // fixme
+        return;
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+        std::ostringstream buf;
+        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
+        fab->addWriter(*writer);
+        fab->operator()(fab->parameters());
+        delete writer;
+#endif
+    }
+
+    void testAddWriterToCacheBlockingSimulationFactory()
+    {
+        // fixme
+        return;
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+#ifdef LIBGEODECOMP_WITH_THREADS
+        std::ostringstream buf;
+        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100, 0, buf);
+        cFab->addWriter(*writer);
+        cFab->operator()(cFab->parameters());
+        delete writer;
+#endif
+#endif
+    }
+
+private:
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    Coord<3> dim;
+    unsigned maxSteps;
+    boost::shared_ptr<VarStepInitializerProxy<SimFabTestCell> > initializerProxy;
+    SimulationFactory<SimFabTestCell> *fab;
+
+#ifdef LIBGEODECOMP_WITH_THREADS
+    SimulationFactory<SimFabTestCell> *cFab;
+#endif
+
+#endif
+
+};
+
+}
