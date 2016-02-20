@@ -20,7 +20,7 @@ public:
     SerialSimulationFactory(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
         SimulationFactory<CELL>(initializer)
     {
-        // Serial Simulation has no Parameters to optimize
+        // SerialSimulator has no parameters to optimize
     }
 
 protected:
