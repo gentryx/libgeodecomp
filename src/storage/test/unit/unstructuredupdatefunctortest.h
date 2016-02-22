@@ -107,7 +107,7 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+        for (int i = hoodOld.index(); i < indexEnd / HOOD_OLD::ARITY; ++i, ++hoodOld) {
             ShortVec tmp;
             tmp.load_aligned(&hoodNew->sum() + i * 4);
             for (const auto& j: hoodOld.weights(0)) {
@@ -353,7 +353,7 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
-        Coord<1> dim(DIM);
+        CoordBox<1> dim(Coord<1>(0), Coord<1>(DIM));
 
         UnstructuredSoATestCell<1> defaultCell(200);
         UnstructuredSoATestCell<1> edgeCell(-1);
@@ -406,7 +406,7 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
-        Coord<1> dim(DIM);
+        CoordBox<1> dim(Coord<1>(0), Coord<1>(DIM));
 
         UnstructuredSoATestCell<150> defaultCell(200);
         UnstructuredSoATestCell<150> edgeCell(-1);
