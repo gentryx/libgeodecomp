@@ -72,11 +72,12 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
     {
         // fixme: index is actually the index in the chunkVector, not necessarily a cell id :-(
-        for (;hoodOld.index() < indexEnd / HOOD_OLD::ARITY; ++hoodOld) {
+        for (; hoodOld.index() < indexEnd / HOOD_OLD::ARITY; ++hoodOld) {
+
             // assemble weight maps:
             std::vector<std::map<int, double> > weights(HOOD_OLD::ARITY);
             for (typename HOOD_OLD::Iterator i = hoodOld.begin(); i != hoodOld.end(); ++i) {
-                const int *columnPointer = (*i).first;
+                const unsigned *columnPointer = (*i).first;
                 const double *weightPointer = (*i).second;
 
                 for (int i = 0; i < HOOD_OLD::ARITY; ++i) {
