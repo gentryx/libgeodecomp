@@ -27,20 +27,16 @@ public:
 
     virtual double operator()(const SimulationParameters& params)
     {
-        LOG(Logger::DBG, "SimulationFactory::operator(params)");
         boost::shared_ptr<ClonableInitializer<CELL> > init(SimulationFactory<CELL>::initializer->clone());
-        std::unique_ptr<Simulator<CELL> >(buildSimulator(init, params));
-        LOG(Logger::DBG, "sim get buildSimulator(initializer->clone(), params)")
+        boost::unique_ptr<Simulator<CELL> > sim(buildSimulator(init, params));
         Chronometer chrono;
 
         {
             TimeCompute t(&chrono);
-            LOG(Logger::DBG,"next step is sim->run()")
             try {
                 sim->run();
             } catch(const std::runtime_error& error){
-                LOG(Logger::INFO,"runtime error detcted")
-                return std::numeric_limits<double>.min();
+                return std::numeric_limits<double>::min();
             }
         }
 

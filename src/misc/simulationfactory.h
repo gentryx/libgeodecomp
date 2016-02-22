@@ -6,6 +6,7 @@
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
+#include <boost/shared_ptr.hpp>
 
 namespace LibGeoDecomp {
 
@@ -58,7 +59,7 @@ public:
 
     virtual double operator()(const SimulationParameters& params)
     {
-        std::unique_ptr<Simulator<CELL> > sim(buildSimulator(initializer, params));
+        boost::shared_ptr<Simulator<CELL> > sim(buildSimulator(initializer, params));
         Chronometer chrono;
 
         {
