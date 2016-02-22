@@ -80,9 +80,9 @@ public:
     /**
      * "Virtual Copy constructor"
      * This function may be called whenever a copy of a steerer is needed
-     * instead of a plain pointer copy. Must be implemented by t
+     * instead of a plain pointer copy.
      */
-    virtual Steerer *clone()
+    virtual Steerer *clone() const
     {
         throw std::logic_error("clone not implemented");
     }

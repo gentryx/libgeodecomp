@@ -604,8 +604,8 @@ private:
             std::numeric_limits<double>::max(),
             std::numeric_limits<double>::max());
         maxCoord = FloatCoord<2>(
-            -std::numeric_limits<double>::max(),
-            -std::numeric_limits<double>::max());
+            std::numeric_limits<double>::min(),
+            std::numeric_limits<double>::min());
 
         for (int i = 0; i < numberOfDomains; ++i) {
             FloatCoord<2> p(centers[i][0], centers[i][1]);

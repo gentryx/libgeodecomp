@@ -5,7 +5,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/storage/gridbase.h>
-#include <libgeodecomp/geometry/adjacency.h>
+#include <libgeodecomp/geometry/regionbasedadjacency.h>
 
 namespace LibGeoDecomp {
 
@@ -94,9 +94,9 @@ public:
         Random::seed(index);
     }
 
-    virtual Adjacency getAdjacency() const
+    virtual boost::shared_ptr<Adjacency> getAdjacency() const
     {
-        return Adjacency();
+        return boost::make_shared<RegionBasedAdjacency>();
     }
 };
 

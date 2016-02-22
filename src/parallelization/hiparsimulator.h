@@ -31,7 +31,7 @@ public:
     boost::shared_ptr<PARTITION_TYPE> operator()(
         const CoordBox<DIM>& box,
         const std::vector<std::size_t>& weights,
-        const Adjacency& /* unused*/)
+        boost::shared_ptr<Adjacency> /* unused*/)
     {
         return boost::make_shared<PARTITION_TYPE>(
             box.origin,
@@ -49,7 +49,7 @@ public:
     boost::shared_ptr<UnstructuredStripingPartition> operator()(
         const CoordBox<1>& box,
         const std::vector<std::size_t>& weights,
-        const Adjacency& /* unused */)
+        boost::shared_ptr<Adjacency> /* unused */)
     {
         return boost::make_shared<UnstructuredStripingPartition>(
             box.origin,
@@ -70,7 +70,7 @@ public:
     boost::shared_ptr<PTScotchUnstructuredPartition<DIM >> operator()(
         const CoordBox<DIM>& box,
         const std::vector<std::size_t>& weights,
-        const Adjacency& adjacency)
+        boost::shared_ptr<Adjacency> adjacency)
     {
         return boost::make_shared<PTScotchUnstructuredPartition<DIM> >(
             box.origin,
@@ -78,19 +78,6 @@ public:
             0,
             weights,
             adjacency);
-    }
-
-    boost::shared_ptr<PTScotchUnstructuredPartition<DIM >> operator()(
-        const CoordBox<DIM>& box,
-        const std::vector<std::size_t>& weights,
-        Adjacency&& adjacency)
-    {
-        return boost::make_shared<PTScotchUnstructuredPartition<DIM> >(
-            box.origin,
-            box.dimensions,
-            0,
-            weights,
-            std::move(adjacency));
     }
 };
 
@@ -101,7 +88,7 @@ public:
     boost::shared_ptr<DistributedPTScotchUnstructuredPartition<DIM >> operator()(
         const CoordBox<DIM>& box,
         const std::vector<std::size_t>& weights,
-        const Adjacency& adjacency)
+        boost::shared_ptr<Adjacency> adjacency)
     {
         return boost::make_shared<DistributedPTScotchUnstructuredPartition<DIM> >(
             box.origin,
@@ -109,19 +96,6 @@ public:
             0,
             weights,
             adjacency);
-    }
-
-    boost::shared_ptr<DistributedPTScotchUnstructuredPartition<DIM >> operator()(
-        const CoordBox<DIM>& box,
-        const std::vector<std::size_t>& weights,
-        Adjacency&& adjacency)
-    {
-        return boost::make_shared<DistributedPTScotchUnstructuredPartition<DIM> >(
-            box.origin,
-            box.dimensions,
-            0,
-            weights,
-            std::move(adjacency));
     }
 };
 
@@ -271,7 +245,7 @@ private:
      * comprised of multiple genrations of nodes or x86 clusters with
      * additional Xeon Phi accelerators).
      */
-    std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double> rankSpeeds) const
+    std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double>& rankSpeeds) const
     {
         std::size_t size = rankSpeeds.size();
         double totalSum = sum(rankSpeeds);

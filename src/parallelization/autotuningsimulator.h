@@ -1,15 +1,47 @@
-// vim: noai:ts=4:sw=4:expandtab
 #ifndef LIBGEODECOMP_PARALLELIZATION_AUTOTUNINGSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_AUTOTUNINGSIMULATOR_H
 
+#include <libgeodecomp/config.h>
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+
 #include <libgeodecomp/misc/optimizer.h>
-#include <libgeodecomp/misc/simulationfactory.h>
+#include <libgeodecomp/misc/cacheblockingsimulationfactory.h>
+#include <libgeodecomp/misc/cudasimulationfactory.h>
+#include <libgeodecomp/misc/serialsimulationfactory.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/io/varstepinitializerproxy.h>
 #include <libgeodecomp/io/logger.h>
 #include <cfloat>
 
-namespace LibGeoDecomp{
+namespace LibGeoDecomp {
+
+namespace AutoTuningSimulatorHelpers {
+
+template<typename CELL_TYPE>
+class Simulation{
+public:
+    typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
+
+    Simulation(
+        const std::string& name,
+        SimFactoryPtr simFactory,
+        SimulationParameters param,
+        double fit = std::numeric_limits<double>::max()):
+        simulationType(name),
+        simulationFactory(simFactory),
+        parameters(param),
+        fitness(fit)
+    {}
+
+    std::string simulationType;
+    SimFactoryPtr simulationFactory;
+    SimulationParameters parameters;
+    double fitness;
+};
+
+}
 
 /**
  * This Simulator makes use of LibGeoDecomp's parameter optimization
@@ -21,217 +53,226 @@ template<typename CELL_TYPE, typename OPTIMIZER_TYPE>
 class AutoTuningSimulator
 {
 public:
-    typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
-    class Simulation{
-    public:
-        Simulation(std::string name,
-            SimFactoryPtr simFactory,
-            SimulationParameters param,
-            double fit = DBL_MAX):
-            simulationType(name),
-            simulationFactory(simFactory),
-            parameters(param),
-            fitness(fit)
-        {}
-        std::string simulationType;
-        SimFactoryPtr simulationFactory;
-        SimulationParameters parameters;
-        double fitness;
-    };
+    friend class AutotuningSimulatorWithoutCudaTest;
+    friend class AutotuningSimulatorWithCudaTest;
 
+    typedef AutoTuningSimulatorHelpers::Simulation<CELL_TYPE>  Simulation;
+    typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
     typedef boost::shared_ptr<Simulation> SimulationPtr;
 
-    template<typename INITIALIZER>
-    AutoTuningSimulator(INITIALIZER initializer) :
-        simulationSteps(10)
-    {
-        addNewSimulation("SerialSimulation",
-            "SerialSimulation",
-            initializer);
+    AutoTuningSimulator(Initializer<CELL_TYPE> *initializer, unsigned optimizationSteps = 10);
 
-// #ifdef LIBGEODECOMP_WITH_THREADS
-//         addNewSimulation("CacheBlockingSimulation",
-//             "CacheBlockingSimulation",
-//             initializer);
-// #endif
+    void addWriter(ParallelWriter<CELL_TYPE> *writer);
 
-#ifdef __CUDACC__
-#ifdef LIBGEODECOMP_WITH_CUDA
-        addNewSimulation("CudaSimulation",
-            "CudaSimulation",
-            initializer);
-#endif
-#endif
-    }
+    void addWriter(Writer<CELL_TYPE> *writer);
 
-    ~AutoTuningSimulator()
-    {}
+    void addSteerer(const Steerer<CELL_TYPE> *steerer);
 
-    void addWriter(ParallelWriter<CELL_TYPE> *writer)
-    {
-        parallelWriters.push_back(boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer));
-    }
-
-    void addWriter(Writer<CELL_TYPE> *writer)
-    {
-        writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer));
-    }
-
-    void addSteerer(const Steerer<CELL_TYPE> *steerer)
-    {
-        steerers.push_back(boost::shared_ptr<Steerer<CELL_TYPE> >(steerer));
-    }
-
-    template<typename INITIALIZER>
-    void addNewSimulation(std::string name, std::string typeOfSimulation, INITIALIZER initializer)
-    {
-        if (typeOfSimulation == "SerialSimulation") {
-            SimFactoryPtr simFac_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
-            SimulationPtr sim_p(new Simulation(
-                    typeOfSimulation,
-                    simFac_p,
-                    simFac_p->parameters()));
-            simulations[name] = sim_p;
-            return;
-        }
-
-// #ifdef LIBGEODECOMP_WITH_THREADS
-//         if (typeOfSimulation == "CacheBlockingSimulation") {
-//             SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
-//             SimulationPtr sim_p(new Simulation(
-//                     typeOfSimulation,
-//                     simFac_p,
-//                     simFac_p->parameters()));
-//             simulations[name] = sim_p;
-//             return;
-//         }
-// #endif
-
-#ifdef __CUDACC__
-#ifdef LIBGEODECOMP_WITH_CUDA
-         if (typeOfSimulation == "CudaSimulation") {
-            SimFactoryPtr simFac_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
-            SimulationPtr sim_p(new Simulation(
-                    typeOfSimulation,
-                    simFac_p,
-                    simFac_p->parameters()));
-            simulations[name] = sim_p;
-            return;
-         }
-#endif
-#endif
-
-        throw std::invalid_argument("SimulationFactory::addNewSimulation(): unknown simulator type");
-    }
-
-    void deleteAllSimulations()
-    {
-        simulations.clear();
-    }
-
-    std::vector<std::string> getSimulationNames()
-    {
-        std::vector<std::string> result;
-        typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
-        for (IterType iter = simulations.begin(); iter != simulations.end(); iter++)
-        {
-            result.push_back(iter->first);
-        }
-        return result;
-    }
-
-    std::string getSimulatorType(std::string simulationName)
-    {
-        if (isInMap(simulationName)){
-            return simulations[simulationName]->simulationType;
-        } else {
-            throw std::invalid_argument("getSimulatorType(simulationName)) get invalid simulationName");
-        }
-    }
-
-    double getFitness(std::string simulationName)
-    {
-        if (isInMap(simulationName)){
-            return simulations[simulationName]->fitness;
-        } else {
-            throw std::invalid_argument("getFitness(simulationName) get invalid simulationName");
-        }
-    }
-
-    SimulationParameters getSimulationParameters(std::string simulationName)
-    {
-        if (isInMap(simulationName)){
-            return simulations[simulationName]->parameters;
-        } else {
-            throw std::invalid_argument("getSimulationParameters(simulationName) get invalid simulationName");
-        }
-    }
-
-    void setSimulationSteps(unsigned steps)
-    {
-        simulationSteps = steps;
-    }
-
-    void setParameters(SimulationParameters params, std::string name)
-    {
-        if (isInMap(name)) {
-            simulations[name]->parameters = params;
-        } else {
-            throw std::invalid_argument(
-                "AutotuningSimulatro<...>::setParameters(params,name) get invalid name");
-        }
-    }
-
-    void run()
-    {
-       runTest();
-    }
-
-    void runTest()
-    {
-        typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
-
-        for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
-            LOG(Logger::DBG, iter->first);
-            for (unsigned i = 0; i < writers.size(); ++i) {
-                iter->second->simulationFactory->addWriter(*writers[i].get()->clone());
-            }
-            for (unsigned i = 0; i < parallelWriters.size(); ++i) {
-                iter->second->simulationFactory->addWriter(*parallelWriters[i].get()->clone());
-            }
-            for (unsigned i = 0; i < steerers.size(); ++i) {
-                iter->second->simulationFactory->addSteerer(*steerers[i].get()->clone());
-            }
-
-            OPTIMIZER_TYPE optimizer(iter->second->parameters);
-            iter->second->parameters = optimizer(
-                simulationSteps,
-                *iter->second->simulationFactory);
-            iter->second->fitness = optimizer.getFitness();
-
-            LOG(Logger::DBG, "Result of the " << iter->second->simulationType
-                << ": " << iter->second->fitness << std::endl
-                << "new Parameters:"<< std::endl << iter->second->parameters
-                << std::endl);
-        }
-    }
+    void run();
 
 private:
     std::map<const std::string, SimulationPtr> simulations;
-    unsigned simulationSteps; // maximum number of Steps for the optimizer
+    unsigned optimizationSteps; // maximum number of Steps for the optimizer
+    boost::shared_ptr<VarStepInitializerProxy<CELL_TYPE> > varStepInitializer;
     std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > parallelWriters;
     std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
     std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
 
-    bool isInMap(const std::string name)const
+    template<typename FACTORY_TYPE>
+    void addSimulation(const std::string& name, const FACTORY_TYPE& factory)
     {
-        if (simulations.find(name) == simulations.end()){
-            return false;
-        } else {
-            return true;
+        SimFactoryPtr simFactoryPtr(new FACTORY_TYPE(factory));
+        SimulationPtr simulationPtr(new Simulation(
+                                        name,
+                                        simFactoryPtr,
+                                        simFactoryPtr->parameters()));
+        simulations[name] = simulationPtr;
+    }
+
+    template<typename FACTORY_TYPE>
+    void addSimulation(const FACTORY_TYPE& factory)
+    {
+        addSimulation(factory.name(), factory);
+    }
+
+    std::string getBestSim();
+
+    void runToCompletion(const std::string& optimizerName);
+
+    unsigned normalizeSteps(double goal, unsigned startStepNum);
+
+    void runTest();
+
+    void prepareSimulations();
+
+    SimulationPtr getSimulation(const std::string& simulatorName)
+    {
+        if (simulations.find(simulatorName) == simulations.end()) {
+            throw std::invalid_argument("AutoTuningSimulator could not find simulatorName in registry of factories");
+        }
+
+        return simulations[simulatorName];
+    }
+};
+
+template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::AutoTuningSimulator(Initializer<CELL_TYPE> *initializer, unsigned optimizationSteps):
+    optimizationSteps(optimizationSteps),
+    varStepInitializer(new VarStepInitializerProxy<CELL_TYPE>(initializer))
+{
+    addSimulation(SerialSimulationFactory<CELL_TYPE>(varStepInitializer));
+#ifdef LIBGEODECOMP_WITH_THREADS
+    addSimulation(CacheBlockingSimulationFactory<CELL_TYPE>(varStepInitializer));
+#endif
+
+#ifdef __CUDACC__
+#ifdef LIBGEODECOMP_WITH_CUDA
+    addSimulation(CudaSimulationFactory<CELL_TYPE>(varStepInitializer));
+#endif
+#endif
+}
+
+
+template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addWriter(ParallelWriter<CELL_TYPE> *writer)
+{
+    parallelWriters.push_back(boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer));
+}
+
+template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addWriter(Writer<CELL_TYPE> *writer)
+{
+    writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer));
+}
+
+template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addSteerer(const Steerer<CELL_TYPE> *steerer)
+{
+    steerers.push_back(boost::shared_ptr<Steerer<CELL_TYPE> >(steerer));
+}
+
+template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::run()
+{
+    // fitnessGoal must be negative, the autotuning is searching for a Maximum.
+    double fitnessGoal = -1.0;
+    // default number of steps to simulate when normalizing test
+    // duration or if normalization fails.
+    unsigned defaultInitializerSteps = 5;
+
+    prepareSimulations();
+    if (!normalizeSteps(fitnessGoal, defaultInitializerSteps)) {
+        LOG(Logger::WARN, "normalize Steps was not successful, default step number will be used");
+        varStepInitializer->setMaxSteps(defaultInitializerSteps);
+    }
+
+    runTest();
+    std::string best = getBestSim();
+    runToCompletion(best);
+}
+
+template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+std::string AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getBestSim()
+{
+    std::string bestSimulation;
+    double tmpFitness = std::numeric_limits<double>::min();
+    typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
+
+    for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
+        if (iter->second->fitness > tmpFitness) {
+            tmpFitness = iter->second->fitness;
+            bestSimulation = iter->first;
         }
     }
-}; //AutoTunigSimulator
-} // namespace LibGeoDecomp
+
+    LOG(Logger::DBG, "bestSimulation: " << bestSimulation);
+    return bestSimulation;
+}
+
+template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runToCompletion(const std::string& optimizerName)
+{
+    varStepInitializer->resetMaxSteps();
+    (*getSimulation(optimizerName)->simulationFactory)(simulations[optimizerName]->parameters);
+}
+
+template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double goal, unsigned startStepNum)
+{
+    LOG(Logger::INFO, "normalizeSteps")
+    if (startStepNum == 0) {
+        throw std::invalid_argument("startSteps needs to be grater than zero");
+    }
+
+    SimulationPtr simulation = getSimulation("SerialSimulation");
+    SimFactoryPtr factory = simulation->simulationFactory;
+    unsigned steps = startStepNum;
+    unsigned oldSteps = startStepNum;
+    varStepInitializer->setMaxSteps(1);
+    double variance = (*simulation->simulationFactory)(factory->parameters());
+    double fitness = std::numeric_limits<double>::max();
+
+    do {
+        varStepInitializer->setMaxSteps(steps);
+        fitness = (*factory)(simulation->parameters);
+        oldSteps = steps;
+        LOG(Logger::DBG, "steps: " << steps)
+        steps = ((double) steps / fitness) * (double)goal;
+        if (steps < 1) {
+            steps =1;
+        }
+        LOG(Logger::DBG, "new calculated steps: " << steps);
+        LOG(Logger::DBG, "fitness: " << fitness << " goal: " << goal);
+        LOG(Logger::DBG, "variance: " << variance);
+    } while((!(fitness > goal + variance && fitness < goal - variance ))
+         && (!(oldSteps <= 1 && fitness > goal)));
+
+    return oldSteps;
+}
+
+template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runTest()
+{
+    typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
+
+    for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
+        OPTIMIZER_TYPE optimizer(iter->second->parameters);
+        iter->second->parameters = optimizer(
+            optimizationSteps,
+            *iter->second->simulationFactory);
+        iter->second->fitness = optimizer.getFitness();
+
+        LOG(Logger::DBG, "Result of the " << iter->second->simulationType
+            << ": " << iter->second->fitness << std::endl
+            << "new Parameters:"<< std::endl << iter->second->parameters
+            << std::endl);
+    }
+}
+
+template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
+void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::prepareSimulations()
+{
+    typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
+
+    for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
+        LOG(Logger::DBG, iter->first);
+
+        for (unsigned i = 0; i < writers.size(); ++i) {
+            iter->second->simulationFactory->addWriter(*writers[i].get()->clone());
+        }
+
+        for (unsigned i = 0; i < parallelWriters.size(); ++i) {
+            iter->second->simulationFactory->addWriter(*parallelWriters[i].get()->clone());
+        }
+
+        for (unsigned i = 0; i < steerers.size(); ++i) {
+            iter->second->simulationFactory->addSteerer(*steerers[i].get()->clone());
+        }
+    }
+}
+
+}
+
+#endif
 
 #endif

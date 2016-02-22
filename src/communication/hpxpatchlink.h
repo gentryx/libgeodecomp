@@ -89,7 +89,13 @@ public:
             const std::size_t target) :
             Link(region, Link::genLinkName(basename, source, target)),
             receiverID(HPXReceiver<BufferType>::find(linkName).get())
-        {}
+        {
+            // FIXME: this shouldn't be needed. However, the apply in the put function
+            // currently leads to unnecessary decref/incref requests which limits
+            // scalability. This is a performance bug in HPX and needs to be fixed
+            // eventually
+            receiverID.make_unmanaged();
+        }
 
         virtual void charge(std::size_t next, std::size_t last, std::size_t newStride)
         {

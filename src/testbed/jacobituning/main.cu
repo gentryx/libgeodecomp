@@ -85,65 +85,18 @@ public:
         }
     }
 };
-int normalizeSteps(double goal)
-{
-    std::cout << "in normalizeSteps" << std::endl;
-    int steps = 5;
-    int oldSteps = 5;
-    CellInitializer init(1,1);
-    SerialSimulationFactory<Cell> fab(init);
-    double limit = fab(fab.parameters());
-    double fitness = DBL_MAX;
-
-    do {
-        CellInitializer init(1,steps);
-        SerialSimulationFactory<Cell> fab(init);
-        fitness = fab(fab.parameters());
-        oldSteps = steps;
-        steps = ((double) steps / fitness)* (double)goal;
-        if (steps < 1) {
-            steps =1;
-        }
-        std::cout << "fitness: " << fitness << " goal " << goal << std::endl;
-    } while((!(fitness > goal + limit && fitness < goal - limit )) && (!(oldSteps <= 1 && fitness > goal)));
-    
-    
-    return oldSteps;
-}
 
 void runSimulation()
 {
     std::cout << "runSimulation" << std::endl;
-    int simSteps = 500;
-    int optSteps = normalizeSteps(-0.5);
-    std::cout << "optSteps: " << optSteps << std::endl;
-    AutoTuningSimulator<Cell,PatternOptimizer> autoSim(CellInitializer(1,optSteps));
-    autoSim.setSimulationSteps(20);
-    autoSim.runTest();
+    AutoTuningSimulator<Cell,PatternOptimizer> autoSim(new CellInitializer(1, 500), 20);
+    autoSim.run();
 
-    std::vector<std::string> simulations = autoSim.getSimulationNames();
-    for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
-        std::cout << "Factory Name: " << *iter << " Fitness: " << autoSim.getFitness(*iter) << std::endl
-                  << autoSim.getSimulationParameters(*iter)<< std::endl;
-    }
-    
-    std::cout << "-----------------" << std::endl;
-
-    // looking for the best, of the best, of the best! Sir [MIB I] ;)
-    // TODO to get the best simulator for a long run, the build up costs need to be deducted.
-    optSteps *= 5;
-    double bestFitness = DBL_MAX* -1.0;
-    std::string bestSimulator;
-    for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
-        if (autoSim.getFitness(*iter) >= bestFitness){
-            bestSimulator = autoSim.getSimulatorType(*iter);
-            bestFitness = autoSim.getFitness(*iter);
-        }
-    }
-    std::cout << "Best Simulator: " << bestSimulator << " with fitness: " << bestFitness << std::endl;
-    // let Will Smith running :)
-
-
+    // std::vector<std::string> simulations = autoSim.getSimulationNames();
+    // for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
+    //     std::cout << "Factory Name: " << *iter << " Fitness: " << autoSim.getFitness(*iter) << std::endl
+    //               << autoSim.getSimulationParameters(*iter)<< std::endl;
+    // }
 
 
     // HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(

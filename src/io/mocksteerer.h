@@ -160,7 +160,7 @@ public:
         *events << Event(-1, STEERER_ALL_DONE, -1, true);
     }
 
-    Steerer<CELL_TYPE> *clone()
+    Steerer<CELL_TYPE> *clone() const
     {
         return new MockSteerer(*this);
     }

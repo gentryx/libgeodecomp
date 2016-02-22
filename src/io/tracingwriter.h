@@ -1,14 +1,15 @@
 #ifndef LIBGEODECOMP_IO_TRACINGWRITER_H
 #define LIBGEODECOMP_IO_TRACINGWRITER_H
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/posix_time/time_parsers.hpp>
 #include <iostream>
 #include <stdexcept>
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/time_parsers.hpp>
 
 namespace LibGeoDecomp {
 
