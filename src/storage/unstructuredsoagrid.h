@@ -114,6 +114,8 @@ class UnstructuredSoAGrid : public GridBase<ELEMENT_TYPE, 1>
 public:
     const static int DIM = 1;
 
+    static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<ELEMENT_TYPE>::VALUE;
+
     explicit
     UnstructuredSoAGrid(const CoordBox<DIM> box,
                         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
