@@ -40,7 +40,7 @@ public:
                 sim->run();
             } catch(const std::runtime_error& error){
                 LOG(Logger::INFO,"runtime error detcted")
-                return DBL_MAX *-1.0;
+                return std::numeric_limits<double>.min();
             }
         }
 

@@ -1,12 +1,9 @@
-// vim: noai:ts=4:sw=4:expandtab
 #include <libgeodecomp/misc/simplexoptimizer.h>
 #include <cfloat>
 #include <libgeodecomp/io/logger.h>
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
-
-//#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 namespace LibGeoDecomp{
 
@@ -260,7 +257,8 @@ void SimplexOptimizer::initSimplex(SimulationParameters params)
 std::size_t SimplexOptimizer::minInSimplex()
 {
     std::size_t retval = 0;
-    double min = DBL_MAX;
+    double min = std::numeric_limits<double>.max();
+
     for (std::size_t i = 0; i < simplex.size(); ++i) {
         if (min >= simplex[i].getFitness()) {
             min = simplex[i].getFitness();
@@ -273,7 +271,8 @@ std::size_t SimplexOptimizer::minInSimplex()
 std::size_t SimplexOptimizer::maxInSimplex()
 {
     std::size_t retval = 0;
-    double max = DBL_MIN;
+    double max = std::numeric_limits<double>.min();
+
     for (std::size_t i = 0; i < simplex.size(); ++i) {
         if (max <= simplex[i].getFitness()) {
             max = simplex[i].getFitness();
@@ -366,10 +365,12 @@ bool SimplexOptimizer::checkConvergence()
     tmp *= ((double) 1 / (n + 1.0));
 #endif
 
-    LOG(Logger::DBG, "Convergencecheck: " << tmp << " epsilon^2: " << (epsilon * epsilon))
-    if(tmp < epsilon * epsilon){
+    LOG(Logger::DBG, "Convergencecheck: " << tmp << " epsilon^2: " << (epsilon * epsilon));
+
+    if (tmp < epsilon * epsilon){
         return true;
     }
+
     return false;
 
 }
