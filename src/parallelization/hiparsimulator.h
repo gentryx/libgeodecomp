@@ -245,7 +245,7 @@ private:
      * comprised of multiple genrations of nodes or x86 clusters with
      * additional Xeon Phi accelerators).
      */
-    std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double> &rankSpeeds) const
+    std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double>& rankSpeeds) const
     {
         std::size_t size = rankSpeeds.size();
         double totalSum = sum(rankSpeeds);
