@@ -83,7 +83,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         MySoACell1 defaultCell(5);
         MySoACell1 edgeCell(-1);
-        Coord<1> dim(100);
+        CoordBox<1> dim(Coord<1>(0), Coord<1>(100));
 
         UnstructuredSoAGrid<MySoACell1> grid(dim, defaultCell, edgeCell);
 
@@ -99,7 +99,7 @@ public:
     void testGetAndSet()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        UnstructuredSoAGrid<MySoACell1> grid(Coord<1>(10));
+        UnstructuredSoAGrid<MySoACell1> grid(CoordBox<1>(Coord<1>(), Coord<1>(10)));
         MySoACell1 elem1(1);
         MySoACell1 elem2(2);
         grid.set(Coord<1>(5), elem1);
@@ -116,7 +116,7 @@ public:
         Selector<MySoACell1> valSelector(&MySoACell1::val, "val");
         MySoACell1 defaultCell(5);
         MySoACell1 edgeCell(-1);
-        Coord<1> dim(100);
+        CoordBox<1> dim(Coord<1>(), Coord<1>(100));
         UnstructuredSoAGrid<MySoACell1> grid(dim, defaultCell, edgeCell);
 
         Region<1> region;
@@ -157,7 +157,7 @@ public:
         Selector<MySoACell2> valSelector(&MySoACell2::y, "y");
         MySoACell2 defaultCell(5, 6, 7);
         MySoACell2 edgeCell(-1, -2, -3);
-        Coord<1> dim(100);
+        CoordBox<1> dim(Coord<1>(), Coord<1>(100));
         UnstructuredSoAGrid<MySoACell2> grid(dim, defaultCell, edgeCell);
 
         Region<1> region;
