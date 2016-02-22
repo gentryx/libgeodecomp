@@ -1,8 +1,9 @@
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/simplexoptimizer.h>
 #include <cfloat>
-#include <libgeodecomp/io/logger.h>
-#include <sstream>
 #include <iostream>
+#include <limits>
+#include <sstream>
 #include <stdexcept>
 
 namespace LibGeoDecomp{
@@ -257,7 +258,7 @@ void SimplexOptimizer::initSimplex(SimulationParameters params)
 std::size_t SimplexOptimizer::minInSimplex()
 {
     std::size_t retval = 0;
-    double min = std::numeric_limits<double>.max();
+    double min = std::numeric_limits<double>::max();
 
     for (std::size_t i = 0; i < simplex.size(); ++i) {
         if (min >= simplex[i].getFitness()) {
@@ -271,7 +272,7 @@ std::size_t SimplexOptimizer::minInSimplex()
 std::size_t SimplexOptimizer::maxInSimplex()
 {
     std::size_t retval = 0;
-    double max = std::numeric_limits<double>.min();
+    double max = std::numeric_limits<double>::min();
 
     for (std::size_t i = 0; i < simplex.size(); ++i) {
         if (max <= simplex[i].getFitness()) {

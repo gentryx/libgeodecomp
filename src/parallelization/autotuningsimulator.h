@@ -28,7 +28,7 @@ public:
         const std::string& name,
         SimFactoryPtr simFactory,
         SimulationParameters param,
-        double fit = std::numeric_limits<double>.max()):
+        double fit = std::numeric_limits<double>::max()):
         simulationType(name),
         simulationFactory(simFactory),
         parameters(param),
@@ -182,17 +182,19 @@ void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::run()
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 std::string AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getBestSim()
 {
-std::string bestSimulation;
-double tmpFitness = std::numeric_limits<double>.min();
-typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
-for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
-    if (iter->second->fitness > tmpFitness) {
-        tmpFitness = iter->second->fitness;
-        bestSimulation = iter->first;
+    std::string bestSimulation;
+    double tmpFitness = std::numeric_limits<double>::min();
+    typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
+
+    for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
+        if (iter->second->fitness > tmpFitness) {
+            tmpFitness = iter->second->fitness;
+            bestSimulation = iter->first;
+        }
     }
-}
-LOG(Logger::DBG, "bestSimulation: " << bestSimulation)
-return bestSimulation;
+
+    LOG(Logger::DBG, "bestSimulation: " << bestSimulation);
+    return bestSimulation;
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
@@ -216,7 +218,8 @@ unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double g
     unsigned oldSteps = startStepNum;
     varStepInitializer->setMaxSteps(1);
     double variance = (*simulation->simulationFactory)(factory->parameters());
-    double fitness = std::numeric_limits<double>.max();
+    double fitness = std::numeric_limits<double>::max();
+
     do {
         varStepInitializer->setMaxSteps(steps);
         fitness = (*factory)(simulation->parameters);

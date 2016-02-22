@@ -45,7 +45,7 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_CPP14
         unsigned maxSteps = initializerProxy->maxSteps();
-        double oldFitness = std::numeric_limits<double>.min();
+        double oldFitness = std::numeric_limits<double>::min();
         double aktFitness = 0.0;
 
         for (unsigned i = 10; i < maxSteps; i *= 2) {
