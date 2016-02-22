@@ -78,8 +78,23 @@ private:
     std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
     std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
 
-    // fixme: why pass a string here and not a SimFactory instance? also: parameters and SimFactory should be added simultaneously
-    void addNewSimulation(const std::string& name, const std::string& typeOfSimulation);
+    template<typename FACTORY_TYPE>
+    void addSimulation(const std::string& name, const FACTORY_TYPE& factory)
+    {
+        SimFactoryPtr simFactoryPtr(new FACTORY_TYPE(factory));
+        SimulationPtr simulationPtr(new Simulation(
+                                        name,
+                                        simFactoryPtr,
+                                        simFactoryPtr->parameters()));
+        simulations[name] = simulationPtr;
+    }
+
+    template<typename FACTORY_TYPE>
+    void addSimulation(const FACTORY_TYPE& factory)
+    {
+        addSimulation(factory.name(), factory);
+    }
+
     void setParameters(const SimulationParameters& params, const std::string& name);
 
     std::string getBestSim();
@@ -107,15 +122,14 @@ AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::AutoTuningSimulator(Initializer<
     optimizationSteps(optimizationSteps),
     varStepInitializer(new VarStepInitializerProxy<CELL_TYPE>(initializer))
 {
-    addNewSimulation("SerialSimulation", "SerialSimulation");
-
+    addSimulation(SerialSimulationFactory<CELL_TYPE>(varStepInitializer));
 #ifdef LIBGEODECOMP_WITH_THREADS
-    addNewSimulation("CacheBlockingSimulation", "CacheBlockingSimulation");
+    addSimulation(CacheBlockingSimulationFactory<CELL_TYPE>(varStepInitializer));
 #endif
 
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
-    addNewSimulation("CudaSimulation", "CudaSimulation");
+    addSimulation(CudaSimulationFactory<CELL_TYPE>(varStepInitializer));
 #endif
 #endif
 }
@@ -137,51 +151,6 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addSteerer(const Steerer<CELL_TYPE> *steerer)
 {
     steerers.push_back(boost::shared_ptr<Steerer<CELL_TYPE> >(steerer));
-}
-
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addNewSimulation(
-    const std::string& name,
-    const std::string& typeOfSimulation)
-{
-    // fixme: if we already have specialized factories, we should not have this additional manual type switch
-    if (typeOfSimulation == "SerialSimulation") {
-        SimFactoryPtr simFac_p(new SerialSimulationFactory<CELL_TYPE>(varStepInitializer));
-        SimulationPtr sim_p(new Simulation(
-                typeOfSimulation,
-                simFac_p,
-                simFac_p->parameters()));
-        simulations[name] = sim_p;
-        return;
-    }
-
-#ifdef LIBGEODECOMP_WITH_THREADS
-    if (typeOfSimulation == "CacheBlockingSimulation") {
-        SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(varStepInitializer));
-        SimulationPtr sim_p(new Simulation(
-                typeOfSimulation,
-                simFac_p,
-                simFac_p->parameters()));
-        simulations[name] = sim_p;
-        return;
-    }
-#endif
-
-#ifdef __CUDACC__
-#ifdef LIBGEODECOMP_WITH_CUDA
-     if (typeOfSimulation == "CudaSimulation") {
-        SimFactoryPtr simFac_p(new CudaSimulationFactory<CELL_TYPE>(varStepInitializer));
-        SimulationPtr sim_p(new Simulation(
-                typeOfSimulation,
-                simFac_p,
-                simFac_p->parameters()));
-        simulations[name] = sim_p;
-        return;
-     }
-#endif
-#endif
-
-    throw std::invalid_argument("SimulationFactory::addNewSimulation(): unknown simulator type");
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>

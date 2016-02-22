@@ -141,7 +141,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
-        // This test don't test SimulationParameters!!!!
+        // This test doesn't test SimulationParameters
         SimulationParameters params;
         params.addParameter("BlockDimX", 1, 64);
         params.addParameter("BlockDimY", 1, 6);
@@ -166,8 +166,8 @@ public:
             new SimFabTestInitializer(dim, maxSteps));
         ats.simulations.clear();
         ats.addNewSimulation(
-            "SerialSimulation",
-            "SerialSimulation");
+            "SerialSimulator",
+            "SerialSimulator");
         std::ostringstream buf;
         ats.addWriter(static_cast<Writer<SimFabTestCell> *>(new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
         ats.run();

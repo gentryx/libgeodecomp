@@ -29,7 +29,7 @@ public:
     {
         LOG(Logger::DBG, "SimulationFactory::operator(params)");
         boost::shared_ptr<ClonableInitializer<CELL> > init(SimulationFactory<CELL>::initializer->clone());
-        Simulator<CELL> *sim = buildSimulator(init, params);
+        std::unique_ptr<Simulator<CELL> >(buildSimulator(init, params));
         LOG(Logger::DBG, "sim get buildSimulator(initializer->clone(), params)")
         Chronometer chrono;
 
@@ -40,14 +40,16 @@ public:
                 sim->run();
             } catch(const std::runtime_error& error){
                 LOG(Logger::INFO,"runtime error detcted")
-                delete sim;
                 return DBL_MAX *-1.0;
             }
         }
 
-        LOG(Logger::DBG,"now deleting sim")
-        delete sim;
         return chrono.interval<TimeCompute>() * -1.0;
+    }
+
+    std::string name() const
+    {
+        return "CudaSimulator";
     }
 
 protected:

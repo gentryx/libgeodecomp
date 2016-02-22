@@ -164,9 +164,9 @@ public:
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
         ats.simulations.clear();
-        ats.addNewSimulation(
+        ats.addSimulation(
             "SerialSimulation",
-            "SerialSimulation");
+            SerialSimulationFactory<SimFabTestCell>(ats.varStepInitializer));
         std::ostringstream buf;
         ats.addWriter(static_cast<Writer<SimFabTestCell> *>(new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
         ats.run();

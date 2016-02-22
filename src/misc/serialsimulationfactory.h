@@ -23,6 +23,11 @@ public:
         // SerialSimulator has no parameters to optimize
     }
 
+    std::string name() const
+    {
+        return "SerialSimulator";
+    }
+
 protected:
     virtual Simulator<CELL> *buildSimulator(
         boost::shared_ptr<ClonableInitializer<CELL> > initializer,

@@ -26,6 +26,11 @@ public:
         SimulationFactory<CELL>::parameterSet.addParameter("PipelineLength",  1,   30);
     }
 
+    std::string name() const
+    {
+        return "CacheBlockingSimulator";
+    }
+
 protected:
     virtual Simulator<CELL> *buildSimulator(
         boost::shared_ptr<ClonableInitializer<CELL> > initializer,
