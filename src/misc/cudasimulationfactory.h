@@ -28,7 +28,7 @@ public:
     virtual double operator()(const SimulationParameters& params)
     {
         boost::shared_ptr<ClonableInitializer<CELL> > init(SimulationFactory<CELL>::initializer->clone());
-        boost::unique_ptr<Simulator<CELL> > sim(buildSimulator(init, params));
+        boost::shared_ptr<Simulator<CELL> > sim(buildSimulator(init, params));
         Chronometer chrono;
 
         {
