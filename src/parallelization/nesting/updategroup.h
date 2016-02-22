@@ -18,7 +18,7 @@ namespace LibGeoDecomp {
  * blocks for a Simulator which implements LibGeoDecomp's hierarchical
  * parallelization for tightly coupled simulations. To be more
  * specific: this class sets up the PartitionManager (which decides
- * the domain decompotition) and, based on that, the PatchLinks (for
+ * the domain decomposition) and, based on that, the PatchLinks (for
  * ghost zone communication) and the Stepper (which handles the actual
  * updates of the local subdomain).
  */
