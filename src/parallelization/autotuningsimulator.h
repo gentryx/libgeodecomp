@@ -95,8 +95,6 @@ private:
         addSimulation(factory.name(), factory);
     }
 
-    void setParameters(const SimulationParameters& params, const std::string& name);
-
     std::string getBestSim();
 
     void runToCompletion(const std::string& optimizerName);
@@ -151,12 +149,6 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addSteerer(const Steerer<CELL_TYPE> *steerer)
 {
     steerers.push_back(boost::shared_ptr<Steerer<CELL_TYPE> >(steerer));
-}
-
-template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::setParameters(const SimulationParameters& params, const std::string& name)
-{
-    getSimulation(name)->parameters = params;
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
