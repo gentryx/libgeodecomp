@@ -99,9 +99,8 @@ public:
         params.addParameter("WavefrontWidth", 1, 300);
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
-        ats.addNewSimulation("1.CacheBlockingSimulator",
-            "CacheBlockingSimulation");
-        ats.setParameters(params, "1.CacheBlockingSimulator");
+        ats.addSimulation("1.CacheBlockingSimulator", CacheBlockingSimulationFactory<SimFabTestCell>(ats.varStepInitializer));
+        ats.getSimulation("1.CacheBlockingSimulator")->parameters = params;
         ats.run();
 #endif
 #endif
@@ -122,7 +121,7 @@ public:
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
 
-        ats.setParameters(params, "CacheBlockingSimulation");
+        ats.getSimulation("CacheBlockingSimulation")->parameters = params;
         ats.run();
 #endif
 #endif
@@ -135,22 +134,8 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_THREADS
 #ifdef LIBGEODECOMP_WITH_CPP14
-        AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
-            new SimFabTestInitializer(dim, maxSteps));
-        // This test don't test SimulationParameters!!!!
-        SimulationParameters params;
-        params.addParameter("WavefrontWidth", 1, 300);
-        params.addParameter("WavefrontHeight", 1, 300);
-        params.addParameter("PipelineLength", 1, 25);
-        // The e in CacheBlockingSimlator is missing...
-        TS_ASSERT_THROWS(
-            ats.addNewSimulation("1.CacheBlockingSimulator",
-                                 "CachBlockingSimulation"),
-            std::invalid_argument);
-        TS_ASSERT_THROWS(
-            ats.setParameters(params, "1.CacheBlockingSimulator"),
-            std::invalid_argument);
-        TS_ASSERT_THROWS(ats.setParameters(params, "NoSimulator"), std::invalid_argument);
+        AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(new SimFabTestInitializer(dim, maxSteps));
+        TS_ASSERT_THROWS(ats.getSimulation("NoSimulator"), std::invalid_argument);
 #endif
 #endif
     }

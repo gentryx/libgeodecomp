@@ -101,13 +101,7 @@ public:
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
         ats.simulations.clear();
-        SimulationParameters params;
-        params.addParameter("BlockDimX", 1, 128);
-        params.addParameter("BlockDimY", 1, 8);
-        params.addParameter("BlockDimZ", 1, 8);
-        ats.addNewSimulation("1.CudaSimulator",
-            "CudaSimulation");
-        ats.setParameters(params, "1.CudaSimulator");
+        ats.addSimulation("1.CudaSimulator", CudaSimulationFactory<SimFabTestCell>(ats.varStepInitializer));
         ats.run();
 #endif
 #endif
@@ -127,7 +121,7 @@ public:
         params.addParameter("BlockDimY", 1, 6);
         params.addParameter("BlockDimZ", 1, 6);
 
-        ats.setParameters(params, "CudaSimulation");
+        ats.getSimulation("CudaSimulator")->parameters = params;
         ats.run();
 #endif
     }
@@ -141,17 +135,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
-        // This test doesn't test SimulationParameters
-        SimulationParameters params;
-        params.addParameter("BlockDimX", 1, 64);
-        params.addParameter("BlockDimY", 1, 6);
-        params.addParameter("BlockDimZ", 1, 6);
-        // A JuliaSimulator is not valid
-        TS_ASSERT_THROWS(ats.addNewSimulation("1.CudaSimulator",
-            "JuliaSimulation"), std::invalid_argument);
-        TS_ASSERT_THROWS(ats.setParameters(params, "1.CudaSimulator"),
-            std::invalid_argument);
-        TS_ASSERT_THROWS(ats.setParameters(params, "NoSimulator"), std::invalid_argument);
+        TS_ASSERT_THROWS(ats.getSimulation("1.CudaSimulator"), std::invalid_argument);
+        TS_ASSERT_THROWS(ats.getSimulation("NoSimulator"), std::invalid_argument);
 #endif
 #endif
     }
@@ -165,9 +150,10 @@ public:
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
         ats.simulations.clear();
-        ats.addNewSimulation(
+        ats.addSimulation(
             "SerialSimulator",
-            "SerialSimulator");
+            SerialSimulationFactory<SimFabTestCell>(ats.varStepInitializer));
+
         std::ostringstream buf;
         ats.addWriter(static_cast<Writer<SimFabTestCell> *>(new TracingWriter<SimFabTestCell>(1, 100, 0, buf)));
         ats.run();
