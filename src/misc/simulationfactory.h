@@ -52,27 +52,20 @@ public:
      */
     Simulator<CELL> *operator()()
     {
-        LOG(Logger::DBG, "SimulationFactory::operator()")
         Simulator<CELL> *sim = buildSimulator(initializer, parameterSet);
         return sim;
     }
 
-    // fixme: move this functionality to another class, possibly inside AutoTuningSimulator?
     virtual double operator()(const SimulationParameters& params)
     {
-        LOG(Logger::DBG, "SimulationFactory::operator(params)");
-        Simulator<CELL> *sim = buildSimulator(initializer, params);
-        LOG(Logger::DBG, "sim get buildSimulator(initializer->clone(), params)")
+        std::unique_ptr<Simulator<CELL> > sim(buildSimulator(initializer, params));
         Chronometer chrono;
 
         {
             TimeCompute t(&chrono);
-            LOG(Logger::DBG,"next step is sim->run()")
             sim->run();
         }
 
-        LOG(Logger::DBG,"now deleting sim")
-        delete sim;
         return chrono.interval<TimeCompute>() * -1.0;
     }
 

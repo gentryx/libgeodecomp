@@ -229,9 +229,7 @@ return bestSimulation;
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::runToCompletion(const std::string& optimizerName)
 {
-    // fixme: rework this
-    boost::shared_ptr<Initializer<CELL_TYPE> > originalInitializer = varStepInitializer->getInitializer();
-    varStepInitializer->setMaxSteps(originalInitializer->maxSteps());
+    varStepInitializer->resetMaxSteps();
     (*getSimulation(optimizerName)->simulationFactory)(simulations[optimizerName]->parameters);
 }
 
