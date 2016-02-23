@@ -225,7 +225,8 @@ private:
                 box.origin,
                 box.dimensions,
                 0,
-                weights));
+                weights,
+                initializer->getAdjacency()));
 
         std::vector<hpx::future<boost::shared_ptr<UpdateGroupType> > > updateGroupCreationFutures;
 
