@@ -466,6 +466,7 @@ public:
                       << 96
                       << 100
                       << 101;
+
         expectedEvents << WRITER_INITIALIZED
                        << WRITER_STEP_FINISHED
                        << WRITER_STEP_FINISHED
@@ -489,7 +490,7 @@ public:
                        << WRITER_STEP_FINISHED
                        << WRITER_ALL_DONE;
 
-        sim->addWriter(new ParallelTestWriter(period, expectedSteps, expectedEvents));
+        sim->addWriter(new ParallelTestWriter<>(period, expectedSteps, expectedEvents));
         sim->run();
     }
 

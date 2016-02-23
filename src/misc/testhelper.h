@@ -150,8 +150,8 @@
                                                                         \
         ollKorrect &= assertGrid.getEdge().edgeCell();                  \
         ollKorrect &= assertGrid.getEdge().valid();                     \
-        Region<_GRID_TYPE::DIM>::Iterator end = assertRegion.end();     \
-        for (Region<_GRID_TYPE::DIM>::Iterator i = assertRegion.begin(); i != end; ++i) { \
+        typename Region<_GRID_TYPE::DIM>::Iterator end = assertRegion.end(); \
+        for (typename Region<_GRID_TYPE::DIM>::Iterator i = assertRegion.begin(); i != end; ++i) { \
             bool flag = assertGrid.get(*i).valid();                     \
             if (!flag) {                                                \
                 std::cout << "TestCell not valid\n";                    \

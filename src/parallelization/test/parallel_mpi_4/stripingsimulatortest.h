@@ -428,7 +428,7 @@ public:
                        << WRITER_STEP_FINISHED
                        << WRITER_ALL_DONE;
 
-        testSim->addWriter(new ParallelTestWriter(period, expectedSteps, expectedEvents));
+        testSim->addWriter(new ParallelTestWriter<>(period, expectedSteps, expectedEvents));
         testSim->run();
     }
 

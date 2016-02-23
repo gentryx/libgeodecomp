@@ -13,17 +13,20 @@ namespace LibGeoDecomp {
  * This class serves to verify the callback behavior of
  * implementations of DistributedSimulator.
  */
-class ParallelTestWriter : public Clonable<ParallelWriter<TestCell<2> >, ParallelTestWriter>
+template<typename CELL = TestCell<2> >
+class ParallelTestWriter : public Clonable<ParallelWriter<CELL>, ParallelTestWriter<CELL> >
 {
 public:
-    typedef ParallelWriter<TestCell<2> >::GridType GridType;
-    using ParallelWriter<TestCell<2> >::region;
+    using typename ParallelWriter<CELL>::GridType;
+    using typename ParallelWriter<CELL>::Topology;
+    using ParallelWriter<CELL>::region;
+    static const int DIM = Topology::DIM;
 
     ParallelTestWriter(
         const unsigned period,
         const std::vector<unsigned>& expectedSteps,
         const std::vector<WriterEvent> expectedEvents)  :
-        Clonable<ParallelWriter<TestCell<2> >, ParallelTestWriter>("", period),
+        Clonable<ParallelWriter<CELL>, ParallelTestWriter>("", period),
         expectedSteps(expectedSteps),
         expectedEvents(expectedEvents),
         lastStep(-1)
@@ -48,7 +51,7 @@ public:
         }
         unaccountedRegion -= validRegion;
 
-        unsigned myExpectedCycle = APITraits::SelectNanoSteps<TestCell<2> >::VALUE * step;
+        unsigned myExpectedCycle = APITraits::SelectNanoSteps<CELL>::VALUE * step;
         TS_ASSERT_TEST_GRID_REGION(GridType, grid, validRegion, myExpectedCycle);
 
         TS_ASSERT(!expectedSteps.empty());
@@ -80,7 +83,7 @@ private:
     std::vector<unsigned> expectedSteps;
     std::vector<WriterEvent> expectedEvents;
     unsigned lastStep;
-    Region<2> unaccountedRegion;
+    Region<DIM> unaccountedRegion;
 };
 
 }
