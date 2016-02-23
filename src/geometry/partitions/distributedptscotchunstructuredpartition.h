@@ -1,4 +1,3 @@
-
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_DISTRIBUTEDPTSCOTCHUNSTRUCTUREDPARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_DISTRIBUTEDPTSCOTCHUNSTRUCTUREDPARTITION_H
 
@@ -207,10 +206,10 @@ private:
 
         // send partial regions to all other nodes so they can build the complete regions
         std::size_t numIndices = indices.size();
-        for (size_t j = 0; j < numPartitions; ++j) {
+        for (std::size_t j = 0; j < numPartitions; ++j) {
             if (j != MPILayer().rank()) { // dont send own regions to self
                 // send all partial regions
-                for (size_t k = 0; k < numPartitions; ++k)
+                for (std::size_t k = 0; k < numPartitions; ++k)
                 {
                     MPILayer().sendRegion(partials.at(k), j);
                 }
@@ -220,7 +219,7 @@ private:
                     if (i == j) continue; // we won't receive regions from ourself
 
                     // receive parts&  build up own regions
-                    for (size_t k = 0; k < numPartitions; ++k) {
+                    for (std::size_t k = 0; k < numPartitions; ++k) {
                         Region<1> received;
                         MPILayer().recvRegion(&received, i);
 
