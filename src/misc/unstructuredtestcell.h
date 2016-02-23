@@ -71,7 +71,7 @@ public:
     template<typename HOOD_OLD, typename HOOD_NEW>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
     {
-        // fixme: index is actually the index in the chunkVector, not necessarily a cell id :-(
+        // Important: index is actually the index in the chunkVector, not necessarily a cell id.
         for (; hoodOld.index() < indexEnd / HOOD_OLD::ARITY; ++hoodOld) {
 
             // assemble weight maps:
