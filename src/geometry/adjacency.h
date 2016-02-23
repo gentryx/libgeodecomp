@@ -7,7 +7,11 @@
 
 namespace LibGeoDecomp {
 
-
+/**
+ * This class defines an interface for classes which model edge sets
+ * for directed graphs. Unstructured grids use the adjacency to define
+ * their topoloy.
+ */
 class Adjacency
 {
 public:

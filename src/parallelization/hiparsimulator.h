@@ -81,6 +81,7 @@ public:
     }
 };
 
+// fixme: can we eliminate these classes?
 template<int DIM>
 class PartitionBuilder<DistributedPTScotchUnstructuredPartition<DIM> >
 {

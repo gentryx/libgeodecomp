@@ -73,6 +73,12 @@ inline void prettyPrint(
 
 }
 
+/**
+ * This class will decompose an unstructured grid using PT-SCOTCH's
+ * parallel decomposition algorithm. Subdomains of each node will end
+ * up scattered across multiple ranks, but this class leverages MPI to
+ * gather them.
+ */
 template<int DIM>
 class DistributedPTScotchUnstructuredPartition : public Partition<DIM>
 {

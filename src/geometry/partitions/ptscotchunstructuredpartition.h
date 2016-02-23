@@ -16,6 +16,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This class is like DistributedPTScotchUnstructuredPartition, but
+ * relies on PT-SCOTCH's serial decomposition. This limits
+ * scalability, but decouples the code from MPI.
+ */
 template<int DIM>
 class PTScotchUnstructuredPartition : public Partition<DIM>
 {

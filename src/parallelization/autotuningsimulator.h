@@ -19,6 +19,10 @@ namespace LibGeoDecomp {
 
 namespace AutoTuningSimulatorHelpers {
 
+/**
+ * A helper flass which encapsulates a simulation factory and the
+ * associated fitness values.
+ */
 template<typename CELL_TYPE>
 class Simulation{
 public:

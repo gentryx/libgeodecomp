@@ -9,13 +9,12 @@
 
 #ifdef LIBGEODECOMP_WITH_CPP14
 
-/**
- * The VarStepInitializerProxy is a class to rig the max Steps.
- * It provide the possibility to change the max steps of an exiting
- * intinializer.
- */
 namespace LibGeoDecomp {
 
+/**
+ * This class wraps another initializer but overrides its max steps
+ * setting. This way a simulation can be run piece-wise.
+ */
 template<typename CELL>
 class VarStepInitializerProxy : public ClonableInitializer<CELL>
 {

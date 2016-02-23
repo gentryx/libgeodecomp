@@ -10,6 +10,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * As its name implies this class helps with instantiating
+ * CudaSimulators and lists all drivable/optimizable parameters.
+ */
 template<typename CELL>
 class CudaSimulationFactory : public SimulationFactory<CELL>
 {

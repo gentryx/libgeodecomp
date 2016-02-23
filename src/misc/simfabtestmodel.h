@@ -6,6 +6,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This test model is used to verify that our simulation factories are
+ * correctly instantiating Simulators.
+ */
 class SimFabTestCell
 {
 public:
@@ -47,6 +51,10 @@ public:
     double temp;
 };
 
+/**
+ * The SimFabTestInitializer is only used in conjunction with
+ * SimFabTestCell and exists solely for for testing purposes.
+ */
 class SimFabTestInitializer : public SimpleInitializer<SimFabTestCell>
 {
 public:

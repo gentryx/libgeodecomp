@@ -28,6 +28,12 @@ class SoAAPI :
 
 }
 
+/**
+ * This class is the counterpart to TestCell for structured grids. We
+ * use this class to verify that our Simulators correcly invoke
+ * updates on unstructed grids and that ghost zone synchronization is
+ * working as expected.
+ */
 template<typename ADDITIONAL_API = UnstructuredTestCellHelpers::EmptyAPI, typename OUTPUT = TestCellHelpers::StdOutput>
 class UnstructuredTestCell
 {

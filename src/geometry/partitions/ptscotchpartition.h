@@ -12,6 +12,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This class decomposes structured grids via PT-SCOTCH. It exports a
+ * graph that corresponds to the structured grid's topology to SCOTCH
+ * and then assembles the coordinate lists into Regions.
+ */
 template<int DIM>
 class PTScotchPartition : public Partition<DIM>
 {
