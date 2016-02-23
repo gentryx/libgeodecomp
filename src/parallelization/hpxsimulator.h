@@ -14,8 +14,7 @@
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <libgeodecomp/parallelization/distributedsimulator.h>
-#include <libgeodecomp/parallelization/nesting/eventpoint.h>
+#include <libgeodecomp/parallelization/hierarchicalsimulator.h>
 #include <libgeodecomp/parallelization/nesting/hpxupdategroup.h>
 #include <libgeodecomp/parallelization/nesting/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/nesting/steereradapter.h>
@@ -39,13 +38,20 @@ template<
     class PARTITION,
     class STEPPER=LibGeoDecomp::VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableHPX>
 >
-class HpxSimulator : public DistributedSimulator<CELL_TYPE>
+class HpxSimulator : public HierarchicalSimulator<CELL_TYPE>
 {
 public:
     friend class HpxSimulatorTest;
     using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
+    using HierarchicalSimulator<CELL_TYPE>::handleEvents;
+    using HierarchicalSimulator<CELL_TYPE>::initialWeights;
+    using HierarchicalSimulator<CELL_TYPE>::events;
+    using HierarchicalSimulator<CELL_TYPE>::initEvents;
+    using HierarchicalSimulator<CELL_TYPE>::timeToLastEvent;
+    using HierarchicalSimulator<CELL_TYPE>::timeToNextEvent;
+
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
-    typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
+    typedef LibGeoDecomp::HierarchicalSimulator<CELL_TYPE> ParentType;
     typedef HPXUpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
     typedef LibGeoDecomp::ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE> ParallelWriterAdapterType;
@@ -70,10 +76,9 @@ public:
         const unsigned loadBalancingPeriod = 1,
         const unsigned ghostZoneWidth = 1,
         std::string basename = "/HPXSimulator") :
-        ParentType(initializer),
+        ParentType(initializer, loadBalancingPeriod * NANO_STEPS),
         updateGroupSpeeds(updateGroupSpeeds),
         balancer(balancer),
-        loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
         basename(basename),
         rank(hpx::get_locality_id())
@@ -193,10 +198,8 @@ private:
 
     std::vector<double> updateGroupSpeeds;
     boost::shared_ptr<LoadBalancer> balancer;
-    unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
     std::string basename;
-    EventMap events;
 
     std::vector<boost::shared_ptr<UpdateGroupType> > updateGroups;
     std::vector<double> globalUpdateGroupSpeeds;
@@ -245,62 +248,10 @@ private:
         initEvents();
     }
 
-    // fixme: reduce duplication from HiParSimulator
-    inline void initEvents()
-    {
-        events.clear();
-        long lastNanoStep = initializer->maxSteps() * NANO_STEPS;
-        events[lastNanoStep] << END;
-
-        insertNextLoadBalancingEvent();
-    }
-
-    inline void handleEvents()
-    {
-        if (currentNanoStep() > events.begin()->first) {
-            throw std::logic_error("stale event found, should have been handled previously");
-        }
-        if (currentNanoStep() < events.begin()->first) {
-            // don't need to handle future events now
-            return;
-        }
-
-        const EventSet& curEvents = events.begin()->second;
-        for (EventSet::const_iterator i = curEvents.begin(); i != curEvents.end(); ++i) {
-            if (*i == LOAD_BALANCING) {
-                balanceLoad();
-                insertNextLoadBalancingEvent();
-            }
-        }
-        events.erase(events.begin());
-    }
-
-    inline void insertNextLoadBalancingEvent()
-    {
-        long nextLoadBalancing = currentNanoStep() + loadBalancingPeriod;
-        events[nextLoadBalancing] << LOAD_BALANCING;
-    }
-
     inline long currentNanoStep() const
     {
         std::pair<int, int> now = updateGroups[0]->currentStep();
         return (long)now.first * NANO_STEPS + now.second;
-    }
-
-    /**
-     * returns the number of nano steps until the next event needs to be handled.
-     */
-    inline long timeToNextEvent() const
-    {
-        return events.begin()->first - currentNanoStep();
-    }
-
-    /**
-     * returns the number of nano steps until simulation end.
-     */
-    inline long timeToLastEvent() const
-    {
-        return  events.rbegin()->first - currentNanoStep();
     }
 
     inline void balanceLoad()
@@ -318,34 +269,6 @@ private:
         }
 
         hpx::lcos::wait_all(std::move(updateFutures));
-    }
-
-    /**
-     * computes an initial weight distribution of the work items (i.e.
-     * number of cells in the simulation space). rankSpeeds gives an
-     * estimate of the relative performance of the different ranks
-     * (good when running on heterogeneous systems, e.g. clusters
-     * comprised of multiple genrations of nodes or x86 clusters with
-     * additional Xeon Phi accelerators).
-     */
-    // fixme: stolen from HiParSimulator
-    std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double> rankSpeeds) const
-    {
-        std::size_t size = rankSpeeds.size();
-        double totalSum = sum(rankSpeeds);
-        std::vector<std::size_t> ret(size);
-
-        std::size_t lastPos = 0;
-        double partialSum = 0.0;
-        for (std::size_t i = 0; i < size - 1; ++i) {
-            partialSum += rankSpeeds[i];
-            std::size_t nextPos = items * partialSum / totalSum;
-            ret[i] = nextPos - lastPos;
-            lastPos = nextPos;
-        }
-        ret[size - 1] = items - lastPos;
-
-        return ret;
     }
 
     boost::shared_ptr<UpdateGroupType> createUpdateGroup(
