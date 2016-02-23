@@ -25,6 +25,7 @@ public:
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,
         const SizeTVec weights = SizeTVec(),
+        const boost::shared_ptr<Adjacency>& adjacency = boost::make_shared<RegionBasedAdjacency>(),
         const Coord<DIM>& dimWeights = Coord<DIM>::diagonal(1)) :
         Partition<DIM>(0, weights),
         origin(origin),

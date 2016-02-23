@@ -24,7 +24,8 @@ public:
         const Coord<1> origin,
         const Coord<1> /* unused: dimensions */,
         const long offset,
-        const std::vector<std::size_t>& weights) :
+        const std::vector<std::size_t>& weights,
+        const boost::shared_ptr<Adjacency>& /* unused: adjacency */ = boost::make_shared<RegionBasedAdjacency>()) :
         Partition<1>(origin.x() + offset, weights)
     {}
 

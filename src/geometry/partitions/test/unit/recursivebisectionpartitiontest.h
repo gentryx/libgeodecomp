@@ -45,6 +45,7 @@ public:
             dimensions,
             0,
             weights,
+            boost::make_shared<RegionBasedAdjacency>(),
             Coord<3>::diagonal(1));
 
         TS_ASSERT_EQUALS(
@@ -107,6 +108,7 @@ public:
             dimensions,
             0,
             weights,
+            boost::make_shared<RegionBasedAdjacency>(),
             dimWeights);
 
         TS_ASSERT_EQUALS(

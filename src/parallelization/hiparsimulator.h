@@ -20,90 +20,6 @@
 #include <boost/make_shared.hpp>
 
 namespace LibGeoDecomp {
-namespace HiParSimulatorHelpers {
-
-// fixme: can we eliminate these classes?
-template<typename PARTITION_TYPE>
-class PartitionBuilder
-{
-public:
-    template<int DIM>
-    boost::shared_ptr<PARTITION_TYPE> operator()(
-        const CoordBox<DIM>& box,
-        const std::vector<std::size_t>& weights,
-        boost::shared_ptr<Adjacency> /* unused*/)
-    {
-        return boost::make_shared<PARTITION_TYPE>(
-            box.origin,
-            box.dimensions,
-            0,
-            weights);
-    }
-};
-
-// fixme: can we eliminate these classes?
-template<>
-class PartitionBuilder<UnstructuredStripingPartition>
-{
-public:
-    boost::shared_ptr<UnstructuredStripingPartition> operator()(
-        const CoordBox<1>& box,
-        const std::vector<std::size_t>& weights,
-        boost::shared_ptr<Adjacency> /* unused */)
-    {
-        return boost::make_shared<UnstructuredStripingPartition>(
-            box.origin,
-            box.dimensions,
-            0,
-            weights);
-    }
-};
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-#ifdef LIBGEODECOMP_WITH_SCOTCH
-
-// fixme: can we eliminate these classes?
-template<int DIM>
-class PartitionBuilder<PTScotchUnstructuredPartition<DIM> >
-{
-public:
-    boost::shared_ptr<PTScotchUnstructuredPartition<DIM >> operator()(
-        const CoordBox<DIM>& box,
-        const std::vector<std::size_t>& weights,
-        boost::shared_ptr<Adjacency> adjacency)
-    {
-        return boost::make_shared<PTScotchUnstructuredPartition<DIM> >(
-            box.origin,
-            box.dimensions,
-            0,
-            weights,
-            adjacency);
-    }
-};
-
-// fixme: can we eliminate these classes?
-template<int DIM>
-class PartitionBuilder<DistributedPTScotchUnstructuredPartition<DIM> >
-{
-public:
-    boost::shared_ptr<DistributedPTScotchUnstructuredPartition<DIM >> operator()(
-        const CoordBox<DIM>& box,
-        const std::vector<std::size_t>& weights,
-        boost::shared_ptr<Adjacency> adjacency)
-    {
-        return boost::make_shared<DistributedPTScotchUnstructuredPartition<DIM> >(
-            box.origin,
-            box.dimensions,
-            0,
-            weights,
-            adjacency);
-    }
-};
-
-#endif
-#endif // LIBGEODECOMP_WITH_CPP14
-
-}
 
 /**
  * The HiParSimulator implements our hierarchical parallelization
@@ -116,7 +32,10 @@ public:
  *
  * fixme: check if code runs with a communicator which is merely a subset of MPI_COMM_WORLD
  */
-template<typename CELL_TYPE, typename PARTITION, typename STEPPER = VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableOpenMP> >
+template<
+    typename CELL_TYPE,
+    typename PARTITION,
+    typename STEPPER = VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableOpenMP> >
 class HiParSimulator : public DistributedSimulator<CELL_TYPE>
 {
 public:
@@ -300,11 +219,13 @@ private:
             box.dimensions.prod(),
             rankSpeeds);
 
-        boost::shared_ptr<PARTITION> partition =
-            HiParSimulatorHelpers::PartitionBuilder<PARTITION>()(
-               box,
-               weights,
-               initializer->getAdjacency());
+        boost::shared_ptr<PARTITION> partition(
+            new PARTITION(
+                box.origin,
+                box.dimensions,
+                0,
+                weights,
+                initializer->getAdjacency()));
 
         updateGroup.reset(
             new UpdateGroupType(
