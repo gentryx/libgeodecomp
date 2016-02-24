@@ -17,8 +17,8 @@ template<typename CELL = TestCell<2> >
 class ParallelTestWriter : public Clonable<ParallelWriter<CELL>, ParallelTestWriter<CELL> >
 {
 public:
-    using typename ParallelWriter<CELL>::GridType;
-    using typename ParallelWriter<CELL>::Topology;
+    typedef typename ParallelWriter<CELL>::Topology Topology;
+    typedef typename ParallelWriter<CELL>::GridType GridType;
     using ParallelWriter<CELL>::region;
     static const int DIM = Topology::DIM;
 
@@ -52,7 +52,7 @@ public:
         unaccountedRegion -= validRegion;
 
         unsigned myExpectedCycle = APITraits::SelectNanoSteps<CELL>::VALUE * step;
-        TS_ASSERT_TEST_GRID_REGION(GridType, grid, validRegion, myExpectedCycle);
+        TS_ASSERT_TEST_GRID_REGION2(GridType, grid, validRegion, myExpectedCycle, typename);
 
         TS_ASSERT(!expectedSteps.empty());
         unsigned expectedStep = expectedSteps.front();

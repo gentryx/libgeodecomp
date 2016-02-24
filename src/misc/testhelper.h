@@ -141,7 +141,7 @@
 #define TS_ASSERT_TEST_GRID(_GRID_TYPE, _GRID, _EXPECTED_CYCLE) \
     TS_ASSERT_TEST_GRID2(_GRID_TYPE, _GRID, _EXPECTED_CYCLE, )
 
-#define TS_ASSERT_TEST_GRID_REGION(_GRID_TYPE, _GRID, _REGION, _EXPECTED_CYCLE) \
+#define TS_ASSERT_TEST_GRID_REGION2(_GRID_TYPE, _GRID, _REGION, _EXPECTED_CYCLE, _TYPENAME) \
     {                                                                   \
         const _GRID_TYPE& assertGrid = _GRID;                           \
         Region<_GRID_TYPE::DIM> assertRegion = _REGION;                 \
@@ -150,8 +150,8 @@
                                                                         \
         ollKorrect &= assertGrid.getEdge().edgeCell();                  \
         ollKorrect &= assertGrid.getEdge().valid();                     \
-        typename Region<_GRID_TYPE::DIM>::Iterator end = assertRegion.end(); \
-        for (typename Region<_GRID_TYPE::DIM>::Iterator i = assertRegion.begin(); i != end; ++i) { \
+        _TYPENAME Region<_GRID_TYPE::DIM>::Iterator end = assertRegion.end();     \
+        for (_TYPENAME Region<_GRID_TYPE::DIM>::Iterator i = assertRegion.begin(); i != end; ++i) { \
             bool flag = assertGrid.get(*i).valid();                     \
             if (!flag) {                                                \
                 std::cout << "TestCell not valid\n";                    \
@@ -173,5 +173,8 @@
             }                                                           \
         }                                                               \
     }
+
+#define TS_ASSERT_TEST_GRID_REGION(_GRID_TYPE, _GRID, _REGION, _EXPECTED_CYCLE) \
+    TS_ASSERT_TEST_GRID_REGION2(_GRID_TYPE, _GRID, _REGION, _EXPECTED_CYCLE, )
 
 #endif
