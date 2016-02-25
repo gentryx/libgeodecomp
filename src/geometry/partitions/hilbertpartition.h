@@ -3,8 +3,8 @@
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
+#include <libgeodecomp/storage/grid.h>
 
-#include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 #include <sstream>
@@ -24,7 +24,8 @@ private:
     enum Form {LL_TO_LR=0, LL_TO_UL=1, UR_TO_LR=2, UR_TO_UL=3};
 
 public:
-    static boost::shared_ptr<boost::multi_array<std::vector<Coord<2> >, 3> > squareCoordsCache;
+    typedef Grid<std::vector<Coord<2> >, Topologies::Cube<3>::Topology> CacheType;
+    static boost::shared_ptr<CacheType> squareCoordsCache;
     static Form squareFormTransitions[4][4];
     static int squareSectorTransitions[4][4];
     static Coord<2> maxCachedDimensions;
@@ -179,8 +180,10 @@ public:
             const Form& form)
         {
             sublevelState = CACHED;
-            std::vector<Coord<2> > &coords =
-                (*squareCoordsCache)[dimensions.x()][dimensions.y()][form];
+            Coord<3> c(dimensions.x(),
+                       dimensions.y(),
+                       form);
+            std::vector<Coord<2> >& coords = (*squareCoordsCache)[c];
             cachedSquareOrigin = origin;
             cachedSquareCoordsIterator = &coords[offset];
             cachedSquareCoordsEnd      = &coords[0] + coords.size();
@@ -340,7 +343,7 @@ private:
     static inline bool fillCaches()
     {
         Coord<2> maxDim(17, 17);
-        squareCoordsCache.reset(new boost::multi_array<std::vector<Coord<2> >, 3>(boost::extents[maxDim.x()][maxDim.y()][4]));
+        squareCoordsCache.reset(new CacheType(Coord<3>(maxDim.x(), maxDim.y(), 4)));
 
         for (int y = 2; y < maxDim.y(); ++y) {
             maxCachedDimensions = Coord<2>(y, y);
@@ -353,7 +356,8 @@ private:
                         coords.push_back(*i);
                     }
 
-                    (*squareCoordsCache)[dimensions.x()][dimensions.y()][f] = coords;
+                    Coord<3> c(dimensions.x(), dimensions.y(), f);
+                    (*squareCoordsCache)[c] = coords;
                 }
             }
         }

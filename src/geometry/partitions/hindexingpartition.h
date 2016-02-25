@@ -4,8 +4,8 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/grid.h>
 
-#include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <iostream>
@@ -117,7 +117,8 @@ public:
     // original one.
     static int triangleTransitions[4][4];
     // (dimensions.x(), dimensions.y(), type) -> coord sequence
-    static boost::shared_ptr<boost::multi_array<CoordVector, 3> > triangleCoordsCache;
+    typedef Grid<CoordVector, Topologies::Cube<3>::Topology> CacheType;
+    static boost::shared_ptr<CacheType> triangleCoordsCache;
     static Coord<2> maxCachedDimensions;
     static std::map<std::pair<Coord<2>, unsigned>, unsigned> triangleLengthCache;
     static bool cachesInitialized;
@@ -258,7 +259,8 @@ public:
         {
             sublevelState = CACHED;
             cachedTriangleOrigin = triangle.origin;
-            CoordVector& coords = (*triangleCoordsCache)[triangle.dimensions.x()][triangle.dimensions.y()][triangle.type];
+            Coord<3> c(triangle.dimensions.x(), triangle.dimensions.y(), triangle.type);
+            CoordVector& coords = (*triangleCoordsCache)[c];
             cachedTriangleCoordsIterator = &coords[counter];
             cachedTriangleCoordsEnd = &coords[0] + coords.size();
         }
@@ -562,15 +564,13 @@ private:
     {
         // store triangles of at most maxDim in size
         Coord<2> maxDim(17, 17);
-        triangleCoordsCache.reset(
-            new boost::multi_array<CoordVector, 3>(
-                boost::extents[maxDim.x()][maxDim.y()][4]));
+        triangleCoordsCache.reset(new CacheType(Coord<3>(maxDim.x(), maxDim.y(), 4)));
 
         for (int y = 2; y < maxDim.y(); ++y) {
             maxCachedDimensions = Coord<2>(y, y);
             for (int x = 2; x < maxDim.x(); ++x) {
                 Coord<2> dimensions(x, y);
-                for (unsigned t = 0; t < 4; t++) {
+                for (unsigned t = 0; t < 4; ++t) {
                     CoordVector coords;
                     Iterator end(Coord<2>(0, 0));
 
@@ -578,7 +578,8 @@ private:
                         coords.push_back(*h);
                     }
 
-                    (*triangleCoordsCache)[dimensions.x()][dimensions.y()][t] = coords;
+                    Coord<3> c(dimensions.x(), dimensions.y(), t);
+                    (*triangleCoordsCache)[c] = coords;
                 }
             }
         }
