@@ -162,19 +162,19 @@ public:
                 g[Coord<2>(x, y)] = y * 10 + x;
         int actual;
 
-        actual = Topologies::Cube<2>::Topology::locate(g.cellMatrix, Coord<2>(1, 2), g.dimensions, g.edgeCell);
+        actual = Topologies::Cube<2>::Topology::locate(g.cellVector, Coord<2>(1, 2), g.dimensions, g.edgeCell);
         TS_ASSERT_EQUALS(21, actual);
 
-        actual = Topologies::Cube<2>::Topology::locate(g.cellMatrix, Coord<2>(7, 2), g.dimensions, g.edgeCell);
+        actual = Topologies::Cube<2>::Topology::locate(g.cellVector, Coord<2>(7, 2), g.dimensions, g.edgeCell);
         TS_ASSERT_EQUALS(-1, actual);
 
-        actual = Topologies::Cube<2>::Topology::locate(g.cellMatrix, Coord<2>(4, -1), g.dimensions, g.edgeCell);
+        actual = Topologies::Cube<2>::Topology::locate(g.cellVector, Coord<2>(4, -1), g.dimensions, g.edgeCell);
         TS_ASSERT_EQUALS(-1, actual);
 
-        Topologies::Cube<2>::Topology::locate(g.cellMatrix, Coord<2>(2, 3), g.dimensions, g.edgeCell) = 4711;
+        Topologies::Cube<2>::Topology::locate(g.cellVector, Coord<2>(2, 3), g.dimensions, g.edgeCell) = 4711;
         TS_ASSERT_EQUALS(4711, g[Coord<2>(2, 3)]);
 
-        Topologies::Cube<2>::Topology::locate(g.cellMatrix, Coord<2>(4, -1), g.dimensions, g.edgeCell) = 4712;
+        Topologies::Cube<2>::Topology::locate(g.cellVector, Coord<2>(4, -1), g.dimensions, g.edgeCell) = 4712;
         TS_ASSERT_EQUALS(4712, g.getEdgeCell());
     }
 
@@ -191,10 +191,10 @@ public:
         }
         int actual;
 
-        Topologies::Cube<3>::Topology::locate(g.cellMatrix, Coord<3>(4, -1, 0), g.dimensions, g.edgeCell) = 4712;
+        Topologies::Cube<3>::Topology::locate(g.cellVector, Coord<3>(4, -1, 0), g.dimensions, g.edgeCell) = 4712;
         TS_ASSERT_EQUALS(4712, g.getEdgeCell());
 
-        actual = Topologies::Cube<3>::Topology::locate(g.cellMatrix, Coord<3>(1, 2, 3), g.dimensions, g.edgeCell);
+        actual = Topologies::Cube<3>::Topology::locate(g.cellVector, Coord<3>(1, 2, 3), g.dimensions, g.edgeCell);
         TS_ASSERT_EQUALS(321, actual);
 
     }
@@ -210,16 +210,16 @@ public:
         }
         int actual;
 
-        actual = Topologies::Torus<2>::Topology::locate(g.cellMatrix, Coord<2>(1, 2), g.dimensions, g.edgeCell);
+        actual = Topologies::Torus<2>::Topology::locate(g.cellVector, Coord<2>(1, 2), g.dimensions, g.edgeCell);
         TS_ASSERT_EQUALS(21, actual);
 
-        actual = Topologies::Torus<2>::Topology::locate(g.cellMatrix, Coord<2>(7, 2), g.dimensions, g.edgeCell);
+        actual = Topologies::Torus<2>::Topology::locate(g.cellVector, Coord<2>(7, 2), g.dimensions, g.edgeCell);
         TS_ASSERT_EQUALS(20, actual);
 
-        actual = Topologies::Torus<2>::Topology::locate(g.cellMatrix, Coord<2>(4, -1), g.dimensions, g.edgeCell);
+        actual = Topologies::Torus<2>::Topology::locate(g.cellVector, Coord<2>(4, -1), g.dimensions, g.edgeCell);
         TS_ASSERT_EQUALS(84, actual);
 
-        Topologies::Torus<2>::Topology::locate(g.cellMatrix, Coord<2>(4, -1), g.dimensions, g.edgeCell) = 4711;
+        Topologies::Torus<2>::Topology::locate(g.cellVector, Coord<2>(4, -1), g.dimensions, g.edgeCell) = 4711;
         TS_ASSERT_EQUALS(4711, g[Coord<2>(4, 8)]);
     }
 

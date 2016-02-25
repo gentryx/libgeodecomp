@@ -145,74 +145,6 @@ public:
 };
 
 /**
- * Helper class which performs the access to an n-dimensional
- * container from an n-dimensional coord by means of chaned square
- * brackets operators.
- */
-template<int DIM>
-class Accessor;
-
-/**
- * see above
- */
-template<>
-class Accessor<1>
-{
-public:
-    template<typename STORAGE, typename VALUE>
-    void operator()(STORAGE& storage, VALUE **value, const Coord<1>& coord) const
-    {
-        *value = &storage[coord.x()];
-    }
-
-    template<typename STORAGE, typename VALUE>
-    void operator()(const STORAGE& storage, const VALUE **value, const Coord<1>& coord) const
-    {
-        *value = &storage[coord.x()];
-    }
-};
-
-/**
- * see above
- */
-template<>
-class Accessor<2>
-{
-public:
-    template<typename STORAGE, typename VALUE>
-    void operator()(STORAGE& storage, VALUE **value, const Coord<2>& coord) const
-    {
-        *value = &storage[coord.y()][coord.x()];
-    }
-
-    template<typename STORAGE, typename VALUE>
-    void operator()(const STORAGE& storage, const VALUE **value, const Coord<2>& coord) const
-    {
-        *value = &storage[coord.y()][coord.x()];
-    }
-};
-
-/**
- * see above
- */
-template<>
-class Accessor<3>
-{
-public:
-    template<typename STORAGE, typename VALUE>
-    void operator()(STORAGE& storage, VALUE **value, const Coord<3>& coord) const
-    {
-        *value = &storage[coord.z()][coord.y()][coord.x()];
-    }
-
-    template<typename STORAGE, typename VALUE>
-    void operator()(const STORAGE& storage, const VALUE **value, const Coord<3>& coord) const
-    {
-        *value = &storage[coord.z()][coord.y()][coord.x()];
-    }
-};
-
-/**
  * Helper class for direct access to topology specs
  */
 template<int DIMENSIONS, bool WRAP_DIM0, bool WRAP_DIM1, bool WRAP_DIM2>
@@ -235,36 +167,36 @@ public:
     typedef RawTopology<DIMENSIONS, WRAP_DIM0, WRAP_DIM1, WRAP_DIM2> RawTopologyType;
     static const int DIM = DIMENSIONS;
 
-    template<typename GRID, int DIM>
-    static inline const typename GRID::element& locate(
+    template<typename GRID>
+    static inline const typename GRID::value_type& locate(
         const GRID& grid,
         const Coord<DIM>& coord,
         const Coord<DIM>& gridDim,
-        const typename GRID::element& edgeCell)
+        const typename GRID::value_type& edgeCell)
     {
         if (OutOfBounds<RawTopologyType>()(coord, gridDim)) {
             return edgeCell;
         }
 
-        const typename GRID::element *ret;
-        Accessor<DIM>()(grid, &ret, NormalizeEdges<RawTopologyType>()(coord, gridDim));
-        return *ret;
+        const Coord<DIM> normalizedCoord = NormalizeEdges<RawTopologyType>()(coord, gridDim);
+        const std::size_t index = normalizedCoord.toIndex(gridDim);
+        return grid[index];
     }
 
     template<typename GRID>
-    static inline typename GRID::element& locate(
+    static inline typename GRID::value_type& locate(
         GRID& grid,
-        const Coord<DIMENSIONS>& coord,
+        const Coord<DIM>& coord,
         const Coord<DIM>& gridDim,
-        typename GRID::element& edgeCell)
+        typename GRID::value_type& edgeCell)
     {
         if (OutOfBounds<RawTopologyType>()(coord, gridDim)) {
             return edgeCell;
         }
 
-        typename GRID::element *ret;
-        Accessor<DIMENSIONS>()(grid, &ret, NormalizeEdges<RawTopologyType>()(coord, gridDim));
-        return *ret;
+        const Coord<DIM> normalizedCoord = NormalizeEdges<RawTopologyType>()(coord, gridDim);
+        const std::size_t index = normalizedCoord.toIndex(gridDim);
+        return grid[index];
     }
 
     template<int D>

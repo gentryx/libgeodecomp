@@ -221,31 +221,6 @@ public:
         TS_ASSERT_EQUALS(9, c3[2]);
     }
 
-    void testToExtents()
-    {
-        boost::multi_array<int, 1> a1;
-        boost::multi_array<int, 1> b1;
-        boost::multi_array<int, 2> a2;
-        boost::multi_array<int, 2> b2;
-        boost::multi_array<int, 3> a3;
-        boost::multi_array<int, 3> b3;
-
-        a1.resize(boost::extents[4]);
-        b1.resize(Coord<1>(4).toExtents());
-        TS_ASSERT_EQUALS(a1.size(), b1.size());
-
-        a2.resize(boost::extents[4][3]);
-        b2.resize(Coord<2>(3, 4).toExtents());
-        TS_ASSERT_EQUALS(a2.size(),    b2.size());
-        TS_ASSERT_EQUALS(a2[0].size(), b2[0].size());
-
-        a3.resize(boost::extents[6][5][4]);
-        b3.resize(Coord<3>(4, 5, 6).toExtents());
-        TS_ASSERT_EQUALS(a3.size(),       b3.size());
-        TS_ASSERT_EQUALS(a3[0].size(),    b3[0].size());
-        TS_ASSERT_EQUALS(a3[0][0].size(), b3[0][0].size());
-    }
-
     void testCoordDiagonal()
     {
         TS_ASSERT_EQUALS(Coord<1>::diagonal(32), Coord<1>(32));
