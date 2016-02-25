@@ -19,6 +19,7 @@
 #endif
 
 #include <string>
+#include <sstream>
 #include <stdlib.h>
 
 #include <libgeodecomp/geometry/fixedcoord.h>
