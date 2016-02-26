@@ -2720,7 +2720,7 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+        for (int i = hoodOld.index(); i < indexEnd / C; ++i, ++hoodOld) {
             ShortVec tmp;
             tmp.load_aligned(&hoodNew->sum() + i * C);
             for (const auto& j: hoodOld.weights(0)) {
@@ -2781,7 +2781,7 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         REAL tmp, weights, values;
-        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+        for (int i = hoodOld.index(); i < (indexEnd / C); ++i, ++hoodOld) {
             tmp = &hoodNew->sum() + i * C;
             for (const auto& j: hoodOld.weights(0)) {
                 weights = j.second;
