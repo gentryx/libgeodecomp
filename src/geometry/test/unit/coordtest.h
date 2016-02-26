@@ -115,14 +115,20 @@ public:
         {
             Coord<1> base(5);
             TS_ASSERT_EQUALS(Coord<1>(15), base * 3);
+            TS_ASSERT_EQUALS(Coord<1>(19), base * 3.9f);
+            TS_ASSERT_EQUALS(Coord<1>(25), base * 5.01);
         }
         {
             Coord<2> base(5, 7);
             TS_ASSERT_EQUALS(Coord<2>(15, 21), base * 3);
+            TS_ASSERT_EQUALS(Coord<2>(15, 21), base * 3.1f);
+            TS_ASSERT_EQUALS(Coord<2>(22, 31), base * 4.5);
         }
         {
             Coord<3> base(5, 7, 6);
             TS_ASSERT_EQUALS(Coord<3>(15, 21, 18), base * 3);
+            TS_ASSERT_EQUALS(Coord<3>(16, 22, 19), base * 3.2f);
+            TS_ASSERT_EQUALS(Coord<3>(19, 27, 23), base * 3.9);
         }
     }
 
