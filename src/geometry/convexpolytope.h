@@ -34,6 +34,7 @@ public:
                << EquationType(COORD(0, center[1]),              COORD( 1,  0))
                << EquationType(COORD(simSpaceDim[0], center[1]), COORD(-1,  0))
                << EquationType(COORD(center[0], simSpaceDim[1]), COORD( 0, -1));
+        cutPoints = generateCutPoints(limits);
     }
 
     ConvexPolytope& operator<<(const EquationType& eq)
@@ -47,7 +48,6 @@ public:
             }
         }
 
-        std::vector<COORD > cutPoints = generateCutPoints(limits);
         std::set<int> deleteSet;
         bool newLimitIsSuperfluous = true;
         for (std::size_t i = 0; i < limits.size(); ++i) {
@@ -80,6 +80,11 @@ public:
         if (!newLimitIsSuperfluous) {
             limits << eq;
         }
+
+        if (!deleteSet.empty() || !newLimitIsSuperfluous) {
+            cutPoints = generateCutPoints(limits);
+        }
+
         return *this;
     }
 
@@ -89,14 +94,18 @@ public:
         COORD base = (center + c.first) * 0.5;
         COORD dir = center - c.first;
 
+        COORD relative = COORD(boundingBox().origin) - base;
+        if ((relative[0] > (boundingBox().dimensions[0] + 1)) ||
+            (relative[1] > (boundingBox().dimensions[1] + 1))) {
+            return *this;
+        }
+
         *this << EquationType(base, dir, c.second);
         return *this;
     }
 
     std::vector<COORD > getShape() const
     {
-        std::vector<COORD > cutPoints = generateCutPoints(limits);
-
         for (std::size_t i = 0; i < cutPoints.size(); ++i) {
             if (cutPoints[i] == farAway<2>()) {
                 throw std::logic_error("invalid cut point");
@@ -104,7 +113,7 @@ public:
         }
 
         std::map<double, COORD > points;
-        for (typename std::vector<COORD >::iterator i = cutPoints.begin();
+        for (typename std::vector<COORD >::const_iterator i = cutPoints.begin();
              i != cutPoints.end();
              ++i) {
             COORD delta = *i - center;
@@ -141,10 +150,8 @@ public:
         return myBoundingBox;
     }
 
-    void updateGeometryData()
+    void updateGeometryData(bool updateBoundingBoxOnly = false)
     {
-        std::vector<COORD > cutPoints = generateCutPoints(limits);
-
         for (std::size_t i = 0; i < limits.size(); ++i) {
             COORD delta = cutPoints[2 * i + 0] - cutPoints[2 * i + 1];
             limits[i].length = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
@@ -168,6 +175,10 @@ public:
             deltaInt[i] = delta[i];
         }
         myBoundingBox = CoordBox<DIM>(minInt, deltaInt);
+
+        if (updateBoundingBoxOnly) {
+            return;
+        }
 
         int hits = 0;
         for (std::size_t i = 0; i < SAMPLES; ++i) {
@@ -225,6 +236,7 @@ private:
     double area;
     double diameter;
     std::vector<EquationType> limits;
+    std::vector<COORD> cutPoints;
 
     template<int DIM>
     static Coord<DIM> farAway()
@@ -237,9 +249,9 @@ private:
         return COORD(c[1], -c[0]);
     }
 
-    std::vector<COORD > generateCutPoints(const std::vector<EquationType>& equations) const
+    std::vector<COORD> generateCutPoints(const std::vector<EquationType>& equations) const
     {
-        std::vector<COORD > buf(2 * equations.size(), farAway<2>());
+        std::vector<COORD> buf(2 * equations.size(), farAway<2>());
 
         for (std::size_t i = 0; i < equations.size(); ++i) {
             for (std::size_t j = 0; j < equations.size(); ++j) {
