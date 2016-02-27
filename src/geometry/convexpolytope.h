@@ -65,15 +65,17 @@ public:
             }
         }
 
-        std::vector<EquationType> newLimits;
-        for (std::size_t i = 0; i < limits.size(); ++i) {
-            if (!deleteSet.count(i)) {
-                newLimits << limits[i];
+        if (!deleteSet.empty()) {
+            std::vector<EquationType> newLimits;
+            for (std::size_t i = 0; i < limits.size(); ++i) {
+                if (!deleteSet.count(i)) {
+                    newLimits << limits[i];
+                }
             }
-        }
 
-        using std::swap;
-        swap(limits, newLimits);
+            using std::swap;
+            swap(limits, newLimits);
+        }
 
         if (!newLimitIsSuperfluous) {
             limits << eq;
