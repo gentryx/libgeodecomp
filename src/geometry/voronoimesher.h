@@ -95,7 +95,6 @@ public:
             for (typename ContainerCellType::Iterator i = container.begin(); i != container.end(); ++i) {
                 Cargo& cell = *i;
                 ElementType e(cell.center, simSpaceDim);
-
                 for (int y = -1; y < 2; ++y) {
                     for (int x = -1; x < 2; ++x) {
                         ContainerCellType container2 =
