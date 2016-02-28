@@ -18,16 +18,12 @@
 #include <mpi.h>
 #endif
 
+#include <cstdlib>
 #include <string>
-#include <stdlib.h>
+#include <sstream>
+
 
 #include <libgeodecomp/geometry/fixedcoord.h>
-
-// CodeGear's C++ compiler isn't compatible with boost::multi_array
-// (at least the version that ships with C++ Builder 2009)
-#ifndef __CODEGEARC__
-#include <boost/multi_array.hpp>
-#endif
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/serialization/is_bitwise_serializable.hpp>
@@ -225,6 +221,20 @@ public:
         return Coord(scale * x());
     }
 
+
+    __host__ __device__
+    inline Coord operator*(float scale) const
+    {
+        return Coord(scale * x());
+    }
+
+
+    __host__ __device__
+    inline Coord operator*(double scale) const
+    {
+        return Coord(scale * x());
+    }
+
     __host__ __device__
     inline int operator*(const Coord& multiplier) const
     {
@@ -234,7 +244,7 @@ public:
     __host__ __device__
     inline Coord operator/(int divisor) const
     {
-        return Coord(x()/ divisor);
+        return Coord(x() / divisor);
     }
 
     __host__ __device__
@@ -277,11 +287,6 @@ public:
     inline int maxElement() const
     {
         return x();
-    }
-
-    boost::detail::multi_array::extent_gen<1ul> toExtents() const
-    {
-        return boost::extents[x()];
     }
 
     std::string toString() const
@@ -472,6 +477,18 @@ public:
     }
 
     __host__ __device__
+    inline Coord operator*(float scale) const
+    {
+        return Coord(scale * x(), scale * y());
+    }
+
+    __host__ __device__
+    inline Coord operator*(double scale) const
+    {
+        return Coord(scale * x(), scale * y());
+    }
+
+    __host__ __device__
     inline int operator*(const Coord& multiplier) const
     {
         return x() * multiplier.x() + y() * multiplier.y();
@@ -480,7 +497,7 @@ public:
     __host__ __device__
     inline Coord operator/(int divisor) const
     {
-        return Coord(x()/ divisor, y() / divisor);
+        return Coord(x() / divisor, y() / divisor);
     }
 
     __host__ __device__
@@ -526,11 +543,6 @@ public:
     inline int maxElement() const
     {
         return x() > y() ? x() : y();
-    }
-
-    boost::detail::multi_array::extent_gen<2ul> toExtents() const
-    {
-        return boost::extents[y()][x()];
     }
 
     std::string toString() const
@@ -740,6 +752,19 @@ public:
     }
 
     __host__ __device__
+    inline Coord operator*(float scale) const
+    {
+        return Coord(scale * x(), scale * y(), scale * z());
+    }
+
+
+    __host__ __device__
+    inline Coord operator*(double scale) const
+    {
+        return Coord(scale * x(), scale * y(), scale * z());
+    }
+
+    __host__ __device__
     inline int operator*(const Coord& multiplier) const
     {
         return x() * multiplier.x() + y() * multiplier.y() + z() * multiplier.z();
@@ -801,11 +826,6 @@ public:
     {
         return x() > y() ?
                   (x() > z() ? x() : z()) : (y() > z() ? y() : z());
-    }
-
-    boost::detail::multi_array::extent_gen<3ul> toExtents() const
-    {
-        return boost::extents[z()][y()][x()];
     }
 
     std::string toString() const

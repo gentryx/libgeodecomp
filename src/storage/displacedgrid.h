@@ -25,7 +25,6 @@ public:
 
     typedef CELL_TYPE Cell;
     typedef TOPOLOGY Topology;
-    typedef typename boost::multi_array<CELL_TYPE, DIM>::index Index;
     typedef Grid<CELL_TYPE, TOPOLOGY> Delegate;
     typedef CoordMap<CELL_TYPE, Delegate> CoordMapType;
 

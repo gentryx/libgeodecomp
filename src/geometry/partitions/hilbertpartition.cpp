@@ -1,5 +1,4 @@
 #include <libgeodecomp/geometry/partitions/hilbertpartition.h>
-#include <boost/multi_array/iterator.hpp>
 
 namespace LibGeoDecomp {
 
@@ -20,7 +19,7 @@ int HilbertPartition::squareSectorTransitions[4][4] = {
     {1, 3, 2, 0}  // UR_TO_UL
 };
 
-boost::shared_ptr<boost::multi_array<std::vector<Coord<2> >, 3> > HilbertPartition::squareCoordsCache;
+boost::shared_ptr<Grid<std::vector<Coord<2> >, Topologies::Cube<3>::Topology> > HilbertPartition::squareCoordsCache;
 Coord<2> HilbertPartition::maxCachedDimensions;
 bool HilbertPartition::cachesInitialized = HilbertPartition::fillCaches();
 

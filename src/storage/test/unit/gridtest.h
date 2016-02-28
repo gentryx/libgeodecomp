@@ -129,7 +129,7 @@ public:
         TS_ASSERT(!other[Coord<2>(2, 4)].isValid);
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
-                other.cellMatrix[y][x] = testGrid->cellMatrix[y][x];
+                other.cellVector[y * width + x] = testGrid->cellVector[y * width + x];
             }
         }
 

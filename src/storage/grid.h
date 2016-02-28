@@ -10,14 +10,6 @@
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
 
-// CodeGear's C++ compiler isn't compatible with boost::multi_array
-// (at least the version that ships with C++ Builder 2009)
-#ifndef __CODEGEARC__
-#include <boost/multi_array.hpp>
-#endif
-
-#include <iostream>
-
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE, typename GRID_TYPE>
@@ -103,18 +95,8 @@ public:
     friend class ParallelStripingSimulatorTest;
     const static int DIM = TOPOLOGY::DIM;
 
-#ifndef __CODEGEARC__
-    typedef typename boost::detail::multi_array::sub_array<CELL_TYPE, DIM - 1> SliceRef;
-    typedef typename boost::detail::multi_array::const_sub_array<CELL_TYPE, 1> ConstSliceRef;
-    typedef typename boost::multi_array<
-        // always align on cache line boundaries
-        CELL_TYPE, DIM, LibFlatArray::aligned_allocator<CELL_TYPE, 64> > CellMatrix;
-    typedef typename CellMatrix::index Index;
-#else
-    typedef std::vector<CELL_TYPE>& SliceRef;
-    typedef const std::vector<CELL_TYPE>& ConstSliceRef;
-    typedef int Index;
-#endif
+    // always align on cache line boundaries
+    typedef typename std::vector<CELL_TYPE, LibFlatArray::aligned_allocator<CELL_TYPE, 64> > CellVector;
 
     typedef TOPOLOGY Topology;
     typedef CELL_TYPE Cell;
@@ -125,21 +107,13 @@ public:
         const CELL_TYPE& defaultCell = CELL_TYPE(),
         const CELL_TYPE& edgeCell = CELL_TYPE()) :
         dimensions(dim),
-        cellMatrix(dim.toExtents()),
+        cellVector(dim.prod(), defaultCell),
         edgeCell(edgeCell)
-    {
-        CoordBox<DIM> box(Coord<DIM>(), dim);
-        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
-            Streak<DIM> s = *i;
-            CELL_TYPE *start = &(*this)[s.origin];
-            CELL_TYPE *end   = start + s.length();
-            std::fill(start, end, defaultCell);
-        }
-    }
+    {}
 
     explicit Grid(const GridBase<CELL_TYPE, DIM>& base) :
         dimensions(base.dimensions()),
-        cellMatrix(base.dimensions().toExtents()),
+        cellVector(base.dimensions().prod()),
         edgeCell(base.getEdge())
     {
         CoordBox<DIM> box = base.boundingBox();
@@ -151,7 +125,7 @@ public:
     Grid& operator=(const Grid& other)
     {
         resize(other.getDimensions());
-        std::copy(other.cellMatrix.begin(), other.cellMatrix.end(), cellMatrix.begin());
+        std::copy(other.cellVector.begin(), other.cellVector.end(), cellVector.begin());
         edgeCell = other.edgeCell;
 
         return *this;
@@ -159,14 +133,8 @@ public:
 
     inline void resize(const Coord<DIM>& newDim)
     {
-        // temporarly resize to 0-sized array to avoid having two
-        // large arrays simultaneously allocated. somehow I feel
-        // boost::multi_array::resize should be responsible for
-        // this...
-        Coord<DIM> tempDim;
-        cellMatrix.resize(tempDim.toExtents());
         dimensions = newDim;
-        cellMatrix.resize(newDim.toExtents());
+        cellVector.resize(newDim.prod());
     }
 
     /**
@@ -200,12 +168,12 @@ public:
 
     inline CELL_TYPE& operator[](const Coord<DIM>& coord)
     {
-        return Topology::locate(cellMatrix, coord, dimensions, edgeCell);
+        return Topology::locate(cellVector, coord, dimensions, edgeCell);
     }
 
     inline const CELL_TYPE& operator[](const Coord<DIM>& coord) const
     {
-        return Topology::locate(cellMatrix, coord, dimensions, edgeCell);
+        return Topology::locate(cellVector, coord, dimensions, edgeCell);
     }
 
     inline bool operator==(const Grid& other) const
@@ -217,7 +185,7 @@ public:
 
         return
             (edgeCell   == other.edgeCell) &&
-            (cellMatrix == other.cellMatrix);
+            (cellVector == other.cellVector);
     }
 
     inline bool operator==(const GridBase<CELL_TYPE, TOPOLOGY::DIM>& other) const
@@ -357,7 +325,7 @@ protected:
 
 private:
     Coord<DIM> dimensions;
-    CellMatrix cellMatrix;
+    CellVector cellVector;
     CELL_TYPE edgeCell;
 };
 

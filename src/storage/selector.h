@@ -75,7 +75,7 @@ template<typename CELL>
 class PrimitiveSelector
 {
 public:
-    PrimitiveSelector(const std::string& variableName = "primitiveType") :
+    explicit PrimitiveSelector(const std::string& variableName = "primitiveType") :
         variableName(variableName)
     {}
 
@@ -451,7 +451,7 @@ template<>
 class Selector<char> : public SelectorHelpers::PrimitiveSelector<char>
 {
 public:
-    Selector(const std::string name = "primitiveType") :
+    explicit Selector(const std::string name = "primitiveType") :
         SelectorHelpers::PrimitiveSelector<char>(name)
     {}
 };
@@ -463,7 +463,7 @@ template<>
 class Selector<unsigned char> : public SelectorHelpers::PrimitiveSelector<unsigned char>
 {
 public:
-    Selector(const std::string name = "primitiveType") :
+    explicit Selector(const std::string name = "primitiveType") :
         SelectorHelpers::PrimitiveSelector<unsigned char>(name)
     {}
 };
@@ -475,7 +475,7 @@ template<>
 class Selector<int> : public SelectorHelpers::PrimitiveSelector<int>
 {
 public:
-    Selector(const std::string name = "primitiveType") :
+    explicit Selector(const std::string name = "primitiveType") :
         SelectorHelpers::PrimitiveSelector<int>(name)
     {}
 };
@@ -487,7 +487,7 @@ template<>
 class Selector<unsigned> : public SelectorHelpers::PrimitiveSelector<unsigned>
 {
 public:
-    Selector(const std::string name = "primitiveType") :
+    explicit Selector(const std::string name = "primitiveType") :
         SelectorHelpers::PrimitiveSelector<unsigned>(name)
     {}
 };
@@ -499,7 +499,7 @@ template<>
 class Selector<float> : public SelectorHelpers::PrimitiveSelector<float>
 {
 public:
-    Selector(const std::string name = "primitiveType") :
+    explicit Selector(const std::string name = "primitiveType") :
         SelectorHelpers::PrimitiveSelector<float>(name)
     {}
 };
@@ -511,7 +511,7 @@ template<>
 class Selector<double> : public SelectorHelpers::PrimitiveSelector<double>
 {
 public:
-    Selector(const std::string name = "primitiveType") :
+    explicit Selector(const std::string name = "primitiveType") :
         SelectorHelpers::PrimitiveSelector<double>(name)
     {}
 };

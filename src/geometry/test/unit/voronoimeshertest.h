@@ -103,8 +103,8 @@ public:
                 for (int subY = 0; subY < 4; ++subY) {
                     for (int subX = 0; subX < 4; ++subX) {
                         FloatCoord<2> realPos(
-                            x * quadrantSize[0] + subX * 15.5,
-                            y * quadrantSize[1] + subY * 16.5);
+                            x * quadrantSize[0] + subX * 25.0,
+                            y * quadrantSize[1] + subY * 25.0);
                         mesher.addCell(&grid[c], realPos);
                     }
                 }
@@ -118,7 +118,7 @@ public:
             TS_ASSERT_EQUALS(cell.size(), std::size_t(16));
 
             for (ContainerCellType::Iterator j = cell.begin(); j != cell.end(); ++j) {
-                if (j->shape.size() < 4) {
+                if (j->shape.size() != 4) {
                     std::cout << "center: " << j->center << "\n"
                               << "  shape: " << j->shape << "\n";
                 }
