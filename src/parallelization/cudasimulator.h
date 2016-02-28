@@ -358,12 +358,20 @@ public:
      */
     virtual void step()
     {
+        SteererFeedback feedback;
+        step(&feedback);
+      }
+
+    virtual void step(SteererFeedback *feedback)
+    {
+
         using std::swap;
         // fixme: test steerer application, ensure grid gets copied to host and back to device
         // notify all registered Steerers
         for(unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
-                steerers[i]->nextStep(&ioGrid, simArea, simArea.boundingBox().dimensions, stepNum, STEERER_NEXT_STEP, 0, true, 0);
+                // fixme: copy static data from feedback to device address space
+                steerers[i]->nextStep(&ioGrid, simArea, simArea.boundingBox().dimensions, stepNum, STEERER_NEXT_STEP, 0, true, feedback
             }
         }
 
@@ -405,6 +413,7 @@ public:
     virtual void run()
     {
         initializer->grid(&ioGrid);
+        SteererFeedback feedback;
 
         // pad boundaries, see c-tor
         Region<DIM> padding;
@@ -427,7 +436,11 @@ public:
         }
 
         for (; stepNum < initializer->maxSteps();) {
-            step();
+            if (feedback.simulationEnded()) {
+                break;
+            }
+
+            step(&feedback);
         }
     }
 

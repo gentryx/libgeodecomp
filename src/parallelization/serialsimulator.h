@@ -175,7 +175,6 @@ protected:
                     feedback);
             }
         }
-        // fixme: apply SteererFeedback!
     }
 
     void setIORegions()

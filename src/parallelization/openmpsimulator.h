@@ -175,7 +175,6 @@ protected:
                 steerers[i]->nextStep(curGrid, simArea, gridDim, getStep(), event, 0, true, feedback);
             }
         }
-        // fixme: apply SteererFeedback!
     }
 
     void setIORegions()
