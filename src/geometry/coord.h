@@ -18,9 +18,10 @@
 #include <mpi.h>
 #endif
 
+#include <cstdlib>
 #include <string>
 #include <sstream>
-#include <stdlib.h>
+
 
 #include <libgeodecomp/geometry/fixedcoord.h>
 
