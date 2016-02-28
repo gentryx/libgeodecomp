@@ -359,7 +359,7 @@ public:
         }
 
         std::map<int, ConvexPolytope<FloatCoord<2> > > cells;
-        Coord<2> relativeCoords[] {
+        Coord<2> relativeCoords[] = {
             Coord<2>( 0,  0),
             Coord<2>(-1,  0),
             Coord<2>( 1,  0),
