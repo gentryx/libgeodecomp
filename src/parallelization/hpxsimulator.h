@@ -123,7 +123,6 @@ public:
     virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
     {
         for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
-            // fixme: check events just like writer events
             boost::shared_ptr<Steerer<CELL_TYPE> > steererSharedPointer(steerer);
 
             // two adapters needed, just as for the writers

@@ -6,6 +6,7 @@
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/mockwriter.h>
+#include <libgeodecomp/io/paralleltestwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/teststeerer.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
@@ -656,7 +657,818 @@ public:
             ghostZoneWidth,
             "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth6");
 
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
         sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testWriterFunctionality2DWithGhostZoneWidth1()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth1");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+
+    void testWriterFunctionality2DWithGhostZoneWidth2()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 2;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth2");
+
+        sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
+        sim.run();
+    }
+
+    void testWriterFunctionality2DWithGhostZoneWidth3()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 3;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth3");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality2DWithGhostZoneWidth4()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 4;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth4");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality2DWithGhostZoneWidth5()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 5;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth5");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality2DWithGhostZoneWidth6()
+    {
+        typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 6;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth6");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth1()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality3DWithGhostZoneWidth1");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth2()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 110;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 2;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality3DWithGhostZoneWidth2");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<   0
+                            <<   5
+                            <<  10
+                            <<  15
+                            <<  20
+                            <<  25
+                            <<  30
+                            <<  35
+                            <<  40
+                            <<  45
+                            <<  50
+                            <<  55
+                            <<  60
+                            <<  65
+                            <<  70
+                            <<  75
+                            <<  80
+                            <<  85
+                            <<  90
+                            <<  95
+                            << 100
+                            << 105
+                            << 110;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth3()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 3;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality3DWithGhostZoneWidth3");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth4()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 4;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality3DWithGhostZoneWidth4");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth5()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 5;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterFunctionality3DWithGhostZoneWidth5");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterCallback3DWithGhostZoneWidth6()
+    {
+        typedef HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 6;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/HpxSimulatorTest/testWriterCallback3DWithGhostZoneWidth6");
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
         sim.run();
     }
 

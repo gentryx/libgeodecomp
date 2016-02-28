@@ -439,6 +439,762 @@ public:
         sim.run();
     }
 
+    void testWriterFunctionality2DWithGhostZoneWidth1()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality2DWithGhostZoneWidth2()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 2;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality2DWithGhostZoneWidth3()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 3;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality2DWithGhostZoneWidth4()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 4;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality2DWithGhostZoneWidth5()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 5;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality2DWithGhostZoneWidth6()
+    {
+        typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<2> dim(20, 25);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 6;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<2> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth1()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth2()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 2;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth3()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 120;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 3;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<   0
+                            <<   5
+                            <<  10
+                            <<  15
+                            <<  20
+                            <<  25
+                            <<  30
+                            <<  35
+                            <<  40
+                            <<  45
+                            <<  50
+                            <<  55
+                            <<  60
+                            <<  65
+                            <<  70
+                            <<  75
+                            <<  80
+                            <<  85
+                            <<  90
+                            <<  95
+                            << 100
+                            << 105
+                            << 110
+                            << 115
+                            << 120;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth4()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 4;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth5()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 5;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
+    void testWriterFunctionality3DWithGhostZoneWidth6()
+    {
+        typedef HiParSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        int maxTimeSteps = 90;
+        Coord<3> dim(20, 25, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 6;
+        SimulatorType sim(
+            init,
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+
+        std::vector<unsigned> expectedWriterSteps;
+        std::vector<WriterEvent> expectedWriterEvents;
+
+        expectedWriterSteps <<  0
+                            <<  5
+                            << 10
+                            << 15
+                            << 20
+                            << 25
+                            << 30
+                            << 35
+                            << 40
+                            << 45
+                            << 50
+                            << 55
+                            << 60
+                            << 65
+                            << 70
+                            << 75
+                            << 80
+                            << 85
+                            << 90;
+
+        expectedWriterEvents << WRITER_INITIALIZED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_STEP_FINISHED
+                             << WRITER_ALL_DONE;
+
+        sim.addWriter(new ParallelTestWriter<TestCell<3> >(5, expectedWriterSteps, expectedWriterEvents));
+        sim.run();
+    }
+
     void testParallelWriterInvocation()
     {
         unsigned period = 4;
