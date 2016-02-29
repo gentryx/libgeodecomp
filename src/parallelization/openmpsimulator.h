@@ -78,6 +78,7 @@ protected:
     {
         TimeOutput t(&chronometer);
 
+#pragma omp parallel for schedule(dynamic)
         for (unsigned i = 0; i < writers.size(); i++) {
             if ((event != WRITER_STEP_FINISHED) ||
                 ((getStep() % writers[i]->getPeriod()) == 0)) {
@@ -96,6 +97,7 @@ protected:
     {
         TimeInput t(&chronometer);
 
+#pragma omp parallel for schedule(dynamic)
         for (unsigned i = 0; i < steerers.size(); ++i) {
             if ((event != STEERER_NEXT_STEP) ||
                 (stepNum % steerers[i]->getPeriod() == 0)) {
