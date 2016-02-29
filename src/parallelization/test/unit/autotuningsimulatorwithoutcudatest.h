@@ -15,7 +15,7 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class AutotuningSimulatorWithoutCudaTest : public CxxTest::TestSuite
+class AutotuningSimulatorWithoutCUDATest : public CxxTest::TestSuite
 {
 public:
     void setUp()

@@ -57,8 +57,8 @@ template<typename CELL_TYPE, typename OPTIMIZER_TYPE>
 class AutoTuningSimulator
 {
 public:
-    friend class AutotuningSimulatorWithoutCudaTest;
-    friend class AutotuningSimulatorWithCudaTest;
+    friend class AutotuningSimulatorWithoutCUDATest;
+    friend class AutotuningSimulatorWithCUDATest;
 
     typedef AutoTuningSimulatorHelpers::Simulation<CELL_TYPE>  Simulation;
     typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
@@ -131,7 +131,7 @@ AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::AutoTuningSimulator(Initializer<
 
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
-    addSimulation(CudaSimulationFactory<CELL_TYPE>(varStepInitializer));
+    addSimulation(CUDASimulationFactory<CELL_TYPE>(varStepInitializer));
 #endif
 #endif
 }

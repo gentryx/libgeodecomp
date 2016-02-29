@@ -11,7 +11,7 @@ namespace LibGeoDecomp {
  * Simpler counterpart to the UpdateFunctor, optimized for CUDA code.
  */
 template<typename CELL_TYPE>
-class CudaUpdateFunctor
+class CUDAUpdateFunctor
 {
 public:
     template<typename HOOD>
@@ -37,7 +37,7 @@ private:
     __device__
     void runUpdate(CELL_TYPE *gridNew, int& index, int offset, const HOOD& hood, int nanoStep, APITraits::TrueType) const
     {
-        gridNew[index].updateCuda(hood, nanoStep);
+        gridNew[index].updateCUDA(hood, nanoStep);
     }
 };
 

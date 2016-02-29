@@ -62,7 +62,7 @@ LIBFLATARRAY_REGISTER_SOA(
 
 namespace LibGeoDecomp {
 
-class CudaSimulatorTest : public CxxTest::TestSuite
+class CUDASimulatorTest : public CxxTest::TestSuite
 {
 public:
 
@@ -70,7 +70,7 @@ public:
     {
         Coord<1> dim(777);
         int numSteps = 33;
-        CudaSimulator<TestCell1dCube> sim(new TestInitializer1dCube(dim, numSteps));
+        CUDASimulator<TestCell1dCube> sim(new TestInitializer1dCube(dim, numSteps));
 
         TestWriter<TestCell1dCube> *writer = new TestWriter<TestCell1dCube>(1, 0, numSteps);
         sim.addWriter(writer);
@@ -84,7 +84,7 @@ public:
         Coord<1> dim(666);
         int startStep = 40;
         int endStep = 70;
-        CudaSimulator<TestCell1dTorus> sim(new TestInitializer1dTorus(dim, endStep, startStep));
+        CUDASimulator<TestCell1dTorus> sim(new TestInitializer1dTorus(dim, endStep, startStep));
 
         TestWriter<TestCell1dTorus> *writer = new TestWriter<TestCell1dTorus>(3, startStep, endStep);
         sim.addWriter(writer);
@@ -97,7 +97,7 @@ public:
     {
         Coord<2> dim(121, 151);
         int numSteps = 21;
-        CudaSimulator<TestCell2dCube> sim(new TestInitializer2dCube(dim, numSteps));
+        CUDASimulator<TestCell2dCube> sim(new TestInitializer2dCube(dim, numSteps));
 
         TestWriter<TestCell2dCube> *writer = new TestWriter<TestCell2dCube>(8, 0, numSteps);
         sim.addWriter(writer);
@@ -111,7 +111,7 @@ public:
         Coord<2> dim(141, 131);
         int startStep = 35;
         int endStep = 60;
-        CudaSimulator<TestCell2dTorus> sim(new TestInitializer2dTorus(dim, endStep, startStep));
+        CUDASimulator<TestCell2dTorus> sim(new TestInitializer2dTorus(dim, endStep, startStep));
 
         TestWriter<TestCell2dTorus> *writer = new TestWriter<TestCell2dTorus>(6, startStep, endStep);
         sim.addWriter(writer);
@@ -124,7 +124,7 @@ public:
     {
         Coord<3> dim(50, 20, 10);
         int numSteps = 5;
-        CudaSimulator<TestCell3dCube> sim(new TestInitializer3dCube(dim, numSteps));
+        CUDASimulator<TestCell3dCube> sim(new TestInitializer3dCube(dim, numSteps));
 
         TestWriter<TestCell3dCube> *writer = new TestWriter<TestCell3dCube>(1, 0, numSteps);
         sim.addWriter(writer);
@@ -139,7 +139,7 @@ public:
         int startStep = 28;
         int endStep = 38;
         int ioPeriod = 3;
-        CudaSimulator<TestCell3dTorus> sim(new TestInitializer3dTorus(dim, endStep, startStep));
+        CUDASimulator<TestCell3dTorus> sim(new TestInitializer3dTorus(dim, endStep, startStep));
 
         TestWriter<TestCell3dTorus> *writer = new TestWriter<TestCell3dTorus>(ioPeriod, startStep, endStep);
         sim.addWriter(writer);
@@ -152,7 +152,7 @@ public:
     {
         Coord<2> dim(135, 127);
         int numSteps = 21;
-        CudaSimulator<TestCell2dCube> sim(
+        CUDASimulator<TestCell2dCube> sim(
             new TestInitializer2dCube(dim, numSteps),
             Coord<3>(128, 5, 1));
 
@@ -167,7 +167,7 @@ public:
     {
         Coord<2> dim(251, 91);
         int numSteps = 21;
-        CudaSimulator<TestCell2dTorus> sim(
+        CUDASimulator<TestCell2dTorus> sim(
             new TestInitializer2dTorus(dim, numSteps),
             Coord<3>(128, 5, 1));
 
@@ -182,7 +182,7 @@ public:
     {
         Coord<3> dim(52, 20, 14);
         int numSteps = 6;
-        CudaSimulator<TestCell3dCube> sim(
+        CUDASimulator<TestCell3dCube> sim(
             new TestInitializer3dCube(dim, numSteps),
             Coord<3>(128, 2, 3));
 
@@ -197,7 +197,7 @@ public:
     {
         Coord<3> dim(54, 20, 13);
         int numSteps = 7;
-        CudaSimulator<TestCell3dTorus> sim(
+        CUDASimulator<TestCell3dTorus> sim(
             new TestInitializer3dTorus(dim, numSteps),
             Coord<3>(64, 2, 3));
 
@@ -227,7 +227,7 @@ public:
     {
         Coord<3> dim(54, 20, 13);
         int numSteps = 7;
-        CudaSimulator<TestCellSoA3dTorus> sim(
+        CUDASimulator<TestCellSoA3dTorus> sim(
             new TestInitializerSoA3dTorus(dim, numSteps),
             Coord<3>(64, 2, 3));
 
