@@ -55,7 +55,6 @@ public:
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
-        // fixme: refactor serialsim, cudasim to reduce code duplication
         CoordBox<DIM> box = curGrid->boundingBox();
         simArea << box;
     }
