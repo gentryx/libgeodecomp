@@ -62,39 +62,28 @@ public:
             return offset == other.offset;
         }
 
-        // fixme: use this in perf test
-        inline const Iterator *operator->() const
-        {
-            return this;
-        }
-
         inline
         bool operator!=(const Iterator& other) const
         {
             return !(*this == other);
         }
 
-        inline
-        const IteratorPair operator*() const
+        inline const Iterator& operator*() const
         {
-            // load indices and matrix values pointers
-            const VALUE_TYPE *weights = &matrix.valuesVec()[offset];
-            // fixme: type
-            const unsigned *indices = (unsigned*)&matrix.columnVec()[offset];
-            return std::make_pair(indices, weights);
-        }
-
-        inline
-        const VALUE_TYPE *first() const
-        {
-            return &matrix.valuesVec()[offset];
+            return *this;
         }
 
         inline
         // fixme: type
-        const unsigned *second() const
+        const unsigned *first() const
         {
             return (unsigned*)&matrix.columnVec()[offset];
+        }
+
+        inline
+        const VALUE_TYPE *second() const
+        {
+            return &matrix.valuesVec()[offset];
         }
 
     private:

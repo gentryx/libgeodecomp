@@ -2737,8 +2737,8 @@ public:
             tmp.load_aligned(&hoodNew->sum() + i * C);
             for (const auto& j: hoodOld.weights(0)) {
                 ShortVec weights, values;
-                weights.load_aligned(j.second);
-                values.gather(&hoodOld->value(), j.first);
+                weights.load_aligned(j.second());
+                values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
             tmp.store_aligned(&hoodNew->sum() + i * C);
@@ -2796,8 +2796,8 @@ public:
         for (int i = hoodOld.index(); i < (indexEnd / C); ++i, ++hoodOld) {
             tmp = &hoodNew->sum() + i * C;
             for (const auto& j: hoodOld.weights(0)) {
-                weights = j.second;
-                values.gather(&hoodOld->value(), j.first);
+                weights = j.second();
+                values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
             (&hoodNew->sum() + i * C) << tmp;

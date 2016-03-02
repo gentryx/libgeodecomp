@@ -112,8 +112,8 @@ public:
             tmp.load_aligned(&hoodNew->sum() + i * 4);
             for (const auto& j: hoodOld.weights(0)) {
                 ShortVec weights, values;
-                weights.load_aligned(j.second);
-                values.gather(&hoodOld->value(), j.first);
+                weights.load_aligned(j.second());
+                values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
             tmp.store_aligned(&hoodNew->sum() + i * 4);
