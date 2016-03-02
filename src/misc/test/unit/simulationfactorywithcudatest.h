@@ -22,7 +22,7 @@ public:
         maxSteps = 100;
         initializerProxy.reset(new VarStepInitializerProxy<SimFabTestCell>(
                                    new SimFabTestInitializer(dim,maxSteps)));
-        cudaFab = new CudaSimulationFactory<SimFabTestCell>(initializerProxy);
+        cudaFab = new CUDASimulationFactory<SimFabTestCell>(initializerProxy);
 #ifdef LIBGEODECOMP_WITH_THREADS
         cFab = new CacheBlockingSimulationFactory<SimFabTestCell>(initializerProxy);
 #endif
