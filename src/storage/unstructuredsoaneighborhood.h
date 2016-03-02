@@ -31,7 +31,7 @@ public:
     static const int ARITY = C;
 
     using Grid = UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
-    using IteratorPair = std::pair<const unsigned*, const VALUE_TYPE*>;
+    using IteratorPair = std::pair<const int*, const VALUE_TYPE*>;
     using SoAAccessor = LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>;
 
     /**
@@ -74,10 +74,9 @@ public:
         }
 
         inline
-        // fixme: type
-        const unsigned *first() const
+        const int *first() const
         {
-            return (unsigned*)&matrix.columnVec()[offset];
+            return &matrix.columnVec()[offset];
         }
 
         inline
@@ -104,15 +103,6 @@ public:
     {
         ++currentChunk;
         return *this;
-    }
-
-    // fixme: kill this?
-    inline
-    UnstructuredSoANeighborhood operator++(int)
-    {
-        UnstructuredSoANeighborhood tmp(*this);
-        operator++();
-        return tmp;
     }
 
     inline

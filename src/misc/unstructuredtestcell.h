@@ -83,7 +83,7 @@ public:
             // assemble weight maps:
             std::vector<std::map<int, double> > weights(HOOD_OLD::ARITY);
             for (typename HOOD_OLD::Iterator i = hoodOld.begin(); i != hoodOld.end(); ++i) {
-                const unsigned *columnPointer = i.first();
+                const int *columnPointer = i.first();
                 const double *weightPointer = i.second();
 
                 for (int i = 0; i < HOOD_OLD::ARITY; ++i) {
