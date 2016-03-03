@@ -959,6 +959,36 @@ public:
 
     inline void operator+=(const Region& other)
     {
+        // short cuts if one Region is empty
+        if (other.empty()) {
+            return;
+        }
+        if (empty()) {
+            *this = other;
+            return;
+        }
+
+        // short cuts if one Region can be appended to the other;
+        if (isAppendable(other)) {
+            for (StreakIterator i = other.beginStreak(); i != other.endStreak(); ++i) {
+                *this << *i;
+            }
+
+            return;
+        }
+        if (other.isAppendable(*this)) {
+            Region buf;
+            swap(*this, buf);
+            *this = other;
+
+            for (StreakIterator i = buf.beginStreak(); i != buf.endStreak(); ++i) {
+                *this << *i;
+            }
+
+            return;
+        }
+
+        // normal merge otherwise:
         Region newValue = *this + other;
         swap(*this, newValue);
     }
