@@ -486,7 +486,7 @@ public:
         typedef std::map<int, std::vector<int> > MapAdjacency;
 
         MapAdjacency mapAdjacency;
-        for (Region<2>::Iterator it = adjacency.getRegion().begin(); it != adjacency.getRegion().end(); ++it) {
+        for (Region<2>::Iterator it = adjacency.regions[0].begin(); it != adjacency.regions[0].end(); ++it) {
             mapAdjacency[it->x()].push_back(it->y());
         }
 
