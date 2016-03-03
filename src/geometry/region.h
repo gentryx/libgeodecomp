@@ -960,7 +960,7 @@ public:
     inline void operator+=(const Region& other)
     {
         Region newValue = *this + other;
-        *this = newValue;
+        swap(*this, newValue);
     }
 
     inline Region operator+(const Region& other) const
