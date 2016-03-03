@@ -884,6 +884,7 @@ public:
     void testDelete()
     {
         Region<2>::IndexVectorType expected;
+
         expected << IntPair(0, 10)  // 0
                                     // 1
                  << IntPair(0, 10)  // 2
@@ -913,7 +914,9 @@ public:
 
     void testAndNot1()
     {
-        Region<2> minuend, expected;
+        Region<2> minuend;
+        Region<2> expected;
+
         for(int x = 0; x < 10; ++x) {
             for(int y = 0; y < 10; ++y) {
                 c << Coord<2>(x, y);
@@ -944,6 +947,7 @@ public:
     void testAndNot2()
     {
         Region<2> expanded, expected;
+
         for(int x = 0; x < 10; ++x) {
             for(int y = 0; y < 10; ++y) {
                 c << Coord<2>(x, y);
@@ -964,7 +968,10 @@ public:
 
     void testAndAssignmentOperator()
     {
-        Region<2> original, mask, expected;
+        Region<2> original;
+        Region<2> mask;
+        Region<2> expected;
+
         for(int x = 0; x < 10; ++x) {
             for(int y = 0; y < 10; ++y) {
                 original << Coord<2>(x, y);
@@ -1013,7 +1020,10 @@ public:
 
     void testAddAssignmentOperator()
     {
-        Region<2> original, addent, expected;
+        Region<2> original;
+        Region<2> addend;
+        Region<2> expected;
+
         for(int x = 0; x < 10; ++x) {
             for(int y = 0; y < 10; ++y) {
                 original << Coord<2>(x, y);
@@ -1022,7 +1032,7 @@ public:
 
         for(int x = 3; x < 15; ++x) {
             for(int y = 0; y < 10; ++y) {
-                addent << Coord<2>(x, y);
+                addend << Coord<2>(x, y);
             }
         }
 
@@ -1032,13 +1042,16 @@ public:
             }
         }
 
-        original += addent;
+        original += addend;
         TS_ASSERT_EQUALS(original, expected);
     }
 
     void testAddOperator()
     {
-        Region<2> original, addent, expected;
+        Region<2> original;
+        Region<2> addend;
+        Region<2> expected;
+
         for(int x = 0; x < 10; ++x) {
             for(int y = 0; y < 10; ++y) {
                 original << Coord<2>(x, y);
@@ -1047,7 +1060,7 @@ public:
 
         for(int x = 3; x < 15; ++x) {
             for(int y = 0; y < 10; ++y) {
-                addent << Coord<2>(x, y);
+                addend << Coord<2>(x, y);
             }
         }
 
@@ -1057,7 +1070,20 @@ public:
             }
         }
 
-        TS_ASSERT_EQUALS(original + addent, expected);
+        TS_ASSERT_EQUALS(original + addend, expected);
+    }
+
+    void testAddOperator2()
+    {
+        Region<2> r1;
+        Region<2> r2;
+        Region<2> r3;
+
+        r1 << CoordBox<2>(Coord<2>(10, 10), Coord<2>(30, 15));
+        r2 << CoordBox<2>(Coord<2>(10, 25), Coord<2>(30, 40));
+        r3 << CoordBox<2>(Coord<2>(10, 10), Coord<2>(30, 55));
+
+        TS_ASSERT_EQUALS(r1 + r2, r3);
     }
 
     void testEqualsOperator()
