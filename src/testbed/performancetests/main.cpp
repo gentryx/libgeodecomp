@@ -297,9 +297,9 @@ public:
                 }
             }
 
-            for (int z = 1; z < (dim.z() - 1); ++z) {
-                for (int y = 1; y < (dim.y() - 1); ++y) {
-                    r2 << Streak<3>(Coord<3>(1, y, z), dim.x() - 1);
+            for (int z = dim.z(); z < (2 * dim.z()); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    r2 << Streak<3>(Coord<3>(0, y, z), dim.x());
                 }
             }
 
