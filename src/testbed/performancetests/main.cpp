@@ -270,6 +270,64 @@ public:
     }
 };
 
+class RegionAppend : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "RegionAppend";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+        double seconds = 0;
+        {
+            Region<3> r1;
+            Region<3> r2;
+
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    r1 << Streak<3>(Coord<3>(0, y, z), dim.x());
+                }
+            }
+
+            for (int z = 1; z < (dim.z() - 1); ++z) {
+                for (int y = 1; y < (dim.y() - 1); ++y) {
+                    r2 << Streak<3>(Coord<3>(1, y, z), dim.x() - 1);
+                }
+            }
+
+            Region<3> akku1 = r1;
+            Region<3> akku2 = r2;
+            int sum = 0;
+
+            {
+                ScopedTimer t(&seconds);
+                akku1 += r2;
+                akku2 += r1;
+
+                sum += akku1.size();
+                sum += akku2.size();
+                sum += (r1 + r2).size();
+                sum += (r2 + r1).size();
+            }
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
 class RegionExpand : public CPUBenchmark
 {
 public:
@@ -3286,6 +3344,10 @@ int main(int argc, char **argv)
     eval(RegionUnion(), toVector(Coord<3>( 128,  128,  128)));
     eval(RegionUnion(), toVector(Coord<3>( 512,  512,  512)));
     eval(RegionUnion(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionAppend(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionAppend(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionAppend(), toVector(Coord<3>(2048, 2048, 2048)));
 
     eval(RegionExpand(1), toVector(Coord<3>( 128,  128,  128)));
     eval(RegionExpand(1), toVector(Coord<3>( 512,  512,  512)));
