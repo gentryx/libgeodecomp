@@ -55,7 +55,6 @@ public:
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
-        // fixme: refactor serialsim, cudasim to reduce code duplication
         CoordBox<DIM> box = curGrid->boundingBox();
         simArea << box;
     }
@@ -127,7 +126,7 @@ protected:
     GridType *newGrid;
     Region<DIM> simArea;
 
-    void nanoStep(unsigned nanoStep)
+    virtual void nanoStep(unsigned nanoStep)
     {
         using std::swap;
         TimeCompute t(&chronometer);
@@ -175,7 +174,6 @@ protected:
                     feedback);
             }
         }
-        // fixme: apply SteererFeedback!
     }
 
     void setIORegions()

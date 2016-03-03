@@ -124,8 +124,8 @@ public:
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
             tmp.load_aligned(&hoodNew->sum() + i * C);
             for (const auto& j: hoodOld.weights(0)) {
-                weights.load_aligned(j.second);
-                values.gather(&hoodOld->value(), j.first);
+                weights.load_aligned(j.second());
+                values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
             tmp.store_aligned(&hoodNew->sum() + i * C);

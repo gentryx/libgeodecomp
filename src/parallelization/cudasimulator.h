@@ -13,8 +13,7 @@
 
 namespace LibGeoDecomp {
 
-// fixme: rename Cuda to CUDA
-namespace CudaSimulatorHelpers {
+namespace CUDASimulatorHelpers {
 
 /**
  * Simple neighborhood object, optimized for GPUs (actually: NVCC as
@@ -78,7 +77,7 @@ private:
 };
 
 /**
- * see CudaStepper::nanoStep() for a documentation of the parameters.
+ * see CUDAStepper::nanoStep() for a documentation of the parameters.
  */
 template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS, class CELL_TYPE>
 __global__
@@ -130,7 +129,7 @@ void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
         addTop    = axisWrapOffset.y;
         addBottom = 0;
 
-        CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetY, hood, nanoStep);
+        CUDAUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetY, hood, nanoStep);
         paddedMinY += 1;
     }
 
@@ -140,7 +139,7 @@ void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
     if (WRAP_Y_AXIS && (paddedMaxY == logicalGridDim.y)) {
 #pragma unroll
         for (int myY = paddedMinY; myY < (paddedMaxY - 1); ++myY) {
-            CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetY, hood, nanoStep);
+            CUDAUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetY, hood, nanoStep);
         }
 
         addTop = 0;
@@ -150,13 +149,13 @@ void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
     } else {
 #pragma unroll
         for (int myY = paddedMinY; myY < paddedMaxY; ++myY) {
-            CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetY, hood, nanoStep);
+            CUDAUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetY, hood, nanoStep);
         }
     }
 }
 
 /**
- * see CudaStepper::nanoStep() for a documentation of the parameters.
+ * see CUDAStepper::nanoStep() for a documentation of the parameters.
  */
 template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS, class CELL_TYPE>
 __global__
@@ -211,7 +210,7 @@ void kernel3D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
         addSouth = axisWrapOffset.z;
         addNorth = 0;
 
-        CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
+        CUDAUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
         paddedMinZ += 1;
     }
 
@@ -221,17 +220,17 @@ void kernel3D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
     if (WRAP_Z_AXIS && (paddedMaxZ == logicalGridDim.z)) {
 #pragma unroll
         for (int myZ = paddedMinZ; myZ < (paddedMaxZ - 1); ++myZ) {
-            CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
+            CUDAUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
         }
 
         addSouth = 0;
         addNorth = -axisWrapOffset.z;
-        CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
+        CUDAUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
 
     } else {
 #pragma unroll
         for (int myZ = paddedMinZ; myZ < paddedMaxZ; ++myZ) {
-            CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
+            CUDAUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
         }
     }
 }
@@ -293,28 +292,27 @@ public:
 }
 
 /**
- * CudaSimulator delegates all the work to the current Nvidia GPU.
+ * CUDASimulator delegates all the work to the current Nvidia GPU.
  */
 template<typename CELL_TYPE>
-class CudaSimulator : public MonolithicSimulator<CELL_TYPE>
+class CUDASimulator : public MonolithicSimulator<CELL_TYPE>
 {
 public:
-    friend class CudaSimulatorTest;
+    friend class CUDASimulatorTest;
 
     typedef typename MonolithicSimulator<CELL_TYPE>::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
+    typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
 
     static const int DIM = Topology::DIM;
 
     /**
-     * creates a CudaSimulator with the given initializer. The
+     * creates a CUDASimulator with the given initializer. The
      * blockSize will heavily influence the performance and should be
      * chosen on a per GPU basis -- GPU architectures vary greatly.
      */
-    explicit CudaSimulator(
+    explicit CUDASimulator(
         Initializer<CELL_TYPE> *initializer,
-        // fixme: blockSize should be driven by an auto-tuner or at
-        // least come with a better heuristic.
         Coord<3> blockSize = Coord<3>(128, (DIM < 3) ? 1 : 4, 1)) :
         MonolithicSimulator<CELL_TYPE>(initializer),
         blockSize(blockSize),
@@ -345,9 +343,92 @@ public:
         simArea << box;
 
         ioGrid = ProxyGrid<CELL_TYPE, DIM> (&grid, initializer->gridBox());
+
+        /**
+         * We'll need a couple of parameters to describe the topology of
+         * the problem space to the kernel. Here is a quick scetch. As an
+         * example I'll use a 2D model with constant boundary conditions.
+         * The grid will be padded on its boundary. Some parameters will
+         * be used to calculate addresses within the memory allocated for
+         * the grid:
+         *
+         * - offsetY/Z: how many cells separate two adjecent lines (y) or
+         *   frames (z)?
+         *
+         * - axisWrapOffset: the same, but calculated for opposing sides
+         *   of the grid (hence each is a multiple of the logicalGridDim
+         *   and the corresponding offsetY/Z. "offsetX" is trivially
+         *   assumed to be 1).
+         *
+         * - wavefrontLength will be used to determine how many cells each
+         *   thread is tasked to traverse along the higest dimension of
+         *   the simspace (Y axis for 2D, Z axis for 3D).
+         *
+         *                 gridOffset.x
+         *                 -
+         *  gridOffset.y | XXXXXXXXXXXXXX -
+         *                 X$$$$$$$$$$$$X |      -
+         *                 X$$$$$$$$$$$$X |      |
+         *                 X$$$$$$$$$$$$X |      |
+         *                 X$$$$$$$$$$$$X |      |
+         *                 X$$$$$$$$$$$$X |      - logicalGridDim.y
+         *                 XXXXXXXXXXXXXX - paddedGrid.y
+         *
+         *                    paddedGridDim.x
+         *                 <------------>
+         *
+         *                    logicalGridDim.x
+         *                  <---------->
+         *
+         *
+         *
+         * Legend
+         * ------
+         *
+         * X: Boundary
+         * $: Active grid content (i.e. cells which are going to be updated)
+         */
+        Coord<DIM> initGridDim = initializer->gridDimensions();
+        Coord<DIM> cudaGridDim;
+        // hack: treat 1D as special case of 2D, we don't need
+        // wavefront traversal in this case:
+        const int lastDim = (DIM == 1) ? 1 : DIM - 1;
+
+        for (int d = 0; d < lastDim; ++d) {
+            cudaGridDim[d] = ceil(1.0 * initGridDim[d] / blockSize[d]);
+        }
+
+        if (lastDim < DIM) {
+            cudaGridDim[lastDim] = 1;
+        }
+
+        logicalGridDim = initGridDim;
+        cudaDimBlock = blockSize;
+        cudaDimGrid = cudaGridDim;
+
+        Coord<3> rawOffset;
+        for (int d = 0; d < DIM; ++d) {
+            rawOffset[d] = grid.boundingBox().origin[d];
+        }
+        for (int d = DIM; d < 3; ++d) {
+            rawOffset[d] = 0;
+        }
+        gridOffset = rawOffset;
+        dim3 paddedGridDim = grid.boundingBox().dimensions;
+        offsetY = paddedGridDim.x;
+        offsetZ = paddedGridDim.x * paddedGridDim.y;
+
+        axisWrapOffset.x = logicalGridDim.x * 1;
+        axisWrapOffset.y = logicalGridDim.y * offsetY;
+        axisWrapOffset.z = logicalGridDim.z * offsetZ;
+
+        wavefrontLength = lastDim < DIM ? ceil(1.0 * initGridDim[lastDim] / blockSize[lastDim]) : 1;
+        if (wavefrontLength == 0) {
+            wavefrontLength = 1;
+        }
     }
 
-    virtual ~CudaSimulator()
+    virtual ~CUDASimulator()
     {
         cudaFree(devGridOld);
         cudaFree(devGridNew);
@@ -358,12 +439,28 @@ public:
      */
     virtual void step()
     {
+        SteererFeedback feedback;
+        step(&feedback);
+      }
+
+    virtual void step(SteererFeedback *feedback)
+    {
+
         using std::swap;
         // fixme: test steerer application, ensure grid gets copied to host and back to device
         // notify all registered Steerers
         for(unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
-                steerers[i]->nextStep(&ioGrid, simArea, simArea.boundingBox().dimensions, stepNum, STEERER_NEXT_STEP, 0, true, 0);
+                // fixme: copy static data from feedback to device address space
+                steerers[i]->nextStep(
+                    &ioGrid,
+                    simArea,
+                    simArea.boundingBox().dimensions,
+                    stepNum,
+                    STEERER_NEXT_STEP,
+                    0,
+                    true,
+                    feedback);
             }
         }
 
@@ -405,6 +502,7 @@ public:
     virtual void run()
     {
         initializer->grid(&ioGrid);
+        SteererFeedback feedback;
 
         // pad boundaries, see c-tor
         Region<DIM> padding;
@@ -427,7 +525,11 @@ public:
         }
 
         for (; stepNum < initializer->maxSteps();) {
-            step();
+            if (feedback.simulationEnded()) {
+                break;
+            }
+
+            step(&feedback);
         }
     }
 
@@ -441,6 +543,14 @@ private:
     int byteSize;
     Region<DIM> simArea;
     bool hasCurrentGridOnHost;
+    dim3 cudaDimBlock;
+    dim3 cudaDimGrid;
+    dim3 gridOffset;
+    dim3 logicalGridDim;
+    dim3 axisWrapOffset;
+    int offsetY;
+    int offsetZ;
+    int wavefrontLength;
 
     using MonolithicSimulator<CELL_TYPE>::initializer;
     using MonolithicSimulator<CELL_TYPE>::steerers;
@@ -454,102 +564,15 @@ private:
         hasCurrentGridOnHost = false;
     }
 
-    /**
-     * We'll need a couple of parameters to describe the topology of
-     * the problem space to the kernel. Here is a quick scetch. As an
-     * example I'll use a 2D model with constant boundary conditions.
-     * The grid will be padded on its boundary. Some parameters will
-     * be used to calculate addresses within the memory allocated for
-     * the grid:
-     *
-     * - offsetY/Z: how many cells separate two adjecent lines (y) or
-     *   frames (z)?
-     *
-     * - axisWrapOffset: the same, but calculated for opposing sides
-     *   of the grid (hence each is a multiple of the logicalGridDim
-     *   and the corresponding offsetY/Z. "offsetX" is trivially
-     *   assumed to be 1).
-     *
-     * - wavefrontLength will be used to determine how many cells each
-     *   thread is tasked to traverse along the higest dimension of
-     *   the simspace (Y axis for 2D, Z axis for 3D).
-     *
-     *                 gridOffset.x
-     *                 -
-     *  gridOffset.y | XXXXXXXXXXXXXX -
-     *                 X$$$$$$$$$$$$X |      -
-     *                 X$$$$$$$$$$$$X |      |
-     *                 X$$$$$$$$$$$$X |      |
-     *                 X$$$$$$$$$$$$X |      |
-     *                 X$$$$$$$$$$$$X |      - logicalGridDim.y
-     *                 XXXXXXXXXXXXXX - paddedGrid.y
-     *
-     *                    paddedGridDim.x
-     *                 <------------>
-     *
-     *                    logicalGridDim.x
-     *                  <---------->
-     *
-     *
-     *
-     * Legend
-     * ------
-     *
-     * X: Boundary
-     * $: Active grid content (i.e. cells which are going to be updated)
-     */
     void nanoStepImpl(const unsigned nanoStep, APITraits::FalseType /* has no SoA */)
     {
-        // fixme: measure time for this preprocessing via chronometer
-        Coord<DIM> initGridDim = initializer->gridDimensions();
-
-        Coord<DIM> cudaGridDim;
-        // hack: treat 1D as special case of 2D, we don't need
-        // wavefront traversal in this case:
-        const int lastDim = (DIM == 1) ? 1 : DIM - 1;
-
-        for (int d = 0; d < lastDim; ++d) {
-            cudaGridDim[d] = ceil(1.0 * initGridDim[d] / blockSize[d]);
-        }
-
-        if (lastDim < DIM) {
-            cudaGridDim[lastDim] = 1;
-        }
-
-        dim3 logicalGridDim = initGridDim;
-        dim3 cudaDimBlock = blockSize;
-        dim3 cudaDimGrid = cudaGridDim;
-
-        Coord<3> rawOffset;
-        for (int d = 0; d < DIM; ++d) {
-            rawOffset[d] = grid.boundingBox().origin[d];
-        }
-        for (int d = DIM; d < 3; ++d) {
-            rawOffset[d] = 0;
-        }
-        dim3 gridOffset = rawOffset;
-        dim3 paddedGridDim = grid.boundingBox().dimensions;
-        int offsetY = paddedGridDim.x;
-        int offsetZ = paddedGridDim.x * paddedGridDim.y;
-
-        dim3 axisWrapOffset;
-        axisWrapOffset.x = logicalGridDim.x * 1;
-        axisWrapOffset.y = logicalGridDim.y * offsetY;
-        axisWrapOffset.z = logicalGridDim.z * offsetZ;
-
-        int wavefrontLength = lastDim < DIM ? ceil(1.0 * initGridDim[lastDim] / blockSize[lastDim]) : 1;
-        if (wavefrontLength == 0) {
-            wavefrontLength = 1;
-        }
-
-        LOG(DBG, "CudaSimulator running kernel on grid size " << initGridDim
-            << " with cudaDimGrid " << cudaDimGrid
+        LOG(DBG, "CUDASimulator running kernel with cudaDimGrid " << cudaDimGrid
             << " and cudaDimBlock " << cudaDimBlock
             << " and gridOffset " << gridOffset
             << " and logicalGridDim " << logicalGridDim
             << " and wavefrontLength " << wavefrontLength);
 
-        CudaSimulatorHelpers::KernelWrapper<
+        CUDASimulatorHelpers::KernelWrapper<
             DIM,
             Topology::template WrapsAxis<0>::VALUE,
             Topology::template WrapsAxis<1>::VALUE,

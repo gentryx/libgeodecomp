@@ -31,7 +31,7 @@ public:
     static const int ARITY = C;
 
     using Grid = UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
-    using IteratorPair = std::pair<const unsigned*, const VALUE_TYPE*>;
+    using IteratorPair = std::pair<const int*, const VALUE_TYPE*>;
     using SoAAccessor = LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>;
 
     /**
@@ -62,39 +62,27 @@ public:
             return offset == other.offset;
         }
 
-        // fixme: use this in perf test
-        inline const Iterator *operator->() const
-        {
-            return this;
-        }
-
         inline
         bool operator!=(const Iterator& other) const
         {
             return !(*this == other);
         }
 
-        inline
-        const IteratorPair operator*() const
+        inline const Iterator& operator*() const
         {
-            // load indices and matrix values pointers
-            const VALUE_TYPE *weights = &matrix.valuesVec()[offset];
-            // fixme: type
-            const unsigned *indices = (unsigned*)&matrix.columnVec()[offset];
-            return std::make_pair(indices, weights);
+            return *this;
         }
 
         inline
-        const VALUE_TYPE *first() const
+        const int *first() const
+        {
+            return &matrix.columnVec()[offset];
+        }
+
+        inline
+        const VALUE_TYPE *second() const
         {
             return &matrix.valuesVec()[offset];
-        }
-
-        inline
-        // fixme: type
-        const unsigned *second() const
-        {
-            return (unsigned*)&matrix.columnVec()[offset];
         }
 
     private:
@@ -115,15 +103,6 @@ public:
     {
         ++currentChunk;
         return *this;
-    }
-
-    // fixme: kill this?
-    inline
-    UnstructuredSoANeighborhood operator++(int)
-    {
-        UnstructuredSoANeighborhood tmp(*this);
-        operator++();
-        return tmp;
     }
 
     inline

@@ -12,16 +12,16 @@ namespace LibGeoDecomp {
 
 /**
  * As its name implies this class helps with instantiating
- * CudaSimulators and lists all drivable/optimizable parameters.
+ * CUDASimulators and lists all drivable/optimizable parameters.
  */
 template<typename CELL>
-class CudaSimulationFactory : public SimulationFactory<CELL>
+class CUDASimulationFactory : public SimulationFactory<CELL>
 {
 public:
     using SimulationFactory<CELL>::addSteerers;
     using SimulationFactory<CELL>::addWriters;
 
-    CudaSimulationFactory<CELL>(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
+    CUDASimulationFactory<CELL>(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
         SimulationFactory<CELL>(initializer)
     {
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimX", 1, 128);
@@ -49,7 +49,7 @@ public:
 
     std::string name() const
     {
-        return "CudaSimulator";
+        return "CUDASimulator";
     }
 
 protected:
@@ -58,7 +58,7 @@ protected:
         const SimulationParameters& params) const
     {
         Coord<3> blockSize(params["BlockDimX"], params["BlockDimY"], params["BlockDimZ"]);
-        CudaSimulator<CELL> *sim = new CudaSimulator<CELL>(initializer->clone(), blockSize);
+        CUDASimulator<CELL> *sim = new CUDASimulator<CELL>(initializer->clone(), blockSize);
 
         addWriters(sim);
         addSteerers(sim);

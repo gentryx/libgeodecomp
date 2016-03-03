@@ -20,7 +20,7 @@ namespace LibGeoDecomp {
  * without CUDA. This duplication is acceptable as the same code may
  * behave differently in the presence of CUDA.
  */
-class AutotuningSimulatorWithCudaTest : public CxxTest::TestSuite
+class AutotuningSimulatorWithCUDATest : public CxxTest::TestSuite
 {
 public:
     void setUp()
@@ -91,7 +91,7 @@ public:
 #endif
     }
 
-    void testAddOwnSimulationsForCudaSim()
+    void testAddOwnSimulationsForCUDASim()
     {
         // fixme
         return;
@@ -101,13 +101,13 @@ public:
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
         ats.simulations.clear();
-        ats.addSimulation("1.CudaSimulator", CudaSimulationFactory<SimFabTestCell>(ats.varStepInitializer));
+        ats.addSimulation("1.CUDASimulator", CUDASimulationFactory<SimFabTestCell>(ats.varStepInitializer));
         ats.run();
 #endif
 #endif
     }
 
-    void testManuallyParamterizedCudaSim()
+    void testManuallyParamterizedCUDASim()
     {
         // fixme
         return;
@@ -121,12 +121,12 @@ public:
         params.addParameter("BlockDimY", 1, 6);
         params.addParameter("BlockDimZ", 1, 6);
 
-        ats.getSimulation("CudaSimulator")->parameters = params;
+        ats.getSimulation("CUDASimulator")->parameters = params;
         ats.run();
 #endif
     }
 
-    void testInvalidArgumentsForCudaSim()
+    void testInvalidArgumentsForCUDASim()
     {
         // fixme
         return;
@@ -135,7 +135,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
-        TS_ASSERT_THROWS(ats.getSimulation("1.CudaSimulator"), std::invalid_argument);
+        TS_ASSERT_THROWS(ats.getSimulation("1.CUDASimulator"), std::invalid_argument);
         TS_ASSERT_THROWS(ats.getSimulation("NoSimulator"), std::invalid_argument);
 #endif
 #endif

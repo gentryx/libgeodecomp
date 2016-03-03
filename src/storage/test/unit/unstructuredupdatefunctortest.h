@@ -28,7 +28,7 @@ class DefaultUnstructuredTestCellAPI : public APITraits::HasUpdateLineX
 {};
 
 template<int SIGMA, typename ADDITIONAL_API = DefaultUnstructuredTestCellAPI>
-class UnstructuredTestCell
+class SimpleUnstructuredTestCell
 {
 public:
     class API :
@@ -40,7 +40,7 @@ public:
         public APITraits::HasSellSigma<SIGMA>
     {};
 
-    inline explicit UnstructuredTestCell(double v = 0) :
+    inline explicit SimpleUnstructuredTestCell(double v = 0) :
         value(v), sum(0)
     {}
 
@@ -64,12 +64,12 @@ public:
         }
     }
 
-    inline bool operator==(const UnstructuredTestCell& other)
+    inline bool operator==(const SimpleUnstructuredTestCell& other)
     {
         return sum == other.sum;
     }
 
-    inline bool operator!=(const UnstructuredTestCell& other)
+    inline bool operator!=(const SimpleUnstructuredTestCell& other)
     {
         return !(*this == other);
     }
@@ -78,10 +78,8 @@ public:
     double sum;
 };
 
-// fixme: unify with UnstructuredTestCell?
-// fixme: move both test cell classes to dedicated file?
 template<int SIGMA>
-class UnstructuredSoATestCell
+class SimpleUnstructuredSoATestCell
 {
 public:
     typedef short_vec<double, 4> ShortVec;
@@ -100,7 +98,7 @@ public:
         LIBFLATARRAY_CUSTOM_SIZES((16)(32)(64)(128)(256)(512), (1), (1))
     };
 
-    inline explicit UnstructuredSoATestCell(double v = 0) :
+    inline explicit SimpleUnstructuredSoATestCell(double v = 0) :
         value(v), sum(0)
     {}
 
@@ -112,8 +110,8 @@ public:
             tmp.load_aligned(&hoodNew->sum() + i * 4);
             for (const auto& j: hoodOld.weights(0)) {
                 ShortVec weights, values;
-                weights.load_aligned(j.second);
-                values.gather(&hoodOld->value(), j.first);
+                weights.load_aligned(j.second());
+                values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
             tmp.store_aligned(&hoodNew->sum() + i * 4);
@@ -129,12 +127,12 @@ public:
         }
     }
 
-    inline bool operator==(const UnstructuredSoATestCell& cell) const
+    inline bool operator==(const SimpleUnstructuredSoATestCell& cell) const
     {
         return cell.sum == sum;
     }
 
-    inline bool operator!=(const UnstructuredSoATestCell& cell) const
+    inline bool operator!=(const SimpleUnstructuredSoATestCell& cell) const
     {
         return !(*this == cell);
     }
@@ -143,8 +141,8 @@ public:
     double sum;
 };
 
-LIBFLATARRAY_REGISTER_SOA(UnstructuredSoATestCell<1  >, ((double)(sum))((double)(value)))
-LIBFLATARRAY_REGISTER_SOA(UnstructuredSoATestCell<150>, ((double)(sum))((double)(value)))
+LIBFLATARRAY_REGISTER_SOA(SimpleUnstructuredSoATestCell<1  >, ((double)(sum))((double)(value)))
+LIBFLATARRAY_REGISTER_SOA(SimpleUnstructuredSoATestCell<150>, ((double)(sum))((double)(value)))
 #endif
 
 namespace LibGeoDecomp {
@@ -158,7 +156,7 @@ public:
         const int DIM = 150;
         Coord<1> dim(DIM);
 
-        typedef UnstructuredTestCell<1, EmptyUnstructuredTestCellAPI> TestCellType;
+        typedef SimpleUnstructuredTestCell<1, EmptyUnstructuredTestCellAPI> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
@@ -204,7 +202,7 @@ public:
         const int DIM = 150;
         Coord<1> dim(DIM);
 
-        typedef UnstructuredTestCell<1> TestCellType;
+        typedef SimpleUnstructuredTestCell<1> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
@@ -250,7 +248,7 @@ public:
         const int DIM = 150;
         Coord<1> dim(DIM);
 
-        typedef UnstructuredTestCell<128, EmptyUnstructuredTestCellAPI> TestCellType;
+        typedef SimpleUnstructuredTestCell<128, EmptyUnstructuredTestCellAPI> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
@@ -303,7 +301,7 @@ public:
         const int DIM = 150;
         Coord<1> dim(DIM);
 
-        typedef UnstructuredTestCell<128> TestCellType;
+        typedef SimpleUnstructuredTestCell<128> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
@@ -355,11 +353,11 @@ public:
         const int DIM = 150;
         CoordBox<1> dim(Coord<1>(0), Coord<1>(DIM));
 
-        UnstructuredSoATestCell<1> defaultCell(200);
-        UnstructuredSoATestCell<1> edgeCell(-1);
+        SimpleUnstructuredSoATestCell<1> defaultCell(200);
+        SimpleUnstructuredSoATestCell<1> edgeCell(-1);
 
-        UnstructuredSoAGrid<UnstructuredSoATestCell<1>, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredSoAGrid<UnstructuredSoATestCell<1>, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
+        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<1>, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
+        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<1>, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
 
         Region<1> region;
         // "normal" streak
@@ -383,9 +381,9 @@ public:
         }
         gridOld.setWeights(0, matrix);
 
-        UnstructuredUpdateFunctor<UnstructuredSoATestCell<1> > functor;
+        UnstructuredUpdateFunctor<SimpleUnstructuredSoATestCell<1> > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
-        APITraits::SelectThreadedUpdate<UnstructuredSoATestCell<1> >::Value modelThreadingSpec;
+        APITraits::SelectThreadedUpdate<SimpleUnstructuredSoATestCell<1> >::Value modelThreadingSpec;
 
         functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
@@ -408,11 +406,11 @@ public:
         const int DIM = 150;
         CoordBox<1> dim(Coord<1>(0), Coord<1>(DIM));
 
-        UnstructuredSoATestCell<150> defaultCell(200);
-        UnstructuredSoATestCell<150> edgeCell(-1);
+        SimpleUnstructuredSoATestCell<150> defaultCell(200);
+        SimpleUnstructuredSoATestCell<150> edgeCell(-1);
 
-        UnstructuredSoAGrid<UnstructuredSoATestCell<150>, 1, double, 4, 150> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredSoAGrid<UnstructuredSoATestCell<150>, 1, double, 4, 150> gridNew(dim, defaultCell, edgeCell);
+        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<150>, 1, double, 4, 150> gridOld(dim, defaultCell, edgeCell);
+        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<150>, 1, double, 4, 150> gridNew(dim, defaultCell, edgeCell);
 
         Region<1> region;
         // "normal" streak
@@ -436,9 +434,9 @@ public:
         }
         gridOld.setWeights(0, matrix);
 
-        UnstructuredUpdateFunctor<UnstructuredSoATestCell<150> > functor;
+        UnstructuredUpdateFunctor<SimpleUnstructuredSoATestCell<150> > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
-        APITraits::SelectThreadedUpdate<UnstructuredSoATestCell<150> >::Value modelThreadingSpec;
+        APITraits::SelectThreadedUpdate<SimpleUnstructuredSoATestCell<150> >::Value modelThreadingSpec;
 
         functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
