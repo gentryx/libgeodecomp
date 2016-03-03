@@ -35,12 +35,24 @@ class Region;
 class RegionBasedAdjacency : public Adjacency
 {
 public:
+    friend class RegionBasedAdjacencyTest;
+    friend class RegionExpandWithAdjacency;
+
+    explicit RegionBasedAdjacency(std::size_t maxSize = (std::size_t(1) << 30)) :
+        regions(1),
+        limits(1, std::numeric_limits<int>().max()),
+        maxSize(maxSize)
+    {}
+
     /**
      * Insert a single edge (from, to) to the graph
      */
     void insert(int from, int to)
     {
-        region << Coord<2>(to, from);
+        std::size_t myIndex = index(from);
+        regions[myIndex] << Coord<2>(to, from);
+
+        splitIfTooLarge(myIndex);
     }
 
     /**
@@ -55,7 +67,10 @@ public:
             buf << Coord<2>(*i, from);
         }
 
-        region += buf;
+        std::size_t myIndex = index(from);
+        regions[myIndex] += buf;
+
+        splitIfTooLarge(myIndex);
     }
 
     /**
@@ -63,12 +78,13 @@ public:
      */
     void getNeighbors(int node, std::vector<int> *neighbors) const
     {
-        CoordBox<2> box = region.boundingBox();
+        std::size_t myIndex = index(node);
+        CoordBox<2> box = regions[myIndex].boundingBox();
         int minX = box.origin.x();
         int maxX = minX + box.dimensions.x();
 
-        for (Region<2>::StreakIterator i = region.streakIteratorOnOrAfter(Coord<2>(minX, node));
-             i != region.streakIteratorOnOrAfter(Coord<2>(maxX, node));
+        for (Region<2>::StreakIterator i = regions[myIndex].streakIteratorOnOrAfter(Coord<2>(minX, node));
+             i != regions[myIndex].streakIteratorOnOrAfter(Coord<2>(maxX, node));
              ++i) {
             for (int j = i->origin.x(); j < i->endX; ++j) {
                 (*neighbors) << j;
@@ -81,16 +97,56 @@ public:
      */
     std::size_t size() const
     {
-        return region.size();
-    }
+        std::size_t sum = 0;
+        for (std::vector<Region<2> >::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+            sum += i->size();
+        }
 
-    const Region<2>& getRegion() const
-    {
-        return region;
+        return sum;
     }
 
 private:
-    Region<2> region;
+    std::vector<Region<2> > regions;
+    std::vector<int> limits;
+    std::size_t maxSize;
+
+    /**
+     * split Regions which are about to overflow into two
+     */
+    void splitIfTooLarge(std::size_t i)
+    {
+        using std::swap;
+
+        if (regions[i].numStreaks() <= maxSize) {
+            return;
+        }
+
+        std::size_t yIndicesSize = regions[i].indicesSize(1);
+        int newLimit = regions[i].indicesAt(1, yIndicesSize / 2)->first;
+
+        // this swap avoids copying the data out and reduces insertion overhead
+        Region<2> buf;
+        swap(buf, regions[i]);
+
+        regions.insert(regions.begin() + i, Region<2>());
+        limits.insert(limits.begin() + i, newLimit);
+
+        Region<2>::StreakIterator middle = buf.streakIteratorOnOrAfter(Coord<2>(std::numeric_limits<int>().max(), newLimit));
+
+        for (Region<2>::StreakIterator iter = buf.beginStreak(); iter != middle; ++iter) {
+            regions[i + 0] << *iter;
+        }
+
+        for (Region<2>::StreakIterator iter = middle; iter != buf.endStreak(); ++iter) {
+            regions[i + 1] << *iter;
+        }
+    }
+
+    std::size_t index(int y) const
+    {
+        using std::lower_bound;
+        return lower_bound(limits.begin(), limits.end(), y) - limits.begin();
+    }
 };
 
 }
