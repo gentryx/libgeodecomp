@@ -965,6 +965,33 @@ public:
 
     inline Region operator+(const Region& other) const
     {
+        // short cuts if one Region is empty:
+        if (other.empty()) {
+            return *this;
+        }
+        if (empty()) {
+            return other;
+        }
+
+        // short cuts if we can append one Region to the other:
+        if (isAppendable(other)) {
+            Region ret = *this;
+            for (StreakIterator i = other.beginStreak(); i != other.endStreak(); ++i) {
+                ret << *i;
+            }
+
+            return ret;
+        }
+        if (other.isAppendable(*this)) {
+            Region ret = other;
+            for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
+                ret << *i;
+            }
+
+            return ret;
+        }
+
+        // else: normal merge
         Region ret;
 
         merge2way(
@@ -1043,7 +1070,7 @@ public:
      * Checks whether the other Region can be simply pasted at the end
      * of the current Region.
      */
-    inline bool isAppendable(const Region<DIM>& other)
+    inline bool isAppendable(const Region<DIM>& other) const
     {
         if (other.empty() || empty()) {
             return true;
