@@ -36,7 +36,6 @@ class RegionBasedAdjacency : public Adjacency
 {
 public:
     friend class RegionBasedAdjacencyTest;
-    friend class RegionExpandWithAdjacency;
 
     explicit RegionBasedAdjacency(std::size_t maxSize = (std::size_t(1) << 30)) :
         regions(1),

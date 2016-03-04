@@ -474,26 +474,22 @@ public:
 
         // II. Extract Adjacency List from Cells
         RegionBasedAdjacency adjacency;
+        std::vector<int> ids;
 
         for (std::map<int, ConvexPolytope<FloatCoord<2> > >::iterator  i = cells.begin(); i != cells.end(); ++i) {
             int id = i->first;
             const ConvexPolytope<FloatCoord<2> > element = i->second;
 
+            ids << id;
             addNeighbors(adjacency, id, element.getLimits());
         }
 
         // III. Fill Region
-        typedef std::map<int, std::vector<int> > MapAdjacency;
-
-        MapAdjacency mapAdjacency;
-        for (Region<2>::Iterator it = adjacency.regions[0].begin(); it != adjacency.regions[0].end(); ++it) {
-            mapAdjacency[it->x()].push_back(it->y());
-        }
-
+        std::sort(ids.begin(), ids.end());
         Region<1> r;
         int counter = 0;
         bool select = true;
-        for (MapAdjacency::iterator i = mapAdjacency.begin(); i != mapAdjacency.end(); ++i) {
+        for (std::vector<int>::iterator i = ids.begin(); i != ids.end(); ++i) {
             ++counter;
             if (counter >= skipCells) {
                 counter = 0;
@@ -501,7 +497,7 @@ public:
             }
 
             if (select) {
-                r << Coord<1>(i->first);
+                r << Coord<1>(*i);
             }
         }
 
