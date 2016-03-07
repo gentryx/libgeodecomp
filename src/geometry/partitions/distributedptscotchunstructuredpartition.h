@@ -107,8 +107,8 @@ public:
     void getStartEnd(int rank, std::size_t *start, std::size_t *end)
     {
         std::size_t cells = dimensions.prod();
-        *start = (float)rank / numPartitions * cells;
-        *end = (float)(rank + 1) / numPartitions * cells;
+        *start = float(rank) / numPartitions * cells;
+        *end = float(rank + 1) / numPartitions * cells;
     }
 
     Region<DIM> getRegion(const std::size_t node) const override
@@ -208,14 +208,15 @@ private:
         for (int i = 0; i < indices.size(); ++i) {
             partials.at(indices[i]) << Coord<1>(start + i);
         }
+
         regions = partials;
 
         // send partial regions to all other nodes so they can build the complete regions
         for (std::size_t j = 0; j < numPartitions; ++j) {
-            if (j != MPILayer().rank()) { // dont send own regions to self
+            // dont send own regions to self:
+            if (j != MPILayer().rank()) {
                 // send all partial regions
-                for (std::size_t k = 0; k < numPartitions; ++k)
-                {
+                for (std::size_t k = 0; k < numPartitions; ++k) {
                     MPILayer().sendRegion(partials.at(k), j);
                 }
             } else {
@@ -255,8 +256,7 @@ private:
 
             MPILayer().barrier();
         }
-#endif // PTSCOTCH_PARTITION_PRETTY_PRINT_GRID_SIZE
-
+#endif
     }
 
 };
