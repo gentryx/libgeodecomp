@@ -210,11 +210,6 @@ public:
         return partition->getWeights();
     }
 
-    const Adjacency& adjacency() const
-    {
-        return *partition->getAdjacency();
-    }
-
     inline unsigned rank() const
     {
         return myRank;
@@ -239,6 +234,11 @@ private:
     unsigned myRank;
     unsigned ghostZoneWidth;
     std::vector<CoordBox<DIM> > boundingBoxes;
+
+    const Adjacency& adjacency() const
+    {
+        return *partition->getAdjacency();
+    }
 
     inline void fillRegion(unsigned node)
     {
