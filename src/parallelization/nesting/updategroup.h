@@ -157,6 +157,7 @@ protected:
         PatchProviderVec patchProvidersInner)
     {
         partitionManager->resetRegions(
+            initializer,
             box,
             partition,
             rank,

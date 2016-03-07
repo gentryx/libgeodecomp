@@ -36,7 +36,7 @@ public:
         std::vector<std::size_t> weights(1, simulationArea.size());
         boost::shared_ptr<Partition<DIM> > partition(
             new StripingPartition<DIM>(Coord<DIM>(), simulationArea.dimensions, 0, weights));
-        resetRegions(simulationArea, partition, 0, 1);
+        resetRegions(boost::make_shared<AdjacencyManufacturer<DIM>>(), simulationArea, partition, 0, 1);
         resetGhostZones(std::vector<CoordBox<DIM> >(1));
     }
 
@@ -53,11 +53,13 @@ public:
      * accelerators).
      */
     inline void resetRegions(
+        boost::shared_ptr<AdjacencyManufacturer<DIM> > adjacencyManufacturer,
         const CoordBox<DIM>& newSimulationArea,
         boost::shared_ptr<Partition<DIM> > newPartition,
         unsigned newRank,
         unsigned newGhostZoneWidth)
     {
+        adjacencyManufacturer = adjacencyManufacturer;
         partition = newPartition;
         simulationArea = newSimulationArea;
         myRank = newRank;
@@ -221,6 +223,7 @@ public:
     }
 
 private:
+    boost::shared_ptr<AdjacencyManufacturer<DIM> > adjacencyManufacturer;
     boost::shared_ptr<Partition<DIM> > partition;
     CoordBox<DIM> simulationArea;
     Region<DIM> outerRim;
@@ -235,9 +238,9 @@ private:
     unsigned ghostZoneWidth;
     std::vector<CoordBox<DIM> > boundingBoxes;
 
-    const Adjacency& adjacency() const
+    const boost::shared_ptr<Adjacency> adjacency(const Region<DIM>& region) const
     {
-        return *partition->getAdjacency();
+        return adjacencyManufacturer->getAdjacency(region);
     }
 
     inline void fillRegion(unsigned node)
@@ -252,7 +255,7 @@ private:
                 1,
                 simulationArea.dimensions,
                 Topology(),
-                adjacency());
+                *adjacency(reg));
             regionExpansion[i] = expanded;
         }
     }
@@ -265,14 +268,14 @@ private:
                 1,
                 simulationArea.dimensions,
                 Topology(),
-                adjacency()) - ownRegion());
+                *adjacency(ownRegion())) - ownRegion());
         Region<DIM> kernel(
             ownRegion() -
             surface.expandWithTopology(
                 getGhostZoneWidth(),
                 simulationArea.dimensions,
                 Topology(),
-                adjacency()));
+                *adjacency(surface)));
         outerRim = ownExpandedRegion() - ownRegion();
         ownRims.resize(getGhostZoneWidth() + 1);
         ownInnerSets.resize(getGhostZoneWidth() + 1);
@@ -280,15 +283,26 @@ private:
         ownRims.back() = ownRegion() - kernel;
         for (int i = getGhostZoneWidth() - 1; i >= 0; --i) {
             ownRims[i] = ownRims[i + 1].expandWithTopology(
-                1, simulationArea.dimensions, Topology(), adjacency());
+                1,
+                simulationArea.dimensions,
+                Topology(),
+                *adjacency(ownRims[i + 1]));
         }
 
         ownInnerSets.front() = ownRegion();
         Region<DIM> minuend = surface.expandWithTopology(
-            1, simulationArea.dimensions, Topology(), adjacency());
+            1,
+            simulationArea.dimensions,
+            Topology(),
+            *adjacency(surface));
+
         for (std::size_t i = 1; i <= getGhostZoneWidth(); ++i) {
             ownInnerSets[i] = ownInnerSets[i - 1] - minuend;
-            minuend = minuend.expandWithTopology(1, simulationArea.dimensions, Topology(), adjacency());
+            minuend = minuend.expandWithTopology(
+                1,
+                simulationArea.dimensions,
+                Topology(),
+                *adjacency(minuend));
         }
 
         volatileKernel = ownInnerSets.back() & rim(0);

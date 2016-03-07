@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 
+#include <libgeodecomp/geometry/adjacencymanufacturer.h>
 #include <libgeodecomp/geometry/regionbasedadjacency.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
@@ -23,15 +24,14 @@ public:
      * _weights. For most applications offset should be set to 0.
      * Also, _weights.sum() should equal simulationArea.size() (where
      * simulationArea is stored in PartitionManager). This basically
-     * means that each simulation cell corresponds to a weight of 1.
+     * means that each simulation cell corresponds to Adjacencya weight of 1.
      * Each entry in the weight vector will usually correspond to an
      * MPI process, identified by its rank.
      */
     inline Partition(
         const long offset,
         const std::vector<std::size_t>& weights) :
-        weights(weights),
-        adjacency(new RegionBasedAdjacency())
+        weights(weights)
     {
         startOffsets.resize(weights.size() + 1);
         startOffsets[0] = offset;
@@ -50,15 +50,9 @@ public:
 
     virtual Region<DIM> getRegion(const std::size_t node) const = 0;
 
-    virtual boost::shared_ptr<Adjacency> getAdjacency() const
-    {
-        return adjacency;
-    }
-
 protected:
     std::vector<std::size_t> weights;
     std::vector<std::size_t> startOffsets;
-    boost::shared_ptr<Adjacency> adjacency;
 };
 
 }

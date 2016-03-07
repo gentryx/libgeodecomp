@@ -77,9 +77,9 @@ public:
         return proxyObj->startStep() + newMaxSteps;
     }
 
-    virtual boost::shared_ptr<Adjacency> getAdjacency() const override
+    virtual boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const override
     {
-        return proxyObj->getAdjacency();
+        return proxyObj->getAdjacency(region);
     }
 
     //--------------- inherited functions from Clonableinitializer --------------

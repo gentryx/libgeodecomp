@@ -188,6 +188,8 @@ private:
         }
 
         CoordBox<DIM> box = initializer->gridBox();
+        Region<DIM> globalRegion;
+        globalRegion << box;
 
         double mySpeed = APITraits::SelectSpeedGuide<CELL_TYPE>::value();
         std::vector<double> rankSpeeds = mpiLayer.allGather(mySpeed);
@@ -201,7 +203,7 @@ private:
                 box.dimensions,
                 0,
                 weights,
-                initializer->getAdjacency()));
+                initializer->getAdjacency(globalRegion)));
 
         updateGroup.reset(
             new UpdateGroupType(

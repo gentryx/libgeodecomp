@@ -68,7 +68,10 @@ public:
                 weights,
                 partition);
 
+        boost::shared_ptr<AdjacencyManufacturer<2> > dummyAdjacencyManufacturer(new AdjacencyManufacturer<2>);
+
         partitionManager.resetRegions(
+            dummyAdjacencyManufacturer,
             CoordBox<2>(Coord<2>(), dimensions),
             partition,
             rank,
@@ -148,8 +151,11 @@ public:
         boost::shared_ptr<Partition<3> > partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
+        boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new AdjacencyManufacturer<3>);
+
         PartitionManager<Topologies::Torus<3>::Topology> partitionManager;
         partitionManager.resetRegions(
+            dummyAdjacencyManufacturer,
             box,
             partition,
             0,

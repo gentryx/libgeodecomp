@@ -218,12 +218,15 @@ public:
             boost::shared_ptr<PARTITION> partition(new PARTITION(Coord<3>(), box.dimensions, 0, weights));
 
             PartitionManager<Topologies::Torus<3>::Topology> myPartitionManager;
+            boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new AdjacencyManufacturer<3>);
 
             myPartitionManager.resetRegions(
+                dummyAdjacencyManufacturer,
                 box,
                 partition,
                 0,
                 ghostZoneWidth);
+
             std::vector<CoordBox<3> > boundingBoxes;
             for (int i = 0; i < 2; ++i) {
                 boundingBoxes << myPartitionManager.getRegion(i, 0).boundingBox();

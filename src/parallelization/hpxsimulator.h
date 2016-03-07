@@ -217,6 +217,8 @@ private:
         }
 
         CoordBox<DIM> box = initializer->gridBox();
+        Region<DIM> globalRegion;
+        globalRegion << box;
 
         std::vector<std::size_t> weights = initialWeights(
             box.dimensions.prod(),
@@ -228,7 +230,7 @@ private:
                 box.dimensions,
                 0,
                 weights,
-                initializer->getAdjacency()));
+                initializer->getAdjacency(globalRegion)));
 
         std::vector<hpx::future<boost::shared_ptr<UpdateGroupType> > > updateGroupCreationFutures;
 

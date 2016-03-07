@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_IO_INITIALIZER_H
 
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/geometry/adjacencymanufacturer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/storage/gridbase.h>
@@ -17,7 +18,7 @@ namespace LibGeoDecomp {
  * grid.
  */
 template<typename CELL>
-class Initializer
+class Initializer : public AdjacencyManufacturer<APITraits::SelectTopology<CELL>::Value::DIM>
 {
 public:
     typedef typename APITraits::SelectTopology<CELL>::Value Topology;
@@ -94,7 +95,11 @@ public:
         Random::seed(index);
     }
 
-    virtual boost::shared_ptr<Adjacency> getAdjacency() const
+    /**
+     * Returns the list of neighboring nodes for at least all IDs
+     * stored in the Region.
+     */
+    boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const
     {
         return boost::make_shared<RegionBasedAdjacency>();
     }
