@@ -211,7 +211,6 @@ private:
         regions = partials;
 
         // send partial regions to all other nodes so they can build the complete regions
-        std::size_t numIndices = indices.size();
         for (std::size_t j = 0; j < numPartitions; ++j) {
             if (j != MPILayer().rank()) { // dont send own regions to self
                 // send all partial regions
