@@ -28,8 +28,11 @@ public:
             TS_ASSERT_EQUALS(*i, neighbors[*i].id);
         }
 
-        int buffer;
+        int buffer = 0;
         TS_ASSERT_THROWS(buffer = neighbors[4711].id, std::logic_error);
+        if (buffer != 0) {
+            id -= 10000;
+        }
         id -= 4000;
     }
 
