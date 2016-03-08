@@ -35,8 +35,19 @@ public:
     {
         std::vector<std::size_t> weights(1, simulationArea.size());
         boost::shared_ptr<Partition<DIM> > partition(
-            new StripingPartition<DIM>(Coord<DIM>(), simulationArea.dimensions, 0, weights));
-        resetRegions(boost::make_shared<AdjacencyManufacturer<DIM>>(), simulationArea, partition, 0, 1);
+            new StripingPartition<DIM>(
+                Coord<DIM>(),
+                simulationArea.dimensions,
+                0,
+                weights));
+
+        resetRegions(
+            boost::make_shared<AdjacencyManufacturer<DIM> >(),
+            simulationArea,
+            partition,
+            0,
+            1);
+
         resetGhostZones(std::vector<CoordBox<DIM> >(1));
     }
 
