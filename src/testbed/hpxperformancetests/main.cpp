@@ -86,35 +86,60 @@ LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(UnstructuredBusyworkCell)
 class CellInitializer : public SimpleInitializer<UnstructuredBusyworkCell>
 {
 public:
-    CellInitializer(int width) :
-        SimpleInitializer<UnstructuredBusyworkCell>(Coord<1>(1000), 100),
-        width(width)
+    CellInitializer(Coord<2> dim) :
+        SimpleInitializer<UnstructuredBusyworkCell>(Coord<1>(dim.prod()), 100),
+        dim(dim)
     {}
 
     virtual void grid(GridBase<UnstructuredBusyworkCell, 1> *ret)
     {
         CoordBox<1> boundingBox = ret->boundingBox();
         for (CoordBox<1>::Iterator i = boundingBox.begin(); i != boundingBox.end(); ++i) {
-            UnstructuredBusyworkCell cell(i->x() % width, i->x() / width);
+            UnstructuredBusyworkCell cell(i->x() % width(), i->x() / width());
             ret->set(*i, cell);
         }
     }
 
     boost::shared_ptr<Adjacency> getAdjacency(const Region<1>& region) const
     {
-        boost::shared_ptr<Adjacency> adjacency;
+        boost::shared_ptr<Adjacency> adjacency(new RegionBasedAdjacency);
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            int id = i->x();
+            int x = id % width();
+            int y = id / width();
+            int west = y * width() + (width() + x - 1) % width();
+            int east = y * width() + (width() + x + 1) % width();
+            int north = ((height() + y - 1) % height()) * width() + x;
+            int south = ((height() + y + 1) % height()) * width() + x;
+            adjacency->insert(id, west);
+            adjacency->insert(id, east);
+            adjacency->insert(id, north);
+            adjacency->insert(id, south);
+        }
+
         return adjacency;
     }
 
 private:
-    int width;
+    Coord<2> dim;
+
+    int width() const
+    {
+        return dim.x();
+    }
+
+    int height() const
+    {
+        return dim.y();
+    }
 };
 
 void runSimulation()
 {
     typedef HpxSimulator<UnstructuredBusyworkCell, UnstructuredStripingPartition> SimulatorType;
 
-    CellInitializer *init = new CellInitializer(100);
+    CellInitializer *init = new CellInitializer(Coord<2>(100, 50));
 
     SimulatorType sim(
         init,
