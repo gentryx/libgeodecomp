@@ -3,7 +3,9 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
+#include <libgeodecomp/geometry/dummyadjacencymanufacturer.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/geometry/regionbasedadjacency.h>
 
 #include <boost/shared_ptr.hpp>
 
@@ -31,7 +33,7 @@ public:
     };
 
     explicit PartitionManager(
-        const CoordBox<DIM>& simulationArea=CoordBox<DIM>())
+        const CoordBox<DIM>& simulationArea = CoordBox<DIM>())
     {
         std::vector<std::size_t> weights(1, simulationArea.size());
         boost::shared_ptr<Partition<DIM> > partition(
@@ -42,7 +44,7 @@ public:
                 weights));
 
         resetRegions(
-            boost::make_shared<AdjacencyManufacturer<DIM> >(),
+            boost::make_shared<DummyAdjacencyManufacturer<DIM> >(DummyAdjacencyManufacturer<DIM>()),
             simulationArea,
             partition,
             0,
@@ -64,13 +66,13 @@ public:
      * accelerators).
      */
     inline void resetRegions(
-        boost::shared_ptr<AdjacencyManufacturer<DIM> > adjacencyManufacturer,
+        boost::shared_ptr<AdjacencyManufacturer<DIM> > newAdjacencyManufacturer,
         const CoordBox<DIM>& newSimulationArea,
         boost::shared_ptr<Partition<DIM> > newPartition,
         unsigned newRank,
         unsigned newGhostZoneWidth)
     {
-        adjacencyManufacturer = adjacencyManufacturer;
+        adjacencyManufacturer = newAdjacencyManufacturer;
         partition = newPartition;
         simulationArea = newSimulationArea;
         myRank = newRank;

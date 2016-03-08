@@ -32,7 +32,7 @@ public:
         TS_ASSERT_EQUALS(sum(weights) + offset, product);
 
         partition.reset(new StripingPartition<2>(Coord<2>(0, 0), dimensions, offset, weights));
-        boost::shared_ptr<AdjacencyManufacturer<2> > dummyAdjacencyManufacturer(new AdjacencyManufacturer<2>);
+        boost::shared_ptr<AdjacencyManufacturer<2> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<2>);
 
         manager.resetRegions(
             dummyAdjacencyManufacturer,

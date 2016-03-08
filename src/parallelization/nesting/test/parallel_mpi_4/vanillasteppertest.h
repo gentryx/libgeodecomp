@@ -50,7 +50,7 @@ public:
         boost::shared_ptr<Partition<3> > partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
-        boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new AdjacencyManufacturer<3>);
+        boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
 
         partitionManager.reset(new PartitionManagerType());
         partitionManager->resetRegions(

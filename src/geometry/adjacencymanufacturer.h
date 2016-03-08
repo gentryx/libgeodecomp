@@ -18,10 +18,7 @@ public:
     virtual ~AdjacencyManufacturer()
     {}
 
-    virtual boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const
-    {
-        throw std::logic_error("getAdjacency() should have been implemented");
-    }
+    virtual boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const = 0;
 };
 
 }
