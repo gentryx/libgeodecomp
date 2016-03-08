@@ -218,7 +218,7 @@ public:
             boost::shared_ptr<PARTITION> partition(new PARTITION(Coord<3>(), box.dimensions, 0, weights));
 
             PartitionManager<Topologies::Torus<3>::Topology> myPartitionManager;
-            boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new AdjacencyManufacturer<3>);
+            boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
 
             myPartitionManager.resetRegions(
                 dummyAdjacencyManufacturer,
