@@ -40,7 +40,6 @@ public:
     static const int SIGMA = 1;
 
     class API :
-        public APITraits::HasUpdateLineX,
         public APITraits::HasUnstructuredTopology,
         public APITraits::HasSellType<double>,
         public APITraits::HasSellMatrices<1>,
@@ -50,19 +49,25 @@ public:
 
     explicit UnstructuredBusyworkCell(double x = 0, double y = 0) :
         x(x),
-        y(y)
+        y(y),
+        cReal(0),
+        cImag(0)
     {}
 
     template<typename HOOD>
     void update(const HOOD& hood, int nanoStep)
     {
-        // fixme
-    }
+        *this = hood[hood.index()];
 
-    template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
-    {
-        // fixme
+        for (int i = 0; i < 100; ++i) {
+            cReal = cReal * cReal - cImag * cImag;
+            cImag = 2 * cImag * cReal;
+        }
+
+        for (auto i = hood.begin(); i != hood.end(); ++i) {
+            cReal += hood[*i.first()].x;
+            cImag += hood[*i.first()].y;
+        }
     }
 
     template <class ARCHIVE>
@@ -70,11 +75,15 @@ public:
     {
         ar & x;
         ar & y;
+        ar & cReal;
+        ar & cImag;
     }
 
 private:
     double x;
     double y;
+    double cReal;
+    double cImag;
 };
 
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(UnstructuredBusyworkCell)
@@ -86,8 +95,8 @@ LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(UnstructuredBusyworkCell)
 class CellInitializer : public SimpleInitializer<UnstructuredBusyworkCell>
 {
 public:
-    CellInitializer(Coord<2> dim) :
-        SimpleInitializer<UnstructuredBusyworkCell>(Coord<1>(dim.prod()), 100),
+    CellInitializer(Coord<2> dim, int steps) :
+        SimpleInitializer<UnstructuredBusyworkCell>(Coord<1>(dim.prod()), steps),
         dim(dim)
     {}
 
@@ -137,15 +146,17 @@ private:
 
 void runSimulation()
 {
+    // fixme: we need tests {update, updateLineX} x {AoS, SoA} x {fine-grained parallelism / no fine-grained parallelism}
     typedef HpxSimulator<UnstructuredBusyworkCell, UnstructuredStripingPartition> SimulatorType;
 
-    CellInitializer *init = new CellInitializer(Coord<2>(100, 50));
+    int steps = 10000;
+    CellInitializer *init = new CellInitializer(Coord<2>(100, 50), steps);
 
     SimulatorType sim(
         init,
         std::vector<double>(1, 1.0),
         new TracingBalancer(new OozeBalancer()),
-        100,
+        10,
         1);
 
     sim.run();
