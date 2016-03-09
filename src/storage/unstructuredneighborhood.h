@@ -30,30 +30,47 @@ public:
         matrix(matrix), index(startIndex)
     {}
 
-    inline void operator++()
+    inline
+    void operator++()
     {
         index += C;
     }
 
-    inline bool operator==(const Iterator& other) const
+    inline
+    bool operator==(const Iterator& other) const
     {
         // matrix is ignored, since in general it's not useful to compare iterators
         // pointing to different matrices
         return index == other.index;
     }
 
-    inline bool operator!=(const Iterator& other) const
+    inline
+    bool operator!=(const Iterator& other) const
     {
         return !(*this == other);
     }
 
-    inline const std::pair<int, VALUE_TYPE> operator*() const
+    inline
+    const std::pair<int, VALUE_TYPE> operator*() const
     {
         return std::make_pair(matrix.columnVec()[index],
                               matrix.valuesVec()[index]);
     }
     // fixme: not pretty: no operator-> available. should we implement
     // Iterator::operator-> and return a pseudo-pair?
+
+    inline
+    const int *first() const
+    {
+        return &matrix.columnVec()[index];
+    }
+
+    inline
+    const VALUE_TYPE *second() const
+    {
+        return &matrix.valuesVec()[index];
+    }
+
 
 private:
     const Matrix& matrix;
@@ -318,6 +335,7 @@ public:
         UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, true>(grid, startX)
     {}
 
+    inline
     const CELL& operator[](int index) const
     {
         return grid[index];
@@ -342,6 +360,7 @@ public:
         UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, 1, false>(grid, startX)
     {}
 
+    inline
     const CELL& operator[](int index) const
     {
         return grid[index];
