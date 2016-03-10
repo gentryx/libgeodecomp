@@ -183,7 +183,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             steps,
             1,
-            "hpxperformancetests_HPXBusyworkCellIron");
+            "hpxperformancetests_HPXBusyworkCellIron_" + dim.toString());
 
         double seconds;
         {
@@ -206,7 +206,109 @@ public:
 
 int hpx_main(int argc, char **argv)
 {
-        // fixme: we need tests {update, updateLineX} x {AoS, SoA} x {fine-grained parallelism / no fine-grained parallelism} x {structured, unstructured} x {HPX, OpenMP, CUDA} x {memory bound, compute bound}
+    // fixme: we need tests {update, updateLineX} x {AoS, SoA} x {fine-grained parallelism / no fine-grained parallelism} x {structured, unstructured} x {HPX, OpenMP, CUDA} x {memory bound, compute bound}:
+    // fixme: same for functional tests
+
+    // Function    | Memory | Parallelism | Grid         | Threading | Model         | TestClass
+    // ----------- | ------ | ----------- | ------------ | --------- | ------------- | ---------
+    // update      | AoS    | coarse      | structured   | OpenMP    | compute-bound | 
+    // updateLineX | AoS    | coarse      | structured   | OpenMP    | compute-bound | 
+    // update      | SoA    | coarse      | structured   | OpenMP    | compute-bound | *1
+    // updateLineX | SoA    | coarse      | structured   | OpenMP    | compute-bound | 
+    // update      | AoS    | fine        | structured   | OpenMP    | compute-bound | 
+    // updateLineX | AoS    | fine        | structured   | OpenMP    | compute-bound | 
+    // update      | SoA    | fine        | structured   | OpenMP    | compute-bound | *1
+    // updateLineX | SoA    | fine        | structured   | OpenMP    | compute-bound | 
+    // update      | AoS    | coarse      | unstructured | OpenMP    | compute-bound | 
+    // updateLineX | AoS    | coarse      | unstructured | OpenMP    | compute-bound | 
+    // update      | SoA    | coarse      | unstructured | OpenMP    | compute-bound | *1
+    // updateLineX | SoA    | coarse      | unstructured | OpenMP    | compute-bound | 
+    // update      | AoS    | fine        | unstructured | OpenMP    | compute-bound | 
+    // updateLineX | AoS    | fine        | unstructured | OpenMP    | compute-bound | 
+    // update      | SoA    | fine        | unstructured | OpenMP    | compute-bound | *1
+    // updateLineX | SoA    | fine        | unstructured | OpenMP    | compute-bound | 
+    // update      | AoS    | coarse      | structured   | HPX       | compute-bound | 
+    // updateLineX | AoS    | coarse      | structured   | HPX       | compute-bound | 
+    // update      | SoA    | coarse      | structured   | HPX       | compute-bound | *1
+    // updateLineX | SoA    | coarse      | structured   | HPX       | compute-bound | 
+    // update      | AoS    | fine        | structured   | HPX       | compute-bound | 
+    // updateLineX | AoS    | fine        | structured   | HPX       | compute-bound | 
+    // update      | SoA    | fine        | structured   | HPX       | compute-bound | *1
+    // updateLineX | SoA    | fine        | structured   | HPX       | compute-bound | 
+    // update      | AoS    | coarse      | unstructured | HPX       | compute-bound | HPXBusyworkCellIron
+    // updateLineX | AoS    | coarse      | unstructured | HPX       | compute-bound | fixme2 silver
+    // update      | SoA    | coarse      | unstructured | HPX       | compute-bound | *1
+    // updateLineX | SoA    | coarse      | unstructured | HPX       | compute-bound | fixme4 platinum
+    // update      | AoS    | fine        | unstructured | HPX       | compute-bound | fixme1 bronze
+    // updateLineX | AoS    | fine        | unstructured | HPX       | compute-bound | fixme3 gold
+    // update      | SoA    | fine        | unstructured | HPX       | compute-bound | *1
+    // updateLineX | SoA    | fine        | unstructured | HPX       | compute-bound | fixme5 titanium
+    // update      | AoS    | coarse      | structured   | CUDA      | compute-bound | 
+    // updateLineX | AoS    | coarse      | structured   | CUDA      | compute-bound | 
+    // update      | SoA    | coarse      | structured   | CUDA      | compute-bound | *1
+    // updateLineX | SoA    | coarse      | structured   | CUDA      | compute-bound | 
+    // update      | AoS    | fine        | structured   | CUDA      | compute-bound | 
+    // updateLineX | AoS    | fine        | structured   | CUDA      | compute-bound | 
+    // update      | SoA    | fine        | structured   | CUDA      | compute-bound | *1
+    // updateLineX | SoA    | fine        | structured   | CUDA      | compute-bound | 
+    // update      | AoS    | coarse      | unstructured | CUDA      | compute-bound | 
+    // updateLineX | AoS    | coarse      | unstructured | CUDA      | compute-bound | 
+    // update      | SoA    | coarse      | unstructured | CUDA      | compute-bound | *1
+    // updateLineX | SoA    | coarse      | unstructured | CUDA      | compute-bound | 
+    // update      | AoS    | fine        | unstructured | CUDA      | compute-bound | 
+    // updateLineX | AoS    | fine        | unstructured | CUDA      | compute-bound | 
+    // update      | SoA    | fine        | unstructured | CUDA      | compute-bound | *1
+    // updateLineX | SoA    | fine        | unstructured | CUDA      | compute-bound | 
+    // update      | AoS    | coarse      | structured   | OpenMP    | memory-bound  | 
+    // updateLineX | AoS    | coarse      | structured   | OpenMP    | memory-bound  | 
+    // update      | SoA    | coarse      | structured   | OpenMP    | memory-bound  | *1
+    // updateLineX | SoA    | coarse      | structured   | OpenMP    | memory-bound  | 
+    // update      | AoS    | fine        | structured   | OpenMP    | memory-bound  | 
+    // updateLineX | AoS    | fine        | structured   | OpenMP    | memory-bound  | 
+    // update      | SoA    | fine        | structured   | OpenMP    | memory-bound  | *1
+    // updateLineX | SoA    | fine        | structured   | OpenMP    | memory-bound  | 
+    // update      | AoS    | coarse      | unstructured | OpenMP    | memory-bound  | 
+    // updateLineX | AoS    | coarse      | unstructured | OpenMP    | memory-bound  | 
+    // update      | SoA    | coarse      | unstructured | OpenMP    | memory-bound  | *1
+    // updateLineX | SoA    | coarse      | unstructured | OpenMP    | memory-bound  | 
+    // update      | AoS    | fine        | unstructured | OpenMP    | memory-bound  | 
+    // updateLineX | AoS    | fine        | unstructured | OpenMP    | memory-bound  | 
+    // update      | SoA    | fine        | unstructured | OpenMP    | memory-bound  | *1
+    // updateLineX | SoA    | fine        | unstructured | OpenMP    | memory-bound  | 
+    // update      | AoS    | coarse      | structured   | HPX       | memory-bound  | 
+    // updateLineX | AoS    | coarse      | structured   | HPX       | memory-bound  | 
+    // update      | SoA    | coarse      | structured   | HPX       | memory-bound  | *1
+    // updateLineX | SoA    | coarse      | structured   | HPX       | memory-bound  | 
+    // update      | AoS    | fine        | structured   | HPX       | memory-bound  | 
+    // updateLineX | AoS    | fine        | structured   | HPX       | memory-bound  | 
+    // update      | SoA    | fine        | structured   | HPX       | memory-bound  | *1
+    // updateLineX | SoA    | fine        | structured   | HPX       | memory-bound  | 
+    // update      | AoS    | coarse      | unstructured | HPX       | memory-bound  | 
+    // updateLineX | AoS    | coarse      | unstructured | HPX       | memory-bound  | 
+    // update      | SoA    | coarse      | unstructured | HPX       | memory-bound  | *1
+    // updateLineX | SoA    | coarse      | unstructured | HPX       | memory-bound  | 
+    // update      | AoS    | fine        | unstructured | HPX       | memory-bound  | 
+    // updateLineX | AoS    | fine        | unstructured | HPX       | memory-bound  | 
+    // update      | SoA    | fine        | unstructured | HPX       | memory-bound  | *1
+    // updateLineX | SoA    | fine        | unstructured | HPX       | memory-bound  | 
+    // update      | AoS    | coarse      | structured   | CUDA      | memory-bound  | 
+    // updateLineX | AoS    | coarse      | structured   | CUDA      | memory-bound  | 
+    // update      | SoA    | coarse      | structured   | CUDA      | memory-bound  | *1
+    // updateLineX | SoA    | coarse      | structured   | CUDA      | memory-bound  | 
+    // update      | AoS    | fine        | structured   | CUDA      | memory-bound  | 
+    // updateLineX | AoS    | fine        | structured   | CUDA      | memory-bound  | 
+    // update      | SoA    | fine        | structured   | CUDA      | memory-bound  | *1
+    // updateLineX | SoA    | fine        | structured   | CUDA      | memory-bound  | 
+    // update      | AoS    | coarse      | unstructured | CUDA      | memory-bound  | 
+    // updateLineX | AoS    | coarse      | unstructured | CUDA      | memory-bound  | 
+    // update      | SoA    | coarse      | unstructured | CUDA      | memory-bound  | *1
+    // updateLineX | SoA    | coarse      | unstructured | CUDA      | memory-bound  | 
+    // update      | AoS    | fine        | unstructured | CUDA      | memory-bound  | 
+    // updateLineX | AoS    | fine        | unstructured | CUDA      | memory-bound  | 
+    // update      | SoA    | fine        | unstructured | CUDA      | memory-bound  | *1
+    // updateLineX | SoA    | fine        | unstructured | CUDA      | memory-bound  |
+    //
+    // *1) left out as deemed impratical
 
     if ((argc < 3) || (argc == 4) || (argc > 5)) {
         std::cerr << "usage: " << argv[0] << " [-n,--name SUBSTRING] REVISION CUDA_DEVICE \n"
@@ -235,9 +337,14 @@ int hpx_main(int argc, char **argv)
     LibFlatArray::evaluate eval(name, revision);
     eval.print_header();
 
-    std::vector<int> size;
-    size << 100 << 100 << 100;
-    eval(HPXBusyworkCellIron(), size);
+    std::vector<Coord<3> > sizes;
+    sizes << Coord<3>( 10,  10, 10000)
+          << Coord<3>(100, 100,   100);
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(HPXBusyworkCellIron(), toVector(sizes[i]));
+    }
+
     return hpx::finalize();
 }
 
