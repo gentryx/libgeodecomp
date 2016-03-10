@@ -68,7 +68,6 @@ public:
             return !(*this == other);
         }
 
-        // fixme: kill this?
         inline const Iterator& operator*() const
         {
             return *this;
