@@ -19,7 +19,10 @@
 #include <libgeodecomp/storage/fixedarray.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
+#include <libgeodecomp/storage/unstructuredneighborhoodnew.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
+#include <libgeodecomp/storage/unstructuredsoaneighborhoodnew.h>
+#include <libgeodecomp/storage/unstructuredsoascalarneighborhood.h>
 #include <libgeodecomp/storage/updatefunctormacros.h>
 
 namespace LibGeoDecomp {
@@ -168,7 +171,7 @@ public:
         // HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld,
         // UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
         //     hoodOld(gridOld, streak.origin.x());
-        // CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+        // UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA>
         //     hoodNew(*gridNew);
 
 
@@ -181,7 +184,7 @@ public:
             std::vector<hpx::future<void> > updateFutures;
             for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
                 UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOld(gridOld, i->origin.x());
-                CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodNew(*gridNew);
+                UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA> hoodNew(*gridNew);
                 int origin = i->origin.x();
                 for (int offset = 0; offset < i->length(); ++offset) {
                     updateFutures << hpx::async(
@@ -210,7 +213,7 @@ public:
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
         UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>   \
             hoodOld(gridOld, i->origin.x());                            \
-        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>         \
+        UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA>         \
             hoodNew(*gridNew);                                          \
         for (int id = i->origin.x(); id != i->endX; ++id, ++hoodOld) {  \
             hoodNew[id].update(hoodOld, nanoStep);                      \
@@ -237,7 +240,7 @@ public:
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
         UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>   \
             hoodOld(gridOld, i->origin.x());                            \
-        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>         \
+        UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA> \
             hoodNew(*gridNew);                                          \
         CELL::updateLineX(hoodNew, i->endX, hoodOld, nanoStep);         \
         /**/

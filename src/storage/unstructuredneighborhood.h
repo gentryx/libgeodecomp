@@ -362,39 +362,6 @@ public:
     }
 };
 
-/**
- * Simple neighborhood which is used for hoodNew in updateLineX().
- * Provides access to cells via an identifier which is returned by
- * hoodOld (see Iterator classe above).
- */
-template<typename CELL, std::size_t MATRICES = 1,
-         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
-class CellIDNeighborhood
-{
-public:
-    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
-
-    inline explicit
-    CellIDNeighborhood(Grid& grid) :
-        grid(grid)
-    {}
-
-    inline
-    CELL& operator[](int index)
-    {
-        return grid[index];
-    }
-
-    inline
-    const CELL& operator[](int index) const
-    {
-        return grid[index];
-    }
-
-private:
-    Grid& grid;                 /**< new grid */
-};
-
 }
 
 #endif
