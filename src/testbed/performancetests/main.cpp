@@ -2962,10 +2962,8 @@ private:
     void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
                        GRID *gridNew, unsigned nanoStep)
     {
-        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodOld(gridOld, streak.origin.x());
-        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodNew(*gridNew);
+        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOld(gridOld, streak.origin.x());
+        UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA> hoodNew(*gridNew);
 
         // call update()
         for (int i = hoodOld.index(); i < streak.endX; ++i, ++hoodOld) {
