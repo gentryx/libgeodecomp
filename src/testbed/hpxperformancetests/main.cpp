@@ -36,7 +36,8 @@ private:
 
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(ChargedParticle)
 
-class UnstructuredBusyworkCell
+template<typename ADDITIONAL_API>
+class UnstructuredBusyworkCellBase
 {
 public:
     static const int ITERATIONS = 10000;
@@ -48,25 +49,20 @@ public:
         public APITraits::HasSellType<double>,
         public APITraits::HasSellMatrices<1>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
+        public APITraits::HasSellSigma<SIGMA>,
+        public ADDITIONAL_API
     {};
 
-    explicit UnstructuredBusyworkCell(double x = 0, double y = 0) :
+    inline
+    explicit UnstructuredBusyworkCellBase(double x = 0, double y = 0) :
         x(x),
         y(y),
         cReal(0),
         cImag(0)
     {}
 
-    // template<typename HOOD_NEW, typename HOOD_OLD>
-    // static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
-    // {
-    // fixme
-    //     std::cout << "updateLineX\n";
-    // }
-
     template<typename HOOD>
-    void update(const HOOD& hood, int /* nanoStep */)
+    inline void update(const HOOD& hood, int /* nanoStep */)
     {
         *this = hood[hood.index()];
 
@@ -82,7 +78,7 @@ public:
     }
 
     template <class ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
+    inline void serialize(ARCHIVE& ar, unsigned)
     {
         ar & x;
         ar & y;
@@ -90,32 +86,82 @@ public:
         ar & cImag;
     }
 
-private:
+protected:
     double x;
     double y;
     double cReal;
     double cImag;
 };
 
+class EmptyAPI
+{};
+
+class APIWithUpdateLineX :
+    public APITraits::HasUpdateLineX
+{};
+
+
+class UnstructuredBusyworkCell : public UnstructuredBusyworkCellBase<EmptyAPI>
+{
+public:
+    inline
+    explicit UnstructuredBusyworkCell(double x = 0, double y = 0) :
+        UnstructuredBusyworkCellBase<EmptyAPI>(x, y)
+    {}
+};
+
+class UnstructuredBusyworkCellWithUpdateLineX : public UnstructuredBusyworkCellBase<APIWithUpdateLineX>
+{
+public:
+    inline
+    explicit UnstructuredBusyworkCellWithUpdateLineX(double x = 0, double y = 0) :
+        UnstructuredBusyworkCellBase<APIWithUpdateLineX>(x, y)
+    {}
+
+    template<typename HOOD_NEW, typename HOOD_OLD>
+    inline static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    {
+        for (; hoodOld.index() < indexEnd; ++hoodOld) {
+            UnstructuredBusyworkCellWithUpdateLineX& self = hoodNew[hoodOld.index()];
+            self = hoodOld[hoodOld.index()];
+
+            for (int i = 0; i < ITERATIONS; ++i) {
+                self.cReal = self.cReal * self.cReal - self.cImag * self.cImag;
+                self.cImag = 2 * self.cImag * self.cReal;
+            }
+
+            for (auto i = hoodOld.begin(); i != hoodOld.end(); ++i) {
+                self.cReal += hoodOld[i.first()].x * i.second();
+                self.cImag += hoodOld[i.first()].y * i.second();
+            }
+        }
+    }
+};
+
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(UnstructuredBusyworkCell)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(UnstructuredBusyworkCellWithUpdateLineX)
+
+
+
 
 /**
  * Connects cells in a structure that corresponds to a regular grid of
  * the given width.
  */
-class CellInitializer : public SimpleInitializer<UnstructuredBusyworkCell>
+template<typename CELL_TYPE>
+class CellInitializer : public SimpleInitializer<CELL_TYPE>
 {
 public:
     CellInitializer(Coord<2> dim, int steps) :
-        SimpleInitializer<UnstructuredBusyworkCell>(Coord<1>(dim.prod()), steps),
+        SimpleInitializer<CELL_TYPE>(Coord<1>(dim.prod()), steps),
         dim(dim)
     {}
 
-    virtual void grid(GridBase<UnstructuredBusyworkCell, 1> *ret)
+    virtual void grid(GridBase<CELL_TYPE, 1> *ret)
     {
         CoordBox<1> boundingBox = ret->boundingBox();
         for (CoordBox<1>::Iterator i = boundingBox.begin(); i != boundingBox.end(); ++i) {
-            UnstructuredBusyworkCell cell(i->x() % width(), i->x() / width());
+            CELL_TYPE cell(i->x() % width(), i->x() / width());
             ret->set(*i, cell);
         }
     }
@@ -155,7 +201,8 @@ private:
     }
 };
 
-class HPXBusyworkCellIron : public CPUBenchmark
+template<typename CELL>
+class HPXBusyworkCellTest : public CPUBenchmark
 {
 public:
     std::string family()
@@ -163,9 +210,9 @@ public:
         return "HPXBusyworkCell";
     }
 
-    std::string species()
+    std::string unit()
     {
-        return "iron";
+        return "GFLOP/s";
     }
 
     double performance(std::vector<int> rawDim)
@@ -173,9 +220,9 @@ public:
         Coord<2> dim(rawDim[0], rawDim[1]);
         int steps = rawDim[2];
 
-        typedef HpxSimulator<UnstructuredBusyworkCell, UnstructuredStripingPartition> SimulatorType;
+        typedef HpxSimulator<CELL, UnstructuredStripingPartition> SimulatorType;
 
-        CellInitializer *init = new CellInitializer(dim, steps);
+        CellInitializer<CELL> *init = new CellInitializer<CELL>(dim, steps);
 
         SimulatorType sim(
             init,
@@ -183,7 +230,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             steps,
             1,
-            "hpxperformancetests_HPXBusyworkCellIron_" + dim.toString());
+            "hpxperformancetests_HPXBusyworkCellTest_" + species() + dim.toString());
 
         double seconds;
         {
@@ -192,15 +239,28 @@ public:
         }
 
         double latticeUpdates = 1.0 * dim.prod() * steps;
-        double flopsPerLatticeUpdate = UnstructuredBusyworkCell::ITERATIONS * 5 + 4 * 4;
+        double flopsPerLatticeUpdate = CELL::ITERATIONS * 5 + 4 * 4;
         double gflops = latticeUpdates * flopsPerLatticeUpdate / seconds * 1e-9;
 
         return gflops;
     }
+};
 
-    std::string unit()
+class HPXBusyworkCellIron : public HPXBusyworkCellTest<UnstructuredBusyworkCell>
+{
+public:
+    std::string species()
     {
-        return "GFLOP/s";
+        return "iron";
+    }
+};
+
+class HPXBusyworkCellSilver : public HPXBusyworkCellTest<UnstructuredBusyworkCellWithUpdateLineX>
+{
+public:
+    std::string species()
+    {
+        return "silver";
     }
 };
 
@@ -236,7 +296,7 @@ int hpx_main(int argc, char **argv)
     // update      | SoA    | fine        | structured   | HPX       | compute-bound | *1
     // updateLineX | SoA    | fine        | structured   | HPX       | compute-bound | 
     // update      | AoS    | coarse      | unstructured | HPX       | compute-bound | HPXBusyworkCellIron
-    // updateLineX | AoS    | coarse      | unstructured | HPX       | compute-bound | fixme2 silver
+    // updateLineX | AoS    | coarse      | unstructured | HPX       | compute-bound | HPXBusyworkCellSilver
     // update      | SoA    | coarse      | unstructured | HPX       | compute-bound | *1
     // updateLineX | SoA    | coarse      | unstructured | HPX       | compute-bound | fixme4 platinum
     // update      | AoS    | fine        | unstructured | HPX       | compute-bound | fixme1 bronze
@@ -343,6 +403,10 @@ int hpx_main(int argc, char **argv)
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
         eval(HPXBusyworkCellIron(), toVector(sizes[i]));
+    }
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(HPXBusyworkCellSilver(), toVector(sizes[i]));
     }
 
     return hpx::finalize();
