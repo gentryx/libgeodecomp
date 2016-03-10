@@ -51,24 +51,21 @@ public:
     }
 
     inline
-    const std::pair<int, VALUE_TYPE> operator*() const
+    const Iterator& operator*() const
     {
-        return std::make_pair(matrix.columnVec()[index],
-                              matrix.valuesVec()[index]);
-    }
-    // fixme: not pretty: no operator-> available. should we implement
-    // Iterator::operator-> and return a pseudo-pair?
-
-    inline
-    const int *first() const
-    {
-        return &matrix.columnVec()[index];
+        return *this;
     }
 
     inline
-    const VALUE_TYPE *second() const
+    const int first() const
     {
-        return &matrix.valuesVec()[index];
+        return matrix.columnVec()[index];
+    }
+
+    inline
+    const VALUE_TYPE second() const
+    {
+        return matrix.valuesVec()[index];
     }
 
 

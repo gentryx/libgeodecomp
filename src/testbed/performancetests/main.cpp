@@ -2717,7 +2717,7 @@ public:
     {
         sum = 0.;
         for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first].value * j.second;
+            sum += neighborhood[j.first()].value * j.second();
         }
     }
 
@@ -2804,7 +2804,7 @@ public:
     {
         sum = 0.;
         for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first].value * j.second;
+            sum += neighborhood[j.first()].value * j.second();
         }
     }
 
@@ -2863,7 +2863,7 @@ public:
     {
         sum = 0.;
         for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first].value * j.second;
+            sum += neighborhood[j.first()].value * j.second();
         }
     }
 

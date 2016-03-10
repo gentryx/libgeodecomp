@@ -98,15 +98,15 @@ public:
         auto it1 = *weights1.begin();
         auto it2 = *weights2.begin();
         auto it3 = *weights3.begin();
-        TS_ASSERT_EQUALS(it0.first, 0);
-        TS_ASSERT_EQUALS(it1.first, 1);
-        TS_ASSERT_EQUALS(it2.first, 2);
-        TS_ASSERT_EQUALS(it3.first, 3);
+        TS_ASSERT_EQUALS(it0.first(), 0);
+        TS_ASSERT_EQUALS(it1.first(), 1);
+        TS_ASSERT_EQUALS(it2.first(), 2);
+        TS_ASSERT_EQUALS(it3.first(), 3);
 
-        TS_ASSERT_EQUALS(it0.second, 1);
-        TS_ASSERT_EQUALS(it1.second, 2);
-        TS_ASSERT_EQUALS(it2.second, 3);
-        TS_ASSERT_EQUALS(it3.second, 4);
+        TS_ASSERT_EQUALS(it0.second(), 1);
+        TS_ASSERT_EQUALS(it1.second(), 2);
+        TS_ASSERT_EQUALS(it2.second(), 3);
+        TS_ASSERT_EQUALS(it3.second(), 4);
 #endif
     }
 
@@ -151,24 +151,24 @@ public:
         for (const auto& i: nb.weights()) {
             switch (cnt) {
             case 0:
-                TS_ASSERT_EQUALS(i.first, 1);
-                TS_ASSERT_EQUALS(i.second, 2);
+                TS_ASSERT_EQUALS(i.first(),  1);
+                TS_ASSERT_EQUALS(i.second(), 2);
                 break;
             case 1:
-                TS_ASSERT_EQUALS(i.first, 3);
-                TS_ASSERT_EQUALS(i.second, 3);
+                TS_ASSERT_EQUALS(i.first(),  3);
+                TS_ASSERT_EQUALS(i.second(), 3);
                 break;
             case 2:
-                TS_ASSERT_EQUALS(i.first, 4);
-                TS_ASSERT_EQUALS(i.second, 7);
+                TS_ASSERT_EQUALS(i.first(),  4);
+                TS_ASSERT_EQUALS(i.second(), 7);
                 break;
             case 3:
-                TS_ASSERT_EQUALS(i.first, 5);
-                TS_ASSERT_EQUALS(i.second, 6);
+                TS_ASSERT_EQUALS(i.first(),  5);
+                TS_ASSERT_EQUALS(i.second(), 6);
                 break;
             case 4:
-                TS_ASSERT_EQUALS(i.first, 6);
-                TS_ASSERT_EQUALS(i.second, 4);
+                TS_ASSERT_EQUALS(i.first(),  6);
+                TS_ASSERT_EQUALS(i.second(), 4);
                 break;
             }
             ++cnt;

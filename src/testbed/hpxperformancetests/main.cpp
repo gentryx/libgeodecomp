@@ -65,8 +65,8 @@ public:
         }
 
         for (auto i = hood.begin(); i != hood.end(); ++i) {
-            cReal += hood[*i.first()].x;
-            cImag += hood[*i.first()].y;
+            cReal += hood[i.first()].x * i.second();
+            cImag += hood[i.first()].y * i.second();
         }
     }
 

@@ -50,7 +50,7 @@ public:
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
             hoodNew[i].sum = 0.;
             for (const auto& j: hoodOld.weights(0)) {
-                hoodNew[i].sum += hoodOld[j.first].value * j.second;
+                hoodNew[i].sum += hoodOld[j.first()].value * j.second();
             }
         }
     }
@@ -60,7 +60,7 @@ public:
     {
         sum = 0.;
         for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first].value * j.second;
+            sum += neighborhood[j.first()].value * j.second();
         }
     }
 
@@ -123,7 +123,7 @@ public:
     {
         sum = 0.;
         for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first].value * j.second;
+            sum += neighborhood[j.first()].value * j.second();
         }
     }
 

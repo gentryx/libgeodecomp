@@ -26,6 +26,48 @@ class SoAAPI :
         public APITraits::HasSellSigma<1>
 {};
 
+class IterAdapter
+{
+public:
+    inline
+    IterAdapter(std::map<int, double>::iterator iter) :
+        iter(iter)
+    {}
+
+    inline
+    int first() const
+    {
+        return iter->first;
+    }
+
+    inline
+    double second() const
+    {
+        return iter->second;
+    }
+
+    inline
+    bool operator==(const IterAdapter& other)
+    {
+        return iter == other.iter;
+    }
+
+    inline
+    bool operator!=(const IterAdapter& other)
+    {
+        return iter != other.iter;
+    }
+
+    inline
+    void operator++()
+    {
+        ++iter;
+    }
+
+private:
+    std::map<int, double>::iterator iter;
+};
+
 }
 
 /**
@@ -101,7 +143,11 @@ public:
             for (int i = 0; i < HOOD_OLD::ARITY; ++i) {
                 int index = hoodOld.index() * HOOD_OLD::ARITY + i;
                 cells << hoodOld[index];
-                cells.back().verify(weights[i].begin(), weights[i].end(), hoodOld, nanoStep);
+                cells.back().verify(
+                    UnstructuredTestCellHelpers::IterAdapter(weights[i].begin()),
+                    UnstructuredTestCellHelpers::IterAdapter(weights[i].end()),
+                    hoodOld,
+                    nanoStep);
             }
 
             // copy back to new grid:
@@ -148,8 +194,8 @@ private:
         std::map<int, double> actualNeighborWeights;
 
         for (ITERATOR1 i = begin; i != end; ++i) {
-            checkNeighbor((*i).first, hood[(*i).first]);
-            actualNeighborWeights[(*i).first] = (*i).second;
+            checkNeighbor(i.first(), hood[i.first()]);
+            actualNeighborWeights[i.first()] = i.second();
         }
 
         if (expectedNeighborWeights != actualNeighborWeights) {
