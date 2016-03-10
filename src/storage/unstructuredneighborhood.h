@@ -122,7 +122,6 @@ public:
         return tmp;
     }
 
-    // fixme
     inline
     void operator+=(long i)
     {
@@ -220,7 +219,6 @@ public:
         return tmp;
     }
 
-    // fixme
     inline
     void operator+=(long i)
     {
