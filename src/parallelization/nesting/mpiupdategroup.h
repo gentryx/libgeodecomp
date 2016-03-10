@@ -45,6 +45,7 @@ public:
         PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
         PatchProviderVec patchProvidersGhost = PatchProviderVec(),
         PatchProviderVec patchProvidersInner = PatchProviderVec(),
+        bool enableFineGrainedParallelism = false,
         MPI_Comm communicator = MPI_COMM_WORLD) :
         UpdateGroup<CELL_TYPE, PatchLink>(ghostZoneWidth, initializer, MPILayer(communicator).rank()),
         mpiLayer(communicator)
@@ -58,7 +59,8 @@ public:
             patchAcceptersGhost,
             patchAcceptersInner,
             patchProvidersGhost,
-            patchProvidersInner);
+            patchProvidersInner,
+            enableFineGrainedParallelism);
     }
 
 private:

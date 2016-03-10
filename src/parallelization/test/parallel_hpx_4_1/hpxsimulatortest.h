@@ -163,6 +163,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testBasic");
 
         MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(events, outputFrequency);
@@ -199,6 +200,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererCallback");
 
         boost::shared_ptr<MockSteerer<ConwayCell>::EventsStore> events(new MockSteerer<ConwayCell>::EventsStore);
@@ -238,6 +240,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testHeterogeneous");
 
         MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(events, outputFrequency);
@@ -304,6 +307,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWithTestCell2D");
 
         MockWriter<TestCell<2> > *writer = new MockWriter<TestCell<2> >(events, outputFrequency);
@@ -345,6 +349,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWithTestCell3DHeterogeneous");
 
         MockWriter<TestCell<3>> *writer = new MockWriter<TestCell<3>>(events, outputFrequency);
@@ -390,6 +395,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth1");
 
         sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
@@ -415,6 +421,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth2");
 
         sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
@@ -439,6 +446,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth3");
 
         sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
@@ -463,6 +471,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth4");
 
         sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
@@ -511,6 +520,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality2DWithGhostZoneWidth6");
 
         sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
@@ -535,6 +545,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth1");
 
         sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
@@ -559,6 +570,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth2");
 
         sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
@@ -583,6 +595,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth3");
 
         sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
@@ -607,6 +620,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth4");
 
         sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
@@ -631,6 +645,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth5");
 
         sim.addSteerer(new TestSteerer<3>(5, 25, 4711 * 27));
@@ -655,6 +670,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testSteererFunctionality3DWithGhostZoneWidth6");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -720,6 +736,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth1");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -788,6 +805,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth2");
 
         sim.addSteerer(new TestSteerer<2>(5, 25, 4711 * 27));
@@ -812,6 +830,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth3");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -879,6 +898,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth4");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -946,6 +966,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth5");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -1013,6 +1034,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality2DWithGhostZoneWidth6");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -1080,6 +1102,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality3DWithGhostZoneWidth1");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -1147,6 +1170,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality3DWithGhostZoneWidth2");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -1222,6 +1246,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality3DWithGhostZoneWidth3");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -1289,6 +1314,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality3DWithGhostZoneWidth4");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -1356,6 +1382,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterFunctionality3DWithGhostZoneWidth5");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -1423,6 +1450,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testWriterCallback3DWithGhostZoneWidth6");
 
         std::vector<unsigned> expectedWriterSteps;
@@ -1491,6 +1519,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
+            false,
             "/HpxSimulatorTest/testStepAndGetStep");
 
         TS_ASSERT_EQUALS(startStep + 0, sim.getStep());

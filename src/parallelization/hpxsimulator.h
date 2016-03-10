@@ -45,6 +45,7 @@ public:
     using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
     using HierarchicalSimulator<CELL_TYPE>::handleEvents;
     using HierarchicalSimulator<CELL_TYPE>::initialWeights;
+    using HierarchicalSimulator<CELL_TYPE>::enableFineGrainedParallelism;
     using HierarchicalSimulator<CELL_TYPE>::events;
     using HierarchicalSimulator<CELL_TYPE>::initEvents;
     using HierarchicalSimulator<CELL_TYPE>::timeToLastEvent;
@@ -75,8 +76,12 @@ public:
         LoadBalancer *balancer = 0,
         const unsigned loadBalancingPeriod = 1,
         const unsigned ghostZoneWidth = 1,
+        bool enableFineGrainedParallelism = false,
         std::string basename = "/HPXSimulator") :
-        ParentType(initializer, loadBalancingPeriod * NANO_STEPS),
+        ParentType(
+            initializer,
+            loadBalancingPeriod * NANO_STEPS,
+            enableFineGrainedParallelism),
         updateGroupSpeeds(updateGroupSpeeds),
         balancer(balancer),
         ghostZoneWidth(ghostZoneWidth),
@@ -289,6 +294,7 @@ private:
                       writerAdaptersInner[rank],
                       steererAdaptersGhost[rank],
                       steererAdaptersInner[rank],
+                      enableFineGrainedParallelism,
                       basename,
                       rank));
         return ret;

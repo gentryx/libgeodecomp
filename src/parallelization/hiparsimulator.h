@@ -43,6 +43,7 @@ public:
     using DistributedSimulator<CELL_TYPE>::chronometer;
     using HierarchicalSimulator<CELL_TYPE>::handleEvents;
     using HierarchicalSimulator<CELL_TYPE>::initialWeights;
+    using HierarchicalSimulator<CELL_TYPE>::enableFineGrainedParallelism;
     using HierarchicalSimulator<CELL_TYPE>::events;
     using HierarchicalSimulator<CELL_TYPE>::initEvents;
     using HierarchicalSimulator<CELL_TYPE>::timeToLastEvent;
@@ -62,8 +63,12 @@ public:
         LoadBalancer *balancer = 0,
         unsigned loadBalancingPeriod = 1,
         unsigned ghostZoneWidth = 1,
+        bool enableFineGrainedParallelism = false,
         MPI_Comm communicator = MPI_COMM_WORLD) :
-        ParentType(initializer, loadBalancingPeriod * NANO_STEPS),
+        ParentType(
+            initializer,
+            loadBalancingPeriod * NANO_STEPS,
+            enableFineGrainedParallelism),
         balancer(balancer),
         ghostZoneWidth(ghostZoneWidth),
         mpiLayer(communicator)
@@ -216,6 +221,7 @@ private:
                 writerAdaptersInner,
                 steererAdaptersGhost,
                 steererAdaptersInner,
+                enableFineGrainedParallelism,
                 mpiLayer.communicator()));
 
         writerAdaptersGhost.clear();

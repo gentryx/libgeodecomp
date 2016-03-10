@@ -14,10 +14,15 @@ protected:
     using DistributedSimulator<CELL>::initializer;
     EventMap events;
     unsigned loadBalancingPeriod;
+    bool enableFineGrainedParallelism;
 
-    HierarchicalSimulator(Initializer<CELL> *initializer, unsigned loadBalancingPeriod) :
+    HierarchicalSimulator(
+        Initializer<CELL> *initializer,
+        unsigned loadBalancingPeriod,
+        bool enableFineGrainedParallelism) :
         DistributedSimulator<CELL>(initializer),
-        loadBalancingPeriod(loadBalancingPeriod)
+        loadBalancingPeriod(loadBalancingPeriod),
+        enableFineGrainedParallelism(enableFineGrainedParallelism)
     {}
 
     inline void initEvents()

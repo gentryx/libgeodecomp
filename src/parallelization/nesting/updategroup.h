@@ -154,7 +154,8 @@ protected:
         PatchAccepterVec patchAcceptersGhost,
         PatchAccepterVec patchAcceptersInner,
         PatchProviderVec patchProvidersGhost,
-        PatchProviderVec patchProvidersInner)
+        PatchProviderVec patchProvidersInner,
+        bool enableFineGrainedParallelism)
     {
         partitionManager->resetRegions(
             initializer,
@@ -235,7 +236,8 @@ protected:
                           // add external PatchProviders last to allow them to override
                           // the local ghost zone providers (a.k.a. PatchLink::Source).
                           patchLinkProviders + patchProvidersGhost,
-                          patchProvidersInner));
+                          patchProvidersInner,
+                          enableFineGrainedParallelism));
     }
 
     virtual std::vector<CoordBox<DIM> > gatherBoundingBoxes(

@@ -44,8 +44,9 @@ public:
         PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
         PatchProviderVec patchProvidersGhost = PatchProviderVec(),
         PatchProviderVec patchProvidersInner = PatchProviderVec(),
+        bool enableFineGrainedParallelism = false,
         std::string basename = "/HPXSimulator::UpdateGroup",
-        int rank = hpx::get_locality_id()) :
+        int rank = hpx::get_locality_id()):
         UpdateGroup<CELL_TYPE, HPXPatchLink>(ghostZoneWidth, initializer, rank),
         basename(basename)
     {
@@ -58,7 +59,8 @@ public:
             patchAcceptersGhost,
             patchAcceptersInner,
             patchProvidersGhost,
-            patchProvidersInner);
+            patchProvidersInner,
+            enableFineGrainedParallelism);
     }
 
 private:
