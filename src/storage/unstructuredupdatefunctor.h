@@ -150,7 +150,7 @@ public:
     {
         typedef typename APITraits::SelectSoA<CELL>::Value SoAFlag;
 
-        soaWrapper(region, gridOld, gridNew, nanoStep, concurrencySpec, modelThreadingSpec, SoAFlag());
+        switchAoSvsSoA(region, gridOld, gridNew, nanoStep, concurrencySpec, modelThreadingSpec, SoAFlag());
     }
 
 
@@ -249,7 +249,7 @@ public:
     }
 
     template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
-    void soaWrapper(
+    void switchAoSvsSoA(
         const Region<DIM>& region,
         const GRID1& gridOld,
         GRID2 *gridNew,
@@ -265,7 +265,7 @@ public:
     }
 
     template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
-    void soaWrapper(
+    void switchAoSvsSoA(
         const Region<DIM>& region,
         const GRID1& gridOld,
         GRID2 *gridNew,
