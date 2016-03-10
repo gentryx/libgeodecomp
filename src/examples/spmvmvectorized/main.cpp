@@ -65,6 +65,7 @@ public:
                 ShortVec weights;
                 ShortVec values;
                 weights.load_aligned(j.second());
+                // fixme: is this gahter actually correct? shouldn't we use offset 0 for the gather? see also hpxperformancetests/main.cpp
                 values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
@@ -103,8 +104,8 @@ public:
     typedef UnstructuredSoAGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
 
     inline explicit
-    CellInitializerDiagonal(unsigned steps)
-        : SimpleInitializer<Cell>(Coord<1>(100), steps)
+    CellInitializerDiagonal(unsigned steps) :
+        SimpleInitializer<Cell>(Coord<1>(100), steps)
     {}
 
     virtual void grid(GridBase<Cell, 1> *grid)
