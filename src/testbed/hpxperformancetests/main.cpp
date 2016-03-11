@@ -216,7 +216,6 @@ LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(UnstructuredBusyworkCellWithSoAAndUpdateLine
 
 
 
-
 /**
  * Connects cells in a structure that corresponds to a regular grid of
  * the given width.
@@ -274,7 +273,7 @@ private:
     }
 };
 
-template<typename CELL>
+template<typename CELL, bool ENABLE_COARSE_GRAINED_PARALLELISM>
 class HPXBusyworkCellTest : public CPUBenchmark
 {
 public:
@@ -303,6 +302,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             steps,
             1,
+            ENABLE_COARSE_GRAINED_PARALLELISM,
             "hpxperformancetests_HPXBusyworkCellTest_" + species() + dim.toString());
 
         double seconds;
@@ -319,7 +319,7 @@ public:
     }
 };
 
-class HPXBusyworkCellIron : public HPXBusyworkCellTest<UnstructuredBusyworkCell>
+class HPXBusyworkCellIron : public HPXBusyworkCellTest<UnstructuredBusyworkCell, true>
 {
 public:
     std::string species()
@@ -328,7 +328,7 @@ public:
     }
 };
 
-class HPXBusyworkCellSilver : public HPXBusyworkCellTest<UnstructuredBusyworkCellWithUpdateLineX>
+class HPXBusyworkCellSilver : public HPXBusyworkCellTest<UnstructuredBusyworkCellWithUpdateLineX, true>
 {
 public:
     std::string species()
@@ -337,12 +337,39 @@ public:
     }
 };
 
-class HPXBusyworkCellPlatinum : public HPXBusyworkCellTest<UnstructuredBusyworkCellWithSoAAndUpdateLineX>
+class HPXBusyworkCellPlatinum : public HPXBusyworkCellTest<UnstructuredBusyworkCellWithSoAAndUpdateLineX, true>
 {
 public:
     std::string species()
     {
         return "platinum";
+    }
+};
+
+class HPXBusyworkCellBronze : public HPXBusyworkCellTest<UnstructuredBusyworkCell, false>
+{
+public:
+    std::string species()
+    {
+        return "bronze";
+    }
+};
+
+class HPXBusyworkCellGold : public HPXBusyworkCellTest<UnstructuredBusyworkCellWithUpdateLineX, false>
+{
+public:
+    std::string species()
+    {
+        return "gold";
+    }
+};
+
+class HPXBusyworkCellTitanium : public HPXBusyworkCellTest<UnstructuredBusyworkCellWithSoAAndUpdateLineX, false>
+{
+public:
+    std::string species()
+    {
+        return "titanium";
     }
 };
 
@@ -381,10 +408,10 @@ int hpx_main(int argc, char **argv)
     // updateLineX | AoS    | coarse      | unstructured | HPX       | compute-bound | HPXBusyworkCellSilver
     // update      | SoA    | coarse      | unstructured | HPX       | compute-bound | *1
     // updateLineX | SoA    | coarse      | unstructured | HPX       | compute-bound | HPXBusyworkCellPlatinum
-    // update      | AoS    | fine        | unstructured | HPX       | compute-bound | fixme1 bronze
-    // updateLineX | AoS    | fine        | unstructured | HPX       | compute-bound | fixme3 gold
+    // update      | AoS    | fine        | unstructured | HPX       | compute-bound | HPXBusyworkCellBronze
+    // updateLineX | AoS    | fine        | unstructured | HPX       | compute-bound | HPXBusyworkCellGold
     // update      | SoA    | fine        | unstructured | HPX       | compute-bound | *1
-    // updateLineX | SoA    | fine        | unstructured | HPX       | compute-bound | fixme5 titanium
+    // updateLineX | SoA    | fine        | unstructured | HPX       | compute-bound | HPXBusyworkCellTitanium
     // update      | AoS    | coarse      | structured   | CUDA      | compute-bound | 
     // updateLineX | AoS    | coarse      | structured   | CUDA      | compute-bound | 
     // update      | SoA    | coarse      | structured   | CUDA      | compute-bound | *1
@@ -488,11 +515,23 @@ int hpx_main(int argc, char **argv)
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(HPXBusyworkCellBronze(), toVector(sizes[i]));
+    }
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
         eval(HPXBusyworkCellSilver(), toVector(sizes[i]));
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(HPXBusyworkCellGold(), toVector(sizes[i]));
+    }
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
         eval(HPXBusyworkCellPlatinum(), toVector(sizes[i]));
+    }
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(HPXBusyworkCellTitanium(), toVector(sizes[i]));
     }
 
     return hpx::finalize();
