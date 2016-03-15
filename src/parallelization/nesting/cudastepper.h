@@ -309,14 +309,16 @@ public:
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
         const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
-        const PatchProviderVec& innerSetPatchProviders = PatchProviderVec()) :
+        const PatchProviderVec& innerSetPatchProviders = PatchProviderVec(),
+        bool enableFineGrainedParallelism = false) :
         CommonStepper<CELL_TYPE>(
             partitionManager,
             initializer,
             ghostZonePatchAccepters,
             innerSetPatchAccepters,
             ghostZonePatchProviders,
-            innerSetPatchProviders)
+            innerSetPatchProviders,
+            enableFineGrainedParallelism)
     {
         initGrids();
     }
