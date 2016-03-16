@@ -2611,7 +2611,7 @@ public:
     double performance(std::vector<int> rawDim)
     {
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
-        int maxT = 20;
+        int maxT = 200;
         OpenMPSimulator<LBMSoACell> sim(
             new NoOpInitializer<LBMSoACell>(dim, maxT));
 
