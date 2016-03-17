@@ -27,7 +27,7 @@ public:
 
     static ElementType *getData(BufferType& buffer)
     {
-        return &buffer.first();
+        return &buffer.front();
     }
 
 #ifdef LIBGEODECOMP_WITH_MPI
