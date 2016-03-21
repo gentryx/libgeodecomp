@@ -21,6 +21,9 @@ public:
     friend class CUDASoAGridTest;
 
     const static int DIM = TOPOLOGY::DIM;
+
+    using typename GridBase<CELL, DIM>::BufferType;
+
     /**
      * Accumulated size of all members. Note that this may be lower
      * than sizeof(CELL) as the compiler may add padding within a
@@ -42,7 +45,73 @@ public:
         edgeCell(edgeCell),
         box(box),
         topoDimensions(topologicalDimensions)
+    {}
+
+    void set(const Coord<DIM>&, const CELL&)
     {
+        // fixme
+    }
+
+    void set(const Streak<DIM>&, const CELL*)
+    {
+        // fixme
+    }
+
+    CELL get(const Coord<DIM>&) const
+    {
+        // fixme
+        return CELL();
+    }
+
+    void get(const Streak<DIM>&, CELL *) const
+    {
+        // fixme
+    }
+
+    void setEdge(const CELL&)
+    {
+        // fixme
+    }
+
+    const CELL& getEdge() const
+    {
+        // fixme
+    }
+
+    CoordBox<DIM> boundingBox() const
+    {
+        // fixme
+        return CoordBox<DIM>();
+    }
+
+
+    void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        // fixme
+    }
+
+    void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    {
+        // fixme
+    }
+
+protected:
+    virtual void saveMemberImplementation(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) const
+    {
+        // fixme
+    }
+
+    virtual void loadMemberImplementation(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region)
+    {
+        // fixme
     }
 
 private:
