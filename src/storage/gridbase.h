@@ -7,6 +7,7 @@
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/storage/memorylocation.h>
 #include <libgeodecomp/storage/selector.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 
 namespace LibGeoDecomp {
 
@@ -32,6 +33,8 @@ public:
     friend class ProxyGrid<CELL, DIMENSIONS, WEIGHT_TYPE>;
 
     typedef CELL CellType;
+    typedef typename SerializationBuffer<CELL>::BufferType BufferType;
+
     const static int DIM = DIMENSIONS;
 
     virtual ~GridBase()
@@ -74,6 +77,27 @@ public:
     {
         return !(*this == other);
     }
+
+    /**
+     * Extract cells specified by the Region and serialize them in the
+     * given buffer. An optional offset will be added to all
+     * coordinates in the Region.
+     */
+    virtual void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        // fixme: make pure virtual
+    }
+
+    /**
+     * Load cells from the buffer and store them at the coordinates
+     * specified in region. The Region may be translated by an
+     * optional offset.
+     */
+    virtual void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    {
+        // fixme: make pure virtual
+    }
+
 
     /**
      * Allows the user to extract a single member variable of all
