@@ -427,6 +427,14 @@ public:
 
     }
 
+    static Coord<3> calcEdgeRadii()
+    {
+        return Coord<3>(
+            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : Stencil::RADIUS,
+            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : Stencil::RADIUS,
+            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : Stencil::RADIUS);
+    }
+
 protected:
     void saveMemberImplementation(
         char *target,
@@ -457,14 +465,6 @@ private:
     CELL edgeCell;
     CoordBox<DIM> box;
     Coord<DIM> topoDimensions;
-
-    static Coord<3> calcEdgeRadii()
-    {
-        return Coord<3>(
-            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : Stencil::RADIUS,
-            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : Stencil::RADIUS,
-            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : Stencil::RADIUS);
-    }
 
     CELL delegateGet(const Coord<1>& coord) const
     {
