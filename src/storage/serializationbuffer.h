@@ -25,6 +25,12 @@ public:
         return BufferType(region.size());
     }
 
+    template<typename REGION>
+    static void resize(BufferType *buffer, const REGION& region)
+    {
+        return buffer->resize(region.size());
+    }
+
     static ElementType *getData(BufferType& buffer)
     {
         return &buffer.front();
@@ -53,6 +59,12 @@ public:
     static BufferType create(const REGION& region)
     {
         return BufferType(LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size());
+    }
+
+    template<typename REGION>
+    static void resize(BufferType *buffer, const REGION& region)
+    {
+        return buffer->resize(LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size());
     }
 
     static ElementType *getData(BufferType& buffer)
@@ -85,6 +97,12 @@ public:
         return BufferType();
     }
 
+
+    template<typename REGION>
+    static void resize(BufferType *buffer, const REGION& region)
+    {
+        buffer->resize(0);
+    }
     static ElementType *getData(BufferType& buffer)
     {
         return &buffer.front();
@@ -122,6 +140,12 @@ public:
     static inline ElementType *getData(BufferType& buffer)
     {
         return Implementation::getData(buffer);
+    }
+
+    template<typename REGION>
+    static inline void resize(BufferType *buffer, const REGION& region)
+    {
+        Implementation::resize(buffer, region);
     }
 
 #ifdef LIBGEODECOMP_WITH_MPI
