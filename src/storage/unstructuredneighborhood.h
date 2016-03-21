@@ -57,13 +57,13 @@ public:
     }
 
     inline
-    const int first() const
+    int first() const
     {
         return matrix.columnVec()[index];
     }
 
     inline
-    const VALUE_TYPE second() const
+    VALUE_TYPE second() const
     {
         return matrix.valuesVec()[index];
     }
