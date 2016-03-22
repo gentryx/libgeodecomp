@@ -121,7 +121,7 @@ private:
             return;
         }
 
-        grid.saveRegion(&(*vec)[0], region);
+        grid.saveRegion(&*vec, region);
     }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
@@ -279,7 +279,7 @@ private:
             return;
         }
 
-        grid->loadRegion(&vec[0], region);
+        grid->loadRegion(vec, region);
     }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
