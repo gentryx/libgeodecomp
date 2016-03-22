@@ -31,6 +31,7 @@ public:
     Coord<DIM> origin;
     Coord<DIM> dimensions;
 
+    __host__ __device__
     explicit CoordBox(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>()) :
