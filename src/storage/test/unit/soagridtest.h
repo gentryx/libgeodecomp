@@ -12,7 +12,8 @@ class SoATestCell
 {
 public:
     class API :
-        public APITraits::HasStencil<Stencils::Moore<3, 2> >
+        public APITraits::HasStencil<Stencils::Moore<3, 2> >,
+        public APITraits::HasSoA
     {};
 
     explicit SoATestCell(int v = 0) :
@@ -329,7 +330,7 @@ public:
             }
         }
 
-        grid.saveRegion(&buffer[0], region);
+        grid.saveRegion(&buffer, region);
 
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -342,7 +343,7 @@ public:
             }
         }
 
-        grid.loadRegion(&buffer[0], region);
+        grid.loadRegion(buffer, region);
 
         counter = 444;
         for (int z = 0; z < dim.z(); ++z) {
@@ -389,7 +390,7 @@ public:
             }
         }
 
-        grid.saveRegion(&buffer[0], region);
+        grid.saveRegion(&buffer, region);
 
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -402,7 +403,7 @@ public:
             }
         }
 
-        grid.loadRegion(&buffer[0], region);
+        grid.loadRegion(buffer, region);
 
         counter = 444;
         for (int z = 0; z < dim.z(); ++z) {
@@ -450,7 +451,7 @@ public:
             }
         }
 
-        grid.saveRegion(&buffer[0], region);
+        grid.saveRegion(&buffer, region);
 
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -463,7 +464,7 @@ public:
             }
         }
 
-        grid.loadRegion(&buffer[0], region);
+        grid.loadRegion(buffer, region);
 
         counter = 444;
         for (int z = 0; z < dim.z(); ++z) {
