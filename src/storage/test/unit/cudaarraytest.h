@@ -73,6 +73,122 @@ public:
 #endif
     }
 
+    void testResizeAfterAssignment()
+    {
+        CUDAArray<double> deviceArray1(20, 12.34);
+        CUDAArray<double> deviceArray2(30, 666);
+        CUDAArray<double> deviceArray3(25, 31);
+
+        std::vector<double> hostVec(30);
+        deviceArray2.save(hostVec.data());
+
+        for (int i = 0; i < 30; ++i) {
+            TS_ASSERT_EQUALS(hostVec[i], 666);
+        }
+
+        deviceArray1 = deviceArray2;
+        deviceArray2 = deviceArray3;
+
+        TS_ASSERT_EQUALS(deviceArray1.size(),     30);
+        TS_ASSERT_EQUALS(deviceArray1.capacity(), 30);
+
+        TS_ASSERT_EQUALS(deviceArray2.size(),     25);
+        TS_ASSERT_EQUALS(deviceArray2.capacity(), 30);
+
+        hostVec = std::vector<double>(30, -1);
+        deviceArray1.save(hostVec.data());
+
+        for (int i = 0; i < 30; ++i) {
+            TS_ASSERT_EQUALS(hostVec[i], 666);
+        }
+
+        deviceArray2.save(hostVec.data());
+
+        for (int i = 0; i < 25; ++i) {
+            TS_ASSERT_EQUALS(hostVec[i], 31);
+        }
+
+        TS_ASSERT_DIFFERS(deviceArray1.data(), deviceArray2.data());
+        TS_ASSERT_DIFFERS(deviceArray1.data(), deviceArray3.data());
+        TS_ASSERT_DIFFERS(deviceArray2.data(), deviceArray3.data());
+    }
+
+    void testResize()
+    {
+        CUDAArray<double> deviceArray(200, 1.3);
+        TS_ASSERT_EQUALS(200, deviceArray.size());
+        TS_ASSERT_EQUALS(200, deviceArray.capacity());
+
+        deviceArray.resize(150);
+        TS_ASSERT_EQUALS(150, deviceArray.size());
+        TS_ASSERT_EQUALS(200, deviceArray.capacity());
+
+        {
+            std::vector<double> hostVec(250, 10);
+            deviceArray.save(hostVec.data());
+
+            for (int i = 0; i < 150; ++i) {
+                TS_ASSERT_EQUALS(hostVec[i], 1.3);
+            }
+            for (int i = 150; i < 250; ++i) {
+                TS_ASSERT_EQUALS(hostVec[i], 10);
+            }
+        }
+
+        deviceArray.resize(250, 27);
+        TS_ASSERT_EQUALS(250, deviceArray.size());
+        TS_ASSERT_EQUALS(250, deviceArray.capacity());
+
+        {
+            std::vector<double> hostVec(250, -1);
+            deviceArray.save(hostVec.data());
+
+            for (int i = 0; i < 150; ++i) {
+                TS_ASSERT_EQUALS(hostVec[i], 1.3);
+            }
+            for (int i = 150; i < 250; ++i) {
+                TS_ASSERT_EQUALS(hostVec[i], 27);
+            }
+        }
+
+        // ensure content is kept intact if shrunk and enlarged
+        // afterwards sans default initialization:
+        deviceArray.resize(10);
+        deviceArray.resize(210);
+        TS_ASSERT_EQUALS(210, deviceArray.size());
+        TS_ASSERT_EQUALS(250, deviceArray.capacity());
+
+        {
+            std::vector<double> hostVec(250, -1);
+            deviceArray.save(hostVec.data());
+
+            for (int i = 0; i < 150; ++i) {
+                TS_ASSERT_EQUALS(hostVec[i], 1.3);
+            }
+            for (int i = 150; i < 210; ++i) {
+                TS_ASSERT_EQUALS(hostVec[i], 27);
+            }
+        }
+    }
+
+    void testReserve()
+    {
+        CUDAArray<double> deviceArray(31, 1.3);
+        TS_ASSERT_EQUALS(31, deviceArray.size());
+        TS_ASSERT_EQUALS(31, deviceArray.capacity());
+
+        deviceArray.reserve(55);
+        TS_ASSERT_EQUALS(31, deviceArray.size());
+        TS_ASSERT_EQUALS(55, deviceArray.capacity());
+
+        std::vector<double> hostVec(31, -1);
+        deviceArray.save(hostVec.data());
+
+        for (int i = 0; i < 31; ++i) {
+            TS_ASSERT_EQUALS(hostVec[i], 1.3)
+        }
+    }
+
 };
 
 }
