@@ -389,7 +389,7 @@ public:
         }
 
         // check loadRegion()
-        for (int i = 0; i < region.size(); ++i) {
+        for (std::size_t i = 0; i < region.size(); ++i) {
             buffer[i].testValue = 4711 + i;
         }
 
@@ -448,7 +448,7 @@ public:
         }
 
         // check loadRegion()
-        for (int i = 0; i < region.size(); ++i) {
+        for (std::size_t i = 0; i < region.size(); ++i) {
             buffer[i].testValue = 4711 + i;
         }
 
