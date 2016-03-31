@@ -19,10 +19,12 @@ public:
     UnstructuredTestInitializer(
         int dim,
         unsigned maxSteps,
-        unsigned startStep = 0) :
+        unsigned startStep = 0,
+        unsigned maxNeighbors = 20) :
         dim(dim),
         lastStep(maxSteps),
-        firstStep(startStep)
+        firstStep(startStep),
+        maxNeighbors(maxNeighbors)
     {}
 
     virtual void grid(GridBase<TEST_CELL, 1> *ret)
@@ -35,7 +37,7 @@ public:
             TEST_CELL cell(i->x(), cycle, true);
 
             int startNeighbors = i->x() + 1;
-            int numNeighbors   = i->x() + 1;
+            int numNeighbors   = i->x() % maxNeighbors + 1;
             int endNeighbors   = startNeighbors + numNeighbors;
 
             for (int j = startNeighbors; j != endNeighbors; ++j) {
@@ -73,6 +75,7 @@ private:
     int dim;
     unsigned lastStep;
     unsigned firstStep;
+    unsigned maxNeighbors;
 };
 
 }

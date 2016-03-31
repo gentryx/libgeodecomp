@@ -31,10 +31,10 @@ public:
             TS_ASSERT_EQUALS(cell.id, i);
             TS_ASSERT_EQUALS(cell.cycleCounter, expectedCycle);
             TS_ASSERT_EQUALS(cell.isValid, true);
-            TS_ASSERT_EQUALS(cell.expectedNeighborWeights.size(), i + 1);
+            TS_ASSERT_EQUALS(cell.expectedNeighborWeights.size(), i % 20 + 1);
 
             std::map<int, double> expected;
-            for (int j = i + 1; j < (2 * i + 2); ++j) {
+            for (int j = i + 1; j < (i + i % 20 + 2); ++j) {
                 int neighbor = j % 100;
                 expected[neighbor] = neighbor + 0.1;
             }
@@ -45,9 +45,9 @@ public:
         for (int i = 0; i < 100; ++i) {
             auto sparseRow = weights.getRow(i);
 
-            TS_ASSERT_EQUALS(sparseRow.size(), i + 1);
+            TS_ASSERT_EQUALS(sparseRow.size(), i % 20 + 1);
             int start = i + 1;
-            int end = 2 * i + 2;
+            int end = start + i % 20 + 1;
             std::vector<std::pair<int, double> > expectedPairs;
             for (int j = start; j != end; ++j) {
                 int neighbor = j % 100;
