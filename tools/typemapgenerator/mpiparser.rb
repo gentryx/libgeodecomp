@@ -558,9 +558,15 @@ class MPIParser
 
     # gotta search a little longer for symbolic sizes:
     @log.debug "resolve_cardinality -> non-trivial cardinality"
-    member_id = member.attributes["id"]
-    cardinality_id = resolve_cardinality_id(member_id)
-    return resolve_cardinality_declaration(cardinality_id)
+
+    # the following code seems over-engineered, so it got replaced by the simple regex below:
+    #   member_id = member.attributes["id"]
+    #   cardinality_id = resolve_cardinality_id(member_id)
+    #   return resolve_cardinality_declaration(cardinality_id)
+
+    argsString.text =~ /\[(.*)\]/
+    return $1
+
   end
 
   def member_id_to_8h_file(member_id)
