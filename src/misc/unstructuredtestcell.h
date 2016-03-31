@@ -18,12 +18,43 @@ class EmptyAPI
 
 /**
  * Struct of Arrays is another important dimension of the test range.
+ * We'll check different values for C and Sigma.
  */
-class SoAAPI :
+class SoAAPI1 :
         public APITraits::HasSoA,
         public APITraits::HasUpdateLineX,
         public APITraits::HasSellC<32>,
         public APITraits::HasSellSigma<1>
+{};
+
+/**
+ * C=8, Sigma=1
+ */
+class SoAAPI2 :
+        public APITraits::HasSoA,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasSellC<8>,
+        public APITraits::HasSellSigma<1>
+{};
+
+/**
+ * C=8, Sigma=64
+ */
+class SoAAPI3 :
+        public APITraits::HasSoA,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasSellC<8>,
+        public APITraits::HasSellSigma<64>
+{};
+
+/**
+ * C=16, Sigma=32
+ */
+class SoAAPI4 :
+        public APITraits::HasSoA,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasSellC<16>,
+        public APITraits::HasSellSigma<32>
 {};
 
 class IterAdapter
@@ -143,6 +174,7 @@ public:
             for (int i = 0; i < HOOD_OLD::ARITY; ++i) {
                 int index = hoodOld.index() * HOOD_OLD::ARITY + i;
                 cells << hoodOld[index];
+
                 cells.back().verify(
                     UnstructuredTestCellHelpers::IterAdapter(weights[i].begin()),
                     UnstructuredTestCellHelpers::IterAdapter(weights[i].end()),
@@ -215,12 +247,6 @@ private:
             isValid = false;
         }
 
-        if (expectedNeighborWeights.size() != std::size_t(id + 1)) {
-            OUTPUT() << "UnstructuredTestCell error: id " << id
-                     << " has a bad weights set\n";
-            isValid = false;
-        }
-
         if (!isValid) {
             OUTPUT() << "UnstructuredTestCell error: id " << id << " is invalid\n";
         }
@@ -230,17 +256,43 @@ private:
 };
 
 typedef std::map<int, double> WeightsMap;
-typedef UnstructuredTestCell<UnstructuredTestCellHelpers::SoAAPI> UnstructuredTestCellSoA;
+typedef UnstructuredTestCell<UnstructuredTestCellHelpers::SoAAPI1> UnstructuredTestCellSoA1;
+typedef UnstructuredTestCell<UnstructuredTestCellHelpers::SoAAPI2> UnstructuredTestCellSoA2;
+typedef UnstructuredTestCell<UnstructuredTestCellHelpers::SoAAPI3> UnstructuredTestCellSoA3;
+typedef UnstructuredTestCell<UnstructuredTestCellHelpers::SoAAPI4> UnstructuredTestCellSoA4;
 
 }
 
 LIBFLATARRAY_REGISTER_SOA(
-    LibGeoDecomp::UnstructuredTestCellSoA,
+    LibGeoDecomp::UnstructuredTestCellSoA1,
     ((int)(id))
     ((unsigned)(cycleCounter))
     ((bool)(isValid))
     ((bool)(isEdgeCell))
-    ((LibGeoDecomp::WeightsMap)(expectedNeighborWeights))
-                          )
+    ((LibGeoDecomp::WeightsMap)(expectedNeighborWeights)) )
+
+LIBFLATARRAY_REGISTER_SOA(
+    LibGeoDecomp::UnstructuredTestCellSoA2,
+    ((int)(id))
+    ((unsigned)(cycleCounter))
+    ((bool)(isValid))
+    ((bool)(isEdgeCell))
+    ((LibGeoDecomp::WeightsMap)(expectedNeighborWeights)) )
+
+LIBFLATARRAY_REGISTER_SOA(
+    LibGeoDecomp::UnstructuredTestCellSoA3,
+    ((int)(id))
+    ((unsigned)(cycleCounter))
+    ((bool)(isValid))
+    ((bool)(isEdgeCell))
+    ((LibGeoDecomp::WeightsMap)(expectedNeighborWeights)) )
+
+LIBFLATARRAY_REGISTER_SOA(
+    LibGeoDecomp::UnstructuredTestCellSoA4,
+    ((int)(id))
+    ((unsigned)(cycleCounter))
+    ((bool)(isValid))
+    ((bool)(isEdgeCell))
+    ((LibGeoDecomp::WeightsMap)(expectedNeighborWeights)) )
 
 #endif
