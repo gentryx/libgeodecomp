@@ -253,7 +253,7 @@ public:
     void testUnstructuredSoA()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        typedef UnstructuredTestCell<> TestCellType;
+        typedef UnstructuredTestCellSoA1 TestCellType;
         int startStep = 7;
         int endStep = 20;
 
