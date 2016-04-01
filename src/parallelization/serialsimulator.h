@@ -85,7 +85,12 @@ public:
         }
 
         ++stepNum;
-        handleOutput(WRITER_STEP_FINISHED);
+
+        WriterEvent event = WRITER_STEP_FINISHED;
+        if (stepNum == initializer->maxSteps()) {
+            event = WRITER_ALL_DONE;
+        }
+        handleOutput(event);
     }
 
     /**
@@ -110,7 +115,6 @@ public:
         }
 
         handleInput(STEERER_ALL_DONE, &feedback);
-        handleOutput(WRITER_ALL_DONE);
     }
 
     /**

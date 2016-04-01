@@ -108,7 +108,7 @@ public:
         MockWriter<>::EventsStore expectedEvents;
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, 0, true);
 
-        for (unsigned i = startStep + 2; i <= init->maxSteps(); i += 3) {
+        for (unsigned i = startStep + 2; i < init->maxSteps(); i += 3) {
             expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, 0, true);
         }
 
@@ -250,7 +250,7 @@ public:
 #endif
     }
 
-    void testUnstructuredSoA()
+    void testUnstructuredSoA1()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA1 TestCellType;
@@ -258,6 +258,49 @@ public:
         int endStep = 20;
 
         SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep));
+        sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA2()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        // fixme:
+
+        // typedef UnstructuredTestCellSoA2 TestCellType;
+        // int startStep = 7;
+        // int endStep = 15;
+
+        // SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(632, endStep, startStep));
+        // sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
+        // sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA3()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        // fixme:
+
+        // typedef UnstructuredTestCellSoA3 TestCellType;
+        // int startStep = 7;
+        // int endStep = 19;
+
+        // SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(655, endStep, startStep));
+        // sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
+        // sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA4()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA1 TestCellType;
+        int startStep = 5;
+        int endStep = 24;
+
+        SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(444, endStep, startStep));
         sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
         sim.run();
 #endif

@@ -103,9 +103,14 @@ public:
         for (unsigned i = 0; i < NANO_STEPS; i++) {
             nanoStep(i);
         }
+
         ++stepNum;
 
-        handleOutput(WRITER_STEP_FINISHED);
+        WriterEvent event = WRITER_STEP_FINISHED;
+        if (stepNum == initializer->maxSteps()) {
+            event = WRITER_ALL_DONE;
+        }
+        handleOutput(event);
     }
 
     /**
@@ -120,8 +125,6 @@ public:
         while (stepNum < initializer->maxSteps()) {
             step();
         }
-
-        handleOutput(WRITER_ALL_DONE);
     }
 
     inline unsigned getLoadBalancingPeriod() const
