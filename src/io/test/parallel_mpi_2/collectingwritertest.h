@@ -16,7 +16,6 @@ class CollectingWriterTest : public CxxTest::TestSuite
 public:
     void setUp()
     {
-        std::cout << "up\n";
         TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
 
         LoadBalancer *balancer = MPILayer().rank()? 0 : new RandomBalancer;
@@ -34,7 +33,6 @@ public:
     void tearDown()
     {
         sim.reset();
-        std::cout << "down\n";
     }
 
     void testBasic()
