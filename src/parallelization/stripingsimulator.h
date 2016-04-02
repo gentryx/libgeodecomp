@@ -7,10 +7,11 @@
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/communication/mpilayer.h>
+#include <libgeodecomp/io/testwriter.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
-#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {
@@ -29,7 +30,8 @@ public:
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef LoadBalancer::WeightVec WeightVec;
     typedef LoadBalancer::LoadVec LoadVec;
-    typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
+    typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
+    typedef typename GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value GridType;
     typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
     static const int DIM = Topology::DIM;
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
