@@ -1,14 +1,17 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/clonableinitializerwrapper.h>
+#include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/paralleltestwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/teststeerer.h>
+#include <libgeodecomp/io/unstructuredtestinitializer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
 #include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/misc/unstructuredtestcell.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
@@ -462,6 +465,109 @@ public:
             *testSim->curStripe,
             testSim->region,
             cycle);
+    }
+
+    void testUnstructured()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        // fixme: test different threading strategies?
+        typedef UnstructuredTestCell<> TestCellType;
+        int startStep = 7;
+        int endStep = 20;
+
+        StripingSimulator<TestCellType> sim(
+            new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA1()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA1 TestCellType;
+        int startStep = 7;
+        int endStep = 20;
+
+        StripingSimulator<TestCellType> sim(
+            new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA2()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        // fixme:
+
+        // typedef UnstructuredTestCellSoA2 TestCellType;
+        // int startStep = 7;
+        // int endStep = 15;
+
+        // StripingSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(632, endStep, startStep),
+        // rank? 0 : new NoOpBalancer());
+
+        // Writer<TestCellType> *writer = 0;
+        // if (MPILayer().rank() == 0) {
+        //     writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        // }
+        // sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        // sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA3()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        // fixme:
+
+        // typedef UnstructuredTestCellSoA3 TestCellType;
+        // int startStep = 7;
+        // int endStep = 19;
+
+        // StripingSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(655, endStep, startStep),
+        // rank? 0 : new NoOpBalancer());
+
+        // Writer<TestCellType> *writer = 0;
+        // if (MPILayer().rank() == 0) {
+        //     writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        // }
+        // sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        // sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA4()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA1 TestCellType;
+        int startStep = 5;
+        int endStep = 24;
+
+        StripingSimulator<TestCellType> sim(
+            new UnstructuredTestInitializer<TestCellType>(444, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        sim.run();
+#endif
     }
 
 private:
