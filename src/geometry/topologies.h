@@ -269,6 +269,13 @@ public:
         {
         public:
             static const int DIM = 1;
+
+            template<int D>
+            class WrapsAxis
+            {
+            public:
+                static const bool VALUE = false;
+            };
         };
     };
 
