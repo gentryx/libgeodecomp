@@ -315,6 +315,7 @@ class MPIParser
 
       if template_params.empty?
         @log.debug "  simple path"
+
         resolve_class_simple(klass, members, parents,
                              classes,
                              resolved_classes, resolved_parents,
@@ -436,7 +437,8 @@ class MPIParser
   end
 
   def lookup_type(type)
-    return @datatype_map[type] || @datatype_map["#{@namespace}::#{type}"]
+    return @datatype_map["#{type}"   ] || @datatype_map["#{@namespace}::#{type}"   ] ||
+           @datatype_map["#{type}< >"] || @datatype_map["#{@namespace}::#{type}< >"]
   end
 
   # tries to map all members to mpi datatypes (using datatype_map as a
