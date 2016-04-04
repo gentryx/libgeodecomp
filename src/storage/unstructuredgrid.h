@@ -210,6 +210,15 @@ public:
         return !(*this == other);
     }
 
+    // fixme: needs test
+    inline void resize(const CoordBox<DIM>& newDim)
+    {
+        *this = UnstructuredGrid(
+            newDim.dimensions,
+            elements[0],
+            edgeElement);
+    }
+
     inline std::string toString() const
     {
         std::ostringstream message;
