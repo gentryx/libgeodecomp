@@ -7,6 +7,7 @@
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/storage/gridtypeselector.h>
 
 namespace LibGeoDecomp {
 
@@ -21,7 +22,8 @@ class CollectingWriter : public Clonable<ParallelWriter<CELL_TYPE>, CollectingWr
 {
 public:
     typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
-    typedef DisplacedGrid<CELL_TYPE, Topology> StorageGridType;
+    typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
+    typedef typename GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value StorageGridType;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType SimulatorGridType;
 
     using ParallelWriter<CELL_TYPE>::period;
@@ -68,7 +70,13 @@ public:
                 globalGrid.resize(CoordBox<DIM>(Coord<DIM>(), globalDimensions));
             }
 
-            globalGrid.paste(grid, validRegion);
+            // fixme: replace this by GridBase::loadRegion
+            for (typename Region<DIM>::StreakIterator i = validRegion.beginStreak(); i != validRegion.endStreak(); ++i) {
+                std::vector<CELL_TYPE> buf(i->length());
+                grid.get(*i, buf.data());
+                globalGrid.set(*i, buf.data());
+            }
+
             globalGrid.setEdge(grid.getEdge());
         }
 
@@ -107,7 +115,7 @@ public:
         mpiLayer.waitAll();
 
         if (lastCall && (mpiLayer.rank() == root)) {
-            writer->stepFinished(*globalGrid.vanillaGrid(), step, event);
+            writer->stepFinished(globalGrid, step, event);
         }
     }
 
