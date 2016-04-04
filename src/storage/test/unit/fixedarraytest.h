@@ -149,38 +149,48 @@ public:
         c << 1 << 9 << 15 << 0;
 
         TS_ASSERT( (a == a));
+        TS_ASSERT(!(a != a));
         TS_ASSERT(!(a <  a));
         TS_ASSERT(!(a >  a));
 
         TS_ASSERT(!(a == b));
+        TS_ASSERT( (a != b));
         TS_ASSERT( (a <  b));
         TS_ASSERT(!(a >  b));
 
         TS_ASSERT(!(a == c));
+        TS_ASSERT( (a != c));
         TS_ASSERT( (a <  c));
         TS_ASSERT(!(a >  c));
 
         TS_ASSERT(!(b == a));
+        TS_ASSERT( (b != a));
+        TS_ASSERT( (b != a));
         TS_ASSERT(!(b <  a));
         TS_ASSERT( (b >  a));
 
         TS_ASSERT( (b == b));
+        TS_ASSERT(!(b != b));
         TS_ASSERT(!(b <  b));
         TS_ASSERT(!(b >  b));
 
         TS_ASSERT(!(b == c));
+        TS_ASSERT( (b != c));
         TS_ASSERT( (b <  c));
         TS_ASSERT(!(b >  c));
 
         TS_ASSERT(!(c == a));
+        TS_ASSERT( (c != a));
         TS_ASSERT(!(c <  a));
         TS_ASSERT( (c >  a));
 
         TS_ASSERT(!(c == b));
+        TS_ASSERT( (c != b));
         TS_ASSERT(!(c <  b));
         TS_ASSERT( (c >  b));
 
         TS_ASSERT( (c == c));
+        TS_ASSERT(!(c != c));
         TS_ASSERT(!(c <  c));
         TS_ASSERT(!(c >  c));
     }
