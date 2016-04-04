@@ -424,7 +424,7 @@ private:
         curStripe->resize(box);
         newStripe->resize(box);
         initializer->grid(curStripe);
-        newStripe->getEdgeCell() = curStripe->getEdgeCell();
+        newStripe->setEdge(curStripe->getEdge());
         stepNum = initializer->startStep();
     }
 
