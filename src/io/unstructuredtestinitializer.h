@@ -43,7 +43,8 @@ public:
             for (int j = startNeighbors; j != endNeighbors; ++j) {
                 int actualNeighbor = j % dim;
                 double edgeWeight = actualNeighbor + 0.1;
-                cell.expectedNeighborWeights[actualNeighbor] = edgeWeight;
+                cell.expectedNeighborIDs << actualNeighbor;
+                cell.expectedNeighborWeights << edgeWeight;
                 weights[Coord<2>(i->x(), actualNeighbor)] = edgeWeight;
             }
 

@@ -31,14 +31,18 @@ public:
             TS_ASSERT_EQUALS(cell.id, i);
             TS_ASSERT_EQUALS(cell.cycleCounter, expectedCycle);
             TS_ASSERT_EQUALS(cell.isValid, true);
+            TS_ASSERT_EQUALS(cell.expectedNeighborIDs.size(),     i % 20 + 1);
             TS_ASSERT_EQUALS(cell.expectedNeighborWeights.size(), i % 20 + 1);
 
-            std::map<int, double> expected;
+            FixedArray<int,    100> expectedIDs;
+            FixedArray<double, 100> expectedWeights;
             for (int j = i + 1; j < (i + i % 20 + 2); ++j) {
                 int neighbor = j % 100;
-                expected[neighbor] = neighbor + 0.1;
+                expectedIDs << neighbor;
+                expectedWeights << neighbor + 0.1;
             }
-            TS_ASSERT_EQUALS(expected, cell.expectedNeighborWeights);
+            TS_ASSERT_EQUALS(expectedIDs,     cell.expectedNeighborIDs);
+            TS_ASSERT_EQUALS(expectedWeights, cell.expectedNeighborWeights);
         }
 
         auto weights = grid.getWeights(0);
