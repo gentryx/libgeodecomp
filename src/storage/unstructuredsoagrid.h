@@ -338,6 +338,7 @@ public:
         elements.callback(&newGrid->elements, functor);
     }
 
+    // fixme
     void saveRegion(char *target, const Region<DIM>& region) const
     {
         char *dataIterator = target;
@@ -353,6 +354,7 @@ public:
         }
     }
 
+    // fixme
     void loadRegion(const char *source, const Region<DIM>& region)
     {
         const char *dataIterator = source;
