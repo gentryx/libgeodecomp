@@ -42,7 +42,9 @@ public:
     {
         typedef typename GRID_TYPE::CellType CellType;
         gridToVector(
-            grid, vec, region,
+            grid,
+            vec,
+            region,
             typename APITraits::SelectSoA<CellType>::Value(),
             typename APITraits::SelectBoostSerialization<CellType>::Value());
     }
@@ -55,7 +57,9 @@ public:
     {
         typedef typename GRID_TYPE::CellType CellType;
         vectorToGrid(
-            vec, grid, region,
+            vec,
+            grid,
+            region,
             typename APITraits::SelectSoA<CellType>::Value(),
             typename APITraits::SelectBoostSerialization<CellType>::Value());
     }
@@ -68,7 +72,9 @@ public:
     {
         typedef typename GRID_TYPE::CellType CellType;
         vectorToGrid(
-            vec, grid, region,
+            vec,
+            grid,
+            region,
             typename APITraits::SelectSoA<CellType>::Value(),
             typename APITraits::SelectBoostSerialization<CellType>::Value());
     }
