@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_GEOMETRY_CUDAREGION_H
 
 #include <libgeodecomp/geometry/region.h>
-#include <libgeodecomp/storage/cudaarray.h>
+#include <libflatarray/cuda_array.hpp>
 
 #include <cuda.h>
 #include <vector>
@@ -22,7 +22,7 @@ public:
     CUDARegion(const REGION_TYPE& region)
     {
         int size = DIM * region.size();
-        coords = CUDAArray<int>(size);
+        coords = LibFlatArray::cuda_array<int>(size);
         std::vector<int> coordsBuffer(size);
         std::size_t index = 0;
 
@@ -45,7 +45,7 @@ public:
 
 private:
 
-    CUDAArray<int> coords;
+    LibFlatArray::cuda_array<int> coords;
 
     void addCoord(std::vector<int> *coordsBuffer, const Coord<1>& c, std::size_t index, std::size_t stride) const
     {

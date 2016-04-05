@@ -1,9 +1,10 @@
 #ifndef LIBGEODECOMP_STORAGE_CUDAGRID_H
 #define LIBGEODECOMP_STORAGE_CUDAGRID_H
 
+#include <libflatarray/cuda_array.hpp>
+
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
-#include <libgeodecomp/storage/cudaarray.h>
 #include <libgeodecomp/storage/gridbase.h>
 
 #include <cuda.h>
@@ -213,8 +214,8 @@ protected:
 private:
     CoordBox<DIM> box;
     Coord<DIM> topoDimensions;
-    CUDAArray<CellType> array;
-    CUDAArray<CellType> edgeCellStore;
+    LibFlatArray::cuda_array<CellType> array;
+    LibFlatArray::cuda_array<CellType> edgeCellStore;
     CellType hostEdgeCell;
 
     std::size_t byteSize() const

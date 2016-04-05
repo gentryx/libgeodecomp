@@ -3,6 +3,7 @@
 
 #ifdef LIBGEODECOMP_WITH_CUDA
 #include <cuda.h>
+#include <libflatarray/cuda_array.hpp>
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
@@ -11,7 +12,6 @@
 
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/storage/cudaarray.h>
 #include <libgeodecomp/storage/selector.h>
 
 using namespace LibGeoDecomp;
@@ -73,9 +73,9 @@ public:
         std::vector<int>    targetY(64 * 1, -1);
         std::vector<float>  targetZ(64 * 3, -1);
 
-        CUDAArray<double> deviceTargetX(&targetX[0], 64 * 1);
-        CUDAArray<int>    deviceTargetY(&targetY[0], 64 * 1);
-        CUDAArray<float>  deviceTargetZ(&targetZ[0], 64 * 3);
+        LibFlatArray::cuda_array<double> deviceTargetX(&targetX[0], 64 * 1);
+        LibFlatArray::cuda_array<int>    deviceTargetY(&targetY[0], 64 * 1);
+        LibFlatArray::cuda_array<float>  deviceTargetZ(&targetZ[0], 64 * 3);
 
         selectorX.copyMemberOut(
             &vec[0], MemoryLocation::HOST, (char*)deviceTargetX.data(), MemoryLocation::CUDA_DEVICE, 64);
@@ -122,9 +122,9 @@ public:
                     << (i * 1000 + 44);
         }
 
-        CUDAArray<double> deviceSourceX(&sourceX[0], 90);
-        CUDAArray<int>    deviceSourceY(&sourceY[0], 90);
-        CUDAArray<float>  deviceSourceZ(&sourceZ[0], 90 * 3);
+        LibFlatArray::cuda_array<double> deviceSourceX(&sourceX[0], 90);
+        LibFlatArray::cuda_array<int>    deviceSourceY(&sourceY[0], 90);
+        LibFlatArray::cuda_array<float>  deviceSourceZ(&sourceZ[0], 90 * 3);
 
         selectorX.copyMemberIn(
             (char*)deviceSourceX.data(), MemoryLocation::CUDA_DEVICE, &vec[0], MemoryLocation::HOST, 90);

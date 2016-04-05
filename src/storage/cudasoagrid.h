@@ -1,8 +1,9 @@
 #ifndef LIBGEODECOMP_STORAGE_CUDASOAGRID_H
 #define LIBGEODECOMP_STORAGE_CUDASOAGRID_H
 
+#include <libflatarray/cuda_array.hpp>
+
 #include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/storage/cudaarray.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/soagrid.h>
 
