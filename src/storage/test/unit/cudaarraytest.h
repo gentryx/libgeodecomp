@@ -171,6 +171,28 @@ public:
         }
     }
 
+    void testResize2()
+    {
+        CUDAArray<double> array(10, 5);
+        array.resize(20, 6);
+        array.resize(15, 7);
+        double v = 8.0;
+        array.resize(20, v);
+
+        std::vector<double> vec(20);
+        array.save(vec.data());
+
+        for (int i = 0; i < 10; ++i) {
+            TS_ASSERT_EQUALS(vec[i], 5);
+        }
+        for (int i = 10; i < 15; ++i) {
+            TS_ASSERT_EQUALS(vec[i], 6);
+        }
+        for (int i = 15; i < 20; ++i) {
+            TS_ASSERT_EQUALS(vec[i], 8);
+        }
+    }
+
     void testReserve()
     {
         CUDAArray<double> deviceArray(31, 1.3);

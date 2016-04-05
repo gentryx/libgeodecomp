@@ -145,11 +145,10 @@ private:
     {
         if (newSize <= myCapacity) {
             if (defaultElement != 0) {
-                // fixme: needs test
                 for (std::size_t i = mySize; i < newSize; ++i) {
                     cudaMemcpy(
                         dataPointer + i,
-                        &defaultElement,
+                        defaultElement,
                         sizeof(ELEMENT_TYPE),
                         cudaMemcpyHostToDevice);
                 }
