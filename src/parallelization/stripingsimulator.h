@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/communication/mpilayer.h>
-#include <libgeodecomp/io/testwriter.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
