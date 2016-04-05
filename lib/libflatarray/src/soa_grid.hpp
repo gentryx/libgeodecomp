@@ -14,10 +14,11 @@
 #include <libflatarray/detail/construct_functor.hpp>
 #include <libflatarray/detail/destroy_functor.hpp>
 #include <libflatarray/detail/dual_callback_helper.hpp>
-#include <libflatarray/detail/get_set_instance_functor.hpp>
+#include <libflatarray/detail/get_instance_functor.hpp>
 #include <libflatarray/detail/load_functor.hpp>
 #include <libflatarray/detail/save_functor.hpp>
 #include <libflatarray/detail/set_byte_size_functor.hpp>
+#include <libflatarray/detail/set_instance_functor.hpp>
 
 #include <stdexcept>
 
@@ -41,8 +42,17 @@ namespace LibFlatArray {
  * development time). Compilation time may jump from seconds to tens
  * of minutes. See the LBM example for how to split compilation into
  * smaller, parallelizable chunks.
+ *
+ * Allocation on CUDA devices can be selected by setting the template
+ * parameter ALLOCATOR to cuda_allocator. In this case you may want to
+ * set USE_CUDA_FUNCTORS to true. This will cause all constructors and
+ * destructors to run on the current CUDA device and will also
+ * manage data transfer to/from the device.
  */
-template<typename CELL_TYPE, typename ALLOCATOR = aligned_allocator<char, 4096> >
+template<
+    typename CELL_TYPE,
+    typename ALLOCATOR = aligned_allocator<char, 4096>,
+    bool USE_CUDA_FUNCTORS = false>
 class soa_grid
 {
 public:
@@ -140,12 +150,12 @@ public:
 
     void set(std::size_t x, std::size_t y, std::size_t z, const CELL_TYPE& cell)
     {
-        callback(detail::flat_array::set_instance_functor<CELL_TYPE>(&cell, x, y, z, 1));
+        callback(detail::flat_array::set_instance_functor<CELL_TYPE, USE_CUDA_FUNCTORS>(&cell, x, y, z, 1));
     }
 
     void set(std::size_t x, std::size_t y, std::size_t z, const CELL_TYPE *cells, std::size_t count)
     {
-        callback(detail::flat_array::set_instance_functor<CELL_TYPE>(cells, x, y, z, count));
+        callback(detail::flat_array::set_instance_functor<CELL_TYPE, USE_CUDA_FUNCTORS>(cells, x, y, z, count));
     }
 
     CELL_TYPE get(std::size_t x, std::size_t y, std::size_t z) const
@@ -253,7 +263,7 @@ private:
 
     void init()
     {
-        callback(detail::flat_array::construct_functor<CELL_TYPE>(dim_x, dim_y, dim_z));
+        callback(detail::flat_array::construct_functor<CELL_TYPE, USE_CUDA_FUNCTORS>(dim_x, dim_y, dim_z));
     }
 
     void destroy_and_deallocate()
@@ -262,7 +272,7 @@ private:
             return;
         }
 
-        callback(detail::flat_array::destroy_functor<CELL_TYPE>(dim_x, dim_y, dim_z));
+        callback(detail::flat_array::destroy_functor<CELL_TYPE, USE_CUDA_FUNCTORS>(dim_x, dim_y, dim_z));
         ALLOCATOR().deallocate(data, byte_size());
     }
 

@@ -80,7 +80,7 @@ endif()
 
 lfa_add_config_option(LFA_ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
 lfa_add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run inside of Intel's Software Development Emulator (SDE)." "" false)
-lfa_add_config_option(WITH_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
+lfa_add_config_option(WITH_CUDA "Enable modules which harness NVIDIA CUDA GPUs" ${CUDA_FOUND} true)
 lfa_add_config_option(LIB_INSTALL_DIR "Directory where libraries will be installed to, may be overridden for 64-bit installations" "lib" false)
 lfa_add_config_option(WITH_CPP14 "Enable C++ 14 features of LibFlatArray" ${SUPPORTS_CPP14} true)
 
@@ -110,7 +110,7 @@ endif()
 # and -std=c++11).
 set(LFA_C_FLAGS_BACKUP    "${CMAKE_C_FLAGS}")
 set(LFA_CXX_FLAGS_BACKUP  "${CMAKE_CXX_FLAGS}")
-set(LFA_NVCC_FLAGS_BACKUP "$CUDA_NVCC_FLAGS}")
+set(LFA_NVCC_FLAGS_BACKUP "${CUDA_NVCC_FLAGS}")
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${libflatarray_FLAGS} ${LFA_ADDITIONAL_COMPILE_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libflatarray_FLAGS} ${LFA_ADDITIONAL_COMPILE_FLAGS}")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${libflatarray_FLAGS}")
