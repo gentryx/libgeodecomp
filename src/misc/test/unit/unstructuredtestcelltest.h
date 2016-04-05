@@ -53,7 +53,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage weights
-        grid1[Coord<1>(40)].expectedNeighborWeights[41] = 4711;
+        TS_ASSERT_EQUALS(grid1[Coord<1>(40)].expectedNeighborIDs[0], 41);
+        grid1[Coord<1>(40)].expectedNeighborWeights[0] = 4711;
 
         for (int x = 0; x < 200; ++x, ++hood) {
             grid2[Coord<1>(x)].update(hood, 0);

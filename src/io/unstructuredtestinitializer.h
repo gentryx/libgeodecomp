@@ -40,12 +40,20 @@ public:
             int numNeighbors   = i->x() % maxNeighbors + 1;
             int endNeighbors   = startNeighbors + numNeighbors;
 
+            // we need to insert ID/weight pairs here so can retrieve them sorted by ID below:
+            std::map<int, double> weightsReorderBuffer;
+
             for (int j = startNeighbors; j != endNeighbors; ++j) {
                 int actualNeighbor = j % dim;
                 double edgeWeight = actualNeighbor + 0.1;
-                cell.expectedNeighborIDs << actualNeighbor;
-                cell.expectedNeighborWeights << edgeWeight;
+
+                weightsReorderBuffer[actualNeighbor] = edgeWeight;
                 weights[Coord<2>(i->x(), actualNeighbor)] = edgeWeight;
+            }
+
+            for (std::map<int, double>::iterator i = weightsReorderBuffer.begin(); i != weightsReorderBuffer.end(); ++i) {
+                cell.expectedNeighborIDs << i->first;
+                cell.expectedNeighborWeights << i->second;
             }
 
             ret->set(*i, cell);

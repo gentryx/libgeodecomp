@@ -34,13 +34,22 @@ public:
             TS_ASSERT_EQUALS(cell.expectedNeighborIDs.size(),     i % 20 + 1);
             TS_ASSERT_EQUALS(cell.expectedNeighborWeights.size(), i % 20 + 1);
 
-            FixedArray<int,    100> expectedIDs;
-            FixedArray<double, 100> expectedWeights;
+            // we need to insert ID/weight pairs here so can retrieve them sorted by ID below:
+            std::map<int, double> weightsReorderBuffer;
+
             for (int j = i + 1; j < (i + i % 20 + 2); ++j) {
                 int neighbor = j % 100;
-                expectedIDs << neighbor;
-                expectedWeights << neighbor + 0.1;
+                weightsReorderBuffer[neighbor] = neighbor + 0.1;
             }
+
+            FixedArray<int,    100> expectedIDs;
+            FixedArray<double, 100> expectedWeights;
+
+            for (std::map<int, double>::iterator i = weightsReorderBuffer.begin(); i != weightsReorderBuffer.end(); ++i) {
+                expectedIDs << i->first;
+                expectedWeights << i->second;
+            }
+
             TS_ASSERT_EQUALS(expectedIDs,     cell.expectedNeighborIDs);
             TS_ASSERT_EQUALS(expectedWeights, cell.expectedNeighborWeights);
         }
