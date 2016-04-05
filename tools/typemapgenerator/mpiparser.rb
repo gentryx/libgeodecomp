@@ -315,6 +315,7 @@ class MPIParser
 
       if template_params.empty?
         @log.debug "  simple path"
+
         resolve_class_simple(klass, members, parents,
                              classes,
                              resolved_classes, resolved_parents,
@@ -436,7 +437,8 @@ class MPIParser
   end
 
   def lookup_type(type)
-    return @datatype_map[type] || @datatype_map["#{@namespace}::#{type}"]
+    return @datatype_map["#{type}"   ] || @datatype_map["#{@namespace}::#{type}"   ] ||
+           @datatype_map["#{type}< >"] || @datatype_map["#{@namespace}::#{type}< >"]
   end
 
   # tries to map all members to mpi datatypes (using datatype_map as a
@@ -558,9 +560,15 @@ class MPIParser
 
     # gotta search a little longer for symbolic sizes:
     @log.debug "resolve_cardinality -> non-trivial cardinality"
-    member_id = member.attributes["id"]
-    cardinality_id = resolve_cardinality_id(member_id)
-    return resolve_cardinality_declaration(cardinality_id)
+
+    # the following code seems over-engineered, so it got replaced by the simple regex below:
+    #   member_id = member.attributes["id"]
+    #   cardinality_id = resolve_cardinality_id(member_id)
+    #   return resolve_cardinality_declaration(cardinality_id)
+
+    argsString.text =~ /\[(.*)\]/
+    return $1
+
   end
 
   def member_id_to_8h_file(member_id)
