@@ -22,12 +22,24 @@ public:
     template<typename REGION>
     static BufferType create(const REGION& region)
     {
-        return BufferType(region.size());
+        return BufferType(storageSize(region));
+    }
+
+    template<typename REGION>
+    static std::size_t storageSize(const REGION& region)
+    {
+        return region.size();
+    }
+
+    template<typename REGION>
+    static void resize(BufferType *buffer, const REGION& region)
+    {
+        return buffer->resize(storageSize(region));
     }
 
     static ElementType *getData(BufferType& buffer)
     {
-        return &buffer.first();
+        return &buffer.front();
     }
 
 #ifdef LIBGEODECOMP_WITH_MPI
@@ -52,7 +64,19 @@ public:
     template<typename REGION>
     static BufferType create(const REGION& region)
     {
-        return BufferType(LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size());
+        return BufferType(storageSize(region));
+    }
+
+    template<typename REGION>
+    static std::size_t storageSize(const REGION& region)
+    {
+        return LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size();
+    }
+
+    template<typename REGION>
+    static void resize(BufferType *buffer, const REGION& region)
+    {
+        return buffer->resize(storageSize(region));
     }
 
     static ElementType *getData(BufferType& buffer)
@@ -85,6 +109,17 @@ public:
         return BufferType();
     }
 
+    template<typename REGION>
+    static std::size_t storageSize(const REGION& region)
+    {
+        return 0;
+    }
+
+    template<typename REGION>
+    static void resize(BufferType *buffer, const REGION& region)
+    {
+        buffer->resize(storageSize(region));
+    }
     static ElementType *getData(BufferType& buffer)
     {
         return &buffer.front();
@@ -122,6 +157,18 @@ public:
     static inline ElementType *getData(BufferType& buffer)
     {
         return Implementation::getData(buffer);
+    }
+
+    template<typename REGION>
+    static std::size_t storageSize(const REGION& region)
+    {
+        return Implementation::storageSize(region);
+    }
+
+    template<typename REGION>
+    static inline void resize(BufferType *buffer, const REGION& region)
+    {
+        Implementation::resize(buffer, region);
     }
 
 #ifdef LIBGEODECOMP_WITH_MPI

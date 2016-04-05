@@ -27,6 +27,8 @@ public:
 
     static const int DIM = Topology::DIM;
 
+    using typename GridBase<CellType, DIM>::BufferType;
+
     explicit inline CUDAGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
@@ -86,12 +88,41 @@ public:
         return box;
     }
 
+    void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        CellType *cursor = buffer->data();
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+
+            std::size_t length = i->length() * sizeof(CellType);
+            cudaMemcpy(cursor, const_cast<CellType*>(address(i->origin + offset)), length, cudaMemcpyDeviceToHost);
+            cursor += i->length();
+        }
+    }
+
+    void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    {
+        const CellType *cursor = buffer.data();
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+
+            std::size_t length = i->length() * sizeof(CellType);
+            cudaMemcpy(address(i->origin + offset), cursor, length, cudaMemcpyHostToDevice);
+            cursor += i->length();
+        }
+    }
+
     template<typename GRID_TYPE, typename REGION>
     void saveRegion(GRID_TYPE *target, const REGION& region) const
     {
         for (typename REGION::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
+
             std::size_t length = i->length() * sizeof(CellType);
             cudaMemcpy(&(*target)[i->origin], const_cast<CellType*>(address(i->origin)), length, cudaMemcpyDeviceToHost);
         }

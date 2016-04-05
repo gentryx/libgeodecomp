@@ -349,6 +349,126 @@ public:
         }
     }
 
+    void testLoadSaveRegionFromToBuffer()
+    {
+        typedef SerializationBuffer<TestCell<3> > SerializationBuf;
+
+        Coord<3> origin(30, 20, 10);
+        Coord<3> dim(40, 50, 60);
+        CoordBox<3> box(origin, dim);
+
+        Region<3> region;
+        region << Streak<3>(Coord<3>(30, 20, 10), 60)
+               << Streak<3>(Coord<3>(40, 30, 20), 55);
+
+        CUDAGrid<TestCell<3>, Topologies::Cube<3>::Topology> realGrid(box);
+        GridBase<TestCell<3>, 3>& grid = realGrid;
+
+        int counter = 0;
+        std::vector<TestCell<3> > lineBuf(dim.x());
+
+        for (CoordBox<3>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+            for (int x = 0; x < dim.x(); ++x) {
+                lineBuf[x].testValue = counter++;
+            }
+            grid.set(*i, lineBuf.data());
+        }
+
+        SerializationBuf::BufferType buffer = SerializationBuf::create(region);
+
+        // check saveRegion()
+        grid.saveRegion(&buffer, region);
+
+        int offset = (40 - 30) + (30 - 20) * 40 + (20 - 10) * 40 * 50;
+
+        for (int i = 0; i < 30; ++i) {
+            TS_ASSERT_EQUALS(buffer[i].testValue, double(i));
+        }
+        for (int i = 30; i < 45; ++i) {
+            TS_ASSERT_EQUALS(buffer[i].testValue, double(i - 30 + offset));
+        }
+
+        // check loadRegion()
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            buffer[i].testValue = 4711 + i;
+        }
+
+        grid.loadRegion(buffer, region);
+        counter = 4711;
+
+        for (Region<3>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            lineBuf.resize(i->length());
+            grid.get(*i, lineBuf.data());
+
+            for (int x = 0; x < i->length(); ++x) {
+                TS_ASSERT_EQUALS(lineBuf[x].testValue, double(counter));
+                ++counter;
+            }
+        }
+    }
+
+    void testLoadSaveRegionFromToBufferWithOffset()
+    {
+        typedef SerializationBuffer<TestCell<3> > SerializationBuf;
+
+        Coord<3> origin(30, 20, 10);
+        Coord<3> dim(40, 50, 60);
+        CoordBox<3> box(origin, dim);
+
+        Region<3> region;
+        region << Streak<3>(Coord<3>(30, 20, 10), 60)
+               << Streak<3>(Coord<3>(40, 30, 20), 55);
+
+        CUDAGrid<TestCell<3>, Topologies::Cube<3>::Topology> realGrid(box);
+        GridBase<TestCell<3>, 3>& grid = realGrid;
+
+        int counter = 0;
+        std::vector<TestCell<3> > lineBuf(dim.x());
+
+        for (CoordBox<3>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+            for (int x = 0; x < dim.x(); ++x) {
+                lineBuf[x].testValue = counter++;
+            }
+            grid.set(*i, lineBuf.data());
+        }
+
+        SerializationBuf::BufferType buffer = SerializationBuf::create(region);
+
+        // check saveRegion()
+        grid.saveRegion(&buffer, region, Coord<3>(4, 5, 6));
+
+        int offset = (34 - 30) + (25 - 20) * 40 + (16 - 10) * 40 * 50;
+        for (int i = 0; i < 30; ++i) {
+            TS_ASSERT_EQUALS(buffer[i].testValue, double(i + offset));
+        }
+
+        offset = (44 - 30) + (35 - 20) * 40 + (26 - 10) * 40 * 50;
+        for (int i = 30; i < 45; ++i) {
+            TS_ASSERT_EQUALS(buffer[i].testValue, double(i - 30 + offset));
+        }
+
+        // check loadRegion()
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            buffer[i].testValue = 4711 + i;
+        }
+
+        grid.loadRegion(buffer, region, Coord<3>(4, 5, 6));
+        counter = 4711;
+
+        for (Region<3>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            lineBuf.resize(i->length());
+            Streak<3> streak = *i;
+            streak.origin += Coord<3>(4, 5, 6);
+            streak.endX += 4;
+            grid.get(streak, lineBuf.data());
+
+            for (int x = 0; x < i->length(); ++x) {
+                TS_ASSERT_EQUALS(lineBuf[x].testValue, double(counter));
+                ++counter;
+            }
+        }
+    }
+
 };
 
 }

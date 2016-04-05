@@ -7,6 +7,7 @@
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/storage/memorylocation.h>
 #include <libgeodecomp/storage/selector.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 
 namespace LibGeoDecomp {
 
@@ -32,18 +33,73 @@ public:
     friend class ProxyGrid<CELL, DIMENSIONS, WEIGHT_TYPE>;
 
     typedef CELL CellType;
+    typedef typename SerializationBuffer<CELL>::BufferType BufferType;
+
     const static int DIM = DIMENSIONS;
 
     virtual ~GridBase()
     {}
 
+    /**
+     * Copies a single cell into the grid at the given coordinate
+     */
     virtual void set(const Coord<DIM>&, const CELL&) = 0;
+
+    /**
+     * Copies a row of cells into the grid. The pointer is expected to
+     * point to a memory location with at least as many cells as the
+     * streak specifies.
+     */
     virtual void set(const Streak<DIM>&, const CELL*) = 0;
+
+    /**
+     * Copies out a single cell from the grid.
+     */
     virtual CELL get(const Coord<DIM>&) const = 0;
+
+    /**
+     * Copies as many cells as given by the Streak, starting at its
+     * origin, to the pointer. The target is expected to point to a
+     * memory location with sufficient space.
+     */
     virtual void get(const Streak<DIM>&, CELL *) const = 0;
+
+    /**
+     * The edge cell is returned for out-of-bounds accesses on
+     * non-periodic boundaries. If can be set via this function.
+     */
     virtual void setEdge(const CELL&) = 0;
+
+    /**
+     * Reading counterpart for setEdge().
+     */
     virtual const CELL& getEdge() const = 0;
+
+    /**
+     * Returns the extent of the grid (origin and dimension).
+     */
     virtual CoordBox<DIM> boundingBox() const = 0;
+
+    /**
+     * Extract cells specified by the Region and serialize them in the
+     * given buffer. An optional offset will be added to all
+     * coordinates in the Region.
+     */
+    virtual void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        // fixme: make pure virtual
+    }
+
+    /**
+     * Load cells from the buffer and store them at the coordinates
+     * specified in region. The Region may be translated by an
+     * optional offset.
+     */
+    virtual void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    {
+        // fixme: make pure virtual
+    }
+
 
     Coord<DIM> dimensions() const
     {

@@ -91,7 +91,8 @@ protected:
 
     inline void incRemainder(
         const IndexVectorType::iterator& start,
-        const IndexVectorType::iterator& end, int inserts)
+        const IndexVectorType::iterator& end,
+        int inserts)
     {
         if (inserts == 0) {
             return;

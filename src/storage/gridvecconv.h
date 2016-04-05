@@ -42,7 +42,9 @@ public:
     {
         typedef typename GRID_TYPE::CellType CellType;
         gridToVector(
-            grid, vec, region,
+            grid,
+            vec,
+            region,
             typename APITraits::SelectSoA<CellType>::Value(),
             typename APITraits::SelectBoostSerialization<CellType>::Value());
     }
@@ -55,7 +57,9 @@ public:
     {
         typedef typename GRID_TYPE::CellType CellType;
         vectorToGrid(
-            vec, grid, region,
+            vec,
+            grid,
+            region,
             typename APITraits::SelectSoA<CellType>::Value(),
             typename APITraits::SelectBoostSerialization<CellType>::Value());
     }
@@ -68,7 +72,9 @@ public:
     {
         typedef typename GRID_TYPE::CellType CellType;
         vectorToGrid(
-            vec, grid, region,
+            vec,
+            grid,
+            region,
             typename APITraits::SelectSoA<CellType>::Value(),
             typename APITraits::SelectBoostSerialization<CellType>::Value());
     }
@@ -121,7 +127,7 @@ private:
             return;
         }
 
-        grid.saveRegion(&(*vec)[0], region);
+        grid.saveRegion(&*vec, region);
     }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
@@ -279,7 +285,7 @@ private:
             return;
         }
 
-        grid->loadRegion(&vec[0], region);
+        grid->loadRegion(vec, region);
     }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION

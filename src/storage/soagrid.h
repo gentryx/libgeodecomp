@@ -7,6 +7,7 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
 
@@ -267,6 +268,8 @@ public:
     friend class SoAGridTest;
     friend class SelectorTest;
 
+    using typename GridBase<CELL, TOPOLOGY::DIM>::BufferType;
+
     const static int DIM = TOPOLOGY::DIM;
     /**
      * Accumulated size of all members. Note that this may be lower
@@ -391,40 +394,63 @@ public:
         delegate.callback(&newGrid->delegate, functor);
     }
 
-    void saveRegion(char *target, const Region<DIM>& region) const
+    void saveRegion(BufferType *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        char *dataIterator = target;
+        SerializationBuffer<CELL>::resize(target, region);
+        char *dataIterator = target->data();
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
+
             Streak<DIM> s = *i;
             std::size_t length = s.length();
-            int x = s.origin.x() + edgeRadii.x() - box.origin.x();
-            int y = s.origin.y() + edgeRadii.y() - box.origin.y();
-            int z = s.origin.z() + edgeRadii.z() - box.origin.z();
-            delegate.save(x, y, z, dataIterator, length);
+
+            Coord<3> effectiveCoord = edgeRadii;
+            for (int i = 0; i < DIM; ++i) {
+                effectiveCoord[i] += s.origin[i] - box.origin[i] + offset[i];
+            }
+
+            delegate.save(effectiveCoord[0], effectiveCoord[1], effectiveCoord[2], dataIterator, length);
             dataIterator += length * AGGREGATED_MEMBER_SIZE;
         }
 
     }
 
-    void loadRegion(const char *source, const Region<DIM>& region)
+    void loadRegion(const BufferType& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        const char *dataIterator = source;
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::storageSize(region);
+        if (source.size() < expectedMinimumSize) {
+            throw std::logic_error(
+                "source buffer too small (is " + StringOps::itoa(source.size()) +
+                ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
+        }
+        const char *dataIterator = source.data();
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
+
             Streak<DIM> s = *i;
             std::size_t length = s.length();
-            int x = s.origin.x() + edgeRadii.x() - box.origin.x();
-            int y = s.origin.y() + edgeRadii.y() - box.origin.y();
-            int z = s.origin.z() + edgeRadii.z() - box.origin.z();
-            delegate.load(x, y, z, dataIterator, length);
+
+            Coord<3> effectiveCoord = edgeRadii;
+            for (int i = 0; i < DIM; ++i) {
+                effectiveCoord[i] += s.origin[i] - box.origin[i] + offset[i];
+            }
+
+            delegate.load(effectiveCoord[0], effectiveCoord[1], effectiveCoord[2], dataIterator, length);
             dataIterator += length * AGGREGATED_MEMBER_SIZE;
         }
 
+    }
+
+    static Coord<3> calcEdgeRadii()
+    {
+        return Coord<3>(
+            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : Stencil::RADIUS,
+            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : Stencil::RADIUS,
+            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : Stencil::RADIUS);
     }
 
 protected:
@@ -457,14 +483,6 @@ private:
     CELL edgeCell;
     CoordBox<DIM> box;
     Coord<DIM> topoDimensions;
-
-    static Coord<3> calcEdgeRadii()
-    {
-        return Coord<3>(
-            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : Stencil::RADIUS,
-            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : Stencil::RADIUS,
-            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : Stencil::RADIUS);
-    }
 
     CELL delegateGet(const Coord<1>& coord) const
     {
