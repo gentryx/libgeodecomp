@@ -103,7 +103,7 @@ public:
         MockWriter<>::EventsStore expectedEvents;
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, 0, true);
 
-        for (unsigned i = startStep + 2; i <= init->maxSteps(); i += 3) {
+        for (unsigned i = startStep + 2; i < init->maxSteps(); i += 3) {
             expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, 0, true);
         }
 
