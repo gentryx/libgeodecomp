@@ -247,9 +247,9 @@ private:
                      << " is not valid on cycle " << cycleCounter
                      << ", nanoStep: " << nanoStep << "\n"
                      << "  expected IDs: " << expectedNeighborIDs << "\n"
+                     << "  actual IDs:   " << actualNeighborIDs << "\n"
                      << "  expected weights: " << expectedNeighborWeights << "\n"
-                     << "  got IDs: " << actualNeighborIDs << "\n"
-                     << "  got weights: " << actualNeighborWeights << "\n";
+                     << "  actual weights:   " << actualNeighborWeights << "\n";
             isValid = false;
         }
 
