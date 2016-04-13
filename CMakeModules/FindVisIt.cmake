@@ -4,7 +4,7 @@
 #  VisIt_INCLUDE_DIRS - Directories where VisIt headers can be found
 #  VisIt_LIBRARIES - Libraries required by VisIt headers
 
-set(VisIt_VERSIONS 2.4.0 2.4.1 2.4.2 2.5.0 2.5.1 2.5.2 2.6.0 2.6.1 2.6.2 2.7.0 2.7.1 2.7.2 2.7.3 2.8.0 2.8.1 2.8.2 2.9.0)
+set(VisIt_VERSIONS 2.4.0 2.4.1 2.4.2 2.5.0 2.5.1 2.5.2 2.6.0 2.6.1 2.6.2 2.7.0 2.7.1 2.7.2 2.7.3 2.8.0 2.8.1 2.8.2 2.9.0 2.9.1 2.9.2 2.10.0 2.10.1 2.10.2)
 set(VisIt_ARCHITECTURES linux-x86_64)
 set(VisIt_CANDIDATES /opt/visit /opt/visit/visit ${VisIt_ROOT})
 set(VisIt_SUFFIXES)
