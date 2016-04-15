@@ -86,7 +86,7 @@ public:
 
     ThreadSafeEventsStore& operator<<(const MockWriterEvent& event)
     {
-        hpx::lcos::local::spinlock::scoped_lock l(*insertMutex);
+        std::unique_lock<hpx::lcos::local::spinlock> l(*insertMutex);
         delegate[event.rank] << event;
         return *this;
     }
