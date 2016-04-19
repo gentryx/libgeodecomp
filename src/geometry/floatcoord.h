@@ -213,12 +213,12 @@ public:
             (std::min)(c[0], other[0]));
     }
 
-    inline int minElement() const
+    inline double minElement() const
     {
         return c[0];
     }
 
-    inline int maxElement() const
+    inline double maxElement() const
     {
         return c[0];
     }
@@ -455,12 +455,12 @@ public:
             (std::min)(c[1], other[1]));
     }
 
-    inline int minElement() const
+    inline double minElement() const
     {
         return c[0] < c[1] ? c[0] : c[1];
     }
 
-    inline int maxElement() const
+    inline double maxElement() const
     {
         return c[0] > c[1] ? c[0] : c[1];
     }
@@ -718,13 +718,13 @@ public:
             (std::min)(c[2], other[2]));
     }
 
-    inline int minElement() const
+    inline double minElement() const
     {
         return c[0] < c[1] ?
                   (c[0] < c[2] ? c[0] : c[2]) : (c[1] < c[2] ? c[1] : c[2]);
     }
 
-    inline int maxElement() const
+    inline double maxElement() const
     {
         return c[0] > c[1] ?
                   (c[0] > c[2] ? c[0] : c[2]) : (c[1] > c[2] ? c[1] : c[2]);
