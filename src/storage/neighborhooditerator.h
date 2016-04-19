@@ -15,14 +15,20 @@ namespace NeighborhoodIteratorHelpers {
  * surrounding particles) identically to ContainerCells (which
  * rely on NeighborhoodAdapter)
  */
-template<typename NEIGHBORHOOD_ITERATOR>
+template<typename CONTAINER, typename NEIGHBORHOOD_ITERATOR>
 class Adapter
 {
  public:
     typedef NEIGHBORHOOD_ITERATOR Iterator;
 
+    // template<typename MYSTERY>
     inline
-    explicit Adapter(const typename Iterator::Neighborhood *hood) :
+    explicit Adapter(
+        // // typename NEIGHBORHOOD_ITERATOR::Container
+        // MYSTERY
+        // *container,
+        const typename Iterator::Neighborhood *hood) :
+        // container(container),
         myBegin(Iterator::begin(*hood)),
         myEnd(Iterator::end(*hood))
     {}
@@ -40,6 +46,7 @@ class Adapter
     }
 
  private:
+    // typename NEIGHBORHOOD_ITERATOR::Container *container;
     Iterator myBegin;
     Iterator myEnd;
 };
@@ -53,7 +60,11 @@ class Adapter
  * models to transparently traverse all particles in their neighboring
  * containers.
  */
-template<class NEIGHBORHOOD, int DIM, typename COLLECTION_INTERFACE=CollectionInterface::PassThrough<typename NEIGHBORHOOD::Cell> >
+template<
+    typename WRITE_CONTAINER,
+    typename NEIGHBORHOOD,
+    int DIM,
+    typename COLLECTION_INTERFACE=CollectionInterface::PassThrough<typename NEIGHBORHOOD::Cell> >
 class NeighborhoodIterator
 {
 public:
@@ -61,9 +72,10 @@ public:
 
     typedef NEIGHBORHOOD Neighborhood;
     typedef typename Neighborhood::Cell Cell;
+    typedef typename COLLECTION_INTERFACE::Container Container;
     typedef typename COLLECTION_INTERFACE::Container::const_iterator CellIterator;
     typedef typename COLLECTION_INTERFACE::Container::value_type Particle;
-    typedef NeighborhoodIteratorHelpers::Adapter<NeighborhoodIterator> Adapter;
+    typedef NeighborhoodIteratorHelpers::Adapter<WRITE_CONTAINER, NeighborhoodIterator> Adapter;
 
     inline NeighborhoodIterator(
         const Neighborhood& hood,

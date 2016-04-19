@@ -42,7 +42,7 @@ public:
     class NeighborhoodAdapter
     {
     public:
-        typedef typename NeighborhoodIterator<NEIGHBORHOOD, DIM, COLLECTION_INTERFACE>::Adapter Value;
+        typedef typename NeighborhoodIterator<BoxCell, NEIGHBORHOOD, DIM, COLLECTION_INTERFACE>::Adapter Value;
     };
 
     inline explicit BoxCell(
@@ -145,7 +145,6 @@ private:
             }
         }
     }
-
 };
 
 }
