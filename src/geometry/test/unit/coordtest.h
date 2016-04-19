@@ -393,6 +393,21 @@ public:
         TS_ASSERT_EQUALS(3, Coord<3>::DIM);
     }
 
+    void testConversion()
+    {
+        TS_ASSERT_EQUALS(Coord<1>(2), Coord<1>(FloatCoord<1>(2.0)));
+        TS_ASSERT_EQUALS(Coord<1>(2), Coord<1>(FloatCoord<1>(2.1)));
+        TS_ASSERT_EQUALS(Coord<1>(3), Coord<1>(FloatCoord<1>(3.9)));
+
+        TS_ASSERT_EQUALS(Coord<2>(2, 5), Coord<2>(FloatCoord<2>(2.0, 5.0)));
+        TS_ASSERT_EQUALS(Coord<2>(2, 1), Coord<2>(FloatCoord<2>(2.1, 1.1)));
+        TS_ASSERT_EQUALS(Coord<2>(3, 4), Coord<2>(FloatCoord<2>(3.9, 4.4)));
+
+        TS_ASSERT_EQUALS(Coord<3>(2, 5, 9), Coord<3>(FloatCoord<3>(2.0, 5.0, 9.0)));
+        TS_ASSERT_EQUALS(Coord<3>(2, 1, 8), Coord<3>(FloatCoord<3>(2.1, 1.1, 8.1)));
+        TS_ASSERT_EQUALS(Coord<3>(3, 4, 7), Coord<3>(FloatCoord<3>(3.9, 4.4, 7.9)));
+    }
+
 private:
     Coord<2> *c1;
 };

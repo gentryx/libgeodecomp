@@ -24,6 +24,7 @@
 
 
 #include <libgeodecomp/geometry/fixedcoord.h>
+#include <libgeodecomp/geometry/floatcoord.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/serialization/is_bitwise_serializable.hpp>
@@ -102,6 +103,11 @@ public:
     inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)
     {
         c[0] = X;
+    }
+
+    inline explicit Coord(const FloatCoord<1>& other)
+    {
+        c[0] = other[0];
     }
 
 #ifdef __CUDACC__
@@ -341,6 +347,12 @@ public:
     {
         c[0] = X;
         c[1] = Y;
+    }
+
+    inline explicit Coord(const FloatCoord<2>& other)
+    {
+        c[0] = other[0];
+        c[1] = other[1];
     }
 
 #ifdef __CUDACC__
@@ -590,6 +602,13 @@ public:
         c[0] = X;
         c[1] = Y;
         c[2] = Z;
+    }
+
+    inline explicit Coord(const FloatCoord<3>& other)
+    {
+        c[0] = other[0];
+        c[1] = other[1];
+        c[2] = other[2];
     }
 
 #ifdef __CUDACC__
