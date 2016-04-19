@@ -730,6 +730,14 @@ public:
                   (c[0] > c[2] ? c[0] : c[2]) : (c[1] > c[2] ? c[1] : c[2]);
     }
 
+    inline FloatCoord<3> crossProduct(const FloatCoord<3>& other) const
+    {
+        return FloatCoord<3>(
+            c[1] * other[2] - c[2] * other[1],
+            c[2] * other[0] - c[0] * other[2],
+            c[0] * other[1] - c[1] * other[0]);
+    }
+
     inline
     std::string toString() const
     {

@@ -585,6 +585,18 @@ public:
         TS_ASSERT_EQUALS(2, FloatCoord<2>::DIM);
         TS_ASSERT_EQUALS(3, FloatCoord<3>::DIM);
     }
+
+    void testCrossProduct()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<3>( 1, 0, 0), FloatCoord<3>(0, 1, 0).crossProduct(FloatCoord<3>(0, 0, 1)));
+        TS_ASSERT_EQUALS(FloatCoord<3>(-1, 0, 0), FloatCoord<3>(0, 0, 1).crossProduct(FloatCoord<3>(0, 1, 0)));
+
+        TS_ASSERT_EQUALS(FloatCoord<3>(0, -1, 0), FloatCoord<3>(1, 0, 0).crossProduct(FloatCoord<3>(0, 0, 1)));
+        TS_ASSERT_EQUALS(FloatCoord<3>(0,  1, 0), FloatCoord<3>(0, 0, 1).crossProduct(FloatCoord<3>(1, 0, 0)));
+
+        TS_ASSERT_EQUALS(FloatCoord<3>(0, 0, -1), FloatCoord<3>(0, 1, 0).crossProduct(FloatCoord<3>(1, 0, 0)));
+        TS_ASSERT_EQUALS(FloatCoord<3>(0, 0,  1), FloatCoord<3>(1, 0, 0).crossProduct(FloatCoord<3>(0, 1, 0)));
+    }
 };
 
 }
