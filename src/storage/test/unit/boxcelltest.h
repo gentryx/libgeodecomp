@@ -179,7 +179,6 @@ public:
                 std::size_t expected = 4;
 
                 TS_ASSERT_EQUALS(grid2[Coord<2>(x, y)].size(), expected);
-
             }
         }
 
@@ -265,7 +264,7 @@ public:
             &grid2,
             0);
 
-        // we assume that after the first update step all four
+        // we assume that after the first update step all eight
         // particles still reside in their original cell:
         for (int z = 0; z < gridDim.z(); ++z) {
             for (int y = 0; y < gridDim.y(); ++y) {
@@ -273,7 +272,48 @@ public:
                     std::size_t expected = 8;
 
                     TS_ASSERT_EQUALS(grid2[Coord<3>(x, y, z)].size(), expected);
+                }
+            }
+        }
 
+        UpdateFunctor<CellType>()(
+            region,
+            Coord<3>(),
+            Coord<3>(),
+            grid2,
+            &grid1,
+            0);
+
+        // after the second step we assume that particles on the
+        // boundaries have transitioned to neighboring cells:
+        for (int z = 0; z < gridDim.z(); ++z) {
+            for (int y = 0; y < gridDim.y(); ++y) {
+                for (int x = 0; x < gridDim.x(); ++x) {
+                    Coord<3> expectedCubeDim(2, 2, 2);
+                    if (x == 0) {
+                        expectedCubeDim.x() += 1;
+                    }
+                    if (y == 0) {
+                        expectedCubeDim.y() += 1;
+                    }
+                    if (z == 0) {
+                        expectedCubeDim.z() += 1;
+                    }
+
+                    int contributingFaces = 3;
+                    if (x == (gridDim.x() - 1)) {
+                        expectedCubeDim.x() -= 1;
+                    }
+                    if (y == (gridDim.y() - 1)) {
+                        expectedCubeDim.y() -= 1;
+                    }
+                    if (z == (gridDim.z() - 1)) {
+                        expectedCubeDim.z() -= 1;
+                    }
+
+                    std::size_t expected = expectedCubeDim.prod();
+
+                    TS_ASSERT_EQUALS(grid1[Coord<3>(x, y, z)].size(), expected);
                 }
             }
         }
