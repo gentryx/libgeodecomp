@@ -21,13 +21,11 @@ class Adapter
  public:
     typedef NEIGHBORHOOD_ITERATOR Iterator;
 
-    template<typename MYSTERY>
     inline
     explicit Adapter(
-        // // typename NEIGHBORHOOD_ITERATOR::Container
-        MYSTERY *container,
+        CONTAINER *container,
         const typename Iterator::Neighborhood *hood) :
-        // container(container),
+        container(container),
         myBegin(Iterator::begin(container, *hood)),
         myEnd(Iterator::end(container, *hood))
     {}
@@ -45,7 +43,7 @@ class Adapter
     }
 
  private:
-    // typename NEIGHBORHOOD_ITERATOR::Container *container;
+    CONTAINER *container;
     Iterator myBegin;
     Iterator myEnd;
 };
