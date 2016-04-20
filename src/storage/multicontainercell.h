@@ -146,7 +146,6 @@ public:
         inline void update(const NEIGHBORHOOD& hood,                    \
                            int nanoStep)                                \
         {                                                               \
-            *this = hood[LibGeoDecomp::Coord<DIM>()];                   \
             MultiNeighborhoodAdapter<NEIGHBORHOOD> multiHood(           \
                 this,                                                   \
                 &hood);                                                 \

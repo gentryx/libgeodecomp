@@ -108,9 +108,6 @@ public:
     template<class HOOD>
     inline void update(HOOD& hood, const int nanoStep)
     {
-        // fixme: don't copy all over
-        *this = hood[Coord<DIM>()];
-
         typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
         typedef typename NeighborhoodAdapter<BoxCell, HOOD, PassThroughType>::Value NeighborhoodAdapterType;
         NeighborhoodAdapterType adapter(this, &hood);
@@ -125,13 +122,17 @@ public:
         NEIGHBORHOOD_ADAPTER_SELF& ownNeighbors,
         int nanoStep)
     {
+        origin    = oldSelf.origin;
+        dimension = oldSelf.dimension;
+
         if (nanoStep == 0) {
             particles.clear();
             addContainedParticles(ownNeighbors.begin(), ownNeighbors.end());
+        } else {
+            particles = oldSelf.particles;
         }
     }
 
-    // fixme: get rid of ownNeighbors
     template<class NEIGHBORHOOD_ADAPTER_ALL>
     inline void updateCargo(
         NEIGHBORHOOD_ADAPTER_ALL& allNeighbors,

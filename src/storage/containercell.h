@@ -165,12 +165,11 @@ public:
     template<class HOOD>
     inline void update(const HOOD& neighbors, const int nanoStep)
     {
-        *this = neighbors[Coord<DIM>()];
-
         typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
         typedef typename NeighborhoodAdapter<ContainerCell, HOOD, PassThroughType>::Value NeighborhoodAdapterType;
         NeighborhoodAdapterType adapter(this, &neighbors);
 
+        copyOver(neighbors[Coord<DIM>()], adapter, nanoStep);
         updateCargo(adapter, nanoStep);
     }
 
@@ -178,7 +177,7 @@ public:
     template<class HOOD_SELF>
     inline void copyOver(const ContainerCell& oldSelf, HOOD_SELF& ownNeighbors, const int nanoStep)
     {
-        // fixme
+        *this = oldSelf;
     }
 
     /**
