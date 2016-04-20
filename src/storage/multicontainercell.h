@@ -68,8 +68,14 @@ public:
 #define DECLARE_MULTI_CONTAINER_CELL_MEMBER(INDEX, UNUSED, MEMBER)      \
     LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value BOOST_PP_SEQ_ELEM(1, MEMBER);
 
+#define DECLARE_MULTI_CONTAINER_COPY_MEMBER(INDEX, CELL, MEMBER)        \
+    BOOST_PP_SEQ_ELEM(1, MEMBER).copyOver(                              \
+        hood[Coord<DIM>()].BOOST_PP_SEQ_ELEM(1, MEMBER),                \
+        multiHood.BOOST_PP_SEQ_ELEM(1, MEMBER),                         \
+        nanoStep);
+
 #define DECLARE_MULTI_CONTAINER_CELL_UPDATE(INDEX, CELL, MEMBER)        \
-    BOOST_PP_SEQ_ELEM(1, MEMBER).updateCargo(multiHood.BOOST_PP_SEQ_ELEM(1, MEMBER), multiHood, nanoStep);
+    BOOST_PP_SEQ_ELEM(1, MEMBER).updateCargo(multiHood, nanoStep);
 
 /**
  * This cell is a wrapper around ContainerCell to allow user code to
@@ -117,6 +123,11 @@ public:
                 hood(hood)                                              \
             {}                                                          \
                                                                         \
+            NAME *operator->()                                          \
+            {                                                           \
+                return writeContainer;                                  \
+            }                                                           \
+                                                                        \
             BOOST_PP_SEQ_FOR_EACH(                                      \
                 DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_MEMBER,              \
                 NAME,                                                   \
@@ -139,6 +150,11 @@ public:
             MultiNeighborhoodAdapter<NEIGHBORHOOD> multiHood(           \
                 this,                                                   \
                 &hood);                                                 \
+                                                                        \
+            BOOST_PP_SEQ_FOR_EACH(                                      \
+                DECLARE_MULTI_CONTAINER_COPY_MEMBER,                    \
+                NAME,                                                   \
+                MEMBERS)                                                \
                                                                         \
             BOOST_PP_SEQ_FOR_EACH(                                      \
                 DECLARE_MULTI_CONTAINER_CELL_UPDATE,                    \

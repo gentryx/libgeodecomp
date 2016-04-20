@@ -171,7 +171,14 @@ public:
         typedef typename NeighborhoodAdapter<ContainerCell, HOOD, PassThroughType>::Value NeighborhoodAdapterType;
         NeighborhoodAdapterType adapter(this, &neighbors);
 
-        updateCargo(adapter, adapter, nanoStep);
+        updateCargo(adapter, nanoStep);
+    }
+
+    // fixme: add old self to params
+    template<class HOOD_SELF>
+    inline void copyOver(const ContainerCell& oldSelf, HOOD_SELF& ownNeighbors, const int nanoStep)
+    {
+        // fixme
     }
 
     /**
@@ -179,8 +186,8 @@ public:
      * initializing this container's cargo, we also provide
      * updateCargo(), which doesn't copy over the old state:
      */
-    template<class HOOD_SELF, class HOOD_ALL>
-    inline void updateCargo(HOOD_SELF& ownNeighbors, HOOD_ALL& allNeighbors, const int nanoStep)
+    template<class HOOD_ALL>
+    inline void updateCargo(HOOD_ALL& allNeighbors, const int nanoStep)
     {
         for (std::size_t i = 0; i < numElements; ++i) {
             cells[i].update(allNeighbors, nanoStep);

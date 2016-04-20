@@ -15,6 +15,104 @@ DECLARE_MULTI_CONTAINER_CELL(
     (((ContainerCell<std::string, 5>))(labels))
     (((ContainerCell<double,      7>))(prices)) )
 
+class APIProvider
+{
+public:
+    class API : public LibGeoDecomp::APITraits::HasTorusTopology<3>,
+                public LibGeoDecomp::APITraits::HasPointMesh,
+                public LibGeoDecomp::APITraits::HasStencil<LibGeoDecomp::Stencils::Moore<3, 1> >
+    {};
+};
+
+class SpawningParticleBlue;
+
+/**
+ * Another simple test particle which simply spawns new particles
+ */
+class SpawningParticleRed
+{
+public:
+    class API : public APIProvider::API
+    {};
+
+    explicit SpawningParticleRed(
+        const FloatCoord<3>& pos = FloatCoord<3>(),
+        const int numRedParticlesToBeSpawned = 0,
+        const int numBlueParticlesToBeSpawned = 0) :
+        pos(pos),
+        numRedParticlesToBeSpawned(numRedParticlesToBeSpawned),
+        numBlueParticlesToBeSpawned(numBlueParticlesToBeSpawned)
+    {}
+
+    inline const FloatCoord<3>& getPos() const
+    {
+        return pos;
+    }
+
+    template<typename HOOD>
+    inline void update(HOOD& hood, const int nanoStep)
+    {
+        for (int i = 0; i < numRedParticlesToBeSpawned; ++i) {
+            hood->red << SpawningParticleRed(pos, 0);
+        }
+        for (int i = 0; i < numBlueParticlesToBeSpawned; ++i) {
+            hood->blue << SpawningParticleBlue(pos, 0);
+        }
+    }
+
+private:
+    FloatCoord<3> pos;
+    int numRedParticlesToBeSpawned;
+    int numBlueParticlesToBeSpawned;
+};
+
+/**
+ * Another simple test particle which simply spawns new particles
+ */
+class SpawningParticleBlue
+{
+public:
+    class API : public APIProvider::API
+    {};
+
+    explicit SpawningParticleBlue(
+        const FloatCoord<3>& pos = FloatCoord<3>(),
+        const int numRedParticlesToBeSpawned = 0,
+        const int numBlueParticlesToBeSpawned = 0) :
+        pos(pos),
+        numRedParticlesToBeSpawned(numRedParticlesToBeSpawned),
+        numBlueParticlesToBeSpawned(numBlueParticlesToBeSpawned)
+    {}
+
+    inline const FloatCoord<3>& getPos() const
+    {
+        return pos;
+    }
+
+    template<typename HOOD>
+    inline void update(HOOD& hood, const int nanoStep)
+    {
+        for (int i = 0; i < numRedParticlesToBeSpawned; ++i) {
+            hood->red << SpawningParticleRed(pos, 0);
+        }
+        for (int i = 0; i < numBlueParticlesToBeSpawned; ++i) {
+            hood->blue << SpawningParticleBlue(pos, 0);
+        }
+    }
+
+private:
+    FloatCoord<3> pos;
+    int numRedParticlesToBeSpawned;
+    int numBlueParticlesToBeSpawned;
+};
+
+DECLARE_MULTI_CONTAINER_CELL(
+    CellWithSpawningParticles,
+    APIProvider,
+    (((BoxCell<FixedArray<SpawningParticleRed,   16> >))(red))
+    (((BoxCell<FixedArray<SpawningParticleBlue, 221> >))(blue)) )
+
+
 typedef std::vector<std::pair<std::string, std::string> > LogType;
 LogType multiContainerCellTestLog;
 
@@ -271,7 +369,13 @@ public:
 
         Region<2> region;
         region << CoordBox<2>(Coord<2>(), dim);
-        UpdateFunctor<AnotherSimpleContainer>()(region, Coord<2>(), Coord<2>(), gridOld, &gridNew, 12345);
+        UpdateFunctor<AnotherSimpleContainer>()(
+            region,
+            Coord<2>(),
+            Coord<2>(),
+            gridOld,
+            &gridNew,
+            12345);
 
         for (int y = 0; y < dim.y(); ++y) {
             for (int x = 0; x < dim.x(); ++x) {
@@ -301,6 +405,47 @@ public:
                 TS_ASSERT_EQUALS(gridNew[Coord<2>(x, y)].particles[0].seenNeighbors, expectedNeighbors);
                 TS_ASSERT_EQUALS(gridNew[Coord<2>(x, y)].particles[0].seenElements,  expectedElements);
             }
+        }
+    }
+
+    void testSpawn()
+    {
+        Coord<3> dim(10, 5, 7);
+        Region<3> region;
+        region << CoordBox<3>(Coord<3>(), dim);
+        FloatCoord<3> boxDim(2.5, 3.5, 4.5);
+
+        Grid<CellWithSpawningParticles, Topologies::Torus<3>::Topology> gridOld(dim);
+        Grid<CellWithSpawningParticles, Topologies::Torus<3>::Topology> gridNew(dim);
+
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            FloatCoord<3> boxOrigin = boxDim.scale(*i);
+            FloatCoord<3> particleCenter = boxOrigin + boxDim * 0.5;
+
+            CellWithSpawningParticles cell;
+            cell.red  = BoxCell<FixedArray<SpawningParticleRed,   16> >(boxOrigin, boxDim);
+            cell.blue = BoxCell<FixedArray<SpawningParticleBlue, 221> >(boxOrigin, boxDim);
+
+            cell.red  << SpawningParticleRed( particleCenter, i->x(), i->y());
+            cell.blue << SpawningParticleBlue(particleCenter, i->z(), i->prod());
+
+            gridOld[*i] = cell;
+        }
+
+        UpdateFunctor<CellWithSpawningParticles>()(
+            region,
+            Coord<3>(),
+            Coord<3>(),
+            gridOld,
+            &gridNew,
+            0);
+
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            int expectedRedParticles  = 1 + i->x() + i->z();
+            int expectedBlueParticles = 1 + i->y() + i->prod();
+
+            TS_ASSERT_EQUALS(gridNew[*i].red.size(),  expectedRedParticles);
+            TS_ASSERT_EQUALS(gridNew[*i].blue.size(), expectedBlueParticles);
         }
     }
 

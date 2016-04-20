@@ -108,27 +108,40 @@ public:
     template<class HOOD>
     inline void update(HOOD& hood, const int nanoStep)
     {
+        // fixme: don't copy all over
         *this = hood[Coord<DIM>()];
 
         typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
         typedef typename NeighborhoodAdapter<BoxCell, HOOD, PassThroughType>::Value NeighborhoodAdapterType;
         NeighborhoodAdapterType adapter(this, &hood);
 
-        updateCargo(adapter, adapter, nanoStep);
+        copyOver(hood[Coord<DIM>()], adapter, nanoStep);
+        updateCargo(adapter, nanoStep);
     }
 
-    template<class NEIGHBORHOOD_ADAPTER_SELF, class NEIGHBORHOOD_ADAPTER_ALL>
-    inline void updateCargo(
+    template<class NEIGHBORHOOD_ADAPTER_SELF>
+    inline void copyOver(
+        const BoxCell& oldSelf,
         NEIGHBORHOOD_ADAPTER_SELF& ownNeighbors,
-        NEIGHBORHOOD_ADAPTER_ALL& allNeighbors,
         int nanoStep)
     {
         if (nanoStep == 0) {
             particles.clear();
             addContainedParticles(ownNeighbors.begin(), ownNeighbors.end());
         }
+    }
 
-        for (typename Container::iterator i = particles.begin(); i != particles.end(); ++i) {
+    // fixme: get rid of ownNeighbors
+    template<class NEIGHBORHOOD_ADAPTER_ALL>
+    inline void updateCargo(
+        NEIGHBORHOOD_ADAPTER_ALL& allNeighbors,
+        int nanoStep)
+    {
+        // we need to fix end here so particles inserted by update()
+        // won't be immediately updated, too:
+        typename Container::iterator end = particles.end();
+
+        for (typename Container::iterator i = particles.begin(); i != end; ++i) {
             i->update(allNeighbors, nanoStep);
         }
     }
