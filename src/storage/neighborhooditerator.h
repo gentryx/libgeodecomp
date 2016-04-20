@@ -42,6 +42,12 @@ class Adapter
         return myEnd;
     }
 
+    template<typename PARTICLE>
+    void operator<<(const PARTICLE& particle)
+    {
+        (*container) << particle;
+    }
+
  private:
     CONTAINER *container;
     Iterator myBegin;
