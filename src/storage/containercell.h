@@ -39,6 +39,9 @@ public:
     const static std::size_t MAX_SIZE = SIZE;
 
     template<
+        // currently unused as we don't yet allow unstructed grid
+        // codes to add cells to ContainerCells at runtime:
+        typename WRITE_CONTAINER,
         typename NEIGHBORHOOD,
         typename COLLECTION_INTERFACE>
     class NeighborhoodAdapter
@@ -165,8 +168,8 @@ public:
         *this = neighbors[Coord<DIM>()];
 
         typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
-        typedef typename NeighborhoodAdapter<HOOD, PassThroughType>::Value NeighborhoodAdapterType;
-        NeighborhoodAdapterType adapter(&neighbors);
+        typedef typename NeighborhoodAdapter<ContainerCell, HOOD, PassThroughType>::Value NeighborhoodAdapterType;
+        NeighborhoodAdapterType adapter(this, &neighbors);
 
         updateCargo(adapter, adapter, nanoStep);
     }

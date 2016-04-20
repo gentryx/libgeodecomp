@@ -38,11 +38,15 @@ public:
 
     const static int DIM = Topology::DIM;
 
-    template<typename NEIGHBORHOOD, typename COLLECTION_INTERFACE>
+    template<
+        typename WRITE_CONTAINER,
+        typename NEIGHBORHOOD,
+        typename COLLECTION_INTERFACE>
     class NeighborhoodAdapter
     {
     public:
-        typedef typename NeighborhoodIterator<BoxCell, NEIGHBORHOOD, DIM, COLLECTION_INTERFACE>::Adapter Value;
+        typedef NeighborhoodIterator<WRITE_CONTAINER, NEIGHBORHOOD, DIM, COLLECTION_INTERFACE> IteratorType;
+        typedef typename NeighborhoodIteratorHelpers::Adapter<WRITE_CONTAINER, IteratorType>::Adapter Value;
     };
 
     inline explicit BoxCell(
@@ -107,8 +111,8 @@ public:
         *this = hood[Coord<DIM>()];
 
         typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
-        typedef typename NeighborhoodAdapter<HOOD, PassThroughType>::Value NeighborhoodAdapterType;
-        NeighborhoodAdapterType adapter(&hood);
+        typedef typename NeighborhoodAdapter<BoxCell, HOOD, PassThroughType>::Value NeighborhoodAdapterType;
+        NeighborhoodAdapterType adapter(this, &hood);
 
         updateCargo(adapter, adapter, nanoStep);
     }

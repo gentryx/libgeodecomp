@@ -21,16 +21,15 @@ class Adapter
  public:
     typedef NEIGHBORHOOD_ITERATOR Iterator;
 
-    // template<typename MYSTERY>
+    template<typename MYSTERY>
     inline
     explicit Adapter(
         // // typename NEIGHBORHOOD_ITERATOR::Container
-        // MYSTERY
-        // *container,
+        MYSTERY *container,
         const typename Iterator::Neighborhood *hood) :
         // container(container),
-        myBegin(Iterator::begin(*hood)),
-        myEnd(Iterator::end(*hood))
+        myBegin(Iterator::begin(container, *hood)),
+        myEnd(Iterator::end(container, *hood))
     {}
 
     inline
@@ -75,12 +74,13 @@ public:
     typedef typename COLLECTION_INTERFACE::Container Container;
     typedef typename COLLECTION_INTERFACE::Container::const_iterator CellIterator;
     typedef typename COLLECTION_INTERFACE::Container::value_type Particle;
-    typedef NeighborhoodIteratorHelpers::Adapter<WRITE_CONTAINER, NeighborhoodIterator> Adapter;
 
     inline NeighborhoodIterator(
+        WRITE_CONTAINER *writeContainer,
         const Neighborhood& hood,
         const Coord<DIM>& coord,
         const CellIterator& iterator) :
+        writeContainer(writeContainer),
         hood(hood),
         boxIterator(
             typename CoordBox<DIM>::Iterator(
@@ -95,7 +95,9 @@ public:
         iterator(iterator)
     {}
 
-    static inline NeighborhoodIterator begin(const Neighborhood& hood)
+    static inline NeighborhoodIterator begin(
+        WRITE_CONTAINER *writeContainer,
+        const Neighborhood& hood)
     {
         CoordBox<DIM> box(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
 
@@ -103,17 +105,28 @@ public:
              i != box.end();
              ++i) {
             if (COLLECTION_INTERFACE()(hood[*i]).size() > 0) {
-                return NeighborhoodIterator(hood, *i, COLLECTION_INTERFACE()(hood[*i]).begin());
+                return NeighborhoodIterator(
+                    writeContainer,
+                    hood,
+                    *i,
+                    COLLECTION_INTERFACE()(hood[*i]).begin());
             }
         }
 
         Coord<DIM> endCoord = Coord<DIM>::diagonal(1);
-        return NeighborhoodIterator(hood, endCoord, COLLECTION_INTERFACE()(hood[endCoord]).end());
+        return NeighborhoodIterator(
+            writeContainer,
+            hood,
+            endCoord,
+            COLLECTION_INTERFACE()(hood[endCoord]).end());
     }
 
-    static inline NeighborhoodIterator end(const Neighborhood& hood)
+    static inline NeighborhoodIterator end(
+        WRITE_CONTAINER *writeContainer,
+        const Neighborhood& hood)
     {
         return NeighborhoodIterator(
+            writeContainer,
             hood,
             Coord<DIM>::diagonal(1),
             COLLECTION_INTERFACE()(hood[Coord<DIM>::diagonal(1)]).end());
@@ -159,6 +172,7 @@ public:
     }
 
 private:
+    WRITE_CONTAINER *writeContainer;
     const Neighborhood& hood;
     typename CoordBox<DIM>::Iterator boxIterator;
     typename CoordBox<DIM>::Iterator endIterator;

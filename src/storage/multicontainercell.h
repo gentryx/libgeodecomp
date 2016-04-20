@@ -52,14 +52,18 @@ public:
     };
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_ADAPTER(INDEX, CELL, MEMBER) \
-    typedef typename LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value::NeighborhoodAdapter<NEIGHBORHOOD, CollectionInterface ## INDEX>::Value AdapterHelper ## INDEX;
+    typedef typename LibGeoDecomp::MultiContainerCellHelpers::ArgumentType< \
+        void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value::NeighborhoodAdapter< \
+            CELL,                                                       \
+            NEIGHBORHOOD,                                               \
+            CollectionInterface ## INDEX>::Value AdapterHelper ## INDEX;
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_MEMBER(INDEX, CELL, MEMBER)  \
     AdapterHelper ## INDEX                                              \
         BOOST_PP_SEQ_ELEM(1, MEMBER);
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_INIT(INDEX, CELL, MEMBER)    \
-    BOOST_PP_SEQ_ELEM(1, MEMBER)(hood),
+    BOOST_PP_SEQ_ELEM(1, MEMBER)(writeContainer, hood),
 
 #define DECLARE_MULTI_CONTAINER_CELL_MEMBER(INDEX, UNUSED, MEMBER)      \
     LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value BOOST_PP_SEQ_ELEM(1, MEMBER);
@@ -103,11 +107,13 @@ public:
                 MEMBERS)                                                \
                                                                         \
             explicit MultiNeighborhoodAdapter(                          \
+                NAME *writeContainer,                                   \
                 const NEIGHBORHOOD *hood) :                             \
                 BOOST_PP_SEQ_FOR_EACH(                                  \
                     DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_INIT,            \
                     NAME,                                               \
                     MEMBERS)                                            \
+                writeContainer(writeContainer),                         \
                 hood(hood)                                              \
             {}                                                          \
                                                                         \
@@ -116,6 +122,7 @@ public:
                 NAME,                                                   \
                 MEMBERS)                                                \
                                                                         \
+            NAME *writeContainer;                                       \
             const NEIGHBORHOOD *hood;                                   \
         };                                                              \
                                                                         \
@@ -129,7 +136,9 @@ public:
                            int nanoStep)                                \
         {                                                               \
             *this = hood[LibGeoDecomp::Coord<DIM>()];                   \
-            MultiNeighborhoodAdapter<NEIGHBORHOOD> multiHood(&hood);    \
+            MultiNeighborhoodAdapter<NEIGHBORHOOD> multiHood(           \
+                this,                                                   \
+                &hood);                                                 \
                                                                         \
             BOOST_PP_SEQ_FOR_EACH(                                      \
                 DECLARE_MULTI_CONTAINER_CELL_UPDATE,                    \
