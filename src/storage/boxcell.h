@@ -106,7 +106,7 @@ public:
     }
 
     template<class HOOD>
-    inline void update(const HOOD& hood, const int nanoStep)
+    inline void update(HOOD& hood, const int nanoStep)
     {
         *this = hood[Coord<DIM>()];
 
@@ -119,9 +119,9 @@ public:
 
     template<class NEIGHBORHOOD_ADAPTER_SELF, class NEIGHBORHOOD_ADAPTER_ALL>
     inline void updateCargo(
-        const NEIGHBORHOOD_ADAPTER_SELF& ownNeighbors,
-        const NEIGHBORHOOD_ADAPTER_ALL& allNeighbors,
-        const int nanoStep)
+        NEIGHBORHOOD_ADAPTER_SELF& ownNeighbors,
+        NEIGHBORHOOD_ADAPTER_ALL& allNeighbors,
+        int nanoStep)
     {
         if (nanoStep == 0) {
             particles.clear();
