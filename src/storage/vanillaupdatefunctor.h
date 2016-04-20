@@ -27,7 +27,8 @@ public:
         Coord<DIM> targetCoord = targetOrigin;
 
         for (; sourceCoord.x() < streak.endX; ++sourceCoord.x()) {
-            (*gridNew)[targetCoord].update(gridOld.getNeighborhood(sourceCoord), nanoStep);
+            typename GRID1::CoordMapType hood = gridOld.getNeighborhood(sourceCoord);
+            (*gridNew)[targetCoord].update(hood, nanoStep);
             ++targetCoord.x();
         }
     }
