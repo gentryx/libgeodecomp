@@ -57,7 +57,7 @@ public:
     }
 
     inline
-    const int first() const
+    int first() const
     {
         return matrix.columnVec()[index];
     }
