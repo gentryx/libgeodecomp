@@ -173,7 +173,6 @@ public:
         updateCargo(adapter, nanoStep);
     }
 
-    // fixme: add old self to params
     template<class HOOD_SELF>
     inline void copyOver(const ContainerCell& oldSelf, HOOD_SELF& ownNeighbors, const int nanoStep)
     {
