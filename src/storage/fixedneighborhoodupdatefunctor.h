@@ -121,7 +121,7 @@ public:
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) const
     {
-        // this copy is required to blow our potentially 1D or 2D
+        // this copy is required to expand our potentially 1D or 2D
         // input coords to 3D, which is required by LibFlatArray.
         Coord<3> originOld;
         Coord<3> originNew;

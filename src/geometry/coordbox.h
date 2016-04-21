@@ -76,7 +76,8 @@ public:
     }
 
     /**
-     * checks whether the box' volume includes coord.
+     * checks whether the box' volume includes/containes coord.
+     * Returns true if coord is within the limits of the CoordBox.
      */
     __host__ __device__
     inline bool inBounds(const Coord<DIM>& coord) const
