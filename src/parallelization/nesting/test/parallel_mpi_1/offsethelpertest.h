@@ -15,14 +15,19 @@ public:
     {
         Coord<2> offset;
         Coord<2> dimensions;
+
+        Region<2> region;
+        region << CoordBox<2>(Coord<2>(1, 1),
+                              Coord<2>(5, 3));
+        region = region.expand(2);
+
         OffsetHelper<1, 2, Topologies::Torus<2>::Topology>()(
             &offset,
             &dimensions,
-            CoordBox<2>(Coord<2>(1, 1),
-                        Coord<2>(5, 3)),
+            region,
             CoordBox<2>(Coord<2>(0, 0),
-                        Coord<2>(10, 8)),
-            2);
+                        Coord<2>(10, 8)));
+
         TS_ASSERT_EQUALS(Coord<2>(-1, -1), offset);
         TS_ASSERT_EQUALS(Coord<2>(9, 7), dimensions);
     }
@@ -31,14 +36,19 @@ public:
     {
         Coord<2> offset;
         Coord<2> dimensions;
+
+        Region<2> region;
+        region << CoordBox<2>(Coord<2>(1, 1),
+                              Coord<2>(6, 3));
+        region = region.expand(2);
+
         OffsetHelper<1, 2, Topologies::Cube<2>::Topology>()(
             &offset,
             &dimensions,
-            CoordBox<2>(Coord<2>(1, 1),
-                        Coord<2>(6, 3)),
+            region,
             CoordBox<2>(Coord<2>(0, 0),
-                        Coord<2>(8, 8)),
-            2);
+                        Coord<2>(8, 8)));
+
         TS_ASSERT_EQUALS(Coord<2>(0, 0), offset);
         TS_ASSERT_EQUALS(Coord<2>(8, 6), dimensions);
     }

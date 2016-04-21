@@ -92,14 +92,14 @@ protected:
      */
     inline void guessOffset(Coord<DIM> *offset, Coord<DIM> *dimensions)
     {
-        const CoordBox<DIM>& boundingBox =
-            partitionManager->ownRegion().boundingBox();
+        // fixme: use partitionManager->ownRegion(ghostZoneWidth)
+        Region<DIM> expandedRegion = partitionManager->ownRegion().expand(partitionManager->getGhostZoneWidth());
+
         OffsetHelper<DIM - 1, DIM, Topology>()(
             offset,
             dimensions,
-            boundingBox,
-            initializer->gridBox(),
-            partitionManager->getGhostZoneWidth());
+            expandedRegion,
+            initializer->gridBox());
     }
 };
 
