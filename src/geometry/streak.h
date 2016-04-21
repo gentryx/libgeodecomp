@@ -41,6 +41,34 @@ public:
             (endX == other.endX);
     }
 
+    inline Streak<DIM> operator+(const Coord<DIM>& displacement) const
+    {
+        return Streak<DIM>(
+            origin + displacement,
+            endX + displacement.x());
+    }
+
+    inline Streak<DIM> operator-(const Coord<DIM>& displacement) const
+    {
+        return Streak<DIM>(
+            origin - displacement,
+            endX - displacement.x());
+    }
+
+    inline Streak<DIM>&  operator+=(const Coord<DIM>& displacement)
+    {
+        origin += displacement;
+        endX += displacement.x();
+        return *this;
+    }
+
+    inline Streak<DIM>& operator-=(const Coord<DIM>& displacement)
+    {
+        origin -= displacement;
+        endX -= displacement.x();
+        return *this;
+    }
+
     inline bool operator!=(const Streak& other) const
     {
         return !(*this == other);
