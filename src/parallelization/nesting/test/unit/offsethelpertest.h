@@ -10,7 +10,28 @@ namespace LibGeoDecomp {
 class OffsetHelperTest : public CxxTest::TestSuite
 {
 public:
-    void testTorusWithRegionNearOrigin()
+    void testTorus2D()
+    {
+        Coord<2> offset;
+        Coord<2> dimensions;
+
+        Region<2> region;
+        region << CoordBox<2>(Coord<2>(1, 1),
+                              Coord<2>(5, 3));
+        region = region.expand(2);
+
+        OffsetHelper<1, 2, Topologies::Torus<2>::Topology>()(
+            &offset,
+            &dimensions,
+            region,
+            CoordBox<2>(Coord<2>(0, 0),
+                        Coord<2>(10, 8)));
+
+        TS_ASSERT_EQUALS(Coord<2>(-1, -1), offset);
+        TS_ASSERT_EQUALS(Coord<2>(9, 7), dimensions);
+    }
+
+    void testTorus3DWithRegionNearOrigin()
     {
         Region<3> region;
         region << CoordBox<3>(Coord<3>(  0,   0,   0), Coord<3>(10, 10, 10));
@@ -32,7 +53,7 @@ public:
         TS_ASSERT_EQUALS(Coord<3>(16, 16, 16), dimensions);
     }
 
-    void testTorusWithRegionCloseToFarCorner()
+    void testTorus3DWithRegionCloseToFarCorner()
     {
         Region<3> region;
         region << CoordBox<3>(Coord<3>(190, 190, 190), Coord<3>(10, 10, 10));
@@ -52,6 +73,27 @@ public:
 
         TS_ASSERT_EQUALS(Coord<3>(186, 186, 186), offset);
         TS_ASSERT_EQUALS(Coord<3>( 18,  18,  18), dimensions);
+    }
+
+    void testCube2D()
+    {
+        Coord<2> offset;
+        Coord<2> dimensions;
+
+        Region<2> region;
+        region << CoordBox<2>(Coord<2>(1, 1),
+                              Coord<2>(6, 3));
+        region = region.expand(2);
+
+        OffsetHelper<1, 2, Topologies::Cube<2>::Topology>()(
+            &offset,
+            &dimensions,
+            region,
+            CoordBox<2>(Coord<2>(0, 0),
+                        Coord<2>(8, 8)));
+
+        TS_ASSERT_EQUALS(Coord<2>(0, 0), offset);
+        TS_ASSERT_EQUALS(Coord<2>(8, 6), dimensions);
     }
 };
 
