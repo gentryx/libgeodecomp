@@ -10,6 +10,8 @@
 #include <libflatarray/testbed/cpu_benchmark.hpp>
 #include <libflatarray/testbed/evaluate.hpp>
 
+#include <hpx/hpx_init.hpp>
+
 using namespace LibGeoDecomp;
 
 class ChargedParticle
