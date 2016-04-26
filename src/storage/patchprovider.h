@@ -3,6 +3,7 @@
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/lcos/local/spinlock.hpp>
+#include <mutex>
 #endif
 
 #include <limits>
