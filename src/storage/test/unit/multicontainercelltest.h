@@ -50,15 +50,7 @@ public:
     }
 
     template<typename HOOD>
-    inline void update(HOOD& hood, const int nanoStep)
-    {
-        for (int i = 0; i < numRedParticlesToBeSpawned; ++i) {
-            hood->red << SpawningParticleRed(pos, 0);
-        }
-        for (int i = 0; i < numBlueParticlesToBeSpawned; ++i) {
-            hood->blue << SpawningParticleBlue(pos, 0);
-        }
-    }
+    inline void update(HOOD& hood, const int nanoStep);
 
 private:
     FloatCoord<3> pos;
@@ -105,6 +97,17 @@ private:
     int numRedParticlesToBeSpawned;
     int numBlueParticlesToBeSpawned;
 };
+
+template<typename HOOD>
+void SpawningParticleRed::update(HOOD& hood, const int nanoStep)
+{
+    for (int i = 0; i < numRedParticlesToBeSpawned; ++i) {
+        hood->red << SpawningParticleRed(pos, 0);
+    }
+    for (int i = 0; i < numBlueParticlesToBeSpawned; ++i) {
+        hood->blue << SpawningParticleBlue(pos, 0);
+    }
+}
 
 DECLARE_MULTI_CONTAINER_CELL(
     CellWithSpawningParticles,
