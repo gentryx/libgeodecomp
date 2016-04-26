@@ -5,8 +5,10 @@
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#ifndef FLAT_ARRAY_DETAIL_LOAD_FUNCTOR_HPP
-#define FLAT_ARRAY_DETAIL_LOAD_FUNCTOR_HPP
+#ifndef FLAT_ARRAY_DETAIL_SET_INSTANCE_FUNCTOR_HPP
+#define FLAT_ARRAY_DETAIL_SET_INSTANCE_FUNCTOR_HPP
+
+#include <libflatarray/soa_accessor.hpp>
 
 namespace LibFlatArray {
 
@@ -15,41 +17,45 @@ namespace detail {
 namespace flat_array {
 
 /**
- * The purpose of this functor is to load a row of cells which are
- * already prepackaged (in SoA form) in a raw data segment (i.e. all
- * members are stored in a consecutive array of the given length and
- * all arrays are concatenated).
+ * This helper class uses an accessor to push an object's members into
+ * the SoA storage.
  */
 template<typename CELL, bool USE_CUDA_FUNCTORS = false>
-class load_functor
+class set_instance_functor
 {
 public:
-    load_functor(
-        std::size_t x,
-        std::size_t y,
-        std::size_t z,
-        const char *source,
-        std::size_t count) :
+    set_instance_functor(
+        const CELL *source,
+        long x,
+        long y,
+        long z,
+        long count) :
         source(source),
-        count(count),
         x(x),
         y(y),
-        z(z)
+        z(z),
+        count(count)
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& accessor) const
     {
         accessor.index = soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>::gen_index(x, y, z);
-        accessor.load(source, count);
+        const CELL *cursor = source;
+
+        for (std::size_t i = 0; i < count; ++i) {
+            accessor << *cursor;
+            ++cursor;
+            ++accessor.index;
+        }
     }
 
 private:
-    const char *source;
-    std::size_t count;
+    const CELL *source;
     std::size_t x;
     std::size_t y;
     std::size_t z;
+    std::size_t count;
 };
 
 #ifdef LIBFLATARRAY_WITH_CUDA
@@ -57,7 +63,7 @@ private:
 
 template<typename CELL, long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
 __global__
-void load_kernel(const char *source, char *target, long count, long x, long y, long z)
+void set_kernel(const CELL *source, char *target, long count, long x, long y, long z)
 {
     long offset = blockDim.x * blockIdx.x + threadIdx.x;
     if (offset >= count) {
@@ -66,31 +72,30 @@ void load_kernel(const char *source, char *target, long count, long x, long y, l
 
     typedef soa_accessor_light<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor_type;
 
-    long index = accessor_type::gen_index(x, y, z);
+    long index = accessor_type::gen_index(x + offset, y, z);
     accessor_type accessor(target, index);
 
-    // data is assumed to be stored with stride "count":
-    accessor.load(source, 1, offset, count);
+    accessor << source[offset];
 }
 
 /**
  * Specialization for CUDA
  */
 template<typename CELL>
-class load_functor<CELL, true>
+class set_instance_functor<CELL, true>
 {
 public:
-    load_functor(
-        std::size_t x,
-        std::size_t y,
-        std::size_t z,
-        const char *source,
-        std::size_t count) :
+    set_instance_functor(
+        const CELL *source,
+        long x,
+        long y,
+        long z,
+        long count) :
         source(source),
-        count(count),
         x(x),
         y(y),
-        z(z)
+        z(z),
+        count(count)
     {
     }
 
@@ -101,7 +106,7 @@ public:
         dim3 block_dim;
         generate_launch_config()(&grid_dim, &block_dim, count, 1, 1);
 
-        load_kernel<CELL, DIM_X, DIM_Y, DIM_Z, INDEX><<<grid_dim, block_dim>>>(
+        set_kernel<CELL, DIM_X, DIM_Y, DIM_Z, INDEX><<<grid_dim, block_dim>>>(
             source,
             accessor.get_data(),
             count,
@@ -111,11 +116,11 @@ public:
     }
 
 private:
-    const char *source;
-    std::size_t count;
+    const CELL *source;
     std::size_t x;
     std::size_t y;
     std::size_t z;
+    std::size_t count;
 
 };
 

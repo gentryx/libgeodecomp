@@ -1,12 +1,14 @@
 /**
- * Copyright 2014, 2016 Andreas Schäfer
+ * Copyright 2014-2016 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#ifndef FLAT_ARRAY_DETAIL_SAVE_FUNCTOR_HPP
-#define FLAT_ARRAY_DETAIL_SAVE_FUNCTOR_HPP
+#ifndef FLAT_ARRAY_DETAIL_GET_INSTANCE_FUNCTOR_HPP
+#define FLAT_ARRAY_DETAIL_GET_INSTANCE_FUNCTOR_HPP
+
+#include <libflatarray/soa_accessor.hpp>
 
 namespace LibFlatArray {
 
@@ -15,23 +17,24 @@ namespace detail {
 namespace flat_array {
 
 /**
- * Same as load_functor, but the other way around.
+ * This helper class is used to retrieve objects from the SoA storage
+ * with the help of an accessor.
  */
 template<typename CELL, bool USE_CUDA_FUNCTORS = false>
-class save_functor
+class get_instance_functor
 {
 public:
-    save_functor(
-        std::size_t x,
-        std::size_t y,
-        std::size_t z,
-        char *target,
+    get_instance_functor(
+        CELL *target,
+        long x,
+        long y,
+        long z,
         long count) :
         target(target),
-        count(count),
         x(x),
         y(y),
-        z(z)
+        z(z),
+        count(count)
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
@@ -39,15 +42,21 @@ public:
     {
         typedef soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor_type;
         accessor.index = accessor_type::gen_index(x, y, z);
-        accessor.save(target, count);
+        CELL *cursor = target;
+
+        for (long i = 0; i < count; ++i) {
+            accessor >> *cursor;
+            ++cursor;
+            ++accessor.index;
+        }
     }
 
 private:
-    char *target;
-    long count;
+    CELL *target;
     long x;
     long y;
     long z;
+    long count;
 };
 
 #ifdef LIBFLATARRAY_WITH_CUDA
@@ -55,7 +64,7 @@ private:
 
 template<typename CELL, long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
 __global__
-void save_kernel(const char *source, char *target, long count, long x, long y, long z)
+void get_kernel(CELL *target, const char *source, long count, long x, long y, long z)
 {
     long offset = blockDim.x * blockIdx.x + threadIdx.x;
     if (offset >= count) {
@@ -64,31 +73,30 @@ void save_kernel(const char *source, char *target, long count, long x, long y, l
 
     typedef const_soa_accessor_light<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor_type;
 
-    long index = accessor_type::gen_index(x, y, z);
+    long index = accessor_type::gen_index(x + offset, y, z);
     accessor_type accessor(source, index);
 
-    // data is assumed to be stored with stride "count":
-    accessor.save(target, 1, offset, count);
+    accessor >> target[offset];
 }
 
 /**
  * Specialization for CUDA
  */
 template<typename CELL>
-class save_functor<CELL, true>
+class get_instance_functor<CELL, true>
 {
 public:
-    save_functor(
-        std::size_t x,
-        std::size_t y,
-        std::size_t z,
-        char *target,
-        std::size_t count) :
+    get_instance_functor(
+        CELL *target,
+        long x,
+        long y,
+        long z,
+        long count) :
         target(target),
-        count(count),
         x(x),
         y(y),
-        z(z)
+        z(z),
+        count(count)
     {
     }
 
@@ -99,9 +107,9 @@ public:
         dim3 block_dim;
         generate_launch_config()(&grid_dim, &block_dim, count, 1, 1);
 
-        save_kernel<CELL, DIM_X, DIM_Y, DIM_Z, INDEX><<<grid_dim, block_dim>>>(
-            accessor.get_data(),
+        get_kernel<CELL, DIM_X, DIM_Y, DIM_Z, INDEX><<<grid_dim, block_dim>>>(
             target,
+            accessor.get_data(),
             count,
             x,
             y,
@@ -109,11 +117,11 @@ public:
     }
 
 private:
-    char *target;
-    std::size_t count;
+    CELL *target;
     std::size_t x;
     std::size_t y;
     std::size_t z;
+    std::size_t count;
 
 };
 
