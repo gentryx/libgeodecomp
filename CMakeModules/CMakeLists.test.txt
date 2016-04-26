@@ -106,6 +106,7 @@ if(allowed_test AND selected_test)
   if(is_hpx_test)
     set(main_function "
 #include <hpx/hpx.hpp>
+#include <hpx/hpx_init.hpp>
 
 int run_tests(int argc, char **argv);
 
