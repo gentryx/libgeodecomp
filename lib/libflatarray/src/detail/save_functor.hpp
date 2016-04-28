@@ -17,7 +17,7 @@ namespace flat_array {
 /**
  * Same as load_functor, but the other way around.
  */
-template<typename CELL>
+template<typename CELL, bool USE_CUDA_FUNCTORS>
 class save_functor
 {
 public:

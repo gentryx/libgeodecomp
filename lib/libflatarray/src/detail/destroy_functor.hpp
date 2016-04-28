@@ -19,7 +19,7 @@ namespace flat_array {
  * (Struct of Arrays) accessor to destroy a cell's members
  * individually.
  */
-template<typename CELL>
+template<typename CELL, bool USE_CUDA_FUNCTORS>
 class destroy_functor
 {
 public:

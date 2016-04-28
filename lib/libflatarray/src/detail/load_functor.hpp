@@ -20,7 +20,7 @@ namespace flat_array {
  * members are stored in a consecutive array of the given length and
  * all arrays are concatenated).
  */
-template<typename CELL>
+template<typename CELL, bool USE_CUDA_FUNCTORS>
 class load_functor
 {
 public:

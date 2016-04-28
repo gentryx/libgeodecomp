@@ -18,7 +18,7 @@ namespace flat_array {
  * Will initialize all grid cells, relies on the SoA (Struct of
  * Arrays) accessor to initialize a cell's members individually.
  */
-template<typename CELL>
+template<typename CELL, bool USE_CUDA_FUNCTORS>
 class construct_functor
 {
 public:
