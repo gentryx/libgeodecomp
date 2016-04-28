@@ -193,7 +193,9 @@
                     detail::flat_array::offset<CELL, MEMBER_INDEX - 2>::OFFSET * \
                     count),                                             \
                 &(this->BOOST_PP_SEQ_ELEM(1, MEMBER)()[0]),             \
-                count);                                                 \
+                count,                                                  \
+                offset,                                                 \
+                stride);                                                \
     }
 
 #define LIBFLATARRAY_COPY_SOA_GENERIC_MEMBER_ARRAY_IN(MEMBER_INDEX, CELL, MEMBER) \
@@ -225,7 +227,9 @@
                     detail::flat_array::offset<CELL, MEMBER_INDEX - 2>::OFFSET * \
                     count),                                             \
                 &(this->BOOST_PP_SEQ_ELEM(1, MEMBER)()[0]),             \
-                count);                                                 \
+                count,                                                  \
+                offset,                                                 \
+                stride);                                                \
     }
 
 #define LIBFLATARRAY_COPY_SOA_GENERIC_MEMBER_ARRAY_OUT(MEMBER_INDEX, CELL, MEMBER) \

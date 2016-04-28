@@ -29,9 +29,14 @@ public:
             __host__
             __device__
             inline
-            void operator()(const MEMBER *source, MEMBER *data, const std::size_t count)
+            void operator()(
+                const MEMBER *source,
+                MEMBER *data,
+                const std::size_t count,
+                const std::size_t offset,
+                const std::size_t stride)
             {
-                copy_array_in<INDEX - 1, DUMMY>()(source, data, count);
+                copy_array_in<INDEX - 1, DUMMY>()(source, data, count, offset, stride);
                 std::copy(
                     source + count * (INDEX - 1),
                     source + count * (INDEX + 0),
@@ -46,7 +51,12 @@ public:
             __host__
             __device__
             inline
-            void operator()(const MEMBER *source, MEMBER *data, const std::size_t count)
+            void operator()(
+                const MEMBER *source,
+                MEMBER *data,
+                const std::size_t count,
+                const std::size_t offset,
+                const std::size_t stride)
             {}
         };
 
@@ -57,9 +67,14 @@ public:
             __host__
             __device__
             inline
-            void operator()(MEMBER *target, const MEMBER *data, const std::size_t count)
+            void operator()(
+                MEMBER *target,
+                const MEMBER *data,
+                const std::size_t count,
+                const std::size_t offset,
+                const std::size_t stride)
             {
-                copy_array_out<INDEX - 1, DUMMY>()(target, data, count);
+                copy_array_out<INDEX - 1, DUMMY>()(target, data, count, offset, stride);
                 std::copy(
                     data + SIZE * (INDEX - 1),
                     data + SIZE * (INDEX - 1) + count,
@@ -74,7 +89,12 @@ public:
             __host__
             __device__
             inline
-            void operator()(MEMBER *target, const MEMBER *data, const std::size_t count)
+            void operator()(
+                MEMBER *target,
+                const MEMBER *data,
+                const std::size_t count,
+                const std::size_t offset,
+                const std::size_t stride)
             {}
         };
     };

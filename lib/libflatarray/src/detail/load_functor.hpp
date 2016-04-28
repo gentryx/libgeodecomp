@@ -40,7 +40,7 @@ public:
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& accessor) const
     {
-        accessor.index = x + y * DIM_X + z * DIM_X * DIM_Y;
+        accessor.index = soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>::gen_index(x, y, z);
         accessor.load(source, count);
     }
 
