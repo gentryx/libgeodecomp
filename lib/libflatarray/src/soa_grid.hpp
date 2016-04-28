@@ -216,16 +216,12 @@ public:
         raw_staging_buffer.resize(count * aggregated_member_size<CELL_TYPE>::VALUE);
         raw_staging_buffer.load(data);
 
-        std::cout << "soa_grid::load1, count: " << count << ", data:  " << (void*)data << ", byte_size: " << my_byte_size << "\n"
-                  << "          loading from: " << (void*)data << ", aggregated_member_size: " << aggregated_member_size<CELL_TYPE>::VALUE << "\n";
         callback(detail::flat_array::load_functor<CELL_TYPE, USE_CUDA_FUNCTORS>(
                      x,
                      y,
                      z,
-                     data,
-                     // raw_staging_buffer.data(),
+                     raw_staging_buffer.data(),
                      count));
-        std::cout << "soa_grid::load2\n";
     }
 
     void save(std::size_t x, std::size_t y, std::size_t z, char *data, std::size_t count) const

@@ -75,7 +75,7 @@
             number_of_members<CELL_TYPE>::VALUE;                        \
                                                                         \
     public:                                                             \
-        static const std::size_t VALUE =                                     \
+        static const std::size_t VALUE =                                \
             detail::flat_array::offset<CELL_TYPE, INDEX>::OFFSET;       \
     };                                                                  \
                                                                         \

@@ -8,6 +8,9 @@
 #ifndef FLAT_ARRAY_DETAIL_CONSTRUCT_FUNCTOR_HPP
 #define FLAT_ARRAY_DETAIL_CONSTRUCT_FUNCTOR_HPP
 
+#include <libflatarray/config.h>
+#include <libflatarray/detail/generate_cuda_launch_config.hpp>
+
 namespace LibFlatArray {
 
 namespace detail {
@@ -18,7 +21,7 @@ namespace flat_array {
  * Will initialize all grid cells, relies on the SoA (Struct of
  * Arrays) accessor to initialize a cell's members individually.
  */
-template<typename CELL, bool USE_CUDA_FUNCTORS>
+template<typename CELL, bool USE_CUDA_FUNCTORS = false>
 class construct_functor
 {
 public:

@@ -17,7 +17,7 @@ namespace flat_array {
 /**
  * Same as load_functor, but the other way around.
  */
-template<typename CELL, bool USE_CUDA_FUNCTORS>
+template<typename CELL, bool USE_CUDA_FUNCTORS = false>
 class save_functor
 {
 public:
@@ -37,7 +37,8 @@ public:
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& accessor) const
     {
-        accessor.index = x + y * DIM_X + z * DIM_X * DIM_Y;
+        typedef soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor_type;
+        accessor.index = accessor_type::gen_index(x, y, z);
         accessor.save(target, count);
     }
 

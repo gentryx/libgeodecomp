@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2016 Andreas Schäfer
+ * Copyright 2014-2016 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -20,7 +20,7 @@ namespace flat_array {
  * members are stored in a consecutive array of the given length and
  * all arrays are concatenated).
  */
-template<typename CELL, bool USE_CUDA_FUNCTORS>
+template<typename CELL, bool USE_CUDA_FUNCTORS = false>
 class load_functor
 {
 public:
