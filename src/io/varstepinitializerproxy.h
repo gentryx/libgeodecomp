@@ -25,6 +25,7 @@ public:
     typedef typename Initializer<CELL>::Topology Topology;
     const static int DIM = Topology::DIM;
 
+    explicit
     VarStepInitializerProxy(Initializer<CELL> *proxyObj) :
         ClonableInitializer<CELL>(),
         proxyObj(boost::shared_ptr<Initializer<CELL> >(proxyObj)),
@@ -89,6 +90,7 @@ public:
     }
 
 private:
+    explicit
     VarStepInitializerProxy(VarStepInitializerProxy<CELL>* o) :
         proxyObj(o->proxyObj),
         newMaxSteps(o->newMaxSteps)

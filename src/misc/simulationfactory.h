@@ -25,6 +25,7 @@ public:
     typedef std::vector<boost::shared_ptr<Writer<CELL> > > WritersVec;
     typedef std::vector<boost::shared_ptr<Steerer<CELL> > > SteerersVec;
 
+    explicit
     SimulationFactory(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
         initializer(initializer)
     {}

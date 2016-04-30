@@ -22,7 +22,7 @@ class Adapter
     typedef NEIGHBORHOOD_ITERATOR Iterator;
 
     inline
-    explicit Adapter(
+    Adapter(
         CONTAINER *container,
         const typename Iterator::Neighborhood *hood) :
         container(container),
