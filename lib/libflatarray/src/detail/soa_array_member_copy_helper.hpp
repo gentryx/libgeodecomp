@@ -219,6 +219,8 @@ public:
      * g++ >= 4.9.0. It works with clang++ and icpc, though.
      */
     template<typename ELEMENT>
+    __host__
+    __device__
     static void copy(const ELEMENT *source, ELEMENT *target, std::size_t count)
     {
 #ifdef __CUDACC__

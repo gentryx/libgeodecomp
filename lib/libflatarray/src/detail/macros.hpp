@@ -204,13 +204,13 @@
 
 #define LIBFLATARRAY_COPY_SOA_MEMBER_ARRAY_OUT(MEMBER_INDEX, CELL, MEMBER) \
     {                                                                   \
-        std::copy(                                                      \
-            &this->BOOST_PP_SEQ_ELEM(1, MEMBER)(),                      \
-            &this->BOOST_PP_SEQ_ELEM(1, MEMBER)() + count,              \
-            (BOOST_PP_SEQ_ELEM(0, MEMBER)*)(                            \
+        for (std::size_t i = offset; i < (offset + count); ++i) {       \
+            ((BOOST_PP_SEQ_ELEM(0, MEMBER)*)(                           \
                 target +                                                \
                 detail::flat_array::offset<CELL, MEMBER_INDEX - 2>::OFFSET * \
-                count));                                                \
+                stride))[i] =                                           \
+            (&this->BOOST_PP_SEQ_ELEM(1, MEMBER)())[i];                 \
+        }                                                               \
     }
 
 #define LIBFLATARRAY_COPY_SOA_ARRAY_MEMBER_ARRAY_OUT(MEMBER_INDEX, CELL, MEMBER) \
