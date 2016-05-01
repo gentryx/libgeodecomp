@@ -384,8 +384,8 @@
             std::size_t offset,                                         \
             std::size_t stride) const                                   \
         {                                                               \
-           BOOST_PP_SEQ_FOR_EACH(                                       \
-                LIBFLATARRAY_COPY_SOA_MEMBER_ARRAY_OUT,                 \
+            BOOST_PP_SEQ_FOR_EACH(                                      \
+                LIBFLATARRAY_COPY_SOA_GENERIC_MEMBER_ARRAY_OUT,         \
                 CELL_TYPE,                                              \
                 CELL_MEMBERS);                                          \
         }                                                               \
@@ -509,7 +509,7 @@
             std::size_t stride)                                         \
         {                                                               \
             BOOST_PP_SEQ_FOR_EACH(                                      \
-                LIBFLATARRAY_COPY_SOA_MEMBER_ARRAY_IN,                  \
+                LIBFLATARRAY_COPY_SOA_GENERIC_MEMBER_ARRAY_IN,          \
                 CELL_TYPE,                                              \
                 CELL_MEMBERS);                                          \
         }                                                               \
@@ -530,7 +530,7 @@
             std::size_t stride) const                                   \
         {                                                               \
             BOOST_PP_SEQ_FOR_EACH(                                      \
-                LIBFLATARRAY_COPY_SOA_MEMBER_ARRAY_OUT,                 \
+                LIBFLATARRAY_COPY_SOA_GENERIC_MEMBER_ARRAY_OUT,         \
                 CELL_TYPE,                                              \
                 CELL_MEMBERS);                                          \
         }                                                               \
@@ -714,7 +714,7 @@
             std::size_t stride) const                                   \
         {                                                               \
             BOOST_PP_SEQ_FOR_EACH(                                      \
-                LIBFLATARRAY_COPY_SOA_MEMBER_ARRAY_OUT,                 \
+                LIBFLATARRAY_COPY_SOA_GENERIC_MEMBER_ARRAY_OUT,         \
                 CELL_TYPE,                                              \
                 CELL_MEMBERS);                                          \
         }                                                               \
