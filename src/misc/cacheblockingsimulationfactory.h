@@ -18,6 +18,7 @@ public:
     using SimulationFactory<CELL>::addSteerers;
     using SimulationFactory<CELL>::addWriters;
 
+    explicit
     CacheBlockingSimulationFactory<CELL>(boost::shared_ptr<ClonableInitializer<CELL> > initializer):
         SimulationFactory<CELL>(initializer)
     {

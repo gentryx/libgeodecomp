@@ -64,6 +64,7 @@ public:
     typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
     typedef boost::shared_ptr<Simulation> SimulationPtr;
 
+    explicit
     AutoTuningSimulator(Initializer<CELL_TYPE> *initializer, unsigned optimizationSteps = 10);
 
     void addWriter(ParallelWriter<CELL_TYPE> *writer);

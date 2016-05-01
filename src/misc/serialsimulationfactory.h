@@ -17,6 +17,7 @@ public:
     using SimulationFactory<CELL>::addSteerers;
     using SimulationFactory<CELL>::addWriters;
 
+    explicit
     SerialSimulationFactory(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
         SimulationFactory<CELL>(initializer)
     {

@@ -112,7 +112,7 @@ public:
                 NAME,                                                   \
                 MEMBERS)                                                \
                                                                         \
-            explicit MultiNeighborhoodAdapter(                          \
+            MultiNeighborhoodAdapter(                                   \
                 NAME *writeContainer,                                   \
                 const NEIGHBORHOOD *hood) :                             \
                 BOOST_PP_SEQ_FOR_EACH(                                  \
