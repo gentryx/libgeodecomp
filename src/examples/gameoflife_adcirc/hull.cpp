@@ -1,5 +1,4 @@
 #include <libgeodecomp/examples/gameoflife_adcirc/hull.h>
-#include <algorithm>
 
 double cross(const FloatCoord<2> &o, const FloatCoord<2> &a, const FloatCoord<2> &b)
 {
