@@ -37,10 +37,10 @@ public:
                 const std::size_t stride)
             {
                 copy_array_in<INDEX - 1, DUMMY>()(source, data, count, offset, stride);
-                std::copy(
-                    source + count * (INDEX - 1),
-                    source + count * (INDEX + 0),
-                    data + SIZE * (INDEX - 1));
+
+                for (std::size_t i = offset; i < (offset + count); ++i) {
+                    data[SIZE * (INDEX - 1) + i] = source[stride * (INDEX - 1) + i];
+                }
             }
         };
 
@@ -75,10 +75,10 @@ public:
                 const std::size_t stride)
             {
                 copy_array_out<INDEX - 1, DUMMY>()(target, data, count, offset, stride);
-                std::copy(
-                    data + SIZE * (INDEX - 1),
-                    data + SIZE * (INDEX - 1) + count,
-                    target + count * (INDEX - 1));
+
+                for (std::size_t i = offset; i < (offset + count); ++i) {
+                    target[stride * (INDEX - 1) + i] = data[SIZE * (INDEX - 1) + i];
+                }
             }
         };
 
