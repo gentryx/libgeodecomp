@@ -191,7 +191,7 @@ public:
         }
 
     private:
-        boost::shared_ptr<HPXReceiver<BufferType> > receiver;
+        std::shared_ptr<HPXReceiver<BufferType> > receiver;
     };
 };
 

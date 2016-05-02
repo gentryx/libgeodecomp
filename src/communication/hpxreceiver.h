@@ -40,7 +40,7 @@ public:
     typedef CARGO Cargo;
     typedef BUFFER Buffer;
 
-    static hpx::future<boost::shared_ptr<HPXReceiver> > make(const std::string& name, std::size_t rank = 0)
+    static hpx::future<std::shared_ptr<HPXReceiver> > make(const std::string& name, std::size_t rank = 0)
     {
         return hpx::new_<HPXReceiver>(hpx::find_here()).then(
             [name, rank](hpx::future<hpx::id_type> idFuture)
@@ -96,9 +96,9 @@ public:
         std::size_t size,
         const std::string& name)
     {
-        hpx::future<boost::shared_ptr<HPXReceiver> > receiverFuture = hpx::dataflow(
+        hpx::future<std::shared_ptr<HPXReceiver> > receiverFuture = hpx::dataflow(
             [rank, data](
-                hpx::future<boost::shared_ptr<HPXReceiver> > receiverFuture,
+                hpx::future<std::shared_ptr<HPXReceiver> > receiverFuture,
                 std::vector<hpx::future<hpx::id_type> > idsFuture
             )
             {
