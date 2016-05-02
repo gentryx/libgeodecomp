@@ -15,19 +15,21 @@ public:
         Coord<2> offset;
         Coord<2> dimensions;
 
+        Coord<2> gridDim(10, 8);
+        CoordBox<2> gridBox(Coord<2>(), gridDim);
+
         Region<2> region;
         region << CoordBox<2>(Coord<2>(1, 1),
                               Coord<2>(5, 3));
-        region = region.expand(2);
+        region = region.expandWithTopology(2, gridDim, Topologies::Torus<2>::Topology());
 
         OffsetHelper<1, 2, Topologies::Torus<2>::Topology>()(
             &offset,
             &dimensions,
             region,
-            CoordBox<2>(Coord<2>(0, 0),
-                        Coord<2>(10, 8)));
+            gridBox);
 
-        TS_ASSERT_EQUALS(Coord<2>(-1, -1), offset);
+        TS_ASSERT_EQUALS(Coord<2>(9, 7), offset);
         TS_ASSERT_EQUALS(Coord<2>(9, 7), dimensions);
     }
 
@@ -38,7 +40,7 @@ public:
 
         const CoordBox<3> gridBox = CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(200, 200, 200));
         const int ghostZoneWidth = 3;
-        region = region.expand(ghostZoneWidth);
+        region = region.expandWithTopology(ghostZoneWidth, gridBox.dimensions, Topologies::Torus<3>::Topology());
 
         Coord<3> offset;
         Coord<3> dimensions;
@@ -49,8 +51,8 @@ public:
             region,
             gridBox);
 
-        TS_ASSERT_EQUALS(Coord<3>(-3, -3, -3), offset);
-        TS_ASSERT_EQUALS(Coord<3>(16, 16, 16), dimensions);
+        TS_ASSERT_EQUALS(Coord<3>(197, 197, 197), offset);
+        TS_ASSERT_EQUALS(Coord<3>( 16,  16,  16), dimensions);
     }
 
     void testTorus3DWithRegionCloseToFarCorner()
@@ -60,7 +62,7 @@ public:
 
         const CoordBox<3> gridBox = CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(200, 200, 200));
         const int ghostZoneWidth = 4;
-        region = region.expand(ghostZoneWidth);
+        region = region.expandWithTopology(ghostZoneWidth, gridBox.dimensions, Topologies::Torus<3>::Topology());
 
         Coord<3> offset;
         Coord<3> dimensions;
@@ -75,45 +77,30 @@ public:
         TS_ASSERT_EQUALS(Coord<3>( 18,  18,  18), dimensions);
     }
 
+    void testTorus2DWithRegionOnCloseAndFarCorners()
+    {
+        Region<2> region;
+        region << CoordBox<2>(Coord<2>(  0,   0), Coord<2>(10, 20));
+        region << CoordBox<2>(Coord<2>(270, 160), Coord<2>(30, 40));
+        const CoordBox<2> gridBox = CoordBox<2>(Coord<2>(0, 0), Coord<2>(300, 200));
+        const int ghostZoneWidth = 7;
+        region = region.expand(ghostZoneWidth);
+
+        Coord<2> offset;
+        Coord<2> dimensions;
+
+        OffsetHelper<2 - 1, 2, Topologies::Torus<2>::Topology>()(
+            &offset,
+            &dimensions,
+            region,
+            gridBox);
+
+        TS_ASSERT_EQUALS(Coord<2>(263, 153), offset);
+        TS_ASSERT_EQUALS(Coord<2>( 54,  74), dimensions);
+    }
+
     void testTorus3DWithRegionOnCloseAndFarCorners()
     {
-            // // (*dimensions)[INDEX] = (std::min)(width, simulationArea.dimensions[INDEX]);
-
-            // // fixme: extract function:
-
-            // // we scan for unused parts of the simulation space
-            // // enclosed by the bounding box:
-            // Region<1> freeSpaceCache;
-
-            // for (int i = 0; i < ownBoundingBox.dimensions[INDEX]; ++i) {
-            //     CoordBox<DIM> intersectionBox = ownBoundingBox;
-            //     intersectionBox.dimensions[INDEX] = 1;
-            //     intersectionBox.origin[INDEX] += i;
-
-            //     Region<DIM> intersectionRegion;
-            //     intersectionRegion << intersectionBox;
-
-            //     if ((ownExpandedRegion & intersectionRegion).empty()) {
-            //         freeSpaceCache << Coord<1>(i);
-            //     }
-            // }
-
-            // int width = ownBoundingBox.dimensions[INDEX];
-            // if (width < simulationArea.dimensions[INDEX]) {
-            //     (*offset)[INDEX] = ownBoundingBox.origin[INDEX];
-            // } else {
-            //     (*offset)[INDEX] = 0;
-            // }
-
-            // (*dimensions)[INDEX] = (std::min)(width, simulationArea.dimensions[INDEX]);
-
-            // for (Region<1>::StreakIterator i = ownExpandedRegion.beginStreak();
-            //      i != ownExpandedRegion.endStreak();
-            //      ++i) {
-
-            //     int newWidth = dimensions[INDEX] - i->length();
-            //     if (newWidth < )
-            // }
         Region<3> region;
         region << CoordBox<3>(Coord<3>(  0,   0,   0), Coord<3>(10, 10, 10));
         region << CoordBox<3>(Coord<3>(290, 190, 190), Coord<3>(10, 10, 10));
@@ -130,8 +117,8 @@ public:
             region,
             gridBox);
 
-        // TS_ASSERT_EQUALS(Coord<3>(287, 187, 187), offset);
-        // TS_ASSERT_EQUALS(Coord<3>( 26,  26,  26), dimensions);
+        TS_ASSERT_EQUALS(Coord<3>(287, 187, 187), offset);
+        TS_ASSERT_EQUALS(Coord<3>( 26,  26,  26), dimensions);
     }
 
     void testCube2D()
@@ -139,17 +126,19 @@ public:
         Coord<2> offset;
         Coord<2> dimensions;
 
+        Coord<2> gridDim(8, 8);
+
         Region<2> region;
         region << CoordBox<2>(Coord<2>(1, 1),
                               Coord<2>(6, 3));
-        region = region.expand(2);
+        region = region.expandWithTopology(2, gridDim, Topologies::Cube<2>::Topology());
 
         OffsetHelper<1, 2, Topologies::Cube<2>::Topology>()(
             &offset,
             &dimensions,
             region,
             CoordBox<2>(Coord<2>(0, 0),
-                        Coord<2>(8, 8)));
+                        gridDim));
 
         TS_ASSERT_EQUALS(Coord<2>(0, 0), offset);
         TS_ASSERT_EQUALS(Coord<2>(8, 6), dimensions);

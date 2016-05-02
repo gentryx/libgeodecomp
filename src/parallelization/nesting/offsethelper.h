@@ -51,33 +51,51 @@ public:
         const Region<DIM>& ownExpandedRegion,
         const CoordBox<DIM>& simulationArea)
     {
+        OffsetHelper<INDEX - 1, DIM, TOPOLOGY>()(offset, dimensions, ownExpandedRegion, simulationArea);
+
         CoordBox<DIM> ownBoundingBox = ownExpandedRegion.boundingBox();
+        // no point in wrapping over edges if topology doesn't permit
+        // this or our bounding box already tells use that the region
+        // is too small anyway:
+        if ((!TOPOLOGY::template WrapsAxis<INDEX>::VALUE) ||
+            (ownBoundingBox.dimensions[INDEX] < (simulationArea.dimensions[INDEX] / 2))) {
 
-        (*offset)[INDEX] = 0;
-        if (TOPOLOGY::template WrapsAxis<INDEX>::VALUE) {
-            int width = ownBoundingBox.dimensions[INDEX];
-            if (width < simulationArea.dimensions[INDEX]) {
-                (*offset)[INDEX] = ownBoundingBox.origin[INDEX];
-            } else {
-                (*offset)[INDEX] = 0;
-            }
+            (*offset)[INDEX] = ownBoundingBox.origin[INDEX];
+            (*dimensions)[INDEX] = ownBoundingBox.dimensions[INDEX];
 
-            (*dimensions)[INDEX] = (std::min)(width, simulationArea.dimensions[INDEX]);
-        } else {
-            (*offset)[INDEX] = (std::max)(0, ownBoundingBox.origin[INDEX]);
-
-            int end = (std::min)(
-                simulationArea.origin[INDEX] + simulationArea.dimensions[INDEX],
-                ownBoundingBox.origin[INDEX] + ownBoundingBox.dimensions[INDEX]);
-
-            (*dimensions)[INDEX] = end - (*offset)[INDEX];
+            return;
         }
 
-        OffsetHelper<INDEX - 1, DIM, TOPOLOGY>()(
-            offset,
-            dimensions,
-            ownExpandedRegion,
-            simulationArea);
+        // look for gaps which can be exploited by wrapping around the edge of the grid:
+        Region<1> gapStorage;
+        int oppositeSide = ownBoundingBox.origin[INDEX] + ownBoundingBox.dimensions[INDEX];
+
+        for (int i = ownBoundingBox.origin[INDEX]; i < oppositeSide; ++i) {
+            CoordBox<DIM> cutBox = ownBoundingBox;
+            cutBox.origin[INDEX] = i;
+            cutBox.dimensions[INDEX] = 1;
+
+            Region<DIM> cutRegion;
+            cutRegion << cutBox;
+
+            if ((ownExpandedRegion & cutRegion).empty()) {
+                gapStorage << Coord<1>(i);
+            }
+        }
+
+        Streak<1> widestGap;
+        for (Region<1>::StreakIterator i = gapStorage.beginStreak(); i != gapStorage.endStreak(); ++i) {
+            if (i->length() > widestGap.length()) {
+                widestGap = *i;
+            }
+        }
+
+        int wrappedWidth = simulationArea.dimensions[INDEX] - widestGap.length();
+
+        if (wrappedWidth < ownBoundingBox.dimensions[INDEX]) {
+            (*offset)[INDEX] = widestGap.endX;
+            (*dimensions)[INDEX] = wrappedWidth;
+        }
     }
 };
 
