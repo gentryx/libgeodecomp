@@ -92,13 +92,10 @@ protected:
      */
     inline void guessOffset(Coord<DIM> *offset, Coord<DIM> *dimensions)
     {
-        // fixme: use partitionManager->ownRegion(ghostZoneWidth)
-        Region<DIM> expandedRegion = partitionManager->ownRegion().expand(partitionManager->getGhostZoneWidth());
-
         OffsetHelper<DIM - 1, DIM, Topology>()(
             offset,
             dimensions,
-            expandedRegion,
+            partitionManager->ownRegion(partitionManager->getGhostZoneWidth()),
             initializer->gridBox());
     }
 };

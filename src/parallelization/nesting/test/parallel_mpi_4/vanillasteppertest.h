@@ -73,11 +73,11 @@ public:
         Coord<3> expectedDimensions;
         switch (mpiLayer->rank()) {
         case 0:
-            expectedOffset = Coord<3>(0, 0, -4);
+            expectedOffset = Coord<3>(0, 0, 27);
             expectedDimensions = Coord<3>(55, 47, 12);
             break;
         case 1:
-            expectedOffset = Coord<3>(0, 0, -1);
+            expectedOffset = Coord<3>(0, 0, 30);
             expectedDimensions = Coord<3>(55, 47, 15);
             break;
         case 2:

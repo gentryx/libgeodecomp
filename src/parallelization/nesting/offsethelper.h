@@ -95,7 +95,11 @@ public:
         if (wrappedWidth < ownBoundingBox.dimensions[INDEX]) {
             (*offset)[INDEX] = widestGap.endX;
             (*dimensions)[INDEX] = wrappedWidth;
+            return;
         }
+
+        (*offset)[INDEX] = ownBoundingBox.origin[INDEX];
+        (*dimensions)[INDEX] = ownBoundingBox.dimensions[INDEX];
     }
 };
 

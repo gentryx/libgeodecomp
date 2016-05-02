@@ -121,6 +121,27 @@ public:
         TS_ASSERT_EQUALS(Coord<3>( 26,  26,  26), dimensions);
     }
 
+    void testTorus3DWithOrdinaryRegion()
+    {
+        Region<3> region;
+        region << CoordBox<3>(Coord<3>(10, 20, 30), Coord<3>(210, 120, 130));
+        const CoordBox<3> gridBox = CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(300, 200, 200));
+        const int ghostZoneWidth = 5;
+        region = region.expand(ghostZoneWidth);
+
+        Coord<3> offset;
+        Coord<3> dimensions;
+
+        OffsetHelper<3 - 1, 3, Topologies::Torus<3>::Topology>()(
+            &offset,
+            &dimensions,
+            region,
+            gridBox);
+
+        TS_ASSERT_EQUALS(Coord<3>(  5,  15,  25), offset);
+        TS_ASSERT_EQUALS(Coord<3>(220, 130, 140), dimensions);
+    }
+
     void testCube2D()
     {
         Coord<2> offset;

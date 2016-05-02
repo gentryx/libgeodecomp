@@ -28,7 +28,14 @@ public:
     {
         rank = MPILayer().rank();
         dimensions = Coord<2>(231, 350);
-        weights = genWeights(dimensions.x(), dimensions.y(), MPILayer().size());
+
+        weights.clear();
+        weights << (231 / 2) * (350 * 3 / 4)
+                << (231 / 2) * (350 / 2)
+                << (231 / 2) * (350 / 4);
+        int remainder = dimensions.prod() - sum(weights);
+        weights << remainder;
+
         partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
         ghostZoneWidth = 9;
         init.reset(new TestInitializer<TestCell<2> >(dimensions));
@@ -72,24 +79,6 @@ private:
     boost::shared_ptr<Initializer<TestCell<2> > > init;
     boost::shared_ptr<MPIUpdateGroup<TestCell<2> > > updateGroup;
     boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
-
-    std::vector<std::size_t> genWeights(
-        unsigned width,
-        unsigned height,
-        unsigned size)
-    {
-        std::vector<std::size_t> ret(size);
-        unsigned totalSize = width * height;
-        for (std::size_t i = 0; i < ret.size(); ++i) {
-            ret[i] = pos(i+1, ret.size(), totalSize) - pos(i, ret.size(), totalSize);
-        }
-        return ret;
-    }
-
-    long pos(unsigned i, unsigned size, unsigned totalSize)
-    {
-        return i * totalSize / size;
-    }
 };
 
 }
