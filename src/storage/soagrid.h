@@ -393,38 +393,20 @@ public:
 
     void saveRegion(char *target, const Region<DIM>& region) const
     {
-        char *dataIterator = target;
+        Coord<DIM> offset = edgeRadii - box.origin;
+        typename Region<DIM>::StreakIterator start = region.beginStreak(offset);
+        typename Region<DIM>::StreakIterator end   = region.endStreak(offset);
 
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-            Streak<DIM> s = *i;
-            std::size_t length = s.length();
-            int x = s.origin.x() + edgeRadii.x() - box.origin.x();
-            int y = s.origin.y() + edgeRadii.y() - box.origin.y();
-            int z = s.origin.z() + edgeRadii.z() - box.origin.z();
-            delegate.save(x, y, z, dataIterator, length);
-            dataIterator += length * AGGREGATED_MEMBER_SIZE;
-        }
-
+        delegate.save(start, end, target, region.size());
     }
 
     void loadRegion(const char *source, const Region<DIM>& region)
     {
-        const char *dataIterator = source;
+        Coord<DIM> offset = edgeRadii - box.origin;
+        typename Region<DIM>::StreakIterator start = region.beginStreak(offset);
+        typename Region<DIM>::StreakIterator end   = region.endStreak(offset);
 
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-            Streak<DIM> s = *i;
-            std::size_t length = s.length();
-            int x = s.origin.x() + edgeRadii.x() - box.origin.x();
-            int y = s.origin.y() + edgeRadii.y() - box.origin.y();
-            int z = s.origin.z() + edgeRadii.z() - box.origin.z();
-            delegate.load(x, y, z, dataIterator, length);
-            dataIterator += length * AGGREGATED_MEMBER_SIZE;
-        }
-
+        delegate.load(start, end, source, region.size());
     }
 
 protected:
