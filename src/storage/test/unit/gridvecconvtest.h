@@ -141,7 +141,7 @@ public:
         for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
             TestCellType2 cell = gridA.get(*i);
             cell.pos = *i;
-            cell.testValue = 12.45;
+            cell.testValue = i->x() * 10000 + i->y() * 100 + i->z();
             gridA.set(*i, cell);
         }
 
@@ -157,8 +157,10 @@ public:
 
         for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
             TestCellType2 cell = gridB.get(*i);
-            TS_ASSERT_EQUALS(*i,    cell.pos);
-            TS_ASSERT_EQUALS(12.45, cell.testValue);
+            double expectedTestValue = i->x() * 10000 + i->y() * 100 + i->z();
+
+            TS_ASSERT_EQUALS(*i,                cell.pos);
+            TS_ASSERT_EQUALS(expectedTestValue, cell.testValue);
         }
     }
 
