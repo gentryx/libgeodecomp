@@ -730,7 +730,6 @@
             return data;                                                \
         }                                                               \
                                                                         \
-    private:                                                            \
         const char *data;                                               \
         long *index;                                                    \
     };                                                                  \
