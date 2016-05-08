@@ -44,14 +44,18 @@ public:
             const Region<DIM> *region,
             const Coord<DIM> *offsetOld,
             const Coord<DIM> *offsetNew,
+            const Coord<DIM> *dimensionsOld,
             const Coord<DIM> *dimensionsNew,
+            const Coord<DIM> *topologicalDimensions,
             const unsigned nanoStep,
             const CONCURRENCY_FUNCTOR *concurrencySpec,
             const ANY_THREADED_UPDATE *modelThreadingSpec) :
             region(region),
             offsetOld(offsetOld),
             offsetNew(offsetNew),
+            dimensionsOld(dimensionsOld),
             dimensionsNew(dimensionsNew),
+            topologicalDimensions(topologicalDimensions),
             nanoStep(nanoStep),
             concurrencySpec(concurrencySpec),
             modelThreadingSpec(modelThreadingSpec)
@@ -65,15 +69,26 @@ public:
             LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& hoodNew) const
         {
             FixedNeighborhoodUpdateFunctor<CELL, CONCURRENCY_FUNCTOR, ANY_THREADED_UPDATE>(
-                region, offsetOld, offsetNew, dimensionsNew, nanoStep, concurrencySpec, modelThreadingSpec)(
-                    hoodOld, hoodNew);
+                region,
+                offsetOld,
+                offsetNew,
+                dimensionsOld,
+                dimensionsNew,
+                topologicalDimensions,
+                nanoStep,
+                concurrencySpec,
+                modelThreadingSpec)(
+                    hoodOld,
+                    hoodNew);
         }
 
     private:
         const Region<DIM> *region;
         const Coord<DIM> *offsetOld;
         const Coord<DIM> *offsetNew;
+        const Coord<DIM> *dimensionsOld;
         const Coord<DIM> *dimensionsNew;
+        const Coord<DIM> *topologicalDimensions;
         const unsigned nanoStep;
         const CONCURRENCY_FUNCTOR *concurrencySpec;
         const ANY_THREADED_UPDATE *modelThreadingSpec;
@@ -101,10 +116,14 @@ public:
     {
         Coord<DIM> gridOldOrigin = gridOld.boundingBox().origin;
         Coord<DIM> gridNewOrigin = gridNew->boundingBox().origin;
+
+        Coord<DIM> gridOldDimensions = gridOld.boundingBox().dimensions;
         Coord<DIM> gridNewDimensions = gridNew->boundingBox().dimensions;
 
         Coord<DIM> realSourceOffset = sourceOffset - gridOldOrigin + gridOld.getEdgeRadii();
         Coord<DIM> realTargetOffset = targetOffset - gridNewOrigin + gridNew->getEdgeRadii();
+
+        Coord<DIM> topologicalDimensions = gridOld.topologicalDimensions();
 
         gridOld.callback(
             gridNew,
@@ -112,7 +131,9 @@ public:
                 &region,
                 &realSourceOffset,
                 &realTargetOffset,
+                &gridOldDimensions,
                 &gridNewDimensions,
+                &topologicalDimensions,
                 nanoStep,
                 &concurrencySpec,
                 &modelThreadingSpec));

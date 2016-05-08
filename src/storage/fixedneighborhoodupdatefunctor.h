@@ -42,19 +42,22 @@ public:
         ACCESSOR2& hoodNew,
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
-        const Coord<DIM> *dimensions,
+        const Coord<DIM> *dimensionsOld,
+        const Coord<DIM> *dimensionsNew,
+        const Coord<DIM> *topologicalDimensions,
         int nanoStep,
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) const
     {
+        // fixme: proper normalization here!
         if ((CUR_DIM == 2) && (HIGH == true)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
-                ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == ((*dimensions)[CUR_DIM] - 1))) {
+                ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == ((*dimensionsOld)[CUR_DIM] - 1))) {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, true>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             } else {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, false>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             }
         }
 
@@ -62,21 +65,21 @@ public:
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
                 ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == 0)) {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, true,  BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             } else {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, false, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             }
         }
 
         if ((CUR_DIM == 1) && (HIGH == true)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
-                ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == ((*dimensions)[CUR_DIM] - 1))) {
+                ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == ((*dimensionsOld)[CUR_DIM] - 1))) {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, true,  BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             } else {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, false, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             }
         }
 
@@ -84,10 +87,10 @@ public:
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
                 ((streak.origin[CUR_DIM]+ (*offsetOld)[CUR_DIM]) == 0)) {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, true,  BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             } else {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, false, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
             }
         }
     }
@@ -116,21 +119,32 @@ public:
         ACCESSOR2& hoodNew,
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
+        const Coord<DIM> *dimensionsOld,
         const Coord<DIM> *dimensionsNew,
+        const Coord<DIM> *topologicalDimensions,
         int nanoStep,
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) const
     {
+        Coord<DIM> normalizedOriginOld = streak.origin + *offsetOld;
+        Coord<DIM> normalizedOriginNew = streak.origin + *offsetNew;
+        if (*topologicalDimensions != Coord<DIM>()) {
+            normalizedOriginOld = TOPOLOGY::normalize(streak.origin + *offsetOld, *topologicalDimensions);
+            normalizedOriginNew = TOPOLOGY::normalize(streak.origin + *offsetNew, *topologicalDimensions);
+        }
+
         // this copy is required to expand our potentially 1D or 2D
         // input coords to 3D, which is required by LibFlatArray.
         Coord<3> originOld;
         Coord<3> originNew;
         for (int i = 0; i < DIM; ++i) {
-            originOld[i] = streak.origin[i] + (*offsetOld)[i];
-            originNew[i] = streak.origin[i] + (*offsetNew)[i];
+            originOld[i] = normalizedOriginOld[i];
+            originNew[i] = normalizedOriginNew[i];
         }
+
         long indexOld = hoodOld.gen_index(originOld.x(), originOld.y(), originOld.z());
         long indexNew = hoodNew.gen_index(originNew.x(), originNew.y(), originNew.z());
+
         hoodOld.index = indexOld;
         hoodNew.index = indexNew;
         long indexEnd = hoodOld.index + streak.length();
@@ -240,14 +254,18 @@ public:
         const Region<DIM> *region,
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
+        const Coord<DIM> *dimensionsOld,
         const Coord<DIM> *dimensionsNew,
+        const Coord<DIM> *topologicalDimensions,
         int nanoStep,
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) :
         myRegion(region),
         offsetOld(offsetOld),
         offsetNew(offsetNew),
+        dimensionsOld(dimensionsOld),
         dimensionsNew(dimensionsNew),
+        topologicalDimensions(topologicalDimensions),
         nanoStep(nanoStep),
         myConcurrencySpec(concurrencySpec),
         myModelThreadingSpec(modelThreadingSpec)
@@ -271,7 +289,9 @@ public:
             hoodNewCopy,                                                \
             offsetOld,                                                  \
             offsetNew,                                                  \
+            dimensionsOld,                                              \
             dimensionsNew,                                              \
+            topologicalDimensions,                                      \
             nanoStep,                                                   \
             &concurrencySpec,                                           \
             &modelThreadingSpec);
@@ -287,7 +307,9 @@ private:
     const Region<DIM> *myRegion;
     const Coord<DIM> *offsetOld;
     const Coord<DIM> *offsetNew;
+    const Coord<DIM> *dimensionsOld;
     const Coord<DIM> *dimensionsNew;
+    const Coord<DIM> *topologicalDimensions;
     int nanoStep;
     const CONCURRENCY_FUNCTOR *myConcurrencySpec;
     const ANY_THREADED_UPDATE *myModelThreadingSpec;
