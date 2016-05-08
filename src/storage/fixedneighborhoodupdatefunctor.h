@@ -49,48 +49,65 @@ public:
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) const
     {
-        // fixme: proper normalization here!
+        Coord<DIM> normalizedOriginOld = streak.origin + *offsetOld;
+        if (*topologicalDimensions != Coord<DIM>()) {
+            normalizedOriginOld = TOPOLOGY::normalize(streak.origin + *offsetOld, *topologicalDimensions);
+        }
+
+#define LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS         \
+            streak,                                                     \
+            hoodOld,                                                    \
+            hoodNew,                                                    \
+            offsetOld,                                                  \
+            offsetNew,                                                  \
+            dimensionsOld,                                              \
+            dimensionsNew,                                              \
+            topologicalDimensions,                                      \
+            nanoStep,                                                   \
+            concurrencySpec,                                            \
+            modelThreadingSpec                                          \
+
         if ((CUR_DIM == 2) && (HIGH == true)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
-                ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == ((*dimensionsOld)[CUR_DIM] - 1))) {
+                (normalizedOriginOld[CUR_DIM] == ((*dimensionsOld)[CUR_DIM] - 1))) {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, true>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             } else {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, false>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             }
         }
 
         if ((CUR_DIM == 2) && (HIGH == false)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
-                ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == 0)) {
+                (normalizedOriginOld[CUR_DIM] == 0)) {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, true,  BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             } else {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, false, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             }
         }
 
         if ((CUR_DIM == 1) && (HIGH == true)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
-                ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == ((*dimensionsOld)[CUR_DIM] - 1))) {
+                (normalizedOriginOld[CUR_DIM] == ((*dimensionsOld)[CUR_DIM] - 1))) {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, true,  BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             } else {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, false, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             }
         }
 
         if ((CUR_DIM == 1) && (HIGH == false)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
-                ((streak.origin[CUR_DIM]+ (*offsetOld)[CUR_DIM]) == 0)) {
+                (normalizedOriginOld[CUR_DIM] == 0)) {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, true,  BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             } else {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, false, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensionsOld, dimensionsNew, topologicalDimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             }
         }
     }
