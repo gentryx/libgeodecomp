@@ -1476,7 +1476,7 @@ public:
                         UpdateFunctorHelpers::ConcurrencyNoP, APITraits::SelectThreadedUpdate<void>::Value> Updater;
 
                 Coord<3> offset(1, 1, 1);
-                Updater updater(&region, &offset, &offset, &box.dimensions, 0, 0, 0);
+                Updater updater(&region, &offset, &offset, &box.dimensions, &box.dimensions, &box.dimensions, 0, 0, 0);
                 gridNew->callback(gridOld, updater);
                 swap(gridOld, gridNew);
             }
