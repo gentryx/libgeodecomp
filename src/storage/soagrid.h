@@ -275,6 +275,8 @@ public:
      */
     static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<CELL>::VALUE;
 
+    using GridBase<CELL, TOPOLOGY::DIM>::topoDimensions;
+
     typedef CELL CellType;
     typedef TOPOLOGY Topology;
     typedef LibFlatArray::soa_grid<CELL> Delegate;
@@ -285,10 +287,10 @@ public:
         const CELL& defaultCell = CELL(),
         const CELL& edgeCell = CELL(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CELL, TOPOLOGY::DIM>(topologicalDimensions),
         edgeRadii(calcEdgeRadii()),
         edgeCell(edgeCell),
-        box(box),
-        topoDimensions(topologicalDimensions)
+        box(box)
     {
         actualDimensions = Coord<3>::diagonal(1);
         for (int i = 0; i < DIM; ++i) {
@@ -438,7 +440,6 @@ private:
     Coord<3> actualDimensions;
     CELL edgeCell;
     CoordBox<DIM> box;
-    Coord<DIM> topoDimensions;
 
     static Coord<3> calcEdgeRadii()
     {

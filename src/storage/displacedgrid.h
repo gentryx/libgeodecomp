@@ -28,14 +28,16 @@ public:
     typedef Grid<CELL_TYPE, TOPOLOGY> Delegate;
     typedef CoordMap<CELL_TYPE, Delegate> CoordMapType;
 
+    using GridBase<CELL_TYPE, TOPOLOGY::DIM>::topoDimensions;
+
     explicit DisplacedGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
         const CELL_TYPE& defaultCell = CELL_TYPE(),
         const CELL_TYPE& edgeCell = CELL_TYPE(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CELL_TYPE, TOPOLOGY::DIM>(topologicalDimensions),
         delegate(box.dimensions, defaultCell, edgeCell),
-        origin(box.origin),
-        topoDimensions(topologicalDimensions)
+        origin(box.origin)
     {}
 
     explicit DisplacedGrid(
@@ -44,16 +46,6 @@ public:
         delegate(grid),
         origin(origin)
     {}
-
-    inline const Coord<DIM>& topologicalDimensions() const
-    {
-        return topoDimensions;
-    }
-
-    inline Coord<DIM>& topologicalDimensions()
-    {
-        return topoDimensions;
-    }
 
     inline CELL_TYPE *baseAddress()
     {
@@ -230,7 +222,6 @@ protected:
 private:
     Delegate delegate;
     Coord<DIM> origin;
-    Coord<DIM> topoDimensions;
 };
 
 }

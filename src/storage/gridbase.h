@@ -34,6 +34,10 @@ public:
     typedef CELL CellType;
     const static int DIM = DIMENSIONS;
 
+    explicit inline GridBase(const Coord<DIM>& topoDimensions = Coord<DIM>()) :
+        topoDimensions(topoDimensions)
+    {}
+
     virtual ~GridBase()
     {}
 
@@ -44,6 +48,11 @@ public:
     virtual void setEdge(const CELL&) = 0;
     virtual const CELL& getEdge() const = 0;
     virtual CoordBox<DIM> boundingBox() const = 0;
+
+    const Coord<DIM>& topologicalDimensions() const
+    {
+        return topoDimensions;
+    }
 
     Coord<DIM> dimensions() const
     {
@@ -138,6 +147,8 @@ public:
     }
 
 protected:
+    Coord<DIM> topoDimensions;
+
     virtual void saveMemberImplementation(
         char *target,
         MemoryLocation::Location targetLocation,
