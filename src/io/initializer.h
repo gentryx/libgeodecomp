@@ -7,6 +7,7 @@
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/geometry/regionbasedadjacency.h>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 
@@ -101,7 +102,25 @@ public:
      */
     boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const
     {
+        checkTopologyIfAdjacencyIsNeeded(Topology());
         return boost::make_shared<RegionBasedAdjacency>();
+    }
+
+private:
+    template<typename TOPOLOGY>
+    void checkTopologyIfAdjacencyIsNeeded(const TOPOLOGY /* unused */) const
+    {
+        // intentionally left blank
+    }
+
+    void checkTopologyIfAdjacencyIsNeeded(const Topologies::Unstructured::Topology /* unused */) const
+    {
+        std::string message(
+            "You are using an unstructured topology but the Initializer did not re-implement getAdjacency()."
+            "You really need to implement getAdjacency() otherwise ghost zone (halo) synchronization will not work.");
+
+        LOG(FATAL, message);
+        throw std::logic_error(message);
     }
 };
 
