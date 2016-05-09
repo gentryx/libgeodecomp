@@ -174,18 +174,20 @@ public:
         long boundarySouth;
         long boundaryNorth;
 
+        boundaryTop    = BOUNDARY_TOP    ?  (*dimensionsNew)[1] : 0;
+        boundaryBottom = BOUNDARY_BOTTOM ? -(*dimensionsNew)[1] : 0;
+        boundarySouth  = BOUNDARY_SOUTH  ?  (*dimensionsNew)[2] : 0;
+        boundaryNorth  = BOUNDARY_NORTH  ? -(*dimensionsNew)[2] : 0;
+
         // special case: on left boundary
         if (TOPOLOGY::template WrapsAxis<0>::VALUE && (originOld.x() == 0)) {
             boundaryWest   = (*dimensionsNew)[0];
             boundaryEast   = 0;
-            boundaryTop    = BOUNDARY_TOP    ?  (*dimensionsNew)[1] : 0;
-            boundaryBottom = BOUNDARY_BOTTOM ? -(*dimensionsNew)[1] : 0;
-            boundarySouth  = BOUNDARY_SOUTH  ?  (*dimensionsNew)[2] : 0;
-            boundaryNorth  = BOUNDARY_NORTH  ? -(*dimensionsNew)[2] : 0;
+            if (TOPOLOGY::template WrapsAxis<0>::VALUE &&
+                ((originOld.x() + 1) == (*dimensionsNew).x())) {
+                boundaryEast   = -(*dimensionsNew)[0];
+            }
 
-            // fixme: handle special case for boundingBoxNew with width 1 (i.e.
-            // we're on the western and eastern boundary
-            // simultaneously)
             FixedNeighborhood<
                 CELL,
                 ACCESSOR1::DIM_X, ACCESSOR1::DIM_Y, ACCESSOR1::DIM_Z, 0> hoodLeft(
@@ -204,10 +206,6 @@ public:
 
         boundaryWest   = 0;
         boundaryEast   = 0;
-        boundaryTop    = BOUNDARY_TOP    ?  (*dimensionsNew)[1] : 0;
-        boundaryBottom = BOUNDARY_BOTTOM ? -(*dimensionsNew)[1] : 0;
-        boundarySouth  = BOUNDARY_SOUTH  ?  (*dimensionsNew)[2] : 0;
-        boundaryNorth  = BOUNDARY_NORTH  ? -(*dimensionsNew)[2] : 0;
 
         FixedNeighborhood<
             CELL,
