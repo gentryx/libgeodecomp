@@ -219,7 +219,6 @@ public:
                 boundarySouth,
                 boundaryNorth);
 
-
         // other special case: right boundary
         if (TOPOLOGY::template WrapsAxis<0>::VALUE &&
             ((originOld.x() + streak.length()) == (*dimensionsNew).x())) {
@@ -228,10 +227,6 @@ public:
 
             boundaryWest   = 0;
             boundaryEast   = -(*dimensionsNew)[0];
-            boundaryTop    = BOUNDARY_TOP    ?  (*dimensionsNew)[1] : 0;
-            boundaryBottom = BOUNDARY_BOTTOM ? -(*dimensionsNew)[1] : 0;
-            boundarySouth  = BOUNDARY_SOUTH  ?  (*dimensionsNew)[2] : 0;
-            boundaryNorth  = BOUNDARY_NORTH  ? -(*dimensionsNew)[2] : 0;
 
             FixedNeighborhood<
                 CELL,
@@ -247,7 +242,7 @@ public:
 
             CELL::updateLineX(hoodRight, indexEnd, hoodNew, nanoStep);
         } else {
-            CELL::updateLineX(hood,      indexEnd, hoodNew, nanoStep);
+            CELL::updateLineX(hood, indexEnd, hoodNew, nanoStep);
         }
     }
 };
