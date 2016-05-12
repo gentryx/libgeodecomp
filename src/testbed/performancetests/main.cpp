@@ -1455,7 +1455,8 @@ public:
         typedef SoAGrid<
             JacobiCellStreakUpdate,
             APITraits::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
-        CoordBox<3> box(Coord<3>(), dim);
+        Coord<3> topoDim = dim + Coord<3>(2, 2, 2);
+        CoordBox<3> box(Coord<3>(), topoDim);
         GridType gridA(box, JacobiCellStreakUpdate(1.0));
         GridType gridB(box, JacobiCellStreakUpdate(2.0));
         GridType *gridOld = &gridA;
@@ -1464,7 +1465,7 @@ public:
         int maxT = 20;
 
         Region<3> region;
-        region << box;
+        region << CoordBox<3>(Coord<3>(), dim);
 
         double seconds = 0;
         {
@@ -1476,7 +1477,7 @@ public:
                         UpdateFunctorHelpers::ConcurrencyNoP, APITraits::SelectThreadedUpdate<void>::Value> Updater;
 
                 Coord<3> offset(1, 1, 1);
-                Updater updater(&region, &offset, &offset, &box.dimensions, &box.dimensions, &box.dimensions, 0, 0, 0);
+                Updater updater(&region, &offset, &offset, &box.dimensions, &box.dimensions, &topoDim, 0, 0, 0);
                 gridNew->callback(gridOld, updater);
                 swap(gridOld, gridNew);
             }
