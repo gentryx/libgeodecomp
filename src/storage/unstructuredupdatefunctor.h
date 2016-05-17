@@ -191,12 +191,12 @@ public:
             for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
                 int origin = i->origin.x();
                 for (int offset = 0; offset < i->length(); ++offset) {
+                    int hoodOffset = oldHoods.size();
                     oldHoods << UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>(gridOld, i->origin.x());
-                    UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>& hoodOldReference = oldHoods.back();
                     updateFutures << hpx::async(
-                        [&hoodOldReference, &hoodNew, origin, offset, nanoStep]() {
-                            hoodOldReference += long(offset);
-                            hoodNew[origin + offset].update(hoodOldReference, nanoStep);
+                        [&oldHoods, &hoodNew, hoodOffset, origin, offset, nanoStep]() {
+                            oldHoods[hoodOffset] += long(offset);
+                            hoodNew[origin + offset].update(oldHoods[hoodOffset], nanoStep);
                         });
                 }
             }
