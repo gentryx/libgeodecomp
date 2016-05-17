@@ -182,16 +182,21 @@ public:
         if (concurrencySpec.enableHPX()) {
         // if (concurrencySpec.enableHPX() && concurrencySpec.preferFineGrainedParallelism()) {
             std::vector<hpx::future<void> > updateFutures;
+            std::vector<UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> > oldHoods;
+
+            updateFutures.reserve(region.size());
+            oldHoods.reserve(region.size());
+            UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA> hoodNew(*gridNew);
+
             for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-                UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOld(gridOld, i->origin.x());
-                UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA> hoodNew(*gridNew);
                 int origin = i->origin.x();
                 for (int offset = 0; offset < i->length(); ++offset) {
+                    oldHoods << UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>(gridOld, i->origin.x());
+                    UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>& hoodOldReference = oldHoods.back();
                     updateFutures << hpx::async(
-                        [&hoodOld, &hoodNew, origin, offset, nanoStep]() {
-                            UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOldMoved = hoodOld;
-                            hoodOldMoved += long(offset);
-                            hoodNew[origin + offset].update(hoodOldMoved, nanoStep);
+                        [&hoodOldReference, &hoodNew, origin, offset, nanoStep]() {
+                            hoodOldReference += long(offset);
+                            hoodNew[origin + offset].update(hoodOldReference, nanoStep);
                         });
                 }
             }
