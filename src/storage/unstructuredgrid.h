@@ -53,13 +53,14 @@ public:
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
-        elements(box.dimensions.x(), defaultElement),
+        // fixme: dirty hack, we're allocating way too many cells. trim this down!
+        elements(box.origin.x() + box.dimensions.x(), defaultElement),
         edgeElement(edgeElement),
-        dimension(box.dimensions)
+        dimension(box.origin + box.dimensions)
     {
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
-                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(dimension.x());
+                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(box.origin.x() + dimension.x());
         }
     }
 
