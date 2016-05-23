@@ -64,42 +64,42 @@ public:
             (*dimensions)[INDEX] = ownBoundingBox.dimensions[INDEX];
 
             return;
-        }
+        } else {
+            // look for gaps which can be exploited by wrapping around the edge of the grid:
+            Region<1> gapStorage;
+            int oppositeSide = ownBoundingBox.origin[INDEX] + ownBoundingBox.dimensions[INDEX];
 
-        // look for gaps which can be exploited by wrapping around the edge of the grid:
-        Region<1> gapStorage;
-        int oppositeSide = ownBoundingBox.origin[INDEX] + ownBoundingBox.dimensions[INDEX];
+            for (int i = ownBoundingBox.origin[INDEX]; i < oppositeSide; ++i) {
+                CoordBox<DIM> cutBox = ownBoundingBox;
+                cutBox.origin[INDEX] = i;
+                cutBox.dimensions[INDEX] = 1;
 
-        for (int i = ownBoundingBox.origin[INDEX]; i < oppositeSide; ++i) {
-            CoordBox<DIM> cutBox = ownBoundingBox;
-            cutBox.origin[INDEX] = i;
-            cutBox.dimensions[INDEX] = 1;
+                Region<DIM> cutRegion;
+                cutRegion << cutBox;
 
-            Region<DIM> cutRegion;
-            cutRegion << cutBox;
-
-            if ((ownExpandedRegion & cutRegion).empty()) {
-                gapStorage << Coord<1>(i);
+                if ((ownExpandedRegion & cutRegion).empty()) {
+                    gapStorage << Coord<1>(i);
+                }
             }
-        }
 
-        Streak<1> widestGap;
-        for (Region<1>::StreakIterator i = gapStorage.beginStreak(); i != gapStorage.endStreak(); ++i) {
-            if (i->length() > widestGap.length()) {
-                widestGap = *i;
+            Streak<1> widestGap;
+            for (Region<1>::StreakIterator i = gapStorage.beginStreak(); i != gapStorage.endStreak(); ++i) {
+                if (i->length() > widestGap.length()) {
+                    widestGap = *i;
+                }
             }
+
+            int wrappedWidth = simulationArea.dimensions[INDEX] - widestGap.length();
+
+            if (wrappedWidth < ownBoundingBox.dimensions[INDEX]) {
+                (*offset)[INDEX] = widestGap.endX;
+                (*dimensions)[INDEX] = wrappedWidth;
+                return;
+            }
+
+            (*offset)[INDEX] = ownBoundingBox.origin[INDEX];
+            (*dimensions)[INDEX] = ownBoundingBox.dimensions[INDEX];
         }
-
-        int wrappedWidth = simulationArea.dimensions[INDEX] - widestGap.length();
-
-        if (wrappedWidth < ownBoundingBox.dimensions[INDEX]) {
-            (*offset)[INDEX] = widestGap.endX;
-            (*dimensions)[INDEX] = wrappedWidth;
-            return;
-        }
-
-        (*offset)[INDEX] = ownBoundingBox.origin[INDEX];
-        (*dimensions)[INDEX] = ownBoundingBox.dimensions[INDEX];
     }
 };
 
