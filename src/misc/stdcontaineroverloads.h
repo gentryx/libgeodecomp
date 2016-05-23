@@ -23,8 +23,6 @@
 
 namespace LibGeoDecomp {
 
-using std::vector;
-
 /**
  * vector:
  */

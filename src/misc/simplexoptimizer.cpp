@@ -131,7 +131,7 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
     evalSimplex(eval);
     int i;
     for (i = 0; i < steps; ++i) {
-        vector<SimplexVertex> old(simplex);
+        std::vector<SimplexVertex> old(simplex);
         LOG(Logger::DBG, simplexToString())
         std::size_t worst = minInSimplex();
         std::size_t best = maxInSimplex();
@@ -214,7 +214,7 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
     return simplex[maxInSimplex()];
 }
 
-bool SimplexOptimizer::eq(vector<SimplexVertex> simplex1, vector<SimplexVertex> simplex2)
+bool SimplexOptimizer::eq(std::vector<SimplexVertex> simplex1, std::vector<SimplexVertex> simplex2)
 {
     for (std::size_t i = 0; i < simplex1.size(); ++i) {
         for (std::size_t j = 0; j < simplex1[i].size(); ++j) {
@@ -239,7 +239,7 @@ void SimplexOptimizer::evalSimplex(Evaluator& eval)
 void SimplexOptimizer::initSimplex(SimulationParameters params)
 {
     SimplexVertex tmp(params);
-    simplex = vector<SimplexVertex>();
+    simplex = std::vector<SimplexVertex>();
     simplex.push_back(tmp);
     for (std::size_t i = 0; i < tmp.size(); ++i) {
         SimplexVertex tmp2(tmp);

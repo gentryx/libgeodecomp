@@ -67,7 +67,7 @@ private:
     SimplexVertex expansion();
     SimplexVertex partialOutsideContraction();
     SimplexVertex partialInsideContraction();
-    bool eq(vector<SimplexVertex> simplex1, vector<SimplexVertex> simplex2);
+    bool eq(std::vector<SimplexVertex> simplex1, std::vector<SimplexVertex> simplex2);
     std::vector<SimplexVertex> simplex;
     int comperator(double fitness);
     std::string simplexToString() const;
