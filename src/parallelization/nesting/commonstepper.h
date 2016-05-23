@@ -161,7 +161,7 @@ protected:
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
 
         initializer->grid(&*oldGrid);
-        initializer->grid(&*newGrid);
+        *newGrid = *oldGrid;
 
         notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST,     globalNanoStep());
         notifyPatchProviders(partitionManager->ownRegion(),   ParentType::INNER_SET, globalNanoStep());
