@@ -34,13 +34,11 @@ if(NOT HPX_FOUND)
     endif()
   endif()
 
-  # mandatory Boost libs go into the first line, optional ones into
-  # their own call. This avoids leaving out any available lib during
-  # link time. The reason for this ugly multi-stage discovery is the
-  # following: since CMAKE 2.8.11 each call to find_package(Boost...)
-  # will reset Boost_LIBRARIES.
+  # The reason for this ugly multi-stage discovery is the following:
+  # since CMAKE 2.8.11 each call to find_package(Boost...) will reset
+  # Boost_LIBRARIES.
   find_package(Boost REQUIRED COMPONENTS date_time filesystem system)
-  set(ALL_BOOST_LIBS "${Boost_LIBRARIES}")
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
   find_package(Boost COMPONENTS serialization)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
   find_package(Boost COMPONENTS thread)
@@ -51,9 +49,6 @@ else()
   # If HPX was found, we use the Boost libraries found by HPX
   set(ALL_BOOST_LIBS ${HPX_LIBRARIES})
 endif()
-
-find_package(Boost COMPONENTS serialization)
-set(Boost_SERIALIZATION_LIBRARIES "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 
 find_package(Boost COMPONENTS mpi)
 set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")

@@ -874,6 +874,9 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
 }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+
+#include<boost/mpl/bool.hpp>
+
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<1>)
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<2>)
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<3>)
