@@ -4,8 +4,9 @@
 #include <libgeodecomp/storage/displacedgrid.h>
 
 #include <boost/assign/std/vector.hpp>
-#include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
+
+#include <unistd.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
@@ -62,7 +63,7 @@ public:
     void tearDown()
     {
         for (std::size_t i = 0; i < files.size(); ++i) {
-            boost::filesystem::remove(files[i]);
+            unlink(files[i].c_str());
         }
     }
 

@@ -13,10 +13,10 @@
 #include <cmath>
 #endif
 
-#include <boost/filesystem.hpp>
 #include <fstream>
 #include <sstream>
 #include <cxxtest/TestSuite.h>
+#include <unistd.h>
 
 /**
  * This macro differs from TS_ASSERT_DELTA in that the error margin is relative
@@ -56,16 +56,16 @@
 
 #define TS_ASSERT_FILE(filename)                                        \
     {                                                                   \
-        boost::filesystem::path path(filename);                         \
-        TSM_ASSERT("File " + filename + " should exist, but doesn't",   \
-                   boost::filesystem::exists(path));                    \
+        std::string path(filename);                                     \
+        TSM_ASSERT("File " + path + " should exist, but doesn't",       \
+                   (access(path.c_str(), F_OK) != -1));                 \
     }
 
 #define TS_ASSERT_NO_FILE(filename)                                     \
     {                                                                   \
-        boost::filesystem::path path(filename);                         \
-        TSM_ASSERT("File " + filename + " should not exist, but does",  \
-                   !boost::filesystem::exists(path));                   \
+        std::string path(filename);                                     \
+        TSM_ASSERT("File " + path + " should not exist, but does",      \
+                   (access(path.c_str(), F_OK) == -1));                 \
     }
 
 #define TS_ASSERT_FILE_CONTENTS_EQUAL(_filename1, _filename2)           \

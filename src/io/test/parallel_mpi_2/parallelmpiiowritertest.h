@@ -6,8 +6,8 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
-#include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
+#include <unistd.h>
 
 using namespace LibGeoDecomp;
 
@@ -27,7 +27,7 @@ public:
     void tearDown()
     {
         for (std::size_t i = 0; i < files.size(); ++i) {
-            boost::filesystem::remove(files[i]);
+            unlink(files[i].c_str());
         }
     }
 

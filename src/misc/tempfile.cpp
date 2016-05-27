@@ -5,10 +5,10 @@
 #endif
 
 #include <fstream>
-#include <boost/filesystem.hpp>
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/tempfile.h>
+#include <unistd.h>
 
 namespace LibGeoDecomp {
 
@@ -29,7 +29,7 @@ std::string TempFile::serial(const std::string& prefix)
         std::string filename = prefix + StringOps::itoa(r);
         buf << filename;
         name += buf.str();
-        if (!boost::filesystem::exists(name)) {
+        if (access(name.c_str(), F_OK) == -1) {
             return name;
         }
     }
