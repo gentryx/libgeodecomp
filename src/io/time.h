@@ -9,6 +9,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This class helps with taking and rendering time stamps. It replaces
+ * our previous use of boost::posix_time.
+ */
 class Time
 {
 public:
@@ -35,6 +39,30 @@ public:
         stream  << buf << "." << std::setw(6) << std::setfill('0') << secondsSinceEpoch.tv_usec;
 
         return stream.str();
+    }
+
+    static std::string renderDuration(double duration)
+    {
+        std::stringstream stream;
+        double realSeconds;
+        double subseconds = std::modf(duration, &realSeconds);
+
+        int totalSeconds = realSeconds;
+        int seconds = totalSeconds % 60;
+        int minutes = totalSeconds / 60 % 60;
+        int hours = totalSeconds / 3600;
+
+        std::stringstream buf;
+        buf << std::setw(2) << std::setfill('0') << hours << ":"
+            << std::setw(2) << std::setfill('0') << minutes << ":"
+            << std::setw(2) << std::setfill('0') << seconds;
+
+        if (subseconds > 0) {
+            int fraction = subseconds * 1.0e6;
+            buf << "." << std::setw(6) << fraction;
+        }
+
+        return buf.str();
     }
 };
 
