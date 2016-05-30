@@ -1,12 +1,9 @@
-// vim: noai:ts=4:sw=4:expandtab
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/io/logger.h>
 #include <cmath>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-
-//#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 namespace LibGeoDecomp {
 
