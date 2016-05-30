@@ -2,7 +2,6 @@
 #include <libgeodecomp/misc/testhelper.h>
 
 #include <cxxtest/TestSuite.h>
-#include <boost/math/tools/precision.hpp>
 
 using namespace LibGeoDecomp;
 

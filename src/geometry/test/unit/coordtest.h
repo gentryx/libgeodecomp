@@ -11,7 +11,6 @@
 
 #include <sstream>
 #include <cxxtest/TestSuite.h>
-#include <boost/math/tools/precision.hpp>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
