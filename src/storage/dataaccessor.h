@@ -1,10 +1,9 @@
 #ifndef LIBGEODECOMP_STORAGE_DATAACCESSOR_H
 #define LIBGEODECOMP_STORAGE_DATAACCESSOR_H
 
-#include <boost/algorithm/string/case_conv.hpp>
-
 namespace LibGeoDecomp {
 
+// fixme: delete this class
 /**
  * Manages access to member variables of cells from generic
  * Writer/Steerer classes. DataAccessor usually serves as a base class
@@ -18,7 +17,7 @@ public:
         const std::string& variableName,
         const std::string& variableType) :
         myName(variableName),
-        myType(boost::algorithm::to_upper_copy(variableType))
+        myType(variableType)
     {}
 
     virtual ~DataAccessor()

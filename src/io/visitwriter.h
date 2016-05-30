@@ -12,7 +12,6 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_VISIT
 
-#include <boost/algorithm/string.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cerrno>
 #include <fstream>
