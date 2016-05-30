@@ -11,8 +11,6 @@
 #include <hpx/parallel/algorithms/for_each.hpp>
 #endif
 
-#include <boost/iterator/counting_iterator.hpp>
-
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/coord.h>

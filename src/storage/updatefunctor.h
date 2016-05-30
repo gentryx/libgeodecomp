@@ -5,7 +5,6 @@
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/runtime/launch_policy.hpp>
 #include <hpx/parallel/algorithms/for_each.hpp>
-#include <boost/iterator/counting_iterator.hpp>
 #endif
 
 #include <libgeodecomp/communication/mpilayer.h>
