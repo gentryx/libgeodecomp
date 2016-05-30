@@ -5,11 +5,10 @@
 #include <stdexcept>
 
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/io/time.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/posix_time/time_parsers.hpp>
+#include <libgeodecomp/misc/scopedtimer.h>
 
 namespace LibGeoDecomp {
 
@@ -27,8 +26,8 @@ class TracingWriter :
 public:
     using Writer<CELL_TYPE>::NANO_STEPS;
 
-    typedef boost::posix_time::ptime Time;
-    typedef boost::posix_time::time_duration Duration;
+    typedef double TimeType;
+    typedef double DurationType;
     typedef typename Writer<CELL_TYPE>::GridType WriterGridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType ParallelWriterGridType;
     typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
@@ -71,13 +70,13 @@ public:
 private:
     int outputRank;
     std::ostream& stream;
-    Time startTime;
+    TimeType startTime;
     unsigned lastStep;
     unsigned maxSteps;
 
     void stepFinished(unsigned step, const Coord<DIM>& globalDimensions, WriterEvent event)
     {
-        Duration delta;
+        DurationType delta;
 
         switch (event) {
         case WRITER_INITIALIZED:
@@ -92,7 +91,7 @@ private:
         case WRITER_ALL_DONE:
             delta = currentTime() - startTime;
             stream << "TracingWriter::allDone()\n"
-                   << "  total time: " << boost::posix_time::to_simple_string(delta) << "\n";
+                   << "  total time: " << Time::renderDuration(delta) << "\n";
             printTime();
             break;
         default:
@@ -106,23 +105,22 @@ private:
             return;
         }
 
-        Time now = currentTime();
-        Duration delta = now - startTime;
-        Duration remaining = delta * (maxSteps - step) / step;
-        Time eta = now + remaining;
+        TimeType now = currentTime();
+        DurationType delta = now - startTime;
+        DurationType remaining = delta * (maxSteps - step) / step;
+        TimeType eta = now + remaining;
 
         double updates = 1.0 * step * NANO_STEPS * globalDimensions.prod();
-        double seconds = delta.total_microseconds() / 1000.0 / 1000.0;
-        double glups = updates / seconds / 1000.0 / 1000.0 / 1000.0;
+        double glups = updates / delta / 1000.0 / 1000.0 / 1000.0;
         double bandwidth = glups * 2 * sizeof(CELL_TYPE);
 
         stream << "TracingWriter::stepFinished()\n"
                << "  step: " << step << " of " << maxSteps << "\n"
                << "  elapsed: " << delta << "\n"
                << "  remaining: "
-               << boost::posix_time::to_simple_string(remaining) << "\n"
+               << Time::renderDuration(remaining) << "\n"
                << "  ETA:  "
-               << boost::posix_time::to_simple_string(eta) << "\n"
+               << Time::renderDuration(eta) << "\n"
                << "  speed: " << glups << " GLUPS\n"
                << "  effective memory bandwidth " << bandwidth << " GB/s\n";
         printTime();
@@ -130,13 +128,13 @@ private:
 
     void printTime() const
     {
-        stream << "  time: " << boost::posix_time::to_simple_string(currentTime()) << "\n";
+        stream << "  time: " << Time::renderDuration(currentTime()) << "\n";
         stream.flush();
     }
 
-    Time currentTime() const
+    TimeType currentTime() const
     {
-        return boost::posix_time::microsec_clock::local_time();
+        return ScopedTimer::time();
     }
 };
 

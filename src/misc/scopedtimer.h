@@ -2,11 +2,12 @@
 #define LIBGEODECOMP_MISC_SCOPEDTIMER_H
 
 #include <libgeodecomp/config.h>
+
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #include <hpx/util/high_resolution_timer.hpp>
 #else
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <sys/time.h>
 #endif
 
 namespace LibGeoDecomp {
@@ -35,8 +36,10 @@ public:
 #ifdef LIBGEODECOMP_WITH_HPX
         return hpx::util::high_resolution_timer::now();
 #else
-        boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
-        return now.time_of_day().total_microseconds() * 1e-6;
+        timeval t;
+        gettimeofday(&t, 0);
+
+        return t.tv_sec + t.tv_usec * 1.0e-6;
 #endif
     }
 

@@ -7,7 +7,6 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <unistd.h>
 #include <cxxtest/TestSuite.h>
 

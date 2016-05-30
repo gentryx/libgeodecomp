@@ -1,29 +1,19 @@
 #ifndef LIBGEODECOMP_IO_TIME_H
 #define LIBGEODECOMP_IO_TIME_H
 
-#include <ctime>
 #include <cmath>
 #include <iomanip>
 #include <sstream>
-#include <sys/time.h>
 
 namespace LibGeoDecomp {
 
 /**
- * This class helps with taking and rendering time stamps. It replaces
+ * This class helps with rendering time stamps. It replaces
  * our previous use of boost::posix_time.
  */
 class Time
 {
 public:
-    static double getTime()
-    {
-        timeval t;
-        gettimeofday(&t, 0);
-
-        return t.tv_sec + t.tv_usec * 1.0e-6;
-    }
-
     static std::string renderISO(double time)
     {
         timeval secondsSinceEpoch;
