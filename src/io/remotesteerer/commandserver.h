@@ -9,8 +9,6 @@
 #include <libgeodecomp/io/remotesteerer/waitaction.h>
 #include <libgeodecomp/misc/stringops.h>
 
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cerrno>
 #include <iostream>
@@ -21,8 +19,6 @@
 namespace LibGeoDecomp {
 
 namespace RemoteSteererHelpers {
-
-using boost::asio::ip::tcp;
 
 /**
  * A server which can be reached by TCP (nc, telnet, ...). Its purpose
@@ -98,8 +94,8 @@ public:
         int port,
         boost::shared_ptr<Pipe> pipe) :
         port(port),
-        pipe(pipe),
-        serverThread(&CommandServer::runServer, this)
+        pipe(pipe)
+        // serverThread(&CommandServer::runServer, this)
     {
         addAction(new QuitAction(&continueFlag));
         addAction(new PingAction);
@@ -108,17 +104,20 @@ public:
         // The thread may take a while to start up. We need to wait
         // here so we don't try to clean up in the d-tor before the
         // thread has created anything.
-        boost::unique_lock<boost::mutex> lock(mutex);
-        while(!acceptor) {
-            threadCreationVar.wait(lock);
-        }
+
+        // fixme
+        // boost::unique_lock<boost::mutex> lock(mutex);
+        // while(!acceptor) {
+        //     threadCreationVar.wait(lock);
+        // }
     }
 
     ~CommandServer()
     {
-        signalClose();
-        LOG(DBG, "CommandServer waiting for network thread");
-        serverThread.join();
+        // fixme
+        // signalClose();
+        // LOG(DBG, "CommandServer waiting for network thread");
+        // serverThread.join();
     }
 
     /**
@@ -128,16 +127,17 @@ public:
     void sendMessage(const std::string& message)
     {
         LOG(DBG, "CommandServer::sendMessage(" << message << ")");
-        boost::system::error_code errorCode;
-        boost::asio::write(
-            *socket,
-            boost::asio::buffer(message),
-            boost::asio::transfer_all(),
-            errorCode);
+        // fixme
+        // boost::system::error_code errorCode;
+        // boost::asio::write(
+        //     *socket,
+        //     boost::asio::buffer(message),
+        //     boost::asio::transfer_all(),
+        //     errorCode);
 
-        if (errorCode) {
-            LOG(WARN, "CommandServer::sendMessage encountered " << errorCode.message());
-        }
+        // if (errorCode) {
+        //     LOG(WARN, "CommandServer::sendMessage encountered " << errorCode.message());
+        // }
     }
 
     /**
@@ -155,46 +155,49 @@ public:
         Interactor interactor(command, feedbackLines, false, port, host);
         interactor();
         return interactor.feedback();
-        boost::asio::io_service ioService;
-        tcp::resolver resolver(ioService);
-        tcp::resolver::query query(host, StringOps::itoa(port));
-        tcp::resolver::iterator endpointIterator = resolver.resolve(query);
-        tcp::socket socket(ioService);
-        boost::asio::connect(socket, endpointIterator);
-        boost::system::error_code errorCode;
+        // fixme
+        // boost::asio::io_service ioService;
+        // tcp::resolver resolver(ioService);
+        // tcp::resolver::query query(host, StringOps::itoa(port));
+        // tcp::resolver::iterator endpointIterator = resolver.resolve(query);
+        // tcp::socket socket(ioService);
+        // boost::asio::connect(socket, endpointIterator);
+        // boost::system::error_code errorCode;
 
-        boost::asio::write(
-            socket,
-            boost::asio::buffer(command),
-            boost::asio::transfer_all(),
-            errorCode);
+        // boost::asio::write(
+        //     socket,
+        //     boost::asio::buffer(command),
+        //     boost::asio::transfer_all(),
+        //     errorCode);
 
-        if (errorCode) {
-            LOG(WARN, "error while writing to socket: " << errorCode.message());
-        }
+        // if (errorCode) {
+        //     LOG(WARN, "error while writing to socket: " << errorCode.message());
+        // }
 
         StringVec ret;
 
         for (int i = 0; i < feedbackLines; ++i) {
-            boost::asio::streambuf buf;
-            boost::system::error_code errorCode;
+            // fixme
+            // boost::asio::streambuf buf;
+            // boost::system::error_code errorCode;
 
             LOG(DBG, "CommandServer::sendCommandWithFeedback() reading line");
 
-            std::size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
-            if (errorCode) {
-                LOG(WARN, "error while writing to socket: " << errorCode.message());
-            }
+            // fixme
+            // std::size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
+            // if (errorCode) {
+            //     LOG(WARN, "error while writing to socket: " << errorCode.message());
+            // }
 
-            // purge \n at end of line
-            if (length) {
-                length -= 1;
-            }
+            // // purge \n at end of line
+            // if (length) {
+            //     length -= 1;
+            // }
 
-            std::istream lineBuf(&buf);
-            std::string line(length, 'X');
-            lineBuf.read(&line[0], length);
-            ret << line;
+            // std::istream lineBuf(&buf);
+            // std::string line(length, 'X');
+            // lineBuf.read(&line[0], length);
+            // ret << line;
         }
 
         return ret;
@@ -213,50 +216,52 @@ public:
 private:
     int port;
     boost::shared_ptr<Pipe> pipe;
-    boost::asio::io_service ioService;
-    boost::shared_ptr<tcp::acceptor> acceptor;
-    boost::shared_ptr<tcp::socket> socket;
-    boost::thread serverThread;
-    boost::condition_variable threadCreationVar;
-    boost::mutex mutex;
+    // fixme
+    // boost::asio::io_service ioService;
+    // boost::shared_ptr<tcp::acceptor> acceptor;
+    // boost::shared_ptr<tcp::socket> socket;
+    // boost::thread serverThread;
+    // boost::condition_variable threadCreationVar;
+    // boost::mutex mutex;
     ActionMap actions;
     bool continueFlag;
 
     void runSession()
     {
-        for (;;) {
-            boost::array<char, 1024> buf;
-            boost::system::error_code errorCode;
-            LOG(DBG, "CommandServer::runSession(): reading");
-            std::size_t length = socket->read_some(boost::asio::buffer(buf), errorCode);
-            LOG(DBG, "CommandServer::runSession(): read " << length << " bytes");
+        // fixme
+        // for (;;) {
+        //     boost::array<char, 1024> buf;
+        //     boost::system::error_code errorCode;
+        //     LOG(DBG, "CommandServer::runSession(): reading");
+        //     std::size_t length = socket->read_some(boost::asio::buffer(buf), errorCode);
+        //     LOG(DBG, "CommandServer::runSession(): read " << length << " bytes");
 
-            if (length > 0) {
-                std::string input(buf.data(), length);
-                handleInput(input);
-            }
+        //     if (length > 0) {
+        //         std::string input(buf.data(), length);
+        //         handleInput(input);
+        //     }
 
-            if (errorCode == boost::asio::error::eof) {
-                LOG(INFO, "CommandServer::runSession(): client closed connection");
-                return;
-            }
+        //     if (errorCode == boost::asio::error::eof) {
+        //         LOG(INFO, "CommandServer::runSession(): client closed connection");
+        //         return;
+        //     }
 
-            if (errorCode) {
-                LOG(WARN, "CommandServer::runSession encountered " << errorCode.message());
-            }
+        //     if (errorCode) {
+        //         LOG(WARN, "CommandServer::runSession encountered " << errorCode.message());
+        //     }
 
-            if (!socket->is_open()) {
-                return;
-            }
+        //     if (!socket->is_open()) {
+        //         return;
+        //     }
 
-            StringVec feedback = pipe->retrieveSteeringFeedback();
-            for (StringVec::iterator i = feedback.begin();
-                 i != feedback.end();
-                 ++i) {
-                LOG(DBG, "CommandServer::runSession sending »" << *i << "«");
-                sendMessage(*i + "\n");
-            }
-        }
+        //     StringVec feedback = pipe->retrieveSteeringFeedback();
+        //     for (StringVec::iterator i = feedback.begin();
+        //          i != feedback.end();
+        //          ++i) {
+        //         LOG(DBG, "CommandServer::runSession sending »" << *i << "«");
+        //         sendMessage(*i + "\n");
+        //     }
+        // }
     }
 
     void handleInput(const std::string& input)
@@ -295,36 +300,37 @@ private:
 
     int runServer()
     {
-        try {
-            // Thread-aware initialization, allows c-tor to exit safely.
-            {
-                boost::unique_lock<boost::mutex> lock(mutex);
-                acceptor.reset(new tcp::acceptor(ioService, tcp::endpoint(tcp::v4(), port)));
-            }
-            threadCreationVar.notify_one();
+        // fixme
+        // try {
+        //     // Thread-aware initialization, allows c-tor to exit safely.
+        //     {
+        //         boost::unique_lock<boost::mutex> lock(mutex);
+        //         acceptor.reset(new tcp::acceptor(ioService, tcp::endpoint(tcp::v4(), port)));
+        //     }
+        //     threadCreationVar.notify_one();
 
-            boost::system::error_code errorCode;
-            continueFlag = true;
+        //     boost::system::error_code errorCode;
+        //     continueFlag = true;
 
-            while (continueFlag) {
-                LOG(DBG, "CommandServer: waiting for new connection");
-                socket.reset(new tcp::socket(ioService));
-                acceptor->accept(*socket, errorCode);
+        //     while (continueFlag) {
+        //         LOG(DBG, "CommandServer: waiting for new connection");
+        //         socket.reset(new tcp::socket(ioService));
+        //         acceptor->accept(*socket, errorCode);
 
-                if (errorCode) {
-                    LOG(WARN, "CommandServer::runServer() encountered " << errorCode.message());
-                } else {
-                    LOG(INFO, "CommandServer: client connected");
-                    runSession();
-                    LOG(INFO, "CommandServer: client disconnected");
-                }
-            }
-        }
-        catch (std::exception& e) {
-            LOG(FATAL, "CommandServer::runServer() listening on port " << port
-                << " caught exception " << e.what() << ", exiting");
-            return 1;
-        }
+        //         if (errorCode) {
+        //             LOG(WARN, "CommandServer::runServer() encountered " << errorCode.message());
+        //         } else {
+        //             LOG(INFO, "CommandServer: client connected");
+        //             runSession();
+        //             LOG(INFO, "CommandServer: client disconnected");
+        //         }
+        //     }
+        // }
+        // catch (std::exception& e) {
+        //     LOG(FATAL, "CommandServer::runServer() listening on port " << port
+        //         << " caught exception " << e.what() << ", exiting");
+        //     return 1;
+        // }
 
         return 0;
     }
