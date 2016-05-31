@@ -1,6 +1,6 @@
 #include <libgeodecomp/misc/scopedtimer.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
-
+#include <unistd.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;

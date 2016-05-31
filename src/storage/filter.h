@@ -5,6 +5,7 @@
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/storage/filterbase.h>
 #include <libgeodecomp/storage/memorylocation.h>
+#include <typeinfo>
 
 #ifdef LIBGEODECOMP_WITH_SILO
 #include <silo.h>
