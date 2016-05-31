@@ -5,7 +5,7 @@
 // #include <libgeodecomp/misc/testhelper.h>
 // #include <libgeodecomp/communication/patchlink.h>
 
-namespace Libgeodecomp {}
+namespace LibGeoDecomp {}
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
