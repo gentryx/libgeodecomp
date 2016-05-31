@@ -1,5 +1,13 @@
 #include <cxxtest/TestSuite.h>
 
+#include <libgeodecomp/io/ppmwriter.h>
+#include <libgeodecomp/io/remotesteerer.h>
+#include <libgeodecomp/io/serialbovwriter.h>
+#include <libgeodecomp/io/silowriter.h>
+#include <libgeodecomp/io/simplecellplotter.h>
+#include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/tracingwriter.h>
+
 #include <libgeodecomp/communication/boostserialization.h>
 #include <libgeodecomp/communication/hpxserialization.h>
 #include <libgeodecomp/geometry/floatcoord.h>
