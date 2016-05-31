@@ -75,7 +75,8 @@ public:
         // LOG(DBG, "Pipe::copySteeringRequestsQueue()");
         // boost::lock_guard<boost::mutex> lock(mutex);
         // StringVec requests = steeringRequestsQueue;
-        // return requests;
+        StringVec requests;
+        return requests;
     }
 
     StringVec retrieveSteeringFeedback()
@@ -83,12 +84,12 @@ public:
         // fixme
         // using std::swap;
         // LOG(DBG, "Pipe::retrieveSteeringFeedback()");
-        // StringVec feedback;
+        StringVec feedback;
         // boost::lock_guard<boost::mutex> lock(mutex);
         // swap(feedback, steeringFeedback);
         // LOG(DBG, "  retrieveSteeringFeedback yields " << feedback.size());
         // LOG(DBG, "  retrieveSteeringFeedback is " << feedback);
-        // return feedback;
+        return feedback;
     }
 
     StringVec copySteeringFeedback()
@@ -97,7 +98,9 @@ public:
         // LOG(DBG, "Pipe::copySteeringFeedback()");
         // boost::lock_guard<boost::mutex> lock(mutex);
         // StringVec feedback = steeringFeedback;
-        // return feedback;
+
+        StringVec feedback;
+        return feedback;
     }
 
     void sync()
@@ -126,9 +129,9 @@ private:
     // fixme
 //     boost::mutex mutex;
 //     boost::condition_variable signal;
-//     StringVec steeringRequestsQueue;
-//     StringVec steeringRequests;
-//     StringVec steeringFeedback;
+    StringVec steeringRequestsQueue;
+    StringVec steeringRequests;
+    StringVec steeringFeedback;
 
 // #ifdef LIBGEODECOMP_WITH_MPI
 //     MPILayer mpiLayer;
