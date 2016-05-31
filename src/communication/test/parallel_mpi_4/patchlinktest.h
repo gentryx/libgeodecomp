@@ -1,8 +1,8 @@
 #include <cxxtest/TestSuite.h>
 
 // #include <libgeodecomp.h>
-// #include <libgeodecomp/io/testinitializer.h>
-// #include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/communication/patchlink.h>
 
 namespace LibGeoDecomp {}
