@@ -21,7 +21,7 @@ public:
         secondsSinceEpoch.tv_usec = std::modf(time, &intFraction) * 1.0e6;
         secondsSinceEpoch.tv_sec = intFraction;
         tm timeSpec;
-        localtime_r(&secondsSinceEpoch.tv_sec, &timeSpec);
+        gmtime_r(&secondsSinceEpoch.tv_sec, &timeSpec);
         char buf[1024];
         strftime(buf, 1024, "%Y.%m.%d %H:%M:%S", &timeSpec);
 

@@ -10,9 +10,9 @@ class TimeTest : public CxxTest::TestSuite
 public:
     void testRenderISO()
     {
-        TS_ASSERT_EQUALS(Time::renderISO(12345.6),           "1970.01.01 04:25:45.600000");
-        TS_ASSERT_EQUALS(Time::renderISO(1234567890.000998), "2009.02.14 00:31:30.000998");
-        TS_ASSERT_EQUALS(Time::renderISO(1234567890.000000), "2009.02.14 00:31:30.000000");
+        TS_ASSERT_EQUALS(Time::renderISO(12345.6),           "1970.01.01 03:25:45.600000");
+        TS_ASSERT_EQUALS(Time::renderISO(1234567890.000998), "2009.02.13 23:31:30.000998");
+        TS_ASSERT_EQUALS(Time::renderISO(1234567890.000000), "2009.02.13 23:31:30.000000");
     }
 
     void testRenderDuration()
