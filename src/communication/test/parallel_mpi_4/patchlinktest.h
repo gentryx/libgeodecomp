@@ -379,16 +379,16 @@ private:
     boost::shared_ptr<PatchProviderType> pro;
     boost::shared_ptr<MPILayer> mpiLayer;
 
-    // GridType markGrid(const Region<2>& region, int id)
-    // {
-    //     GridType ret = zeroGrid;
+    GridType markGrid(const Region<2>& region, int id)
+    {
+        GridType ret = zeroGrid;
 
-    //     for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
-    //         ret[*i] = id + i->y() * 10 + i->x();
-    //     }
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            ret[*i] = id + i->y() * 10 + i->x();
+        }
 
-    //     return ret;
-    // }
+        return ret;
+    }
 
     // int genTag(int from, int to) {
     //     return 100 + from * 10 + to;
