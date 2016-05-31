@@ -20,12 +20,17 @@
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #endif
 
+#ifdef LIBGEODECOMP_WITH_VISIT
+#include <libgeodecomp/io/visitwriter.h>
+#endif
+
 #include <libgeodecomp/communication/boostserialization.h>
 #include <libgeodecomp/communication/hpxserialization.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/voronoimesher.h>
 #include <libgeodecomp/io/ppmwriter.h>
+#include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/serialbovwriter.h>
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
