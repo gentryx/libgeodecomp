@@ -6,7 +6,6 @@
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
 
-#include <boost/thread.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
