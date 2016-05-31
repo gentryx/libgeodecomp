@@ -31,9 +31,9 @@ public:
 #ifdef LIBGEODECOMP_WITH_MPI
     explicit Pipe(
         int root = 0,
-        MPI_Comm communicator = MPI_COMM_WORLD) :
-        mpiLayer(communicator),
-        root(root)
+        MPI_Comm communicator = MPI_COMM_WORLD)
+        // mpiLayer(communicator),
+        // root(root)
     {}
 #endif
 
