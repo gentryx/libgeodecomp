@@ -50,31 +50,31 @@ public:
 
     void setUp()
     {
-        // mpiLayer.reset(new MPILayer());
+        mpiLayer.reset(new MPILayer());
 
-        // region1.clear();
-        // region1 << Streak<2>(Coord<2>(2, 2), 4);
-        // region1 << Streak<2>(Coord<2>(2, 3), 5);
-        // region2.clear();
-        // region2 << Streak<2>(Coord<2>(0, 0), 6);
-        // region2 << Streak<2>(Coord<2>(4, 1), 5);
+        region1.clear();
+        region1 << Streak<2>(Coord<2>(2, 2), 4);
+        region1 << Streak<2>(Coord<2>(2, 3), 5);
+        region2.clear();
+        region2 << Streak<2>(Coord<2>(0, 0), 6);
+        region2 << Streak<2>(Coord<2>(4, 1), 5);
 
-        // boundingBox = CoordBox<2>(Coord<2>(0, 0), Coord<2>(7, 5));
-        // zeroGrid  = GridType(boundingBox, 0);
-        // boundingRegion.clear();
-        // boundingRegion << boundingBox;
+        boundingBox = CoordBox<2>(Coord<2>(0, 0), Coord<2>(7, 5));
+        zeroGrid  = GridType(boundingBox, 0);
+        boundingRegion.clear();
+        boundingRegion << boundingBox;
 
-        // sendGrid1 = markGrid(region1, mpiLayer->rank());
-        // sendGrid2 = markGrid(region2, mpiLayer->rank());
+        sendGrid1 = markGrid(region1, mpiLayer->rank());
+        sendGrid2 = markGrid(region2, mpiLayer->rank());
 
-        // tag = 69;
+        tag = 69;
     }
 
     void tearDown()
     {
-        // acc.reset();
-        // pro.reset();
-        // mpiLayer.reset();
+        acc.reset();
+        pro.reset();
+        mpiLayer.reset();
     }
 
     void testBasic()
