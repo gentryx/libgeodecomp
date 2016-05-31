@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/io/ppmwriter.h>
-#include <libgeodecomp/io/remotesteerer.h>
+// #include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/serialbovwriter.h>
 // #include <libgeodecomp/io/silowriter.h>
 // #include <libgeodecomp/io/simplecellplotter.h>
