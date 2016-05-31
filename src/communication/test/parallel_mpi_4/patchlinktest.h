@@ -16,36 +16,36 @@ namespace LibGeoDecomp {
 class MyComplicatedCell
 {
 public:
-    // class API : public APITraits::HasBoostSerialization
-    // {};
+    class API : public APITraits::HasBoostSerialization
+    {};
 
-    // template<typename NEIGHBORHOOD>
-    // void update(const NEIGHBORHOOD& hood, int nanoStep)
-    // {
-    // }
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    {
+    }
 
-    // template<typename ARCHIVE>
-    // void serialize(ARCHIVE& archive, int version)
-    // {
-    //     archive & x;
-    //     archive & cargo;
-    // }
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& archive, int version)
+    {
+        archive & x;
+        archive & cargo;
+    }
 
-    // int x;
-    // std::vector<int> cargo;
+    int x;
+    std::vector<int> cargo;
 };
 
 class PatchLinkTest : public CxxTest::TestSuite
 {
 public:
-    // typedef DisplacedGrid<int> GridType;
-    // typedef PatchLink<GridType>::Accepter PatchAccepterType;
-    // typedef PatchLink<GridType>::Provider PatchProviderType;
+    typedef DisplacedGrid<int> GridType;
+    typedef PatchLink<GridType>::Accepter PatchAccepterType;
+    typedef PatchLink<GridType>::Provider PatchProviderType;
 
-    // typedef TestCellSoA TestCellType;
-    // typedef SoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> GridType2;
+    typedef TestCellSoA TestCellType;
+    typedef SoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> GridType2;
 
-    // typedef DisplacedGrid<MyComplicatedCell> GridType3;
+    typedef DisplacedGrid<MyComplicatedCell> GridType3;
 
     void setUp()
     {
