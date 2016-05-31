@@ -1,7 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
-#include <boost/assign/std/deque.hpp>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/mocksteerer.h>
@@ -16,7 +15,6 @@
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
 using namespace LibGeoDecomp;
-using namespace boost::assign;
 
 class ConwayCell
 {
@@ -33,7 +31,9 @@ public:
                 ret += neighborhood[Coord<2>(x, y)].alive;
             }
         }
+
         ret -= neighborhood[Coord<2>(0, 0)].alive;
+
         return ret;
     }
 
@@ -79,30 +79,28 @@ public:
         //          x
         //           x
         //         xxx
-        startCells +=
-            Coord<2>(11, 10),
-            Coord<2>(12, 11),
-            Coord<2>(10, 12), Coord<2>(11, 12), Coord<2>(12, 12);
+        startCells << Coord<2>(11, 10)
+                   << Coord<2>(12, 11)
+                   << Coord<2>(10, 12) << Coord<2>(11, 12) << Coord<2>(12, 12);
 
 
         // ...add a Diehard pattern...
         //                x
         //          xx
         //           x   xxx
-        startCells +=
-            Coord<2>(55, 70), Coord<2>(56, 70), Coord<2>(56, 71),
-            Coord<2>(60, 71), Coord<2>(61, 71), Coord<2>(62, 71),
-            Coord<2>(61, 69);
+        startCells << Coord<2>(61, 69)
+                   << Coord<2>(55, 70) << Coord<2>(56, 70)
+                   << Coord<2>(56, 71)
+                   << Coord<2>(60, 71) << Coord<2>(61, 71) << Coord<2>(62, 71);
 
         // ...and an Acorn pattern:
         //        x
         //          x
         //       xx  xxx
-        startCells +=
-            Coord<2>(111, 30),
-            Coord<2>(113, 31),
-            Coord<2>(110, 32), Coord<2>(111, 32),
-            Coord<2>(113, 32), Coord<2>(114, 32), Coord<2>(115, 32);
+        startCells << Coord<2>(111, 30)
+                   << Coord<2>(113, 31)
+                   << Coord<2>(110, 32) << Coord<2>(111, 32)
+                   << Coord<2>(113, 32) << Coord<2>(114, 32) << Coord<2>(115, 32);
 
 
         for (std::vector<Coord<2> >::iterator i = startCells.begin();
@@ -175,10 +173,12 @@ public:
         int startStep = init->startStep();
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, false);
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, true);
+
         for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
             expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, false);
             expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, true);
         }
+
         expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, false);
         expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, true);
 
@@ -212,10 +212,12 @@ public:
         int startStep = init->startStep();
         expectedEvents << MockSteerer<ConwayCell>::Event(startStep, STEERER_INITIALIZED, rank, false);
         expectedEvents << MockSteerer<ConwayCell>::Event(startStep, STEERER_INITIALIZED, rank, true);
+
         for (unsigned i = startStep + steeringPeriod; i < init->maxSteps(); i += steeringPeriod) {
             expectedEvents << MockSteerer<ConwayCell>::Event(i, STEERER_NEXT_STEP, rank, false);
             expectedEvents << MockSteerer<ConwayCell>::Event(i, STEERER_NEXT_STEP, rank, true);
         }
+
         expectedEvents << MockSteerer<ConwayCell>::Event(init->maxSteps(), STEERER_ALL_DONE, rank, false);
         expectedEvents << MockSteerer<ConwayCell>::Event(init->maxSteps(), STEERER_ALL_DONE, rank, true);
 
@@ -261,10 +263,12 @@ public:
         for (std::size_t groupRank = startRank; groupRank < endRank; ++groupRank) {
             expectedWriterEvents << MockWriter<ConwayCell>::Event(startStep, WRITER_INITIALIZED, groupRank, false);
             expectedWriterEvents << MockWriter<ConwayCell>::Event(startStep, WRITER_INITIALIZED, groupRank, true);
+
             for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
                 expectedWriterEvents << MockWriter<ConwayCell>::Event(i, WRITER_STEP_FINISHED, groupRank, false);
                 expectedWriterEvents << MockWriter<ConwayCell>::Event(i, WRITER_STEP_FINISHED, groupRank, true);
             }
+
             expectedWriterEvents << MockWriter<ConwayCell>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, false);
             expectedWriterEvents << MockWriter<ConwayCell>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, true);
         }
@@ -279,10 +283,12 @@ public:
         for (std::size_t groupRank = startRank; groupRank < endRank; ++groupRank) {
             expectedSteererEvents << MockSteerer<ConwayCell>::Event(startStep, STEERER_INITIALIZED, groupRank, false);
             expectedSteererEvents << MockSteerer<ConwayCell>::Event(startStep, STEERER_INITIALIZED, groupRank, true);
+
             for (unsigned i = startStep + steeringPeriod; i < init->maxSteps(); i += steeringPeriod) {
                 expectedSteererEvents << MockSteerer<ConwayCell>::Event(i, STEERER_NEXT_STEP, groupRank, false);
                 expectedSteererEvents << MockSteerer<ConwayCell>::Event(i, STEERER_NEXT_STEP, groupRank, true);
             }
+
             expectedSteererEvents << MockSteerer<ConwayCell>::Event(init->maxSteps(), STEERER_ALL_DONE, groupRank, false);
             expectedSteererEvents << MockSteerer<ConwayCell>::Event(init->maxSteps(), STEERER_ALL_DONE, groupRank, true);
         }
@@ -319,10 +325,12 @@ public:
         int startStep = init->startStep();
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, false);
         expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, true);
+
         for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
             expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, false);
             expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, true);
         }
+
         expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, false);
         expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, true);
 
@@ -365,10 +373,12 @@ public:
         for (std::size_t groupRank = startRank; groupRank < endRank; ++groupRank) {
             expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, groupRank, false);
             expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, groupRank, true);
+
             for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
                 expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, groupRank, false);
                 expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, groupRank, true);
             }
+
             expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, false);
             expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, groupRank, true);
         }

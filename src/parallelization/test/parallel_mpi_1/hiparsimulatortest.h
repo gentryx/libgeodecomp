@@ -9,11 +9,9 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -104,7 +102,7 @@ public:
 
         std::vector<unsigned> actualSteps;
         std::vector<unsigned> expectedSteps;
-        expectedSteps += 20, 21;
+        expectedSteps << 20 << 21;
 
         MemoryWriterType::GridMap grids = memoryWriter->getGrids();
         for (MemoryWriterType::GridMap::iterator iter = grids.begin(); iter != grids.end(); ++iter) {

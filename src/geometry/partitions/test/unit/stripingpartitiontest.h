@@ -1,10 +1,8 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 
-#include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -25,7 +23,7 @@ public:
         StripingPartition<2>::Iterator end = p.end();
 
         for (StripingPartition<2>::Iterator i = p.begin(); i != end; ++i) {
-            actual += *i;
+            actual << *i;
         }
 
         TS_ASSERT_EQUALS(actual, expected);
@@ -33,35 +31,38 @@ public:
 
     void testSimple()
     {
-        expected += Coord<2>(0, 0);
+        expected << Coord<2>(0, 0);
         check(StripingPartition<2>(Coord<2>(0, 0), Coord<2>(1, 1)), expected);
     }
 
     void testVertical()
     {
-        expected += Coord<2>(0, 0), Coord<2>(0, 1), Coord<2>(0, 2), Coord<2>(0, 3);
+        expected << Coord<2>(0, 0) << Coord<2>(0, 1) << Coord<2>(0, 2) << Coord<2>(0, 3);
         check(StripingPartition<2>(Coord<2>(0, 0), Coord<2>(1, 4)), expected);
     }
 
     void testHorizontal()
     {
-        expected += Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(2, 0), Coord<2>(3, 0), Coord<2>(4, 0);
+        expected << Coord<2>(0, 0) << Coord<2>(1, 0) << Coord<2>(2, 0) << Coord<2>(3, 0) << Coord<2>(4, 0);
         check(StripingPartition<2>(Coord<2>(0, 0), Coord<2>(5, 1)), expected);
     }
 
     void testNormal()
     {
-        expected +=
-            Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(2, 0),
-            Coord<2>(0, 1), Coord<2>(1, 1), Coord<2>(2, 1),
-            Coord<2>(0, 2), Coord<2>(1, 2), Coord<2>(2, 2),
-            Coord<2>(0, 3), Coord<2>(1, 3), Coord<2>(2, 3);
+        expected << Coord<2>(0, 0) << Coord<2>(1, 0) << Coord<2>(2, 0)
+                 << Coord<2>(0, 1) << Coord<2>(1, 1) << Coord<2>(2, 1)
+                 << Coord<2>(0, 2) << Coord<2>(1, 2) << Coord<2>(2, 2)
+                 << Coord<2>(0, 3) << Coord<2>(1, 3) << Coord<2>(2, 3);
         check(StripingPartition<2>(Coord<2>(0, 0), Coord<2>(3, 4)), expected);
     }
 
     void testOffset()
     {
-        expected += Coord<2>(12, 34), Coord<2>(13, 34), Coord<2>(14, 34), Coord<2>(15, 34), Coord<2>(16, 34);
+        expected << Coord<2>(12, 34)
+                 << Coord<2>(13, 34)
+                 << Coord<2>(14, 34)
+                 << Coord<2>(15, 34)
+                 << Coord<2>(16, 34);
         check(StripingPartition<2>(Coord<2>(12, 34), Coord<2>(5, 1)), expected);
     }
 
@@ -69,12 +70,13 @@ public:
     {
         StripingPartition<2> s(Coord<2>(), Coord<2>(3, 3));
         std::vector<StripingPartition<2>::Iterator> expected, actual;
-        expected += s[0], s[1], s[2], s[3];
+        expected << s[0] << s[1] << s[2] << s[3];
         StripingPartition<2>::Iterator i = s.begin();
         for (int c = 0; c < 4; ++c) {
             actual.push_back(i);
             ++i;
         }
+
         TS_ASSERT_EQUALS(expected, actual);
     }
 

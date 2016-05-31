@@ -3,9 +3,6 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/partitions/scotchpartition.h>
 
-#include <boost/assign/std/vector.hpp>
-
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {

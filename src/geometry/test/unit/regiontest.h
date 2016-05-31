@@ -3,12 +3,10 @@
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 
-#include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include <unistd.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -25,34 +23,34 @@ public:
         c = Region<2>();
 
         std::vector<std::string> s;
-        s +=
-            "               ",
-            "               ",
-            "               ",
-            "               ",
-            "               ",
-            "               ",
-            "          X    ",
-            "          X    ",
-            "   X X X XXXXXX",
-            " XXXXXXXXXXXXX ",
-            "  XXXXXXXXXX   ",
-            "  XXXXXXXXXX   ",
-            "  XXXXXXXXXX   ",
-            "  XXXXXXXXXX   ",
-            "  XXXXXXXXXX   ",
-            "  XXXXXXXXXX   ",
-            "  XXXXXXXXXX   ",
-            "  XXXXXXXXXX   ",
-            "  XXX    XXX   ",
-            "  XXX    XXX   ",
-            "  XXX    XXX   ",
-            "  XXX    XXX   ",
-            "  XXXXXXXXXX   ",
-            "  XXX    XXX   ",
-            "  XXX    XXX   ",
-            "  XXX    XXX   ",
-            "  XXX    XXX   ";
+        s << "               "
+          << "               "
+          << "               "
+          << "               "
+          << "               "
+          << "               "
+          << "          X    "
+          << "          X    "
+          << "   X X X XXXXXX"
+          << " XXXXXXXXXXXXX "
+          << "  XXXXXXXXXX   "
+          << "  XXXXXXXXXX   "
+          << "  XXXXXXXXXX   "
+          << "  XXXXXXXXXX   "
+          << "  XXXXXXXXXX   "
+          << "  XXXXXXXXXX   "
+          << "  XXXXXXXXXX   "
+          << "  XXXXXXXXXX   "
+          << "  XXX    XXX   "
+          << "  XXX    XXX   "
+          << "  XXX    XXX   "
+          << "  XXX    XXX   "
+          << "  XXXXXXXXXX   "
+          << "  XXX    XXX   "
+          << "  XXX    XXX   "
+          << "  XXX    XXX   "
+          << "  XXX    XXX   ";
+
         bigInsertOrdered = transform(s);
         bigInsertShuffled = bigInsertOrdered;
         std::random_shuffle(bigInsertShuffled.begin(), bigInsertShuffled.end());
@@ -278,12 +276,12 @@ public:
             expected, h.substract(IntPair(40, 50),
                            IntPair(40, 50)));
 
-        expected += IntPair(40, 42);
+        expected << IntPair(40, 42);
         TS_ASSERT_EQUALS(
             expected, h.substract(IntPair(40, 50),
                            IntPair(42, 60)));
 
-        expected += IntPair(49, 50);
+        expected << IntPair(49, 50);
         TS_ASSERT_EQUALS(
             expected, h.substract(IntPair(40, 50),
                                   IntPair(42, 49)));
@@ -327,25 +325,24 @@ public:
     void testInsert2()
     {
         CoordVector expected;
-        expected +=
-            Coord<2>(17, 22),
-            Coord<2>(18, 22),
-            Coord<2>(20, 11),
-            Coord<2>(20, 11),
-            Coord<2>(-100, 33),
-            Coord<2>(11, 33),
-            Coord<2>(12, 33),
-            Coord<2>(10, 33),
-            Coord<2>(12, 33),
-            Coord<2>(20, 33),
-            Coord<2>(49, 11),
-            Coord<2>(48, 11),
-            Coord<2>(47, 11),
-            Coord<2>(48, 11),
-            Coord<2>(40, 44),
-            Coord<2>(43, 44),
-            Coord<2>(41, 44),
-            Coord<2>(42, 44);
+        expected << Coord<2>(  17, 22)
+                 << Coord<2>(  18, 22)
+                 << Coord<2>(  20, 11)
+                 << Coord<2>(  20, 11)
+                 << Coord<2>(-100, 33)
+                 << Coord<2>(  11, 33)
+                 << Coord<2>(  12, 33)
+                 << Coord<2>(  10, 33)
+                 << Coord<2>(  12, 33)
+                 << Coord<2>(  20, 33)
+                 << Coord<2>(  49, 11)
+                 << Coord<2>(  48, 11)
+                 << Coord<2>(  47, 11)
+                 << Coord<2>(  48, 11)
+                 << Coord<2>(  40, 44)
+                 << Coord<2>(  43, 44)
+                 << Coord<2>(  41, 44)
+                 << Coord<2>(  42, 44);
 
         for (CoordVector::iterator i = expected.begin();
              i != expected.end(); i++) {
@@ -575,10 +572,12 @@ public:
 
     void testStreakIteration()
     {
-        std::vector<Streak<2> > actual, expected;
+        std::vector<Streak<2> > actual;
+        std::vector<Streak<2> > expected;
+
         for (Region<2>::StreakIterator i = c.beginStreak();
              i != c.endStreak(); ++i) {
-            actual += *i;
+            actual << *i;
         }
         TS_ASSERT_EQUALS(actual, expected);
 
@@ -591,13 +590,12 @@ public:
 
         for (Region<2>::StreakIterator i = c.beginStreak();
              i != c.endStreak(); ++i) {
-            actual += *i;
+            actual << *i;
         }
 
-        expected +=
-            Streak<2>(Coord<2>(10, 10), 40),
-            Streak<2>(Coord<2>(10, 20), 30),
-            Streak<2>(Coord<2>( 5, 30), 60);
+        expected << Streak<2>(Coord<2>(10, 10), 40)
+                 << Streak<2>(Coord<2>(10, 20), 30)
+                 << Streak<2>(Coord<2>( 5, 30), 60);
         TS_ASSERT_EQUALS(actual, expected);
     }
 
@@ -2249,6 +2247,7 @@ private:
             if (file.eof()) {
                 break;
             }
+
             ret += c;
         }
 

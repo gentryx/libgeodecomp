@@ -9,9 +9,6 @@
 #include <libgeodecomp/parallelization/nesting/mpiupdategroup.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
-#include <boost/assign/std/vector.hpp>
-
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {

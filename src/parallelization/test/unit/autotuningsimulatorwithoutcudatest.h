@@ -8,7 +8,6 @@
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/parallelization/autotuningsimulator.h>
-#include <boost/assign/list_of.hpp>
 #include <sstream>
 
 using namespace LibGeoDecomp;

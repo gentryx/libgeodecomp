@@ -1,8 +1,5 @@
 #include <libgeodecomp.h>
 
-#include <boost/assign/std/vector.hpp>
-
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 class CircleCell

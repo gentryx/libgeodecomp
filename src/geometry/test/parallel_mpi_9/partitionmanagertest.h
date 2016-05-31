@@ -2,9 +2,6 @@
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 
-#include <boost/assign/std/vector.hpp>
-
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -111,11 +108,13 @@ public:
             unsigned startLine = startingLine(layer->rank()) - 1 * ghostZoneWidth + i;
             unsigned endLine   = startingLine(layer->rank()) + 2 * ghostZoneWidth - i;
             Region<2> rim = fillLines(startLine, endLine);
+
             if (layer->rank() != layer->size() - 1) {
                 startLine = startingLine(layer->rank() + 1) - 2 * ghostZoneWidth + i;
                 endLine   = startingLine(layer->rank() + 1) + 1 * ghostZoneWidth - i;
                 rim += fillLines(startLine, endLine);
             }
+
             TS_ASSERT_EQUALS(rim, manager.rim(i));
         }
     }

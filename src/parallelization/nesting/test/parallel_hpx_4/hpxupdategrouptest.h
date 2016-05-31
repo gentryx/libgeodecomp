@@ -4,7 +4,6 @@
 #include <hpx/include/lcos.hpp>
 #include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
-#include <boost/assign/std/deque.hpp>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/testinitializer.h>
@@ -411,7 +410,7 @@ public:
                 init,
                 reinterpret_cast<StepperType*>(0)));
         expectedNanoSteps.clear();
-        expectedNanoSteps += 5, 7, 8, 33, 55;
+        expectedNanoSteps << 5 << 7 << 8 << 33 << 55;
         mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
         for (std::deque<std::size_t>::iterator i = expectedNanoSteps.begin();
              i != expectedNanoSteps.end();

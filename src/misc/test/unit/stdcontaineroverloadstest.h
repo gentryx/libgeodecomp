@@ -2,12 +2,9 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 
-#include <boost/assign/std/deque.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -261,10 +258,13 @@ public:
     void testPushFront()
     {
         std::vector<int> a;
-        a += 47, 11, 2000;
+        a <<   47
+          <<   11
+          << 2000;
 
         std::vector<int> b;
-        b += 11, 2000;
+        b <<   11
+          << 2000;
         push_front(b, 47);
 
         TS_ASSERT_EQUALS(a, b);
@@ -273,18 +273,31 @@ public:
     void testSum()
     {
         std::vector<int> s;
-        s += 12, 43, -9, -8, 15;
+        s << 12
+          << 43
+          << -9
+          << -8
+          << 15;
         TS_ASSERT_EQUALS(53, sum(s));
     }
 
     void testAppend()
     {
         std::vector<int> a;
-        a += 1, 2, 3;
+        a << 1
+          << 2
+          << 3;
+
         std::vector<int> b;
-        b += 4, 5;
+        b << 4
+          << 5;
+
         std::vector<int> c;
-        c += 1, 2, 3, 4, 5;
+        c << 1
+          << 2
+          << 3
+          << 4
+          << 5;
 
         TS_ASSERT_EQUALS(a + b, c);
         append(a, b);
@@ -294,23 +307,23 @@ public:
     void testCoordToVector()
     {
         std::vector<int> expected1;
-        expected1 += 1, 2, 4;
+        expected1 << 1 << 2 << 4;
         TS_ASSERT_EQUALS(expected1, toVector(Coord<3>(1, 2, 4)));
 
         std::vector<int> expected2;
-        expected2 += 6, 8;
+        expected2 << 6 << 8;
         TS_ASSERT_EQUALS(expected2, toVector(Coord<2>(6, 8)));
 
         std::vector<int> expected3;
-        expected3 += 9;
+        expected3 << 9;
         TS_ASSERT_EQUALS(expected3, toVector(Coord<1>(9)));
 
         std::vector<double> expected4;
-        expected4 += 1.2, 3.4;
+        expected4 << 1.2 << 3.4;
         TS_ASSERT_EQUALS(expected4, toVector(FloatCoord<2>(1.2, 3.4)));
     }
 
-    void testOperatorLessLess()
+    void testShiftOperator()
     {
         std::vector<int> a;
         {
@@ -319,14 +332,14 @@ public:
             TS_ASSERT_EQUALS("[]", temp.str());
         }
 
-        a += 1;
+        a << 1;
         {
             std::ostringstream temp;
             temp << a;
             TS_ASSERT_EQUALS("[1]", temp.str());
         }
 
-        a += 2, 3;
+        a << 2 << 3;
         {
             std::ostringstream temp;
             temp << a;
@@ -337,7 +350,7 @@ public:
     void testContains()
     {
         std::vector<int> a;
-        a += 0, 1;
+        a << 0 << 1;
         TS_ASSERT_EQUALS(contains(a, 2), false);
         TS_ASSERT_EQUALS(contains(a, 1), true);
     }
@@ -346,8 +359,8 @@ public:
     {
         std::vector<unsigned> v;
         std::vector<unsigned> w;
-        v += 0, 3, 1, 2;
-        w += 0, 1, 2, 3;
+        v << 0 << 3 << 1 << 2;
+        w << 0 << 1 << 2 << 3;
         sort(v);
         TS_ASSERT_EQUALS(v, w);
     }
@@ -355,7 +368,7 @@ public:
     void testMinMaxVector()
     {
         std::vector<int> a;
-        a += 0, 3, 1 ,2;
+        a << 0 << 3 << 1 << 2;
         TS_ASSERT_EQUALS((min)(a), 0);
         TS_ASSERT_EQUALS((max)(a), 3);
 
@@ -444,7 +457,7 @@ public:
     void testContains()
     {
         std::deque<int> a;
-        a += 0, 1, 4, -1;
+        a << 0 << 1 << 4 << -1;
         TS_ASSERT_EQUALS(contains(a,  2), false);
         TS_ASSERT_EQUALS(contains(a,  3), false);
         TS_ASSERT_EQUALS(contains(a,  1), true);
@@ -455,7 +468,7 @@ public:
     void testSum()
     {
         std::deque<int> a;
-        a += 5, 2, 6, 1, 3, 100;
+        a << 5 << 2 << 6 << 1 << 3 << 100;
 
         TS_ASSERT_EQUALS(sum(a), 117);
     }

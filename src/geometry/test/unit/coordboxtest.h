@@ -1,11 +1,9 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
-#include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
-using namespace boost::assign;
 
 namespace LibGeoDecomp {
 
@@ -102,7 +100,11 @@ public:
     {
         CoordBox<1> box(Coord<1>(10), Coord<1>(5));
         std::vector<Coord<1> > expected;
-        expected += Coord<1>(10), Coord<1>(11), Coord<1>(12), Coord<1>(13), Coord<1>(14);
+        expected << Coord<1>(10)
+                 << Coord<1>(11)
+                 << Coord<1>(12)
+                 << Coord<1>(13)
+                 << Coord<1>(14);
 
         std::vector<Coord<1> > actual;
         for (CoordBox<1>::Iterator i = box.begin();

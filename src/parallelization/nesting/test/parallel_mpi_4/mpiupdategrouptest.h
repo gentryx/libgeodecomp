@@ -9,10 +9,7 @@
 #include <libgeodecomp/parallelization/nesting/mpiupdategroup.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
-#include <boost/assign/std/deque.hpp>
-
 using namespace LibGeoDecomp;
-using namespace boost::assign;
 
 namespace LibGeoDecomp {
 
@@ -47,13 +44,15 @@ public:
                 init,
                 reinterpret_cast<StepperType*>(0)));
         expectedNanoSteps.clear();
-        expectedNanoSteps += 5, 7, 8, 33, 55;
+        expectedNanoSteps << 5 << 7 << 8 << 33 << 55;
         mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
+
         for (std::deque<std::size_t>::iterator i = expectedNanoSteps.begin();
              i != expectedNanoSteps.end();
              ++i) {
             mockPatchAccepter->pushRequest(*i);
         }
+
         updateGroup->addPatchAccepter(mockPatchAccepter, StepperType::INNER_SET);
     }
 

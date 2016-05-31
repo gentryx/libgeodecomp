@@ -8,9 +8,6 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/nesting/vanillastepper.h>
 
-#include <boost/assign/std/vector.hpp>
-
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -45,7 +42,7 @@ public:
         CoordBox<3> box = init->gridBox();
 
         std::vector<std::size_t> weights;
-        weights += 10000, 15000, 25000;
+        weights << 10000 << 15000 << 25000;
         weights << box.dimensions.prod() - sum(weights);
         boost::shared_ptr<Partition<3> > partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));

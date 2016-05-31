@@ -7,7 +7,6 @@
 #include <libgeodecomp/misc/simplexoptimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/parallelization/autotuningsimulator.h>
-#include <boost/assign/list_of.hpp>
 #include <cuda.h>
 #include <sstream>
 

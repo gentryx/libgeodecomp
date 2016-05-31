@@ -13,6 +13,7 @@
 #include <libgeodecomp/io/remotesteerer/handler.h>
 #include <libgeodecomp/io/remotesteerer/gethandler.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
+#include <boost/shared_ptr.hpp>
 
 namespace LibGeoDecomp {
 
