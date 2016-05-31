@@ -364,16 +364,16 @@ public:
 private:
     int tag;
 
-    // GridType zeroGrid;
-    // GridType sendGrid1;
-    // GridType sendGrid2;
-    // GridType expected;
-    // GridType actual;
+    GridType zeroGrid;
+    GridType sendGrid1;
+    GridType sendGrid2;
+    GridType expected;
+    GridType actual;
 
-    // CoordBox<2> boundingBox;
-    // Region<2> boundingRegion;
-    // Region<2> region1;
-    // Region<2> region2;
+    CoordBox<2> boundingBox;
+    Region<2> boundingRegion;
+    Region<2> region1;
+    Region<2> region2;
 
     boost::shared_ptr<PatchAccepterType> acc;
     boost::shared_ptr<PatchProviderType> pro;
