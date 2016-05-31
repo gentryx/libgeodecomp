@@ -375,9 +375,9 @@ private:
     // Region<2> region1;
     // Region<2> region2;
 
-    // boost::shared_ptr<PatchAccepterType> acc;
-    // boost::shared_ptr<PatchProviderType> pro;
-    // boost::shared_ptr<MPILayer> mpiLayer;
+    boost::shared_ptr<PatchAccepterType> acc;
+    boost::shared_ptr<PatchProviderType> pro;
+    boost::shared_ptr<MPILayer> mpiLayer;
 
     // GridType markGrid(const Region<2>& region, int id)
     // {
