@@ -1,6 +1,13 @@
 #include <cxxtest/TestSuite.h>
 
-#include <libgeodecomp/io/remotesteerer.h>
+#include <libgeodecomp/communication/typemaps.h>
+#include <libgeodecomp/communication/mpilayer.h>
+#include <libgeodecomp/io/steerer.h>
+#include <libgeodecomp/io/remotesteerer/commandserver.h>
+#include <libgeodecomp/io/remotesteerer/handler.h>
+#include <libgeodecomp/io/remotesteerer/gethandler.h>
+#include <libgeodecomp/io/remotesteerer/pipe.h>
+#include <boost/shared_ptr.hpp>
 
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/serialbovwriter.h>
