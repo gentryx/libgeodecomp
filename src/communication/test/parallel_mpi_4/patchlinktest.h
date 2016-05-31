@@ -1,9 +1,10 @@
 #include <cxxtest/TestSuite.h>
 
 // #include <libgeodecomp.h>
+#include <libgeodecomp/communication/patchlink.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
-#include <libgeodecomp/communication/patchlink.h>
+#include <libgeodecomp/storage/soagrid.h>
 
 namespace LibGeoDecomp {}
 using namespace LibGeoDecomp;
