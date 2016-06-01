@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_STORAGE_FIXEDARRAY_H
 #define LIBGEODECOMP_STORAGE_FIXEDARRAY_H
 
+#include <algorithm>
 #include <stdexcept>
 #include <libgeodecomp/config.h>
 
