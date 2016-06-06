@@ -37,8 +37,6 @@ if(NOT HPX_FOUND)
   # The reason for this ugly multi-stage discovery is the following:
   # since CMAKE 2.8.11 each call to find_package(Boost...) will reset
   # Boost_LIBRARIES.
-  find_package(Boost COMPONENTS serialization)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
   find_package(Boost COMPONENTS thread)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
   find_package(Boost COMPONENTS move)
@@ -47,6 +45,9 @@ else()
   # If HPX was found, we use the Boost libraries found by HPX
   set(ALL_BOOST_LIBS ${HPX_LIBRARIES})
 endif()
+
+find_package(Boost COMPONENTS serialization)
+set(BOOST_SERIALIZATION_LIBS "${Boost_LIBRARIES}")
 
 find_package(Boost COMPONENTS mpi)
 set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
