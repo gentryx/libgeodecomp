@@ -10,20 +10,44 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class DummyResult
+class DummyMessage
 {
 public:
-    DummyResult(int id) :
-        id(id)
+    DummyMessage(int senderId = -1,
+                 int receiverId = -1,
+                 int timestep = -1,
+                 int data = -1) :
+        senderId(senderId),
+        receiverId(receiverId),
+        timestep(timestep),
+        data(data)
     {}
 
-    int id;
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& archive, int)
+    {
+        archive & senderId;
+        archive & receiverId;
+        archive & timestep;
+        archive & data;
+    }
+
+    int senderId;
+    int receiverId;
+    int timestep;
+    int data;
 };
+
+}
+
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(DummyMessage)
+
+namespace LibGeoDecomp {
 
 class DummyModel
 {
 public:
-    class API :      
+    class API :
         public APITraits::HasUnstructuredTopology
     {};
 
@@ -31,15 +55,18 @@ public:
         id(id)
     {}
 
-    DummyResult update(const std::vector<DummyResult>& input)
+    int update(const std::vector<DummyMessage>& input// , int /* unused */
+               )
     {
 	std::cout << "updating Dummy " << id << " and my neighbors are: [";
 	for (int i = 0; i != input.size(); ++i) {
-	    std::cout << input[i].id << " ";
+	    std::cout << input[i].senderId << " -> " << input[i].receiverId;
 	}
 	std::cout << "]\n";
 
-	return DummyResult(id);
+        // fixme: don't return, but send via apply
+	// return DummyResult(id);
+        return 0;
     }
 
 private:
@@ -97,78 +124,142 @@ private:
 	return adjacency;
     }
 
-private:
-    int gridSize;
-    int myMaxSteps;
- };
+ private:
+     int gridSize;
+     int myMaxSteps;
+};
 
+template<typename CELL>
+class TestComponent
+{
+public:
+    explicit TestComponent(CELL *cell = 0) :
+        cell(cell)
+    {}
 
- class HpxDataflowSimulatorTest : public CxxTest::TestSuite
- {
- public:
-     void setUp()
-     {
-     }
+    CELL *cell;
+    std::map<int, std::shared_ptr<HPXReceiver<DummyMessage> > > receivers;
+};
 
-     void testBasic()
-     {
-	 std::cout << "starting dataflow test\n";
+class HpxDataflowSimulatorTest : public CxxTest::TestSuite
+{
+public:
+    void setUp()
+    {
+    }
 
-	 DummyInitializer initializer(5, 13);
-	 UnstructuredGrid<DummyModel> grid(initializer.gridBox());
-	 initializer.grid(&grid);
-	 std::cout << "grid size: " << grid.boundingBox() << "\n";
+    void testBasic()
+    {
+        std::cout << "starting dataflow test\n";
 
-	 typedef hpx::shared_future<DummyResult> ResultsFuture;
-	 typedef std::map<int, ResultsFuture> Space; // futures of one time step
+        DummyInitializer initializer(5, 13);
+        UnstructuredGrid<DummyModel> grid(initializer.gridBox());
+        initializer.grid(&grid);
+        std::cout << "grid size: " << grid.boundingBox() << "\n";
 
-	 using hpx::dataflow;
-	 using hpx::util::unwrapped;
+        typedef hpx::shared_future<int> UpdateResultFuture;
+        typedef std::map<int, UpdateResultFuture> TimeStepFutures;
 
-	 // U[t][i] is the state of position i at time t.
-	 std::vector<Space> futures(2);
+        using hpx::dataflow;
+        using hpx::util::unwrapped;
+        TimeStepFutures lastTimeStepFutures;
+        TimeStepFutures thisTimeStepFutures;
+        std::cout << "blah0\n";
 
-	 Region<1> localRegion;
-	 localRegion << initializer.gridBox();
+        Region<1> localRegion;
+        localRegion << initializer.gridBox();
 
-	 for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-	     futures[0][i->x()] = hpx::make_ready_future(DummyResult(i->x()));
-	 }
+        // fixme
+        // for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+        //     futures[0][i->x()] = hpx::make_ready_future(DummyResult(i->x()));
+        // }
 
-	 boost::shared_ptr<Adjacency> adjacency = initializer.getAdjacency(localRegion);
+        boost::shared_ptr<Adjacency> adjacency = initializer.getAdjacency(localRegion);
+        std::cout << "blah1\n";
 
-	 std::cout << "setting up dataflow\n";
-	
-	 int maxTimeSteps = initializer.maxSteps();
-	 for (int t = 0; t < maxTimeSteps; ++t) {
-	     Space& lastTimeStepFutures = futures[(t + 0) % 2];
-	     Space& thisTimeStepFutures = futures[(t + 1) % 2];
+        // fixme: instantiate components in agas and only hold ids of those
+        std::map<int, TestComponent<DummyModel> > components;
+        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+            std::cout << "   blubbA " << *i << "\n";
+            TestComponent<DummyModel> component(&grid[*i]);
 
-             for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-                 auto Op = unwrapped(boost::bind(&DummyModel::update, &grid[i->x()], _1));
-		 std::vector<ResultsFuture> localDependencies;
+            std::cout << "   blubbB " << *i << "\n";
+            std::vector<int> neighbors;
+            adjacency->getNeighbors(i->x(), &neighbors);
+            std::cout << "   blubbC " << neighbors << "\n";
 
-		 std::vector<int> neighbors;
-		 adjacency->getNeighbors(i->x(), &neighbors);
+            for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
+                component.receivers[*j] = HPXReceiver<DummyMessage>::make(
+                    "hpx_receiver_" +
+                    StringOps::itoa(*j) +
+                    "_to_" +
+                    StringOps::itoa(i->x())).get();
+            }
 
-		 for (std::vector<int>::iterator n = neighbors.begin(); n != neighbors.end(); ++n) {
-		     localDependencies.push_back(lastTimeStepFutures[*n]);
-		 }
-		 
-		 thisTimeStepFutures[i->x()] = dataflow(hpx::launch::async, Op, localDependencies);
-	     }
-	 }
-	
-	 std::cout << "waiting on futures\n";
+            std::cout << "   blubbD " << *i << "\n";
+            components[i->x()] = component;
+            std::cout << "   blubbE " << *i << "\n";
+        }
 
-	 std::vector<ResultsFuture> finalStep;
-	 for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-	     finalStep.push_back(futures[maxTimeSteps % 2][i->x()]);
-	 }
-	 hpx::when_all(finalStep).get();
+        std::cout << "setting up dataflow\n";
+        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+            lastTimeStepFutures[i->x()] = hpx::make_ready_future(UpdateResultFuture());
+        }
 
-	 std::cout << "dataflow test done\n";
-     }
- };
+        std::cout << "blah2\n";
+        int maxTimeSteps = initializer.maxSteps();
+        for (int t = 0; t < maxTimeSteps; ++t) {
+
+            for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+
+                std::vector<hpx::shared_future<DummyMessage> > receiveMessagesFutures;
+                std::vector<int> neighbors;
+                adjacency->getNeighbors(i->x(), &neighbors);
+                for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
+                    receiveMessagesFutures << hpx::make_ready_future(DummyMessage(-1, -1, -1, -1));
+                    // receiveMessagesFutures << components[i->x()].receivers[*j].get(t);
+                }
+
+                auto Operation = unwrapped(boost::bind(&DummyModel::update, *components[i->x()].cell, _1// , _2
+                                                       ));
+
+                thisTimeStepFutures[i->x()] = dataflow(hpx::launch::async, Operation, receiveMessagesFutures// , lastTimeStepFutures[i->x()]
+                                                       );
+                // for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+
+                //     // fixme: use hpxreceiver::receive to get futures
+                //     auto Op = unwrapped(boost::bind(&DummyModel::update, &grid[i->x()], _1));
+                //     std::vector<ResultsFuture> localDependencies;
+
+                //     std::vector<int> neighbors;
+                //     adjacency->getNeighbors(i->x(), &neighbors);
+
+                //     for (std::vector<int>::iterator n = neighbors.begin(); n != neighbors.end(); ++n) {
+                //         localDependencies.push_back(lastTimeStepFutures[*n]);
+                //     }
+
+                //     thisTimeStepFutures[i->x()] = dataflow(hpx::launch::async, Op, localDependencies);
+            }
+
+            using std::swap;
+            swap(thisTimeStepFutures, lastTimeStepFutures);
+        }
+
+        std::cout << "waiting on futures\n";
+
+        // std::vector<ResultsFuture> finalStep;
+        // for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+        //     finalStep.push_back(futures[maxTimeSteps % 2][i->x()]);
+        // }
+
+        // fixme: this is ugly
+        for (auto&& i: lastTimeStepFutures) {
+            i.second.get();
+        }
+        // hpx::when_all(lastTimeStepFutures).get();
+
+        std::cout << "dataflow test done\n";
+    }
+};
 
 }
