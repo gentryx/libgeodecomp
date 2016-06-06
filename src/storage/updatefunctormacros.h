@@ -1,6 +1,8 @@
 #ifndef LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROS_H
 #define LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROS_H
 
+#include <boost/iterator/counting_iterator.hpp>
+
 #ifdef LIBGEODECOMP_WITH_THREADS
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1                         \
     if (concurrencySpec.enableOpenMP() &&                               \
