@@ -4,6 +4,8 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 
+#include <libgeodecomp/communication/hpxreceiver.h>
+
 namespace LibGeoDecomp {
 
 /**
