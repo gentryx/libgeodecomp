@@ -55,10 +55,12 @@ public:
         id(id)
     {}
 
-    int update(const std::vector<DummyMessage>& input// , int /* unused */
-               )
+    // fixme: use move semantics here
+    int update(std::vector<hpx::shared_future<DummyMessage> > inputFutures, const hpx::shared_future<int>& /* unused */)
     {
 	std::cout << "updating Dummy " << id << " and my neighbors are: [";
+        std::vector<DummyMessage> input = hpx::util::unwrapped(inputFutures);
+
 	for (int i = 0; i != input.size(); ++i) {
 	    std::cout << input[i].senderId << " -> " << input[i].receiverId;
 	}
@@ -113,8 +115,6 @@ private:
 	    if (i->x() != 0) {
 		adjacency->insert(i->x(), i->x() - 1);
 	    }
-
-	    adjacency->insert(i->x(), i->x());
 
 	    if (i->x() != (gridSize - 1)) {
 		adjacency->insert(i->x(), i->x() + 1);
@@ -220,11 +220,14 @@ public:
                     // receiveMessagesFutures << components[i->x()].receivers[*j].get(t);
                 }
 
-                auto Operation = unwrapped(boost::bind(&DummyModel::update, *components[i->x()].cell, _1// , _2
-                                                       ));
+                auto Operation = boost::bind(&DummyModel::update, *components[i->x()].cell, _1, _2);
 
-                thisTimeStepFutures[i->x()] = dataflow(hpx::launch::async, Operation, receiveMessagesFutures// , lastTimeStepFutures[i->x()]
-                                                       );
+                thisTimeStepFutures[i->x()] = dataflow(
+                    hpx::launch::async,
+                    Operation,
+                    receiveMessagesFutures,
+                    lastTimeStepFutures[i->x()]);
+
                 // for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
 
                 //     // fixme: use hpxreceiver::receive to get futures
