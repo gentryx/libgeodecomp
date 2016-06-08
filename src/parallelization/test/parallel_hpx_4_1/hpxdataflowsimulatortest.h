@@ -52,21 +52,21 @@ public:
     {};
 
     DummyModel(int id = -1, const std::vector<int>& neighbors = std::vector<int>()) :
-        id(id)
+        id(id),
+        neighbors(neighbors)
     {}
 
     // fixme: use move semantics here
     template<typename HOOD>
     void update(
-        std::vector<hpx::shared_future<DummyMessage> > inputFutures,
-        int step,
-        const HOOD& hood)
+        HOOD& hood,
+        int step)
     {
-	std::cout << "updating Dummy " << id << " and my neighbors are: [";
-        std::vector<DummyMessage> input = hpx::util::unwrapped(inputFutures);
-
-	for (int i = 0; i != input.size(); ++i) {
-	    std::cout << input[i].senderId << " -> " << input[i].receiverId;
+	std::cout << "updating Dummy " << id << " and my neighbors are: [\n";
+	for (int i = 0; i != neighbors.size(); ++i) {
+	    std::cout << "  at " << neighbors[i]
+                      << ", " << hood[neighbors[i]].senderId
+                      << " -> " << hood[neighbors[i]].receiverId << "\n";
 	}
 	std::cout << "]\n";
 
@@ -96,6 +96,7 @@ private:
 
 	 for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
              DummyModel cell(i->x(), getNeighbors(i->x()));
+             std::cout << "initing id " << i->x() << " with neighbors " << getNeighbors(i->x()) << "\n";
 	     grid->set(*i, cell);
 	 }
      }
@@ -149,6 +150,42 @@ private:
      }
 };
 
+template<typename MESSAGE>
+class HPXDataflowNeighborhood
+{
+public:
+    // fixme: move semantics
+    inline HPXDataflowNeighborhood(
+        std::vector<int> messageNeighborIDs,
+        std::vector<hpx::shared_future<MESSAGE> > messagesFromNeighbors,
+        const std::map<int, hpx::id_type>& remoteIDs) :
+        messageNeighborIDs(messageNeighborIDs),
+        messagesFromNeighbors(hpx::util::unwrapped(messagesFromNeighbors)),
+        remoteIDs(remoteIDs)
+    {}
+
+    const MESSAGE& operator[](int index) const
+    {
+        std::vector<int>::const_iterator i = std::find(messageNeighborIDs.begin(), messageNeighborIDs.end(), index);
+        return messagesFromNeighbors[i - messageNeighborIDs.begin()];
+    }
+
+    void send(int remoteCellID, const DummyMessage& message, int step) const
+    {
+        // fixme: no const casts
+        std::map<int, hpx::id_type>& nonConstRemoteIDs = const_cast<std::map<int, hpx::id_type>&>(remoteIDs);
+        hpx::apply(
+            typename HPXReceiver<DummyMessage>::receiveAction(),
+            nonConstRemoteIDs[remoteCellID],
+            step,
+            message);
+    }
+
+private:
+    std::vector<int> messageNeighborIDs;
+    std::vector<MESSAGE> messagesFromNeighbors;
+    std::map<int, hpx::id_type> remoteIDs;
+};
 template<typename CELL>
 class TestComponent
 {
@@ -159,23 +196,15 @@ public:
 
     // fixme: use move semantics here
     void update(
+        std::vector<int> neighbors,
         std::vector<hpx::shared_future<DummyMessage> > inputFutures,
         const hpx::shared_future<void>& /* unused, just here to ensure
                                            correct ordering of updates
                                            per cell */,
         int step)
     {
-        cell->update(inputFutures, step, *this);
-    }
-
-    void send(int remoteCellID, const DummyMessage& message, int step) const
-    {
-        std::map<int, hpx::id_type>& nonConstRemoteIDs = const_cast<std::map<int, hpx::id_type>&>(remoteIDs);
-        hpx::apply(
-            typename HPXReceiver<DummyMessage>::receiveAction(),
-            nonConstRemoteIDs[remoteCellID],
-            step,
-            message);
+        HPXDataflowNeighborhood<DummyMessage> hood(neighbors, inputFutures, remoteIDs);
+        cell->update(hood, step);
     }
 
     CELL *cell;
@@ -275,15 +304,16 @@ public:
                 std::vector<int> neighbors;
                 adjacency->getNeighbors(i->x(), &neighbors);
                 for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                    receiveMessagesFutures << hpx::make_ready_future(DummyMessage(-1, -1, -1, -1));
+                    receiveMessagesFutures <<  hpx::make_ready_future(DummyMessage(-1, -1, -1, -1));
                     // receiveMessagesFutures << components[i->x()].receivers[*j].get(t);
                 }
 
-                auto Operation = boost::bind(&TestComponent<DummyModel>::update, components[i->x()], _1, _2, _3);
+                auto Operation = boost::bind(&TestComponent<DummyModel>::update, components[i->x()], _1, _2, _3, _4);
 
                 thisTimeStepFutures[i->x()] = dataflow(
                     hpx::launch::async,
                     Operation,
+                    neighbors,
                     receiveMessagesFutures,
                     lastTimeStepFutures[i->x()],
                     t);
