@@ -71,7 +71,7 @@ public:
 	std::cout << "]\n";
 
         for (auto&& neighbor: neighbors) {
-            DummyMessage dummyMessage;
+            DummyMessage dummyMessage(id, neighbor, step, 10000 * step + 100 * id + neighbor);
             // fixme: strip this from signature
             hood.send(neighbor, dummyMessage, step);
         }
@@ -167,6 +167,9 @@ public:
     const MESSAGE& operator[](int index) const
     {
         std::vector<int>::const_iterator i = std::find(messageNeighborIDs.begin(), messageNeighborIDs.end(), index);
+        if (i == messageNeighborIDs.end()) {
+            throw std::logic_error("FUUUU");
+        }
         return messagesFromNeighbors[i - messageNeighborIDs.begin()];
     }
 
@@ -204,7 +207,7 @@ public:
         int step)
     {
         HPXDataflowNeighborhood<DummyMessage> hood(neighbors, inputFutures, remoteIDs);
-        cell->update(hood, step);
+        cell->update(hood, step + 1);
     }
 
     CELL *cell;
@@ -252,13 +255,10 @@ public:
         // fixme: instantiate components in agas and only hold ids of those
         std::map<int, TestComponent<DummyModel> > components;
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            std::cout << "   blubbA " << *i << "\n";
             TestComponent<DummyModel> component(&grid[*i]);
 
-            std::cout << "   blubbB " << *i << "\n";
             std::vector<int> neighbors;
             adjacency->getNeighbors(i->x(), &neighbors);
-            std::cout << "   blubbC " << neighbors << "\n";
 
             for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
                 component.receivers[*j] = HPXReceiver<DummyMessage>::make(
@@ -268,9 +268,7 @@ public:
                     StringOps::itoa(i->x())).get();
             }
 
-            std::cout << "   blubbD " << *i << "\n";
             components[i->x()] = component;
-            std::cout << "   blubbE " << *i << "\n";
         }
 
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
@@ -294,7 +292,6 @@ public:
             lastTimeStepFutures[i->x()] = hpx::make_ready_future(UpdateResultFuture());
         }
 
-        std::cout << "blah2\n";
         int maxTimeSteps = initializer.maxSteps();
         for (int t = 0; t < maxTimeSteps; ++t) {
 
@@ -303,9 +300,13 @@ public:
                 std::vector<hpx::shared_future<DummyMessage> > receiveMessagesFutures;
                 std::vector<int> neighbors;
                 adjacency->getNeighbors(i->x(), &neighbors);
-                for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                    receiveMessagesFutures <<  hpx::make_ready_future(DummyMessage(-1, -1, -1, -1));
-                    // receiveMessagesFutures << components[i->x()].receivers[*j].get(t);
+
+                    for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
+                        if (t > 0) {
+                            receiveMessagesFutures << components[i->x()].receivers[*j]->get(t);
+                        } else {
+                            receiveMessagesFutures <<  hpx::make_ready_future(DummyMessage(-1, -1, -1, -1));
+                        }
                 }
 
                 auto Operation = boost::bind(&TestComponent<DummyModel>::update, components[i->x()], _1, _2, _3, _4);
