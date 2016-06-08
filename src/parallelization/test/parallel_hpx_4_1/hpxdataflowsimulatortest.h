@@ -233,7 +233,7 @@ public:
         initializer.grid(&grid);
 
         typedef hpx::shared_future<void> UpdateResultFuture;
-        typedef std::map<int, UpdateResultFuture> TimeStepFutures;
+        typedef std::vector<UpdateResultFuture> TimeStepFutures;
 
         using hpx::dataflow;
         using hpx::util::unwrapped;
@@ -277,6 +277,7 @@ public:
             adjacency->getNeighbors(i->x(), &neighbors);
 
             for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
+                // fixme: create name in dedicated function
                 std::string linkName = "hpx_receiver_" +
                     StringOps::itoa(i->x()) +
                     "_to_" +
@@ -288,11 +289,13 @@ public:
 
         std::cout << "setting up dataflow\n";
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            lastTimeStepFutures[i->x()] = hpx::make_ready_future(UpdateResultFuture());
+            lastTimeStepFutures << hpx::make_ready_future(UpdateResultFuture());
         }
+        thisTimeStepFutures.resize(localRegion.size());
 
         int maxTimeSteps = initializer.maxSteps();
         for (int t = 0; t < maxTimeSteps; ++t) {
+            int index = 0;
 
             for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
 
@@ -310,26 +313,22 @@ public:
 
                 auto Operation = boost::bind(&TestComponent<DummyModel>::update, components[i->x()], _1, _2, _3, _4);
 
-                thisTimeStepFutures[i->x()] = dataflow(
+                thisTimeStepFutures[index] = dataflow(
                     hpx::launch::async,
                     Operation,
                     neighbors,
                     receiveMessagesFutures,
-                    lastTimeStepFutures[i->x()],
+                    lastTimeStepFutures[index],
                     t);
+
+                ++index;
             }
 
             using std::swap;
             swap(thisTimeStepFutures, lastTimeStepFutures);
         }
 
-        // fixme: this is ugly
-        for (auto&& i: lastTimeStepFutures) {
-            i.second.get();
-        }
-        // hpx::when_all(lastTimeStepFutures).get();
-
-        std::cout << "dataflow test done\n";
+        hpx::when_all(lastTimeStepFutures).get();
     }
 };
 
