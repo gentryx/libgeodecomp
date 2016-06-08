@@ -168,18 +168,22 @@ public:
     {
         std::vector<int>::const_iterator i = std::find(messageNeighborIDs.begin(), messageNeighborIDs.end(), index);
         if (i == messageNeighborIDs.end()) {
-            throw std::logic_error("FUUUU");
+            throw std::logic_error("ID not found for incoming messages");
         }
+
         return messagesFromNeighbors[i - messageNeighborIDs.begin()];
     }
 
     void send(int remoteCellID, const DummyMessage& message, int step) const
     {
-        // fixme: no const casts
-        std::map<int, hpx::id_type>& nonConstRemoteIDs = const_cast<std::map<int, hpx::id_type>&>(remoteIDs);
+        std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
+        if (iter == remoteIDs.end()) {
+            throw std::logic_error("ID not found for outgoing messages");
+        }
+
         hpx::apply(
             typename HPXReceiver<DummyMessage>::receiveAction(),
-            nonConstRemoteIDs[remoteCellID],
+            iter->second,
             step,
             message);
     }
@@ -224,12 +228,9 @@ public:
 
     void testBasic()
     {
-        std::cout << "starting dataflow test\n";
-
         DummyInitializer initializer(50, 13);
         UnstructuredGrid<DummyModel> grid(initializer.gridBox());
         initializer.grid(&grid);
-        std::cout << "grid size: " << grid.boundingBox() << "\n";
 
         typedef hpx::shared_future<void> UpdateResultFuture;
         typedef std::map<int, UpdateResultFuture> TimeStepFutures;
@@ -238,7 +239,6 @@ public:
         using hpx::util::unwrapped;
         TimeStepFutures lastTimeStepFutures;
         TimeStepFutures thisTimeStepFutures;
-        std::cout << "blah0\n";
 
         Region<1> localRegion;
         CoordBox<1> box = initializer.gridBox();
@@ -250,7 +250,6 @@ public:
         }
 
         boost::shared_ptr<Adjacency> adjacency = initializer.getAdjacency(localRegion);
-        std::cout << "blah1\n";
 
         // fixme: instantiate components in agas and only hold ids of those
         std::map<int, TestComponent<DummyModel> > components;
@@ -318,33 +317,11 @@ public:
                     receiveMessagesFutures,
                     lastTimeStepFutures[i->x()],
                     t);
-
-                // for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-
-                //     // fixme: use hpxreceiver::receive to get futures
-                //     auto Op = unwrapped(boost::bind(&DummyModel::update, &grid[i->x()], _1));
-                //     std::vector<ResultsFuture> localDependencies;
-
-                //     std::vector<int> neighbors;
-                //     adjacency->getNeighbors(i->x(), &neighbors);
-
-                //     for (std::vector<int>::iterator n = neighbors.begin(); n != neighbors.end(); ++n) {
-                //         localDependencies.push_back(lastTimeStepFutures[*n]);
-                //     }
-
-                //     thisTimeStepFutures[i->x()] = dataflow(hpx::launch::async, Op, localDependencies);
             }
 
             using std::swap;
             swap(thisTimeStepFutures, lastTimeStepFutures);
         }
-
-        std::cout << "waiting on futures\n";
-
-        // std::vector<ResultsFuture> finalStep;
-        // for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-        //     finalStep.push_back(futures[maxTimeSteps % 2][i->x()]);
-        // }
 
         // fixme: this is ugly
         for (auto&& i: lastTimeStepFutures) {
