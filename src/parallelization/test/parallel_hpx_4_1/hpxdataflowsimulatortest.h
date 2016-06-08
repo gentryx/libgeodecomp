@@ -205,9 +205,16 @@ template<typename CELL>
 class TestComponent
 {
 public:
-    explicit TestComponent(CELL *cell = 0) :
-        cell(cell)
-    {}
+    // fixme: move semantics
+    explicit TestComponent(CELL *cell = 0, int id = -1, std::vector<int> neighbors = std::vector<int>()) :
+        cell(cell),
+        id(id)
+    {
+        for (auto&& neighbor: neighbors) {
+            std::string linkName = TestComponent<DummyMessage>::endpointName(neighbor, id);
+            receivers[neighbor] = HPXReceiver<DummyMessage>::make(linkName).get();
+        }
+    }
 
     // fixme: use move semantics here
     void update(
@@ -232,6 +239,7 @@ public:
     }
 
     CELL *cell;
+    int id;
     std::map<int, std::shared_ptr<HPXReceiver<DummyMessage> > > receivers;
     std::map<int, hpx::id_type> remoteIDs;
 };
@@ -270,25 +278,19 @@ public:
 
         // fixme: instantiate components in agas and only hold ids of those
         std::map<int, TestComponent<DummyModel> > components;
+        std::vector<int> neighbors;
+
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            TestComponent<DummyModel> component(&grid[*i]);
-
-            std::vector<int> neighbors;
+            neighbors.clear();
             adjacency->getNeighbors(i->x(), &neighbors);
-
-            // fixme: move this to constructor of testcomponent
-            for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                std::string linkName = TestComponent<DummyMessage>::endpointName(*j, i->x());
-                component.receivers[*j] = HPXReceiver<DummyMessage>::make(linkName).get();
-            }
-
+            TestComponent<DummyModel> component(&grid[*i], i->x(), neighbors);
             components[i->x()] = component;
         }
 
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
             TestComponent<DummyModel>& component = components[i->x()];
 
-            std::vector<int> neighbors;
+            neighbors.clear();
             adjacency->getNeighbors(i->x(), &neighbors);
 
             for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
@@ -309,7 +311,7 @@ public:
             for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
 
                 std::vector<hpx::shared_future<DummyMessage> > receiveMessagesFutures;
-                std::vector<int> neighbors;
+                neighbors.clear();
                 adjacency->getNeighbors(i->x(), &neighbors);
 
                     for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
