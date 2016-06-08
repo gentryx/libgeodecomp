@@ -158,14 +158,14 @@ public:
     {}
 
     // fixme: use move semantics here
-    // fixme: int -> void?
-    int update(
+    void update(
         std::vector<hpx::shared_future<DummyMessage> > inputFutures,
-        const hpx::shared_future<int>& /* unused */,
+        const hpx::shared_future<void>& /* unused, just here to ensure
+                                           correct ordering of updates
+                                           per cell */,
         int step)
     {
         cell->update(inputFutures, step, *this);
-        return 0;
     }
 
     void send(int remoteCellID, const DummyMessage& message, int step) const
@@ -199,7 +199,7 @@ public:
         initializer.grid(&grid);
         std::cout << "grid size: " << grid.boundingBox() << "\n";
 
-        typedef hpx::shared_future<int> UpdateResultFuture;
+        typedef hpx::shared_future<void> UpdateResultFuture;
         typedef std::map<int, UpdateResultFuture> TimeStepFutures;
 
         using hpx::dataflow;
