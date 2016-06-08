@@ -13,12 +13,12 @@ namespace LibGeoDecomp {
 class DummyMessage
 {
 public:
-    DummyMessage(int senderId = -1,
-                 int receiverId = -1,
+    DummyMessage(int senderID = -1,
+                 int receiverID = -1,
                  int timestep = -1,
                  int data = -1) :
-        senderId(senderId),
-        receiverId(receiverId),
+        senderID(senderID),
+        receiverID(receiverID),
         timestep(timestep),
         data(data)
     {}
@@ -26,14 +26,14 @@ public:
     template<typename ARCHIVE>
     void serialize(ARCHIVE& archive, int)
     {
-        archive & senderId;
-        archive & receiverId;
+        archive & senderID;
+        archive & receiverID;
         archive & timestep;
         archive & data;
     }
 
-    int senderId;
-    int receiverId;
+    int senderID;
+    int receiverID;
     int timestep;
     int data;
 };
@@ -60,20 +60,23 @@ public:
     template<typename HOOD>
     void update(
         HOOD& hood,
-        int step)
+        // fixme: make sure nanosteps are being issued here, not global steps:
+        int nanoStep)
     {
-	std::cout << "updating Dummy " << id << " and my neighbors are: [\n";
-	for (int i = 0; i != neighbors.size(); ++i) {
-	    std::cout << "  at " << neighbors[i]
-                      << ", " << hood[neighbors[i]].senderId
-                      << " -> " << hood[neighbors[i]].receiverId << "\n";
+	for (auto&& neighbor: neighbors) {
+            // fixme: use actual step AND nanoStep here
+            int expectedData = 10000 * (nanoStep - 1) + neighbor * 100 + id;
+            TS_ASSERT_EQUALS(hood[neighbor].data,       expectedData);
+            TS_ASSERT_EQUALS(hood[neighbor].timestep,   (nanoStep - 1));
+            TS_ASSERT_EQUALS(hood[neighbor].senderID,   neighbor);
+            TS_ASSERT_EQUALS(hood[neighbor].receiverID, id);
 	}
-	std::cout << "]\n";
 
         for (auto&& neighbor: neighbors) {
-            DummyMessage dummyMessage(id, neighbor, step, 10000 * step + 100 * id + neighbor);
+            // fixme: use actual step AND nanoStep here
+            DummyMessage dummyMessage(id, neighbor, nanoStep, 10000 * nanoStep + 100 * id + neighbor);
             // fixme: strip this from signature
-            hood.send(neighbor, dummyMessage, step);
+            hood.send(neighbor, dummyMessage, nanoStep);
         }
     }
 
@@ -96,7 +99,6 @@ private:
 
 	 for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
              DummyModel cell(i->x(), getNeighbors(i->x()));
-             std::cout << "initing id " << i->x() << " with neighbors " << getNeighbors(i->x()) << "\n";
 	     grid->set(*i, cell);
 	 }
      }
@@ -314,7 +316,8 @@ public:
                         if (t > 0) {
                             receiveMessagesFutures << components[i->x()].receivers[*j]->get(t);
                         } else {
-                            receiveMessagesFutures <<  hpx::make_ready_future(DummyMessage(-1, -1, -1, -1));
+                            int data = *j * 100 + i->x();
+                            receiveMessagesFutures <<  hpx::make_ready_future(DummyMessage(*j, i->x(), 0, data));
                         }
                 }
 
