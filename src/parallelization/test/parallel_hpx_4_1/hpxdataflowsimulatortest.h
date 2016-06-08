@@ -56,7 +56,11 @@ public:
     {}
 
     // fixme: use move semantics here
-    int update(std::vector<hpx::shared_future<DummyMessage> > inputFutures, const hpx::shared_future<int>& /* unused */)
+    int update(
+        std::vector<hpx::shared_future<DummyMessage> > inputFutures,
+        const hpx::shared_future<int>& /* unused */,
+        int step,
+        std::map<int, hpx::id_type> remoteIDs)
     {
 	std::cout << "updating Dummy " << id << " and my neighbors are: [";
         std::vector<DummyMessage> input = hpx::util::unwrapped(inputFutures);
@@ -66,8 +70,12 @@ public:
 	}
 	std::cout << "]\n";
 
-        // fixme: don't return, but send via apply
-	// return DummyResult(id);
+        for (auto&& iter: remoteIDs) {
+            DummyMessage dummyMessage;
+            std::cout << "storing ID " << iter.second << ", step: " << step << "\n";
+            hpx::apply(typename HPXReceiver<DummyMessage>::receiveAction(), iter.second,  step, dummyMessage);
+        }
+
         return 0;
     }
 
@@ -112,6 +120,7 @@ private:
 	boost::shared_ptr<Adjacency> adjacency(new RegionBasedAdjacency());
 
 	for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            // fixme: have more connections
 	    if (i->x() != 0) {
 		adjacency->insert(i->x(), i->x() - 1);
 	    }
@@ -139,6 +148,7 @@ public:
 
     CELL *cell;
     std::map<int, std::shared_ptr<HPXReceiver<DummyMessage> > > receivers;
+    std::map<int, hpx::id_type> remoteIDs;
 };
 
 class HpxDataflowSimulatorTest : public CxxTest::TestSuite
@@ -152,7 +162,7 @@ public:
     {
         std::cout << "starting dataflow test\n";
 
-        DummyInitializer initializer(5, 13);
+        DummyInitializer initializer(50, 13);
         UnstructuredGrid<DummyModel> grid(initializer.gridBox());
         initializer.grid(&grid);
         std::cout << "grid size: " << grid.boundingBox() << "\n";
@@ -167,12 +177,13 @@ public:
         std::cout << "blah0\n";
 
         Region<1> localRegion;
-        localRegion << initializer.gridBox();
-
-        // fixme
-        // for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-        //     futures[0][i->x()] = hpx::make_ready_future(DummyResult(i->x()));
-        // }
+        CoordBox<1> box = initializer.gridBox();
+        int rank = hpx::get_locality_id();
+        for (int i = ((rank + 0) * box.dimensions.x() / 4);
+             i <     ((rank + 1) * box.dimensions.x() / 4);
+             ++i) {
+            localRegion << Coord<1>(i);
+        }
 
         boost::shared_ptr<Adjacency> adjacency = initializer.getAdjacency(localRegion);
         std::cout << "blah1\n";
@@ -201,6 +212,22 @@ public:
             std::cout << "   blubbE " << *i << "\n";
         }
 
+        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+            TestComponent<DummyModel>& component = components[i->x()];
+
+            std::vector<int> neighbors;
+            adjacency->getNeighbors(i->x(), &neighbors);
+
+            for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
+                std::string linkName = "hpx_receiver_" +
+                    StringOps::itoa(i->x()) +
+                    "_to_" +
+                    StringOps::itoa(*j);
+
+                component.remoteIDs[*j] = hpx::id_type(HPXReceiver<DummyMessage>::find(linkName).get());
+            }
+        }
+
         std::cout << "setting up dataflow\n";
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
             lastTimeStepFutures[i->x()] = hpx::make_ready_future(UpdateResultFuture());
@@ -220,13 +247,15 @@ public:
                     // receiveMessagesFutures << components[i->x()].receivers[*j].get(t);
                 }
 
-                auto Operation = boost::bind(&DummyModel::update, *components[i->x()].cell, _1, _2);
+                auto Operation = boost::bind(&DummyModel::update, *components[i->x()].cell, _1, _2, _3, _4);
 
                 thisTimeStepFutures[i->x()] = dataflow(
                     hpx::launch::async,
                     Operation,
                     receiveMessagesFutures,
-                    lastTimeStepFutures[i->x()]);
+                    lastTimeStepFutures[i->x()],
+                    t,
+                    components[i->x()].remoteIDs);
 
                 // for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
 
