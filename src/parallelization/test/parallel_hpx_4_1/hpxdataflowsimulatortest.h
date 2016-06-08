@@ -137,13 +137,19 @@ private:
      std::vector<int> getNeighbors(int id) const
      {
          std::vector<int> neighbors;
-         // fixme: have more connections
-         if (id != 0) {
+
+         if (id > 0) {
              neighbors << (id - 1);
          }
+         if (id > 1) {
+             neighbors << (id - 2);
+         }
 
-         if (id != (gridSize - 1)) {
+         if (id < (gridSize - 1)) {
              neighbors << (id + 1);
+         }
+         if (id < (gridSize - 2)) {
+             neighbors << (id + 2);
          }
 
          return neighbors;
@@ -214,6 +220,15 @@ public:
         cell->update(hood, step + 1);
     }
 
+    static std::string endpointName(int sender, int receiver)
+    {
+        return "HPXDataflowSimulatorEndPoint_" +
+            StringOps::itoa(sender) +
+            "_to_" +
+            StringOps::itoa(receiver);
+
+    }
+
     CELL *cell;
     std::map<int, std::shared_ptr<HPXReceiver<DummyMessage> > > receivers;
     std::map<int, hpx::id_type> remoteIDs;
@@ -259,12 +274,10 @@ public:
             std::vector<int> neighbors;
             adjacency->getNeighbors(i->x(), &neighbors);
 
+            // fixme: move this to constructor of testcomponent
             for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                component.receivers[*j] = HPXReceiver<DummyMessage>::make(
-                    "hpx_receiver_" +
-                    StringOps::itoa(*j) +
-                    "_to_" +
-                    StringOps::itoa(i->x())).get();
+                std::string linkName = TestComponent<DummyMessage>::endpointName(*j, i->x());
+                component.receivers[*j] = HPXReceiver<DummyMessage>::make(linkName).get();
             }
 
             components[i->x()] = component;
@@ -277,17 +290,11 @@ public:
             adjacency->getNeighbors(i->x(), &neighbors);
 
             for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                // fixme: create name in dedicated function
-                std::string linkName = "hpx_receiver_" +
-                    StringOps::itoa(i->x()) +
-                    "_to_" +
-                    StringOps::itoa(*j);
-
+                std::string linkName = TestComponent<DummyMessage>::endpointName(i->x(), *j);
                 component.remoteIDs[*j] = hpx::id_type(HPXReceiver<DummyMessage>::find(linkName).get());
             }
         }
 
-        std::cout << "setting up dataflow\n";
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
             lastTimeStepFutures << hpx::make_ready_future(UpdateResultFuture());
         }
