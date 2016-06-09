@@ -87,6 +87,7 @@ public:
 
     static std::string endpointName(int sender, int receiver)
     {
+        // fixme: make this prefix configurable
         return "HPXDataflowSimulatorEndPoint_" +
             StringOps::itoa(sender) +
             "_to_" +
@@ -105,6 +106,8 @@ public:
 /**
  * Experimental Simulator based on (surprise surprise) HPX' dataflow
  operator. Primary use case (for now) is DGSWEM.
+ *
+ * fixme: add partitioning scheme for placement of cells
  */
 template<typename CELL>
 class HPXDataflowSimulator : public DistributedSimulator<CELL>
