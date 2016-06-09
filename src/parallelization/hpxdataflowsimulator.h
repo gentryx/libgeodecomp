@@ -137,11 +137,13 @@ public:
 
         Region<1> localRegion;
         CoordBox<1> box = initializer->gridBox();
-        int rank = hpx::get_locality_id();
+        std::size_t rank = hpx::get_locality_id();
         // fixme: don't hardcode num of localities
-        for (int i = ((rank + 0) * box.dimensions.x() / 4);
-             i <     ((rank + 1) * box.dimensions.x() / 4);
-             ++i) {
+        std::size_t numLocalities = hpx::get_num_localities().get();
+        std::size_t start = ((rank + 0) * box.dimensions.x() / numLocalities);
+        std::size_t end   = ((rank + 1) * box.dimensions.x() / numLocalities);
+
+        for (std::size_t i = start; i < end; ++i) {
             localRegion << Coord<1>(i);
         }
 
@@ -164,6 +166,7 @@ public:
             neighbors.clear();
             adjacency->getNeighbors(i->x(), &neighbors);
 
+            // fixme: move this initialization into the c-tor of the CellComponent:
             for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
                 std::string linkName = HPXDataFlowSimulatorHelpers::CellComponent<MessageType, MessageType>::endpointName(
                     i->x(), *j);
@@ -171,6 +174,7 @@ public:
             }
         }
 
+        // fixme: also create dataflow in cellcomponent
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
             lastTimeStepFutures << hpx::make_ready_future(UpdateResultFuture());
         }
