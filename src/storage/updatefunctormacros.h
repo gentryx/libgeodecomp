@@ -1,6 +1,10 @@
 #ifndef LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROS_H
 #define LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROS_H
 
+#if !defined(LGD_CHUNK_THRESHOLD)
+#define LGD_CHUNK_THRESHOLD 0
+#endif
+
 #ifdef LIBGEODECOMP_WITH_THREADS
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1                         \
     if (concurrencySpec.enableOpenMP() &&                               \
@@ -41,25 +45,53 @@
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
+// fixme: replace with executor parameter
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3                         \
     if (concurrencySpec.enableHPX() && !modelThreadingSpec.hasHPX()) {  \
-        hpx::parallel::for_each(                                        \
-            hpx::parallel::par,                                         \
-            boost::make_counting_iterator(std::size_t(0)),              \
-            boost::make_counting_iterator(region.numPlanes()),          \
-            [&](std::size_t c) {                                        \
-                typename Region<DIM>::StreakIterator e =                \
-                    region.planeStreakIterator(c + 1);                  \
-                typedef typename Region<DIM>::StreakIterator Iter;      \
-                for (Iter i = region.planeStreakIterator(c + 0);        \
-                     i != e;                                            \
-                     ++i) {                                             \
-                    LGD_UPDATE_FUNCTOR_BODY;                            \
+        std::vector<hpx::future<void> > updateFutures;                  \
+        updateFutures.reserve(region.numPlanes());                      \
+        typedef typename Region<DIM>::StreakIterator Iter;              \
+        Iter begin = region.beginStreak();                              \
+        Iter end = region.endStreak();                                  \
+        const int chunkThreshold = LGD_CHUNK_THRESHOLD;                 \
+        while(begin != end) {                                           \
+            Iter next = begin;                                          \
+            int chunkLength = 0;                                        \
+            while(next != end) {                                        \
+                chunkLength += next->length();                          \
+                ++next;                                                 \
+                if(chunkLength >= chunkThreshold || next == end) {      \
+                    updateFutures << hpx::async(                        \
+                        [&](Iter i, Iter end) {                         \
+                            for(; i != end; ++i) {                      \
+                                LGD_UPDATE_FUNCTOR_BODY;                \
+                            }                                           \
+                        }, begin, next);                                \
+                    break;                                              \
                 }                                                       \
-            });                                                         \
-                                                                        \
+            }                                                           \
+            begin = next;                                               \
+        }                                                               \
+        hpx::wait_all(updateFutures);                                   \
         return;                                                         \
     }                                                                   \
+//         hpx::parallel::for_each(                                        \
+//             hpx::parallel::par,                                         \
+//             boost::make_counting_iterator(std::size_t(0)),              \
+//             boost::make_counting_iterator(region.numPlanes()),          \
+//             [&](std::size_t c) {                                        \
+//                 typename Region<DIM>::StreakIterator e =                \
+//                     region.planeStreakIterator(c + 1);                  \
+//                 typedef typename Region<DIM>::StreakIterator Iter;      \
+//                 for (Iter i = region.planeStreakIterator(c + 0);        \
+//                      i != e;                                            \
+//                      ++i) {                                             \
+//                     LGD_UPDATE_FUNCTOR_BODY;                            \
+//                 }                                                       \
+//             });                                                         \
+//                                                                         \
+//         return;                                                         \
+//     }                                                                   \
     /**/
 #else
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3

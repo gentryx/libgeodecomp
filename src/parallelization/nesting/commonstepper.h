@@ -101,7 +101,7 @@ protected:
     Region<DIM> kernelFraction;
     bool enableFineGrainedParallelism;
 
-    inline void notifyPatchAccepters(
+    virtual inline void notifyPatchAccepters(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
@@ -123,7 +123,7 @@ protected:
         }
     }
 
-    inline void notifyPatchProviders(
+    virtual inline void notifyPatchProviders(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
