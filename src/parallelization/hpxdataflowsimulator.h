@@ -199,7 +199,7 @@ public:
                             receiveMessagesFutures << components[i->x()].receivers[*j]->get(t);
                         } else {
                             int data = *j * 100 + i->x();
-                            receiveMessagesFutures <<  hpx::make_ready_future(MessageType(*j, i->x(), 0, data));
+                            receiveMessagesFutures <<  hpx::make_ready_future(MessageType());
                         }
                 }
 
@@ -212,6 +212,7 @@ public:
                     neighbors,
                     receiveMessagesFutures,
                     lastTimeStepFutures[index],
+                    // fixme: nanoStep!
                     t);
 
                 ++index;

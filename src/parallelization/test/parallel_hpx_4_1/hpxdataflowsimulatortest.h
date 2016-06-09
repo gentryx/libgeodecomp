@@ -64,14 +64,17 @@ public:
         // fixme: make sure nanosteps are being issued here, not global steps:
         int nanoStep)
     {
-	for (auto&& neighbor: neighbors) {
-            // fixme: use actual step AND nanoStep here
-            int expectedData = 10000 * (nanoStep - 1) + neighbor * 100 + id;
-            TS_ASSERT_EQUALS(hood[neighbor].data,       expectedData);
-            TS_ASSERT_EQUALS(hood[neighbor].timestep,   (nanoStep - 1));
-            TS_ASSERT_EQUALS(hood[neighbor].senderID,   neighbor);
-            TS_ASSERT_EQUALS(hood[neighbor].receiverID, id);
-	}
+        // fixme: don't check for nanoStep, but step. also: why 1, not 0?
+        if (nanoStep > 1) {
+            for (auto&& neighbor: neighbors) {
+                // fixme: use actual step AND nanoStep here
+                int expectedData = 10000 * (nanoStep - 1) + neighbor * 100 + id;
+                TS_ASSERT_EQUALS(hood[neighbor].data,       expectedData);
+                TS_ASSERT_EQUALS(hood[neighbor].timestep,   (nanoStep - 1));
+                TS_ASSERT_EQUALS(hood[neighbor].senderID,   neighbor);
+                TS_ASSERT_EQUALS(hood[neighbor].receiverID, id);
+            }
+        }
 
         for (auto&& neighbor: neighbors) {
             // fixme: use actual step AND nanoStep here
