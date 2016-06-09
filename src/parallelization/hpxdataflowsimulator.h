@@ -61,6 +61,7 @@ class CellComponent
 {
 public:
     // fixme: move semantics
+    // fixme: own cell, not just pointer, to facilitate migration of components
     explicit CellComponent(CELL *cell = 0, int id = -1, std::vector<int> neighbors = std::vector<int>()) :
         cell(cell),
         id(id)
@@ -101,9 +102,6 @@ public:
 
 }
 
-// fixme
-class DummyMessage;
-
 /**
  * Experimental Simulator based on (surprise surprise) HPX' dataflow
  operator. Primary use case (for now) is DGSWEM.
@@ -112,6 +110,7 @@ template<typename CELL>
 class HPXDataflowSimulator : public DistributedSimulator<CELL>
 {
 public:
+    typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
     using DistributedSimulator<CELL>::initializer;
 
     inline HPXDataflowSimulator(Initializer<CELL> *initializer) :
@@ -149,26 +148,26 @@ public:
         boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency(localRegion);
 
         // fixme: instantiate components in agas and only hold ids of those
-        std::map<int, HPXDataFlowSimulatorHelpers::CellComponent<CELL, DummyMessage> > components;
+        std::map<int, HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> > components;
         std::vector<int> neighbors;
 
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
             neighbors.clear();
             adjacency->getNeighbors(i->x(), &neighbors);
-            HPXDataFlowSimulatorHelpers::CellComponent<CELL, DummyMessage> component(&grid[*i], i->x(), neighbors);
+            HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> component(&grid[*i], i->x(), neighbors);
             components[i->x()] = component;
         }
 
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            HPXDataFlowSimulatorHelpers::CellComponent<CELL, DummyMessage>& component = components[i->x()];
+            HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>& component = components[i->x()];
 
             neighbors.clear();
             adjacency->getNeighbors(i->x(), &neighbors);
 
             for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                std::string linkName = HPXDataFlowSimulatorHelpers::CellComponent<DummyMessage, DummyMessage>::endpointName(
+                std::string linkName = HPXDataFlowSimulatorHelpers::CellComponent<MessageType, MessageType>::endpointName(
                     i->x(), *j);
-                component.remoteIDs[*j] = hpx::id_type(HPXReceiver<DummyMessage>::find(linkName).get());
+                component.remoteIDs[*j] = hpx::id_type(HPXReceiver<MessageType>::find(linkName).get());
             }
         }
 
@@ -184,7 +183,7 @@ public:
 
             for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
 
-                std::vector<hpx::shared_future<DummyMessage> > receiveMessagesFutures;
+                std::vector<hpx::shared_future<MessageType> > receiveMessagesFutures;
                 neighbors.clear();
                 adjacency->getNeighbors(i->x(), &neighbors);
 
@@ -193,11 +192,11 @@ public:
                             receiveMessagesFutures << components[i->x()].receivers[*j]->get(t);
                         } else {
                             int data = *j * 100 + i->x();
-                            receiveMessagesFutures <<  hpx::make_ready_future(DummyMessage(*j, i->x(), 0, data));
+                            receiveMessagesFutures <<  hpx::make_ready_future(MessageType(*j, i->x(), 0, data));
                         }
                 }
 
-                auto Operation = boost::bind(&HPXDataFlowSimulatorHelpers::CellComponent<CELL, DummyMessage>::update,
+                auto Operation = boost::bind(&HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>::update,
                                              components[i->x()], _1, _2, _3, _4);
 
                 thisTimeStepFutures[index] = dataflow(

@@ -48,7 +48,8 @@ class DummyModel
 {
 public:
     class API :
-        public APITraits::HasUnstructuredTopology
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasCustomMessageType<DummyMessage>
     {};
 
     DummyModel(int id = -1, const std::vector<int>& neighbors = std::vector<int>()) :
