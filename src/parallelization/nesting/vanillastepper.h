@@ -39,8 +39,6 @@ public:
     using ParentType::patchProviders;
     using ParentType::partitionManager;
     using ParentType::chronometer;
-    using ParentType::notifyPatchAccepters;
-    using ParentType::notifyPatchProviders;
 
     using ParentType::innerSet;
     using ParentType::saveKernel;
@@ -112,7 +110,7 @@ private:
             }
         }
 
-        notifyPatchAccepters(innerSet(ghostZoneWidth()), ParentType::INNER_SET, globalNanoStep());
+       this->notifyPatchAccepters(innerSet(ghostZoneWidth()), ParentType::INNER_SET, globalNanoStep());
 
         if (validGhostZoneWidth == 0) {
             updateGhost();
@@ -121,18 +119,18 @@ private:
 
         index = ghostZoneWidth() - validGhostZoneWidth;
         const Region<DIM>& nextRegion = innerSet(index);
-        notifyPatchProviders(nextRegion, ParentType::INNER_SET, globalNanoStep());
+        this->notifyPatchProviders(nextRegion, ParentType::INNER_SET, globalNanoStep());
     }
 
     inline void initGrids()
     {
         initGridsCommon();
 
-        notifyPatchAccepters(
+        this->notifyPatchAccepters(
             rim(),
             ParentType::GHOST,
             globalNanoStep());
-        notifyPatchAccepters(
+        this->notifyPatchAccepters(
             innerSet(ghostZoneWidth()),
             ParentType::INNER_SET,
             globalNanoStep());
@@ -174,7 +172,7 @@ private:
         std::size_t curGlobalNanoStep = globalNanoStep();
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
-            notifyPatchProviders(rim(t), ParentType::GHOST, globalNanoStep());
+            this->notifyPatchProviders(rim(t), ParentType::GHOST, globalNanoStep());
 
             {
                 TimeComputeGhost timer(&chronometer);
@@ -200,7 +198,7 @@ private:
                 ++curGlobalNanoStep;
             }
 
-            notifyPatchAccepters(rim(ghostZoneWidth()), ParentType::GHOST, curGlobalNanoStep);
+            this->notifyPatchAccepters(rim(ghostZoneWidth()), ParentType::GHOST, curGlobalNanoStep);
         }
 
         {

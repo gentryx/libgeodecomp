@@ -19,7 +19,7 @@
 #include <libgeodecomp/parallelization/nesting/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/nesting/steereradapter.h>
 #include <libgeodecomp/parallelization/nesting/stepper.h>
-#include <libgeodecomp/parallelization/nesting/vanillastepper.h>
+#include <libgeodecomp/parallelization/nesting/hpxstepper.h>
 
 namespace LibGeoDecomp {
 namespace HpxSimulatorHelpers {
@@ -36,7 +36,7 @@ void gatherAndBroadcastLocalityIndices(
 template<
     class CELL_TYPE,
     class PARTITION,
-    class STEPPER=LibGeoDecomp::VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableHPX>
+    class STEPPER=LibGeoDecomp::HPXStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableHPX>
 >
 class HpxSimulator : public HierarchicalSimulator<CELL_TYPE>
 {
@@ -190,9 +190,16 @@ public:
 
     std::vector<Chronometer> gatherStatistics()
     {
-        // fixme
-        Chronometer statistics;
-        return std::vector<Chronometer>(1, statistics);
+        // fixme: gather from all updategroups
+
+        std::vector<Chronometer> statistics;
+        statistics.reserve(updateGroups.size());
+
+        for (auto& i: updateGroups) {
+            statistics << i->statistics();
+        }
+
+        return statistics;
     }
 
 private:
