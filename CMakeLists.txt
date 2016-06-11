@@ -47,7 +47,7 @@ else()
 endif()
 
 find_package(Boost COMPONENTS serialization)
-set(BOOST_SERIALIZATION_LIBS "${Boost_LIBRARIES}")
+set(Boost_SERIALIZATION_LIBRARIES "${Boost_LIBRARIES}")
 
 find_package(Boost COMPONENTS mpi)
 set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
