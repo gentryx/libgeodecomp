@@ -18,7 +18,7 @@ public:
     static std::string renderISO(double time)
     {
         double intFraction;
-        double uSecondsSinceEpoch = std::modf(time, &intFraction) * 1.0e6;
+        int uSecondsSinceEpoch = std::modf(time, &intFraction) * 1.0e6;
         time_t secondsSinceEpoch = intFraction;
         tm timeSpec;
         gmtime_r(&secondsSinceEpoch, &timeSpec);
