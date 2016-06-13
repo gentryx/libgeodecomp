@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_IO_TIME_H
 
 #include <cmath>
+#include <ctime>
 #include <iomanip>
 #include <sstream>
 
@@ -16,17 +17,16 @@ class Time
 public:
     static std::string renderISO(double time)
     {
-        timeval secondsSinceEpoch;
         double intFraction;
-        secondsSinceEpoch.tv_usec = std::modf(time, &intFraction) * 1.0e6;
-        secondsSinceEpoch.tv_sec = intFraction;
+        double uSecondsSinceEpoch = std::modf(time, &intFraction) * 1.0e6;
+        time_t secondsSinceEpoch = intFraction;
         tm timeSpec;
-        gmtime_r(&secondsSinceEpoch.tv_sec, &timeSpec);
+        gmtime_r(&secondsSinceEpoch, &timeSpec);
         char buf[1024];
         strftime(buf, 1024, "%Y.%m.%d %H:%M:%S", &timeSpec);
 
         std::stringstream stream;
-        stream  << buf << "." << std::setw(6) << std::setfill('0') << secondsSinceEpoch.tv_usec;
+        stream  << buf << "." << std::setw(6) << std::setfill('0') << uSecondsSinceEpoch;
 
         return stream.str();
     }
