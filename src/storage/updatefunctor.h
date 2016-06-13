@@ -272,11 +272,11 @@ public:
         UnstructuredUpdateFunctor<CELL>()(region, gridOld, gridNew, nanoStep, concurrencySpec, modelThreadingSpec);
         // }
         // fixme
-// #define LGD_UPDATE_FUNCTOR_BODY                                         
-//         Streak<DIM> sourceStreak(i->origin + sourceOffset,              
-//                                  i->endX + sourceOffset.x());           
-//         UnstructuredUpdateFunctor<CELL>()(                              
-//             sourceStreak, gridOld, gridNew, nanoStep);                  
+// #define LGD_UPDATE_FUNCTOR_BODY
+//         Streak<DIM> sourceStreak(i->origin + sourceOffset,
+//                                  i->endX + sourceOffset.x());
+//         UnstructuredUpdateFunctor<CELL>()(
+//             sourceStreak, gridOld, gridNew, nanoStep);
 //         /**/
 //         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
 //         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2

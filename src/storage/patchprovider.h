@@ -48,17 +48,17 @@ public:
         const bool remove=true) = 0;
 
 #ifdef LIBGEODECOMP_WITH_HPX
-    virtual void get(
+    virtual hpx::future<void> getAsync(
         GRID_TYPE *destinationGrid,
         const Region<DIM>& patchableRegion,
         const Coord<DIM>& globalGridDimensions,
         const std::size_t nanoStep,
         const std::size_t rank,
-        hpx::lcos::local::spinlock& mutex,
         const bool remove=true)
     {
-        std::unique_lock<hpx::lcos::local::spinlock> lock(mutex);
-        this->get(destinationGrid, patchableRegion, globalGridDimensions, nanoStep, rank, remove);
+        return hpx::async(&PatchProvider::get, this,
+            destinationGrid, std::cref(patchableRegion),
+            std::cref(globalGridDimensions), nanoStep, rank, remove);
     }
 #endif
 
