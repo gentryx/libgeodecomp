@@ -559,7 +559,8 @@ private:
         Coord<2> chunkOffset = gridIndex.scale(chunkDim);
 
         for (int i = 0; i < elementsPerChunk; ++i) {
-            Coord<2> randomCoord = Coord<2>(Random::gen_u(chunkDim.x()), Random::gen_u(chunkDim.y()));
+            Coord<2> randomCoord = Coord<2>(Random::genUnsigned(chunkDim.x()),
+                                            Random::genUnsigned(chunkDim.y()));
             randomCoord += chunkOffset;
 
             if (doesNotCollide(randomCoord, *grid, gridIndex, minDistance)) {

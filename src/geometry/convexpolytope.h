@@ -182,8 +182,8 @@ public:
 
         int hits = 0;
         for (std::size_t i = 0; i < SAMPLES; ++i) {
-            COORD p = COORD(Random::gen_d(delta[0]),
-                            Random::gen_d(delta[1])) + min;
+            COORD p = COORD(Random::genDouble(delta[0]),
+                            Random::genDouble(delta[1])) + min;
             if (includes(p)) {
                 ++hits;
             }

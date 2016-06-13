@@ -15,14 +15,14 @@ unsigned randomMT();
 class Random
 {
 public:
-    static inline unsigned gen_u(const unsigned max = std::numeric_limits<unsigned>::max())
+    static inline unsigned genUnsigned(const unsigned max = std::numeric_limits<unsigned>::max())
     {
         return randomMT() % (unsigned)max;
     }
 
-    static inline double gen_d(const double max = 1.0)
+    static inline double genDouble(const double max = 1.0)
     {
-        return (double)gen_u() / double(std::numeric_limits<unsigned>::max()) * max;
+        return (double)genUnsigned() / double(std::numeric_limits<unsigned>::max()) * max;
     }
 
     static inline void seed(const unsigned newSeed)

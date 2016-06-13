@@ -39,11 +39,11 @@ public:
 
         init.seedRNG(Coord<3>(199, 0, 0));
         for (int i = 0; i < 10; ++i) {
-            expected << Random::gen_d();
+            expected << Random::genDouble();
         }
         init.seedRNG(Coord<3>(-1, 0, 0));
         for (int i = 0; i < 10; ++i) {
-            actual << Random::gen_d();
+            actual << Random::genDouble();
         }
         TS_ASSERT_EQUALS(actual, expected);
         actual.clear();
@@ -51,11 +51,11 @@ public:
 
         init.seedRNG(Coord<3>(50, 99, 25));
         for (int i = 0; i < 10; ++i) {
-            expected << Random::gen_d();
+            expected << Random::genDouble();
         }
         init.seedRNG(Coord<3>(50, -1, 25));
         for (int i = 0; i < 10; ++i) {
-            actual << Random::gen_d();
+            actual << Random::genDouble();
         }
         TS_ASSERT_EQUALS(actual, expected);
         actual.clear();
@@ -63,11 +63,11 @@ public:
 
         init.seedRNG(Coord<3>(160, 99, 49));
         for (int i = 0; i < 10; ++i) {
-            expected << Random::gen_d();
+            expected << Random::genDouble();
         }
         init.seedRNG(Coord<3>(160, 99, -1));
         for (int i = 0; i < 10; ++i) {
-            actual << Random::gen_d();
+            actual << Random::genDouble();
         }
         TS_ASSERT_EQUALS(actual, expected);
         actual.clear();
@@ -75,11 +75,11 @@ public:
 
         init.seedRNG(Coord<3>(160, 99, 49));
         for (int i = 0; i < 10; ++i) {
-            expected << Random::gen_d();
+            expected << Random::genDouble();
         }
         init.seedRNG(Coord<3>(161, 99, -2));
         for (int i = 0; i < 10; ++i) {
-            actual << Random::gen_d();
+            actual << Random::genDouble();
         }
         TS_ASSERT_DIFFERS(actual, expected);
         actual.clear();

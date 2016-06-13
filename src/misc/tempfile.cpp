@@ -25,7 +25,7 @@ std::string TempFile::serial(const std::string& prefix)
         std::string name = tempDir? tempDir : "/tmp";
         buf << '/';
 #endif
-        unsigned r = Random::gen_u();
+        unsigned r = Random::genUnsigned();
         std::string filename = prefix + StringOps::itoa(r);
         buf << filename;
         name += buf.str();
