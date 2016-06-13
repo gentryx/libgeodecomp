@@ -5,6 +5,7 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/geometry/adjacency.h>
 #include <boost/shared_ptr.hpp>
+#include <limits>
 
 namespace LibGeoDecomp {
 
