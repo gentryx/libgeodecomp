@@ -42,7 +42,7 @@ public:
     void testBasic()
     {
         mySetUp("HPXReceiverTest::testBasic");
-        boost::shared_ptr<ReceiverType1> receiver = ReceiverType1::make(name).get();
+        std::shared_ptr<ReceiverType1> receiver = ReceiverType1::make(name).get();
 
         hpx::id_type leftID  = ReceiverType1::find(leftName ).get();
         hpx::id_type rightID = ReceiverType1::find(rightName).get();
@@ -72,7 +72,7 @@ public:
         hpx::serialization::serialize_buffer<char> sendLeftBuffer( &sendToLeft[0],  sendToLeft.size());
         hpx::serialization::serialize_buffer<char> sendRightBuffer(&sendToRight[0], sendToRight.size());
 
-        boost::shared_ptr<ReceiverType2> receiver = ReceiverType2::make(name).get();
+        std::shared_ptr<ReceiverType2> receiver = ReceiverType2::make(name).get();
 
         hpx::id_type leftID  = ReceiverType2::find(leftName ).get();
         hpx::id_type rightID = ReceiverType2::find(rightName).get();
@@ -98,7 +98,7 @@ public:
         double sendToLeft  = rank + 10.123;
         double sendToRight = rank + 10.234;
 
-        boost::shared_ptr<ReceiverType3> receiver = ReceiverType3::make(name).get();
+        std::shared_ptr<ReceiverType3> receiver = ReceiverType3::make(name).get();
 
         hpx::id_type leftID  = ReceiverType3::find(leftName ).get();
         hpx::id_type rightID = ReceiverType3::find(rightName).get();
@@ -118,7 +118,7 @@ public:
     void testMultipleReceivers()
     {
         std::string name = "testMultipleReceivers";
-        boost::shared_ptr<ReceiverType3> receiver = ReceiverType3::make(name, rank).get();
+        std::shared_ptr<ReceiverType3> receiver = ReceiverType3::make(name, rank).get();
         std::vector<hpx::future<hpx::id_type> > futures = ReceiverType3::find_all(name, size);
         std::vector<hpx::id_type> ids = hpx::util::unwrapped(futures);
 

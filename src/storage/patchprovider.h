@@ -3,6 +3,7 @@
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/lcos/local/spinlock.hpp>
+#include <mutex>
 #endif
 
 #include <limits>
@@ -56,7 +57,7 @@ public:
         hpx::lcos::local::spinlock& mutex,
         const bool remove=true)
     {
-        hpx::lcos::local::spinlock::scoped_lock lock(mutex);
+        std::unique_lock<hpx::lcos::local::spinlock> lock(mutex);
         this->get(destinationGrid, patchableRegion, globalGridDimensions, nanoStep, rank, remove);
     }
 #endif
