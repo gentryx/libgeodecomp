@@ -77,7 +77,7 @@ public:
         for (int i = 0; i < 10; ++i) {
             expected << Random::gen_d();
         }
-        init.seedRNG(Coord<3>(161, 99, -1));
+        init.seedRNG(Coord<3>(161, 99, -2));
         for (int i = 0; i < 10; ++i) {
             actual << Random::gen_d();
         }
