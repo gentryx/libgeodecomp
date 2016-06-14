@@ -36,8 +36,8 @@ public:
     void testUnsigned()
     {
         int repeats = 1000;
-        long max = long(std::numeric_limits<unsigned>::max()) * repeats;
-        long sum = 0;
+        long long max = (long long)(std::numeric_limits<unsigned>::max()) * repeats;
+        long long sum = 0;
 
         for (int i = 0; i < repeats; ++i) {
             sum += Random::genUnsigned();
