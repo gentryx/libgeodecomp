@@ -5,6 +5,7 @@
 #ifdef LIBGEODECOMP_WITH_MPI
 
 #include <deque>
+#include <limits>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 #include <libgeodecomp/storage/patchprovider.h>
@@ -160,8 +161,8 @@ public:
 
         void sendHeader(APITraits::FalseType)
         {
-            if (buffer.size() > INT_MAX) {
-                throw std::invalid_argument("buffer size exceeds INT_MAX");
+            if (buffer.size() > std::numeric_limits<int>::max()) {
+                throw std::invalid_argument("buffer size exceeds std::numeric_limits<int>::max()");
             }
 
             dataSize = buffer.size();

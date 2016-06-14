@@ -1,6 +1,7 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/random.h>
 #include <cxxtest/TestSuite.h>
+#include <limits>
 
 using namespace LibGeoDecomp;
 
@@ -35,8 +36,9 @@ public:
     void testUnsigned()
     {
         int repeats = 1000;
-        long long max = (long long)boost::integer_traits<unsigned>::const_max * repeats;
-        long long sum = 0;
+        long max = long(std::numeric_limits<unsigned>::max()) * repeats;
+        long sum = 0;
+
         for (int i = 0; i < repeats; ++i) {
             sum += Random::genUnsigned();
         }
