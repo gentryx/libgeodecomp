@@ -52,22 +52,35 @@ set(Boost_SERIALIZATION_LIBRARIES "${Boost_LIBRARIES}")
 find_package(Boost COMPONENTS mpi)
 set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
 
-if(NOT DEFINED Boost_INCLUDE_DIR)
-  set(Boost_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/boost")
-endif()
-
 # search for external LibFlatArray, but -- if none was found -- default to bundled version:
 find_package(libflatarray QUIET)
 if(NOT libflatarray_FOUND)
+  message(andi internal)
   add_subdirectory(lib/libflatarray)
   # add this include paths only to BUILD_INCLUDE_DIRECTORIES as must
   # not be exported during install in any case (the build tree must be
   # considered a temporary directory, and CMake would complain).
   list(APPEND BUILD_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/libflatarray/src")
 else()
+  message(andi external ${libflatarray_INCLUDE_DIR})
   # if LibFlatArray was found outside, we'll assume we're not using
   # the bundled version and we need export the relevant directory:
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${libflatarray_INCLUDE_DIR})
+endif()
+
+# use bundled Boost if none is found
+if(USING_BUNDLED_BOOST)
+  set(Boost_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/libflatarray/lib/boost")
+  set(Boost_INCLUDE_DIRS "${Boost_INCLUDE_DIR}")
+  mark_as_advanced(FORCE Boost_INCLUDE_DIR)
+  # add this include paths only to BUILD_INCLUDE_DIRECTORIES as must
+  # not be exported during install in any case (the build tree must be
+  # considered a temporary directory, and CMake would complain).
+  list(APPEND BUILD_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIRS}")
+else()
+  # if Boost was found outside, we'll assume we're not using
+  # the bundled version and we need export the relevant directory:
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 endif()
 
 # currently VisIt only supports Python 2.x. This (undocumented?)

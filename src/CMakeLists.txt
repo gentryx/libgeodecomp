@@ -66,8 +66,6 @@ if(WITH_THREADS)
   endif()
 endif()
 
-list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
-
 set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} ${libflatarray_FLAGS}")
 
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_AGGREGATED_C_FLAGS}")
@@ -297,17 +295,6 @@ if(WITH_QT5)
     ${Qt5Gui_location}
     ${Qt5OpenGL_location}
     ${Qt5Widgets_location})
-endif()
-
-if(WITH_THREADS)
-  if (WITH_LIBPTHREAD)
-    # some systems (e.g. my devel notebook) require manually linking pthreads for OpenMP...
-    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-      set(LIBGEODECOMP_LINK_LIBRARIES
-        ${LIBGEODECOMP_LINK_LIBRARIES}
-        pthread)
-    endif()
-  endif()
 endif()
 
 if(WITH_MPI)
