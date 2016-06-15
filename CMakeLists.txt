@@ -52,6 +52,10 @@ set(Boost_SERIALIZATION_LIBRARIES "${Boost_LIBRARIES}")
 find_package(Boost COMPONENTS mpi)
 set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
 
+if(NOT DEFINED Boost_INCLUDE_DIR)
+  set(Boost_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/boost")
+endif()
+
 # search for external LibFlatArray, but -- if none was found -- default to bundled version:
 find_package(libflatarray QUIET)
 if(NOT libflatarray_FOUND)
