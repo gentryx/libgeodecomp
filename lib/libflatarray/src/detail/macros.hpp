@@ -170,12 +170,12 @@
 
 #define LIBFLATARRAY_COPY_SOA_MEMBER_ARRAY_IN(MEMBER_INDEX, CELL, MEMBER) \
     {                                                                   \
-        for (std::size_t i = offset; i < (offset + count); ++i) {       \
+        for (std::size_t i = 0; i < count; ++i) {                       \
             (&this->BOOST_PP_SEQ_ELEM(1, MEMBER)())[i] =                \
             ((const BOOST_PP_SEQ_ELEM(0, MEMBER)*)(                     \
                 source +                                                \
                 detail::flat_array::offset<CELL, MEMBER_INDEX - 2>::OFFSET * \
-                stride))[i];                                            \
+                stride))[offset + i];                                   \
         }                                                               \
     }
 
@@ -204,11 +204,11 @@
 
 #define LIBFLATARRAY_COPY_SOA_MEMBER_ARRAY_OUT(MEMBER_INDEX, CELL, MEMBER) \
     {                                                                   \
-        for (std::size_t i = offset; i < (offset + count); ++i) {       \
+        for (std::size_t i = 0; i < count; ++i) {                       \
             ((BOOST_PP_SEQ_ELEM(0, MEMBER)*)(                           \
                 target +                                                \
                 detail::flat_array::offset<CELL, MEMBER_INDEX - 2>::OFFSET * \
-                stride))[i] =                                           \
+                stride))[offset + i] =                                  \
             (&this->BOOST_PP_SEQ_ELEM(1, MEMBER)())[i];                 \
         }                                                               \
     }
