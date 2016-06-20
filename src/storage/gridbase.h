@@ -37,6 +37,10 @@ public:
 
     const static int DIM = DIMENSIONS;
 
+    explicit inline GridBase(const Coord<DIM>& topoDimensions = Coord<DIM>()) :
+        topoDimensions(topoDimensions)
+    {}
+
     virtual ~GridBase()
     {}
 
@@ -193,6 +197,11 @@ public:
         throw std::logic_error("edge weights cannot be set on this grid type");
     }
 
+    const Coord<DIM>& topologicalDimensions() const
+    {
+        return topoDimensions;
+    }
+
 protected:
     virtual void saveMemberImplementation(
         char *target,
@@ -206,6 +215,7 @@ protected:
         const Selector<CELL>& selector,
         const Region<DIM>& region) = 0;
 
+    Coord<DIM> topoDimensions;
 };
 
 }
