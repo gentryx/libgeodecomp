@@ -252,6 +252,66 @@ private:
     long memberOffset;
 };
 
+template<typename ITERATOR, int DIM>
+class OffsetStreakIterator
+{
+public:
+    inline OffsetStreakIterator(const ITERATOR& delegate, Coord<3> offset) :
+        delegate(delegate),
+        offset(offset)
+    {
+        reset();
+    }
+
+    inline bool operator==(const OffsetStreakIterator other)
+    {
+        return delegate == other.delegate;
+    }
+
+    inline bool operator!=(const OffsetStreakIterator other)
+    {
+        return delegate != other.delegate;
+    }
+
+    inline const OffsetStreakIterator& operator*() const
+    {
+        return *this;
+    }
+
+    inline const OffsetStreakIterator *operator->() const
+    {
+        return this;
+    }
+
+    inline OffsetStreakIterator& operator++()
+    {
+        ++delegate;
+        reset();
+
+        return *this;
+    }
+
+    inline int length() const
+    {
+        return delegate->length();
+    }
+
+    Coord<3> origin;
+
+private:
+    ITERATOR delegate;
+    Coord<3> offset;
+
+    inline void reset()
+    {
+        origin = offset;
+
+        for (int i = 0; i < DIM; ++i) {
+            origin[i] += delegate->origin[i];
+        }
+    }
+};
+
 }
 
 /**
@@ -278,6 +338,8 @@ public:
      */
     static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<CELL>::VALUE;
 
+    using GridBase<CELL, TOPOLOGY::DIM>::topoDimensions;
+
     typedef CELL CellType;
     typedef TOPOLOGY Topology;
     typedef LibFlatArray::soa_grid<CELL> Delegate;
@@ -288,10 +350,10 @@ public:
         const CELL& defaultCell = CELL(),
         const CELL& edgeCell = CELL(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CELL, TOPOLOGY::DIM>(topologicalDimensions),
         edgeRadii(calcEdgeRadii()),
         edgeCell(edgeCell),
-        box(box),
-        topoDimensions(topologicalDimensions)
+        box(box)
     {
         actualDimensions = Coord<3>::diagonal(1);
         for (int i = 0; i < DIM; ++i) {
@@ -397,24 +459,16 @@ public:
     void saveRegion(BufferType *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
         SerializationBuffer<CELL>::resize(target, region);
-        char *dataIterator = target->data();
-
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-
-            Streak<DIM> s = *i;
-            std::size_t length = s.length();
-
-            Coord<3> effectiveCoord = edgeRadii;
-            for (int i = 0; i < DIM; ++i) {
-                effectiveCoord[i] += s.origin[i] - box.origin[i] + offset[i];
-            }
-
-            delegate.save(effectiveCoord[0], effectiveCoord[1], effectiveCoord[2], dataIterator, length);
-            dataIterator += length * AGGREGATED_MEMBER_SIZE;
+        Coord<3> actualOffset = edgeRadii;
+        for (int i = 0; i < DIM; ++i) {
+            actualOffset[i] += -box.origin[i] + offset[i];
         }
 
+        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
+        StreakIteratorType start(region.beginStreak(), actualOffset);
+        StreakIteratorType end(  region.endStreak(),   actualOffset);
+
+        delegate.save(start, end, target->data(), region.size());
     }
 
     void loadRegion(const BufferType& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
@@ -425,24 +479,17 @@ public:
                 "source buffer too small (is " + StringOps::itoa(source.size()) +
                 ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
         }
-        const char *dataIterator = source.data();
 
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-
-            Streak<DIM> s = *i;
-            std::size_t length = s.length();
-
-            Coord<3> effectiveCoord = edgeRadii;
-            for (int i = 0; i < DIM; ++i) {
-                effectiveCoord[i] += s.origin[i] - box.origin[i] + offset[i];
-            }
-
-            delegate.load(effectiveCoord[0], effectiveCoord[1], effectiveCoord[2], dataIterator, length);
-            dataIterator += length * AGGREGATED_MEMBER_SIZE;
+        Coord<3> actualOffset = edgeRadii;
+        for (int i = 0; i < DIM; ++i) {
+            actualOffset[i] += -box.origin[i] + offset[i];
         }
 
+        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
+        StreakIteratorType start(region.beginStreak(), actualOffset);
+        StreakIteratorType end(  region.endStreak(),   actualOffset);
+
+        delegate.load(start, end, source.data(), region.size());
     }
 
     static Coord<3> calcEdgeRadii()
@@ -482,7 +529,6 @@ private:
     Coord<3> actualDimensions;
     CELL edgeCell;
     CoordBox<DIM> box;
-    Coord<DIM> topoDimensions;
 
     CELL delegateGet(const Coord<1>& coord) const
     {
