@@ -586,7 +586,7 @@ private:
 
     void delegateSet(const Coord<1>& coord, const CELL& cell)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y(),
             edgeRadii.z(),
@@ -595,7 +595,7 @@ private:
 
     void delegateSet(const Coord<2>& coord, const CELL& cell)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y() + coord.y(),
             edgeRadii.z(),
@@ -604,7 +604,7 @@ private:
 
     void delegateSet(const Coord<3>& coord, const CELL& cell)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y() + coord.y(),
             edgeRadii.z() + coord.z(),
@@ -613,7 +613,7 @@ private:
 
     void delegateSet(const Coord<1>& coord, const CELL *cells, int count)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y(),
             edgeRadii.z(),
@@ -623,7 +623,7 @@ private:
 
     void delegateSet(const Coord<2>& coord, const CELL *cells, int count)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y() + coord.y(),
             edgeRadii.z(),
@@ -633,7 +633,7 @@ private:
 
     void delegateSet(const Coord<3>& coord, const CELL *cells, int count)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y() + coord.y(),
             edgeRadii.z() + coord.z(),
