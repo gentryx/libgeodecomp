@@ -414,8 +414,8 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
 
 LIBFLATARRAY_REGISTER_SOA(
     LibGeoDecomp::TestCellSoA,
-    ((double)(testValue))
     ((LibGeoDecomp::CoordBox<3>)(dimensions))
+    ((double)(testValue))
     ((LibGeoDecomp::Coord<3>)(pos))
     ((unsigned)(cycleCounter))
     ((bool)(isEdgeCell))
