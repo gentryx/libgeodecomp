@@ -25,7 +25,10 @@
 
 namespace LibGeoDecomp {
 
-template<typename CELL, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
+template<
+    typename CELL,
+    typename TOPOLOGY,
+    bool TOPOLOGICALLY_CORRECT>
 class SoAGrid;
 
 /**
@@ -265,7 +268,11 @@ private:
         }
     }
 
-    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, typename REGION_TYPE, bool TOPOLOGICALLY_CORRECT>
+    template<
+        typename CELL_TYPE,
+        typename TOPOLOGY_TYPE,
+        typename REGION_TYPE,
+        bool TOPOLOGICALLY_CORRECT>
     static void vectorToGrid(
         const std::vector<char>& vec,
         SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT> *grid,
@@ -342,7 +349,14 @@ private:
         }
     }
 
-    template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE, typename BOOST_SERIALIZATION_TYPE>
+    template<
+        typename CELL_TYPE,
+        std::size_t MATRICES,
+        typename VALUE_TYPE,
+        int C,
+        int SIGMA,
+        typename REGION_TYPE,
+        typename BOOST_SERIALIZATION_TYPE>
     static void vectorToGrid(
         const std::vector<char>& vec,
         UnstructuredSoAGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA> *grid,

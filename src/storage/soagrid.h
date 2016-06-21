@@ -329,16 +329,15 @@ public:
     friend class SelectorTest;
 
     using typename GridBase<CELL, TOPOLOGY::DIM>::BufferType;
-
+    using GridBase<CELL, TOPOLOGY::DIM>::topoDimensions;
     const static int DIM = TOPOLOGY::DIM;
+
     /**
      * Accumulated size of all members. Note that this may be lower
      * than sizeof(CELL) as the compiler may add padding within a
      * struct/class to ensure alignment.
      */
     static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<CELL>::VALUE;
-
-    using GridBase<CELL, TOPOLOGY::DIM>::topoDimensions;
 
     typedef CELL CellType;
     typedef TOPOLOGY Topology;

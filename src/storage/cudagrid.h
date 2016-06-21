@@ -27,14 +27,14 @@ public:
     typedef TOPOLOGY Topology;
 
     static const int DIM = Topology::DIM;
-
     using typename GridBase<CellType, DIM>::BufferType;
+    using GridBase<CellType, DIM>::topoDimensions;
 
     explicit inline CUDAGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CellType, DIM>(topologicalDimensions),
         box(box),
-        topoDimensions(topologicalDimensions),
         array(box.dimensions.prod()),
         edgeCellStore(1, CELL_TYPE())
     {}
@@ -213,7 +213,6 @@ protected:
 
 private:
     CoordBox<DIM> box;
-    Coord<DIM> topoDimensions;
     LibFlatArray::cuda_array<CellType> array;
     LibFlatArray::cuda_array<CellType> edgeCellStore;
     CellType hostEdgeCell;
