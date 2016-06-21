@@ -14,8 +14,6 @@ namespace LibGeoDecomp {
 class CUDASoAGridTest : public CxxTest::TestSuite
 {
 public:
-    // fixme: check out-of-range access for cube and torus
-
     void testConstructor()
     {
         TestCellSoA defaultCell(
@@ -50,7 +48,7 @@ public:
         TS_ASSERT_EQUALS(grid.getEdge(), edgeCell);
     }
 
-    void testGetSetEdge()
+    void testTorus()
     {
         TestCellSoA defaultCell(
             Coord<3>(1, 2, 3),
@@ -63,7 +61,59 @@ public:
             15,
             16);
 
-        Coord<3> dim(51, 43, 21);
+        Coord<3> dim(10, 40, 20);
+        Coord<3> origin(0, 0, 0);
+        CoordBox<3> box(origin, dim);
+        Region<3> region;
+        region << box;
+
+        CUDASoAGrid<TestCellSoA, Topologies::Torus<3>::Topology, true> grid(
+            box,
+            defaultCell,
+            edgeCell,
+            dim);
+
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TestCellSoA cell = defaultCell;
+            cell.pos = *i;
+            grid.set(*i, cell);
+        }
+
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TestCellSoA cell = grid.get(*i);
+            TS_ASSERT_EQUALS(cell.pos, *i);
+        }
+
+        TS_ASSERT_EQUALS(Coord<3>( 0,  0, 19), grid.get(Coord<3>( 0,  0, -1)).pos);
+        TS_ASSERT_EQUALS(Coord<3>( 3,  2, 19), grid.get(Coord<3>( 3,  2, -1)).pos);
+        TS_ASSERT_EQUALS(Coord<3>( 0,  0,  0), grid.get(Coord<3>( 0,  0, 20)).pos);
+        TS_ASSERT_EQUALS(Coord<3>( 4,  6,  0), grid.get(Coord<3>( 4,  6, 20)).pos);
+
+        TS_ASSERT_EQUALS(Coord<3>( 9,  0,  0), grid.get(Coord<3>(-1,  0,  0)).pos);
+        TS_ASSERT_EQUALS(Coord<3>( 9,  5,  3), grid.get(Coord<3>(-1,  5,  3)).pos);
+        TS_ASSERT_EQUALS(Coord<3>( 0,  0,  0), grid.get(Coord<3>(10,  0,  0)).pos);
+        TS_ASSERT_EQUALS(Coord<3>( 0,  6,  7), grid.get(Coord<3>(10,  6,  7)).pos);
+
+        TS_ASSERT_EQUALS(Coord<3>( 0, 39,  0), grid.get(Coord<3>( 0, -1,  0)).pos);
+        TS_ASSERT_EQUALS(Coord<3>( 2, 39,  6), grid.get(Coord<3>( 2, -1,  6)).pos);
+        TS_ASSERT_EQUALS(Coord<3>( 0,  0,  0), grid.get(Coord<3>( 0, 40,  0)).pos);
+        TS_ASSERT_EQUALS(Coord<3>( 3,  0,  9), grid.get(Coord<3>( 3, 40,  9)).pos);
+    }
+
+    void testGetSetEdge()
+    {
+        TestCellSoA defaultCell(
+            Coord<3>(101, 102, 103),
+            Coord<3>(104, 105, 106),
+            107,
+            108);
+        TestCellSoA edgeCell(
+            Coord<3>(109, 110, 111),
+            Coord<3>(112, 113, 114),
+            115,
+            116);
+
+        Coord<3> dim(64, 32, 21);
         Coord<3> origin(12, 41, 12);
         CoordBox<3> box(origin, dim);
 
