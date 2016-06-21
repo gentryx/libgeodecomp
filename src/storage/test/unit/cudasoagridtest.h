@@ -54,7 +54,57 @@ public:
 
     void testGetSetMultiple()
     {
-        
+        Coord<3> dim(123, 25, 63);
+        Coord<3> origin(10, 10, 10);
+        CoordBox<3> box(origin, dim);
+
+        CUDASoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> grid(box);
+
+        Region<3> region;
+        region << Streak<3>(Coord<3>(10, 10, 10), 100)
+               << Streak<3>(Coord<3>(20, 11, 10), 133)
+               << Streak<3>(Coord<3>(10, 24, 72), 133);
+        int counter = 0;
+
+        for (Region<3>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+
+            std::vector<TestCellSoA> cells;
+            cells.reserve(i->length());
+            for (int j = 0; j < i->length(); ++j) {
+                cells << TestCellSoA(
+                    Coord<3>(counter + 0,    counter + 1000, counter + 2000),
+                    Coord<3>(counter + 3000, counter + 4000, counter + 5000),
+                    counter + 6000,
+                    counter + 7000);
+
+                ++counter;
+            }
+
+            grid.set(*i, cells.data());
+        }
+
+        counter = 0;
+
+        for (Region<3>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+
+            std::vector<TestCellSoA> cells(i->length());
+            grid.get(*i, cells.data());
+
+            for (int j = 0; j < i->length(); ++j) {
+                TestCellSoA expected(
+                    Coord<3>(counter + 0,    counter + 1000, counter + 2000),
+                    Coord<3>(counter + 3000, counter + 4000, counter + 5000),
+                    counter + 6000,
+                    counter + 7000);
+
+                TS_ASSERT_EQUALS(cells[j], expected);
+                ++counter;
+            }
+        }
     }
 
 };

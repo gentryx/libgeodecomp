@@ -72,8 +72,6 @@ public:
         }
 
         delegateSet(relativeCoord, cell);
-
-        // fixme: needs test
     }
 
     void set(const Streak<DIM>& streak, const CELL* cells)
@@ -84,7 +82,6 @@ public:
         }
 
         delegateSet(relativeCoord, cells, streak.length());
-        // fixme
     }
 
     CELL get(const Coord<DIM>& absoluteCoord) const
@@ -98,7 +95,6 @@ public:
         }
 
         return delegateGet(relativeCoord);
-        // fixme
     }
 
     void get(const Streak<DIM>& streak, CELL *cells) const
@@ -109,7 +105,6 @@ public:
         }
 
         delegateGet(relativeCoord, cells, streak.length());
-        // fixme
     }
 
     void setEdge(const CELL&)
