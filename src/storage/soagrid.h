@@ -32,7 +32,7 @@ public:
      * wraps this dimension. It'll be equal to the stencil's radius if
      * the dimensions is not being wrapped. Example:
      *
-     * gridDim = (6, 3, 1)
+     * gridDim = (10, 9, 1)
      * edgeRadii = (2, 3, 0)
      *
      * memory layout (numbers = x-coord, e = edgeCell
