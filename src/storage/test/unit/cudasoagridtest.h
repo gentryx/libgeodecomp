@@ -46,6 +46,39 @@ public:
         for (Region<3>::Iterator i = edgeRegion.begin(); i != edgeRegion.end(); ++i) {
             TS_ASSERT_EQUALS(edgeCell, grid.get(*i));
         }
+
+        TS_ASSERT_EQUALS(grid.getEdge(), edgeCell);
+    }
+
+    void testGetSetEdge()
+    {
+        TestCellSoA defaultCell(
+            Coord<3>(1, 2, 3),
+            Coord<3>(4, 5, 6),
+            7,
+            8);
+        TestCellSoA edgeCell(
+            Coord<3>( 9, 10, 11),
+            Coord<3>(12, 13, 14),
+            15,
+            16);
+
+        Coord<3> dim(51, 43, 21);
+        Coord<3> origin(12, 41, 12);
+        CoordBox<3> box(origin, dim);
+
+        CUDASoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> grid(box, defaultCell, edgeCell);
+        TS_ASSERT_EQUALS(edgeCell,    grid.get(Coord<3>(12, 41, 11)));
+        TS_ASSERT_EQUALS(edgeCell,    grid.get(Coord<3>(11, 41, 12)));
+        TS_ASSERT_EQUALS(edgeCell,    grid.get(Coord<3>(12, 40, 12)));
+        TS_ASSERT_EQUALS(defaultCell, grid.get(Coord<3>(12, 41, 12)));
+
+        edgeCell.testValue = 666;
+        grid.setEdge(edgeCell);
+        TS_ASSERT_EQUALS(edgeCell,    grid.get(Coord<3>(12, 41, 11)));
+        TS_ASSERT_EQUALS(edgeCell,    grid.get(Coord<3>(11, 41, 12)));
+        TS_ASSERT_EQUALS(edgeCell,    grid.get(Coord<3>(12, 40, 12)));
+        TS_ASSERT_EQUALS(defaultCell, grid.get(Coord<3>(12, 41, 12)));
     }
 
     void testScalarGetSet()

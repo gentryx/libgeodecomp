@@ -21,7 +21,8 @@ void set_kernel(
     long dimZ,
     long edgeRadiiX,
     long edgeRadiiY,
-    long edgeRadiiZ)
+    long edgeRadiiZ,
+    bool initInterior)
 {
     int x = blockDim.x * blockIdx.x + threadIdx.x;
     int y = blockDim.y * blockIdx.y + threadIdx.y;
@@ -39,14 +40,14 @@ void set_kernel(
     accessor_type accessor(target, index);
 
     const CELL *reference = innerCell;
-    if ((x < edgeRadiiX) || (x >= (dimX - edgeRadiiX))) {
+    if ((x < edgeRadiiX) || (x >= (dimX - edgeRadiiX)) ||
+        (y < edgeRadiiY) || (y >= (dimY - edgeRadiiY)) ||
+        (z < edgeRadiiZ) || (z >= (dimZ - edgeRadiiZ))) {
         reference = edgeCell;
-    }
-    if ((y < edgeRadiiY) || (y >= (dimY - edgeRadiiY))) {
-        reference = edgeCell;
-    }
-    if ((z < edgeRadiiZ) || (z >= (dimZ - edgeRadiiZ))) {
-        reference = edgeCell;
+    } else {
+        if (!initInterior) {
+            return;
+        }
     }
 
     accessor << *reference;
@@ -88,7 +89,8 @@ public:
             gridDim.z(),
             edgeRadii.x(),
             edgeRadii.y(),
-            edgeRadii.z());
+            edgeRadii.z(),
+            INIT_INTERIOR);
     }
 
 private:
@@ -183,7 +185,6 @@ public:
                 edgeRadii,
                 edgeCell,
                 defaultCell));
-
     }
 
     void set(const Coord<DIM>& absoluteCoord, const CELL& cell)
@@ -233,14 +234,22 @@ public:
         delegateGet(relativeCoord, cells, streak.length());
     }
 
-    void setEdge(const CELL&)
+    void setEdge(const CELL& newEdgeCell)
     {
-        // fixme
+        edgeCell = newEdgeCell;
+
+        delegate.callback(
+            CUDASoAGridHelpers::SetContent<CELL, false>(
+                delegate.get_data(),
+                actualDimensions,
+                edgeRadii,
+                edgeCell,
+                edgeCell));
     }
 
     const CELL& getEdge() const
     {
-        // fixme
+        return edgeCell;
     }
 
     CoordBox<DIM> boundingBox() const
