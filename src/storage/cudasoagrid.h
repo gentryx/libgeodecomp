@@ -254,10 +254,8 @@ public:
 
     CoordBox<DIM> boundingBox() const
     {
-        // fixme
-        return CoordBox<DIM>();
+        return box;
     }
-
 
     void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
