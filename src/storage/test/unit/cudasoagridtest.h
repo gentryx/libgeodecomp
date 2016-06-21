@@ -223,6 +223,64 @@ public:
         }
     }
 
+    void testLoadSaveRegion()
+    {
+        Coord<3> dim(23, 25, 63);
+        Coord<3> origin(10, 10, 10);
+        CoordBox<3> box1(origin, dim);
+        CoordBox<3> box2(
+            Coord<3>( 3,  2,  1),
+            Coord<3>(30, 33, 72));
+
+        CUDASoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> grid1(box1);
+        CUDASoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> grid2(box2);
+
+        Region<3> region;
+        region << box1;
+
+        int counter = 0;
+        for (Region<3>::Iterator i = region.begin();
+             i != region.end();
+             ++i) {
+            grid1.set(
+                *i,
+                TestCellSoA(
+                    Coord<3>(counter +    1, counter + 1001, counter + 2001),
+                    Coord<3>(counter + 3001, counter + 4001, counter + 5001),
+                    counter + 6001,
+                    counter + 7001));
+            ++counter;
+        }
+
+        region.clear();
+        region << Streak<3>(Coord<3>(10, 10, 10), 30)
+               << Streak<3>(Coord<3>(10, 11, 10), 33)
+               << Streak<3>(Coord<3>(15, 34, 72), 33);
+
+        std::vector<char> buffer(
+            SoAGrid<TestCellSoA, Topologies::Cube<3>::Topology>::AGGREGATED_MEMBER_SIZE *
+            region.size());
+
+        grid1.saveRegion(&buffer, region);
+        grid2.loadRegion( buffer, region);
+
+        for (Region<3>::Iterator i = region.begin();
+             i != region.end();
+             ++i) {
+            Coord<3> relativeCoord = *i - origin;
+            counter = relativeCoord.toIndex(dim);
+
+            TestCellSoA actual = grid1.get(*i);
+            TestCellSoA expected(
+                Coord<3>(counter +    1, counter + 1001, counter + 2001),
+                Coord<3>(counter + 3001, counter + 4001, counter + 5001),
+                counter + 6001,
+                counter + 7001);
+
+            TS_ASSERT_EQUALS(expected, actual);
+        }
+    }
+
 };
 
 }

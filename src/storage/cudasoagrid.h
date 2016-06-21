@@ -257,14 +257,40 @@ public:
         return box;
     }
 
-    void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    void saveRegion(BufferType *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        // fixme
+        SerializationBuffer<CELL>::resize(target, region);
+        Coord<3> actualOffset = edgeRadii;
+        for (int i = 0; i < DIM; ++i) {
+            actualOffset[i] += -box.origin[i] + offset[i];
+        }
+
+        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
+        StreakIteratorType start(region.beginStreak(), actualOffset);
+        StreakIteratorType end(  region.endStreak(),   actualOffset);
+
+        delegate.save(start, end, target->data(), region.size());
     }
 
-    void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    void loadRegion(const BufferType& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        // fixme
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::storageSize(region);
+        if (source.size() < expectedMinimumSize) {
+            throw std::logic_error(
+                "source buffer too small (is " + StringOps::itoa(source.size()) +
+                ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
+        }
+
+        Coord<3> actualOffset = edgeRadii;
+        for (int i = 0; i < DIM; ++i) {
+            actualOffset[i] += -box.origin[i] + offset[i];
+        }
+
+        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
+        StreakIteratorType start(region.beginStreak(), actualOffset);
+        StreakIteratorType end(  region.endStreak(),   actualOffset);
+
+        delegate.load(start, end, source.data(), region.size());
     }
 
 protected:
