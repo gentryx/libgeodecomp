@@ -8,6 +8,123 @@
 
 namespace LibGeoDecomp {
 
+namespace CUDASoAGridHelpers {
+
+template<typename CELL, long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
+__global__
+void set_kernel(
+    const CELL *edgeCell,
+    const CELL *innerCell,
+    char *target,
+    long dimX,
+    long dimY,
+    long dimZ,
+    long edgeRadiiX,
+    long edgeRadiiY,
+    long edgeRadiiZ)
+{
+    int x = blockDim.x * blockIdx.x + threadIdx.x;
+    int y = blockDim.y * blockIdx.y + threadIdx.y;
+    int z = blockDim.z * blockIdx.z + threadIdx.z;
+
+    if ((x >= dimX) ||
+        (y >= dimY) ||
+        (z >= dimZ)) {
+        return;
+    }
+
+    typedef LibFlatArray::soa_accessor_light<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor_type;
+
+    long index = accessor_type::gen_index(x, y, z) + INDEX;
+    accessor_type accessor(target, index);
+
+    const CELL *reference = innerCell;
+    if ((x < edgeRadiiX) || (x >= (dimX - edgeRadiiX))) {
+        reference = edgeCell;
+    }
+    if ((y < edgeRadiiY) || (y >= (dimY - edgeRadiiY))) {
+        reference = edgeCell;
+    }
+    if ((z < edgeRadiiZ) || (z >= (dimZ - edgeRadiiZ))) {
+        reference = edgeCell;
+    }
+
+    accessor << *reference;
+}
+
+/**
+ * Helper class, derived from SoAGrid's helpers.
+ */
+template<typename CELL, bool INIT_INTERIOR>
+class SetContent
+{
+public:
+    SetContent(
+        char *data,
+        const Coord<3>& gridDim,
+        const Coord<3>& edgeRadii,
+        const CELL& edgeCell,
+        const CELL& innerCell) :
+        data(data),
+        gridDim(gridDim),
+        edgeRadii(edgeRadii),
+        edgeCellBuffer(1, edgeCell),
+        innerCellBuffer(1, innerCell)
+    {}
+
+    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
+    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
+    {
+        dim3 cudaGridDim;
+        dim3 cudaBlockDim;
+        generateLaunchConfig(&cudaGridDim, &cudaBlockDim, gridDim);
+
+        set_kernel<CELL, DIM_X, DIM_Y, DIM_Z, INDEX><<<cudaGridDim, cudaBlockDim>>>(
+            edgeCellBuffer.data(),
+            innerCellBuffer.data(),
+            data,
+            gridDim.x(),
+            gridDim.y(),
+            gridDim.z(),
+            edgeRadii.x(),
+            edgeRadii.y(),
+            edgeRadii.z());
+    }
+
+private:
+    char *data;
+    Coord<3> gridDim;
+    Coord<3> edgeRadii;
+    LibFlatArray::cuda_array<CELL> edgeCellBuffer;
+    LibFlatArray::cuda_array<CELL> innerCellBuffer;
+
+    static void generateLaunchConfig(dim3 *grid_dim, dim3 *block_dim, const Coord<3>& dim)
+    {
+        if (dim.y() >= 4) {
+            *block_dim = dim3(128, 4, 1);
+        } else {
+            *block_dim = dim3(512, 1, 1);
+        }
+
+        grid_dim->x = divideAndRoundUp(dim.x(), block_dim->x);
+        grid_dim->y = divideAndRoundUp(dim.y(), block_dim->y);
+        grid_dim->z = divideAndRoundUp(dim.z(), block_dim->z);
+    }
+
+private:
+    static int divideAndRoundUp(int i, int dividend)
+    {
+        int ret = i / dividend;
+        if (i % dividend) {
+            ret += 1;
+        }
+
+        return ret;
+    }
+};
+
+}
+
 /**
  * CUDA-enabled implementation of SoAGrid, relies on
  * LibFlatArray::soa_grid.
@@ -57,6 +174,15 @@ public:
             actualDimensions.x(),
             actualDimensions.y(),
             actualDimensions.z());
+
+        // init edges and interior
+        delegate.callback(
+            CUDASoAGridHelpers::SetContent<CELL, true>(
+                delegate.get_data(),
+                actualDimensions,
+                edgeRadii,
+                edgeCell,
+                defaultCell));
 
     }
 
