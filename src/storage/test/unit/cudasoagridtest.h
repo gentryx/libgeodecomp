@@ -281,6 +281,82 @@ public:
         }
     }
 
+    void testLoadSaveMember()
+    {
+        Selector<TestCellSoA> testValSelector(&TestCellSoA::testValue, "testValue");
+
+        Coord<3> dim(23, 25, 63);
+        Coord<3> origin(10, 10, 10);
+        CoordBox<3> box1(origin, dim);
+        CoordBox<3> box2(
+            Coord<3>( 3,  2,  1),
+            Coord<3>(30, 33, 72));
+
+        CUDASoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> grid1(box1);
+        CUDASoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> grid2(box2);
+
+        Region<3> region;
+        region << box1;
+
+        int counter = 0;
+        for (Region<3>::Iterator i = region.begin();
+             i != region.end();
+             ++i) {
+            grid1.set(
+                *i,
+                TestCellSoA(
+                    Coord<3>(counter +    5, counter + 1005, counter + 2005),
+                    Coord<3>(counter + 3005, counter + 4005, counter + 5005),
+                    counter + 6005,
+                    counter + 7005));
+            ++counter;
+        }
+
+        region.clear();
+        region << Streak<3>(Coord<3>(10, 10, 10), 30)
+               << Streak<3>(Coord<3>(10, 11, 11), 33)
+               << Streak<3>(Coord<3>(15, 11, 11), 33);
+        std::vector<double> testValVec(region.size());
+
+        grid1.saveMember(
+            testValVec.data(),
+            MemoryLocation::HOST,
+            testValSelector,
+            region);
+
+        counter = 0;
+        for (Region<3>::Iterator i = region.begin();
+             i != region.end();
+             ++i) {
+            Coord<3> relativeCoord = *i - origin;
+            int expectedTestValue = relativeCoord.toIndex(dim) + 7005;
+            TS_ASSERT_EQUALS(testValVec[counter], expectedTestValue);
+            ++counter;
+        }
+        grid2.loadMember(
+            testValVec.data(),
+            MemoryLocation::HOST,
+            testValSelector,
+            region);
+
+        counter = 0;
+        for (CoordBox<3>::Iterator i = box2.begin(); i != box2.end(); ++i) {
+            TestCellSoA cell = grid2.get(*i);
+
+            if (region.count(*i)) {
+                TS_ASSERT_EQUALS(cell.testValue, testValVec[counter]);
+                ++counter;
+            } else {
+                TS_ASSERT_EQUALS(cell.testValue, 666);
+            }
+        }
+
+        // fixme: load members into grid2
+        // fixme: check pos member, too
+        // fixme: try copy to cuda memory as well
+        // fixme: verify results
+    }
+
 };
 
 }

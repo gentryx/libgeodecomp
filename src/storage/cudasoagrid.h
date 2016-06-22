@@ -4,6 +4,7 @@
 #include <libflatarray/cuda_array.hpp>
 
 #include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/misc/cudautil.h>
 #include <libgeodecomp/storage/soagrid.h>
 
 namespace LibGeoDecomp {
@@ -78,7 +79,7 @@ public:
     {
         dim3 cudaGridDim;
         dim3 cudaBlockDim;
-        generateLaunchConfig(&cudaGridDim, &cudaBlockDim, gridDim);
+        CUDAUtil::generateLaunchConfig(&cudaGridDim, &cudaBlockDim, gridDim);
 
         set_kernel<CELL, DIM_X, DIM_Y, DIM_Z, INDEX><<<cudaGridDim, cudaBlockDim>>>(
             edgeCellBuffer.data(),
@@ -99,30 +100,6 @@ private:
     Coord<3> edgeRadii;
     LibFlatArray::cuda_array<CELL> edgeCellBuffer;
     LibFlatArray::cuda_array<CELL> innerCellBuffer;
-
-    static void generateLaunchConfig(dim3 *grid_dim, dim3 *block_dim, const Coord<3>& dim)
-    {
-        if (dim.y() >= 4) {
-            *block_dim = dim3(128, 4, 1);
-        } else {
-            *block_dim = dim3(512, 1, 1);
-        }
-
-        grid_dim->x = divideAndRoundUp(dim.x(), block_dim->x);
-        grid_dim->y = divideAndRoundUp(dim.y(), block_dim->y);
-        grid_dim->z = divideAndRoundUp(dim.z(), block_dim->z);
-    }
-
-private:
-    static int divideAndRoundUp(int i, int dividend)
-    {
-        int ret = i / dividend;
-        if (i % dividend) {
-            ret += 1;
-        }
-
-        return ret;
-    }
 };
 
 }
@@ -300,7 +277,15 @@ protected:
         const Selector<CELL>& selector,
         const Region<DIM>& region) const
     {
-        // fixme
+        delegate.callback(
+            SoAGridHelpers::SaveMember<CELL, DIM>(
+                target,
+                MemoryLocation::CUDA_DEVICE,
+                targetLocation,
+                selector,
+                region,
+                box.origin,
+                edgeRadii));
     }
 
     virtual void loadMemberImplementation(
@@ -309,7 +294,15 @@ protected:
         const Selector<CELL>& selector,
         const Region<DIM>& region)
     {
-        // fixme
+        delegate.callback(
+            SoAGridHelpers::LoadMember<CELL, DIM>(
+                source,
+                sourceLocation,
+                MemoryLocation::CUDA_DEVICE,
+                selector,
+                region,
+                box.origin,
+                edgeRadii));
     }
 
 private:

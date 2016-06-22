@@ -157,12 +157,14 @@ class SaveMember
 public:
     SaveMember(
         char *target,
+        MemoryLocation::Location sourceLocation,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
         const Region<DIM>& region,
         const Coord<DIM>& origin,
         const Coord<3>& edgeRadii) :
         target(target),
+        sourceLocation(sourceLocation),
         targetLocation(targetLocation),
         selector(selector),
         region(region),
@@ -180,7 +182,7 @@ public:
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakOut(
                 data,
-                MemoryLocation::HOST,
+                sourceLocation,
                 currentTarget,
                 targetLocation,
                 i->length(),
@@ -191,6 +193,7 @@ public:
 
 private:
     char *target;
+    MemoryLocation::Location sourceLocation;
     MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
     const Region<DIM>& region;
@@ -209,12 +212,14 @@ public:
     LoadMember(
         const char *source,
         MemoryLocation::Location sourceLocation,
+        MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
         const Region<DIM>& region,
         const Coord<DIM>& origin,
         const Coord<3>& edgeRadii) :
         source(source),
         sourceLocation(sourceLocation),
+        targetLocation(targetLocation),
         selector(selector),
         region(region),
         origin(origin),
@@ -234,7 +239,7 @@ public:
                 currentSource,
                 sourceLocation,
                 currentTarget,
-                MemoryLocation::HOST,
+                targetLocation,
                 i->length(),
                 DIM_X * DIM_Y * DIM_Z);
 
@@ -245,6 +250,7 @@ public:
 private:
     const char *source;
     MemoryLocation::Location sourceLocation;
+    MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
     const Region<DIM>& region;
     const Coord<DIM>& origin;
@@ -508,7 +514,13 @@ protected:
     {
         delegate.callback(
             SoAGridHelpers::SaveMember<CELL, DIM>(
-                target, targetLocation, selector, region, box.origin, edgeRadii));
+                target,
+                MemoryLocation::HOST,
+                targetLocation,
+                selector,
+                region,
+                box.origin,
+                edgeRadii));
     }
 
     void loadMemberImplementation(
@@ -519,7 +531,13 @@ protected:
     {
         delegate.callback(
             SoAGridHelpers::LoadMember<CELL, DIM>(
-                source, sourceLocation, selector, region, box.origin, edgeRadii));
+                source,
+                sourceLocation,
+                MemoryLocation::HOST,
+                selector,
+                region,
+                box.origin,
+                edgeRadii));
     }
 
 private:
