@@ -284,6 +284,7 @@ public:
     void testLoadSaveMember()
     {
         Selector<TestCellSoA> testValSelector(&TestCellSoA::testValue, "testValue");
+        Selector<TestCellSoA> posSelector(    &TestCellSoA::pos,       "pos");
 
         Coord<3> dim(23, 25, 63);
         Coord<3> origin(10, 10, 10);
@@ -316,6 +317,8 @@ public:
         region << Streak<3>(Coord<3>(10, 10, 10), 30)
                << Streak<3>(Coord<3>(10, 11, 11), 33)
                << Streak<3>(Coord<3>(15, 11, 11), 33);
+
+        // check testVal:
         std::vector<double> testValVec(region.size());
 
         grid1.saveMember(
@@ -351,10 +354,44 @@ public:
             }
         }
 
-        // fixme: load members into grid2
-        // fixme: check pos member, too
-        // fixme: try copy to cuda memory as well
-        // fixme: verify results
+        // check pos:
+        LibFlatArray::cuda_array<Coord<3> > cudaPosVec(region.size());
+        std::vector<Coord<3> > posVec(region.size());
+
+        grid1.saveMember(
+            cudaPosVec.data(),
+            MemoryLocation::CUDA_DEVICE,
+            posSelector,
+            region);
+        cudaPosVec.save(posVec.data());
+
+        counter = 0;
+        for (Region<3>::Iterator i = region.begin();
+             i != region.end();
+             ++i) {
+            Coord<3> relativeCoord = *i - origin;
+            int index = relativeCoord.toIndex(dim);
+            Coord<3> expectedPos(index + 5, index + 1005, index + 2005);
+            TS_ASSERT_EQUALS(posVec[counter], expectedPos);
+            ++counter;
+        }
+        grid2.loadMember(
+            cudaPosVec.data(),
+            MemoryLocation::CUDA_DEVICE,
+            posSelector,
+            region);
+
+        counter = 0;
+        for (CoordBox<3>::Iterator i = box2.begin(); i != box2.end(); ++i) {
+            TestCellSoA cell = grid2.get(*i);
+
+            if (region.count(*i)) {
+                TS_ASSERT_EQUALS(cell.pos, posVec[counter]);
+                ++counter;
+            } else {
+                TS_ASSERT_EQUALS(cell.pos, Coord<3>());
+            }
+        }
     }
 
 };
