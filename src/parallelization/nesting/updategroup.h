@@ -235,7 +235,8 @@ protected:
                           patchAcceptersInner,
                           // add external PatchProviders last to allow them to override
                           // the local ghost zone providers (a.k.a. PatchLink::Source).
-                          patchLinkProviders + patchProvidersGhost,
+                          patchLinkProviders,
+                          patchProvidersGhost,
                           patchProvidersInner,
                           enableFineGrainedParallelism));
     }

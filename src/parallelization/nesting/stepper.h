@@ -25,7 +25,7 @@ class Stepper
 public:
     friend class StepperTest;
 
-    enum PatchType {GHOST=0, INNER_SET=1};
+    enum PatchType {GHOST_PHASE_0=0, GHOST_PHASE_1=1, INNER_SET=2};
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     const static int DIM = Topology::DIM;
 
@@ -81,8 +81,8 @@ public:
 protected:
     boost::shared_ptr<PartitionManagerType> partitionManager;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
-    PatchProviderList patchProviders[2];
-    PatchAccepterList patchAccepters[2];
+    PatchProviderList patchProviders[3];
+    PatchAccepterList patchAccepters[3];
     Chronometer chronometer;
 
     /**

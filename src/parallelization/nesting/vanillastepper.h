@@ -68,7 +68,8 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
-        const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase0 = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase1 = PatchProviderVec(),
         const PatchProviderVec& innerSetPatchProviders = PatchProviderVec(),
         bool enableFineGrainedParallelism = false) :
         ParentType(
@@ -76,7 +77,8 @@ public:
             initializer,
             ghostZonePatchAccepters,
             innerSetPatchAccepters,
-            ghostZonePatchProviders,
+            ghostZonePatchProvidersPhase0,
+            ghostZonePatchProvidersPhase1,
             innerSetPatchProviders,
             enableFineGrainedParallelism)
     {
@@ -128,7 +130,7 @@ private:
 
         this->notifyPatchAccepters(
             rim(),
-            ParentType::GHOST,
+            ParentType::GHOST_PHASE_0,
             globalNanoStep());
         this->notifyPatchAccepters(
             innerSet(ghostZoneWidth()),
@@ -172,7 +174,8 @@ private:
         std::size_t curGlobalNanoStep = globalNanoStep();
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
-            this->notifyPatchProviders(rim(t), ParentType::GHOST, globalNanoStep());
+            this->notifyPatchProviders(rim(t), ParentType::GHOST_PHASE_0, globalNanoStep());
+            this->notifyPatchProviders(rim(t), ParentType::GHOST_PHASE_1, globalNanoStep());
 
             {
                 TimeComputeGhost timer(&chronometer);
@@ -198,7 +201,7 @@ private:
                 ++curGlobalNanoStep;
             }
 
-            this->notifyPatchAccepters(rim(ghostZoneWidth()), ParentType::GHOST, curGlobalNanoStep);
+            this->notifyPatchAccepters(rim(ghostZoneWidth()), ParentType::GHOST_PHASE_0, curGlobalNanoStep);
         }
 
         {

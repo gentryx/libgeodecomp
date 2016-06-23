@@ -50,7 +50,8 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
-        const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase0 = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase1 = PatchProviderVec(),
         const PatchProviderVec& innerSetPatchProviders = PatchProviderVec(),
         bool enableFineGrainedParallelism = false) :
         ParentType(
@@ -58,7 +59,8 @@ public:
             initializer,
             ghostZonePatchAccepters,
             innerSetPatchAccepters,
-            ghostZonePatchProviders,
+            ghostZonePatchProvidersPhase0,
+            ghostZonePatchProvidersPhase1,
             innerSetPatchProviders,
             enableFineGrainedParallelism)
     {}

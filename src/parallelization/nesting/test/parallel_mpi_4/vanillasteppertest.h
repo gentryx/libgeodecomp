@@ -145,7 +145,7 @@ public:
                             tag,
                             Typemaps::lookup<TestCell<3> >()));
                     providers << p;
-                    stepper->addPatchProvider(p, StepperType::GHOST);
+                    stepper->addPatchProvider(p, StepperType::GHOST_PHASE_0);
                 }
             }
         }
@@ -162,7 +162,7 @@ public:
                             tag,
                             Typemaps::lookup<TestCell<3> >()));
                     accepters << p;
-                    stepper->addPatchAccepter(p, StepperType::GHOST);
+                    stepper->addPatchAccepter(p, StepperType::GHOST_PHASE_0);
                 }
             }
         }

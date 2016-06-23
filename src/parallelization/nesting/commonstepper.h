@@ -41,7 +41,8 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters  = PatchAccepterVec(),
-        const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase0 = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase1 = PatchProviderVec(),
         const PatchProviderVec& innerSetPatchProviders  = PatchProviderVec(),
         bool enableFineGrainedParallelism = false) :
         Stepper<CELL_TYPE>(
@@ -53,14 +54,17 @@ public:
         curNanoStep = 0;
 
         for (std::size_t i = 0; i < ghostZonePatchAccepters.size(); ++i) {
-            addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
+            addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST_PHASE_0);
         }
         for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
             addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
         }
 
-        for (std::size_t i = 0; i < ghostZonePatchProviders.size(); ++i) {
-            addPatchProvider(ghostZonePatchProviders[i], ParentType::GHOST);
+        for (std::size_t i = 0; i < ghostZonePatchProvidersPhase0.size(); ++i) {
+            addPatchProvider(ghostZonePatchProvidersPhase0[i], ParentType::GHOST_PHASE_0);
+        }
+        for (std::size_t i = 0; i < ghostZonePatchProvidersPhase1.size(); ++i) {
+            addPatchProvider(ghostZonePatchProvidersPhase1[i], ParentType::GHOST_PHASE_1);
         }
         for (std::size_t i = 0; i < innerSetPatchProviders.size(); ++i) {
             addPatchProvider(innerSetPatchProviders[i], ParentType::INNER_SET);
@@ -163,7 +167,8 @@ protected:
         initializer->grid(&*oldGrid);
         *newGrid = *oldGrid;
 
-        notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST,     globalNanoStep());
+        notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST_PHASE_0, globalNanoStep());
+        notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST_PHASE_1, globalNanoStep());
         notifyPatchProviders(partitionManager->ownRegion(),   ParentType::INNER_SET, globalNanoStep());
 
         newGrid->setEdge(oldGrid->getEdge());

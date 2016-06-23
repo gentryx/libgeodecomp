@@ -30,7 +30,7 @@ public:
         stepper.reset(
             new StepperType(partitionManager, init));
 
-        stepper->addPatchAccepter(patchAccepter, StepperType::GHOST);
+        stepper->addPatchAccepter(patchAccepter, StepperType::GHOST_PHASE_0);
     }
 
     void testUpdate1()
