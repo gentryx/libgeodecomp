@@ -308,7 +308,8 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
-        const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase0 = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase1 = PatchProviderVec(),
         const PatchProviderVec& innerSetPatchProviders = PatchProviderVec(),
         bool enableFineGrainedParallelism = false) :
         CommonStepper<CELL_TYPE>(
@@ -316,7 +317,8 @@ public:
             initializer,
             ghostZonePatchAccepters,
             innerSetPatchAccepters,
-            ghostZonePatchProviders,
+            ghostZonePatchProvidersPhase0,
+            ghostZonePatchProvidersPhase1,
             innerSetPatchProviders,
             enableFineGrainedParallelism)
     {
@@ -378,14 +380,15 @@ private:
         const Region<DIM>& region,
         std::size_t nanoStep)
     {
-        notifyPatchAccepters(region, ParentType::GHOST, nanoStep);
+        notifyPatchAccepters(region, ParentType::GHOST_PHASE_0, nanoStep);
     }
 
     inline void notifyPatchProvidersGhostZones(
         const Region<DIM>& region,
         std::size_t nanoStep)
     {
-        notifyPatchProviders(region, ParentType::GHOST, nanoStep);
+        notifyPatchProviders(region, ParentType::GHOST_PHASE_0, nanoStep);
+        notifyPatchProviders(region, ParentType::GHOST_PHASE_1, nanoStep);
     }
 
     inline void notifyPatchAcceptersInnerSet(
