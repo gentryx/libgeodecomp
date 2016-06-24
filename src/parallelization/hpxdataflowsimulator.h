@@ -183,6 +183,9 @@ public:
         }
         thisTimeStepFutures.resize(localRegion.size());
 
+	// HPX Reset counters 
+	hpx::reset_active_counters();
+
         // fixme: add steerer/writer interaction
         int maxTimeSteps = initializer->maxSteps();
         for (int t = 0; t < maxTimeSteps; ++t) {
