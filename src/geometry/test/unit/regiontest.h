@@ -880,6 +880,15 @@ public:
         }
     }
 
+    void testExpandWithStencil()
+    {
+        Region<3> region;
+        region << Streak<3>(Coord<3>(10, 20, 30), 40)
+               << CoordBox<3>(Coord<3>(100, 120, 140), Coord<3>(300, 300, 300));
+
+        Region<3> expanded = region.expandWithStencil(Stencils::VonNeumann<3, 1>());
+    }
+
     void testDelete()
     {
         Region<2>::IndexVectorType expected;

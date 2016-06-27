@@ -118,9 +118,10 @@ public:
     inline void operator()(
         Streak<STREAK_DIM> *streak,
         IndexVectorType::const_iterator *iterators,
-        const Coord<STREAK_DIM>& offset)
+        const Coord<STREAK_DIM>& offset,
+        int additionalLength)
     {
-        ConstructStreakFromIterators<DIM - 1>()(streak, iterators, offset);
+        ConstructStreakFromIterators<DIM - 1>()(streak, iterators, offset, additionalLength);
         streak->origin[DIM] = iterators[DIM]->first + offset[DIM];
     }
 };
@@ -139,10 +140,11 @@ public:
     inline void operator()(
         Streak<STREAK_DIM> *streak,
         IndexVectorType::const_iterator *iterators,
-        const Coord<STREAK_DIM>& offset)
+        const Coord<STREAK_DIM>& offset,
+        int additionalLength)
     {
         streak->origin[0] = iterators[0]->first  + offset[0];
-        streak->endX      = iterators[0]->second + offset[0];
+        streak->endX      = iterators[0]->second + offset[0] + additionalLength;
     }
 };
 
@@ -165,14 +167,15 @@ public:
         Streak<STREAK_DIM> *streak,
         IndexVectorType::const_iterator *iterators,
         const REGION& region,
-        const Coord<STREAK_DIM>& unusedOffsets) const
+        const Coord<STREAK_DIM>& unusedOffsets,
+        int unusedAdditionalLength) const
     {
         iterators[DIM] = region.indicesBegin(DIM) + offset;
         for (int d = DIM - 1; d >= 0; --d) {
             iterators[d] = region.indicesBegin(d) + iterators[d + 1]->second;
         }
 
-        ConstructStreakFromIterators<DIM>()(streak, iterators, unusedOffsets);
+        ConstructStreakFromIterators<DIM>()(streak, iterators, unusedOffsets, unusedAdditionalLength);
     }
 
 private:
@@ -264,11 +267,12 @@ public:
         Streak<STREAK_DIM> *streak,
         IndexVectorType::const_iterator *iterators,
         const REGION& region,
-        const Coord<STREAK_DIM>& offset) const
+        const Coord<STREAK_DIM>& offset,
+        int additionalLength) const
     {
         StreakIteratorInitSingleOffset<DIM> delegate(offsetIndex);
         delegate(streak, iterators, region);
-        ConstructStreakFromIterators<DIM>()(streak, iterators, offset);
+        ConstructStreakFromIterators<DIM>()(streak, iterators, offset, additionalLength);
     }
 
 private:
@@ -294,12 +298,13 @@ public:
         Streak<STREAK_DIM> *streak,
         IndexVectorType::const_iterator *iterators,
         const REGION& region,
-        const Coord<STREAK_DIM>& offset) const
+        const Coord<STREAK_DIM>& offset,
+        int additionalLength) const
     {
         iterators[DIM] = region.indicesBegin(DIM) + offsets[DIM];
 
         StreakIteratorInitOffsets<DIM - 1, COORD_DIM> delegate(offsets);
-        delegate(streak, iterators, region, offset);
+        delegate(streak, iterators, region, offset, additionalLength);
     }
 
 private:
@@ -325,12 +330,13 @@ public:
         Streak<STREAK_DIM> *streak,
         IndexVectorType::const_iterator *iterators,
         const REGION& region,
-        const Coord<STREAK_DIM>& offset) const
+        const Coord<STREAK_DIM>& offset,
+        int additionalLength) const
     {
         iterators[0] = region.indicesBegin(0) + offsets[0];
 
         if (int(region.indicesSize(0)) > offsets[0]) {
-            ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators, offset);
+            ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators, offset, additionalLength);
         }
     }
 
@@ -353,10 +359,11 @@ public:
         Streak<STREAK_DIM> *streak,
         IndexVectorType::const_iterator *iterators,
         const REGION& region,
-        const Coord<STREAK_DIM>& offset) const
+        const Coord<STREAK_DIM>& offset,
+        int additionalLength) const
     {
         iterators[DIM] = region.indicesBegin(DIM);
-        StreakIteratorInitBegin<DIM - 1>()(streak, iterators, region, offset);
+        StreakIteratorInitBegin<DIM - 1>()(streak, iterators, region, offset, additionalLength);
     }
 };
 
@@ -375,12 +382,13 @@ public:
         Streak<STREAK_DIM> *streak,
         IndexVectorType::const_iterator *iterators,
         const REGION& region,
-        const Coord<STREAK_DIM>& offset) const
+        const Coord<STREAK_DIM>& offset,
+        int additionalLength) const
     {
         iterators[0] = region.indicesBegin(0);
 
         if (region.indicesSize(0) > 0) {
-            ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators, offset);
+            ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators, offset, additionalLength);
         }
     }
 };
@@ -400,9 +408,10 @@ public:
         Streak<STREAK_DIM> *streak,
         IndexVectorType::const_iterator *iterators,
         const REGION& region,
-        const Coord<STREAK_DIM>& offset) const
+        const Coord<STREAK_DIM>& offset,
+        int additionalLength) const
     {
-        StreakIteratorInitEnd<DIM - 1>()(streak, iterators, region, offset);
+        StreakIteratorInitEnd<DIM - 1>()(streak, iterators, region, offset, additionalLength);
         iterators[DIM] = region.indicesEnd(DIM);
     }
 };
@@ -422,7 +431,8 @@ public:
         Streak<STREAK_DIM> *streak,
         IndexVectorType::const_iterator *iterators,
         const REGION& region,
-        const Coord<STREAK_DIM>& offset) const
+        const Coord<STREAK_DIM>& offset,
+        int additionalLength) const
     {
         iterators[0] = region.indicesEnd(0);
     }
@@ -489,6 +499,17 @@ class RegionInsertHelper;
 
 template<int DIM>
 class RegionRemoveHelper;
+
+template<class STENCIL, int INDEX>
+class AddCoord
+{
+public:
+    template<typename REGION>
+    void operator()(REGION *stencilRegion)
+    {
+        *stencilRegion << Coord<3>(typename STENCIL::template Coords<INDEX>());
+    }
+};
 
 }
 
@@ -682,6 +703,30 @@ public:
         for (int d = 1; d < DIM; ++d) {
             expandInOneDimension(d, radii[d], accumulator, buffer);
         }
+
+        return accumulator;
+    }
+
+    /**
+     * Generate an expanded Region which contains the neighborhood
+     * specified by the stencil class (see class Stencils).
+     */
+    template<typename STENCIL>
+    inline Region expandWithStencil(STENCIL) const
+    {
+        Region stencil;
+
+        // Stencils::Repeat<
+        //     STENCIL::VOLUME,
+        //     RegionHelpers::AddCoord,
+        //     STENCIL>()(&stencil);
+        // std::cout << "stencil region:\n"
+        //           << stencil << "\n";
+
+        Region accumulator;
+
+        // for (StreakIterator i = stencil.beginStreak(); i != stencil.endStreak(); ++i) {
+        // }
 
         return accumulator;
     }
@@ -1157,14 +1202,14 @@ public:
         return (indices[0].size() == 0);
     }
 
-    inline StreakIterator beginStreak(const Coord<DIM>& offset = Coord<DIM>()) const
+    inline StreakIterator beginStreak(const Coord<DIM>& offset = Coord<DIM>(), int additionalLength = 0) const
     {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>(), offset);
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>(), offset, additionalLength);
     }
 
-    inline StreakIterator endStreak(const Coord<DIM>& offset = Coord<DIM>()) const
+    inline StreakIterator endStreak(const Coord<DIM>& offset = Coord<DIM>(), int additionalLength = 0) const
     {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitEnd<DIM - 1>(), offset);
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitEnd<DIM - 1>(), offset, additionalLength);
     }
 
     /**
