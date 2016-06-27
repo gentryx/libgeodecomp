@@ -691,12 +691,13 @@ public:
         Region accumulator;
         Region buffer;
 
+        Coord<DIM> xOffset;
+        xOffset[0] = -radii[0];
+
+        StreakIterator end = endStreak(xOffset, radii[0] * 2);
         // expansion in X dimension is a simple 1-pass operation:
-        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
-            Streak<DIM> streak = *i;
-            streak.origin[0] -= radii[0];
-            streak.endX += radii[0];
-            accumulator << streak;
+        for (StreakIterator i = beginStreak(xOffset, radii[0] * 2); i != end; ++i) {
+            accumulator << *i;
         }
 
         // expand into other dimensions, one after another
