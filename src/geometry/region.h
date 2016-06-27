@@ -1152,24 +1152,6 @@ public:
         return (indices[0].size() == 0);
     }
 
-    /**
-     * Checks whether the other Region can be simply pasted at the end
-     * of the current Region.
-     */
-    inline bool isAppendable(const Region<DIM>& other) const
-    {
-        if (other.empty() || empty()) {
-            return true;
-        }
-
-        // we need to compare the last Streak in this Region with the
-        // first one on the other Region:
-        Coord<DIM> c = endStreak() - beginStreak() - Coord<DIM>::diagonal(1);
-        StreakIterator lastStreakIter = (*this)[c];
-
-        return RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(*lastStreakIter, *other.beginStreak());
-    }
-
     inline StreakIterator beginStreak(const Coord<DIM>& offset = Coord<DIM>()) const
     {
         return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>(), offset);
@@ -1349,6 +1331,24 @@ private:
             if (ITERATOR == END) {                 \
                 break;                             \
             }
+
+    /**
+     * Checks whether the other Region can be simply pasted at the end
+     * of the current Region.
+     */
+    inline bool isAppendable(const Region<DIM>& other) const
+    {
+        if (other.empty() || empty()) {
+            return true;
+        }
+
+        // we need to compare the last Streak in this Region with the
+        // first one on the other Region:
+        Coord<DIM> c = endStreak() - beginStreak() - Coord<DIM>::diagonal(1);
+        StreakIterator lastStreakIter = (*this)[c];
+
+        return RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(*lastStreakIter, *other.beginStreak());
+    }
 
     inline static void merge2way(
         Region& ret,
@@ -1572,7 +1572,10 @@ private:
     }
 
     static inline void expandInOneDimension(
-        int dim, int radius, Region<DIM>& accumulator, Region<DIM>& buffer)
+        int dim,
+        int radius,
+        Region<DIM>& accumulator,
+        Region<DIM>& buffer)
     {
         using std::swap;
         int targetWidth = 2 * radius + 1;
