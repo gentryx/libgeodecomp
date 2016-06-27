@@ -651,6 +651,11 @@ public:
         return indices[0].size();
     }
 
+    /**
+     * returns a Region that encompaseses the current Region as well
+     * as all coordinates which are no further than "width" cells
+     * (maximum norm) away.
+     */
     inline Region expand(unsigned width=1) const
     {
         return expand(Coord<DIM>::diagonal(width));
