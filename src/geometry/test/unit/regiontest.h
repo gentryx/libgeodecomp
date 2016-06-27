@@ -880,13 +880,57 @@ public:
         }
     }
 
-    void testExpandWithStencil()
+    void testExpandWithStencilAndVonNeumannStencil()
     {
         Region<3> region;
         region << Streak<3>(Coord<3>(10, 20, 30), 40)
                << CoordBox<3>(Coord<3>(100, 120, 140), Coord<3>(300, 300, 300));
 
-        Region<3> expanded = region.expandWithStencil(Stencils::VonNeumann<3, 1>());
+        Region<3> actual = region.expandWithStencil(Stencils::VonNeumann<3, 1>());
+
+        Region<3> expected;
+        expected << Streak<3>(Coord<3>(10, 20, 29), 40)
+                 << Streak<3>(Coord<3>(10, 19, 30), 40)
+                 << Streak<3>(Coord<3>( 9, 20, 30), 41)
+                 << Streak<3>(Coord<3>(10, 21, 30), 40)
+                 << Streak<3>(Coord<3>(10, 20, 31), 40)
+                 << CoordBox<3>(Coord<3>(100, 120, 139), Coord<3>(300, 300,   1))
+                 << CoordBox<3>(Coord<3>(100, 119, 140), Coord<3>(300,   1, 300))
+                 << CoordBox<3>(Coord<3>( 99, 120, 140), Coord<3>(302, 300, 300))
+                 << CoordBox<3>(Coord<3>(100, 420, 140), Coord<3>(300,   1, 300))
+                 << CoordBox<3>(Coord<3>(100, 120, 440), Coord<3>(300, 300,   1));
+
+        TS_ASSERT_EQUALS(actual, expected);
+    }
+
+    void testExpandWithStencilAndMooreStencil()
+    {
+        Region<3> region;
+        region << Streak<3>(Coord<3>(10, 20, 30), 40)
+               << CoordBox<3>(Coord<3>(100, 120, 140), Coord<3>(300, 300, 300));
+
+        Region<3> actual = region.expandWithStencil(Stencils::Moore<3, 1>());
+
+        Region<3> expected;
+        expected << CoordBox<3>(Coord<3>(  9,  19,  29), Coord<3>( 32,   3,   3))
+                 << CoordBox<3>(Coord<3>( 99, 119, 139), Coord<3>(302, 302, 302));
+
+        TS_ASSERT_EQUALS(actual, expected);
+    }
+
+    void testExpandWithStencil2D()
+    {
+        Region<2> region;
+        region << Streak<2>(Coord<2>(10, 20), 40)
+               << CoordBox<2>(Coord<2>(100, 120), Coord<2>(300, 300));
+
+        Region<2> actual = region.expandWithStencil(Stencils::Moore<2, 2>());
+
+        Region<2> expected;
+        expected << CoordBox<2>(Coord<2>(  8,  18), Coord<2>( 34,   5))
+                 << CoordBox<2>(Coord<2>( 98, 118), Coord<2>(304, 304));
+
+        TS_ASSERT_EQUALS(actual, expected);
     }
 
     void testDelete()

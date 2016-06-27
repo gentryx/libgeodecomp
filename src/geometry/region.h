@@ -507,7 +507,7 @@ public:
     template<typename REGION>
     void operator()(REGION *stencilRegion)
     {
-        *stencilRegion << Coord<3>(typename STENCIL::template Coords<INDEX>());
+        *stencilRegion << Coord<REGION::DIM>(typename STENCIL::template Coords<INDEX>());
     }
 };
 
@@ -519,12 +519,14 @@ public:
  * get split up and are stored implicitly in the hierarchical indices
  * vectors.
  */
-template<int DIM>
+template<int DIMENSIONS>
 class Region
 {
 public:
     friend class BoostSerialization;
     friend class HPXSerialization;
+
+    static const int DIM = DIMENSIONS;
 
     template<int MY_DIM> friend void swap(Region<MY_DIM>&, Region<MY_DIM>&);
     template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;
@@ -588,10 +590,10 @@ public:
     {}
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    inline Region(const Region<DIM>& other) = default;
+    inline Region(const Region<DIMENSIONS>& other) = default;
 
     inline
-    explicit Region(Region<DIM>&& other) :
+    explicit Region(Region<DIMENSIONS>&& other) :
         myBoundingBox(other.myBoundingBox),
         mySize(other.mySize),
         geometryCacheTainted(other.geometryCacheTainted)
@@ -601,9 +603,9 @@ public:
         }
     }
 
-    inline Region& operator=(const Region<DIM>& other) = default;
+    inline Region& operator=(const Region<DIMENSIONS>& other) = default;
 
-    inline Region& operator=(Region<DIM>&& other)
+    inline Region& operator=(Region<DIMENSIONS>&& other)
     {
         using std::swap;
         swap(*this, other);
@@ -717,19 +719,28 @@ public:
     {
         Region stencil;
 
-        // Stencils::Repeat<
-        //     STENCIL::VOLUME,
-        //     RegionHelpers::AddCoord,
-        //     STENCIL>()(&stencil);
-        // std::cout << "stencil region:\n"
-        //           << stencil << "\n";
+        Stencils::Repeat<
+            STENCIL::VOLUME,
+            RegionHelpers::AddCoord,
+            STENCIL>()(&stencil);
 
         Region accumulator;
+        Region current;
 
-        // for (StreakIterator i = stencil.beginStreak(); i != stencil.endStreak(); ++i) {
-        // }
+        for (StreakIterator i = stencil.beginStreak(); i != stencil.endStreak(); ++i) {
+            merge2way(
+                accumulator,
+                current.beginStreak(),
+                current.endStreak(),
+                beginStreak(i->origin, i->length() - 1),
+                endStreak(  i->origin, i->length() - 1));
 
-        return accumulator;
+            current.clear();
+            using std::swap;
+            swap(current, accumulator);
+        }
+
+        return current;
     }
 
     /**
