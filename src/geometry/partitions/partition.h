@@ -24,7 +24,7 @@ public:
      * _weights. For most applications offset should be set to 0.
      * Also, _weights.sum() should equal simulationArea.size() (where
      * simulationArea is stored in PartitionManager). This basically
-     * means that each simulation cell corresponds to Adjacencya weight of 1.
+     * means that each simulation cell corresponds to a weight of 1.
      * Each entry in the weight vector will usually correspond to an
      * MPI process, identified by its rank.
      */
