@@ -20,9 +20,11 @@ class Neighborhood
 public:
     // fixme: move semantics
     inline Neighborhood(
+        int targetGlobalNanoStep,
         std::vector<int> messageNeighborIDs,
         std::vector<hpx::shared_future<MESSAGE> > messagesFromNeighbors,
         const std::map<int, hpx::id_type>& remoteIDs) :
+        targetGlobalNanoStep(targetGlobalNanoStep),
         messageNeighborIDs(messageNeighborIDs),
         messagesFromNeighbors(hpx::util::unwrapped(messagesFromNeighbors)),
         remoteIDs(remoteIDs)
@@ -38,7 +40,8 @@ public:
         return messagesFromNeighbors[i - messageNeighborIDs.begin()];
     }
 
-    void send(int remoteCellID, const MESSAGE& message, int step) const
+    // fixme: move semantics
+    void send(int remoteCellID, const MESSAGE& message) const
     {
         std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
         if (iter == remoteIDs.end()) {
@@ -48,11 +51,12 @@ public:
         hpx::apply(
             typename HPXReceiver<MESSAGE>::receiveAction(),
             iter->second,
-            step,
+            targetGlobalNanoStep,
             message);
     }
 
 private:
+    int targetGlobalNanoStep;
     std::vector<int> messageNeighborIDs;
     std::vector<MESSAGE> messagesFromNeighbors;
     std::map<int, hpx::id_type> remoteIDs;
@@ -63,6 +67,8 @@ template<typename CELL, typename MESSAGE>
 class CellComponent
 {
 public:
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
+
     // fixme: move semantics
     // fixme: own cell, not just pointer, to facilitate migration of components
     explicit CellComponent(
@@ -89,7 +95,8 @@ public:
         int nanoStep,
         int step)
     {
-        Neighborhood<MESSAGE> hood(neighbors, inputFutures, remoteIDs);
+        int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
+        Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
         cell->update(hood, nanoStep, step);
     }
 

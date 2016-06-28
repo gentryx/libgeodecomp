@@ -82,8 +82,7 @@ public:
 
         for (auto&& neighbor: neighbors) {
             DummyMessage dummyMessage(id, neighbor, globalNanoStep + 1, 10000 * (globalNanoStep + 1) + 100 * id + neighbor);
-            // fixme: strip step from signature
-            hood.send(neighbor, dummyMessage, globalNanoStep + 1);
+            hood.send(neighbor, dummyMessage);
         }
     }
 
