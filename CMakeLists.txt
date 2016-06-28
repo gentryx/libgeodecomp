@@ -55,7 +55,6 @@ set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
 # search for external LibFlatArray, but -- if none was found -- default to bundled version:
 find_package(libflatarray QUIET)
 if(NOT libflatarray_FOUND)
-  message(andi internal)
   add_subdirectory(lib/libflatarray)
   # add this include paths only to BUILD_INCLUDE_DIRECTORIES as must
   # not be exported during install in any case (the build tree must be

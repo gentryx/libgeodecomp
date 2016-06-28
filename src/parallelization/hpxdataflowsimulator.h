@@ -4,8 +4,11 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 
+#include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
+#include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/communication/hpxreceiver.h>
-#include <libgeodecomp/parallelization/distributedsimulator.h>
+#include <libgeodecomp/parallelization/hierarchicalsimulator.h>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 
@@ -106,25 +109,44 @@ public:
 /**
  * Experimental Simulator based on (surprise surprise) HPX' dataflow
  operator. Primary use case (for now) is DGSWEM.
- *
- * fixme: add partitioning scheme for placement of cells
  */
-template<typename CELL>
-class HPXDataflowSimulator : public DistributedSimulator<CELL>
+template<typename CELL, typename PARTITION = UnstructuredStripingPartition>
+class HPXDataflowSimulator : public HierarchicalSimulator<CELL>
 {
 public:
     typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
+    typedef HierarchicalSimulator<CELL> ParentType;
+    typedef typename DistributedSimulator<CELL>::Topology Topology;
+    typedef PartitionManager<Topology> PartitionManagerType;
+    using DistributedSimulator<CELL>::NANO_STEPS;
     using DistributedSimulator<CELL>::initializer;
+    using HierarchicalSimulator<CELL>::initialWeights;
 
-    inline HPXDataflowSimulator(Initializer<CELL> *initializer) :
-        DistributedSimulator<CELL>(initializer)
+    inline HPXDataflowSimulator(
+        Initializer<CELL> *initializer,
+        int loadBalancingPeriod = 10000,
+        bool enableFineGrainedParallelism = true) :
+        ParentType(
+            initializer,
+            loadBalancingPeriod * NANO_STEPS,
+            enableFineGrainedParallelism)
     {}
 
     void step()
     {
-        // fixme
+        throw std::logic_error("HPXDataflowSimulator::step() not implemented");
     }
 
+    long currentNanoStep() const
+    {
+        throw std::logic_error("HPXDataflowSimulator::currentNanoStep() not implemented");
+        return 0;
+    }
+
+    void balanceLoad()
+    {
+        throw std::logic_error("HPXDataflowSimulator::balanceLoad() not implemented");
+    }
     void run()
     {
         UnstructuredGrid<CELL> grid(initializer->gridBox());
@@ -141,15 +163,33 @@ public:
         Region<1> localRegion;
         CoordBox<1> box = initializer->gridBox();
         std::size_t rank = hpx::get_locality_id();
-        // fixme: don't hardcode num of localities
         std::size_t numLocalities = hpx::get_num_localities().get();
-        std::size_t start = ((rank + 0) * box.dimensions.x() / numLocalities);
-        std::size_t end   = ((rank + 1) * box.dimensions.x() / numLocalities);
 
-        for (std::size_t i = start; i < end; ++i) {
-            localRegion << Coord<1>(i);
-        }
+        std::vector<double> rankSpeeds(numLocalities, 1.0);
+        std::vector<std::size_t> weights = initialWeights(
+            box.dimensions.prod(),
+            rankSpeeds);
 
+        Region<1> globalRegion;
+        globalRegion << box;
+
+        boost::shared_ptr<PARTITION> partition(
+            new PARTITION(
+                box.origin,
+                box.dimensions,
+                0,
+                weights,
+                initializer->getAdjacency(globalRegion)));
+
+        PartitionManager<Topology> partitionManager;
+        partitionManager.resetRegions(
+            initializer,
+            box,
+            partition,
+            rank,
+            1);
+
+        localRegion = partitionManager.ownRegion();
         boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency(localRegion);
 
         // fixme: instantiate components in agas and only hold ids of those
