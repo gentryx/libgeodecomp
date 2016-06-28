@@ -86,10 +86,11 @@ public:
         const hpx::shared_future<void>& /* unused, just here to ensure
                                            correct ordering of updates
                                            per cell */,
+        int nanoStep,
         int step)
     {
         Neighborhood<MESSAGE> hood(neighbors, inputFutures, remoteIDs);
-        cell->update(hood, step + 1);
+        cell->update(hood, nanoStep, step);
     }
 
     static std::string endpointName(const std::string& basename, int sender, int receiver)
@@ -244,41 +245,43 @@ public:
 
         // fixme: add steerer/writer interaction
         int maxTimeSteps = initializer->maxSteps();
-        for (int t = 0; t < maxTimeSteps; ++t) {
-            int index = 0;
+        for (int step = 0; step < maxTimeSteps; ++step) {
+            for (int nanoStep = 0; nanoStep < NANO_STEPS; ++nanoStep) {
+                int index = 0;
+                int globalNanoStep = step * NANO_STEPS + nanoStep;
 
-            for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+                for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
 
-                std::vector<hpx::shared_future<MessageType> > receiveMessagesFutures;
-                neighbors.clear();
-                adjacency->getNeighbors(i->x(), &neighbors);
+                    std::vector<hpx::shared_future<MessageType> > receiveMessagesFutures;
+                    neighbors.clear();
+                    adjacency->getNeighbors(i->x(), &neighbors);
 
                     for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                        if (t > 0) {
-                            receiveMessagesFutures << components[i->x()].receivers[*j]->get(t);
+                        if ((globalNanoStep) > 0) {
+                            receiveMessagesFutures << components[i->x()].receivers[*j]->get(globalNanoStep);
                         } else {
-                            int data = *j * 100 + i->x();
                             receiveMessagesFutures <<  hpx::make_ready_future(MessageType());
                         }
+                    }
+
+                    auto Operation = boost::bind(&HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>::update,
+                                                 components[i->x()], _1, _2, _3, _4, _5);
+
+                    thisTimeStepFutures[index] = dataflow(
+                        hpx::launch::async,
+                        Operation,
+                        neighbors,
+                        receiveMessagesFutures,
+                        lastTimeStepFutures[index],
+                        nanoStep,
+                        step);
+
+                    ++index;
                 }
 
-                auto Operation = boost::bind(&HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>::update,
-                                             components[i->x()], _1, _2, _3, _4);
-
-                thisTimeStepFutures[index] = dataflow(
-                    hpx::launch::async,
-                    Operation,
-                    neighbors,
-                    receiveMessagesFutures,
-                    lastTimeStepFutures[index],
-                    // fixme: nanoStep!
-                    t);
-
-                ++index;
+                using std::swap;
+                swap(thisTimeStepFutures, lastTimeStepFutures);
             }
-
-            using std::swap;
-            swap(thisTimeStepFutures, lastTimeStepFutures);
         }
 
         hpx::when_all(lastTimeStepFutures).get();

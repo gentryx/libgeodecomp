@@ -48,8 +48,11 @@ namespace LibGeoDecomp {
 class DummyModel
 {
 public:
+    static const int NANO_STEPS = 3;
+
     class API :
         public APITraits::HasUnstructuredTopology,
+        public APITraits::HasNanoSteps<NANO_STEPS>,
         public APITraits::HasCustomMessageType<DummyMessage>
     {};
 
@@ -62,26 +65,25 @@ public:
     template<typename HOOD>
     void update(
         HOOD& hood,
-        // fixme: make sure nanosteps are being issued here, not global steps:
-        int nanoStep)
+        int nanoStep,
+        int step)
     {
-        // fixme: don't check for nanoStep, but step. also: why 1, not 0?
-        if (nanoStep > 1) {
+        int globalNanoStep = step * NANO_STEPS + nanoStep;
+
+        if ((globalNanoStep) > 0) {
             for (auto&& neighbor: neighbors) {
-                // fixme: use actual step AND nanoStep here
-                int expectedData = 10000 * (nanoStep - 1) + neighbor * 100 + id;
+                int expectedData = 10000 * globalNanoStep + neighbor * 100 + id;
                 TS_ASSERT_EQUALS(hood[neighbor].data,       expectedData);
-                TS_ASSERT_EQUALS(hood[neighbor].timestep,   (nanoStep - 1));
+                TS_ASSERT_EQUALS(hood[neighbor].timestep,   globalNanoStep);
                 TS_ASSERT_EQUALS(hood[neighbor].senderID,   neighbor);
                 TS_ASSERT_EQUALS(hood[neighbor].receiverID, id);
             }
         }
 
         for (auto&& neighbor: neighbors) {
-            // fixme: use actual step AND nanoStep here
-            DummyMessage dummyMessage(id, neighbor, nanoStep, 10000 * nanoStep + 100 * id + neighbor);
-            // fixme: strip this from signature
-            hood.send(neighbor, dummyMessage, nanoStep);
+            DummyMessage dummyMessage(id, neighbor, globalNanoStep + 1, 10000 * (globalNanoStep + 1) + 100 * id + neighbor);
+            // fixme: strip step from signature
+            hood.send(neighbor, dummyMessage, globalNanoStep + 1);
         }
     }
 
