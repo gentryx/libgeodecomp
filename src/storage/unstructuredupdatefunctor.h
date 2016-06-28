@@ -102,7 +102,7 @@ public:
                 const int cellsToUpdate = i->endX % C;
                 UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
                     hoodOld(gridOld, i->endX - cellsToUpdate);
-                std::array<CELL, C> cells;
+                FixedArray<CELL, C> cells;
                 Streak<1> cellStreak(Coord<1>(i->endX - cellsToUpdate), i->endX);
 
                 // update SoA grid: copy cells to local buffer, update, copy data back to grid
