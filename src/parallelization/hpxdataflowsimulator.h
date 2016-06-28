@@ -65,12 +65,16 @@ class CellComponent
 public:
     // fixme: move semantics
     // fixme: own cell, not just pointer, to facilitate migration of components
-    explicit CellComponent(CELL *cell = 0, int id = -1, std::vector<int> neighbors = std::vector<int>()) :
+    explicit CellComponent(
+        const std::string& basename = "",
+        CELL *cell = 0,
+        int id = -1,
+        std::vector<int> neighbors = std::vector<int>()) :
         cell(cell),
         id(id)
     {
         for (auto&& neighbor: neighbors) {
-            std::string linkName = endpointName(neighbor, id);
+            std::string linkName = endpointName(basename, neighbor, id);
             receivers[neighbor] = HPXReceiver<MESSAGE>::make(linkName).get();
         }
     }
@@ -88,10 +92,11 @@ public:
         cell->update(hood, step + 1);
     }
 
-    static std::string endpointName(int sender, int receiver)
+    static std::string endpointName(const std::string& basename, int sender, int receiver)
     {
-        // fixme: make this prefix configurable
         return "HPXDataflowSimulatorEndPoint_" +
+            basename +
+            "_" +
             StringOps::itoa(sender) +
             "_to_" +
             StringOps::itoa(receiver);
@@ -108,7 +113,7 @@ public:
 
 /**
  * Experimental Simulator based on (surprise surprise) HPX' dataflow
- operator. Primary use case (for now) is DGSWEM.
+ * operator. Primary use case (for now) is DGSWEM.
  */
 template<typename CELL, typename PARTITION = UnstructuredStripingPartition>
 class HPXDataflowSimulator : public HierarchicalSimulator<CELL>
@@ -122,14 +127,23 @@ public:
     using DistributedSimulator<CELL>::initializer;
     using HierarchicalSimulator<CELL>::initialWeights;
 
+    /**
+     * basename will be added to IDs for use in AGAS lookup, so for
+     * each simulation all localities need to use the same basename,
+     * but if you intent to run multiple different simulations in a
+     * single program, either in parallel or sequentially, you'll need
+     * to use a different basename.
+     */
     inline HPXDataflowSimulator(
         Initializer<CELL> *initializer,
+        const std::string& basename,
         int loadBalancingPeriod = 10000,
         bool enableFineGrainedParallelism = true) :
         ParentType(
             initializer,
             loadBalancingPeriod * NANO_STEPS,
-            enableFineGrainedParallelism)
+            enableFineGrainedParallelism),
+        basename(basename)
     {}
 
     void step()
@@ -192,6 +206,7 @@ public:
         localRegion = partitionManager.ownRegion();
         boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency(localRegion);
 
+
         // fixme: instantiate components in agas and only hold ids of those
         std::map<int, HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> > components;
         std::vector<int> neighbors;
@@ -199,7 +214,11 @@ public:
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
             neighbors.clear();
             adjacency->getNeighbors(i->x(), &neighbors);
-            HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> component(&grid[*i], i->x(), neighbors);
+            HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> component(
+                basename,
+                &grid[*i],
+                i->x(),
+                neighbors);
             components[i->x()] = component;
         }
 
@@ -212,7 +231,7 @@ public:
             // fixme: move this initialization into the c-tor of the CellComponent:
             for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
                 std::string linkName = HPXDataFlowSimulatorHelpers::CellComponent<MessageType, MessageType>::endpointName(
-                    i->x(), *j);
+                    basename, i->x(), *j);
                 component.remoteIDs[*j] = hpx::id_type(HPXReceiver<MessageType>::find(linkName).get());
             }
         }
@@ -272,6 +291,7 @@ public:
     }
 
 private:
+    std::string basename;
 
 };
 
