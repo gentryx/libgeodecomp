@@ -68,6 +68,7 @@ class CellComponent
 {
 public:
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
+    typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
 
     // fixme: move semantics
     // fixme: own cell, not just pointer, to facilitate migration of components
@@ -75,13 +76,27 @@ public:
         const std::string& basename = "",
         CELL *cell = 0,
         int id = -1,
-        std::vector<int> neighbors = std::vector<int>()) :
+        const std::vector<int> neighbors = std::vector<int>()) :
+        basename(basename),
         cell(cell),
-        id(id)
+        id(id),
+    // fixme: move semantics
+        neighbors(neighbors)
     {
         for (auto&& neighbor: neighbors) {
             std::string linkName = endpointName(basename, neighbor, id);
             receivers[neighbor] = HPXReceiver<MESSAGE>::make(linkName).get();
+        }
+    }
+
+    // integrate into c-tor?
+    void setupRemoteIDs()
+    {
+        for (auto i = neighbors.begin(); i != neighbors.end(); ++i) {
+            std::string linkName = HPXDataFlowSimulatorHelpers::CellComponent<MessageType, MessageType>::endpointName(
+                basename, id, *i);
+            // fixme: add dataflow here, return future
+            remoteIDs[*i] = hpx::id_type(HPXReceiver<MessageType>::find(linkName).get());
         }
     }
 
@@ -111,6 +126,10 @@ public:
 
     }
 
+    // fixme: make private
+// private:
+    std::string basename;
+    std::vector<int> neighbors;
     CELL *cell;
     int id;
     std::map<int, std::shared_ptr<HPXReceiver<MESSAGE> > > receivers;
@@ -173,14 +192,9 @@ public:
     {
         UnstructuredGrid<CELL> grid(initializer->gridBox());
         initializer->grid(&grid);
-        // move to simulator:
-        typedef hpx::shared_future<void> UpdateResultFuture;
-        typedef std::vector<UpdateResultFuture> TimeStepFutures;
 
         using hpx::dataflow;
         using hpx::util::unwrapped;
-        TimeStepFutures lastTimeStepFutures;
-        TimeStepFutures thisTimeStepFutures;
 
         Region<1> localRegion;
         CoordBox<1> box = initializer->gridBox();
@@ -231,18 +245,13 @@ public:
         }
 
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>& component = components[i->x()];
-
-            neighbors.clear();
-            adjacency->getNeighbors(i->x(), &neighbors);
-
-            // fixme: move this initialization into the c-tor of the CellComponent:
-            for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                std::string linkName = HPXDataFlowSimulatorHelpers::CellComponent<MessageType, MessageType>::endpointName(
-                    basename, i->x(), *j);
-                component.remoteIDs[*j] = hpx::id_type(HPXReceiver<MessageType>::find(linkName).get());
-            }
+            components[i->x()].setupRemoteIDs();
         }
+
+        typedef hpx::shared_future<void> UpdateResultFuture;
+        typedef std::vector<UpdateResultFuture> TimeStepFutures;
+        TimeStepFutures lastTimeStepFutures;
+        TimeStepFutures thisTimeStepFutures;
 
         // fixme: also create dataflow in cellcomponent
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
