@@ -8,6 +8,7 @@
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/parallelization/hierarchicalsimulator.h>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 
@@ -133,18 +134,18 @@ public:
 
     void step()
     {
-        // fixme
+        throw std::logic_error("HPXDataflowSimulator::step() not implemented");
     }
 
     long currentNanoStep() const
     {
-        // fixme
+        throw std::logic_error("HPXDataflowSimulator::currentNanoStep() not implemented");
         return 0;
     }
 
     void balanceLoad()
     {
-        // fixme
+        throw std::logic_error("HPXDataflowSimulator::balanceLoad() not implemented");
     }
     void run()
     {
