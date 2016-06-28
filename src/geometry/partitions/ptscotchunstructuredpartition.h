@@ -7,9 +7,7 @@
 
 #ifdef LIBGEODECOMP_WITH_CPP14
 #ifdef LIBGEODECOMP_WITH_SCOTCH
-#ifdef LIBGEODECOMP_WITH_MPI
 
-#include <mpi.h>
 #include <ptscotch.h>
 
 #include <chrono>
@@ -35,11 +33,11 @@ public:
             const std::vector<std::size_t>& weights,
             boost::shared_ptr<Adjacency> adjacency) :
         Partition<DIM>(offset, weights),
+        adjacency(adjacency),
         origin(origin),
         dimensions(dimensions),
         numCells(dimensions.prod())
     {
-        this->adjacency = adjacency;
         buildRegions();
     }
 
@@ -49,6 +47,7 @@ public:
     }
 
 private:
+    boost::shared_ptr<Adjacency> adjacency;
     Coord<DIM> origin;
     Coord<DIM> dimensions;
     SCOTCH_Num numCells;
@@ -129,25 +128,12 @@ private:
         for (int i = 0; i < numCells; ++i) {
             regions[indices[i]] << Coord<1>(i);
         }
-
-#if 0
-        if (MPILayer().rank() == 0) {
-            LOG(DBG, "regions: ");
-            for (auto& region : regions) {
-                stringstream ss;
-                region.prettyPrint1D(ss, Coord<2>(2000, 2000), Coord<2>(8, 8));
-                LOG(DBG, ss.str());
-            }
-        }
-#endif
-
     }
 
 };
 
 }
 
-#endif
 #endif
 #endif
 
