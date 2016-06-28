@@ -269,6 +269,33 @@ public:
         {
         public:
             static const int DIM = 1;
+
+            template<typename GRID>
+            static inline const typename GRID::value_type& locate(
+                const GRID& grid,
+                const Coord<1>& coord,
+                const Coord<1>& gridDim,
+                const typename GRID::value_type& edgeCell)
+            {
+                return grid[coord.x()];
+            }
+
+            template<typename GRID>
+            static inline typename GRID::value_type& locate(
+                GRID& grid,
+                const Coord<1>& coord,
+                const Coord<1>& gridDim,
+                const typename GRID::value_type& edgeCell)
+            {
+                return grid[coord.x()];
+            }
+
+            static Coord<1> normalize(
+                const Coord<1>& coord,
+                const Coord<1>& gridDim)
+            {
+                return coord;
+            }
         };
     };
 
