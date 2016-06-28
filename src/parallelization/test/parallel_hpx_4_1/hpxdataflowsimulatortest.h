@@ -1,6 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
 
+#include <libgeodecomp/geometry/partitions/ptscotchunstructuredpartition.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
@@ -172,9 +173,19 @@ public:
     void testBasic()
     {
         Initializer<DummyModel> *initializer = new DummyInitializer(50, 13);
-        HPXDataflowSimulator<DummyModel> sim(initializer);
+        HPXDataflowSimulator<DummyModel> sim(initializer, "testBasic");
         sim.run();
     }
+
+    void testPTScotch()
+    {
+#ifdef LIBGEODECOMP_WITH_SCOTCH
+        Initializer<DummyModel> *initializer = new DummyInitializer(50, 13);
+        HPXDataflowSimulator<DummyModel, PTScotchUnstructuredPartition<1> > sim(initializer, "testPTScotch");
+        sim.run();
+#endif
+    }
+
 };
 
 }
