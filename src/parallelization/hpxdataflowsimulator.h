@@ -91,30 +91,24 @@ public:
 
     void setupDataflow()
     {
-        std::vector<hpx::shared_future<hpx::id_type> > remoteIDFutures;
+        std::vector<hpx::future<void> > remoteIDFutures;
         remoteIDFutures.reserve(neighbors.size());
 
         for (auto i = neighbors.begin(); i != neighbors.end(); ++i) {
             std::string linkName = HPXDataFlowSimulatorHelpers::CellComponent<MessageType, MessageType>::endpointName(
                 basename, id, *i);
 
-            remoteIDFutures << HPXReceiver<MessageType>::find(linkName);
+            int neighbor = *i;
+            remoteIDFutures << HPXReceiver<MessageType>::find(linkName).then(
+                [neighbor, this](hpx::shared_future<hpx::id_type> remoteIDFuture)
+                {
+                    remoteIDs[neighbor] = remoteIDFuture.get();
+                });
         }
 
-        hpx::future<void> res = hpx::when_all(remoteIDFutures).then(
-            [this](hpx::future<std::vector<hpx::shared_future<hpx::id_type> > > remoteIDReadyFuturesFuture) -> void
-            {
-                std::vector<hpx::shared_future<hpx::id_type> > remoteIDReadyFutures = remoteIDReadyFuturesFuture.get();
-                if (neighbors.size() != remoteIDReadyFutures.size()) {
-                    throw std::logic_error("should have as many neighbors as IDs!");
-                }
+        // res.get();
 
-                for (std::size_t i = 0; i < neighbors.size(); ++i) {
-                    remoteIDs[neighbors[i]] = remoteIDReadyFutures[i].get();
-                }
-            });
-
-        res.get();
+        hpx::when_all(remoteIDFutures).get();
     }
 
     // fixme: use move semantics here
