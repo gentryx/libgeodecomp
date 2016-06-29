@@ -89,7 +89,7 @@ public:
         }
     }
 
-    void setupDataflow()
+    hpx::shared_future<void> setupDataflow(int maxSteps)
     {
         std::vector<hpx::future<void> > remoteIDFutures;
         remoteIDFutures.reserve(neighbors.size());
@@ -106,9 +106,45 @@ public:
                 });
         }
 
-        // res.get();
-
         hpx::when_all(remoteIDFutures).get();
+        hpx::shared_future<void> lastTimeStepFuture = hpx::make_ready_future(hpx::shared_future<void>());
+
+        // fixme: add steerer/writer interaction
+        for (int step = 0; step < maxSteps; ++step) {
+            for (int nanoStep = 0; nanoStep < NANO_STEPS; ++nanoStep) {
+                int index = 0;
+                int globalNanoStep = step * NANO_STEPS + nanoStep;
+
+                std::vector<hpx::shared_future<MessageType> > receiveMessagesFutures;
+                receiveMessagesFutures.reserve(neighbors.size());
+
+                for (auto&& neighbor: neighbors) {
+                    if ((globalNanoStep) > 0) {
+                        receiveMessagesFutures << receivers[neighbor]->get(globalNanoStep);
+                    } else {
+                        receiveMessagesFutures <<  hpx::make_ready_future(MessageType());
+                    }
+                }
+
+                auto Operation = boost::bind(
+                    &HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>::update,
+                    *this, _1, _2, _3, _4, _5);
+
+                hpx::shared_future<void> thisTimeStepFuture = dataflow(
+                    hpx::launch::async,
+                    Operation,
+                    neighbors,
+                    receiveMessagesFutures,
+                    lastTimeStepFuture,
+                    nanoStep,
+                    step);
+
+                using std::swap;
+                swap(thisTimeStepFuture, lastTimeStepFuture);
+            }
+        }
+
+        return lastTimeStepFuture;
     }
 
     // fixme: use move semantics here
@@ -257,60 +293,14 @@ public:
             components[i->x()] = component;
         }
 
-        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            components[i->x()].setupDataflow();
-        }
-
         typedef hpx::shared_future<void> UpdateResultFuture;
         typedef std::vector<UpdateResultFuture> TimeStepFutures;
         TimeStepFutures lastTimeStepFutures;
-        TimeStepFutures thisTimeStepFutures;
-
-        // fixme: also create dataflow in cellcomponent
-        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            lastTimeStepFutures << hpx::make_ready_future(UpdateResultFuture());
-        }
-        thisTimeStepFutures.resize(localRegion.size());
-
-        // fixme: add steerer/writer interaction
+        lastTimeStepFutures.reserve(localRegion.size());
         int maxTimeSteps = initializer->maxSteps();
-        for (int step = 0; step < maxTimeSteps; ++step) {
-            for (int nanoStep = 0; nanoStep < NANO_STEPS; ++nanoStep) {
-                int index = 0;
-                int globalNanoStep = step * NANO_STEPS + nanoStep;
 
-                for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-
-                    std::vector<hpx::shared_future<MessageType> > receiveMessagesFutures;
-                    neighbors.clear();
-                    adjacency->getNeighbors(i->x(), &neighbors);
-
-                    for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                        if ((globalNanoStep) > 0) {
-                            receiveMessagesFutures << components[i->x()].receivers[*j]->get(globalNanoStep);
-                        } else {
-                            receiveMessagesFutures <<  hpx::make_ready_future(MessageType());
-                        }
-                    }
-
-                    auto Operation = boost::bind(&HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>::update,
-                                                 components[i->x()], _1, _2, _3, _4, _5);
-
-                    thisTimeStepFutures[index] = dataflow(
-                        hpx::launch::async,
-                        Operation,
-                        neighbors,
-                        receiveMessagesFutures,
-                        lastTimeStepFutures[index],
-                        nanoStep,
-                        step);
-
-                    ++index;
-                }
-
-                using std::swap;
-                swap(thisTimeStepFutures, lastTimeStepFutures);
-            }
+        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+            lastTimeStepFutures << components[i->x()].setupDataflow(maxTimeSteps);
         }
 
         hpx::when_all(lastTimeStepFutures).get();
