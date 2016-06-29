@@ -20,9 +20,11 @@ class Neighborhood
 public:
     // fixme: move semantics
     inline Neighborhood(
+        int targetGlobalNanoStep,
         std::vector<int> messageNeighborIDs,
         std::vector<hpx::shared_future<MESSAGE> > messagesFromNeighbors,
         const std::map<int, hpx::id_type>& remoteIDs) :
+        targetGlobalNanoStep(targetGlobalNanoStep),
         messageNeighborIDs(messageNeighborIDs),
         messagesFromNeighbors(hpx::util::unwrapped(messagesFromNeighbors)),
         remoteIDs(remoteIDs)
@@ -38,7 +40,8 @@ public:
         return messagesFromNeighbors[i - messageNeighborIDs.begin()];
     }
 
-    void send(int remoteCellID, const MESSAGE& message, int step) const
+    // fixme: move semantics
+    void send(int remoteCellID, const MESSAGE& message) const
     {
         std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
         if (iter == remoteIDs.end()) {
@@ -48,11 +51,12 @@ public:
         hpx::apply(
             typename HPXReceiver<MESSAGE>::receiveAction(),
             iter->second,
-            step,
+            targetGlobalNanoStep,
             message);
     }
 
 private:
+    int targetGlobalNanoStep;
     std::vector<int> messageNeighborIDs;
     std::vector<MESSAGE> messagesFromNeighbors;
     std::map<int, hpx::id_type> remoteIDs;
@@ -63,20 +67,84 @@ template<typename CELL, typename MESSAGE>
 class CellComponent
 {
 public:
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
+    typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
     typedef DisplacedGrid<CELL, Topologies::Unstructured::Topology> GridType;
+
 
     // fixme: move semantics
     explicit CellComponent(
+        const std::string& basename = "",
         boost::shared_ptr<GridType> grid = 0,
         int id = -1,
-        std::vector<int> neighbors = std::vector<int>()) :
+        const std::vector<int> neighbors = std::vector<int>()) :
+        basename(basename),
         grid(grid),
-        id(id)
+        id(id),
+    // fixme: move semantics
+        neighbors(neighbors)
     {
         for (auto&& neighbor: neighbors) {
-            std::string linkName = endpointName(neighbor, id);
+            std::string linkName = endpointName(basename, neighbor, id);
             receivers[neighbor] = HPXReceiver<MESSAGE>::make(linkName).get();
         }
+    }
+
+    hpx::shared_future<void> setupDataflow(int maxSteps)
+    {
+        std::vector<hpx::future<void> > remoteIDFutures;
+        remoteIDFutures.reserve(neighbors.size());
+
+        for (auto i = neighbors.begin(); i != neighbors.end(); ++i) {
+            std::string linkName = endpointName(basename, id, *i);
+
+            int neighbor = *i;
+            remoteIDFutures << HPXReceiver<MessageType>::find(linkName).then(
+                [neighbor, this](hpx::shared_future<hpx::id_type> remoteIDFuture)
+                {
+                    remoteIDs[neighbor] = remoteIDFuture.get();
+                });
+        }
+
+        hpx::when_all(remoteIDFutures).get();
+        hpx::shared_future<void> lastTimeStepFuture = hpx::make_ready_future(hpx::shared_future<void>());
+
+        // fixme: add steerer/writer interaction
+        for (int step = 0; step < maxSteps; ++step) {
+            for (int nanoStep = 0; nanoStep < NANO_STEPS; ++nanoStep) {
+                int index = 0;
+                int globalNanoStep = step * NANO_STEPS + nanoStep;
+
+                std::vector<hpx::shared_future<MessageType> > receiveMessagesFutures;
+                receiveMessagesFutures.reserve(neighbors.size());
+
+                for (auto&& neighbor: neighbors) {
+                    if ((globalNanoStep) > 0) {
+                        receiveMessagesFutures << receivers[neighbor]->get(globalNanoStep);
+                    } else {
+                        receiveMessagesFutures <<  hpx::make_ready_future(MessageType());
+                    }
+                }
+
+                auto Operation = boost::bind(
+                    &HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>::update,
+                    *this, _1, _2, _3, _4, _5);
+
+                hpx::shared_future<void> thisTimeStepFuture = dataflow(
+                    hpx::launch::async,
+                    Operation,
+                    neighbors,
+                    receiveMessagesFutures,
+                    lastTimeStepFuture,
+                    nanoStep,
+                    step);
+
+                using std::swap;
+                swap(thisTimeStepFuture, lastTimeStepFuture);
+            }
+        }
+
+        return lastTimeStepFuture;
     }
 
     // fixme: use move semantics here
@@ -86,26 +154,32 @@ public:
         const hpx::shared_future<void>& /* unused, just here to ensure
                                            correct ordering of updates
                                            per cell */,
+        int nanoStep,
         int step)
     {
-        Neighborhood<MESSAGE> hood(neighbors, inputFutures, remoteIDs);
-        cell()->update(hood, step + 1);
+        int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
+        Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
+        cell()->update(hood, nanoStep, step);
     }
 
-    static std::string endpointName(int sender, int receiver)
+private:
+    std::string basename;
+    std::vector<int> neighbors;
+    boost::shared_ptr<GridType> grid;
+    int id;
+    std::map<int, std::shared_ptr<HPXReceiver<MESSAGE> > > receivers;
+    std::map<int, hpx::id_type> remoteIDs;
+
+    static std::string endpointName(const std::string& basename, int sender, int receiver)
     {
-        // fixme: make this prefix configurable
         return "HPXDataflowSimulatorEndPoint_" +
+            basename +
+            "_" +
             StringOps::itoa(sender) +
             "_to_" +
             StringOps::itoa(receiver);
 
     }
-
-    boost::shared_ptr<GridType> grid;
-    int id;
-    std::map<int, std::shared_ptr<HPXReceiver<MESSAGE> > > receivers;
-    std::map<int, hpx::id_type> remoteIDs;
 
     CELL *cell()
     {
@@ -117,7 +191,7 @@ public:
 
 /**
  * Experimental Simulator based on (surprise surprise) HPX' dataflow
- operator. Primary use case (for now) is DGSWEM.
+ * operator. Primary use case (for now) is DGSWEM.
  */
 template<typename CELL, typename PARTITION = UnstructuredStripingPartition>
 class HPXDataflowSimulator : public HierarchicalSimulator<CELL>
@@ -131,14 +205,23 @@ public:
     using DistributedSimulator<CELL>::initializer;
     using HierarchicalSimulator<CELL>::initialWeights;
 
+    /**
+     * basename will be added to IDs for use in AGAS lookup, so for
+     * each simulation all localities need to use the same basename,
+     * but if you intent to run multiple different simulations in a
+     * single program, either in parallel or sequentially, you'll need
+     * to use a different basename.
+     */
     inline HPXDataflowSimulator(
         Initializer<CELL> *initializer,
+        const std::string& basename,
         int loadBalancingPeriod = 10000,
         bool enableFineGrainedParallelism = true) :
         ParentType(
             initializer,
             loadBalancingPeriod * NANO_STEPS,
-            enableFineGrainedParallelism)
+            enableFineGrainedParallelism),
+        basename(basename)
     {}
 
     void step()
@@ -158,14 +241,8 @@ public:
     }
     void run()
     {
-        // move to simulator:
-        typedef hpx::shared_future<void> UpdateResultFuture;
-        typedef std::vector<UpdateResultFuture> TimeStepFutures;
-
         using hpx::dataflow;
         using hpx::util::unwrapped;
-        TimeStepFutures lastTimeStepFutures;
-        TimeStepFutures thisTimeStepFutures;
 
         Region<1> localRegion;
         CoordBox<1> box = initializer->gridBox();
@@ -199,6 +276,7 @@ public:
         localRegion = partitionManager.ownRegion();
         boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency(localRegion);
 
+
         // fixme: instantiate components in agas and only hold ids of those
         typedef HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> ComponentType;
         typedef typename ComponentType::GridType GridType;
@@ -213,72 +291,26 @@ public:
             initializer->grid(&*grid);
 
             neighbors.clear();
-            adjacency->getNeighbors(id, &neighbors);
-
-            ComponentType component(grid, id, neighbors);
-            components[id] = component;
-        }
-
-        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            ComponentType& component = components[i->x()];
-
-            neighbors.clear();
             adjacency->getNeighbors(i->x(), &neighbors);
-
-            // fixme: move this initialization into the c-tor of the CellComponent:
-            for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                std::string linkName = HPXDataFlowSimulatorHelpers::CellComponent<MessageType, MessageType>::endpointName(
-                    i->x(), *j);
-                component.remoteIDs[*j] = hpx::id_type(HPXReceiver<MessageType>::find(linkName).get());
-            }
+            HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> component(
+                basename,
+                grid,
+                i->x(),
+                neighbors);
+            components[i->x()] = component;
         }
-
-        // fixme: also create dataflow in cellcomponent
-        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            lastTimeStepFutures << hpx::make_ready_future(UpdateResultFuture());
-        }
-        thisTimeStepFutures.resize(localRegion.size());
 
 	// HPX Reset counters 
 	hpx::reset_active_counters();
 
-        // fixme: add steerer/writer interaction
+        typedef hpx::shared_future<void> UpdateResultFuture;
+        typedef std::vector<UpdateResultFuture> TimeStepFutures;
+        TimeStepFutures lastTimeStepFutures;
+        lastTimeStepFutures.reserve(localRegion.size());
         int maxTimeSteps = initializer->maxSteps();
-        for (int t = 0; t < maxTimeSteps; ++t) {
-            int index = 0;
 
-            for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-
-                std::vector<hpx::shared_future<MessageType> > receiveMessagesFutures;
-                neighbors.clear();
-                adjacency->getNeighbors(i->x(), &neighbors);
-
-                    for (auto j = neighbors.begin(); j != neighbors.end(); ++j) {
-                        if (t > 0) {
-                            receiveMessagesFutures << components[i->x()].receivers[*j]->get(t);
-                        } else {
-                            int data = *j * 100 + i->x();
-                            receiveMessagesFutures <<  hpx::make_ready_future(MessageType());
-                        }
-                }
-
-                auto Operation = boost::bind(&ComponentType::update,
-                                             components[i->x()], _1, _2, _3, _4);
-
-                thisTimeStepFutures[index] = dataflow(
-                    hpx::launch::async,
-                    Operation,
-                    neighbors,
-                    receiveMessagesFutures,
-                    lastTimeStepFutures[index],
-                    // fixme: nanoStep!
-                    t);
-
-                ++index;
-            }
-
-            using std::swap;
-            swap(thisTimeStepFutures, lastTimeStepFutures);
+        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+            lastTimeStepFutures << components[i->x()].setupDataflow(maxTimeSteps);
         }
 
         hpx::when_all(lastTimeStepFutures).get();
@@ -291,6 +323,7 @@ public:
     }
 
 private:
+    std::string basename;
 
 };
 
