@@ -89,15 +89,32 @@ public:
         }
     }
 
-    // integrate into c-tor?
-    void setupRemoteIDs()
+    void setupDataflow()
     {
+        std::vector<hpx::shared_future<hpx::id_type> > remoteIDFutures;
+        remoteIDFutures.reserve(neighbors.size());
+
         for (auto i = neighbors.begin(); i != neighbors.end(); ++i) {
             std::string linkName = HPXDataFlowSimulatorHelpers::CellComponent<MessageType, MessageType>::endpointName(
                 basename, id, *i);
-            // fixme: add dataflow here, return future
-            remoteIDs[*i] = hpx::id_type(HPXReceiver<MessageType>::find(linkName).get());
+
+            remoteIDFutures << HPXReceiver<MessageType>::find(linkName);
         }
+
+        hpx::future<void> res = hpx::when_all(remoteIDFutures).then(
+            [this](hpx::future<std::vector<hpx::shared_future<hpx::id_type> > > remoteIDReadyFuturesFuture) -> void
+            {
+                std::vector<hpx::shared_future<hpx::id_type> > remoteIDReadyFutures = remoteIDReadyFuturesFuture.get();
+                if (neighbors.size() != remoteIDReadyFutures.size()) {
+                    throw std::logic_error("should have as many neighbors as IDs!");
+                }
+
+                for (std::size_t i = 0; i < neighbors.size(); ++i) {
+                    remoteIDs[neighbors[i]] = remoteIDReadyFutures[i].get();
+                }
+            });
+
+        res.get();
     }
 
     // fixme: use move semantics here
@@ -190,7 +207,9 @@ public:
     }
     void run()
     {
+        // fixme: reduce this
         UnstructuredGrid<CELL> grid(initializer->gridBox());
+        // fixme: init in parallel by calling grid for each cell (forward pointer to cellcomponent?)
         initializer->grid(&grid);
 
         using hpx::dataflow;
@@ -245,7 +264,7 @@ public:
         }
 
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            components[i->x()].setupRemoteIDs();
+            components[i->x()].setupDataflow();
         }
 
         typedef hpx::shared_future<void> UpdateResultFuture;
