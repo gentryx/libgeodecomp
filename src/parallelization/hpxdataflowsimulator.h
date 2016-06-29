@@ -69,16 +69,17 @@ class CellComponent
 public:
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
     typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
+    typedef DisplacedGrid<CELL, Topologies::Unstructured::Topology> GridType;
+
 
     // fixme: move semantics
-    // fixme: own cell, not just pointer, to facilitate migration of components
     explicit CellComponent(
         const std::string& basename = "",
-        CELL *cell = 0,
+        boost::shared_ptr<GridType> grid = 0,
         int id = -1,
         const std::vector<int> neighbors = std::vector<int>()) :
         basename(basename),
-        cell(cell),
+        grid(grid),
         id(id),
     // fixme: move semantics
         neighbors(neighbors)
@@ -158,13 +159,13 @@ public:
     {
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
         Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
-        cell->update(hood, nanoStep, step);
+        cell()->update(hood, nanoStep, step);
     }
 
 private:
     std::string basename;
     std::vector<int> neighbors;
-    CELL *cell;
+    boost::shared_ptr<GridType> grid;
     int id;
     std::map<int, std::shared_ptr<HPXReceiver<MESSAGE> > > receivers;
     std::map<int, hpx::id_type> remoteIDs;
@@ -178,6 +179,11 @@ private:
             "_to_" +
             StringOps::itoa(receiver);
 
+    }
+
+    CELL *cell()
+    {
+        return grid->baseAddress();
     }
 };
 
@@ -235,11 +241,6 @@ public:
     }
     void run()
     {
-        // fixme: reduce this
-        UnstructuredGrid<CELL> grid(initializer->gridBox());
-        // fixme: init in parallel by calling grid for each cell (forward pointer to cellcomponent?)
-        initializer->grid(&grid);
-
         using hpx::dataflow;
         using hpx::util::unwrapped;
 
@@ -277,15 +278,23 @@ public:
 
 
         // fixme: instantiate components in agas and only hold ids of those
-        std::map<int, HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> > components;
+        typedef HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> ComponentType;
+        typedef typename ComponentType::GridType GridType;
+
+        std::map<int, ComponentType> components;
         std::vector<int> neighbors;
 
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+            int id = i->x();
+            CoordBox<1> singleCellBox(Coord<1>(id), Coord<1>(1));
+            boost::shared_ptr<GridType> grid(new GridType(singleCellBox));
+            initializer->grid(&*grid);
+
             neighbors.clear();
             adjacency->getNeighbors(i->x(), &neighbors);
             HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> component(
                 basename,
-                &grid[*i],
+                grid,
                 i->x(),
                 neighbors);
             components[i->x()] = component;

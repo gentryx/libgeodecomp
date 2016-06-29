@@ -120,8 +120,8 @@ void seedMT(uint32 seed)
     // so-- that's why the only change I made is to restrict to odd seeds.
     //
 
-    register uint32 x = (seed | 1U) & 0xFFFFFFFFU, *s = state;
-    register int    j;
+    uint32 x = (seed | 1U) & 0xFFFFFFFFU, *s = state;
+    int    j;
 
     for(left=0, *s++=x, j=N; --j;
         *s++ = (x*=69069U) & 0xFFFFFFFFU);
@@ -130,8 +130,8 @@ void seedMT(uint32 seed)
 
 uint32 reloadMT()
 {
-    register uint32 *p0=state, *p2=state+2, *pM=state+M, s0, s1;
-    register int    j;
+    uint32 *p0=state, *p2=state+2, *pM=state+M, s0, s1;
+    int    j;
 
     if(left < -1) {
         seedMT(4357U);
