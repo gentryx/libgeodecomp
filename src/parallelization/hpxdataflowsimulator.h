@@ -95,8 +95,7 @@ public:
         remoteIDFutures.reserve(neighbors.size());
 
         for (auto i = neighbors.begin(); i != neighbors.end(); ++i) {
-            std::string linkName = HPXDataFlowSimulatorHelpers::CellComponent<MessageType, MessageType>::endpointName(
-                basename, id, *i);
+            std::string linkName = endpointName(basename, id, *i);
 
             int neighbor = *i;
             remoteIDFutures << HPXReceiver<MessageType>::find(linkName).then(
@@ -162,6 +161,14 @@ public:
         cell->update(hood, nanoStep, step);
     }
 
+private:
+    std::string basename;
+    std::vector<int> neighbors;
+    CELL *cell;
+    int id;
+    std::map<int, std::shared_ptr<HPXReceiver<MESSAGE> > > receivers;
+    std::map<int, hpx::id_type> remoteIDs;
+
     static std::string endpointName(const std::string& basename, int sender, int receiver)
     {
         return "HPXDataflowSimulatorEndPoint_" +
@@ -172,15 +179,6 @@ public:
             StringOps::itoa(receiver);
 
     }
-
-    // fixme: make private
-// private:
-    std::string basename;
-    std::vector<int> neighbors;
-    CELL *cell;
-    int id;
-    std::map<int, std::shared_ptr<HPXReceiver<MESSAGE> > > receivers;
-    std::map<int, hpx::id_type> remoteIDs;
 };
 
 }
