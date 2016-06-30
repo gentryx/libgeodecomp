@@ -174,10 +174,10 @@ private:
 }
 
 #ifdef __CUDACC__
-#define MAKE_SELECTOR(CELL, MEMBER)								\
+#define MAKE_SELECTOR(CELL, MEMBER)                             \
     LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER, true)
 #else
-#define MAKE_SELECTOR(CELL, MEMBER)							\
+#define MAKE_SELECTOR(CELL, MEMBER)                             \
     LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER)
 #endif
 
