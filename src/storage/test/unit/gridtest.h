@@ -9,8 +9,8 @@
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/misc/testcell.h>
 
-#define GRIDWIDTH 4
-#define GRIDHEIGHT 5
+#define GRID_WIDTH 4
+#define GRID_HEIGHT 5
 
 double edge = 0;
 
@@ -57,13 +57,11 @@ namespace LibGeoDecomp {
  */
 class GridTest : public CxxTest::TestSuite
 {
-    Grid<TestCell<2> > *testGrid;
-
 public:
 
     void setUp()
     {
-        testGrid = new Grid<TestCell<2> >(Coord<2>(GRIDWIDTH, GRIDHEIGHT));
+        testGrid = new Grid<TestCell<2> >(Coord<2>(GRID_WIDTH, GRID_HEIGHT));
 
         int num = 200;
         for (int y = 0; y < testGrid->getDimensions().y(); y++) {
@@ -214,7 +212,7 @@ public:
 
     void testGetNeighborhoodInUpperRightCorner()
     {
-        CoordMap<TestCell<2> > hood = testGrid->getNeighborhood(Coord<2>(GRIDWIDTH-1, 0));
+        CoordMap<TestCell<2> > hood = testGrid->getNeighborhood(Coord<2>(GRID_WIDTH - 1, 0));
 
         TS_ASSERT_EQUALS(hood[Coord<2>( 0, -1)].testValue,
                          TestCell<2>::defaultValue());
@@ -470,6 +468,42 @@ public:
         }
     }
 
+    void testLoadSaveRegion()
+    {
+        std::vector<TestCell<2> > buffer(10);
+        Region<2> region;
+        region << Streak<2>(Coord<2>(0, 0), 4)
+               << Streak<2>(Coord<2>(1, 1), 3)
+               << Streak<2>(Coord<2>(0, 4), 4);
+
+        testGrid->saveRegion(&buffer, region);
+
+        Region<2>::Iterator iter = region.begin();
+        for (int i = 0; i < 10; ++i) {
+            TestCell<2> actual = testGrid->get(*iter);
+            TestCell<2> expected(*iter, testGrid->getDimensions());
+            expected.testValue = 200 + iter->y() * GRID_WIDTH + iter->x();
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++iter;
+        }
+
+        // manupulate test data:
+        for (int i = 0; i < 10; ++i) {
+            buffer[i].pos = Coord<2>(-i, -10);
+        }
+
+        int index = 0;
+        testGrid->loadRegion(buffer, region);
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            Coord<2> actual = testGrid->get(*i).pos;
+            Coord<2> expected = Coord<2>(index, -10);
+            TS_ASSERT_EQUALS(actual, expected);
+
+            --index;
+        }
+    }
+
     void testCreationOfZeroSizedGrid()
     {
         Grid<int, Topologies::Torus<1>::Topology> grid1;
@@ -481,6 +515,9 @@ public:
         Grid<int, Topologies::Torus<3>::Topology> grid3;
         TS_ASSERT_EQUALS(Coord<3>(), grid3.getDimensions());
     }
+
+private:
+    Grid<TestCell<2> > *testGrid;
 };
 
 }
