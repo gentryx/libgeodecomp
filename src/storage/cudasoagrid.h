@@ -118,8 +118,9 @@ public:
 
     const static int DIM = TOPOLOGY::DIM;
 
-    using typename GridBase<CELL, DIM>::BufferType;
     using GridBase<CELL, DIM>::topoDimensions;
+    using GridBase<CELL, DIM>::saveRegion;
+    using GridBase<CELL, DIM>::loadRegion;
 
     /**
      * Accumulated size of all members. Note that this may be lower
@@ -234,8 +235,10 @@ public:
         return box;
     }
 
-    void saveRegion(BufferType *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    void saveRegion(std::vector<char> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
+        // fixme: check size!
+
         SerializationBuffer<CELL>::resize(target, region);
         Coord<3> actualOffset = edgeRadii;
         for (int i = 0; i < DIM; ++i) {
@@ -249,7 +252,7 @@ public:
         delegate.save(start, end, target->data(), region.size());
     }
 
-    void loadRegion(const BufferType& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    void loadRegion(const std::vector<char>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
         std::size_t expectedMinimumSize = SerializationBuffer<CELL>::storageSize(region);
         if (source.size() < expectedMinimumSize) {

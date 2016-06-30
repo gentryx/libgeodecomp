@@ -10,6 +10,7 @@
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 
 namespace LibGeoDecomp {
 
@@ -334,8 +335,9 @@ public:
     friend class SoAGridTest;
     friend class SelectorTest;
 
-    using typename GridBase<CELL, TOPOLOGY::DIM>::BufferType;
     using GridBase<CELL, TOPOLOGY::DIM>::topoDimensions;
+    using GridBase<CELL, TOPOLOGY::DIM>::saveRegion;
+    using GridBase<CELL, TOPOLOGY::DIM>::loadRegion;
     const static int DIM = TOPOLOGY::DIM;
 
     /**
@@ -461,7 +463,7 @@ public:
         delegate.callback(&newGrid->delegate, functor);
     }
 
-    void saveRegion(BufferType *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    void saveRegion(std::vector<char> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
         SerializationBuffer<CELL>::resize(target, region);
         Coord<3> actualOffset = edgeRadii;
@@ -476,7 +478,7 @@ public:
         delegate.save(start, end, target->data(), region.size());
     }
 
-    void loadRegion(const BufferType& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    void loadRegion(const std::vector<char>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
         std::size_t expectedMinimumSize = SerializationBuffer<CELL>::storageSize(region);
         if (source.size() < expectedMinimumSize) {

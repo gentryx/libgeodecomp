@@ -27,8 +27,9 @@ public:
     typedef TOPOLOGY Topology;
 
     static const int DIM = Topology::DIM;
-    using typename GridBase<CellType, DIM>::BufferType;
     using GridBase<CellType, DIM>::topoDimensions;
+    using GridBase<CellType, DIM>::saveRegion;
+    using GridBase<CellType, DIM>::loadRegion;
 
     explicit inline CUDAGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
@@ -89,8 +90,9 @@ public:
         return box;
     }
 
-    void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    void saveRegion(std::vector<CELL_TYPE> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
+        // fixme: check size of buffer
         CellType *cursor = buffer->data();
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
@@ -103,8 +105,9 @@ public:
         }
     }
 
-    void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    void loadRegion(const std::vector<CELL_TYPE>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
+        // fixme: check size of buffer
         const CellType *cursor = buffer.data();
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();

@@ -95,9 +95,11 @@ public:
     friend class ParallelStripingSimulatorTest;
     const static int DIM = TOPOLOGY::DIM;
 
+    using GridBase<CELL_TYPE, TOPOLOGY::DIM>::loadRegion;
+    using GridBase<CELL_TYPE, TOPOLOGY::DIM>::saveRegion;
+
     // always align on cache line boundaries
     typedef typename std::vector<CELL_TYPE, LibFlatArray::aligned_allocator<CELL_TYPE, 64> > CellVector;
-
     typedef TOPOLOGY Topology;
     typedef CELL_TYPE Cell;
     typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > CoordMapType;
@@ -286,6 +288,28 @@ public:
     virtual CoordBox<DIM> boundingBox() const
     {
         return CoordBox<DIM>(Coord<DIM>(), dimensions);
+    }
+
+    void saveRegion(std::vector<CELL_TYPE> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        CELL_TYPE *target = buffer->data();
+
+        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+            get(*i, target);
+            target += i->length();
+        }
+    }
+
+    void loadRegion(const std::vector<CELL_TYPE>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    {
+        const CELL_TYPE *source = buffer.data();
+
+        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+            set(*i, source);
+            source += i->length();
+        }
     }
 
 protected:
