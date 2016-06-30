@@ -7,9 +7,41 @@
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/storage/memorylocation.h>
 #include <libgeodecomp/storage/selector.h>
-#include <libgeodecomp/storage/serializationbuffer.h>
 
 namespace LibGeoDecomp {
+
+namespace GridBaseHelpers {
+
+/**
+ * We cannot define the functions below inside GridBase as they would
+ * clash with the variants that use the cell type in their signature
+ * if CELL == char. We could disallow char as a template parameter to
+ * GridBase and friends, but that seems unnatural.
+ */
+template<int DIM>
+class LoadSaveRegionCharInterface
+{
+public:
+    /**
+     * This will typically be implemented by grids with Struct of
+     * Arrays (SoA) layout.
+     */
+    virtual void saveRegion(std::vector<char> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        throw std::logic_error("saveRegion not implemented for char buffers, not an SoA grid?");
+    }
+
+    /**
+     * This will typically be implemented by grids with Struct of
+     * Arrays (SoA) layout.
+     */
+    virtual void loadRegion(const std::vector<char>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    {
+        throw std::logic_error("loadRegion not implemented for char buffers, not an SoA grid?");
+    }
+};
+
+}
 
 template<typename CELL, int DIM, typename WEIGHT_TYPE>
 class ProxyGrid;
@@ -27,13 +59,13 @@ class ProxyGrid;
  * stored with the adjacency.
  */
 template<typename CELL, int DIMENSIONS, typename WEIGHT_TYPE = double>
-class GridBase
+class GridBase : GridBaseHelpers::LoadSaveRegionCharInterface<DIMENSIONS>
 {
 public:
     friend class ProxyGrid<CELL, DIMENSIONS, WEIGHT_TYPE>;
-
     typedef CELL CellType;
-    typedef typename SerializationBuffer<CELL>::BufferType BufferType;
+    using GridBaseHelpers::LoadSaveRegionCharInterface<DIMENSIONS>::saveRegion;
+    using GridBaseHelpers::LoadSaveRegionCharInterface<DIMENSIONS>::loadRegion;
 
     const static int DIM = DIMENSIONS;
 
@@ -88,22 +120,29 @@ public:
      * Extract cells specified by the Region and serialize them in the
      * given buffer. An optional offset will be added to all
      * coordinates in the Region.
+     *
+     * This function is typically implemented by Array of Structs
+     * (AoS) grids. SoA grids implement the variant that uses char
+     * buffers.
      */
-    virtual void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    virtual void saveRegion(std::vector<CELL> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        // fixme: make pure virtual
+        throw std::logic_error("loadRegion not implemented for buffers of type CELL, not an AoS grid?");
     }
 
     /**
      * Load cells from the buffer and store them at the coordinates
      * specified in region. The Region may be translated by an
      * optional offset.
+     *
+     * This function is typically implemented by Array of Structs
+     * (AoS) grids. SoA grids implement the variant that uses char
+     * buffers.
      */
-    virtual void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    virtual void loadRegion(const std::vector<CELL>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        // fixme: make pure virtual
+        throw std::logic_error("loadRegion not implemented for buffers of type CELL, not an AoS grid?");
     }
-
 
     Coord<DIM> dimensions() const
     {
