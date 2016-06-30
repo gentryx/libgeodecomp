@@ -3,6 +3,7 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/cudagrid.h>
 #include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 
 #include <cuda.h>
 
