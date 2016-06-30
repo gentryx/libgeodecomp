@@ -39,7 +39,8 @@ public:
         // reserve [100, 199], assuming there won't be more than 100
         // links between any two nodes.
         PATCH_LINK = 100,
-        PARALLEL_MEMORY_WRITER = 200
+        PARALLEL_MEMORY_WRITER = 200,
+        COLLECTING_WRITER = 300
     };
 
     typedef std::map<int, std::vector<MPI_Request> > RequestsMap;
