@@ -24,6 +24,7 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
     typedef typename GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value StorageGridType;
+    typedef typename SerializationBuffer<CELL_TYPE>::BufferType BufferType;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType SimulatorGridType;
 
     using ParallelWriter<CELL_TYPE>::period;
@@ -65,27 +66,16 @@ public:
         std::size_t rank,
         bool lastCall)
     {
+        SerializationBuffer<CELL_TYPE>::resize(&buffer, validRegion);
+        grid.saveRegion(&buffer, validRegion);
+
         if (mpiLayer.rank() == root) {
             if (globalGrid.boundingBox().dimensions != globalDimensions) {
                 globalGrid.resize(CoordBox<DIM>(Coord<DIM>(), globalDimensions));
             }
 
-            // fixme: replace this by GridBase::loadRegion
-            for (typename Region<DIM>::StreakIterator i = validRegion.beginStreak(); i != validRegion.endStreak(); ++i) {
-                std::vector<CELL_TYPE> buf(i->length());
-                grid.get(*i, buf.data());
-                globalGrid.set(*i, buf.data());
-            }
-
+            globalGrid.loadRegion(buffer, validRegion);
             globalGrid.setEdge(grid.getEdge());
-        }
-
-        CoordBox<DIM> box = grid.boundingBox();
-        StorageGridType localGrid(box);
-
-        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
-            Streak<DIM> s(*i);
-            grid.get(s, &localGrid[s.origin]);
         }
 
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {
@@ -93,21 +83,25 @@ public:
                 if (mpiLayer.rank() == root) {
                     Region<DIM> recvRegion;
                     mpiLayer.recvRegion(&recvRegion, sender);
-                    mpiLayer.recvUnregisteredRegion(
-                        &globalGrid,
-                        recvRegion,
+                    SerializationBuffer<CELL_TYPE>::resize(&buffer, recvRegion);
+
+                    mpiLayer.recv(
+                        buffer.data(),
                         sender,
-                        MPILayer::PARALLEL_MEMORY_WRITER,
-                        datatype);
+                        buffer.size(),
+                        MPILayer::COLLECTING_WRITER,
+                        SerializationBuffer<CELL_TYPE>::cellMPIDataType());
+                    mpiLayer.waitAll();
+                    globalGrid.loadRegion(buffer, recvRegion);
                 }
                 if (mpiLayer.rank() == sender) {
                     mpiLayer.sendRegion(validRegion, root);
-                    mpiLayer.sendUnregisteredRegion(
-                        &localGrid,
-                        validRegion,
+                    mpiLayer.send(
+                        buffer.data(),
                         root,
-                        MPILayer::PARALLEL_MEMORY_WRITER,
-                        datatype);
+                        buffer.size(),
+                        MPILayer::COLLECTING_WRITER,
+                        SerializationBuffer<CELL_TYPE>::cellMPIDataType());
                 }
             }
         }
@@ -124,6 +118,7 @@ private:
     MPILayer mpiLayer;
     int root;
     StorageGridType globalGrid;
+    BufferType buffer;
     MPI_Datatype datatype;
 };
 
