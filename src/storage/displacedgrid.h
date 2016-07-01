@@ -28,6 +28,9 @@ public:
     typedef Grid<CELL_TYPE, TOPOLOGY> Delegate;
     typedef CoordMap<CELL_TYPE, Delegate> CoordMapType;
 
+    using GridBase<CELL_TYPE, TOPOLOGY::DIM>::loadRegion;
+    using GridBase<CELL_TYPE, TOPOLOGY::DIM>::saveRegion;
+
     explicit DisplacedGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
         const CELL_TYPE& defaultCell = CELL_TYPE(),
@@ -159,6 +162,16 @@ public:
     virtual CoordBox<DIM> boundingBox() const
     {
         return CoordBox<DIM>(origin, delegate.getDimensions());
+    }
+
+    void saveRegion(std::vector<CELL_TYPE> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        delegate.saveRegion(buffer, region, offset - origin);
+    }
+
+    void loadRegion(const std::vector<CELL_TYPE>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    {
+        delegate.loadRegion(buffer, region, offset - origin);
     }
 
     inline CoordMapType getNeighborhood(const Coord<DIM>& center) const
