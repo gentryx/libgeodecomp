@@ -370,7 +370,12 @@ public:
                 actualDimensions, edgeRadii, edgeCell, defaultCell));
     }
 
-    inline void resize(const CoordBox<DIM>& newBox, bool setEdges = true)
+    inline void resize(const CoordBox<DIM>& newBox)
+    {
+        resize(newBox, true);
+    }
+
+    inline void resize(const CoordBox<DIM>& newBox, bool setEdges)
     {
         box = newBox;
         actualDimensions = Coord<3>::diagonal(1);

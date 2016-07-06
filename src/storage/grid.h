@@ -6,6 +6,7 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/storage/coordmap.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
@@ -131,6 +132,13 @@ public:
         edgeCell = other.edgeCell;
 
         return *this;
+    }
+
+    inline void resize(const CoordBox<DIM>& newBox)
+    {
+        LOG(WARN, "Grid will ignore origin in resize(CoordBox)");
+
+        resize(newBox.dimensions);
     }
 
     inline void resize(const Coord<DIM>& newDim)

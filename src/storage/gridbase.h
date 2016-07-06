@@ -77,6 +77,11 @@ public:
     {}
 
     /**
+     * Changes the dimension and offset of the grid.
+     */
+    virtual void resize(const CoordBox<DIM>&) = 0;
+
+    /**
      * Copies a single cell into the grid at the given coordinate
      */
     virtual void set(const Coord<DIM>&, const CELL&) = 0;

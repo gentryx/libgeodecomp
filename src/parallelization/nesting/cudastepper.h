@@ -472,8 +472,8 @@ private:
         Coord<DIM> topoDim = initializer->gridDimensions();
         CoordBox<DIM> gridBox = initGridsCommon();
 
-        oldDeviceGrid.reset(new CUDAGridType(gridBox, topoDim));
-        newDeviceGrid.reset(new CUDAGridType(gridBox, topoDim));
+        oldDeviceGrid.reset(new CUDAGridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
+        newDeviceGrid.reset(new CUDAGridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
 
         Region<DIM> gridRegion;
         gridRegion << gridBox;
