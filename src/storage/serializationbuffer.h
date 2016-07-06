@@ -112,7 +112,7 @@ public:
     template<typename REGION>
     static std::size_t storageSize(const REGION& region)
     {
-        return 0;
+        return region.size();
     }
 
     template<typename REGION>
