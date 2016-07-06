@@ -214,6 +214,19 @@ public:
         }
     }
 
+    std::string toString() const
+    {
+        std::ostringstream ret;
+        ret << "UnstructuredTestCell\n"
+            << "  id: " << id << "\n"
+            << "  cycleCounter: " << cycleCounter << "\n"
+            << "  isEdgeCell: " << (isEdgeCell ? "true" : "false") << "\n"
+            << "  expectedNeighborIDs: " << expectedNeighborIDs << "\n"
+            << "  expectedNeighborWeights: " << expectedNeighborWeights << "\n"
+            << "  isValid: " << (isValid ? "true" : "false") << "\n";
+        return ret.str();
+    }
+
     int id;
     unsigned cycleCounter;
     bool isValid;
@@ -298,6 +311,19 @@ class UnstructuredTestCellMPIDatatypeHelper
     friend class Typemaps;
     UnstructuredTestCell<UnstructuredTestCellHelpers::EmptyAPI> a;
 };
+
+template<
+    typename CharT,
+    typename Traits,
+    typename AdditionalAPI,
+    typename Output>
+std::basic_ostream<CharT, Traits>&
+operator<<(std::basic_ostream<CharT, Traits>& os,
+           const UnstructuredTestCell<AdditionalAPI, Output>& cell)
+{
+    os << cell.toString();
+    return os;
+}
 
 }
 
