@@ -218,6 +218,56 @@ public:
         delete grid;
 #endif
     }
+
+    void testLoadSaveRegion()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredGrid<UnstructuredTestCell<> > grid(Coord<1>(100));
+
+        for (int i = 0; i < 100; ++i) {
+            grid[Coord<1>(i)] = UnstructuredTestCell<>(i, 4711, true);
+        }
+
+        std::vector<UnstructuredTestCell<> > buffer(10);
+        Region<1> region;
+        region << Streak<1>(Coord<1>( 0),   3)
+               << Streak<1>(Coord<1>(10),  12)
+               << Streak<1>(Coord<1>(20),  21)
+               << Streak<1>(Coord<1>(96), 100);
+        TS_ASSERT_EQUALS(10, region.size());
+
+        grid.saveRegion(&buffer, region);
+
+        int index = 0;
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCell<> actual = buffer[index];
+            UnstructuredTestCell<> expected(i->x(), 4711, true);
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++index;
+        }
+
+        for (std::size_t i = 0; i < buffer.size(); ++i) {
+            buffer[i].id = 1000000 + i;
+            buffer[i].cycleCounter = 777;
+        }
+
+        UnstructuredGrid<UnstructuredTestCell<> > grid2(Coord<1>(100));
+        grid2.loadRegion(buffer, region);
+
+        index = 0;
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCell<> actual = grid2.get(*i);
+            UnstructuredTestCell<> expected(
+                1000000 + index,
+                777,
+                true);
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++index;
+        }
+#endif
+    }
 };
 
 }

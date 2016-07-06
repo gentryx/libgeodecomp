@@ -293,6 +293,28 @@ public:
         return CoordBox<DIM>(Coord<DIM>(), dimension);
     }
 
+    inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>()) const
+    {
+        ELEMENT_TYPE *target = buffer->data();
+
+        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+            get(*i, target);
+            target += i->length();
+        }
+    }
+
+    inline void loadRegion(const std::vector<ELEMENT_TYPE> buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>())
+    {
+        const ELEMENT_TYPE *source = buffer.data();
+
+        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+            set(*i, source);
+            source += i->length();
+        }
+    }
+
 protected:
     void saveMemberImplementation(
         char *target,
