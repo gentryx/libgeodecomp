@@ -269,6 +269,70 @@ public:
 #endif
     }
 
+    void testLoadSaveRegionWithOffset()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredGrid<UnstructuredTestCell<> > grid(Coord<1>(100));
+
+        for (int i = 0; i < 100; ++i) {
+            grid[Coord<1>(i)] = UnstructuredTestCell<>(i, 4711, true);
+        }
+
+        std::vector<UnstructuredTestCell<> > buffer(10);
+        Region<1> region;
+        region << Streak<1>(Coord<1>( 0),   3)
+               << Streak<1>(Coord<1>(10),  12)
+               << Streak<1>(Coord<1>(20),  21)
+               << Streak<1>(Coord<1>(96), 100);
+        TS_ASSERT_EQUALS(10, region.size());
+
+        Region<1> regionOffset10;
+        regionOffset10 << Streak<1>(Coord<1>( 10),  13)
+                       << Streak<1>(Coord<1>( 20),  22)
+                       << Streak<1>(Coord<1>( 30),  31)
+                       << Streak<1>(Coord<1>(106), 110);
+        TS_ASSERT_EQUALS(10, regionOffset10.size());
+
+        Region<1> regionOffset20;
+        regionOffset20 << Streak<1>(Coord<1>( 20),  23)
+                       << Streak<1>(Coord<1>( 30),  32)
+                       << Streak<1>(Coord<1>( 40),  41)
+                       << Streak<1>(Coord<1>(116), 120);
+        TS_ASSERT_EQUALS(10, regionOffset20.size());
+
+        grid.saveRegion(&buffer, regionOffset10, Coord<1>(-10));
+
+        int index = 0;
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCell<> actual = buffer[index];
+            UnstructuredTestCell<> expected(i->x(), 4711, true);
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++index;
+        }
+
+        for (std::size_t i = 0; i < buffer.size(); ++i) {
+            buffer[i].id = 1010101 + i;
+            buffer[i].cycleCounter = 8252;
+        }
+
+        UnstructuredGrid<UnstructuredTestCell<> > grid2(Coord<1>(100));
+        grid2.loadRegion(buffer, regionOffset20, Coord<1>(-20));
+
+        index = 0;
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCell<> actual = grid2.get(*i);
+            UnstructuredTestCell<> expected(
+                1010101 + index,
+                8252,
+                true);
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++index;
+        }
+#endif
+    }
+
     void testResize()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
