@@ -60,7 +60,10 @@ public:
     explicit MPILayer(const MPILayer& other)
     {
         if (other.requests.size() > 0) {
-            throw std::logic_error("Can't clone MPILayer with pending MPI requests, as their duplication (and the subsequent doubled MPI_Wait())  would most likely break MPI");
+            throw std::logic_error(
+                "Can't clone MPILayer with pending MPI requests,"
+                " as their duplication (and the subsequent doubled MPI_Wait())"
+                " would most likely break MPI");
         }
 
         *this = other;
