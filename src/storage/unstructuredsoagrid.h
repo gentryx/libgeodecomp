@@ -117,7 +117,7 @@ public:
     static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<ELEMENT_TYPE>::VALUE;
 
     explicit
-    UnstructuredSoAGrid(const CoordBox<DIM> box,
+    UnstructuredSoAGrid(const CoordBox<DIM> box = CoordBox<DIM>(Coord<DIM>(), Coord<DIM>(1)),
                         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
                         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
                         const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
@@ -183,6 +183,7 @@ public:
         return dimension;
     }
 
+    // fixme: drop this, dangerous overload
     inline const ELEMENT_TYPE operator[](const int y) const
     {
         if (y < 0 || y >= dimension.x()) {
@@ -337,14 +338,14 @@ public:
         elements.callback(&newGrid->elements, functor);
     }
 
-    // fixme
-    inline void saveRegion(char *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    inline void saveRegion(std::vector<char> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        char *dataIterator = target;
+        char *dataIterator = target->data();
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
+
             Streak<DIM> s = *i;
             std::size_t length = s.length();
             int x = s.origin.x();
@@ -353,14 +354,14 @@ public:
         }
     }
 
-    // fixme
-    inline void loadRegion(const char *source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    inline void loadRegion(const std::vector<char> source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        const char *dataIterator = source;
+        const char *dataIterator = source.data();
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
+
             Streak<DIM> s = *i;
             std::size_t length = s.length();
             elements.load(s.origin.x(), 0, 0, dataIterator, length);

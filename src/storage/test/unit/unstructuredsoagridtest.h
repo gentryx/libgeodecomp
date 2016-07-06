@@ -1,5 +1,6 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <cxxtest/TestSuite.h>
@@ -136,6 +137,94 @@ public:
             UnstructuredTestCellSoA1 actual = grid.get(Coord<1>(i));
 
             TS_ASSERT_EQUALS(expected, actual);
+        }
+#endif
+    }
+
+    void testLoadSaveRegion()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        Coord<1> dim(100);
+        CoordBox<1> box(Coord<1>(), dim);
+        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid(box);
+
+        for (int i = 0; i < dim.x(); ++i) {
+            grid.set(Coord<1>(i), UnstructuredTestCellSoA1(i, 4711, true));
+        }
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>( 0),   3)
+               << Streak<1>(Coord<1>(10),  12)
+               << Streak<1>(Coord<1>(20),  21)
+               << Streak<1>(Coord<1>(96), 100);
+        TS_ASSERT_EQUALS(10, region.size());
+
+        std::vector<char> buffer;
+        SerializationBuffer<UnstructuredTestCellSoA1>::resize(&buffer, region);
+
+        grid.saveRegion(&buffer, region);
+
+        box.dimensions.x() = 200;
+        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid2(box);
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCellSoA1 actual = grid2.get(*i);
+            UnstructuredTestCellSoA1 expected = grid.get(*i);
+
+            TS_ASSERT_DIFFERS(actual, expected);
+        }
+
+        grid2.loadRegion(buffer, region);
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCellSoA1 actual = grid2.get(*i);
+            UnstructuredTestCellSoA1 expected = grid.get(*i);
+
+            TS_ASSERT_EQUALS(actual, expected);
+        }
+#endif
+    }
+
+    void testLoadSaveRegion()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        Coord<1> dim(100);
+        CoordBox<1> box(Coord<1>(), dim);
+        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid(box);
+
+        for (int i = 0; i < dim.x(); ++i) {
+            grid.set(Coord<1>(i), UnstructuredTestCellSoA1(i, 4711, true));
+        }
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>( 0),   3)
+               << Streak<1>(Coord<1>(10),  12)
+               << Streak<1>(Coord<1>(20),  21)
+               << Streak<1>(Coord<1>(96), 100);
+        TS_ASSERT_EQUALS(10, region.size());
+
+        std::vector<char> buffer;
+        SerializationBuffer<UnstructuredTestCellSoA1>::resize(&buffer, region);
+
+        grid.saveRegion(&buffer, region);
+
+        box.dimensions.x() = 200;
+        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid2(box);
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCellSoA1 actual = grid2.get(*i);
+            UnstructuredTestCellSoA1 expected = grid.get(*i);
+
+            TS_ASSERT_DIFFERS(actual, expected);
+        }
+
+        grid2.loadRegion(buffer, region);
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCellSoA1 actual = grid2.get(*i);
+            UnstructuredTestCellSoA1 expected = grid.get(*i);
+
+            TS_ASSERT_EQUALS(actual, expected);
         }
 #endif
     }
