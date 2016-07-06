@@ -214,7 +214,6 @@ public:
         return !(*this == other);
     }
 
-    // fixme: needs test
     inline void resize(const CoordBox<DIM>& newDim)
     {
         *this = UnstructuredGrid(

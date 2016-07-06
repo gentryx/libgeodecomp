@@ -268,6 +268,36 @@ public:
         }
 #endif
     }
+
+    void testResize()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        Coord<1> origin(0);
+        Coord<1> dim(10);
+        CoordBox<1> box(origin, dim);
+
+        UnstructuredGrid<UnstructuredTestCellSoA1> grid(box);
+        TS_ASSERT_EQUALS(box, grid.boundingBox());
+
+        dim.x() = 100;
+        box = CoordBox<1>(origin, dim);
+
+        grid.resize(box);
+        TS_ASSERT_EQUALS(box, grid.boundingBox());
+
+        for (int i = 0; i < dim.x(); ++i) {
+            UnstructuredTestCellSoA1 cell(i, 888, true);
+            grid.set(Coord<1>(i), cell);
+        }
+
+        for (int i = origin.x(); i < (origin.x() + dim.x()); ++i) {
+            UnstructuredTestCellSoA1 expected(i, 888, true);
+            UnstructuredTestCellSoA1 actual = grid.get(Coord<1>(i));
+
+            TS_ASSERT_EQUALS(expected, actual);
+        }
+#endif
+    }
 };
 
 }
