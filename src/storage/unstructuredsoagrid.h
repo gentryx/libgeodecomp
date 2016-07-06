@@ -339,7 +339,7 @@ public:
     }
 
     // fixme
-    inline void saveRegion(char *target, const Region<DIM>& region) const
+    inline void saveRegion(char *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
         char *dataIterator = target;
 
@@ -355,7 +355,7 @@ public:
     }
 
     // fixme
-    inline void loadRegion(const char *source, const Region<DIM>& region)
+    inline void loadRegion(const char *source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
         const char *dataIterator = source;
 
