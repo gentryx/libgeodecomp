@@ -362,9 +362,19 @@ public:
         edgeCell(edgeCell),
         box(box)
     {
+        resize(box, false);
+        // init edges and interior
+        delegate.callback(
+            SoAGridHelpers::SetContent<CELL, true>(
+                actualDimensions, edgeRadii, edgeCell, defaultCell));
+    }
+
+    inline void resize(const CoordBox<DIM>& newBox, bool setEdges = true)
+    {
+        box = newBox;
         actualDimensions = Coord<3>::diagonal(1);
         for (int i = 0; i < DIM; ++i) {
-            actualDimensions[i] = box.dimensions[i];
+            actualDimensions[i] = newBox.dimensions[i];
         }
         actualDimensions += edgeRadii * 2;
 
@@ -373,10 +383,11 @@ public:
             actualDimensions.y(),
             actualDimensions.z());
 
-        // init edges and interior
-        delegate.callback(
-            SoAGridHelpers::SetContent<CELL, true>(
-                actualDimensions, edgeRadii, edgeCell, defaultCell));
+        if (setEdges) {
+            delegate.callback(
+                SoAGridHelpers::SetContent<CELL, false>(
+                    actualDimensions, edgeRadii, edgeCell, edgeCell));
+        }
     }
 
     virtual void set(const Coord<DIM>& absoluteCoord, const CELL& cell)
