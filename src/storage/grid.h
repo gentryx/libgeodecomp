@@ -136,7 +136,9 @@ public:
 
     inline void resize(const CoordBox<DIM>& newBox)
     {
-        LOG(WARN, "Grid will ignore origin in resize(CoordBox)");
+        if (newBox.origin != Coord<DIM>()) {
+            throw std::logic_error("Grid can't handle origin in resize(CoordBox)");
+        }
 
         resize(newBox.dimensions);
     }

@@ -57,6 +57,10 @@ public:
         edgeElement(edgeElement),
         dimension(box.dimensions)
     {
+        if (box.origin != Coord<DIM>()) {
+            throw std::logic_error("UnstructuredGrid can't handle origin in resize(CoordBox)");
+        }
+
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
                 SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(dimension.x());
