@@ -144,9 +144,24 @@ public:
         edgeCell(edgeCell),
         box(box)
     {
+        // don't set edges here, but...
+        resize(box, false);
+        // ...init edges AND interior here in one go
+        delegate.callback(
+            CUDASoAGridHelpers::SetContent<CELL, true>(
+                delegate.get_data(),
+                actualDimensions,
+                edgeRadii,
+                edgeCell,
+                defaultCell));
+    }
+
+    inline void resize(const CoordBox<DIM>& newBox, bool setEdges = true)
+    {
+        box = newBox;
         actualDimensions = Coord<3>::diagonal(1);
         for (int i = 0; i < DIM; ++i) {
-            actualDimensions[i] = box.dimensions[i];
+            actualDimensions[i] = newBox.dimensions[i];
         }
         actualDimensions += edgeRadii * 2;
 
@@ -155,14 +170,15 @@ public:
             actualDimensions.y(),
             actualDimensions.z());
 
-        // init edges and interior
-        delegate.callback(
-            CUDASoAGridHelpers::SetContent<CELL, true>(
-                delegate.get_data(),
-                actualDimensions,
-                edgeRadii,
-                edgeCell,
-                defaultCell));
+        if (setEdges) {
+            delegate.callback(
+                CUDASoAGridHelpers::SetContent<CELL, false>(
+                    delegate.get_data(),
+                    actualDimensions,
+                    edgeRadii,
+                    edgeCell,
+                    edgeCell));
+        }
     }
 
     void set(const Coord<DIM>& absoluteCoord, const CELL& cell)

@@ -101,6 +101,66 @@ public:
         TS_ASSERT_EQUALS(Coord<3>( 3,  0,  9), grid.get(Coord<3>( 3, 40,  9)).pos);
     }
 
+    void testResize()
+    {
+        Coord<3> origin(20, 21, 22);
+        Coord<3> dim(30, 20, 10);
+        CoordBox<3> box(origin, dim);
+
+        TestCellSoA innerCell;
+        TestCellSoA edgeCell;
+        innerCell.isEdgeCell = false;
+        edgeCell.isEdgeCell = true;
+
+        CUDASoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> grid(box, innerCell, edgeCell);
+
+        int maxX = dim.x() + 2;
+        int maxY = dim.y() + 2;
+        int maxZ = dim.z() + 2;
+
+        for (int z = 0; z < maxZ; ++z) {
+            for (int y = 0; y < maxY; ++y) {
+                for (int x = 0; x < maxX; ++x) {
+                    TestCellSoA expected = innerCell;
+
+                    if ((x < 1) || (x > (maxX - 2)) ||
+                        (y < 1) || (y > (maxY - 2)) ||
+                        (z < 1) || (z > (maxZ - 2))) {
+                        expected = edgeCell;
+                    }
+
+                    TestCellSoA actual = grid.delegate.get(x, y, z);
+
+                    TS_ASSERT_EQUALS(actual, expected);
+                }
+            }
+        }
+
+        origin = Coord<3>(30, 31, 32);
+        dim = Coord<3>(40, 50, 60);
+        box = CoordBox<3>(origin, dim);
+        grid.resize(box);
+        TS_ASSERT_EQUALS(box, grid.boundingBox());
+
+        maxX = dim.x() + 2;
+        maxY = dim.y() + 2;
+        maxZ = dim.z() + 2;
+
+        for (int z = 0; z < maxZ; ++z) {
+            for (int y = 0; y < maxY; ++y) {
+                for (int x = 0; x < maxX; ++x) {
+                    if ((x < 1) || (x > (maxX - 2)) ||
+                        (y < 1) || (y > (maxY - 2)) ||
+                        (z < 1) || (z > (maxZ - 2))) {
+                        TestCellSoA actual = grid.delegate.get(x, y, z);
+                        TS_ASSERT_EQUALS(actual, edgeCell);
+                    }
+
+                }
+            }
+        }
+    }
+
     void testGetSetEdge()
     {
         TestCellSoA defaultCell(
