@@ -362,8 +362,9 @@ public:
         edgeCell(edgeCell),
         box(box)
     {
+        // don't set edges here, but...
         resize(box, false);
-        // init edges and interior
+        // ...init edges AND interior here in one go
         delegate.callback(
             SoAGridHelpers::SetContent<CELL, true>(
                 actualDimensions, edgeRadii, edgeCell, defaultCell));
