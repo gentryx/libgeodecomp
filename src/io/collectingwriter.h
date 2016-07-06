@@ -35,7 +35,7 @@ public:
         Writer<CELL_TYPE> *writer,
         int root = 0,
         MPI_Comm communicator = MPI_COMM_WORLD,
-        MPI_Datatype mpiDatatype = APITraits::SelectMPIDataType<CELL_TYPE>::value()) :
+        MPI_Datatype mpiDatatype = SerializationBuffer<CELL_TYPE>::cellMPIDataType()) :
         Clonable<ParallelWriter<CELL_TYPE>, CollectingWriter<CELL_TYPE> >("",  1),
         writer(writer),
         mpiLayer(communicator),
