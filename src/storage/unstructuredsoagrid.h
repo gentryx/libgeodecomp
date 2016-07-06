@@ -281,22 +281,22 @@ public:
         return message.str();
     }
 
-    virtual void set(const Coord<DIM>& coord, const ELEMENT_TYPE& element)
+    inline void set(const Coord<DIM>& coord, const ELEMENT_TYPE& element)
     {
         set(coord.x(), element);
     }
 
-    virtual void set(const Streak<DIM>& streak, const ELEMENT_TYPE *cells)
+    inline void set(const Streak<DIM>& streak, const ELEMENT_TYPE *cells)
     {
         elements.set(streak.origin.x(), 0, 0, cells, streak.length());
     }
 
-    virtual ELEMENT_TYPE get(const Coord<DIM>& coord) const
+    inline ELEMENT_TYPE get(const Coord<DIM>& coord) const
     {
         return get(coord.x());
     }
 
-    virtual void get(const Streak<DIM>& streak, ELEMENT_TYPE *cells) const
+    inline void get(const Streak<DIM>& streak, ELEMENT_TYPE *cells) const
     {
         elements.get(streak.origin.x(), 0, 0, cells, streak.length());
     }
@@ -311,17 +311,17 @@ public:
         return edgeElement;
     }
 
-    virtual void setEdge(const ELEMENT_TYPE& element)
+    inline void setEdge(const ELEMENT_TYPE& element)
     {
         getEdgeElement() = element;
     }
 
-    virtual const ELEMENT_TYPE& getEdge() const
+    inline const ELEMENT_TYPE& getEdge() const
     {
         return getEdgeElement();
     }
 
-    virtual CoordBox<DIM> boundingBox() const
+    inline CoordBox<DIM> boundingBox() const
     {
         return CoordBox<DIM>(Coord<DIM>(), dimension);
     }
@@ -339,7 +339,7 @@ public:
     }
 
     // fixme
-    void saveRegion(char *target, const Region<DIM>& region) const
+    inline void saveRegion(char *target, const Region<DIM>& region) const
     {
         char *dataIterator = target;
 
@@ -355,7 +355,7 @@ public:
     }
 
     // fixme
-    void loadRegion(const char *source, const Region<DIM>& region)
+    inline void loadRegion(const char *source, const Region<DIM>& region)
     {
         const char *dataIterator = source;
 

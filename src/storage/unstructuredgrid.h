@@ -241,12 +241,12 @@ public:
         return message.str();
     }
 
-    virtual void set(const Coord<DIM>& coord, const ELEMENT_TYPE& element)
+    void set(const Coord<DIM>& coord, const ELEMENT_TYPE& element)
     {
         (*this)[coord] = element;
     }
 
-    virtual void set(const Streak<DIM>& streak, const ELEMENT_TYPE *element)
+    void set(const Streak<DIM>& streak, const ELEMENT_TYPE *element)
     {
         for (Coord<DIM> cursor = streak.origin; cursor.x() < streak.endX; ++cursor.x()) {
             (*this)[cursor] = *element;
@@ -254,12 +254,12 @@ public:
         }
     }
 
-    virtual ELEMENT_TYPE get(const Coord<DIM>& coord) const
+    ELEMENT_TYPE get(const Coord<DIM>& coord) const
     {
         return (*this)[coord];
     }
 
-    virtual void get(const Streak<DIM>& streak, ELEMENT_TYPE *element) const
+    void get(const Streak<DIM>& streak, ELEMENT_TYPE *element) const
     {
         Coord<DIM> cursor = streak.origin;
         for (; cursor.x() < streak.endX; ++cursor.x()) {
@@ -278,17 +278,17 @@ public:
         return edgeElement;
     }
 
-    virtual void setEdge(const ELEMENT_TYPE& element)
+    void setEdge(const ELEMENT_TYPE& element)
     {
         getEdgeElement() = element;
     }
 
-    virtual const ELEMENT_TYPE& getEdge() const
+    const ELEMENT_TYPE& getEdge() const
     {
         return getEdgeElement();
     }
 
-    virtual CoordBox<DIM> boundingBox() const
+    CoordBox<DIM> boundingBox() const
     {
         return CoordBox<DIM>(Coord<DIM>(), dimension);
     }
