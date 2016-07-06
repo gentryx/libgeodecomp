@@ -12,6 +12,7 @@
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/updatefunctor.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 
 namespace LibGeoDecomp {
 
@@ -32,6 +33,7 @@ public:
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
     typedef typename GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value GridType;
     typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
+    typedef typename SerializationBuffer<CELL_TYPE>::BufferType BufferType;
     static const int DIM = Topology::DIM;
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
@@ -63,6 +65,8 @@ public:
         validateConstructorParams();
 
         CoordBox<DIM> box = adaptDimensions(partitions);
+        adaptBuffers();
+
         curStripe = new GridType(box);
         newStripe = new GridType(box);
         initSimulation();
@@ -80,6 +84,7 @@ public:
         validateConstructorParams();
 
         CoordBox<DIM> box = adaptDimensions(partitions);
+        adaptBuffers();
         curStripe = new GridType(box);
         newStripe = new GridType(box);
         initSimulation();
@@ -163,9 +168,25 @@ private:
     Region<DIM> outerUpperGhostRegion;
     Region<DIM> outerLowerGhostRegion;
     Region<DIM> regionWithOuterGhosts;
+    BufferType upperSendBuffer;
+    BufferType upperRecvBuffer;
+    BufferType lowerSendBuffer;
+    BufferType lowerRecvBuffer;
+
     // contains the start and stop rows for each node's stripe
     WeightVec partitions;
     unsigned loadBalancingPeriod;
+
+    /**
+     * Send and receive buffers need to be resized whenever our ghost zones have changed
+     */
+    void adaptBuffers()
+    {
+        SerializationBuffer<CELL_TYPE>::resize(&upperSendBuffer, innerUpperGhostRegion);
+        SerializationBuffer<CELL_TYPE>::resize(&lowerSendBuffer, innerLowerGhostRegion);
+        SerializationBuffer<CELL_TYPE>::resize(&upperRecvBuffer, outerUpperGhostRegion);
+        SerializationBuffer<CELL_TYPE>::resize(&lowerRecvBuffer, outerLowerGhostRegion);
+    }
 
     void swapGrids()
     {
@@ -231,8 +252,8 @@ private:
         // nanoStep()). actually we could stretch one cycle further to
         // have two concurrent communication requests per ghostregion,
         // but this would be a hell to code and debug.
-        waitForGhostRegions();
-        recvOuterGhostRegion(newStripe);
+        waitForGhostRegions(curStripe);
+        recvOuterGhostRegion();
         updateInnerGhostRegion(nanoStep);
         sendInnerGhostRegion(newStripe);
 
@@ -240,12 +261,21 @@ private:
         swapGrids();
     }
 
-    void waitForGhostRegions()
+    void waitForGhostRegions(GridType *stripe)
     {
         TimeCommunication t(&chronometer);
 
-        mpilayer.wait(GHOSTREGION_ALPHA);
-        mpilayer.wait(GHOSTREGION_BETA);
+        bool hadPendingRequests1 = mpilayer.wait(GHOSTREGION_ALPHA);
+        bool hadPendingRequests2 = mpilayer.wait(GHOSTREGION_BETA);
+
+        if (hadPendingRequests1 || hadPendingRequests2) {
+            if (!hadPendingRequests1 || !hadPendingRequests2) {
+                throw std::logic_error("should have had pending requests on both tags");
+            }
+
+            stripe->loadRegion(upperRecvBuffer, outerUpperGhostRegion);
+            stripe->loadRegion(lowerRecvBuffer, outerLowerGhostRegion);
+        }
     }
 
     void setIORegions()
@@ -263,7 +293,8 @@ private:
     {
         SteererFeedback feedback;
         // notify all registered Steerers
-        waitForGhostRegions();
+        waitForGhostRegions(curStripe);
+
         for(unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
                 steerers[i]->nextStep(
@@ -337,28 +368,28 @@ private:
         updateRegion(innerLowerGhostRegion, nanoStep);
     }
 
-    void recvOuterGhostRegion(GridType *stripe)
+    void recvOuterGhostRegion()
     {
         TimeCommunication t(&chronometer);
 
         int upperNeighborRank = upperNeighbor();
         int lowerNeighborRank = lowerNeighbor();
 
-        if (upperNeighborRank != -1) {
-            mpilayer.recvUnregisteredRegion(
-                stripe,
-                outerUpperGhostRegion,
+        if ((upperNeighborRank != -1) && (upperRecvBuffer.size() > 0)) {
+            mpilayer.recv(
+                upperRecvBuffer.data(),
                 upperNeighborRank,
+                upperRecvBuffer.size(),
                 GHOSTREGION_ALPHA,
-                APITraits::SelectMPIDataType<CELL_TYPE>::value());
+                SerializationBuffer<CELL_TYPE>::cellMPIDataType());
         }
-        if (lowerNeighborRank != -1) {
-            mpilayer.recvUnregisteredRegion(
-                stripe,
-                outerLowerGhostRegion,
+        if ((lowerNeighborRank != -1) && (lowerRecvBuffer.size() > 0)) {
+            mpilayer.recv(
+                lowerRecvBuffer.data(),
                 lowerNeighborRank,
+                lowerRecvBuffer.size(),
                 GHOSTREGION_BETA,
-                APITraits::SelectMPIDataType<CELL_TYPE>::value());
+                SerializationBuffer<CELL_TYPE>::cellMPIDataType());
         }
     }
 
@@ -369,21 +400,25 @@ private:
         int upperNeighborRank = upperNeighbor();
         int lowerNeighborRank = lowerNeighbor();
 
-        if (upperNeighborRank != -1) {
-            mpilayer.sendUnregisteredRegion(
-                stripe,
-                innerUpperGhostRegion,
+        if ((upperNeighborRank != -1) && (upperSendBuffer.size() > 0)) {
+            stripe->saveRegion(&upperSendBuffer, innerUpperGhostRegion);
+
+            mpilayer.send(
+                upperSendBuffer.data(),
                 upperNeighborRank,
+                upperSendBuffer.size(),
                 GHOSTREGION_BETA,
-                APITraits::SelectMPIDataType<CELL_TYPE>::value());
+                SerializationBuffer<CELL_TYPE>::cellMPIDataType());
         }
-        if (lowerNeighborRank != -1) {
-            mpilayer.sendUnregisteredRegion(
-                stripe,
-                innerLowerGhostRegion,
+        if ((lowerNeighborRank != -1) && (lowerSendBuffer.size() > 0)) {
+            stripe->saveRegion(&lowerSendBuffer, innerLowerGhostRegion);
+
+            mpilayer.send(
+                lowerSendBuffer.data(),
                 lowerNeighborRank,
+                lowerSendBuffer.size(),
                 GHOSTREGION_ALPHA,
-                APITraits::SelectMPIDataType<CELL_TYPE>::value());
+                SerializationBuffer<CELL_TYPE>::cellMPIDataType());
         }
     }
 
@@ -540,18 +575,21 @@ private:
     void redistributeGrid(const WeightVec& oldPartitions,
                           const WeightVec& newPartitions)
     {
-        waitForGhostRegions();
+        waitForGhostRegions(curStripe);
         if (newPartitions == oldPartitions) {
             return;
         }
         CoordBox<DIM> box = adaptDimensions(newPartitions);
+        adaptBuffers();
         newStripe->resize(box);
 
         // collect newStripe from others
-        unsigned newStartRow =
-            newPartitions[mpilayer.rank()    ];
-        unsigned newEndRow =
-            newPartitions[mpilayer.rank() + 1];
+        unsigned newStartRow = newPartitions[mpilayer.rank() + 0];
+        unsigned newEndRow =   newPartitions[mpilayer.rank() + 1];
+        std::vector<BufferType> receiveBuffers;
+        std::vector<Region<DIM> > receiveRegions;
+        receiveBuffers.reserve(newPartitions.size() - 1);
+
         for (std::size_t i = 0; i < newPartitions.size() - 1; ++i) {
             unsigned sourceStartRow = oldPartitions[i];
             unsigned sourceEndRow   = oldPartitions[i + 1];
@@ -561,20 +599,25 @@ private:
 
             if (intersectionEnd > intersectionStart) {
                 Region<DIM> intersection = fillRegion(intersectionStart, intersectionEnd);
-                mpilayer.recvUnregisteredRegion(
-                    newStripe,
-                    intersection,
+                receiveRegions << intersection;
+                receiveBuffers << BufferType();
+                SerializationBuffer<CELL_TYPE>::resize(&receiveBuffers.back(), intersection);
+
+                mpilayer.recv(
+                    receiveBuffers.back().data(),
                     i,
+                    receiveBuffers.back().size(),
                     BALANCELOADS,
-                    APITraits::SelectMPIDataType<CELL_TYPE>::value());
+                    SerializationBuffer<CELL_TYPE>::cellMPIDataType());
             }
         }
 
         // send curStripe to others
-        unsigned oldStartRow =
-            oldPartitions[mpilayer.rank()    ];
-        unsigned oldEndRow =
-            oldPartitions[mpilayer.rank() + 1];
+        unsigned oldStartRow = oldPartitions[mpilayer.rank() + 0];
+        unsigned oldEndRow =   oldPartitions[mpilayer.rank() + 1];
+        std::vector<BufferType> sendBuffers;
+        sendBuffers.reserve(newPartitions.size() - 1);
+
         for (std::size_t i = 0; i < newPartitions.size() - 1; ++i) {
             unsigned targetStartRow = newPartitions[i];
             unsigned targetEndRow   = newPartitions[i + 1];
@@ -584,21 +627,28 @@ private:
 
             if (intersectionEnd > intersectionStart) {
                 Region<DIM> intersection = fillRegion(intersectionStart, intersectionEnd);
-                mpilayer.sendUnregisteredRegion(
-                    curStripe,
-                    intersection,
+                sendBuffers << BufferType();
+                SerializationBuffer<CELL_TYPE>::resize(&sendBuffers.back(), intersection);
+                curStripe->saveRegion(&sendBuffers.back(), intersection);
+                mpilayer.send(
+                    sendBuffers.back().data(),
                     i,
+                    sendBuffers.back().size(),
                     BALANCELOADS,
-                    APITraits::SelectMPIDataType<CELL_TYPE>::value());
+                    SerializationBuffer<CELL_TYPE>::cellMPIDataType());
             }
         }
 
         mpilayer.wait(BALANCELOADS);
 
+        for (std::size_t i = 0; i < receiveBuffers.size(); ++i) {
+            newStripe->loadRegion(receiveBuffers[i], receiveRegions[i]);
+        }
+
         curStripe->resize(box);
         swapGrids();
         sendInnerGhostRegion(curStripe);
-        recvOuterGhostRegion(curStripe);
+        recvOuterGhostRegion();
     }
 
     /**
