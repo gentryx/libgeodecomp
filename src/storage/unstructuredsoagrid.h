@@ -347,6 +347,9 @@ public:
              ++i) {
 
             Streak<DIM> s = *i;
+            s.origin += offset;
+            s.endX += offset.x();
+
             std::size_t length = s.length();
             int x = s.origin.x();
             elements.save(x, 0, 0, dataIterator, length);
@@ -363,6 +366,9 @@ public:
              ++i) {
 
             Streak<DIM> s = *i;
+            s.origin += offset;
+            s.endX += offset.x();
+
             std::size_t length = s.length();
             elements.load(s.origin.x(), 0, 0, dataIterator, length);
             dataIterator += length * AGGREGATED_MEMBER_SIZE;

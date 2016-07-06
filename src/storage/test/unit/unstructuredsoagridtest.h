@@ -141,7 +141,7 @@ public:
 #endif
     }
 
-    void testLoadSaveRegion()
+    void testLoadSaveRegionWithOffset()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         Coord<1> dim(100);
@@ -159,10 +159,24 @@ public:
                << Streak<1>(Coord<1>(96), 100);
         TS_ASSERT_EQUALS(10, region.size());
 
+        Region<1> regionOffset10;
+        regionOffset10 << Streak<1>(Coord<1>( 10),  13)
+                       << Streak<1>(Coord<1>( 20),  22)
+                       << Streak<1>(Coord<1>( 30),  31)
+                       << Streak<1>(Coord<1>(106), 110);
+        TS_ASSERT_EQUALS(10, regionOffset10.size());
+
+        Region<1> regionOffset30;
+        regionOffset30 << Streak<1>(Coord<1>( 30),  33)
+                       << Streak<1>(Coord<1>( 40),  42)
+                       << Streak<1>(Coord<1>( 50),  51)
+                       << Streak<1>(Coord<1>(126), 130);
+        TS_ASSERT_EQUALS(10, regionOffset30.size());
+
         std::vector<char> buffer;
         SerializationBuffer<UnstructuredTestCellSoA1>::resize(&buffer, region);
 
-        grid.saveRegion(&buffer, region);
+        grid.saveRegion(&buffer, regionOffset10, Coord<1>(-10));
 
         box.dimensions.x() = 200;
         UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid2(box);
@@ -174,7 +188,7 @@ public:
             TS_ASSERT_DIFFERS(actual, expected);
         }
 
-        grid2.loadRegion(buffer, region);
+        grid2.loadRegion(buffer, regionOffset30, Coord<1>(-30));
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             UnstructuredTestCellSoA1 actual = grid2.get(*i);
