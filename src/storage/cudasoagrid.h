@@ -317,7 +317,7 @@ private:
 
     static Coord<3> calcEdgeRadii()
     {
-        return SoAGrid<CELL>::calcEdgeRadii();
+        return SoAGrid<CELL, Topology>::calcEdgeRadii();
     }
 
     CELL delegateGet(const Coord<1>& coord) const
