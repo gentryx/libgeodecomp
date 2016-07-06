@@ -140,6 +140,38 @@ public:
 #endif
     }
 
+    void testOperatorEquals()
+    {
+        UnstructuredTestCell<> cell1(12, 34, true, true);
+        UnstructuredTestCell<> cell2 = cell1;
+
+        TS_ASSERT_EQUALS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.id = 0;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.cycleCounter = 0;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.isValid = false;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.isEdgeCell = false;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.expectedNeighborIDs << 4711;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.expectedNeighborWeights << 1234;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+    }
+
     void testSoAVariant1()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14

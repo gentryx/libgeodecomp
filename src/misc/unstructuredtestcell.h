@@ -138,6 +138,22 @@ public:
         isEdgeCell(isEdgeCell)
     {}
 
+    bool operator==(const UnstructuredTestCell& other) const
+    {
+        return
+            (id                      == other.id) &&
+            (cycleCounter            == other.cycleCounter) &&
+            (isValid                 == other.isValid) &&
+            (isEdgeCell              == other.isEdgeCell) &&
+            (expectedNeighborIDs     == other.expectedNeighborIDs) &&
+            (expectedNeighborWeights == other.expectedNeighborWeights);
+    }
+
+    bool operator!=(const UnstructuredTestCell& other) const
+    {
+        return !(*this == other);
+    }
+
     bool valid() const
     {
         return isValid;
