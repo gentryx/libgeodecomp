@@ -152,16 +152,18 @@ public:
      * waits until those communication requests tagged with waitTag
      * are finished.
      */
-    void wait(int waitTag)
+    bool wait(int waitTag)
     {
+        bool ret = false;
+
         std::vector<MPI_Request>& requestVec = requests[waitTag];
-
-        if(requestVec.size() > 0) {
+        if (requestVec.size() > 0) {
             MPI_Waitall(requestVec.size(), &requestVec[0], MPI_STATUSES_IGNORE);
-
+            ret = true;
         }
 
         requestVec.clear();
+        return ret;
     }
 
     void testAll()
