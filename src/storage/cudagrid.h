@@ -33,12 +33,22 @@ public:
 
     explicit inline CUDAGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
+        const CellType& defaultCell = CellType(),
+        const CellType& edgeCell = CellType(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
         GridBase<CellType, DIM>(topologicalDimensions),
         box(box),
-        array(box.dimensions.prod()),
-        edgeCellStore(1, CELL_TYPE())
+        array(box.dimensions.prod(), defaultCell),
+        edgeCellStore(1, edgeCell),
+        hostEdgeCell(edgeCell)
     {}
+
+    inline
+    void resize(const CoordBox<DIM>& newBox)
+    {
+        box = newBox;
+        array.resize(box.dimensions.prod());
+    }
 
     inline
     void set(const Coord<DIM>& coord, const CELL_TYPE& source)
@@ -47,6 +57,7 @@ public:
         CELL_TYPE *target = address(coord);
         if (target == edgeCellStore.data()) {
             hostEdgeCell = source;
+            edgeCellStore.load(&source);
         }
         cudaMemcpy(target, &source, length, cudaMemcpyHostToDevice);
     }
@@ -77,7 +88,7 @@ public:
     void setEdge(const CELL_TYPE& cell)
     {
         hostEdgeCell = cell;
-        cudaMemcpy(edgeCellStore.data(), &hostEdgeCell, sizeof(CELL_TYPE), cudaMemcpyHostToDevice);
+        edgeCellStore.load(&cell);
     }
 
     const CELL_TYPE& getEdge() const

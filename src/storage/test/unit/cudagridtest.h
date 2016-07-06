@@ -154,7 +154,7 @@ public:
 
         DisplacedGrid<double> source(globalBox, -1);
         DisplacedGrid<double, Topologies::Torus<2>::Topology, true> target(box, -2, 0, topologicalDim);
-        CUDAGrid<double, Topologies::Torus<2>::Topology, true> buffer(box, topologicalDim);
+        CUDAGrid<double, Topologies::Torus<2>::Topology, true> buffer(box, -10, -20, topologicalDim);
 
         Region<2> region;
         // cover all 4 sectors sketched out above:
@@ -247,8 +247,12 @@ public:
         Coord<2> origin(30, 20);
         CoordBox<2> box(origin, dim);
 
-        CUDAGrid<SimpleCUDATestCell, Topologies::Cube<2>::Topology, true> grid(box, box.dimensions);
-        TS_ASSERT_EQUALS(SimpleCUDATestCell(-1, -2), grid.hostEdgeCell);
+        CUDAGrid<SimpleCUDATestCell, Topologies::Cube<2>::Topology, true> grid(
+            box,
+            SimpleCUDATestCell(),
+            SimpleCUDATestCell(),
+            box.dimensions);
+
         TS_ASSERT_EQUALS(SimpleCUDATestCell(-1, -2), grid.get(Coord<2>(-3, -2)));
         TS_ASSERT_EQUALS(SimpleCUDATestCell(-1, -2), grid.getEdge());
 
@@ -273,7 +277,12 @@ public:
         Coord<3> origin(-3, -2, -1);
         CoordBox<3> box(origin, dim);
 
-        CUDAGrid<SimpleCUDATestCell, Topologies::Torus<3>::Topology, true> grid(box, box.dimensions);
+        CUDAGrid<SimpleCUDATestCell, Topologies::Torus<3>::Topology, true> grid(
+            box,
+            SimpleCUDATestCell(),
+            SimpleCUDATestCell(),
+            box.dimensions);
+
         grid.set(Coord<3>(-3, -2, -1), SimpleCUDATestCell(1.2, 3));
         grid.set(Coord<3>(-2, -2, -1), SimpleCUDATestCell(4.5, 6));
         grid.set(Coord<3>(26,  7,  3), SimpleCUDATestCell(7.8, 9));
@@ -467,6 +476,52 @@ public:
                 TS_ASSERT_EQUALS(lineBuf[x].testValue, double(counter));
                 ++counter;
             }
+        }
+    }
+
+    void testResize()
+    {
+        Coord<3> origin(20, 21, 22);
+        Coord<3> dim(30, 20, 10);
+        CoordBox<3> box(origin, dim);
+
+        TestCell<3> innerCell;
+        TestCell<3> edgeCell;
+        innerCell.isEdgeCell = false;
+        edgeCell.isEdgeCell = true;
+
+        CUDAGrid<TestCell<3>, Topologies::Cube<3>::Topology> grid(box, innerCell, edgeCell);
+        TS_ASSERT_EQUALS(edgeCell, grid.getEdge());
+
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            TS_ASSERT_EQUALS(innerCell, grid.get(*i));
+        }
+
+        origin = Coord<3>(30, 31, 32);
+        dim = Coord<3>(40, 50, 60);
+        box = CoordBox<3>(origin, dim);
+        grid.resize(box);
+        TS_ASSERT_EQUALS(box, grid.boundingBox());
+        TS_ASSERT_EQUALS(edgeCell, grid.getEdge());
+
+        int counter = 0;
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            TestCell<3> cell;
+            cell.testValue = ++counter;
+            cell.isEdgeCell = false;
+            cell.isValid = true;
+
+            grid.set(*i, cell);
+        }
+
+        counter = 0;
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            TestCell<3> cell;
+            cell.testValue = ++counter;
+            cell.isEdgeCell = false;
+            cell.isValid = true;
+
+            TS_ASSERT_EQUALS(cell, grid.get(*i));
         }
     }
 
