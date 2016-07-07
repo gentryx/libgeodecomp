@@ -38,6 +38,7 @@ public:
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
         elements(dim.x(), defaultElement),
+        origin(0),
         edgeElement(edgeElement),
         dimension(dim)
     {
@@ -54,13 +55,10 @@ public:
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
         elements(box.dimensions.x(), defaultElement),
+        origin(box.origin.x()),
         edgeElement(edgeElement),
         dimension(box.dimensions)
     {
-        if (box.origin != Coord<DIM>()) {
-            throw std::logic_error("UnstructuredGrid can't handle origin in resize(CoordBox)");
-        }
-
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
                 SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(dimension.x());
@@ -121,22 +119,26 @@ public:
         return dimension;
     }
 
-    inline const ELEMENT_TYPE& operator[](const int y) const
+    inline const ELEMENT_TYPE& operator[](const int i) const
     {
+        int y = i - origin;
+
         if (y < 0 || y >= dimension.x()) {
             return getEdgeElement();
-        } else {
-            return elements[y];
         }
+
+        return elements[y];
     }
 
-    inline ELEMENT_TYPE& operator[](const int y)
+    inline ELEMENT_TYPE& operator[](const int i)
     {
+        int y = i - origin;
+
         if (y < 0 || y >= dimension.x()) {
             return getEdgeElement();
-        } else {
-            return elements[y];
         }
+
+        return elements[y];
     }
 
     inline ELEMENT_TYPE& operator[](const Coord<DIM>& coord)
@@ -280,7 +282,7 @@ public:
 
     CoordBox<DIM> boundingBox() const
     {
-        return CoordBox<DIM>(Coord<DIM>(), dimension);
+        return CoordBox<DIM>(Coord<DIM>(origin), dimension);
     }
 
     inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>()) const
@@ -332,6 +334,7 @@ protected:
 
 private:
     std::vector<ELEMENT_TYPE> elements;
+    int origin;
     // TODO wrapper for different types of sell c sigma containers
     SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA> matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
