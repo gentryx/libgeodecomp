@@ -117,7 +117,8 @@ public:
             }
             numberOfValues += chunkLength[nChunk] * C;
         }
-        chunkOffset[numberOfChunks] = chunkOffset[numberOfChunks - 1] +
+        chunkOffset[numberOfChunks] =
+            chunkOffset[numberOfChunks - 1] +
             chunkLength[numberOfChunks - 1] * C;
 
         // save values
@@ -183,8 +184,10 @@ public:
         // save chunk lengths and offsets
         chunkOffset[0] = 0;
         for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
-            chunkLength[nChunk] = *std::max_element(rowLength.begin() + nChunk * C,
-                                                    rowLength.begin() + (nChunk + 1) * C);
+            chunkLength[nChunk] = *std::max_element(
+                rowLength.begin() + nChunk * C,
+                rowLength.begin() + (nChunk + 1) * C);
+
             if (nChunk > 0) {
                 chunkOffset[nChunk] = chunkOffset[nChunk - 1] + chunkLength[nChunk - 1] * C;
             }
