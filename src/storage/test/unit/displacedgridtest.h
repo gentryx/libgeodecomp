@@ -311,6 +311,7 @@ public:
         region << Streak<2>(Coord<2>(20, 15), 50)
                << Streak<2>(Coord<2>(21, 16), 31)
                << Streak<2>(Coord<2>(20, 24), 50);
+        TS_ASSERT_EQUALS(buffer.size(), region.size());
 
         testGrid.saveRegion(&buffer, region);
 
@@ -335,6 +336,70 @@ public:
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
             Coord<2> actual = testGrid.get(*i).pos;
             Coord<2> expected = Coord<2>(index, -10);
+            TS_ASSERT_EQUALS(actual, expected);
+
+            --index;
+        }
+    }
+
+    void testLoadSaveRegionWithOffset()
+    {
+        Coord<2> origin(20, 15);
+        Coord<2> dim(40, 15);
+        Coord<2> end = origin + dim;
+        DisplacedGrid<TestCell<2> > testGrid(CoordBox<2>(origin, dim));
+
+        int num = 200;
+        for (int y = origin.y(); y < end.y(); y++) {
+            for (int x = origin.x(); x < end.x(); x++) {
+                testGrid[Coord<2>(x, y)] =
+                    TestCell<2>(Coord<2>(x, y), testGrid.getDimensions());
+                testGrid[Coord<2>(x, y)].testValue =  num++;
+            }
+        }
+
+        std::vector<TestCell<2> > buffer(90);
+        Region<2> region;
+        region << Streak<2>(Coord<2>(20, 15), 60)
+               << Streak<2>(Coord<2>(21, 16), 31)
+               << Streak<2>(Coord<2>(20, 29), 60);
+        TS_ASSERT_EQUALS(buffer.size(), region.size());
+
+        Region<2> regionWithOffset59;
+        regionWithOffset59 << Streak<2>(Coord<2>(25, 24), 65)
+                           << Streak<2>(Coord<2>(26, 25), 36)
+                           << Streak<2>(Coord<2>(25, 38), 65);
+        TS_ASSERT_EQUALS(buffer.size(), regionWithOffset59.size());
+
+        Region<2> regionWithOffset24;
+        regionWithOffset24 << Streak<2>(Coord<2>(22, 19), 62)
+                           << Streak<2>(Coord<2>(23, 20), 33)
+                           << Streak<2>(Coord<2>(22, 33), 62);
+        TS_ASSERT_EQUALS(buffer.size(), regionWithOffset24.size());
+
+        testGrid.saveRegion(&buffer, regionWithOffset59, Coord<2>(-5, -9));
+
+        Region<2>::Iterator iter = region.begin();
+        for (int i = 0; i < 90; ++i) {
+            TestCell<2> actual = testGrid.get(*iter);
+            TestCell<2> expected(*iter, testGrid.getDimensions());
+            int expectedIndex = 200 + (*iter - origin).toIndex(dim);
+            expected.testValue = expectedIndex;
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++iter;
+        }
+
+        // manupulate test data:
+        for (int i = 0; i < 90; ++i) {
+            buffer[i].pos = Coord<2>(-i, -20);
+        }
+
+        int index = 0;
+        testGrid.loadRegion(buffer, regionWithOffset24, Coord<2>(-2, -4));
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            Coord<2> actual = testGrid.get(*i).pos;
+            Coord<2> expected = Coord<2>(index, -20);
             TS_ASSERT_EQUALS(actual, expected);
 
             --index;
