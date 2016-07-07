@@ -31,7 +31,7 @@ public:
 
     CELL operator[](int index) const
     {
-        return grid[index];
+        return grid.get(Coord<1>(index));
     }
 };
 

@@ -89,11 +89,11 @@ public:
         UnstructuredSoAGrid<MySoACell1> grid(dim, defaultCell, edgeCell);
 
         for (int i = 0; i < 100; ++i) {
-            TS_ASSERT_EQUALS(grid[i], defaultCell);
+            TS_ASSERT_EQUALS(grid.get(Coord<1>(i)), defaultCell);
         }
 
         TS_ASSERT_EQUALS(grid.getEdgeElement(), edgeCell);
-        TS_ASSERT_EQUALS(grid[-1], edgeCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<1>(-1)), edgeCell);
 #endif
     }
 
@@ -324,6 +324,29 @@ public:
         grid.loadMember(valVector.data(), MemoryLocation::HOST, valSelector, region);
         for (int i = 0; i < static_cast<int>(region.size()); ++i) {
             TS_ASSERT_EQUALS(grid.get(Coord<1>(i)), MySoACell2(5, -i, 7));
+        }
+#endif
+    }
+
+    void testOffset()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        Coord<1> origin(1000);
+        Coord<1> dim(50);
+        CoordBox<1> box(origin, dim);
+
+        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid(box);
+        TS_ASSERT_EQUALS(box, grid.boundingBox());
+
+        for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
+            UnstructuredTestCellSoA1 cell = grid.get(*i);
+            cell.id = i->x();
+            grid.set(*i, cell);
+        }
+
+        for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
+            UnstructuredTestCellSoA1 cell = grid.get(*i);
+            TS_ASSERT_EQUALS(cell.id, i->x());
         }
 #endif
     }

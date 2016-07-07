@@ -117,11 +117,13 @@ public:
     static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<ELEMENT_TYPE>::VALUE;
 
     explicit
-    UnstructuredSoAGrid(const CoordBox<DIM> box = CoordBox<DIM>(Coord<DIM>(), Coord<DIM>(1)),
-                        const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
-                        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
-                        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
+    UnstructuredSoAGrid(
+        const CoordBox<DIM> box = CoordBox<DIM>(Coord<DIM>(), Coord<DIM>(1)),
+        const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
+        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
+        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
         elements(box.dimensions.x(), 1, 1),
+        origin(box.origin.x()),
         edgeElement(edgeElement),
         dimension(box.dimensions)
     {
@@ -166,16 +168,6 @@ public:
     inline const Coord<DIM>& getDimensions() const
     {
         return dimension;
-    }
-
-    // fixme: drop this, dangerous overload
-    inline const ELEMENT_TYPE operator[](const int y) const
-    {
-        if (y < 0 || y >= dimension.x()) {
-            return getEdgeElement();
-        }
-
-        return get(y);
     }
 
     inline ELEMENT_TYPE operator[](const Coord<DIM>& coord) const
@@ -268,22 +260,35 @@ public:
 
     inline void set(const Coord<DIM>& coord, const ELEMENT_TYPE& element)
     {
-        set(coord.x(), element);
+        int index = coord.x() - origin;
+
+        if ((index < 0) || (index >= dimension.x())) {
+            edgeElement = element;
+            return;
+        }
+
+        set(index, element);
     }
 
     inline void set(const Streak<DIM>& streak, const ELEMENT_TYPE *cells)
     {
-        elements.set(streak.origin.x(), 0, 0, cells, streak.length());
+        elements.set(streak.origin.x() - origin, 0, 0, cells, streak.length());
     }
 
     inline ELEMENT_TYPE get(const Coord<DIM>& coord) const
     {
-        return get(coord.x());
+        int index = coord.x() - origin;
+
+        if ((index < 0) || (index >= dimension.x())) {
+            return edgeElement;
+        }
+
+        return get(index);
     }
 
     inline void get(const Streak<DIM>& streak, ELEMENT_TYPE *cells) const
     {
-        elements.get(streak.origin.x(), 0, 0, cells, streak.length());
+        elements.get(streak.origin.x() - origin, 0, 0, cells, streak.length());
     }
 
     inline ELEMENT_TYPE& getEdgeElement()
@@ -308,7 +313,7 @@ public:
 
     inline CoordBox<DIM> boundingBox() const
     {
-        return CoordBox<DIM>(Coord<DIM>(), dimension);
+        return CoordBox<DIM>(Coord<DIM>(origin), dimension);
     }
 
     template<typename FUNCTOR>
@@ -337,7 +342,7 @@ public:
 
             std::size_t length = s.length();
             int x = s.origin.x();
-            elements.save(x, 0, 0, dataIterator, length);
+            elements.save(x - origin, 0, 0, dataIterator, length);
             dataIterator += length * AGGREGATED_MEMBER_SIZE;
         }
     }
@@ -355,7 +360,7 @@ public:
             s.endX += offset.x();
 
             std::size_t length = s.length();
-            elements.load(s.origin.x(), 0, 0, dataIterator, length);
+            elements.load(s.origin.x() - origin, 0, 0, dataIterator, length);
             dataIterator += length * AGGREGATED_MEMBER_SIZE;
         }
     }
@@ -386,17 +391,16 @@ protected:
 private:
     inline ELEMENT_TYPE get(int x) const
     {
-        assert(x >= 0);
         return elements.get(x, 0, 0);
     }
 
     inline void set(int x, const ELEMENT_TYPE& cell)
     {
-        assert(x >= 0);
         elements.set(x, 0, 0, cell);
     }
 
     LibFlatArray::soa_grid<ELEMENT_TYPE> elements;
+    int origin;
     // TODO wrapper for different types of sell c sigma containers
     SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
