@@ -504,6 +504,55 @@ public:
         }
     }
 
+    void testLoadSaveRegionWithOffset()
+    {
+        std::vector<TestCell<2> > buffer(10);
+        Region<2> region;
+        region << Streak<2>(Coord<2>(0, 0), 4)
+               << Streak<2>(Coord<2>(1, 1), 3)
+               << Streak<2>(Coord<2>(0, 4), 4);
+        TS_ASSERT_EQUALS(region.size(), 10);
+
+        Region<2> regionWithOffset23;
+        regionWithOffset23 << Streak<2>(Coord<2>(2, 3), 6)
+                           << Streak<2>(Coord<2>(3, 4), 5)
+                           << Streak<2>(Coord<2>(2, 7), 6);
+        TS_ASSERT_EQUALS(regionWithOffset23.size(), 10);
+
+        Region<2> regionWithOffset59;
+        regionWithOffset59 << Streak<2>(Coord<2>(5,  9), 9)
+                           << Streak<2>(Coord<2>(6, 10), 8)
+                           << Streak<2>(Coord<2>(5, 13), 9);
+        TS_ASSERT_EQUALS(regionWithOffset59.size(), 10);
+
+        testGrid->saveRegion(&buffer, regionWithOffset23, Coord<2>(-2, -3));
+
+        Region<2>::Iterator iter = region.begin();
+        for (int i = 0; i < 10; ++i) {
+            TestCell<2> actual = testGrid->get(*iter);
+            TestCell<2> expected(*iter, testGrid->getDimensions());
+            expected.testValue = 200 + iter->y() * GRID_WIDTH + iter->x();
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++iter;
+        }
+
+        // manupulate test data:
+        for (int i = 0; i < 10; ++i) {
+            buffer[i].pos = Coord<2>(-i, -12);
+        }
+
+        int index = 0;
+        testGrid->loadRegion(buffer, regionWithOffset59, Coord<2>(-5, -9));
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            Coord<2> actual = testGrid->get(*i).pos;
+            Coord<2> expected = Coord<2>(index, -12);
+            TS_ASSERT_EQUALS(actual, expected);
+
+            --index;
+        }
+    }
+
     void testCreationOfZeroSizedGrid()
     {
         Grid<int, Topologies::Torus<1>::Topology> grid1;
