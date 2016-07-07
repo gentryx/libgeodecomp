@@ -67,19 +67,6 @@ public:
         }
     }
 
-    UnstructuredGrid& operator=(const UnstructuredGrid& other)
-    {
-        elements = other.elements;
-        edgeElement = other.edgeElement;
-        dimension = other.dimension;
-
-        for (std::size_t i = 0; i < MATRICES; ++i) {
-            matrices[i] = other.matrices[i];
-        }
-
-        return *this;
-    }
-
     void setWeights(std::size_t matrixID, const std::map<Coord<2>, WEIGHT_TYPE>& matrix)
     {
         assert(matrixID < MATRICES);

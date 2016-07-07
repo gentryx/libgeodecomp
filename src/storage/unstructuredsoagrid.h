@@ -142,21 +142,6 @@ public:
         }
     }
 
-    template<typename O_ELEMENT_TYPE>
-    UnstructuredSoAGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>&
-    operator=(const UnstructuredSoAGrid<O_ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& other)
-    {
-        elements    = other.elements;
-        edgeElement = other.edgeElement;
-        dimension   = other.dimension;
-
-        for (std::size_t i = 0; i < MATRICES; ++i) {
-            matrices[i] = other.matrices[i];
-        }
-
-        return *this;
-    }
-
     inline
     void setWeights(std::size_t matrixID, const std::map<Coord<2>, VALUE_TYPE>& matrix)
     {
