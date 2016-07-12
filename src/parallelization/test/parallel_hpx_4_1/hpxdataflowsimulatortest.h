@@ -91,20 +91,71 @@ private:
     std::vector<int> neighbors;
 };
 
- class DummyInitializer : public Initializer<DummyModel>
- {
+class AsymmetricDummyModel
+{
+public:
+    static const int NANO_STEPS = 3;
+
+    class API :
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasNanoSteps<NANO_STEPS>,
+        public APITraits::HasCustomMessageType<DummyMessage>
+    {};
+
+    AsymmetricDummyModel(int id = -1, const std::vector<int>& neighbors = std::vector<int>()) :
+        id(id),
+        neighbors(neighbors)
+    {}
+
+    // fixme: use move semantics here
+    template<typename HOOD>
+    void update(
+        HOOD& hood,
+        int nanoStep,
+        int step)
+    {
+        int globalNanoStep = step * NANO_STEPS + nanoStep;
+
+        if ((globalNanoStep) > 0) {
+            for (auto&& neighbor: neighbors) {
+                if (neighbor < id) {
+                    int expectedData = 10000 * globalNanoStep + neighbor * 100 + id;
+                    TS_ASSERT_EQUALS(hood[neighbor].data,       expectedData);
+                    TS_ASSERT_EQUALS(hood[neighbor].timestep,   globalNanoStep);
+                    TS_ASSERT_EQUALS(hood[neighbor].senderID,   neighbor);
+                    TS_ASSERT_EQUALS(hood[neighbor].receiverID, id);
+                }
+            }
+        }
+
+        for (auto&& neighbor: neighbors) {
+            if (neighbor > id) {
+                DummyMessage dummyMessage(id, neighbor, globalNanoStep + 1, 10000 * (globalNanoStep + 1) + 100 * id + neighbor);
+                hood.send(neighbor, dummyMessage);
+            }
+        }
+    }
+
+private:
+    int id;
+    std::vector<int> neighbors;
+};
+
+template<typename MODEL>
+class DummyInitializer : public Initializer<MODEL>
+{
  public:
      DummyInitializer(int gridSize, int myMaxSteps) :
          gridSize(gridSize),
 	 myMaxSteps(myMaxSteps)
      {}
 
-     void grid(GridBase<DummyModel, 1> *grid)
+     void grid(GridBase<MODEL, 1> *grid)
      {
 	 CoordBox<1> box = grid->boundingBox();
 
 	 for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
-             DummyModel cell(i->x(), getNeighbors(i->x()));
+             MODEL cell(i->x(), getNeighbors(i->x()));
 	     grid->set(*i, cell);
 	 }
      }
@@ -173,15 +224,22 @@ public:
 
     void testBasic()
     {
-        Initializer<DummyModel> *initializer = new DummyInitializer(50, 13);
+        Initializer<DummyModel> *initializer = new DummyInitializer<DummyModel>(50, 13);
         HPXDataflowSimulator<DummyModel> sim(initializer, "testBasic");
+        sim.run();
+    }
+
+    void testAsymmetric()
+    {
+        Initializer<AsymmetricDummyModel> *initializer = new DummyInitializer<AsymmetricDummyModel>(50, 13);
+        HPXDataflowSimulator<AsymmetricDummyModel> sim(initializer, "testAsymmetric");
         sim.run();
     }
 
     void testPTScotch()
     {
 #ifdef LIBGEODECOMP_WITH_SCOTCH
-        Initializer<DummyModel> *initializer = new DummyInitializer(50, 13);
+        Initializer<DummyModel> *initializer = new DummyInitializer<DummyModel>(50, 13);
         HPXDataflowSimulator<DummyModel, PTScotchUnstructuredPartition<1> > sim(initializer, "testPTScotch");
         sim.run();
 #endif

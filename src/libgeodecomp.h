@@ -24,6 +24,10 @@
 #include <libgeodecomp/io/visitwriter.h>
 #endif
 
+#ifdef LIBGEODECOMP_WITH_THREADS
+#include <libgeodecomp/parallelization/openmpsimulator.h>
+#endif
+
 #include <libgeodecomp/communication/boostserialization.h>
 #include <libgeodecomp/communication/hpxserialization.h>
 #include <libgeodecomp/geometry/floatcoord.h>

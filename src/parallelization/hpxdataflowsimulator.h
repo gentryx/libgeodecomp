@@ -28,7 +28,9 @@ public:
         messageNeighborIDs(messageNeighborIDs),
         messagesFromNeighbors(hpx::util::unwrapped(messagesFromNeighbors)),
         remoteIDs(remoteIDs)
-    {}
+    {
+        sentNeighbors.reserve(messageNeighborIDs.size());
+    }
 
     const MESSAGE& operator[](int index) const
     {
@@ -41,12 +43,14 @@ public:
     }
 
     // fixme: move semantics
-    void send(int remoteCellID, const MESSAGE& message) const
+    void send(int remoteCellID, const MESSAGE& message)
     {
         std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
         if (iter == remoteIDs.end()) {
             throw std::logic_error("ID not found for outgoing messages");
         }
+
+        sentNeighbors << remoteCellID;
 
         hpx::apply(
             typename HPXReceiver<MESSAGE>::receiveAction(),
@@ -55,11 +59,21 @@ public:
             message);
     }
 
+    void sendEmptyMessagesToUnnotifiedNeighbors()
+    {
+        for (int neighbor: messageNeighborIDs) {
+            if (std::find(sentNeighbors.begin(), sentNeighbors.end(), neighbor) == sentNeighbors.end()) {
+                send(neighbor, MESSAGE());
+            }
+        }
+    }
+
 private:
     int targetGlobalNanoStep;
     std::vector<int> messageNeighborIDs;
     std::vector<MESSAGE> messagesFromNeighbors;
     std::map<int, hpx::id_type> remoteIDs;
+    std::vector<int> sentNeighbors;
 };
 
 // fixme: componentize
@@ -160,6 +174,7 @@ public:
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
         Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
         cell()->update(hood, nanoStep, step);
+        hood.sendEmptyMessagesToUnnotifiedNeighbors();
     }
 
 private:
