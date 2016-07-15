@@ -12,7 +12,7 @@ namespace MultiContainerCellHelpers {
 /**
  * Below we'll use template instantiations with multiple parameters as
  * parameters for macros. Unfortunately the preprocessor gets confused
- * when arguements to macros contain commas, so we need to enclose
+ * when arguments to macros contain commas, so we need to enclose
  * those with parentheses. That however turns a datatype into a
  * function type. This helper class can deduce an argument's type from
  * such a function type.

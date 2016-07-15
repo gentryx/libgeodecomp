@@ -6,7 +6,7 @@
 namespace LibGeoDecomp {
 
 /**
- * The DefaultFilter just copies ofer the specified member -- sans
+ * The DefaultFilter just copies over the specified member -- sans
  * modification.
  */
 template<typename CELL, typename MEMBER, typename EXTERNAL>
