@@ -10,6 +10,9 @@
 #include <libgeodecomp/parallelization/hierarchicalsimulator.h>
 #include <stdexcept>
 
+#include <mutex>
+#include <hpx/include/iostreams.hpp>
+
 namespace LibGeoDecomp {
 
 namespace HPXDataFlowSimulatorHelpers {
@@ -36,7 +39,9 @@ public:
     {
         std::vector<int>::const_iterator i = std::find(messageNeighborIDs.begin(), messageNeighborIDs.end(), index);
         if (i == messageNeighborIDs.end()) {
-            throw std::logic_error("ID not found for incoming messages");
+	    hpx::cout << "ID not found for incoming messages (hpx cout)" << std::endl;
+	    HPX_THROW_EXCEPTION(hpx::no_success, "raise_exception", "ID not found for incoming messages");
+            //throw std::logic_error("ID not found for incoming messages");
         }
 
         return messagesFromNeighbors[i - messageNeighborIDs.begin()];
@@ -47,7 +52,9 @@ public:
     {
         std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
         if (iter == remoteIDs.end()) {
-            throw std::logic_error("ID not found for outgoing messages");
+	    hpx::cout << "ID not found for outgoing messages (hpx cout)" << std::endl;
+	    HPX_THROW_EXCEPTION(hpx::no_success, "raise_exception", "ID not found for outgoing messages");
+	    //throw std::logic_error("ID not found for outgoing messages");
         }
 
         sentNeighbors << remoteCellID;
@@ -109,18 +116,21 @@ public:
         std::vector<hpx::future<void> > remoteIDFutures;
         remoteIDFutures.reserve(neighbors.size());
 
+	hpx::lcos::local::spinlock mutex;
+
         for (auto i = neighbors.begin(); i != neighbors.end(); ++i) {
             std::string linkName = endpointName(basename, id, *i);
-
+	 
             int neighbor = *i;
             remoteIDFutures << HPXReceiver<MessageType>::find(linkName).then(
-                [neighbor, this](hpx::shared_future<hpx::id_type> remoteIDFuture)
+		[&mutex, neighbor, this](hpx::shared_future<hpx::id_type> remoteIDFuture)
                 {
-                    remoteIDs[neighbor] = remoteIDFuture.get();
+		    std::lock_guard<hpx::lcos::local::spinlock> l(mutex);
+                    remoteIDs[neighbor] = remoteIDFuture.get();		    
                 });
         }
 
-        hpx::when_all(remoteIDFutures).get();
+        hpx::when_all(remoteIDFutures).get(); // swallowing exceptions?
         hpx::shared_future<void> lastTimeStepFuture = hpx::make_ready_future();
 
         // fixme: add steerer/writer interaction
@@ -328,7 +338,8 @@ public:
             lastTimeStepFutures << components[i->x()].setupDataflow(maxTimeSteps);
         }
 
-        hpx::when_all(lastTimeStepFutures).get();
+        //hpx::when_all(lastTimeStepFutures).get();
+	hpx::util::unwrapped(lastTimeStepFutures); //
     }
 
     std::vector<Chronometer> gatherStatistics()
