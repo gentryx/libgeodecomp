@@ -121,7 +121,7 @@ public:
         }
 
         hpx::when_all(remoteIDFutures).get();
-        hpx::shared_future<void> lastTimeStepFuture = hpx::make_ready_future(hpx::shared_future<void>());
+        hpx::shared_future<void> lastTimeStepFuture = hpx::make_ready_future();
 
         // fixme: add steerer/writer interaction
         for (int step = 0; step < maxSteps; ++step) {
