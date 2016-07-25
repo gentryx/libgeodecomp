@@ -44,6 +44,35 @@ public:
         TS_ASSERT_EQUALS(std::size_t(0), a.size());
     }
 
+    void testRemove()
+    {
+        FixedArray<int, 30> array;
+        array << 10 << 11 << 12 << 13;
+
+        FixedArray<int, 30> expectedA;
+        expectedA << 10 << 12 << 13;
+
+        FixedArray<int, 30> expectedB;
+        expectedB << 12 << 13;
+
+        FixedArray<int, 30> expectedC;
+        expectedC << 12;
+
+        FixedArray<int, 30> expectedD;
+
+        array.remove(1);
+        TS_ASSERT_EQUALS(array, expectedA);
+
+        array.remove(0);
+        TS_ASSERT_EQUALS(array, expectedB);
+
+        array.remove(1);
+        TS_ASSERT_EQUALS(array, expectedC);
+
+        array.remove(0);
+        TS_ASSERT_EQUALS(array, expectedD);
+    }
+
     void testConstructors()
     {
         FixedArray<int, 4> a(1, 13);

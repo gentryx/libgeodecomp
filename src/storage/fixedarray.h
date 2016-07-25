@@ -79,6 +79,7 @@ public:
         return *this;
     }
 
+    // fixme: drop all these weird element-based operators
     FixedArray<T, SIZE>& operator-=(const FixedArray<T, SIZE>& other)
     {
         std::size_t minSize = std::min(elements, other.elements);
@@ -258,6 +259,15 @@ public:
     void erase(T *elem)
     {
         for (T *i = elem; i != end(); ++i) {
+            *i = *(i + 1);
+        }
+
+        --elements;
+    }
+
+    void remove(std::size_t index)
+    {
+        for (T *i = begin() + index; i != end(); ++i) {
             *i = *(i + 1);
         }
 
