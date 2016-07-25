@@ -236,7 +236,8 @@ public:
         return false;
     }
 
-    bool operator==(const FixedArray<T, SIZE>& other) const
+    template<int SIZE2>
+    bool operator==(const FixedArray<T, SIZE2>& other) const
     {
         if (size() != other.size()) {
             return false;

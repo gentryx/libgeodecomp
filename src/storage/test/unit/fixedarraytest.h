@@ -49,16 +49,16 @@ public:
         FixedArray<int, 30> array;
         array << 10 << 11 << 12 << 13;
 
-        FixedArray<int, 30> expectedA;
+        FixedArray<int, 10> expectedA;
         expectedA << 10 << 12 << 13;
 
-        FixedArray<int, 30> expectedB;
+        FixedArray<int, 15> expectedB;
         expectedB << 12 << 13;
 
-        FixedArray<int, 30> expectedC;
+        FixedArray<int, 20> expectedC;
         expectedC << 12;
 
-        FixedArray<int, 30> expectedD;
+        FixedArray<int, 25> expectedD;
 
         array.remove(1);
         TS_ASSERT_EQUALS(array, expectedA);
