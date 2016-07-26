@@ -39,9 +39,7 @@ public:
     {
         std::vector<int>::const_iterator i = std::find(messageNeighborIDs.begin(), messageNeighborIDs.end(), index);
         if (i == messageNeighborIDs.end()) {
-	    hpx::cout << "ID not found for incoming messages (hpx cout)" << std::endl;
-	    HPX_THROW_EXCEPTION(hpx::no_success, "raise_exception", "ID not found for incoming messages");
-            //throw std::logic_error("ID not found for incoming messages");
+	    throw std::logic_error("ID not found for incoming messages");
         }
 
         return messagesFromNeighbors[i - messageNeighborIDs.begin()];
@@ -52,9 +50,7 @@ public:
     {
         std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
         if (iter == remoteIDs.end()) {
-	    hpx::cout << "ID not found for outgoing messages (hpx cout)" << std::endl;
-	    HPX_THROW_EXCEPTION(hpx::no_success, "raise_exception", "ID not found for outgoing messages");
-	    //throw std::logic_error("ID not found for outgoing messages");
+	    throw std::logic_error("ID not found for outgoing messages");
         }
 
         sentNeighbors << remoteCellID;
@@ -120,7 +116,7 @@ public:
 
         for (auto i = neighbors.begin(); i != neighbors.end(); ++i) {
             std::string linkName = endpointName(basename, id, *i);
-	 
+
             int neighbor = *i;
             remoteIDFutures << HPXReceiver<MessageType>::find(linkName).then(
 		[&mutex, neighbor, this](hpx::shared_future<hpx::id_type> remoteIDFuture)
@@ -338,8 +334,7 @@ public:
             lastTimeStepFutures << components[i->x()].setupDataflow(maxTimeSteps);
         }
 
-        //hpx::when_all(lastTimeStepFutures).get();
-	hpx::util::unwrapped(lastTimeStepFutures); //
+        hpx::when_all(lastTimeStepFutures).get();
     }
 
     std::vector<Chronometer> gatherStatistics()
