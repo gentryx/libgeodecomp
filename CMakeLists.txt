@@ -160,7 +160,34 @@ endif()
 set(RELEASE false)
 lgd_detect_distro()
 
-# compute default flags:
+# A word on the various CMake compiler flag variables used inside LibGeoDecomp:
+#
+# DEFAULT_C_FLAGS, DEFAULT_CXX_FLAGS, NVCC_FLAGS  standard flags which may depend on the compiler,
+#         |                 |             |       but not on 3rd party packages being installed.
+#        _|_               _|_            |
+#        \ /               \ /            |
+#         Y                 Y             |
+# LGD_ADDITIONAL_C/CXX_COMPILE_FLAGS      |       May be overridden by the user via CMake.
+#         |                 |             |
+#        _|_               _|_            |
+#        \ /               \ /            |
+#         Y                 Y             |
+# LGD_AGGREGATED_C/CXX_FLAGS              |       Adds flags exported from packages used by LGD,
+#         |                 |             |       exported to the parent scope of a CMake project
+#        _|_               _|_            |       if LGD is nested.
+#        \ /               \ /            |
+#         Y                 Y             |
+# CMAKE_C_FLAGS,    CMAKE_CXX_FLAGS       |       Default CMake variables
+#         |                 |             |
+#        _|_               _|_           _|_
+#        \ /               \ /           \ /
+#         Y                 Y             Y
+#    C compiler      C++ compiler        nvcc
+#                           |
+#                          _|_
+#                          \ /
+#                           Y
+#                     libgeodecomp_FLAGS          Exported via the CMake module
 set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -Wall")
 set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wall -Wno-sign-conversion -Wnon-virtual-dtor")
 
