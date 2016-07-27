@@ -4,7 +4,6 @@ set(LIBDIRS communication io io/remotesteerer geometry geometry/partitions loadb
 # build. They may for instance include additionally libraries to be
 # linked into the main lib.
 set(AUXDIRS)
-# set(AUXDIRS misc/testbed/cell/spustuff)
 set(SUBDIRS communication examples io geometry loadbalancer misc parallelization storage testbed)
 
 set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
