@@ -188,6 +188,7 @@ lgd_detect_distro()
 #                          \ /
 #                           Y
 #                     libgeodecomp_FLAGS          Exported via the CMake module
+#
 set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -Wall")
 set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wall -Wno-sign-conversion -Wnon-virtual-dtor")
 
@@ -203,7 +204,7 @@ if(NOT SUPPORTS_CPP14)
 
   check_cxx_compiler_flag("-std=c++0x" SUPPORTS_CPP0X)
   if(NOT SUPPORTS_CPP0X)
-    message(FATAL_ERROR "LibGeoDecomp requires support for some C++11 features (e.g. shared pointers), but your compiler doesn't seem to support this.")
+    message(WARNING "LibGeoDecomp requires support for some C++11 features (e.g. shared pointers), but your compiler doesn't seem to support this.")
   endif()
 
   set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -std=c++0x")
@@ -260,7 +261,9 @@ lgd_add_config_option(WITH_BOOST_MPI "Enable/disable Boost.MPI related code." ${
 
 lgd_add_config_option(WITH_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
 
-lgd_add_config_option(WITH_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
+lgd_add_config_option(WITH_BOOST_SHARED_PTR "Lets LibGeoDecomp use boost::shared_ptr instead of std::shared_ptr. Useful if your C++ compiler doesn't support the latter." false true)
+
+lgd_add_config_option(WITH_CUDA "Enable modules which harness NVIDIA CUDA GPUs" ${CUDA_FOUND} true)
 
 lgd_add_config_option(WITH_FORTRAN "Build Fortran examples/utilities, too" false true)
 
