@@ -17,6 +17,32 @@ namespace LibGeoDecomp {
 
 namespace HPXDataFlowSimulatorHelpers {
 
+class UpdateEvent
+{
+public:
+    inline
+    UpdateEvent(const std::vector<int>& neighbors, int nanoStep, int step) :
+        myNeighbors(neighbors),
+        myNanoStep(nanoStep),
+        myStep(step)
+    {}
+
+    inline int nanoStep() const
+    {
+        return myNanoStep;
+    }
+
+    inline int step() const
+    {
+        return myStep;
+    }
+
+private:
+    const std::vector<int>& myNeighbors;
+    int myNanoStep;
+    int myStep;
+};
+
 template<typename MESSAGE>
 class Neighborhood
 {
@@ -33,6 +59,11 @@ public:
         remoteIDs(remoteIDs)
     {
         sentNeighbors.reserve(messageNeighborIDs.size());
+    }
+
+    const std::vector<int>& neighbors() const
+    {
+        return messageNeighborIDs;
     }
 
     const MESSAGE& operator[](int index) const
@@ -96,10 +127,10 @@ public:
         int id = -1,
         const std::vector<int> neighbors = std::vector<int>()) :
         basename(basename),
+        // fixme: move semantics
+        neighbors(neighbors),
         grid(grid),
-        id(id),
-    // fixme: move semantics
-        neighbors(neighbors)
+        id(id)
     {
         for (auto&& neighbor: neighbors) {
             std::string linkName = endpointName(basename, neighbor, id);
@@ -131,8 +162,7 @@ public:
 
         // fixme: add steerer/writer interaction
         for (int step = 0; step < maxSteps; ++step) {
-            for (int nanoStep = 0; nanoStep < NANO_STEPS; ++nanoStep) {
-                int index = 0;
+            for (std::size_t nanoStep = 0; nanoStep < NANO_STEPS; ++nanoStep) {
                 int globalNanoStep = step * NANO_STEPS + nanoStep;
 
                 std::vector<hpx::shared_future<MessageType> > receiveMessagesFutures;
@@ -180,9 +210,9 @@ public:
 
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
         Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
+        UpdateEvent event(neighbors, nanoStep, step);
 
-        // fixme: hand over event type which includes a list of neighbors (for zach & dgswem for cross checking consistency)
-        cell()->update(hood, nanoStep, step);
+        cell()->update(hood, event);
         hood.sendEmptyMessagesToUnnotifiedNeighbors();
     }
 

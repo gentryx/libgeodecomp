@@ -62,13 +62,16 @@ public:
     {}
 
     // fixme: use move semantics here
-    template<typename HOOD>
+    template<typename HOOD, typename EVENT>
     void update(
         HOOD& hood,
-        int nanoStep,
-        int step)
+        const EVENT& event)
     {
-        int globalNanoStep = step * NANO_STEPS + nanoStep;
+        int globalNanoStep = event.step() * NANO_STEPS + event.nanoStep();
+
+        std::vector<int> sortedNeighbors = neighbors;
+        std::sort(sortedNeighbors.begin(), sortedNeighbors.end());
+        TS_ASSERT_EQUALS(hood.neighbors(), sortedNeighbors);
 
         if ((globalNanoStep) > 0) {
             for (auto&& neighbor: neighbors) {
@@ -108,13 +111,12 @@ public:
     {}
 
     // fixme: use move semantics here
-    template<typename HOOD>
+    template<typename HOOD, typename EVENT>
     void update(
         HOOD& hood,
-        int nanoStep,
-        int step)
+        const EVENT& event)
     {
-        int globalNanoStep = step * NANO_STEPS + nanoStep;
+        int globalNanoStep = event.step() * NANO_STEPS + event.nanoStep();
 
         if ((globalNanoStep) > 0) {
             for (auto&& neighbor: neighbors) {
