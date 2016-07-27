@@ -39,7 +39,7 @@ public:
     {
         std::vector<int>::const_iterator i = std::find(messageNeighborIDs.begin(), messageNeighborIDs.end(), index);
         if (i == messageNeighborIDs.end()) {
-	    throw std::logic_error("ID not found for incoming messages");
+            throw std::logic_error("ID not found for incoming messages");
         }
 
         return messagesFromNeighbors[i - messageNeighborIDs.begin()];
@@ -50,7 +50,7 @@ public:
     {
         std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
         if (iter == remoteIDs.end()) {
-	    throw std::logic_error("ID not found for outgoing messages");
+            throw std::logic_error("ID not found for outgoing messages");
         }
 
         sentNeighbors << remoteCellID;
@@ -112,17 +112,17 @@ public:
         std::vector<hpx::future<void> > remoteIDFutures;
         remoteIDFutures.reserve(neighbors.size());
 
-	hpx::lcos::local::spinlock mutex;
+        hpx::lcos::local::spinlock mutex;
 
         for (auto i = neighbors.begin(); i != neighbors.end(); ++i) {
             std::string linkName = endpointName(basename, id, *i);
 
             int neighbor = *i;
             remoteIDFutures << HPXReceiver<MessageType>::find(linkName).then(
-		[&mutex, neighbor, this](hpx::shared_future<hpx::id_type> remoteIDFuture)
+                [&mutex, neighbor, this](hpx::shared_future<hpx::id_type> remoteIDFuture)
                 {
-		    std::lock_guard<hpx::lcos::local::spinlock> l(mutex);
-                    remoteIDs[neighbor] = remoteIDFuture.get();		    
+                    std::lock_guard<hpx::lcos::local::spinlock> l(mutex);
+                    remoteIDs[neighbor] = remoteIDFuture.get();
                 });
         }
 
@@ -180,6 +180,7 @@ public:
 
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
         Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
+
         // fixme: hand over event type which includes a list of neighbors (for zach & dgswem for cross checking consistency)
         cell()->update(hood, nanoStep, step);
         hood.sendEmptyMessagesToUnnotifiedNeighbors();
@@ -323,8 +324,8 @@ public:
             components[i->x()] = component;
         }
 
-	// HPX Reset counters 
-	hpx::reset_active_counters();
+        // HPX Reset counters:
+        hpx::reset_active_counters();
 
         typedef hpx::shared_future<void> UpdateResultFuture;
         typedef std::vector<UpdateResultFuture> TimeStepFutures;
