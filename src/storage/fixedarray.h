@@ -69,7 +69,6 @@ public:
         if (elements >= SIZE) {
             throw std::out_of_range("capacity exceeded");
         }
-
         store[elements++] = t;
     }
 
@@ -259,7 +258,7 @@ public:
 
     void erase(T *elem)
     {
-        for (T *i = elem; i != end(); ++i) {
+        for (T *i = elem; i != (end() - 1); ++i) {
             *i = *(i + 1);
         }
 
@@ -268,7 +267,7 @@ public:
 
     void remove(std::size_t index)
     {
-        for (T *i = begin() + index; i != end(); ++i) {
+        for (T *i = begin() + index; i != (end() - 1); ++i) {
             *i = *(i + 1);
         }
 

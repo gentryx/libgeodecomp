@@ -73,6 +73,15 @@ public:
         TS_ASSERT_EQUALS(array, expectedD);
     }
 
+    void testEraseRemoveOnEnd()
+    {
+        FixedArray<double, 1024> a(1024, 5);
+        a.erase(a.end() - 1);
+
+        a << 123;
+        a.remove(509);
+    }
+
     void testConstructors()
     {
         FixedArray<int, 4> a(1, 13);
