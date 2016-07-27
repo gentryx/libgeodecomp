@@ -61,11 +61,13 @@ public:
         sentNeighbors.reserve(messageNeighborIDs.size());
     }
 
+    inline
     const std::vector<int>& neighbors() const
     {
         return messageNeighborIDs;
     }
 
+    inline
     const MESSAGE& operator[](int index) const
     {
         std::vector<int>::const_iterator i = std::find(messageNeighborIDs.begin(), messageNeighborIDs.end(), index);
@@ -77,6 +79,7 @@ public:
     }
 
     // fixme: move semantics
+    inline
     void send(int remoteCellID, const MESSAGE& message)
     {
         std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
@@ -93,6 +96,7 @@ public:
             message);
     }
 
+    inline
     void sendEmptyMessagesToUnnotifiedNeighbors()
     {
         for (int neighbor: messageNeighborIDs) {
@@ -180,7 +184,7 @@ public:
                     &HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>::update,
                     *this, _1, _2, _3, _4, _5);
 
-                hpx::shared_future<void> thisTimeStepFuture = dataflow(
+                hpx::shared_future<void> thisTimeStepFuture = hpx::dataflow(
                     hpx::launch::async,
                     Operation,
                     neighbors,
@@ -295,9 +299,6 @@ public:
     }
     void run()
     {
-        using hpx::dataflow;
-        using hpx::util::unwrapped;
-
         Region<1> localRegion;
         CoordBox<1> box = initializer->gridBox();
         std::size_t rank = hpx::get_locality_id();
