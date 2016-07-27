@@ -165,14 +165,16 @@ public:
     void update(
         std::vector<int> neighbors,
         std::vector<hpx::shared_future<MESSAGE> > inputFutures,
-        const hpx::shared_future<void>& /* unused, just here to ensure
-                                           correct ordering of updates
-                                           per cell */,
+        // Unused, just here to ensure correct ordering of updates per cell:
+        const hpx::shared_future<void>& lastTimeStepReady,
         int nanoStep,
         int step)
     {
+        // fixme: lastTimeStepReady.get();
+
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
         Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
+        // fixme: hand over event type which includes a list of neighbors (for zach & dgswem for cross checking consistency)
         cell()->update(hood, nanoStep, step);
         hood.sendEmptyMessagesToUnnotifiedNeighbors();
     }
