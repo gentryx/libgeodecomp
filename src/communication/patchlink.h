@@ -161,7 +161,7 @@ public:
 
         void sendHeader(APITraits::FalseType)
         {
-            if (buffer.size() > std::numeric_limits<int>::max()) {
+            if (buffer.size() > std::size_t(std::numeric_limits<int>::max())) {
                 throw std::invalid_argument("buffer size exceeds std::numeric_limits<int>::max()");
             }
 
