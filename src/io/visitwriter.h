@@ -225,7 +225,7 @@ public:
         Selector<CELL_TYPE> selector(memberPointer, memberName);
         DataBuffer *buffer = new DataBuffer(selector);
 
-        variableBuffers << SharedPtr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> >::Type(buffer);
+        variableBuffers << typename SharedPtr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> >::Type(buffer);
     }
 
   private:
