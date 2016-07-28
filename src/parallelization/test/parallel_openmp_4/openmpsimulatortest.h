@@ -125,7 +125,7 @@ public:
         std::vector<Grid<TestCell<2> > > grids1 = gridWriter1->getGrids();
 
 
-        boost::shared_ptr<MockWriter<>::EventsStore> events2(new MockWriter<>::EventsStore);
+        SharedPtr<MockWriter<>::EventsStore>::Type events2(new MockWriter<>::EventsStore);
         events->clear();
         MockWriter<> *eventWriter2 = new MockWriter<>(events2);
         MemoryWriter<TestCell<2> > *gridWriter2 =
@@ -161,7 +161,7 @@ public:
 
     void testSteererCallback()
     {
-        boost::shared_ptr<MockSteererType::EventsStore> events(new MockSteererType::EventsStore);
+        SharedPtr<MockSteererType::EventsStore>::Type events(new MockSteererType::EventsStore);
         simulator->addSteerer(new MockSteererType(5, events));
 
         MockSteererType::EventsStore expectedEvents;
@@ -214,9 +214,9 @@ public:
     }
 
 private:
-    boost::shared_ptr<MockWriter<>::EventsStore> events;
-    boost::shared_ptr<OpenMPSimulator<TestCell<2> > > simulator;
-    boost::shared_ptr<Initializer<TestCell<2> > > init;
+    SharedPtr<MockWriter<>::EventsStore>::Type events;
+    SharedPtr<OpenMPSimulator<TestCell<2> > >::Type simulator;
+    SharedPtr<Initializer<TestCell<2> > >::Type init;
     unsigned maxSteps;
     unsigned startStep;
     Coord<2> dim;

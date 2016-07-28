@@ -19,8 +19,8 @@ public:
     typedef PartitionManager<Topology> PartitionManagerType;
     typedef VanillaStepper<TestCell<3>, UpdateFunctorHelpers::ConcurrencyNoP> StepperType;
     typedef PatchLink<StepperType::GridType> PatchLinkType;
-    typedef boost::shared_ptr<PatchLinkType::Accepter> PatchAccepterPtrType;
-    typedef boost::shared_ptr<PatchLinkType::Provider> PatchProviderPtrType;
+    typedef SharedPtr<PatchLinkType::Accepter>::Type PatchAccepterPtrType;
+    typedef SharedPtr<PatchLinkType::Provider>::Type PatchProviderPtrType;
 
     void setUp()
     {
@@ -44,10 +44,10 @@ public:
         std::vector<std::size_t> weights;
         weights << 10000 << 15000 << 25000;
         weights << box.dimensions.prod() - sum(weights);
-        boost::shared_ptr<Partition<3> > partition(
+        SharedPtr<Partition<3> >::Type partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
-        boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
+        SharedPtr<AdjacencyManufacturer<3> >::Type dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
 
         partitionManager.reset(new PartitionManagerType());
         partitionManager->resetRegions(
@@ -201,10 +201,10 @@ public:
 
 private:
     int ghostZoneWidth;
-    boost::shared_ptr<TestInitializer<TestCell<3> > > init;
-    boost::shared_ptr<PartitionManagerType> partitionManager;
-    boost::shared_ptr<StepperType> stepper;
-    boost::shared_ptr<MPILayer> mpiLayer;
+    SharedPtr<TestInitializer<TestCell<3> > >::Type init;
+    SharedPtr<PartitionManagerType>::Type partitionManager;
+    SharedPtr<StepperType>::Type stepper;
+    SharedPtr<MPILayer>::Type mpiLayer;
 
     void checkInnerSet(
         unsigned shrink,

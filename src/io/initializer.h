@@ -24,6 +24,7 @@ class Initializer : public AdjacencyManufacturer<APITraits::SelectTopology<CELL>
 public:
     typedef typename APITraits::SelectTopology<CELL>::Value Topology;
     typedef CELL Cell;
+    typedef typename SharedPtr<Adjacency>::Type AdjacencyPtr;
 
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
     static const int DIM = Topology::DIM;
@@ -100,10 +101,10 @@ public:
      * Returns the list of neighboring nodes for at least all IDs
      * stored in the Region.
      */
-    boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const
+    AdjacencyPtr getAdjacency(const Region<DIM>& region) const
     {
         checkTopologyIfAdjacencyIsNeeded(Topology());
-        return boost::make_shared<RegionBasedAdjacency>();
+        return AdjacencyPtr();
     }
 
 private:

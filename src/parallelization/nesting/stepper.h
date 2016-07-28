@@ -1,12 +1,12 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_STEPPER_H
 #define LIBGEODECOMP_PARALLELIZATION_NESTING_STEPPER_H
 
-#include <boost/shared_ptr.hpp>
 #include <deque>
 
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/nesting/offsethelper.h>
 #include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/patchaccepter.h>
@@ -33,16 +33,18 @@ public:
     typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;
 
     typedef PartitionManager<Topology> PartitionManagerType;
-    typedef boost::shared_ptr<PatchProvider<GridType> > PatchProviderPtr;
-    typedef boost::shared_ptr<PatchAccepter<GridType> > PatchAccepterPtr;
+    typedef typename SharedPtr<PatchProvider<GridType> >::Type PatchProviderPtr;
+    typedef typename SharedPtr<PatchAccepter<GridType> >::Type PatchAccepterPtr;
+    typedef typename SharedPtr<PartitionManager<Topology> >::Type PartitionManagerPtr;
+    typedef typename SharedPtr<Initializer<CELL_TYPE> >::Type InitPtr;
     typedef std::deque<PatchProviderPtr> PatchProviderList;
     typedef std::deque<PatchAccepterPtr> PatchAccepterList;
     typedef std::vector<PatchAccepterPtr> PatchAccepterVec;
     typedef std::vector<PatchProviderPtr> PatchProviderVec;
 
     inline Stepper(
-        const boost::shared_ptr<PartitionManagerType>& partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer) :
+        PartitionManagerPtr partitionManager,
+        InitPtr initializer) :
         partitionManager(partitionManager),
         initializer(initializer)
     {}
@@ -79,8 +81,8 @@ public:
     }
 
 protected:
-    boost::shared_ptr<PartitionManagerType> partitionManager;
-    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+    PartitionManagerPtr partitionManager;
+    InitPtr initializer;
     PatchProviderList patchProviders[3];
     PatchAccepterList patchAccepters[3];
     Chronometer chronometer;

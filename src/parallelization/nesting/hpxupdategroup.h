@@ -6,6 +6,7 @@
 
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/communication/hpxpatchlink.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/nesting/updategroup.h>
 
 namespace LibGeoDecomp {
@@ -31,14 +32,20 @@ public:
 
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::init;
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::rank;
+
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::InitPtr;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::SteererPtr;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PartitionPtr;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkAccepterPtr;
+    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkProviderPtr;
     const static int DIM = UpdateGroup<CELL_TYPE, HPXPatchLink>::DIM;
 
     template<typename STEPPER>
     HPXUpdateGroup(
-        boost::shared_ptr<Partition<DIM> > partition,
+        PartitionPtr partition,
         const CoordBox<DIM>& box,
         unsigned ghostZoneWidth,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        InitPtr initializer,
         STEPPER *stepperType,
         PatchAccepterVec patchAcceptersGhost = PatchAccepterVec(),
         PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
@@ -68,7 +75,7 @@ private:
 
     std::vector<CoordBox<DIM> > gatherBoundingBoxes(
         const CoordBox<DIM>& ownBoundingBox,
-        boost::shared_ptr<Partition<DIM> > partition) const
+        PartitionPtr partition) const
     {
         std::size_t size = partition->getWeights().size();
         std::string broadcastName = basename + "/boundingBoxes";
@@ -76,9 +83,9 @@ private:
         return HPXReceiver<CoordBox<DIM> >::allGather(ownBoundingBox, rank, size, broadcastName);
     }
 
-    virtual boost::shared_ptr<PatchLinkAccepter> makePatchLinkAccepter(int target, const Region<DIM>& region)
+    virtual PatchLinkAccepterPtr makePatchLinkAccepter(int target, const Region<DIM>& region)
     {
-        return boost::shared_ptr<PatchLinkAccepter>(
+        return PatchLinkAccepterPtr(
             new typename HPXPatchLink<GridType>::Accepter(
                 region,
                 basename,
@@ -87,9 +94,9 @@ private:
 
     }
 
-    virtual boost::shared_ptr<PatchLinkProvider> makePatchLinkProvider(int source, const Region<DIM>& region)
+    virtual PatchLinkProviderPtr makePatchLinkProvider(int source, const Region<DIM>& region)
     {
-        return boost::shared_ptr<PatchLinkProvider>(
+        return PatchLinkProviderPtr(
             new typename HPXPatchLink<GridType>::Provider(
                 region,
                 basename,

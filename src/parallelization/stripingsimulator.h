@@ -5,9 +5,9 @@
 #ifdef LIBGEODECOMP_WITH_MPI
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/storage/displacedgrid.h>
@@ -43,6 +43,8 @@ public:
     using DistributedSimulator<CELL_TYPE>::writers;
     using DistributedSimulator<CELL_TYPE>::gridDim;
 
+    using typename DistributedSimulator<CELL_TYPE>::InitPtr;
+
     enum WaitTags {
         GENERAL,
         BALANCELOADS,
@@ -68,7 +70,7 @@ public:
     }
 
     explicit StripingSimulator(
-        const boost::shared_ptr<Initializer<CELL_TYPE> >& initializer,
+        const InitPtr& initializer,
         LoadBalancer *balancer = 0,
         unsigned loadBalancingPeriod = 1):
         DistributedSimulator<CELL_TYPE>(initializer),
@@ -136,7 +138,7 @@ public:
 
 private:
     MPILayer mpilayer;
-    boost::shared_ptr<LoadBalancer> balancer;
+    typename SharedPtr<LoadBalancer>::Type balancer;
     /**
      * we need to distinguish four types of rims:
      *   - the inner rim is sent to neighboring nodes (and lies whithin our own stripe)

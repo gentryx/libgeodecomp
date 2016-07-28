@@ -29,7 +29,7 @@ public:
         TS_ASSERT_EQUALS(sum(weights) + offset, product);
 
         partition.reset(new StripingPartition<2>(Coord<2>(0, 0), dimensions, offset, weights));
-        boost::shared_ptr<AdjacencyManufacturer<2> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<2>);
+        SharedPtr<AdjacencyManufacturer<2> >::Type dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<2>);
 
         manager.resetRegions(
             dummyAdjacencyManufacturer,
@@ -189,8 +189,8 @@ public:
 
 private:
     PartitionManager<Topologies::Cube<2>::Topology> manager;
-    boost::shared_ptr<StripingPartition<2> > partition;
-    boost::shared_ptr<MPILayer> layer;
+    SharedPtr<StripingPartition<2> >::Type partition;
+    SharedPtr<MPILayer>::Type layer;
     Coord<2> dimensions;
     std::vector<std::size_t> weights;
     unsigned offset;

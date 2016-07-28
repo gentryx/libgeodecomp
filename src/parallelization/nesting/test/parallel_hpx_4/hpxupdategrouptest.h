@@ -394,7 +394,7 @@ public:
     {
         using namespace boost::assign;
 
-        boost::shared_ptr<UpdateGroupType> updateGroup;
+        SharedPtr<UpdateGroupType>::Type updateGroup;
 
         rank = hpx::get_locality_id();
         dimensions = Coord<2>(231, 350);
@@ -431,10 +431,10 @@ private:
     Coord<2> dimensions;
     std::vector<std::size_t> weights;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<PartitionType> partition;
-    boost::shared_ptr<Initializer<TestCell<2> > > init;
-    boost::shared_ptr<UpdateGroupType> updateGroup;
-    boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
+    SharedPtr<PartitionType>::Type partition;
+    SharedPtr<Initializer<TestCell<2> > >::Type init;
+    SharedPtr<UpdateGroupType>::Type updateGroup;
+    SharedPtr<MockPatchAccepter<GridType> >::Type mockPatchAccepter;
 
     std::vector<std::size_t> genWeights(
         unsigned width,

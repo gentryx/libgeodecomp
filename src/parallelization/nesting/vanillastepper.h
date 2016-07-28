@@ -63,9 +63,12 @@ public:
     using ParentType::kernelFraction;
     using ParentType::enableFineGrainedParallelism;
 
+    using typename ParentType::InitPtr;
+    using typename ParentType::PartitionManagerPtr;
+
     inline VanillaStepper(
-        boost::shared_ptr<PartitionManagerType> partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        PartitionManagerPtr partitionManager,
+        InitPtr initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
         const PatchProviderVec& ghostZonePatchProvidersPhase0 = PatchProviderVec(),

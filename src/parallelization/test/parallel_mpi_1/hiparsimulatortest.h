@@ -144,7 +144,7 @@ public:
 
     void testSteererCallback()
     {
-        boost::shared_ptr<MockSteererType::EventsStore> events(new MockSteererType::EventsStore);
+        SharedPtr<MockSteererType::EventsStore>::Type events(new MockSteererType::EventsStore);
         s->addSteerer(new MockSteererType(5, events));
         s->run();
         s.reset();
@@ -181,7 +181,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<SimulatorType> s;
+    SharedPtr<SimulatorType>::Type s;
     Coord<2> dim;
     unsigned maxSteps;
     unsigned firstStep;
@@ -189,7 +189,7 @@ private:
     unsigned loadBalancingPeriod;
     unsigned ghostzZoneWidth;
     MockWriter<> *mockWriter;
-    boost::shared_ptr<MockWriter<>::EventsStore> events;
+    SharedPtr<MockWriter<>::EventsStore>::Type events;
     MemoryWriterType *memoryWriter;
 };
 

@@ -4,10 +4,9 @@
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/soagrid.h>
-
-#include <boost/shared_ptr.hpp>
 #include <vector>
 
 namespace LibGeoDecomp {
@@ -28,7 +27,9 @@ public:
     static const int DIM = Topology::DIM;
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
     typedef GridBase<CELL_TYPE, DIM> GridType;
-    typedef std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
+    typedef typename SharedPtr<Initializer<CELL_TYPE> >::Type InitPtr;
+    typedef typename SharedPtr<Steerer<CELL_TYPE> >::Type SteererPtr;
+    typedef std::vector<SteererPtr> SteererVector;
 
     /**
      * Creates the abstract Simulator object. The Initializer is
@@ -41,7 +42,7 @@ public:
         gridDim(initializer->gridDimensions())
     {}
 
-    inline explicit Simulator(const boost::shared_ptr<Initializer<CELL_TYPE> >& initializer) :
+    inline explicit Simulator(const InitPtr& initializer) :
         stepNum(0),
         initializer(initializer),
         gridDim(initializer->gridDimensions())
@@ -68,7 +69,7 @@ public:
         return stepNum;
     }
 
-    virtual boost::shared_ptr<Initializer<CELL_TYPE> > getInitializer() const
+    virtual InitPtr getInitializer() const
     {
         return initializer;
     }
@@ -81,7 +82,7 @@ public:
      */
     virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
     {
-        steerers << boost::shared_ptr<Steerer<CELL_TYPE> >(steerer);
+        steerers << SteererPtr(steerer);
     }
 
     /**
@@ -94,7 +95,7 @@ public:
 protected:
     Chronometer chronometer;
     unsigned stepNum;
-    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+    InitPtr initializer;
     SteererVector steerers;
     Coord<DIM> gridDim;
 };

@@ -48,7 +48,7 @@ public:
             dimensions,
             0,
             weights,
-            boost::make_shared<RegionBasedAdjacency>(),
+            RecursiveBisectionPartition<3>::AdjacencyPtr(),
             Coord<3>::diagonal(1));
 
         TS_ASSERT_EQUALS(
@@ -122,7 +122,7 @@ public:
             dimensions,
             0,
             weights,
-            boost::make_shared<RegionBasedAdjacency>(),
+            RecursiveBisectionPartition<2>::AdjacencyPtr(),
             dimWeights);
 
         TS_ASSERT_EQUALS(

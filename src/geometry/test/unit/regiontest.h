@@ -1,5 +1,6 @@
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/geometry/regionbasedadjacency.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 

@@ -18,7 +18,7 @@ public:
     {
         MockInitializer::events = "";
         MockSimulator::events = "";
-        boost::shared_ptr<MockWriter<>::EventsStore> events(new MockWriter<>::EventsStore);
+        SharedPtr<MockWriter<>::EventsStore>::Type events(new MockWriter<>::EventsStore);
         {
             MockSimulator sim(new MockInitializer);
             sim.addWriter(new MockWriter<>(events));

@@ -10,13 +10,13 @@
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/geometry/partitions/distributedptscotchunstructuredpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/hierarchicalsimulator.h>
 #include <libgeodecomp/parallelization/nesting/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/nesting/steereradapter.h>
 #include <libgeodecomp/parallelization/nesting/mpiupdategroup.h>
 #include <cmath>
 #include <stdexcept>
-#include <boost/make_shared.hpp>
 
 namespace LibGeoDecomp {
 
@@ -155,10 +155,10 @@ private:
     using DistributedSimulator<CELL_TYPE>::steerers;
     using DistributedSimulator<CELL_TYPE>::writers;
 
-    boost::shared_ptr<LoadBalancer> balancer;
+    SharedPtr<LoadBalancer>::Type balancer;
     unsigned ghostZoneWidth;
     MPILayer mpiLayer;
-    boost::shared_ptr<UpdateGroupType> updateGroup;
+    typename SharedPtr<UpdateGroupType>::Type updateGroup;
 
     typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
     typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
@@ -202,7 +202,7 @@ private:
             box.dimensions.prod(),
             rankSpeeds);
 
-        boost::shared_ptr<PARTITION> partition(
+        typename SharedPtr<PARTITION>::Type partition(
             new PARTITION(
                 box.origin,
                 box.dimensions,

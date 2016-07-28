@@ -179,7 +179,7 @@ public:
 
     void checkRunAndWriterInteraction(int everyN)
     {
-        boost::shared_ptr<MockWriter<>::EventsStore> expectedEvents(new MockWriter<>::EventsStore);
+        SharedPtr<MockWriter<>::EventsStore>::Type expectedEvents(new MockWriter<>::EventsStore);
 
         MockWriter<> *expectedCalls = new MockWriter<>(expectedEvents);
         MockWriter<> *actualCalls = new MockWriter<>(events);
@@ -327,7 +327,7 @@ public:
 
     void checkLoadBalancingRealistically(unsigned balanceEveryN)
     {
-        boost::shared_ptr<MockWriter<>::EventsStore> expectedEvents(new MockWriter<>::EventsStore);
+        SharedPtr<MockWriter<>::EventsStore>::Type expectedEvents(new MockWriter<>::EventsStore);
 
         LoadBalancer *balancer = rank? 0 : new RandomBalancer;
         StripingSimulator<TestCell<2> > localTestSim(
@@ -465,12 +465,12 @@ public:
     }
 
 private:
-    boost::shared_ptr<MockWriter<>::EventsStore> events;
+    SharedPtr<MockWriter<>::EventsStore>::Type events;
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
-    boost::shared_ptr<MPILayer> layer;
-    boost::shared_ptr<MonolithicSimulator<TestCell<2> > > referenceSim;
-    boost::shared_ptr<StripingSimulator<TestCell<2> > > testSim;
-    boost::shared_ptr<ClonableInitializer<TestCell<2> > > init;
+    SharedPtr<MPILayer>::Type layer;
+    SharedPtr<MonolithicSimulator<TestCell<2> > >::Type referenceSim;
+    SharedPtr<StripingSimulator<TestCell<2> > >::Type testSim;
+    SharedPtr<ClonableInitializer<TestCell<2> > >::Type init;
     int rank;
     int size;
     int width;

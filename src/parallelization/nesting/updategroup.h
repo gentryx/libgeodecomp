@@ -2,8 +2,11 @@
 #define LIBGEODECOMP_PARALLELIZATION_NESTING_UPDATEGROUP_H
 
 #include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/io/steerer.h>
+#include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/nesting/stepper.h>
 #include <libgeodecomp/parallelization/nesting/vanillastepper.h>
 #include <libgeodecomp/storage/displacedgrid.h>
@@ -28,26 +31,32 @@ class UpdateGroup
 public:
     typedef LibGeoDecomp::Stepper<CELL_TYPE> StepperType;
     typedef typename StepperType::Topology Topology;
+    const static int DIM = Topology::DIM;
+
+    typedef typename SharedPtr<Partition<DIM> >::Type PartitionPtr;
+    typedef typename SharedPtr<Initializer<CELL_TYPE> >::Type InitPtr;
+    typedef typename SharedPtr<ParallelWriter<CELL_TYPE> >::Type WriterPtr;
+    typedef typename SharedPtr<Steerer<CELL_TYPE> >::Type SteererPtr;
+    typedef typename SharedPtr<StepperType>::Type StepperPtr;
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
     typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;
     typedef typename PATCH_LINK<GridType>::Link PatchLink;
     typedef typename PATCH_LINK<GridType>::Accepter PatchLinkAccepter;
     typedef typename PATCH_LINK<GridType>::Provider PatchLinkProvider;
-    typedef boost::shared_ptr<PatchLink> PatchLinkPtr;
+    typedef typename SharedPtr<PatchLink>::Type PatchLinkPtr;
+    typedef typename SharedPtr<PatchLinkAccepter>::Type PatchLinkAccepterPtr;
+    typedef typename SharedPtr<PatchLinkProvider>::Type PatchLinkProviderPtr;
     typedef PartitionManager<Topology> PartitionManagerType;
     typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
     typedef typename StepperType::PatchAccepterVec PatchAccepterVec;
     typedef typename StepperType::PatchProviderVec PatchProviderVec;
-
     typedef typename StepperType::PatchType PatchType;
     typedef typename StepperType::PatchProviderPtr PatchProviderPtr;
     typedef typename StepperType::PatchAccepterPtr PatchAccepterPtr;
 
-    const static int DIM = Topology::DIM;
-
     UpdateGroup(
         unsigned ghostZoneWidth,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        InitPtr initializer,
         unsigned rank) :
         partitionManager(new PartitionManagerType()),
         ghostZoneWidth(ghostZoneWidth),
@@ -131,10 +140,10 @@ public:
 
 protected:
     std::vector<PatchLinkPtr> patchLinks;
-    boost::shared_ptr<StepperType> stepper;
-    boost::shared_ptr<PartitionManagerType> partitionManager;
+    StepperPtr stepper;
+    typename SharedPtr<PartitionManagerType>::Type partitionManager;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+    InitPtr initializer;
     unsigned rank;
 
     /**
@@ -146,10 +155,10 @@ protected:
      */
     template<typename STEPPER>
     void init(
-        boost::shared_ptr<Partition<DIM> > partition,
+        PartitionPtr partition,
         const CoordBox<DIM>& box,
         unsigned ghostZoneWidth,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        InitPtr initializer,
         STEPPER *stepperType,
         PatchAccepterVec patchAcceptersGhost,
         PatchAccepterVec patchAcceptersInner,
@@ -177,7 +186,7 @@ protected:
         const RegionVecMap& map1 = partitionManager->getOuterGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = map1.begin(); i != map1.end(); ++i) {
             if (!i->second.back().empty()) {
-                boost::shared_ptr<PatchLinkProvider> link(
+                PatchLinkProviderPtr link(
                     makePatchLinkProvider(i->first, i->second.back()));
                 patchLinkProviders << link;
                 patchLinks << link;
@@ -198,7 +207,7 @@ protected:
         const RegionVecMap& map2 = partitionManager->getInnerGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = map2.begin(); i != map2.end(); ++i) {
             if (!i->second.back().empty()) {
-                boost::shared_ptr<PatchLinkAccepter> link(
+                PatchLinkAccepterPtr link(
                     makePatchLinkAccepter(i->first, i->second.back()));
                 ghostZoneAccepterLinks << link;
                 patchLinks << link;
@@ -228,25 +237,26 @@ protected:
             patchProvidersInner[i]->setRegion(partitionManager->ownRegion());
         }
 
-        stepper.reset(new STEPPER(
-                          partitionManager,
-                          this->initializer,
-                          patchAcceptersGhost + ghostZoneAccepterLinks,
-                          patchAcceptersInner,
-                          // add external PatchProviders last to allow them to override
-                          // the local ghost zone providers (a.k.a. PatchLink::Source).
-                          patchLinkProviders,
-                          patchProvidersGhost,
-                          patchProvidersInner,
-                          enableFineGrainedParallelism));
-    }
+        stepper.reset(
+            new STEPPER(
+                partitionManager,
+                this->initializer,
+                patchAcceptersGhost + ghostZoneAccepterLinks,
+                patchAcceptersInner,
+                // add external PatchProviders last to allow them to override
+                // the local ghost zone providers (a.k.a. PatchLink::Source).
+                patchLinkProviders,
+                patchProvidersGhost,
+                patchProvidersInner,
+                enableFineGrainedParallelism));
+}
 
     virtual std::vector<CoordBox<DIM> > gatherBoundingBoxes(
         const CoordBox<DIM>& ownBoundingBox,
-        boost::shared_ptr<Partition<DIM> > partition) const = 0;
+        PartitionPtr partition) const = 0;
 
-    virtual boost::shared_ptr<PatchLinkAccepter> makePatchLinkAccepter(int target, const Region<DIM>& region) = 0;
-    virtual boost::shared_ptr<PatchLinkProvider> makePatchLinkProvider(int source, const Region<DIM>& region) = 0;
+    virtual PatchLinkAccepterPtr makePatchLinkAccepter(int target, const Region<DIM>& region) = 0;
+    virtual PatchLinkProviderPtr makePatchLinkProvider(int source, const Region<DIM>& region) = 0;
 };
 
 }

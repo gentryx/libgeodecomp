@@ -58,10 +58,10 @@ public:
     }
 
 private:
-    boost::shared_ptr<TestInitializer<TestCell<2> > > init;
-    boost::shared_ptr<PartitionManager<Topologies::Cube<2>::Topology> > partitionManager;
-    boost::shared_ptr<StepperType> stepper;
-    boost::shared_ptr<MockPatchAccepter<GridType> > patchAccepter;
+    SharedPtr<TestInitializer<TestCell<2> > >::Type init;
+    SharedPtr<PartitionManager<Topologies::Cube<2>::Topology> >::Type partitionManager;
+    SharedPtr<StepperType>::Type stepper;
+    SharedPtr<MockPatchAccepter<GridType> >::Type patchAccepter;
 };
 
 }

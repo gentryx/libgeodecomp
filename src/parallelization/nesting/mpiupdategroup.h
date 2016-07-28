@@ -29,17 +29,21 @@ public:
     typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkAccepter PatchLinkAccepter;
     typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkProvider PatchLinkProvider;
 
-
     using UpdateGroup<CELL_TYPE, PatchLink>::init;
     using UpdateGroup<CELL_TYPE, PatchLink>::rank;
+    using typename UpdateGroup<CELL_TYPE, PatchLink>::InitPtr;
+    using typename UpdateGroup<CELL_TYPE, PatchLink>::PartitionPtr;
+    using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkAccepterPtr;
+    using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkProviderPtr;
+
     const static int DIM = UpdateGroup<CELL_TYPE, PatchLink>::DIM;
 
     template<typename STEPPER>
     MPIUpdateGroup(
-        boost::shared_ptr<Partition<DIM> > partition,
+        PartitionPtr partition,
         const CoordBox<DIM>& box,
         unsigned ghostZoneWidth,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        InitPtr initializer,
         STEPPER *stepperType,
         PatchAccepterVec patchAcceptersGhost = PatchAccepterVec(),
         PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
@@ -68,16 +72,16 @@ private:
 
     std::vector<CoordBox<DIM> > gatherBoundingBoxes(
         const CoordBox<DIM>& ownBoundingBox,
-        boost::shared_ptr<Partition<DIM> > partition) const
+        PartitionPtr partition) const
     {
         std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         return boundingBoxes;
     }
 
-    virtual boost::shared_ptr<PatchLinkAccepter> makePatchLinkAccepter(int target, const Region<DIM>& region)
+    virtual PatchLinkAccepterPtr makePatchLinkAccepter(int target, const Region<DIM>& region)
     {
-        return boost::shared_ptr<PatchLinkAccepter>(
+        return PatchLinkAccepterPtr(
             new PatchLinkAccepter(
                 region,
                 target,
@@ -87,9 +91,9 @@ private:
 
     }
 
-    virtual boost::shared_ptr<PatchLinkProvider> makePatchLinkProvider(int source, const Region<DIM>& region)
+    virtual PatchLinkProviderPtr makePatchLinkProvider(int source, const Region<DIM>& region)
     {
-        return boost::shared_ptr<PatchLinkProvider>(
+        return PatchLinkProviderPtr(
             new PatchLinkProvider(
                 region,
                 source,

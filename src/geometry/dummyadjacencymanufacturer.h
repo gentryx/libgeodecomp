@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/geometry/adjacencymanufacturer.h>
 #include <libgeodecomp/geometry/regionbasedadjacency.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 namespace LibGeoDecomp {
 
@@ -15,9 +16,11 @@ template<int DIM>
 class DummyAdjacencyManufacturer : public AdjacencyManufacturer<DIM>
 {
 public:
-    virtual boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const
+    using typename AdjacencyManufacturer<DIM>::AdjacencyPtr;
+
+    virtual AdjacencyPtr getAdjacency(const Region<DIM>& region) const
     {
-        return boost::make_shared<RegionBasedAdjacency>(RegionBasedAdjacency());
+        return AdjacencyPtr(new RegionBasedAdjacency());
     }
 };
 

@@ -1,9 +1,9 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 
-#include <libgeodecomp/geometry/adjacencymanufacturer.h>
-#include <libgeodecomp/geometry/regionbasedadjacency.h>
+#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
@@ -18,6 +18,8 @@ template<int DIM>
 class Partition
 {
 public:
+    typedef typename SharedPtr<Adjacency>::Type AdjacencyPtr;
+
     /**
      * initializes the partition so that the domain will be split up
      * in chucks with sizes proportional to the weights specified in

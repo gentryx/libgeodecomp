@@ -66,10 +66,10 @@ private:
     Coord<3> dimensions;
     std::vector<std::size_t> weights;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<PartitionType> partition;
-    boost::shared_ptr<Initializer<TestCell<3> > > init;
-    boost::shared_ptr<MPIUpdateGroup<TestCell<3> > > updateGroup;
-    boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
+    SharedPtr<PartitionType>::Type partition;
+    SharedPtr<Initializer<TestCell<3> > >::Type init;
+    SharedPtr<MPIUpdateGroup<TestCell<3> > >::Type updateGroup;
+    SharedPtr<MockPatchAccepter<GridType> >::Type mockPatchAccepter;
 };
 
 }

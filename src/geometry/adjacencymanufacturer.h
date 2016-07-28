@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 namespace LibGeoDecomp {
 
@@ -15,10 +16,12 @@ template<int DIM>
 class AdjacencyManufacturer
 {
 public:
+    typedef typename SharedPtr<Adjacency>::Type AdjacencyPtr;
+
     virtual ~AdjacencyManufacturer()
     {}
 
-    virtual boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const = 0;
+    virtual AdjacencyPtr getAdjacency(const Region<DIM>& region) const = 0;
 };
 
 }

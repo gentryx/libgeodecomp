@@ -146,21 +146,23 @@ private:
 template<typename MODEL>
 class DummyInitializer : public Initializer<MODEL>
 {
- public:
-     DummyInitializer(int gridSize, int myMaxSteps) :
-         gridSize(gridSize),
-	 myMaxSteps(myMaxSteps)
-     {}
+public:
+    using typename Initializer<MODEL>::AdjacencyPtr;
 
-     void grid(GridBase<MODEL, 1> *grid)
-     {
-	 CoordBox<1> box = grid->boundingBox();
+    DummyInitializer(int gridSize, int myMaxSteps) :
+        gridSize(gridSize),
+        myMaxSteps(myMaxSteps)
+    {}
 
-	 for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
-             MODEL cell(i->x(), getNeighbors(i->x()));
-	     grid->set(*i, cell);
-	 }
-     }
+    void grid(GridBase<MODEL, 1> *grid)
+    {
+        CoordBox<1> box = grid->boundingBox();
+
+        for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
+            MODEL cell(i->x(), getNeighbors(i->x()));
+            grid->set(*i, cell);
+        }
+    }
 
     virtual Coord<1> gridDimensions() const
     {
@@ -177,9 +179,9 @@ class DummyInitializer : public Initializer<MODEL>
 	return myMaxSteps;
     }
 
-    boost::shared_ptr<Adjacency> getAdjacency(const Region<1>& region) const
+    AdjacencyPtr getAdjacency(const Region<1>& region) const
     {
-	boost::shared_ptr<Adjacency> adjacency(new RegionBasedAdjacency());
+	AdjacencyPtr adjacency(new RegionBasedAdjacency());
 
 	for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             std::vector<int> neighbors = getNeighbors(i->x());
@@ -191,30 +193,30 @@ class DummyInitializer : public Initializer<MODEL>
 	return adjacency;
     }
 
- private:
-     int gridSize;
-     int myMaxSteps;
+private:
+    int gridSize;
+    int myMaxSteps;
 
-     std::vector<int> getNeighbors(int id) const
-     {
-         std::vector<int> neighbors;
+    std::vector<int> getNeighbors(int id) const
+    {
+        std::vector<int> neighbors;
 
-         if (id > 0) {
-             neighbors << (id - 1);
-         }
-         if (id > 1) {
-             neighbors << (id - 2);
-         }
+        if (id > 0) {
+            neighbors << (id - 1);
+        }
+        if (id > 1) {
+            neighbors << (id - 2);
+        }
 
-         if (id < (gridSize - 1)) {
-             neighbors << (id + 1);
-         }
-         if (id < (gridSize - 2)) {
-             neighbors << (id + 2);
-         }
+        if (id < (gridSize - 1)) {
+            neighbors << (id + 1);
+        }
+        if (id < (gridSize - 2)) {
+            neighbors << (id + 2);
+        }
 
-         return neighbors;
-     }
+        return neighbors;
+    }
 };
 
 class HpxDataflowSimulatorTest : public CxxTest::TestSuite

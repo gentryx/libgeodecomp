@@ -127,7 +127,7 @@ public:
     // fixme: move semantics
     explicit CellComponent(
         const std::string& basename = "",
-        boost::shared_ptr<GridType> grid = 0,
+        typename SharedPtr<GridType>::Type grid = 0,
         int id = -1,
         const std::vector<int> neighbors = std::vector<int>()) :
         basename(basename),
@@ -223,7 +223,7 @@ public:
 private:
     std::string basename;
     std::vector<int> neighbors;
-    boost::shared_ptr<GridType> grid;
+    typename SharedPtr<GridType>::Type grid;
     int id;
     std::map<int, std::shared_ptr<HPXReceiver<MESSAGE> > > receivers;
     std::map<int, hpx::id_type> remoteIDs;
@@ -312,7 +312,7 @@ public:
         Region<1> globalRegion;
         globalRegion << box;
 
-        boost::shared_ptr<PARTITION> partition(
+        typename SharedPtr<PARTITION>::Type partition(
             new PARTITION(
                 box.origin,
                 box.dimensions,
@@ -329,7 +329,7 @@ public:
             1);
 
         localRegion = partitionManager.ownRegion();
-        boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency(localRegion);
+        SharedPtr<Adjacency>::Type adjacency = initializer->getAdjacency(localRegion);
 
 
         // fixme: instantiate components in agas and only hold ids of those
@@ -342,7 +342,7 @@ public:
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
             int id = i->x();
             CoordBox<1> singleCellBox(Coord<1>(id), Coord<1>(1));
-            boost::shared_ptr<GridType> grid(new GridType(singleCellBox));
+            typename SharedPtr<GridType>::Type grid(new GridType(singleCellBox));
             initializer->grid(&*grid);
 
             neighbors.clear();

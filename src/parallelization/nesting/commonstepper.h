@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_COMMONSTEPPER_H
 #define LIBGEODECOMP_PARALLELIZATION_NESTING_COMMONSTEPPER_H
 
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/nesting/stepper.h>
 #include <libgeodecomp/storage/patchbufferfixed.h>
 
@@ -36,9 +37,12 @@ public:
     using Stepper<CELL_TYPE>::patchAccepters;
     using Stepper<CELL_TYPE>::patchProviders;
 
+    using typename Stepper<CELL_TYPE>::InitPtr;
+    using typename Stepper<CELL_TYPE>::PartitionManagerPtr;
+
     CommonStepper(
-        boost::shared_ptr<PartitionManagerType> partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        PartitionManagerPtr partitionManager,
+        InitPtr initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters  = PatchAccepterVec(),
         const PatchProviderVec& ghostZonePatchProvidersPhase0 = PatchProviderVec(),
@@ -98,8 +102,8 @@ protected:
     std::size_t curStep;
     std::size_t curNanoStep;
     unsigned validGhostZoneWidth;
-    boost::shared_ptr<GridType> oldGrid;
-    boost::shared_ptr<GridType> newGrid;
+    typename SharedPtr<GridType>::Type oldGrid;
+    typename SharedPtr<GridType>::Type newGrid;
     PatchBufferType2 rimBuffer;
     PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;

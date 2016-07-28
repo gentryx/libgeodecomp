@@ -25,13 +25,14 @@ class PTScotchUnstructuredPartition : public Partition<DIM>
 public:
     using Partition<DIM>::startOffsets;
     using Partition<DIM>::weights;
+    using typename Partition<DIM>::AdjacencyPtr;
 
     PTScotchUnstructuredPartition(
             const Coord<DIM>& origin,
             const Coord<DIM>& dimensions,
             const long offset,
             const std::vector<std::size_t>& weights,
-            boost::shared_ptr<Adjacency> adjacency) :
+            const AdjacencyPtr& adjacency) :
         Partition<DIM>(offset, weights),
         adjacency(adjacency),
         origin(origin),
@@ -47,7 +48,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<Adjacency> adjacency;
+    SharedPtr<Adjacency>::Type adjacency;
     Coord<DIM> origin;
     Coord<DIM> dimensions;
     SCOTCH_Num numCells;

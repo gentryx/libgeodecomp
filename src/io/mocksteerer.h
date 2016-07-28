@@ -124,7 +124,7 @@ public:
     std::map<std::size_t, std::vector<MockSteererEvent> > delegate;
 
 private:
-    boost::shared_ptr<hpx::lcos::local::spinlock> insertMutex;
+    SharedPtr<hpx::lcos::local::spinlock>::Type insertMutex;
 };
 
 #endif
@@ -150,7 +150,7 @@ public:
 #endif
     static const int DIM = Topology::DIM;
 
-    MockSteerer(unsigned period, boost::shared_ptr<EventsStore> events)  :
+    MockSteerer(unsigned period, SharedPtr<EventsStore>::Type events)  :
         Steerer<CELL_TYPE>(period),
         events(events)
     {}
@@ -179,7 +179,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<EventsStore> events;
+    SharedPtr<EventsStore>::Type events;
 };
 
 template<typename _CharT, typename _Traits>

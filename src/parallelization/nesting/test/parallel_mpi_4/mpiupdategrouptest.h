@@ -5,6 +5,7 @@
 #include <libgeodecomp.h>
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/nesting/mpiupdategroup.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
@@ -74,10 +75,10 @@ private:
     Coord<2> dimensions;
     std::vector<std::size_t> weights;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<PartitionType> partition;
-    boost::shared_ptr<Initializer<TestCell<2> > > init;
-    boost::shared_ptr<MPIUpdateGroup<TestCell<2> > > updateGroup;
-    boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
+    SharedPtr<PartitionType>::Type partition;
+    SharedPtr<Initializer<TestCell<2> > >::Type init;
+    SharedPtr<MPIUpdateGroup<TestCell<2> > >::Type updateGroup;
+    SharedPtr<MockPatchAccepter<GridType> >::Type mockPatchAccepter;
 };
 
 }

@@ -19,13 +19,15 @@ class UnstructuredStripingPartition : public Partition<1>
 public:
     using Partition<1>::startOffsets;
     using Partition<1>::weights;
+    using Partition<1>::AdjacencyPtr;
+
 
     UnstructuredStripingPartition(
         const Coord<1> origin,
         const Coord<1> /* unused: dimensions */,
         const long offset,
         const std::vector<std::size_t>& weights,
-        const boost::shared_ptr<Adjacency>& /* unused: adjacency */ = boost::make_shared<RegionBasedAdjacency>()) :
+        const AdjacencyPtr& /* unused: adjacency */ = AdjacencyPtr()) :
         Partition<1>(origin.x() + offset, weights)
     {}
 

@@ -203,7 +203,7 @@ public:
             false,
             "/HpxSimulatorTest/testSteererCallback");
 
-        boost::shared_ptr<MockSteerer<ConwayCell>::EventsStore> events(new MockSteerer<ConwayCell>::EventsStore);
+        SharedPtr<MockSteerer<ConwayCell>::EventsStore>::Type events(new MockSteerer<ConwayCell>::EventsStore);
         sim.addSteerer(new MockSteerer<ConwayCell>(steeringPeriod, events));
 
         sim.run();
@@ -248,7 +248,7 @@ public:
         MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(events, outputFrequency);
         sim.addWriter(writer);
 
-        boost::shared_ptr<MockSteerer<ConwayCell>::EventsStore> steererEvents(new MockSteerer<ConwayCell>::EventsStore);
+        SharedPtr<MockSteerer<ConwayCell>::EventsStore>::Type steererEvents(new MockSteerer<ConwayCell>::EventsStore);
         sim.addSteerer(new MockSteerer<ConwayCell>(steeringPeriod, steererEvents));
 
         sim.run();
@@ -1559,7 +1559,7 @@ private:
     std::vector<hpx::id_type> localities;
     int outputFrequency;
     int maxTimeSteps;
-    boost::shared_ptr<MockWriter<>::EventsStore> events;
+    SharedPtr<MockWriter<>::EventsStore>::Type events;
 };
 
 }

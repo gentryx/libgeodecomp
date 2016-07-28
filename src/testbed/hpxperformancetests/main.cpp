@@ -226,6 +226,8 @@ template<typename CELL_TYPE>
 class CellInitializer : public SimpleInitializer<CELL_TYPE>
 {
 public:
+    using typename SimpleInitializer<CELL_TYPE>::AdjacencyPtr;
+
     CellInitializer(Coord<2> dim, int steps) :
         SimpleInitializer<CELL_TYPE>(Coord<1>(dim.prod()), steps),
         dim(dim)
@@ -240,9 +242,9 @@ public:
         }
     }
 
-    boost::shared_ptr<Adjacency> getAdjacency(const Region<1>& region) const
+    AdjacencyPtr getAdjacency(const Region<1>& region) const
     {
-        boost::shared_ptr<Adjacency> adjacency(new RegionBasedAdjacency);
+        AdjacencyPtr adjacency(new RegionBasedAdjacency);
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             int id = i->x();

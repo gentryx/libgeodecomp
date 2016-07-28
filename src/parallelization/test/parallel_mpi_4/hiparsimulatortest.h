@@ -12,7 +12,6 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <sstream>
 
@@ -173,7 +172,7 @@ public:
 
     void testSteererCallback()
     {
-        boost::shared_ptr<MockSteererType::EventsStore> events(new MockSteererType::EventsStore);
+        SharedPtr<MockSteererType::EventsStore>::Type events(new MockSteererType::EventsStore);
         sim->addSteerer(new MockSteererType(5, events));
         sim->run();
         sim.reset();
@@ -1273,7 +1272,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<SimulatorType> sim;
+    SharedPtr<SimulatorType>::Type sim;
     Coord<2> dim;
     unsigned maxSteps;
     unsigned firstStep;
@@ -1281,7 +1280,7 @@ private:
     unsigned outputPeriod;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<MockWriter<>::EventsStore> events;
+    SharedPtr<MockWriter<>::EventsStore>::Type events;
     MockWriter<> *mockWriter;
     MemoryWriterType *memoryWriter;
 };

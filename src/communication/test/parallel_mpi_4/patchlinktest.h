@@ -1,11 +1,6 @@
 #include <cxxtest/TestSuite.h>
 
-// #include <libgeodecomp/io/remotesteerer/commandserver.h>
-// #include <libgeodecomp/io/remotesteerer/handler.h>
-// #include <libgeodecomp/io/remotesteerer/gethandler.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
-
-#include <boost/shared_ptr.hpp>
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/steerer.h>
@@ -22,6 +17,7 @@
 #include <libgeodecomp/geometry/voronoimesher.h>
 #include <libgeodecomp/communication/patchlink.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/storage/soagrid.h>
 
@@ -142,21 +138,21 @@ public:
 
     void testMultiple()
     {
-        std::vector<boost::shared_ptr<PatchAccepterType> > accepters;
-        std::vector<boost::shared_ptr<PatchProviderType> > providers;
+        std::vector<SharedPtr<PatchAccepterType>::Type> accepters;
+        std::vector<SharedPtr<PatchProviderType>::Type> providers;
         int stride = 4;
         std::size_t maxNanoSteps = 31;
 
         for (int i = 0; i < mpiLayer->size(); ++i) {
             if (i != mpiLayer->rank()) {
-                accepters << boost::shared_ptr<PatchAccepterType>(
+                accepters << SharedPtr<PatchAccepterType>::Type(
                     new PatchAccepterType(
                         region1,
                         i,
                         genTag(mpiLayer->rank(), i),
                         MPI_INT));
 
-                providers << boost::shared_ptr<PatchProviderType>(
+                providers << SharedPtr<PatchProviderType>::Type(
                     new PatchProviderType(
                         region1,
                         i,
@@ -189,21 +185,21 @@ public:
 
     void testMultiple2()
     {
-        std::vector<boost::shared_ptr<PatchAccepterType> > accepters;
-        std::vector<boost::shared_ptr<PatchProviderType> > providers;
+        std::vector<SharedPtr<PatchAccepterType>::Type> accepters;
+        std::vector<SharedPtr<PatchProviderType>::Type> providers;
         int stride = 4;
         std::size_t maxNanoSteps = 100;
 
         for (int i = 0; i < mpiLayer->size(); ++i) {
             if (i != mpiLayer->rank()) {
-                accepters << boost::shared_ptr<PatchAccepterType>(
+                accepters << SharedPtr<PatchAccepterType>::Type(
                     new PatchAccepterType(
                         region1,
                         i,
                         genTag(mpiLayer->rank(), i),
                         MPI_INT));
 
-                providers << boost::shared_ptr<PatchProviderType>(
+                providers << SharedPtr<PatchProviderType>::Type(
                     new PatchProviderType(
                         region1,
                         i,
@@ -271,11 +267,11 @@ public:
         accepter.charge(4, 4, 1);
         accepter.put(sendGrid, boxRegion, dim, 4, mpiLayer->rank());
 
-        std::vector<boost::shared_ptr<PatchLink<GridType2>::Provider> > providers;
+        std::vector<SharedPtr<PatchLink<GridType2>::Provider>::Type> providers;
         if (mpiLayer->rank() == (mpiLayer->size() - 1)) {
             for (int i = 0; i < mpiLayer->size(); ++i) {
                 providers.push_back(
-                    boost::shared_ptr<PatchLink<GridType2>::Provider>(
+                    SharedPtr<PatchLink<GridType2>::Provider>::Type(
                         new PatchLink<GridType2>::Provider(
                             regions[i],
                             i,
@@ -343,11 +339,11 @@ public:
         accepter.put(sendGrid, boxRegion, dim, 4, mpiLayer->rank());
         accepter.wait();
 
-        std::vector<boost::shared_ptr<PatchLink<GridType3>::Provider> > providers;
+        std::vector<SharedPtr<PatchLink<GridType3>::Provider>::Type> providers;
         if (mpiLayer->rank() == 0) {
             for (int i = 0; i < mpiLayer->size(); ++i) {
                 providers.push_back(
-                    boost::shared_ptr<PatchLink<GridType3>::Provider>(
+                    SharedPtr<PatchLink<GridType3>::Provider>::Type(
                         new PatchLink<GridType3>::Provider(
                             regions[i],
                             i,
@@ -394,9 +390,9 @@ private:
     Region<2> region1;
     Region<2> region2;
 
-    boost::shared_ptr<PatchAccepterType> acc;
-    boost::shared_ptr<PatchProviderType> pro;
-    boost::shared_ptr<MPILayer> mpiLayer;
+    SharedPtr<PatchAccepterType>::Type acc;
+    SharedPtr<PatchProviderType>::Type pro;
+    SharedPtr<MPILayer>::Type mpiLayer;
 
     GridType markGrid(const Region<2>& region, int id)
     {
