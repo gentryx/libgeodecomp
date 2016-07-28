@@ -1,3 +1,4 @@
+#include <atomic>
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
@@ -167,7 +168,7 @@ public:
 
     HPX_DEFINE_COMPONENT_ACTION(DummyUpdateGroup, step, step_action);
 
-    static boost::atomic<std::size_t> localIndexCounter;
+    static std::atomic<std::size_t> localIndexCounter;
 
 private:
     std::size_t stepCounter;
@@ -178,7 +179,7 @@ private:
 };
 
 template<typename CELL>
-boost::atomic<std::size_t> DummyUpdateGroup<CELL>::localIndexCounter;
+std::atomic<std::size_t> DummyUpdateGroup<CELL>::localIndexCounter;
 
 std::size_t getNumberOfUpdateGroups(const std::string& basename)
 {
