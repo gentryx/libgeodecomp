@@ -8,6 +8,8 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+
 /**
  * Test model for use with Boost.Serialization
  */
@@ -65,12 +67,14 @@ public:
         return ret;
     }
 
-    SharedPtr<IrregularCell>::Type sublevelNW;
-    SharedPtr<IrregularCell>::Type sublevelNE;
-    SharedPtr<IrregularCell>::Type sublevelSW;
-    SharedPtr<IrregularCell>::Type sublevelSE;
+    boost::shared_ptr<IrregularCell> sublevelNW;
+    boost::shared_ptr<IrregularCell> sublevelNE;
+    boost::shared_ptr<IrregularCell> sublevelSW;
+    boost::shared_ptr<IrregularCell> sublevelSE;
     int temperature;
 };
+
+#endif
 
 class GridVecConvTest : public CxxTest::TestSuite
 {
@@ -209,8 +213,8 @@ public:
         }
 
         TS_ASSERT_EQUALS(gridB[Coord<2>(12, 11)].size(), 4);
-        SharedPtr<IrregularCell>::Type null;
-        SharedPtr<IrregularCell>::Type testCell;
+        boost::shared_ptr<IrregularCell> null;
+        boost::shared_ptr<IrregularCell> testCell;
 
         {
             IrregularCell * testCell = &gridB[Coord<2>(12, 11)];
