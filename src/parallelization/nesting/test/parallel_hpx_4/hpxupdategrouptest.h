@@ -392,8 +392,6 @@ public:
 
     void testCreation()
     {
-        using namespace boost::assign;
-
         SharedPtr<UpdateGroupType>::Type updateGroup;
 
         rank = hpx::get_locality_id();

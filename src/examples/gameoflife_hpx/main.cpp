@@ -1,7 +1,6 @@
 #include <hpx/hpx_init.hpp>
 #include <libgeodecomp.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 class ConwayCell
@@ -59,30 +58,28 @@ public:
         //          x
         //           x
         //         xxx
-        startCells +=
-            Coord<2>(11, 10),
-            Coord<2>(12, 11),
-            Coord<2>(10, 12), Coord<2>(11, 12), Coord<2>(12, 12);
+        startCells << Coord<2>(11, 10)
+                   << Coord<2>(12, 11)
+                   << Coord<2>(10, 12) << Coord<2>(11, 12) << Coord<2>(12, 12);
 
 
         // ...add a Diehard pattern...
         //                x
         //          xx
         //           x   xxx
-        startCells +=
-            Coord<2>(55, 70), Coord<2>(56, 70), Coord<2>(56, 71),
-            Coord<2>(60, 71), Coord<2>(61, 71), Coord<2>(62, 71),
-            Coord<2>(61, 69);
+        startCells << Coord<2>(55, 70) << Coord<2>(56, 70)
+                   << Coord<2>(56, 71)
+                   << Coord<2>(60, 71) << Coord<2>(61, 71) << Coord<2>(62, 71)
+                   << Coord<2>(61, 69);
 
         // ...and an Acorn pattern:
         //        x
         //          x
         //       xx  xxx
-        startCells +=
-            Coord<2>(111, 30),
-            Coord<2>(113, 31),
-            Coord<2>(110, 32), Coord<2>(111, 32),
-            Coord<2>(113, 32), Coord<2>(114, 32), Coord<2>(115, 32);
+        startCells << Coord<2>(111, 30)
+                   << Coord<2>(113, 31)
+                   << Coord<2>(110, 32) << Coord<2>(111, 32)
+                   << Coord<2>(113, 32) << Coord<2>(114, 32) << Coord<2>(115, 32);
 
 
         for (std::vector<Coord<2> >::iterator i = startCells.begin();
