@@ -8,12 +8,12 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
+    packages:
     - g++-5
-    - clang-3.6
-
+    - clang-3.7
 compiler:
-    - gcc
-    - clang
+    - gcc-5
+    - clang-3.7
 
 before_script:
     - mkdir build
