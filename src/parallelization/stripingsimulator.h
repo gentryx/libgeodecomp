@@ -627,13 +627,13 @@ private:
         }
 
         // node 0 needs a (central) LoadBalancer...
-        if (mpilayer.rank() == 0 && balancer == 0) {
+        if ((mpilayer.rank() == 0) && (&*balancer == 0)) {
             throw std::invalid_argument(
                 "Rank " + StringOps::itoa(mpilayer.rank()) +
                 "(Root) needs a non-empty LoadBalancer");
         }
         // ...while the others shouldn't have one (they rely on the central one).
-        if (mpilayer.rank() != 0 && balancer != 0) {
+        if ((mpilayer.rank() != 0) && (&*balancer != 0)) {
             throw std::invalid_argument(
                 "Rank " + StringOps::itoa(mpilayer.rank()) +
                 "(Non-Root) needs an empty LoadBalancer");
