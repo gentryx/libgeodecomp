@@ -1,6 +1,16 @@
 language: cpp
 sudo: false
 
+cache:
+  apt: true
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - g++-5
+    - clang-3.6
+
 compiler:
     - gcc
     - clang
