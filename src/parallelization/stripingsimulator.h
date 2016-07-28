@@ -26,11 +26,14 @@ class StripingSimulator : public DistributedSimulator<CELL_TYPE>
 public:
     friend class StripingSimulatorTest;
     friend class ParallelStripingSimulatorTest;
+
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef LoadBalancer::WeightVec WeightVec;
     typedef LoadBalancer::LoadVec LoadVec;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
     typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
+    typedef typename DistributedSimulator<CELL_TYPE>::InitPtr InitPtr;
+
     static const int DIM = Topology::DIM;
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
@@ -42,8 +45,6 @@ public:
     using DistributedSimulator<CELL_TYPE>::stepNum;
     using DistributedSimulator<CELL_TYPE>::writers;
     using DistributedSimulator<CELL_TYPE>::gridDim;
-
-    using typename DistributedSimulator<CELL_TYPE>::InitPtr;
 
     enum WaitTags {
         GENERAL,

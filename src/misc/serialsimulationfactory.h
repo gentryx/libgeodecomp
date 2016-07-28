@@ -16,7 +16,7 @@ class SerialSimulationFactory : public SimulationFactory<CELL>
 public:
     using SimulationFactory<CELL>::addSteerers;
     using SimulationFactory<CELL>::addWriters;
-    using typename SimulationFactory<CELL>::InitPtr;
+    typedef typename SimulationFactory<CELL>::InitPtr InitPtr;
 
     explicit
     SerialSimulationFactory(InitPtr initializer) :

@@ -23,9 +23,9 @@ public:
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef typename SharedPtr<ParallelWriter<CELL_TYPE> >::Type WriterPtr;
     typedef std::vector<WriterPtr> WriterVector;
+    typedef typename Simulator<CELL_TYPE>::InitPtr InitPtr;
 
     using Simulator<CELL_TYPE>::chronometer;
-    using typename Simulator<CELL_TYPE>::InitPtr;
 
     inline explicit DistributedSimulator(Initializer<CELL_TYPE> *initializer) :
         Simulator<CELL_TYPE>(initializer)

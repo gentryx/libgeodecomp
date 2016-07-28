@@ -33,6 +33,8 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
     typedef typename ParentType::PatchProviderVec PatchProviderVec;
+    typedef typename ParentType::InitPtr InitPtr;
+    typedef typename ParentType::PartitionManagerPtr PartitionManagerPtr;
 
     using ParentType::initializer;
     using ParentType::patchAccepters;
@@ -62,9 +64,6 @@ public:
     using ParentType::kernelBuffer;
     using ParentType::kernelFraction;
     using ParentType::enableFineGrainedParallelism;
-
-    using typename ParentType::InitPtr;
-    using typename ParentType::PartitionManagerPtr;
 
     inline VanillaStepper(
         PartitionManagerPtr partitionManager,

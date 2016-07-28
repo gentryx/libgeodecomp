@@ -22,7 +22,7 @@ public:
     friend class StripingPartitionTest;
     const static int DIM = DIMENSIONS;
     typedef typename CoordBox<DIM>::Iterator Iterator;
-    using typename Partition<DIM>::AdjacencyPtr;
+    typedef typename Partition<DIM>::AdjacencyPtr AdjacencyPtr;
 
     explicit StripingPartition(
         const Coord<DIM>& origin = Coord<DIM>(),

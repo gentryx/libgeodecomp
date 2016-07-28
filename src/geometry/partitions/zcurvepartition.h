@@ -31,8 +31,7 @@ public:
     typedef Grid<CoordVector, typename Topologies::Cube<DIM>::Topology> CacheType;
     typedef typename SharedPtr<CacheType>::Type Cache;
     typedef typename Topologies::Cube<DIM>::Topology Topology;
-
-    using typename Partition<DIM>::AdjacencyPtr;
+    typedef typename Partition<DIM>::AdjacencyPtr AdjacencyPtr;
 
     class Square
     {

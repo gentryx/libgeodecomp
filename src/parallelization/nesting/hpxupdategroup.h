@@ -29,15 +29,15 @@ public:
     typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchProviderVec PatchProviderVec;
     typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkAccepter PatchLinkAccepter;
     typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkProvider PatchLinkProvider;
+    typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::InitPtr InitPtr;
+    typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::SteererPtr SteererPtr;
+    typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PartitionPtr PartitionPtr;
+    typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkAccepterPtr PatchLinkAccepterPtr;
+    typedef typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkProviderPtr PatchLinkProviderPtr;
 
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::init;
     using UpdateGroup<CELL_TYPE, HPXPatchLink>::rank;
 
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::InitPtr;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::SteererPtr;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PartitionPtr;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkAccepterPtr;
-    using typename UpdateGroup<CELL_TYPE, HPXPatchLink>::PatchLinkProviderPtr;
     const static int DIM = UpdateGroup<CELL_TYPE, HPXPatchLink>::DIM;
 
     template<typename STEPPER>

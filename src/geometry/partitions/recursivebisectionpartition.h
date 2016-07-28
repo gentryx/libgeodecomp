@@ -19,7 +19,7 @@ class RecursiveBisectionPartition : public Partition<DIM>
 public:
     friend class RecursiveBisectionPartitionTest;
     typedef std::vector<std::size_t> SizeTVec;
-    using typename Partition<DIM>::AdjacencyPtr;
+    typedef typename Partition<DIM>::AdjacencyPtr AdjacencyPtr;
 
     inline explicit RecursiveBisectionPartition(
         const Coord<DIM>& origin = Coord<DIM>(),

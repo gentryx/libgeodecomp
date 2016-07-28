@@ -37,8 +37,8 @@ public:
     using Stepper<CELL_TYPE>::patchAccepters;
     using Stepper<CELL_TYPE>::patchProviders;
 
-    using typename Stepper<CELL_TYPE>::InitPtr;
-    using typename Stepper<CELL_TYPE>::PartitionManagerPtr;
+    typedef typename Stepper<CELL_TYPE>::InitPtr InitPtr;
+    typedef typename Stepper<CELL_TYPE>::PartitionManagerPtr PartitionManagerPtr;
 
     CommonStepper(
         PartitionManagerPtr partitionManager,

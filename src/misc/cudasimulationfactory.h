@@ -21,7 +21,7 @@ class CUDASimulationFactory : public SimulationFactory<CELL>
 public:
     using SimulationFactory<CELL>::addSteerers;
     using SimulationFactory<CELL>::addWriters;
-    using typename SimulationFactory<CELL>::InitPtr;
+    typedef typename SimulationFactory<CELL>::InitPtr InitPtr;
 
     CUDASimulationFactory<CELL>(InitPtr initializer) :
         SimulationFactory<CELL>(initializer)

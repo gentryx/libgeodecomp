@@ -28,13 +28,13 @@ public:
     typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchProviderVec PatchProviderVec;
     typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkAccepter PatchLinkAccepter;
     typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkProvider PatchLinkProvider;
+    typedef typename UpdateGroup<CELL_TYPE, PatchLink>::InitPtr InitPtr;
+    typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PartitionPtr PartitionPtr;
+    typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkAccepterPtr PatchLinkAccepterPtr;
+    typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkProviderPtr PatchLinkProviderPtr;
 
     using UpdateGroup<CELL_TYPE, PatchLink>::init;
     using UpdateGroup<CELL_TYPE, PatchLink>::rank;
-    using typename UpdateGroup<CELL_TYPE, PatchLink>::InitPtr;
-    using typename UpdateGroup<CELL_TYPE, PatchLink>::PartitionPtr;
-    using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkAccepterPtr;
-    using typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkProviderPtr;
 
     const static int DIM = UpdateGroup<CELL_TYPE, PatchLink>::DIM;
 

@@ -16,7 +16,7 @@ template<int DIM>
 class DummyAdjacencyManufacturer : public AdjacencyManufacturer<DIM>
 {
 public:
-    using typename AdjacencyManufacturer<DIM>::AdjacencyPtr;
+    typedef typename AdjacencyManufacturer<DIM>::AdjacencyPtr AdjacencyPtr;
 
     virtual AdjacencyPtr getAdjacency(const Region<DIM>& region) const
     {
