@@ -140,7 +140,7 @@ template<typename CELL_TYPE>
 class VisItWriter : public Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE> >
 {
 public:
-    typedef std::vector<SharedPtr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> > >::Type DataBufferVec;
+    typedef std::vector<typename SharedPtr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> >::Type> DataBufferVec;
     typedef typename Writer<CELL_TYPE>::Topology Topology;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     static const int DIM = Topology::DIM;
