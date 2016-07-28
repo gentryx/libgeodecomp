@@ -26,6 +26,7 @@
 #include <libgeodecomp/geometry/floatcoord.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+#include <boost/mpl/bool.hpp>
 #include <boost/serialization/is_bitwise_serializable.hpp>
 #endif
 
