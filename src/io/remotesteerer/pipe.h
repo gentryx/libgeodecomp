@@ -41,7 +41,7 @@ public:
     {
         // fixme
         // LOG(DBG, "Pipe::addSteeringRequest(" << request << ")");
-        // boost::lock_guard<boost::mutex> lock(mutex);
+        // std::lock_guard<boost::mutex> lock(mutex);
         // steeringRequestsQueue << request;
     }
 
@@ -49,7 +49,7 @@ public:
     {
         // fixme
         // LOG(DBG, "Pipe::addSteeringFeedback(" << feedback << ")");
-        // boost::lock_guard<boost::mutex> lock(mutex);
+        // std::lock_guard<boost::mutex> lock(mutex);
         // steeringFeedback << feedback;
         // signal.notify_one();
     }
@@ -60,7 +60,7 @@ public:
         // using std::swap;
         // LOG(DBG, "Pipe::retrieveSteeringRequests()");
         StringVec requests;
-        // boost::lock_guard<boost::mutex> lock(mutex);
+        // std::lock_guard<boost::mutex> lock(mutex);
         // swap(requests, steeringRequests);
         // LOG(DBG, "  retrieveSteeringRequests yields " << requests.size());
         // if (requests.size() > 0) {
@@ -73,7 +73,7 @@ public:
     {
         // fixme
         // LOG(DBG, "Pipe::copySteeringRequestsQueue()");
-        // boost::lock_guard<boost::mutex> lock(mutex);
+        // std::lock_guard<boost::mutex> lock(mutex);
         // StringVec requests = steeringRequestsQueue;
         StringVec requests;
         return requests;
@@ -85,7 +85,7 @@ public:
         // using std::swap;
         // LOG(DBG, "Pipe::retrieveSteeringFeedback()");
         StringVec feedback;
-        // boost::lock_guard<boost::mutex> lock(mutex);
+        // std::lock_guard<boost::mutex> lock(mutex);
         // swap(feedback, steeringFeedback);
         // LOG(DBG, "  retrieveSteeringFeedback yields " << feedback.size());
         // LOG(DBG, "  retrieveSteeringFeedback is " << feedback);
@@ -96,7 +96,7 @@ public:
     {
         // fixme
         // LOG(DBG, "Pipe::copySteeringFeedback()");
-        // boost::lock_guard<boost::mutex> lock(mutex);
+        // std::lock_guard<boost::mutex> lock(mutex);
         // StringVec feedback = steeringFeedback;
 
         StringVec feedback;
@@ -106,7 +106,7 @@ public:
     void sync()
     {
 //         LOG(DBG, "Pipe::sync()");
-//         boost::lock_guard<boost::mutex> lock(mutex);
+//         std::lock_guard<boost::mutex> lock(mutex);
 // #ifdef LIBGEODECOMP_WITH_MPI
 //         broadcastSteeringRequests();
 //         moveSteeringFeedbackToRoot();
