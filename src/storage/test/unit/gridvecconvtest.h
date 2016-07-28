@@ -65,10 +65,10 @@ public:
         return ret;
     }
 
-    boost::shared_ptr<IrregularCell> sublevelNW;
-    boost::shared_ptr<IrregularCell> sublevelNE;
-    boost::shared_ptr<IrregularCell> sublevelSW;
-    boost::shared_ptr<IrregularCell> sublevelSE;
+    SharedPtr<IrregularCell>::Type sublevelNW;
+    SharedPtr<IrregularCell>::Type sublevelNE;
+    SharedPtr<IrregularCell>::Type sublevelSW;
+    SharedPtr<IrregularCell>::Type sublevelSE;
     int temperature;
 };
 
@@ -209,8 +209,8 @@ public:
         }
 
         TS_ASSERT_EQUALS(gridB[Coord<2>(12, 11)].size(), 4);
-        boost::shared_ptr<IrregularCell> null;
-        boost::shared_ptr<IrregularCell> testCell;
+        SharedPtr<IrregularCell>::Type null;
+        SharedPtr<IrregularCell>::Type testCell;
 
         {
             IrregularCell * testCell = &gridB[Coord<2>(12, 11)];

@@ -265,8 +265,8 @@ public:
 
 private:
     SharedPtr<MockWriter<>::EventsStore>::Type events;
-    boost::shared_ptr<SerialSimulator<TestCell<2> > > simulator;
-    boost::shared_ptr<Initializer<TestCell<2> > > init;
+    SharedPtr<SerialSimulator<TestCell<2> > >::Type simulator;
+    SharedPtr<Initializer<TestCell<2> > >::Type init;
     unsigned maxSteps;
     unsigned startStep;
     Coord<2> dim;

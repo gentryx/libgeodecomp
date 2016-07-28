@@ -9,7 +9,6 @@
 #include <libgeodecomp/io/remotesteerer/waitaction.h>
 #include <libgeodecomp/misc/stringops.h>
 
-#include <boost/shared_ptr.hpp>
 #include <cerrno>
 #include <iostream>
 #include <string>
@@ -31,7 +30,7 @@ template<typename CELL_TYPE>
 class CommandServer
 {
 public:
-    typedef std::map<std::string, boost::shared_ptr<Action<CELL_TYPE> > > ActionMap;
+    typedef std::map<std::string, typename SharedPtr<Action<CELL_TYPE> >::Type > ActionMap;
 
     /**
      * This helper class lets us and the user safely close the
@@ -92,7 +91,7 @@ public:
 
     CommandServer(
         int port,
-        boost::shared_ptr<Pipe> pipe) :
+        SharedPtr<Pipe>::Type pipe) :
         port(port),
         pipe(pipe)
         // serverThread(&CommandServer::runServer, this)
@@ -210,16 +209,16 @@ public:
      */
     void addAction(Action<CELL_TYPE> *action)
     {
-        actions[action->key()] = boost::shared_ptr<Action<CELL_TYPE> >(action);
+        actions[action->key()] = typename SharedPtr<Action<CELL_TYPE> >::Type(action);
     }
 
 private:
     int port;
-    boost::shared_ptr<Pipe> pipe;
+    SharedPtr<Pipe>::Type pipe;
     // fixme
     // boost::asio::io_service ioService;
-    // boost::shared_ptr<tcp::acceptor> acceptor;
-    // boost::shared_ptr<tcp::socket> socket;
+    // SharedPtr<tcp::acceptor>::Type acceptor;
+    // SharedPtr<tcp::socket>::Type socket;
     // boost::thread serverThread;
     // boost::condition_variable threadCreationVar;
     // boost::mutex mutex;

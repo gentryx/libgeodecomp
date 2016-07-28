@@ -3,13 +3,12 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/storage/defaultarrayfilter.h>
 #include <libgeodecomp/storage/defaultcudafilter.h>
 #include <libgeodecomp/storage/defaultcudaarrayfilter.h>
 #include <libgeodecomp/storage/defaultfilter.h>
 #include <libgeodecomp/storage/filterbase.h>
-#include <libflatarray/flat_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <stdexcept>
 #include <typeinfo>
 
@@ -283,7 +282,7 @@ public:
     Selector(
         MEMBER CELL:: *memberPointer,
         const std::string& memberName,
-        const boost::shared_ptr<FilterBase<CELL> >& filter) :
+        const typename SharedPtr<FilterBase<CELL> >::Type& filter) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
         externalSize(filter->sizeOf()),
@@ -298,7 +297,7 @@ public:
     Selector(
         MEMBER (CELL:: *memberPointer)[ARITY],
         const std::string& memberName,
-        const boost::shared_ptr<FilterBase<CELL> >& filter) :
+        const typename SharedPtr<FilterBase<CELL> >::Type& filter) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
         externalSize(filter->sizeOf()),
@@ -441,7 +440,7 @@ private:
     std::size_t externalSize;
     int memberOffset;
     std::string memberName;
-    boost::shared_ptr<FilterBase<CELL> > filter;
+    typename SharedPtr<FilterBase<CELL> >::Type filter;
 };
 
 /**

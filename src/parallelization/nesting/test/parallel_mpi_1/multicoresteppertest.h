@@ -44,12 +44,12 @@ public:
     }
 
 private:
-    boost::shared_ptr<TestInitializer<TestCell<2> > > init;
-    boost::shared_ptr<PartitionManager<Topology> > partitionManager;
+    SharedPtr<TestInitializer<TestCell<2> > >::Type init;
+    SharedPtr<PartitionManager<Topology> >::Type partitionManager;
 #ifdef LIBGEODECOMP_WITH_THREADS
-    boost::shared_ptr<StepperType> stepper;
+    SharedPtr<StepperType>::Type stepper;
 #endif
-    boost::shared_ptr<MockPatchAccepter<GridType> > patchAccepter;
+    SharedPtr<MockPatchAccepter<GridType> >::Type patchAccepter;
 };
 
 }

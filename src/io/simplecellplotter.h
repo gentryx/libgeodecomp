@@ -4,10 +4,10 @@
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/palette.h>
 #include <libgeodecomp/misc/quickpalette.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/storage/filter.h>
 #include <libgeodecomp/storage/selector.h>
 
-#include <boost/shared_ptr.hpp>
 #include <stdexcept>
 
 namespace LibGeoDecomp {
@@ -102,7 +102,7 @@ public:
         cellToColorSelector(
             memberPointer,
             "unnamed parameter",
-            boost::shared_ptr<FilterBase<CELL_TYPE> >(
+            typename SharedPtr<FilterBase<CELL_TYPE> >::Type(
                 new SimpleCellPlotterHelpers::CellToColor<CELL_TYPE, MEMBER, PALETTE>(palette)))
     {}
 

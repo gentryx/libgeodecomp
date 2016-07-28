@@ -41,7 +41,7 @@ public:
         selector = Selector<CELL_TYPE>(
             memberPointer,
             "unused member name",
-            boost::shared_ptr<Filter<CELL_TYPE, MEMBER, char> >(dumpingFilter));
+            typename SharedPtr<Filter<CELL_TYPE, MEMBER, char> >::Type(dumpingFilter));
     }
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)

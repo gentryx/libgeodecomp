@@ -149,7 +149,7 @@ private:
 #ifdef LIBGEODECOMP_WITH_CPP14
     Coord<3> dim;
     unsigned maxSteps;
-    boost::shared_ptr<VarStepInitializerProxy<SimFabTestCell> > initializerProxy;
+    SharedPtr<VarStepInitializerProxy<SimFabTestCell> >::Type initializerProxy;
     SimulationFactory<SimFabTestCell> *fab;
 
 #ifdef LIBGEODECOMP_WITH_THREADS

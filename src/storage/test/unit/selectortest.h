@@ -235,7 +235,7 @@ public:
         };
 
         FilterBase<MyDummyCell> *filter1 = new FancyFilter();
-        boost::shared_ptr<FilterBase<MyDummyCell> > filter2(filter1);
+        SharedPtr<FilterBase<MyDummyCell> >::Type filter2(filter1);
         Selector<MyDummyCell> selector(&MyDummyCell::z, "varZ", filter2);
 
         std::vector<MyDummyCell> vec;
@@ -278,7 +278,7 @@ public:
     void testFilterAoS1()
     {
         // test copyMemberOut:
-        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
+        SharedPtr<FilterBase<MyDummyCell> >::Type filter(
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
@@ -317,7 +317,7 @@ public:
     void testFilterAoS2()
     {
         // test copyMemberOut:
-        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
+        SharedPtr<FilterBase<MyDummyCell> >::Type filter(
             new MySimpleFilter());
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ", filter);
 
@@ -358,7 +358,7 @@ public:
     void testFilterSoA1()
     {
         // test copyStreakOut:
-        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
+        SharedPtr<FilterBase<MyDummyCell> >::Type filter(
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
@@ -399,7 +399,7 @@ public:
     void testFilterSoA2()
     {
         // test copyStreakOut:
-        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
+        SharedPtr<FilterBase<MyDummyCell> >::Type filter(
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
@@ -443,7 +443,7 @@ public:
     void testFilterSoA3()
     {
         // test copyStreakOut:
-        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
+        SharedPtr<FilterBase<MyDummyCell> >::Type filter(
             new MySimpleFilter());
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ", filter);
 
@@ -618,7 +618,7 @@ public:
     void testSimpleArrayFilter1()
     {
         // test copyMemberOut:
-        boost::shared_ptr<FilterBase<MyOtherDummyCell> > filter(
+        SharedPtr<FilterBase<MyOtherDummyCell> >::Type filter(
             new MySimpleArrayFilter());
         Selector<MyOtherDummyCell> selectorY(&MyOtherDummyCell::y, "varY", filter);
 
@@ -660,7 +660,7 @@ public:
     void testSimpleArrayFilter2()
     {
         // test copyStreakOut:
-        boost::shared_ptr<FilterBase<MyOtherDummyCell> > filter(
+        SharedPtr<FilterBase<MyOtherDummyCell> >::Type filter(
             new MySimpleArrayFilter());
         Selector<MyOtherDummyCell> selectorY(&MyOtherDummyCell::y, "varY", filter);
 

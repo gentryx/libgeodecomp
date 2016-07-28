@@ -6,7 +6,6 @@
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
-#include <boost/shared_ptr.hpp>
 
 namespace LibGeoDecomp {
 
@@ -21,12 +20,13 @@ public:
     friend class SimulationFactoryWithoutCudaTest;
     friend class SimulationFactoryWithCudaTest;
 
-    typedef std::vector<boost::shared_ptr<ParallelWriter<CELL> > > ParallelWritersVec;
-    typedef std::vector<boost::shared_ptr<Writer<CELL> > > WritersVec;
-    typedef std::vector<boost::shared_ptr<Steerer<CELL> > > SteerersVec;
+    typedef typename SharedPtr<ClonableInitializer<CELL> >::Type InitPtr;
+    typedef std::vector<typename SharedPtr<ParallelWriter<CELL> >::Type> ParallelWritersVec;
+    typedef std::vector<typename SharedPtr<Writer<CELL> >::Type> WritersVec;
+    typedef std::vector<typename SharedPtr<Steerer<CELL> >::Type> SteerersVec;
 
     explicit
-    SimulationFactory(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
+    SimulationFactory(InitPtr initializer) :
         initializer(initializer)
     {}
 
@@ -35,17 +35,17 @@ public:
 
     void addWriter(const ParallelWriter<CELL>& writer)
     {
-        parallelWriters.push_back(boost::shared_ptr<ParallelWriter<CELL> >(writer.clone()));
+        parallelWriters.push_back(typename SharedPtr<ParallelWriter<CELL> >::Type(writer.clone()));
     }
 
     void addWriter(const Writer<CELL>& writer)
     {
-        writers.push_back(boost::shared_ptr<Writer<CELL> >(writer.clone()));
+        writers.push_back(typename SharedPtr<Writer<CELL> >::Type(writer.clone()));
     }
 
     void addSteerer(const Steerer<CELL>& steerer)
     {
-        steerers.push_back(boost::shared_ptr<Steerer<CELL> >(steerer.clone()));
+        steerers.push_back(typename SharedPtr<Steerer<CELL> >::Type(steerer.clone()));
     }
 
     /**
@@ -60,7 +60,7 @@ public:
 
     virtual double operator()(const SimulationParameters& params)
     {
-        boost::shared_ptr<Simulator<CELL> > sim(buildSimulator(initializer, params));
+        typename SharedPtr<Simulator<CELL> >::Type sim(buildSimulator(initializer, params));
         Chronometer chrono;
 
         {
@@ -77,14 +77,14 @@ public:
     }
 
 protected:
-    boost::shared_ptr<ClonableInitializer<CELL> > initializer;
+    InitPtr initializer;
     SimulationParameters parameterSet;
     ParallelWritersVec parallelWriters;
     WritersVec writers;
     SteerersVec steerers;
 
     virtual Simulator<CELL> *buildSimulator(
-        boost::shared_ptr<ClonableInitializer<CELL> > initializer,
+        InitPtr initializer,
         const SimulationParameters& params) const = 0;
 
     void addSteerers(MonolithicSimulator<CELL> *simulator) const

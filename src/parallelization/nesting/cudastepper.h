@@ -303,9 +303,12 @@ public:
     using CommonStepper<CELL_TYPE>::kernelBuffer;
     using CommonStepper<CELL_TYPE>::kernelFraction;
 
+    using typename ParentType::InitPtr;
+    using typename ParentType::PartitionManagerPtr;
+
     inline CUDAStepper(
-        boost::shared_ptr<PartitionManagerType> partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        PartitionManagerPtr partitionManager,
+        InitPtr initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
         const PatchProviderVec& ghostZonePatchProvidersPhase0 = PatchProviderVec(),
@@ -326,9 +329,9 @@ public:
     }
 
 private:
-    boost::shared_ptr<CUDAGridType> oldDeviceGrid;
-    boost::shared_ptr<CUDAGridType> newDeviceGrid;
-    std::vector<boost::shared_ptr<CUDARegion<DIM> > > deviceInnerSets;
+    typename SharedPtr<CUDAGridType>::Type oldDeviceGrid;
+    typename SharedPtr<CUDAGridType>::Type newDeviceGrid;
+    std::vector<SharedPtr<CUDARegion<DIM> >::Type> deviceInnerSets;
 
     inline void update1()
     {
@@ -487,7 +490,7 @@ private:
         deviceInnerSets.resize(0);
         for (std::size_t i = 0; i <= ghostZoneWidth(); ++i) {
             deviceInnerSets.push_back(
-                boost::shared_ptr<CUDARegion<DIM> >(
+                SharedPtr<CUDARegion<DIM> >::Type(
                     new CUDARegion<DIM>(innerSet(i))));
         }
 
