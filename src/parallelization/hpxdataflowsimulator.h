@@ -4,14 +4,13 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 
+#include <functional>
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/parallelization/hierarchicalsimulator.h>
-#include <stdexcept>
-
 #include <mutex>
-#include <hpx/include/iostreams.hpp>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 
@@ -180,9 +179,15 @@ public:
                     }
                 }
 
-                auto Operation = boost::bind(
+                auto Operation = std::bind(
                     &HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>::update,
-                    *this, _1, _2, _3, _4, _5);
+                    *this,
+                    // explicit namespace to avoid clashes with boost::bind's placeholders:
+                    std::placeholders::_1,
+                    std::placeholders::_2,
+                    std::placeholders::_3,
+                    std::placeholders::_4,
+                    std::placeholders::_5);
 
                 hpx::shared_future<void> thisTimeStepFuture = hpx::dataflow(
                     hpx::launch::async,
