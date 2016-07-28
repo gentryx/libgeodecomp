@@ -4,6 +4,7 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/sharedptr.h>
+#include <libflatarray/member_ptr_to_offset.hpp>
 #include <libgeodecomp/storage/defaultarrayfilter.h>
 #include <libgeodecomp/storage/defaultcudafilter.h>
 #include <libgeodecomp/storage/defaultcudaarrayfilter.h>
