@@ -226,13 +226,11 @@ public:
         return Coord(scale * x());
     }
 
-
     __host__ __device__
     inline Coord operator*(float scale) const
     {
         return Coord(scale * x());
     }
-
 
     __host__ __device__
     inline Coord operator*(double scale) const
