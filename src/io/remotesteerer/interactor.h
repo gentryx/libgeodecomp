@@ -5,8 +5,6 @@
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/stringvec.h>
 
-#include <boost/shared_ptr.hpp>
-
 namespace LibGeoDecomp {
 
 namespace RemoteSteererHelpers {

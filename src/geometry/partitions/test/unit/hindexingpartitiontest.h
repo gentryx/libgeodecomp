@@ -1,7 +1,6 @@
 #include <libgeodecomp/geometry/partitions/hindexingpartition.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;

@@ -1,6 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 using namespace LibGeoDecomp;
 
@@ -46,9 +47,9 @@ public:
 
     void testSerializationViaSharedPointer()
     {
-        boost::shared_ptr<Region<1> > ca1(new Region<1>);
-        boost::shared_ptr<Region<2> > ca2(new Region<2>);
-        boost::shared_ptr<Region<3> > ca3(new Region<3>);
+        SharedPtr<Region<1> >::Type ca1(new Region<1>);
+        SharedPtr<Region<2> >::Type ca2(new Region<2>);
+        SharedPtr<Region<3> >::Type ca3(new Region<3>);
 
         *ca1 << Streak<1>(Coord<1>(210),           211);
         *ca2 << Streak<2>(Coord<2>(212, 213),      214);
@@ -64,9 +65,9 @@ public:
         outputArchive << ca2;
         outputArchive << ca3;
 
-        boost::shared_ptr<Region<1> > cb1;
-        boost::shared_ptr<Region<2> > cb2;
-        boost::shared_ptr<Region<3> > cb3;
+        SharedPtr<Region<1> >::Type cb1;
+        SharedPtr<Region<2> >::Type cb2;
+        SharedPtr<Region<3> >::Type cb3;
 
         hpx::serialization::input_archive inputArchive(buffer);
         inputArchive >> cb1;

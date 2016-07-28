@@ -1,8 +1,8 @@
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_GETHANDLER_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_GETHANDLER_H
 
-#include <boost/shared_ptr.hpp>
 #include <libgeodecomp/io/remotesteerer/handler.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/storage/dataaccessor.h>
 
 namespace LibGeoDecomp {
@@ -18,7 +18,7 @@ class GetHandler : public Handler<CELL_TYPE>
 public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
-    typedef boost::shared_ptr<DataAccessor<CELL_TYPE, MEMBER_TYPE> > AccessorPtr;
+    typedef typename SharedPtr<DataAccessor<CELL_TYPE, MEMBER_TYPE> >::Type AccessorPtr;
 
     static const int DIM = Topology::DIM;
 

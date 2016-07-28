@@ -1,8 +1,8 @@
-#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
@@ -244,14 +244,14 @@ public:
 
     void testMove()
     {
-        boost::shared_ptr<double> ptr(new double);
+        SharedPtr<double>::Type ptr(new double);
         *ptr = 555.666;
-        TS_ASSERT(0 != get_pointer(ptr));
-        std::vector<boost::shared_ptr<double> > vec;
+        TS_ASSERT(0 != &*ptr);
+        std::vector<SharedPtr<double>::Type> vec;
 
         vec << ptr;
 
-        TS_ASSERT(0 != get_pointer(ptr));
+        TS_ASSERT(0 != &*ptr);
         TS_ASSERT_EQUALS(555.666, *ptr);
     }
 

@@ -2,10 +2,9 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
-
-#include <boost/shared_ptr.hpp>
 
 using namespace LibGeoDecomp;
 
@@ -58,7 +57,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<StripingSimulator<TestCell<3> > > sim;
+    SharedPtr<StripingSimulator<TestCell<3> > >::Type sim;
     MemoryWriter<TestCell<3> > *writer;
 
     TestInitializer<TestCell<3> > *getInit()

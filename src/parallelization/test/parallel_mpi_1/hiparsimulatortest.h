@@ -5,11 +5,11 @@
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;

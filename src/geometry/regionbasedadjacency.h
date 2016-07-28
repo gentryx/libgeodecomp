@@ -1,10 +1,9 @@
 #ifndef LIBGEODECOMP_GEOMETRY_REGIONBASEDADJACENCY_H
 #define LIBGEODECOMP_GEOMETRY_REGIONBASEDADJACENCY_H
 
+#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
-#include <libgeodecomp/geometry/adjacency.h>
-#include <boost/shared_ptr.hpp>
 #include <limits>
 
 namespace LibGeoDecomp {

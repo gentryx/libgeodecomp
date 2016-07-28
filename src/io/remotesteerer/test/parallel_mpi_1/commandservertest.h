@@ -1,4 +1,5 @@
 #include <libgeodecomp/io/remotesteerer/commandserver.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -59,7 +60,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<Pipe> pipe;
+    SharedPtr<Pipe>::Type pipe;
 };
 
 }

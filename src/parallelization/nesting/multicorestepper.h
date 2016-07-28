@@ -24,7 +24,10 @@ template<typename CELL_TYPE>
 class MultiCoreStepper : public CommonStepper<CELL_TYPE>
 {
 public:
-    typedef typename Stepper<CELL_TYPE>::Topology Topology;
+    using typename Stepper<CELL_TYPE>::Topology;
+    using typename Stepper<CELL_TYPE>::InitPtr;
+    using typename Stepper<CELL_TYPE>::PartitionManagerPtr;
+
     const static int DIM = Topology::DIM;
     const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
@@ -36,8 +39,8 @@ public:
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
     inline MultiCoreStepper(
-        boost::shared_ptr<PartitionManagerType> partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        PartitionManagerPtr partitionManager,
+        InitPtr initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
         CommonStepper<CELL_TYPE>(

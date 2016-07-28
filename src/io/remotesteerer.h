@@ -13,7 +13,7 @@
 #include <libgeodecomp/io/remotesteerer/handler.h>
 #include <libgeodecomp/io/remotesteerer/gethandler.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
-#include <boost/shared_ptr.hpp>
+#include <libgeodecomp/misc/sharedptr.h>
 
 namespace LibGeoDecomp {
 
@@ -44,7 +44,7 @@ public:
     typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
-    typedef std::map<std::string, boost::shared_ptr<Handler<CELL_TYPE> > > HandlerMap;
+    typedef std::map<std::string, typename SharedPtr<Handler<CELL_TYPE> >::Type> HandlerMap;
     static const int DIM = Topology::DIM;
 
     RemoteSteerer(
@@ -106,7 +106,7 @@ public:
 
     void addHandler(Handler<CELL_TYPE> *handler)
     {
-        handlers[handler->key()] = boost::shared_ptr<Handler<CELL_TYPE> >(handler);
+        handlers[handler->key()] = typename SharedPtr<Handler<CELL_TYPE> >::Type(handler);
     }
 
     template<typename MEMBER_TYPE>
@@ -117,7 +117,7 @@ public:
             addAction(action);
         }
 
-        boost::shared_ptr<DataAccessor<CELL_TYPE, MEMBER_TYPE> > accessorPtr(accessor);
+        typename SharedPtr<DataAccessor<CELL_TYPE, MEMBER_TYPE> >::Type accessorPtr(accessor);
         handlers["get_" + accessor->name()].reset(new GetHandler<CELL_TYPE, MEMBER_TYPE>(accessorPtr));
     }
 
@@ -134,8 +134,8 @@ public:
 private:
     HandlerMap handlers;
     int port;
-    boost::shared_ptr<Pipe> pipe;
-    boost::shared_ptr<CommandServer<CELL_TYPE> > commandServer;
+    SharedPtr<Pipe>::Type pipe;
+    typename SharedPtr<CommandServer<CELL_TYPE> >::Type commandServer;
 };
 
 }

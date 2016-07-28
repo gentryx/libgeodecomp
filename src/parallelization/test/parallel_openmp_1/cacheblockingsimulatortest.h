@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
@@ -106,7 +107,7 @@ public:
 // private:
 //     int pipelineLength;
 //     Coord<3> dim;
-//     boost::shared_ptr<CacheBlockingSimulator<TestCellType> > sim;
+//     SharedPtr<CacheBlockingSimulator<TestCellType> >::Type sim;
 
 //     void init(const Coord<3>& gridDim, int newPipelineLength = 5, const Coord<2> wavefrontDim = Coord<2>(16, 16))
 //     {

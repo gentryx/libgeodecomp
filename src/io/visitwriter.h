@@ -4,6 +4,7 @@
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/simulator.h>
@@ -12,7 +13,6 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_VISIT
 
-#include <boost/shared_ptr.hpp>
 #include <cerrno>
 #include <fstream>
 #include <stdexcept>
@@ -140,7 +140,7 @@ template<typename CELL_TYPE>
 class VisItWriter : public Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE> >
 {
 public:
-    typedef std::vector<boost::shared_ptr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> > > DataBufferVec;
+    typedef std::vector<SharedPtr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> > >::Type DataBufferVec;
     typedef typename Writer<CELL_TYPE>::Topology Topology;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     static const int DIM = Topology::DIM;
@@ -225,7 +225,7 @@ public:
         Selector<CELL_TYPE> selector(memberPointer, memberName);
         DataBuffer *buffer = new DataBuffer(selector);
 
-        variableBuffers << boost::shared_ptr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> >(buffer);
+        variableBuffers << SharedPtr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> >::Type(buffer);
     }
 
   private:

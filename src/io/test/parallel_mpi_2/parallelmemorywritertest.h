@@ -1,5 +1,6 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 
@@ -121,7 +122,7 @@ public:
 
 private:
     Coord<2> dim;
-    boost::shared_ptr<MockSim> sim;
+    SharedPtr<MockSim>::Type sim;
     ParallelMemoryWriter<TestCell<2> > *writer;
     TestInitializer<TestCell<2> > *init;
 };

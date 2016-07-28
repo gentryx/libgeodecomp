@@ -7,8 +7,8 @@
 #include <hpx/config.hpp>
 #endif
 
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
-#include <boost/shared_ptr.hpp>
 #include <stdexcept>
 
 namespace LibGeoDecomp {
@@ -378,7 +378,7 @@ private:
 class SimulationParameters
 {
 public:
-    typedef boost::shared_ptr<SimulationParametersHelpers::Parameter> ParamPointerType;
+    typedef SharedPtr<SimulationParametersHelpers::Parameter>::Type ParamPointerType;
 
     SimulationParameters()
     {}

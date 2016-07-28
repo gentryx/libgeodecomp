@@ -5,6 +5,7 @@
 #include <libgeodecomp/misc/cacheblockingsimulationfactory.h>
 #include <libgeodecomp/misc/cudasimulationfactory.h>
 #include <libgeodecomp/misc/serialsimulationfactory.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <cuda.h>
 
@@ -180,7 +181,7 @@ private:
 #ifdef LIBGEODECOMP_WITH_CPP14
     Coord<3> dim;
     unsigned maxSteps;
-    boost::shared_ptr<VarStepInitializerProxy<SimFabTestCell> > initializerProxy;
+    SharedPtr<VarStepInitializerProxy<SimFabTestCell> >::Type initializerProxy;
     SimulationFactory<SimFabTestCell> *fab;
     SimulationFactory<SimFabTestCell> *cudaFab;
 
