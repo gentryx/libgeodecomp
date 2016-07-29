@@ -246,12 +246,12 @@ public:
     {
         SharedPtr<double>::Type ptr(new double);
         *ptr = 555.666;
-        TS_ASSERT(0 != &*ptr);
+        TS_ASSERT(0 != ptr.get());
         std::vector<SharedPtr<double>::Type> vec;
 
         vec << ptr;
 
-        TS_ASSERT(0 != &*ptr);
+        TS_ASSERT(0 != ptr.get());
         TS_ASSERT_EQUALS(555.666, *ptr);
     }
 
