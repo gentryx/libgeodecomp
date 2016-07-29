@@ -13,6 +13,15 @@ set(LGD_AGGREGATED_CXX_FLAGS "${LGD_ADDITIONAL_CXX_COMPILE_FLAGS}")
 list(APPEND BUILD_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 lgd_generate_sourcelists("./")
 
+if(NOT WITH_CPP14)
+  check_cxx_compiler_flag("-std=c++0x" SUPPORTS_CPP0X)
+  if(NOT SUPPORTS_CPP0X)
+    message(WARNING "LibGeoDecomp requires support for some C++11 features (e.g. shared pointers), but your compiler doesn't seem to support this.")
+  endif()
+
+  set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -std=c++0x")
+endif()
+
 if(WITH_BOOST_MPI)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
 endif()
