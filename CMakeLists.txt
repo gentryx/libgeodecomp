@@ -201,13 +201,6 @@ endif()
 check_cxx_compiler_flag("-std=c++14" SUPPORTS_CPP14)
 if(NOT SUPPORTS_CPP14)
   set(SUPPORTS_CPP14 false)
-
-  check_cxx_compiler_flag("-std=c++0x" SUPPORTS_CPP0X)
-  if(NOT SUPPORTS_CPP0X)
-    message(WARNING "LibGeoDecomp requires support for some C++11 features (e.g. shared pointers), but your compiler doesn't seem to support this.")
-  endif()
-
-  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -std=c++0x")
 endif()
 
 check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
