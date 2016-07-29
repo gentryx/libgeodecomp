@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_IO_VISITWRITER_H
 #define LIBGEODECOMP_IO_VISITWRITER_H
 
+#include <unistd.h>
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>

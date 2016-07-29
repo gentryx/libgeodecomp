@@ -3,6 +3,7 @@
 #include <hpx/config.hpp>
 #endif
 
+#include <unistd.h>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
 
