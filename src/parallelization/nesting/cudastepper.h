@@ -331,7 +331,7 @@ public:
 private:
     typename SharedPtr<CUDAGridType>::Type oldDeviceGrid;
     typename SharedPtr<CUDAGridType>::Type newDeviceGrid;
-    std::vector<SharedPtr<CUDARegion<DIM> >::Type> deviceInnerSets;
+    std::vector<typename SharedPtr<CUDARegion<DIM> >::Type> deviceInnerSets;
 
     inline void update1()
     {
@@ -490,7 +490,7 @@ private:
         deviceInnerSets.resize(0);
         for (std::size_t i = 0; i <= ghostZoneWidth(); ++i) {
             deviceInnerSets.push_back(
-                SharedPtr<CUDARegion<DIM> >::Type(
+                typename SharedPtr<CUDARegion<DIM> >::Type(
                     new CUDARegion<DIM>(innerSet(i))));
         }
 

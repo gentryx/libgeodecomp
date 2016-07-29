@@ -34,7 +34,7 @@ public:
     virtual double operator()(const SimulationParameters& params)
     {
         InitPtr init(SimulationFactory<CELL>::initializer->clone());
-        SharedPtr<Simulator<CELL> >::Type sim(buildSimulator(init, params));
+        typename SharedPtr<Simulator<CELL> >::Type sim(buildSimulator(init, params));
         Chronometer chrono;
 
         {
