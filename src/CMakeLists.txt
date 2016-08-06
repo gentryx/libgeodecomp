@@ -22,12 +22,26 @@ if(NOT WITH_CPP14)
   set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -std=c++0x")
 endif()
 
-if(WITH_BOOST_MPI)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
+if(WITH_BOOST_SHARED_PTR)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif()
+
+if(WITH_BOOST_ASIO)
+  include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
 if(WITH_BOOST_SERIALIZATION)
+  include_directories(${Boost_INCLUDE_DIRS})
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_SERIALIZATION_LIBRARIES}")
+endif()
+
+if(WITH_BOOST_MPI)
+  include_directories(${Boost_INCLUDE_DIRS})
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
+endif()
+
+if(WITH_BOOST_MOVE)
+  include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
 if(WITH_CUDA)
