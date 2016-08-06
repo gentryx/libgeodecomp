@@ -269,6 +269,10 @@ set(ALL_HEADERS ${HEADERS})
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 set_property(TARGET geodecomp PROPERTY VERSION ${PACKAGE_VERSION})
 
+if(CMAKE_VERSION VERSION_GREATER 2.8.12)
+  set_property(TARGET geodecomp PROPERTY MACOSX_RPATH On)
+endif()
+
 # CMake <2.8.11 doesn't have target_include_directories()
 if(CMAKE_VERSION VERSION_GREATER 2.8.11)
   target_include_directories(geodecomp INTERFACE ${INSTALL_INCLUDE_DIRECTORIES})
