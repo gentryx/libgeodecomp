@@ -30,7 +30,7 @@ if(NOT HPX_FOUND)
       set(Boost_NO_SYSTEM_PATHS true)
       set(BOOST_ROOT "$ENV{BOOST_LIBDIR}/../")
       set(Boost_LIBRARY_DIRS "$ENV{BOOST_LIBDIR}")
-      set(Boost_INCLUDE_DIR  "$ENV{BOOST_INCDIR}")
+      set(Boost_INCLUDE_DIRS "$ENV{BOOST_INCDIR}")
     endif()
   endif()
 
