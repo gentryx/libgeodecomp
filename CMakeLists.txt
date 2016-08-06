@@ -67,21 +67,6 @@ else()
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${libflatarray_INCLUDE_DIR})
 endif()
 
-# use bundled Boost if none is found
-if(USING_BUNDLED_BOOST)
-  set(Boost_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/libflatarray/lib/boost")
-  set(Boost_INCLUDE_DIRS "${Boost_INCLUDE_DIR}")
-  mark_as_advanced(FORCE Boost_INCLUDE_DIR)
-  # add this include paths only to BUILD_INCLUDE_DIRECTORIES as must
-  # not be exported during install in any case (the build tree must be
-  # considered a temporary directory, and CMake would complain).
-  list(APPEND BUILD_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIRS}")
-else()
-  # if Boost was found outside, we'll assume we're not using
-  # the bundled version and we need export the relevant directory:
-  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
-endif()
-
 # currently VisIt only supports Python 2.x. This (undocumented?)
 # feature of CMake allows us to avoid Python 3.y.
 set(PythonLibs_FIND_VERSION 2)
