@@ -201,7 +201,7 @@ public:
         seenNeighbors = 0;
         seenElements = 0;
 
-        for (typename NEIGHBORHOOD::AdapterHelper3::Iterator i = hood.particles.begin();
+        for (typename NEIGHBORHOOD::AdapterHelper1::Iterator i = hood.particles.begin();
              i != hood.particles.end();
              ++i) {
             ++seenNeighbors;
