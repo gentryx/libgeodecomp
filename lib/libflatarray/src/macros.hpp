@@ -12,6 +12,7 @@
 #include <libflatarray/number_of_members.hpp>
 #include <libflatarray/detail/macros.hpp>
 #include <libflatarray/detail/offset.hpp>
+#include <libflatarray/detail/sibling_short_vec_switch.hpp>
 
 /**
  * This macro is convenient when you need to return instances of the
@@ -83,7 +84,7 @@
     class soa_accessor<CELL_TYPE, MY_DIM_X, MY_DIM_Y, MY_DIM_Z, INDEX>  \
     {                                                                   \
     public:                                                             \
-        typedef CELL_TYPE MyCell;                                       \
+        typedef CELL_TYPE element_type;                                 \
                                                                         \
         static const long DIM_X = MY_DIM_X;                             \
         static const long DIM_Y = MY_DIM_Y;                             \
@@ -100,7 +101,7 @@
                                                                         \
         inline                                                          \
         __host__ __device__                                             \
-        explicit soa_accessor(char *data, const long index = 0) :       \
+        soa_accessor(char *data, const long index) :                    \
             data(data),                                                 \
             index(index)                                                \
         {}                                                              \
@@ -305,7 +306,7 @@
         CELL_TYPE, MY_DIM_X, MY_DIM_Y, MY_DIM_Z, INDEX>                 \
     {                                                                   \
     public:                                                             \
-        typedef CELL_TYPE MyCell;                                       \
+        typedef CELL_TYPE element_type;                                 \
                                                                         \
         static const long DIM_X = MY_DIM_X;                             \
         static const long DIM_Y = MY_DIM_Y;                             \
@@ -411,7 +412,7 @@
     class soa_accessor_light<CELL_TYPE, MY_DIM_X, MY_DIM_Y, MY_DIM_Z, INDEX> \
     {                                                                   \
     public:                                                             \
-        typedef CELL_TYPE MyCell;                                       \
+        typedef CELL_TYPE element_type;                                 \
                                                                         \
         static const long DIM_X = MY_DIM_X;                             \
         static const long DIM_Y = MY_DIM_Y;                             \
@@ -633,7 +634,7 @@
     class const_soa_accessor_light<CELL_TYPE, MY_DIM_X, MY_DIM_Y, MY_DIM_Z, INDEX> \
     {                                                                   \
     public:                                                             \
-        typedef CELL_TYPE MyCell;                                       \
+        typedef CELL_TYPE element_type;                                 \
                                                                         \
         static const long DIM_X = MY_DIM_X;                             \
         static const long DIM_Y = MY_DIM_Y;                             \
@@ -948,21 +949,33 @@
     }
 
 /**
- * CARGO: element type
+ * This is a shim to ease handling of unaligned or not vectorizable
+ * iterations at the begin/end of loops. It will invoke FUNCTION with
+ * a suitable variant of SHORT_VEC (with its arity adjusted) to that
+ * the main chunk of the iterations will be running with full
+ * vectorization (as given by SHORT_VEC) and only the initial
+ * (possibly unaligned) and trailing (less than SHORT_VEC's arity)
+ * iterations will be done with an arity of 1 (i.e. scalar).
+ *
+ * X is expected to be increased by FUNCTION (e.g. by passing it via
+ * reference).
  */
-#define LIBFLATARRAY_LOOP_PEELER(CARGO, ARITY, COUNTER_TYPE,            \
+#define LIBFLATARRAY_LOOP_PEELER(SHORT_VEC_TYPE, COUNTER_TYPE,          \
                                  X, END_X, FUNCTION, ARGS...)           \
     {                                                                   \
-        typedef LibFlatArray::short_vec<CARGO, (ARITY)> ShortVecType;   \
-        typedef LibFlatArray::short_vec<CARGO, 1>     ScalarType;       \
-        COUNTER_TYPE remainder = *(X) % (ARITY);                        \
-        COUNTER_TYPE next_stop = remainder ?                            \
-            *(X) + (ARITY) - remainder :                                \
-            *(X);                                                       \
+        typedef SHORT_VEC_TYPE lfa_local_short_vec;                     \
+        typedef typename LibFlatArray::detail::flat_array::             \
+            sibling_short_vec_switch<SHORT_VEC_TYPE, 1>::VALUE          \
+            lfa_local_scalar;                                           \
                                                                         \
-        FUNCTION<ScalarType  >(X, next_stop, ARGS);                     \
-        FUNCTION<ShortVecType>(X, (END_X),   ARGS);                     \
-        FUNCTION<ScalarType  >(X, (END_X),   ARGS);                     \
+        COUNTER_TYPE remainder = (X) % (lfa_local_short_vec::ARITY);    \
+        COUNTER_TYPE next_stop = remainder ?                            \
+            (X) + (lfa_local_short_vec::ARITY) - remainder :            \
+            (X);                                                        \
+                                                                        \
+        FUNCTION<lfa_local_scalar   >(X, next_stop, ARGS);              \
+        FUNCTION<lfa_local_short_vec>(X, (END_X),   ARGS);              \
+        FUNCTION<lfa_local_scalar   >(X, (END_X),   ARGS);              \
     }
 
 #endif
