@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2015 Andreas Schäfer
+ * Copyright 2014-2016 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -7,6 +7,8 @@
 
 #ifndef FLAT_ARRAY_SHORT_VEC_HPP
 #define FLAT_ARRAY_SHORT_VEC_HPP
+
+namespace LibFlatArray {
 
 class short_vec_strategy
 {
@@ -17,7 +19,10 @@ public:
     class avx
     {};
 
-    class avx512
+    class avx2
+    {};
+
+    class avx512f
     {};
 
     class cuda
@@ -29,12 +34,82 @@ public:
     class sse
     {};
 
+    class sse2
+    {};
+
+    class sse4_1
+    {};
+
     class mic
     {};
 
     class neon
     {};
 };
+
+}
+
+#define LIBFLATARRAY_SCALAR        10
+#define LIBFLATARRAY_QPX           11
+#define LIBFLATARRAY_ARM_NEON      12
+#define LIBFLATARRAY_MIC           13
+#define LIBFLATARRAY_AVX512F       14
+#define LIBFLATARRAY_AVX           15
+#define LIBFLATARRAY_AVX2          16
+#define LIBFLATARRAY_SSE           17
+#define LIBFLATARRAY_SSE2          18
+#define LIBFLATARRAY_SSE4_1        19
+
+#ifdef __CUDA_ARCH__
+// Use only scalar short_vec implementations on CUDA devices:
+#define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_SCALAR
+#else
+// for IBM Blue Gene/Q's QPX, which is mutually exclusive to
+// Intel/AMD's AVX/SSE or ARM's NEON ISAs:
+#  ifdef __VECTOR4DOUBLE__
+#  define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_QPX
+#  endif
+
+// Dito for ARM NEON:
+#  ifdef __ARM_NEON__
+#  define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_ARM_NEON
+#  endif
+
+// Only the case of the IBM PC is complicated. No thanks to you,
+// history!
+#  ifdef __MIC__
+#  define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_MIC
+#  else
+#    ifdef __AVX512F__
+#    define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_AVX512F
+#    else
+#      ifdef __AVX2__
+#      define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_AVX2
+#      else
+#        ifdef __AVX__
+#        define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_AVX
+#        else
+#          ifdef __SSE4_1__
+#          define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_SSE4_1
+#          else
+#            ifdef __SSE2__
+#            define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_SSE2
+#            else
+#              ifdef __SSE__
+#              define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_SSE
+#              else
+// fallback: scalar implementation always works and is still yields
+// code that's easy to vectorize for the compiler:
+#              define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_SCALAR
+#              endif
+#            endif
+#          endif
+#        endif
+#      endif
+#    endif
+#  endif
+
+#endif
 
 #include <sstream>
 
