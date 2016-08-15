@@ -78,6 +78,38 @@ public:
         return *this;
     }
 
+    FixedArray<T, SIZE> operator+(const FixedArray<T, SIZE>& other) const
+    {
+        if ((elements + other.elements) > SIZE) {
+            throw std::out_of_range("FixedArray capacity exceeded in concatenation");
+        }
+
+        FixedArray<T, SIZE> ret;
+
+        for (std::size_t i = 0; i < elements; ++i) {
+            ret << (*this)[i];
+        }
+
+        for (std::size_t i = 0; i < other.elements; ++i) {
+            ret << other[i];
+        }
+
+        return ret;
+    }
+
+    FixedArray<T, SIZE>& operator+=(const FixedArray<T, SIZE>& other)
+    {
+        if ((elements + other.elements) > SIZE) {
+            throw std::out_of_range("FixedArray capacity exceeded in concatenation");
+        }
+
+        for (std::size_t i = 0; i < other.elements; ++i) {
+            (*this) << other[i];
+        }
+
+        return *this;
+    }
+
     template<int SIZE2>
     bool operator==(const FixedArray<T, SIZE2>& other) const
     {

@@ -119,6 +119,24 @@ public:
         TS_ASSERT_EQUALS(a[2], 11);
     }
 
+    void testAddition()
+    {
+        FixedArray<int, 7> sourceA;
+        FixedArray<int, 7> sourceB;
+        FixedArray<int, 7> expected;
+
+        sourceA  << 1 << 3 << 5;
+        sourceB  << 2 << 1 << 0 << 4;
+        expected << 1 << 3 << 5 << 2 << 1 << 0 << 4;
+
+        TS_ASSERT_EQUALS(sourceA +  sourceB, expected);
+        TS_ASSERT_EQUALS(sourceA += sourceB, expected);
+        TS_ASSERT_EQUALS(sourceA, expected);
+
+        TS_ASSERT_THROWS(sourceA +  sourceB, std::out_of_range);
+        TS_ASSERT_THROWS(sourceA += sourceB, std::out_of_range);
+}
+
     void testComparison()
     {
         FixedArray<int, 6> a;
