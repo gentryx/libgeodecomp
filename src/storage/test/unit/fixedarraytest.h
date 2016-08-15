@@ -32,8 +32,11 @@ public:
 
         FixedArray<int, 10> b;
         TS_ASSERT_THROWS(b.reserve(11), std::out_of_range);
+        TS_ASSERT_THROWS(b.resize(11), std::out_of_range);
 
         b.reserve(3);
+        TS_ASSERT_EQUALS(std::size_t(0), b.size());
+        b.resize(3);
         TS_ASSERT_EQUALS(std::size_t(3), b.size());
         std::copy(a.begin(), a.end(), b.begin());
         TS_ASSERT_EQUALS(0, b[0]);

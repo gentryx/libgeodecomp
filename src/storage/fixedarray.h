@@ -280,6 +280,12 @@ public:
             throw std::out_of_range("reserving too many elements");
         }
 
+        // this is a NOP since we don't reallocate
+    }
+
+    void resize(int num)
+    {
+        reserve(num);
         elements = num;
     }
 
