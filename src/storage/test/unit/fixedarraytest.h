@@ -119,66 +119,6 @@ public:
         TS_ASSERT_EQUALS(a[2], 11);
     }
 
-    void testAddition()
-    {
-        FixedArray<int, 6> sourceA;
-        FixedArray<int, 6> sourceB;
-        FixedArray<int, 6> expected;
-
-        sourceA  << 1 << 3 << 5;
-        sourceB  << 2 << 1 << 0 << 4;
-        expected << 3 << 4 << 5 << 4;
-
-        TS_ASSERT_EQUALS(sourceA + sourceB, expected);
-        TS_ASSERT_EQUALS(sourceB + sourceA, expected);
-        TS_ASSERT_EQUALS(sourceA += sourceB, expected);
-        TS_ASSERT_EQUALS(sourceA, expected);
-    }
-
-    void testSubstraction()
-    {
-        FixedArray<int, 6> sourceA;
-        FixedArray<int, 6> sourceB;
-        FixedArray<int, 6> expected1;
-        FixedArray<int, 6> expected2;
-
-        sourceA   <<  1 <<  3 <<  5;
-        sourceB   <<  2 <<  1 <<  0 <<  4;
-        expected1 << -1 <<  2 <<  5 << -4;
-        expected2 <<  1 << -2 << -5 <<  4;
-
-        TS_ASSERT_EQUALS(sourceA - sourceB, expected1);
-        TS_ASSERT_EQUALS(sourceB - sourceA, expected2);
-        TS_ASSERT_EQUALS(sourceA -= sourceB, expected1);
-        TS_ASSERT_EQUALS(sourceA, expected1);
-    }
-
-    void testDivision()
-    {
-        FixedArray<int, 6> source;
-        FixedArray<int, 6> expected;
-
-        source   << 3 << 9 << 15;
-        expected << 1 << 3 << 5;
-
-        TS_ASSERT_EQUALS(source / 3, expected);
-        TS_ASSERT_EQUALS(source /= 3, expected);
-        TS_ASSERT_EQUALS(source, expected);
-    }
-
-    void testMultiplication()
-    {
-        FixedArray<int, 6> source;
-        FixedArray<int, 6> expected;
-
-        source   << 1 << 3 << 5;
-        expected << 3 << 9 << 15;
-
-        TS_ASSERT_EQUALS(source * 3, expected);
-        TS_ASSERT_EQUALS(source *= 3, expected);
-        TS_ASSERT_EQUALS(source, expected);
-    }
-
     void testComparison()
     {
         FixedArray<int, 6> a;
@@ -190,40 +130,14 @@ public:
         c << 1 << 9 << 15 << 0;
 
         TS_ASSERT( (a == a));
-        TS_ASSERT(!(a <  a));
-        TS_ASSERT(!(a >  a));
-
         TS_ASSERT(!(a == b));
-        TS_ASSERT( (a <  b));
-        TS_ASSERT(!(a >  b));
-
         TS_ASSERT(!(a == c));
-        TS_ASSERT( (a <  c));
-        TS_ASSERT(!(a >  c));
-
         TS_ASSERT(!(b == a));
-        TS_ASSERT(!(b <  a));
-        TS_ASSERT( (b >  a));
-
         TS_ASSERT( (b == b));
-        TS_ASSERT(!(b <  b));
-        TS_ASSERT(!(b >  b));
-
         TS_ASSERT(!(b == c));
-        TS_ASSERT( (b <  c));
-        TS_ASSERT(!(b >  c));
-
         TS_ASSERT(!(c == a));
-        TS_ASSERT(!(c <  a));
-        TS_ASSERT( (c >  a));
-
         TS_ASSERT(!(c == b));
-        TS_ASSERT(!(c <  b));
-        TS_ASSERT( (c >  b));
-
         TS_ASSERT( (c == c));
-        TS_ASSERT(!(c <  c));
-        TS_ASSERT(!(c >  c));
     }
 
     void testToString()
