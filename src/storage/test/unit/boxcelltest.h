@@ -394,6 +394,21 @@ public:
         }
     }
 
+    void testRemove()
+    {
+        typedef BoxCell<FixedArray<SpawningParticle, 222> > CellType;
+
+        FloatCoord<3> origin(3.0, 3.0, 3.0);
+        FloatCoord<3> cellDim(2.0, 2.0, 2.0);
+
+        CellType cell(origin, cellDim);
+        cell.insert(SpawningParticle(FloatCoord<3>(3.5, 3.5, 3.5), 100));
+
+        TS_ASSERT_EQUALS(cell.size(), 1);
+        cell.remove(0);
+        TS_ASSERT_EQUALS(cell.size(), 0);
+    }
+
 private:
     Coord<2> gridDim;
     FloatCoord<2> cellDim;

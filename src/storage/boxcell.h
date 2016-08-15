@@ -81,6 +81,11 @@ public:
         particles << particle;
     }
 
+    inline void remove(const std::size_t i)
+    {
+        particles.remove(i);
+    }
+
     inline std::size_t size() const
     {
         return particles.size();
