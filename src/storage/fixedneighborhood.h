@@ -79,7 +79,7 @@ public:
                 ((Z < 0) ? offsetSouth  : 0) +
                 ((Z > 0) ? offsetNorth  : 0));
 
-        return ACCESSOR(tempAccessor.get_data(), tempIndex);
+        return ACCESSOR(tempAccessor.data(), tempIndex);
     }
 
     void operator>>(CELL& cell) const
