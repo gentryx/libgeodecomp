@@ -64,6 +64,11 @@ public:
         return store + elements;
     }
 
+    inline static std::size_t capacity()
+    {
+        return SIZE;
+    }
+
     void push_back(const T& t)
     {
         if (elements >= SIZE) {
