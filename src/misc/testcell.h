@@ -273,7 +273,7 @@ public:
         ACCESSOR1 hoodOld, int indexEnd,
         ACCESSOR2 hoodNew, unsigned nanoStep)
     {
-        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index) {
+        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index()) {
             TestCell cell;
             cell.update(hoodOld, nanoStep);
             hoodNew << cell;

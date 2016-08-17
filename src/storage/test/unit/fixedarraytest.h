@@ -12,7 +12,9 @@ public:
     void testInsertDelete()
     {
         FixedArray<int, 20> a;
-        TS_ASSERT_EQUALS(std::size_t(0), a.size());
+        TS_ASSERT_EQUALS(std::size_t( 0), a.size());
+        TS_ASSERT_EQUALS(std::size_t(20), a.capacity());
+        TS_ASSERT_EQUALS(std::size_t(20), (FixedArray<int, 20>::capacity()));
 
         a << 0
           << 1
@@ -135,7 +137,7 @@ public:
 
         TS_ASSERT_THROWS(sourceA +  sourceB, std::out_of_range);
         TS_ASSERT_THROWS(sourceA += sourceB, std::out_of_range);
-}
+    }
 
     void testComparison()
     {

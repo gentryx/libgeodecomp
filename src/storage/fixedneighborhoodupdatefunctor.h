@@ -161,9 +161,9 @@ public:
         long indexOld = hoodOld.gen_index(originOld.x(), originOld.y(), originOld.z());
         long indexNew = hoodNew.gen_index(originNew.x(), originNew.y(), originNew.z());
 
-        hoodOld.index = indexOld;
-        hoodNew.index = indexNew;
-        long indexEnd = hoodOld.index + streak.length();
+        hoodOld.index() = indexOld;
+        hoodNew.index() = indexNew;
+        long indexEnd = hoodOld.index() + streak.length();
         long tempIndex;
 
         long boundaryWest;
@@ -199,7 +199,7 @@ public:
                     boundarySouth,
                     boundaryNorth);
 
-            long indexEnd = hoodOld.index + 1;
+            long indexEnd = hoodOld.index() + 1;
             CELL::updateLineX(hoodLeft, indexEnd, hoodNew, nanoStep);
         }
 

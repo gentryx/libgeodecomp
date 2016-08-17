@@ -73,32 +73,32 @@ public:
                     onEdge2 = true;
                 }
 
-                accessor.index =
+                accessor.index() =
                     z * DIM_X * DIM_Y +
                     y * DIM_X;
                 int x = 0;
 
                 for (; x < edgeRadii.x(); ++x) {
                     accessor << edgeCell;
-                    ++accessor.index;
+                    ++accessor.index();
                 }
 
                 if (onEdge2 || INIT_INTERIOR) {
                     for (; x < (gridDim.x() - edgeRadii.x()); ++x) {
                         accessor << *cell2;
-                        ++accessor.index;
+                        ++accessor.index();
                     }
                 } else {
                     // we need to advance index and x manually, otherwise
                     // the following loop will erase the grid's interior:
                     int delta = gridDim.x() - 2 * edgeRadii.x();
                     x += delta;
-                    accessor.index += delta;
+                    accessor.index() += delta;
                 }
 
                 for (; x < gridDim.x(); ++x) {
                     accessor << edgeCell;
-                    ++accessor.index;
+                    ++accessor.index();
                 }
             }
 
@@ -175,7 +175,7 @@ public:
         char *currentTarget = target;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            accessor.index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
+            accessor.index() = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakOut(
                 data,
@@ -226,7 +226,7 @@ public:
         const char *currentSource = source;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            accessor.index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
+            accessor.index() = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
 
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakIn(

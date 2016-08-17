@@ -70,7 +70,7 @@ public:
         typedef SOA_ACCESSOR_OUT<CELL, LIBFLATARRAY_PARAMS_FULL(X, Y, Z, DIM_X, DIM_Y, DIM_Z, INDEX)> ACCESSOR;
         ACCESSOR tempAccessor = accessor[LibFlatArray::coord<X, Y, Z>()];
         tempIndex =
-            *tempAccessor.get_index() +
+            tempAccessor.index() +
             ACCESSOR::gen_index(
                 ((X < 0) ? offsetWest   : 0) +
                 ((X > 0) ? offsetEast   : 0),
@@ -91,14 +91,14 @@ public:
     inline
     long& index()
     {
-        return accessor.index;
+        return accessor.index();
     }
 
     __host__ __device__
     inline
     const long& index() const
     {
-        return accessor.index;
+        return accessor.index();
     }
 
     __host__ __device__

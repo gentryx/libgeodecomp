@@ -1303,7 +1303,7 @@ public:
         if (hoodOld.index() % 2 == 1) {
             updateSingle(hoodOld, hoodNew);
             ++hoodOld.index();
-            ++hoodNew.index;
+            ++hoodNew.index();
         }
 
         __m128d oneSeventh = _mm_set1_pd(1.0 / 7.0);
@@ -1311,7 +1311,7 @@ public:
         same.a = _mm_load_pd( &hoodOld[FixedCoord< 0, 0, 0>()].temp());
         __m128d odds0 = _mm_loadu_pd(&hoodOld[FixedCoord<-1, 0, 0>()].temp());
 
-        for (; hoodOld.index() < (indexEnd - 8 + 1); hoodOld.index() += 8, hoodNew.index += 8) {
+        for (; hoodOld.index() < (indexEnd - 8 + 1); hoodOld.index() += 8, hoodNew.index() += 8) {
 
             load(&same, hoodOld, FixedCoord<0, 0, 0>());
 
@@ -1393,7 +1393,7 @@ public:
             same.a = same.e;
         }
 
-        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index) {
+        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index()) {
             updateSingle(hoodOld, hoodNew);
         }
     }
@@ -2284,7 +2284,7 @@ public:
         const int z = 0;
         Double velX, velY, velZ;
 
-        for (; hoodOld.index() < indexEnd; hoodNew.index += Double::ARITY, hoodOld.index() += Double::ARITY) {
+        for (; hoodOld.index() < indexEnd; hoodNew.index() += Double::ARITY, hoodOld.index() += Double::ARITY) {
             velX  =
                 GET_COMP(x-1,y,z,E) + GET_COMP(x-1,y-1,z,NE) +
                 GET_COMP(x-1,y+1,z,SE) + GET_COMP(x-1,y,z-1,TE) +
