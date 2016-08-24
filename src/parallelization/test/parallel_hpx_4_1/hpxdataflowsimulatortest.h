@@ -233,6 +233,19 @@ public:
         sim.run();
     }
 
+    void testManySteps()
+    {
+        Chronometer c;
+        int steps = 300000;
+        {
+            TimeTotal timer(&c);
+            Initializer<DummyModel> *initializer = new DummyInitializer<DummyModel>(60, steps);
+            HPXDataflowSimulator<DummyModel> sim(initializer, "testManySteps");
+            sim.run();
+        }
+        std::cout << "steps: " << steps << ", time: " << c.interval<TimeTotal>() << "\n";
+    }
+
     void testAsymmetric()
     {
         Initializer<AsymmetricDummyModel> *initializer = new DummyInitializer<AsymmetricDummyModel>(50, 13);
