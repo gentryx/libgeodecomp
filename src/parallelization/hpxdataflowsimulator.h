@@ -141,11 +141,10 @@ public:
         }
     }
 
-    hpx::shared_future<void> setupDataflow(int maxSteps)
+    void setupRemoteReceiverIDs()
     {
         std::vector<hpx::future<void> > remoteIDFutures;
         remoteIDFutures.reserve(neighbors.size());
-
         hpx::lcos::local::spinlock mutex;
 
         for (auto i = neighbors.begin(); i != neighbors.end(); ++i) {
@@ -160,11 +159,19 @@ public:
                 });
         }
 
-        hpx::when_all(remoteIDFutures).get(); // swallowing exceptions?
-        hpx::shared_future<void> lastTimeStepFuture = hpx::make_ready_future();
+        hpx::shared_future<void>(hpx::when_all(remoteIDFutures)).get(); // swallowing exceptions?
+    }
+
+    hpx::shared_future<void> setupDataflow(int startStep, int endStep)
+    {
+        lastTimeStepFuture = hpx::make_ready_future();
+
+        if (startStep == 0) {
+            setupRemoteReceiverIDs();
+        }
 
         // fixme: add steerer/writer interaction
-        for (int step = 0; step < maxSteps; ++step) {
+        for (int step = startStep; step < endStep; ++step) {
             for (std::size_t nanoStep = 0; nanoStep < NANO_STEPS; ++nanoStep) {
                 int globalNanoStep = step * NANO_STEPS + nanoStep;
 
@@ -226,6 +233,7 @@ public:
     }
 
 private:
+    hpx::shared_future<void> lastTimeStepFuture;
     std::string basename;
     std::vector<int> neighbors;
     typename SharedPtr<GridType>::Type grid;
@@ -369,11 +377,17 @@ public:
         lastTimeStepFutures.reserve(localRegion.size());
         int maxTimeSteps = initializer->maxSteps();
 
-        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            lastTimeStepFutures << components[i->x()].setupDataflow(maxTimeSteps);
-        }
+        int chunkSize = 1000;
 
-        hpx::when_all(lastTimeStepFutures).get();
+        for (int startStep = 0; startStep < maxTimeSteps; startStep += chunkSize) {
+            int endStep = std::min(maxTimeSteps, startStep + chunkSize);
+
+            for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+                lastTimeStepFutures << components[i->x()].setupDataflow(startStep, endStep);
+            }
+            hpx::when_all(lastTimeStepFutures).get();
+            lastTimeStepFutures.clear();
+        }
     }
 
     std::vector<Chronometer> gatherStatistics()
