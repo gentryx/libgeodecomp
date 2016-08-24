@@ -287,12 +287,14 @@ public:
         Initializer<CELL> *initializer,
         const std::string& basename,
         int loadBalancingPeriod = 10000,
-        bool enableFineGrainedParallelism = true) :
+        bool enableFineGrainedParallelism = true,
+        int chunkSize = 1000) :
         ParentType(
             initializer,
             loadBalancingPeriod * NANO_STEPS,
             enableFineGrainedParallelism),
-        basename(basename)
+        basename(basename),
+        chunkSize(chunkSize)
     {}
 
     void step()
@@ -377,8 +379,6 @@ public:
         lastTimeStepFutures.reserve(localRegion.size());
         int maxTimeSteps = initializer->maxSteps();
 
-        int chunkSize = 1000;
-
         for (int startStep = 0; startStep < maxTimeSteps; startStep += chunkSize) {
             int endStep = std::min(maxTimeSteps, startStep + chunkSize);
 
@@ -398,7 +398,7 @@ public:
 
 private:
     std::string basename;
-
+    int chunkSize;
 };
 
 }
