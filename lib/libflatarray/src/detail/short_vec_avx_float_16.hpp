@@ -78,6 +78,25 @@ public:
     short_vec(const sqrt_reference<float, 16>& other);
 
     inline
+    bool any() const
+    {
+        __m256 buf0 = _mm256_or_ps(val1, val2);
+        // merge both 128-bit lanes of AVX register:
+        __m128 buf1 = _mm_or_ps(
+            _mm256_extractf128_ps(buf0, 0),
+            _mm256_extractf128_ps(buf0, 1));
+        // shuffle upper 64-bit half down to first 64 bits so we can
+        // "or" both together:
+        __m128 buf2 = _mm_shuffle_ps(buf1, buf1, (3 << 2) | (2 << 0));
+        buf2 = _mm_or_ps(buf1, buf2);
+        // another shuffle to extract 2nd least significant float
+        // member and or it together with least significant float
+        // member:
+        buf1 = _mm_shuffle_ps(buf2, buf2, (1 << 0));
+        return _mm_cvtss_f32(buf1) || _mm_cvtss_f32(buf2);
+    }
+
+    inline
     void operator-=(const short_vec<float, 16>& other)
     {
         val1 = _mm256_sub_ps(val1, other.val1);
@@ -142,6 +161,46 @@ public:
 
     inline
     short_vec<float, 16> operator/(const sqrt_reference<float, 16>& other) const;
+
+    inline
+    short_vec<float, 16> operator<(const short_vec<float, 16>& other) const
+    {
+        return short_vec<float, 16>(
+            _mm256_cmp_ps(val1, other.val1, _CMP_LT_OS),
+            _mm256_cmp_ps(val2, other.val2, _CMP_LT_OS));
+    }
+
+    inline
+    short_vec<float, 16> operator<=(const short_vec<float, 16>& other) const
+    {
+        return short_vec<float, 16>(
+            _mm256_cmp_ps(val1, other.val1, _CMP_LE_OS),
+            _mm256_cmp_ps(val2, other.val2, _CMP_LE_OS));
+    }
+
+    inline
+    short_vec<float, 16> operator==(const short_vec<float, 16>& other) const
+    {
+        return short_vec<float, 16>(
+            _mm256_cmp_ps(val1, other.val1, _CMP_EQ_OQ),
+            _mm256_cmp_ps(val2, other.val2, _CMP_EQ_OQ));
+    }
+
+    inline
+    short_vec<float, 16> operator>(const short_vec<float, 16>& other) const
+    {
+        return short_vec<float, 16>(
+            _mm256_cmp_ps(val1, other.val1, _CMP_GT_OS),
+            _mm256_cmp_ps(val2, other.val2, _CMP_GT_OS));
+    }
+
+    inline
+    short_vec<float, 16> operator>=(const short_vec<float, 16>& other) const
+    {
+        return short_vec<float, 16>(
+            _mm256_cmp_ps(val1, other.val1, _CMP_GE_OS),
+            _mm256_cmp_ps(val2, other.val2, _CMP_GE_OS));
+    }
 
     inline
     short_vec<float, 16> sqrt() const

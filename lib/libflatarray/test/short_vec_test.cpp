@@ -343,6 +343,99 @@ void testImplementationReal()
             TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
         }
     }
+
+    // test comparison
+    {
+        for (int test_value = 0; test_value <= ARITY; ++test_value) {
+            std::vector<CARGO, aligned_allocator<CARGO, 64> > array1(ARITY);
+            std::vector<CARGO, aligned_allocator<CARGO, 64> > array2(ARITY);
+            std::vector<CARGO, aligned_allocator<CARGO, 64> > array3(ARITY);
+
+            for (int i = 0; i < ARITY; ++i) {
+                array1[i] = i;
+                array2[i] = test_value;
+            }
+
+            ShortVec v1(&array1[0]);
+            ShortVec v2(&array2[0]);
+            ShortVec v3;
+
+            // test operator<()
+            v3 = (v1 < v2);
+            &array3[0] << v3;
+
+            for (int i = 0; i < ARITY; ++i) {
+                if (i < test_value) {
+                    BOOST_TEST(array3[i] != 0);
+                } else {
+                    BOOST_TEST(array3[i] == 0);
+                }
+            }
+
+            // test reduction to bool:
+            bool actual = v3.any();
+            bool expected = (test_value > 0);
+            BOOST_TEST_EQ(actual, expected);
+
+            // test operator<=()
+            v3 = (v1 <= v2);
+            &array3[0] << v3;
+
+            for (int i = 0; i < ARITY; ++i) {
+                if (i <= test_value) {
+                    BOOST_TEST(array3[i] != 0);
+                } else {
+                    BOOST_TEST(array3[i] == 0);
+                }
+            }
+
+            // test operator==()
+            v3 = (v1 == v2);
+            &array3[0] << v3;
+
+            for (int i = 0; i < ARITY; ++i) {
+                if (i == test_value) {
+                    BOOST_TEST(array3[i] != 0);
+                } else {
+                    BOOST_TEST(array3[i] == 0);
+                }
+            }
+
+            // test reduction to bool:
+            actual = v3.any();
+            expected = (test_value < ARITY);
+            BOOST_TEST_EQ(actual, expected);
+
+            // test operator>()
+            v3 = (v1 > v2);
+            &array3[0] << v3;
+
+            for (int i = 0; i < ARITY; ++i) {
+                if (i > test_value) {
+                    BOOST_TEST(array3[i] != 0);
+                } else {
+                    BOOST_TEST(array3[i] == 0);
+                }
+            }
+
+            // test operator>=()
+            v3 = (v1 >= v2);
+            &array3[0] << v3;
+
+            for (int i = 0; i < ARITY; ++i) {
+                if (i >= test_value) {
+                    BOOST_TEST(array3[i] != 0);
+                } else {
+                    BOOST_TEST(array3[i] == 0);
+                }
+            }
+
+            // test reduction to bool, again:
+            actual = v3.any();
+            expected = (test_value < ARITY);
+            BOOST_TEST_EQ(actual, expected);
+        }
+    }
 }
 
 template<typename CARGO, int ARITY>
@@ -698,6 +791,7 @@ void checkForStrategy(STRATEGY, STRATEGY)
 
 ADD_TEST(TestImplementationStrategyDouble)
 {
+    // fixme: doc!
 #define EXPECTED_TYPE short_vec_strategy::scalar
     checkForStrategy(short_vec<double, 1>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
@@ -760,12 +854,16 @@ ADD_TEST(TestImplementationStrategyDouble)
 
 #ifdef __AVX__
 #  ifdef __AVX512F__
-#  define EXPECTED_TYPE short_vec_strategy::avx512
+#    define EXPECTED_TYPE short_vec_strategy::avx512
 #  else
-#  define EXPECTED_TYPE short_vec_strategy::avx
+#    define EXPECTED_TYPE short_vec_strategy::avx
 #  endif
 #else
-#define EXPECTED_TYPE short_vec_strategy::scalar
+#  ifdef __SSE__
+#    define EXPECTED_TYPE short_vec_strategy::sse
+#  else
+#    define EXPECTED_TYPE short_vec_strategy::scalar
+#  endif
 #endif
     checkForStrategy(short_vec<double, 16>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
@@ -781,7 +879,15 @@ ADD_TEST(TestImplementationStrategyDouble)
 #ifdef __AVX512F__
 #define EXPECTED_TYPE short_vec_strategy::avx512
 #else
-#define EXPECTED_TYPE short_vec_strategy::scalar
+#  ifdef __AVX__
+#    define EXPECTED_TYPE short_vec_strategy::avx
+#  else
+#    ifdef __SSE__
+#      define EXPECTED_TYPE short_vec_strategy::sse
+#    else
+#      define EXPECTED_TYPE short_vec_strategy::scalar
+#    endif
+#  endif
 #endif
     checkForStrategy(short_vec<double, 32>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
@@ -789,6 +895,7 @@ ADD_TEST(TestImplementationStrategyDouble)
 
 ADD_TEST(TestImplementationStrategyFloat)
 {
+    // fixme: doc!
 #define EXPECTED_TYPE short_vec_strategy::scalar
     checkForStrategy(short_vec<float, 1>::strategy(), EXPECTED_TYPE());
     checkForStrategy(short_vec<float, 2>::strategy(), EXPECTED_TYPE());
@@ -834,12 +941,12 @@ checkForStrategy(short_vec<float, 4>::strategy(), EXPECTED_TYPE());
 #ifdef __SSE__
 #  ifdef __AVX__
 #    ifdef __AVX512F__
-#    define EXPECTED_TYPE short_vec_strategy::avx512
+#      define EXPECTED_TYPE short_vec_strategy::avx512
 #    else
-#    define EXPECTED_TYPE short_vec_strategy::avx
+#      define EXPECTED_TYPE short_vec_strategy::avx
 #    endif
 #  else
-#  define EXPECTED_TYPE short_vec_strategy::sse
+#    define EXPECTED_TYPE short_vec_strategy::sse
 #  endif
 #endif
 
@@ -858,9 +965,13 @@ checkForStrategy(short_vec<float, 4>::strategy(), EXPECTED_TYPE());
 
 #ifdef __AVX__
 #  ifdef __AVX512F__
-#  define EXPECTED_TYPE short_vec_strategy::avx512
+#    define EXPECTED_TYPE short_vec_strategy::avx512
 #  else
-#  define EXPECTED_TYPE short_vec_strategy::avx
+#    define EXPECTED_TYPE short_vec_strategy::avx
+#  endif
+#else
+#  ifdef __SSE__
+#    define EXPECTED_TYPE short_vec_strategy::sse
 #  endif
 #endif
 
@@ -873,6 +984,7 @@ checkForStrategy(short_vec<float, 4>::strategy(), EXPECTED_TYPE());
 
 ADD_TEST(TestImplementationStrategyInt)
 {
+    // fixme: doc!
 #define EXPECTED_TYPE short_vec_strategy::scalar
     checkForStrategy(short_vec<int, 1>::strategy(), EXPECTED_TYPE());
     checkForStrategy(short_vec<int, 2>::strategy(), EXPECTED_TYPE());

@@ -75,6 +75,15 @@ public:
 #endif
 
     inline
+    bool any() const
+    {
+        __m128d buf1 = _mm_or_pd(val1, val2);
+        __m128d buf2 = _mm_shuffle_pd(buf1, buf1, 1);
+
+        return _mm_cvtsd_f64(buf1) || _mm_cvtsd_f64(buf2);
+    }
+
+    inline
     void operator-=(const short_vec<double, 4>& other)
     {
         val1 = _mm_sub_pd(val1, other.val1);
@@ -132,6 +141,46 @@ public:
         return short_vec<double, 4>(
             _mm_div_pd(val1, other.val1),
             _mm_div_pd(val2, other.val2));
+    }
+
+    inline
+    short_vec<double, 4> operator<(const short_vec<double, 4>& other) const
+    {
+        return short_vec<double, 4>(
+            _mm_cmplt_pd(val1, other.val1),
+            _mm_cmplt_pd(val2, other.val2));
+    }
+
+    inline
+    short_vec<double, 4> operator<=(const short_vec<double, 4>& other) const
+    {
+        return short_vec<double, 4>(
+            _mm_cmple_pd(val1, other.val1),
+            _mm_cmple_pd(val2, other.val2));
+    }
+
+    inline
+    short_vec<double, 4> operator==(const short_vec<double, 4>& other) const
+    {
+        return short_vec<double, 4>(
+            _mm_cmpeq_pd(val1, other.val1),
+            _mm_cmpeq_pd(val2, other.val2));
+    }
+
+    inline
+    short_vec<double, 4> operator>(const short_vec<double, 4>& other) const
+    {
+        return short_vec<double, 4>(
+            _mm_cmpgt_pd(val1, other.val1),
+            _mm_cmpgt_pd(val2, other.val2));
+    }
+
+    inline
+    short_vec<double, 4> operator>=(const short_vec<double, 4>& other) const
+    {
+        return short_vec<double, 4>(
+            _mm_cmpge_pd(val1, other.val1),
+            _mm_cmpge_pd(val2, other.val2));
     }
 
     inline

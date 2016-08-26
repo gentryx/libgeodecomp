@@ -77,6 +77,16 @@ public:
 #endif
 
     inline
+    bool any() const
+    {
+        __m128d buf1 = _mm_or_pd(_mm_or_pd(val1, val2),
+                                _mm_or_pd(val3, val4));
+        __m128d buf2 = _mm_shuffle_pd(buf1, buf1, 1);
+
+        return _mm_cvtsd_f64(buf1) || _mm_cvtsd_f64(buf2);
+    }
+
+    inline
     void operator-=(const short_vec<double, 8>& other)
     {
         val1 = _mm_sub_pd(val1, other.val1);
@@ -150,6 +160,59 @@ public:
             _mm_div_pd(val2, other.val2),
             _mm_div_pd(val3, other.val3),
             _mm_div_pd(val4, other.val4));
+    }
+
+    inline
+    short_vec<double, 8> operator/(const sqrt_reference<double, 8>& other) const;
+
+    inline
+    short_vec<double, 8> operator<(const short_vec<double, 8>& other) const
+    {
+        return short_vec<double, 8>(
+            _mm_cmplt_pd(val1, other.val1),
+            _mm_cmplt_pd(val2, other.val2),
+            _mm_cmplt_pd(val3, other.val3),
+            _mm_cmplt_pd(val4, other.val4));
+    }
+
+    inline
+    short_vec<double, 8> operator<=(const short_vec<double, 8>& other) const
+    {
+        return short_vec<double, 8>(
+            _mm_cmple_pd(val1, other.val1),
+            _mm_cmple_pd(val2, other.val2),
+            _mm_cmple_pd(val3, other.val3),
+            _mm_cmple_pd(val4, other.val4));
+    }
+
+    inline
+    short_vec<double, 8> operator==(const short_vec<double, 8>& other) const
+    {
+        return short_vec<double, 8>(
+            _mm_cmpeq_pd(val1, other.val1),
+            _mm_cmpeq_pd(val2, other.val2),
+            _mm_cmpeq_pd(val3, other.val3),
+            _mm_cmpeq_pd(val4, other.val4));
+    }
+
+    inline
+    short_vec<double, 8> operator>(const short_vec<double, 8>& other) const
+    {
+        return short_vec<double, 8>(
+            _mm_cmpgt_pd(val1, other.val1),
+            _mm_cmpgt_pd(val2, other.val2),
+            _mm_cmpgt_pd(val3, other.val3),
+            _mm_cmpgt_pd(val4, other.val4));
+    }
+
+    inline
+    short_vec<double, 8> operator>=(const short_vec<double, 8>& other) const
+    {
+        return short_vec<double, 8>(
+            _mm_cmpge_pd(val1, other.val1),
+            _mm_cmpge_pd(val2, other.val2),
+            _mm_cmpge_pd(val3, other.val3),
+            _mm_cmpge_pd(val4, other.val4));
     }
 
     inline

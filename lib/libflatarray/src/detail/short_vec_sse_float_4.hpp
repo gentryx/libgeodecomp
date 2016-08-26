@@ -86,6 +86,15 @@ public:
     short_vec(const sqrt_reference<float, 4>& other);
 
     inline
+    bool any() const
+    {
+        __m128 buf1 = _mm_shuffle_ps(val1, val1, (3 << 2) | (2 << 0));
+        buf1 = _mm_or_ps(val1, buf1);
+        __m128 buf2 = _mm_shuffle_ps(buf1, buf1, (1 << 0));
+        return _mm_cvtss_f32(buf1) || _mm_cvtss_f32(buf2);
+    }
+
+    inline
     void operator-=(const short_vec<float, 4>& other)
     {
         val1 = _mm_sub_ps(val1, other.val1);
@@ -142,6 +151,41 @@ public:
 
     inline
     short_vec<float, 4> operator/(const sqrt_reference<float, 4>& other) const;
+
+    inline
+    short_vec<float, 4> operator<(const short_vec<float, 4>& other) const
+    {
+        return short_vec<float, 4>(
+            _mm_cmplt_ps(val1, other.val1));
+    }
+
+    inline
+    short_vec<float, 4> operator<=(const short_vec<float, 4>& other) const
+    {
+        return short_vec<float, 4>(
+            _mm_cmple_ps(val1, other.val1));
+    }
+
+    inline
+    short_vec<float, 4> operator==(const short_vec<float, 4>& other) const
+    {
+        return short_vec<float, 4>(
+            _mm_cmpeq_ps(val1, other.val1));
+    }
+
+    inline
+    short_vec<float, 4> operator>(const short_vec<float, 4>& other) const
+    {
+        return short_vec<float, 4>(
+            _mm_cmpgt_ps(val1, other.val1));
+    }
+
+    inline
+    short_vec<float, 4> operator>=(const short_vec<float, 4>& other) const
+    {
+        return short_vec<float, 4>(
+            _mm_cmpge_ps(val1, other.val1));
+    }
 
     inline
     short_vec<float, 4> sqrt() const

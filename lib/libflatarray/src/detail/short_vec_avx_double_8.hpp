@@ -79,6 +79,23 @@ public:
     }
 
     inline
+    bool any() const
+    {
+        __m256d buf0 = _mm256_or_pd(val1, val2);
+        // merge both 128-bit lanes of AVX register:
+        __m128d buf1 = _mm_or_pd(
+            _mm256_extractf128_pd(buf0, 0),
+            _mm256_extractf128_pd(buf0, 1));
+        // shuffle upper 64-bit half down to first 64 bits so we can
+        // "or" both together:
+        __m128d buf2 = _mm_shuffle_pd(buf1, buf1, 1 << 0);
+        buf2 = _mm_or_pd(buf1, buf2);
+        // another shuffle to extract the upper 64-bit half:
+        buf1 = _mm_shuffle_pd(buf2, buf2, 1 << 0);
+        return _mm_cvtsd_f64(buf1) || _mm_cvtsd_f64(buf2);
+    }
+
+    inline
     short_vec<double, 8> operator-(const short_vec<double, 8>& other) const
     {
         return short_vec<double, 8>(
@@ -129,6 +146,46 @@ public:
         return short_vec<double, 8>(
             _mm256_div_pd(val1, other.val1),
             _mm256_div_pd(val2, other.val2));
+    }
+
+    inline
+    short_vec<double, 8> operator<(const short_vec<double, 8>& other) const
+    {
+        return short_vec<double, 8>(
+            _mm256_cmp_pd(val1, other.val1, _CMP_LT_OS),
+            _mm256_cmp_pd(val2, other.val2, _CMP_LT_OS));
+    }
+
+    inline
+    short_vec<double, 8> operator<=(const short_vec<double, 8>& other) const
+    {
+        return short_vec<double, 8>(
+            _mm256_cmp_pd(val1, other.val1, _CMP_LE_OS),
+            _mm256_cmp_pd(val2, other.val2, _CMP_LE_OS));
+    }
+
+    inline
+    short_vec<double, 8> operator==(const short_vec<double, 8>& other) const
+    {
+        return short_vec<double, 8>(
+            _mm256_cmp_pd(val1, other.val1, _CMP_EQ_OQ),
+            _mm256_cmp_pd(val2, other.val2, _CMP_EQ_OQ));
+    }
+
+    inline
+    short_vec<double, 8> operator>(const short_vec<double, 8>& other) const
+    {
+        return short_vec<double, 8>(
+            _mm256_cmp_pd(val1, other.val1, _CMP_GT_OS),
+            _mm256_cmp_pd(val2, other.val2, _CMP_GT_OS));
+    }
+
+    inline
+    short_vec<double, 8> operator>=(const short_vec<double, 8>& other) const
+    {
+        return short_vec<double, 8>(
+            _mm256_cmp_pd(val1, other.val1, _CMP_GE_OS),
+            _mm256_cmp_pd(val2, other.val2, _CMP_GE_OS));
     }
 
     inline
