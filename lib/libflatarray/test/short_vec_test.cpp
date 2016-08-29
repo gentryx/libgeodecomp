@@ -181,6 +181,22 @@ void testImplementationReal()
         TEST_REAL_ACCURACY((i + 0.2) / std::sqrt(double(i + 0.1)), vec2[i], 0.0035);
     }
 
+    // test "/= sqrt()"
+    for (int i = 0; i < numElements; ++i) {
+        vec2[i] = i + 0.2;
+    }
+    for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
+        ShortVec v = &vec1[i];
+        ShortVec w = &vec2[i];
+        w /= sqrt(v);
+        &vec2[i] << w;
+    }
+    for (int i = 0; i < numElements; ++i) {
+        // the expression "foo / sqrt(bar)" will again result in an
+        // estimated result for single precision floats, so lower accuracy is acceptable:
+        TEST_REAL_ACCURACY((i + 0.2) / std::sqrt(double(i + 0.1)), vec2[i], 0.0035);
+    }
+
     // test string conversion
     for (int i = 0; i < ShortVec::ARITY; ++i) {
         vec1[i] = i + 0.1;
@@ -543,7 +559,7 @@ void testImplementationInt()
 
     // test /
     for (int i = 0; i < numElements; ++i) {
-        vec1[i] = 4 * (i + 1);
+        vec1[i] = 4 * (i + 1) * (i + 1);
         vec2[i] = (i + 1);
     }
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
@@ -552,12 +568,12 @@ void testImplementationInt()
         &vec2[i] << (v / w);
     }
     for (int i = 0; i < numElements; ++i) {
-        BOOST_TEST_EQ(4, vec2[i]);
+        BOOST_TEST_EQ(4 * (i + 1), vec2[i]);
     }
 
     // test /=
     for (int i = 0; i < numElements; ++i) {
-        vec1[i] = 4 * (i + 1);
+        vec1[i] = 4 * (i + 1) * (i + 1);
         vec2[i] = (i + 1);
     }
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
@@ -567,7 +583,7 @@ void testImplementationInt()
         &vec2[i] << v;
     }
     for (int i = 0; i < numElements; ++i) {
-        BOOST_TEST_EQ(4, vec2[i]);
+        BOOST_TEST_EQ(4 * (i + 1), vec2[i]);
     }
 
     // test sqrt()
@@ -585,7 +601,7 @@ void testImplementationInt()
     // test "/ sqrt()"
     for (int i = 0; i < numElements; ++i) {
         vec1[i] = (i + 1) * (i + 1);
-        vec2[i] = (i + 1) * 2;
+        vec2[i] = (i + 1) * (i + 1) * 2;
     }
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -593,7 +609,22 @@ void testImplementationInt()
         &vec2[i] << w / sqrt(v);
     }
     for (int i = 0; i < numElements; ++i) {
-        BOOST_TEST_EQ(2, vec2[i]);
+        BOOST_TEST_EQ(2 * (i + 1), vec2[i]);
+    }
+
+    // test "/= sqrt()"
+    for (int i = 0; i < numElements; ++i) {
+        vec1[i] = (i + 1) * (i + 1);
+        vec2[i] = (i + 1) * (i + 1) * 2;
+    }
+    for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
+        ShortVec v = &vec1[i];
+        ShortVec w = &vec2[i];
+        w /= sqrt(v);
+        &vec2[i] << w;
+    }
+    for (int i = 0; i < numElements; ++i) {
+        BOOST_TEST_EQ(2 * (i + 1), vec2[i]);
     }
 
     // test string conversion
