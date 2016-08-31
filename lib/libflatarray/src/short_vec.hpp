@@ -10,6 +10,51 @@
 
 namespace LibFlatArray {
 
+template<typename CARGO, int ARITY>
+class short_vec;
+
+template<typename CARGO, int ARITY >
+inline bool any(const short_vec<CARGO, ARITY>& vec)
+{
+    return vec.any();
+}
+
+inline bool any(unsigned mask)
+{
+    return mask;
+}
+
+inline bool any(unsigned short mask)
+{
+    return mask;
+}
+
+inline bool any(unsigned char mask)
+{
+    return mask;
+}
+
+template<typename CARGO, int ARITY >
+inline CARGO get(const short_vec<CARGO, ARITY>& vec, const int i)
+{
+    return vec.get(i);
+}
+
+inline bool get(unsigned mask, const int i)
+{
+    return (mask >> i) & 1;
+}
+
+inline bool get(unsigned short mask, const int i)
+{
+    return (mask >> i) & 1;
+}
+
+inline bool get(unsigned char mask, const int i)
+{
+    return (mask >> i) & 1;
+}
+
 class short_vec_strategy
 {
 public:
@@ -153,7 +198,7 @@ public:
 #include <libflatarray/detail/short_vec_sse_int_4.hpp>
 #include <libflatarray/detail/short_vec_sse_int_8.hpp>
 #include <libflatarray/detail/short_vec_sse_int_16.hpp>
-// fixme: #include <libflatarray/detail/short_vec_sse_int_32.hpp>
+#include <libflatarray/detail/short_vec_sse_int_32.hpp>
 
 #include <libflatarray/detail/short_vec_avx_int_8.hpp>
 #include <libflatarray/detail/short_vec_avx_int_16.hpp>
@@ -176,7 +221,7 @@ public:
 #include <libflatarray/detail/short_vec_qpx_double_4.hpp>
 #include <libflatarray/detail/short_vec_qpx_double_8.hpp>
 #include <libflatarray/detail/short_vec_qpx_double_16.hpp>
-// fixme: #include <libflatarray/detail/short_vec_qpx_double_32.hpp>
+#include <libflatarray/detail/short_vec_qpx_double_32.hpp>
 
 #include <libflatarray/detail/short_vec_neon_float_4.hpp>
 #include <libflatarray/detail/short_vec_neon_float_8.hpp>

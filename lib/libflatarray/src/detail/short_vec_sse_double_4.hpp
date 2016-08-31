@@ -11,8 +11,7 @@
 
 #if (LIBFLATARRAY_WIDEST_VECTOR_ISA == LIBFLATARRAY_SSE) ||     \
     (LIBFLATARRAY_WIDEST_VECTOR_ISA == LIBFLATARRAY_SSE2) ||    \
-    (LIBFLATARRAY_WIDEST_VECTOR_ISA == LIBFLATARRAY_SSE4_1) ||  \
-    (LIBFLATARRAY_WIDEST_VECTOR_ISA == LIBFLATARRAY_AVX512F)
+    (LIBFLATARRAY_WIDEST_VECTOR_ISA == LIBFLATARRAY_SSE4_1)
 
 
 #include <emmintrin.h>
@@ -39,7 +38,7 @@ class short_vec<double, 4>
 {
 public:
     static const int ARITY = 4;
-
+    typedef short_vec<double, 4> mask_type;
     typedef short_vec_strategy::sse strategy;
 
     template<typename _CharT, typename _Traits>
@@ -81,6 +80,26 @@ public:
         __m128d buf2 = _mm_shuffle_pd(buf1, buf1, 1);
 
         return _mm_cvtsd_f64(buf1) || _mm_cvtsd_f64(buf2);
+    }
+
+    inline
+    double get(int i) const
+    {
+        __m128d buf;
+        if (i < 2) {
+            buf = val1;
+        } else {
+            buf = val2;
+        }
+
+        i &= 1;
+
+        if (i == 0) {
+            return _mm_cvtsd_f64(buf);
+        }
+
+        buf = _mm_shuffle_pd(buf, buf, 1);
+        return _mm_cvtsd_f64(buf);
     }
 
     inline

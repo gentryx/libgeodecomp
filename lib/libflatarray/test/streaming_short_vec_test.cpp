@@ -22,10 +22,12 @@
 
 namespace LibFlatArray {
 
+#define SHORT_VEC_TEMPLATE short_vec
+
 template<typename CARGO, int ARITY>
 void testImplementationReal()
 {
-    typedef streaming_short_vec<CARGO, ARITY> ShortVec;
+    typedef SHORT_VEC_TEMPLATE<CARGO, ARITY> ShortVec;
     int numElements = ShortVec::ARITY * 10;
 
     std::vector<CARGO, aligned_allocator<CARGO, 64> > vec1(numElements);
@@ -174,6 +176,22 @@ void testImplementationReal()
         ShortVec v = &vec1[i];
         ShortVec w = &vec2[i];
         &vec2[i] << w / sqrt(v);
+    }
+    for (int i = 0; i < numElements; ++i) {
+        // the expression "foo / sqrt(bar)" will again result in an
+        // estimated result for single precision floats, so lower accuracy is acceptable:
+        TEST_REAL_ACCURACY((i + 0.2) / std::sqrt(double(i + 0.1)), vec2[i], 0.0035);
+    }
+
+    // test "/= sqrt()"
+    for (int i = 0; i < numElements; ++i) {
+        vec2[i] = i + 0.2;
+    }
+    for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
+        ShortVec v = &vec1[i];
+        ShortVec w = &vec2[i];
+        w /= sqrt(v);
+        &vec2[i] << w;
     }
     for (int i = 0; i < numElements; ++i) {
         // the expression "foo / sqrt(bar)" will again result in an
@@ -344,12 +362,99 @@ void testImplementationReal()
             TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
         }
     }
+
+    // test comparison
+    {
+        for (int test_value = 0; test_value <= ARITY; ++test_value) {
+            std::vector<CARGO, aligned_allocator<CARGO, 64> > array1(ARITY);
+            std::vector<CARGO, aligned_allocator<CARGO, 64> > array2(ARITY);
+
+            for (int i = 0; i < ARITY; ++i) {
+                array1[i] = i;
+                array2[i] = test_value;
+            }
+
+            ShortVec v1(&array1[0]);
+            ShortVec v2(&array2[0]);
+            typename ShortVec::mask_type res;
+
+            // test operator<()
+            res = (v1 < v2);
+
+            for (int i = 0; i < ARITY; ++i) {
+                if (i < test_value) {
+                    BOOST_TEST(get(res, i) != 0);
+                } else {
+                    BOOST_TEST(get(res, i) == 0);
+                }
+            }
+
+            // test reduction to bool:
+            bool actual = any(res);
+            bool expected = (test_value > 0);
+            BOOST_TEST_EQ(actual, expected);
+
+            // test operator<=()
+            res = (v1 <= v2);
+
+            for (int i = 0; i < ARITY; ++i) {
+                if (i <= test_value) {
+                    BOOST_TEST(get(res, i) != 0);
+                } else {
+                    BOOST_TEST(get(res, i) == 0);
+                }
+            }
+
+            // test operator==()
+            res = (v1 == v2);
+
+            for (int i = 0; i < ARITY; ++i) {
+                if (i == test_value) {
+                    BOOST_TEST(get(res, i) != 0);
+                } else {
+                    BOOST_TEST(get(res, i) == 0);
+                }
+            }
+
+            // test reduction to bool:
+            actual = any(res);
+            expected = (test_value < ARITY);
+            BOOST_TEST_EQ(actual, expected);
+
+            // test operator>()
+            res = (v1 > v2);
+
+            for (int i = 0; i < ARITY; ++i) {
+                if (i > test_value) {
+                    BOOST_TEST(get(res, i) != 0);
+                } else {
+                    BOOST_TEST(get(res, i) == 0);
+                }
+            }
+
+            // test operator>=()
+            res = (v1 >= v2);
+
+            for (int i = 0; i < ARITY; ++i) {
+                if (i >= test_value) {
+                    BOOST_TEST(get(res, i) != 0);
+                } else {
+                    BOOST_TEST(get(res, i) == 0);
+                }
+            }
+
+            // test reduction to bool, again:
+            actual = any(res);
+            expected = (test_value < ARITY);
+            BOOST_TEST_EQ(actual, expected);
+        }
+    }
 }
 
 template<typename CARGO, int ARITY>
 void testImplementationInt()
 {
-    typedef streaming_short_vec<CARGO, ARITY> ShortVec;
+    typedef SHORT_VEC_TEMPLATE<CARGO, ARITY> ShortVec;
     const int numElements = ShortVec::ARITY * 10;
 
     std::vector<CARGO, aligned_allocator<CARGO, 64> > vec1(numElements);
@@ -451,7 +556,7 @@ void testImplementationInt()
 
     // test /
     for (int i = 0; i < numElements; ++i) {
-        vec1[i] = 4 * (i + 1);
+        vec1[i] = 4 * (i + 1) * (i + 1);
         vec2[i] = (i + 1);
     }
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
@@ -460,12 +565,12 @@ void testImplementationInt()
         &vec2[i] << (v / w);
     }
     for (int i = 0; i < numElements; ++i) {
-        BOOST_TEST_EQ(4, vec2[i]);
+        BOOST_TEST_EQ(4 * (i + 1), vec2[i]);
     }
 
     // test /=
     for (int i = 0; i < numElements; ++i) {
-        vec1[i] = 4 * (i + 1);
+        vec1[i] = 4 * (i + 1) * (i + 1);
         vec2[i] = (i + 1);
     }
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
@@ -475,7 +580,7 @@ void testImplementationInt()
         &vec2[i] << v;
     }
     for (int i = 0; i < numElements; ++i) {
-        BOOST_TEST_EQ(4, vec2[i]);
+        BOOST_TEST_EQ(4 * (i + 1), vec2[i]);
     }
 
     // test sqrt()
@@ -493,7 +598,7 @@ void testImplementationInt()
     // test "/ sqrt()"
     for (int i = 0; i < numElements; ++i) {
         vec1[i] = (i + 1) * (i + 1);
-        vec2[i] = (i + 1) * 2;
+        vec2[i] = (i + 1) * (i + 1) * 2;
     }
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
@@ -501,7 +606,22 @@ void testImplementationInt()
         &vec2[i] << w / sqrt(v);
     }
     for (int i = 0; i < numElements; ++i) {
-        BOOST_TEST_EQ(2, vec2[i]);
+        BOOST_TEST_EQ(2 * (i + 1), vec2[i]);
+    }
+
+    // test "/= sqrt()"
+    for (int i = 0; i < numElements; ++i) {
+        vec1[i] = (i + 1) * (i + 1);
+        vec2[i] = (i + 1) * (i + 1) * 3;
+    }
+    for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
+        ShortVec v = &vec1[i];
+        ShortVec w = &vec2[i];
+        w /= sqrt(v);
+        &vec2[i] << w;
+    }
+    for (int i = 0; i < numElements; ++i) {
+        BOOST_TEST_EQ(3 * (i + 1), vec2[i]);
     }
 
     // test string conversion
@@ -698,70 +818,69 @@ void checkForStrategy(STRATEGY, STRATEGY)
 
 ADD_TEST(TestImplementationStrategyDouble)
 {
-    // fixme: doc!
+    // 1x:
 #define EXPECTED_TYPE short_vec_strategy::scalar
-    checkForStrategy(streaming_short_vec<double, 1>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<double, 1>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 2x:
 #ifdef __SSE__
-#define EXPECTED_TYPE short_vec_strategy::sse
+#  define EXPECTED_TYPE short_vec_strategy::sse
 #else
-#define EXPECTED_TYPE short_vec_strategy::scalar
+#  define EXPECTED_TYPE short_vec_strategy::scalar
 #endif
-    checkForStrategy(streaming_short_vec<double, 2>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<double, 2>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 4x:
 #ifdef __VECTOR4DOUBLE___
-#define EXPECTED_TYPE short_vec_strategy::qpx
+#  define EXPECTED_TYPE short_vec_strategy::qpx
 #endif
-
 #ifdef __SSE__
 #  ifdef __AVX__
-#  define EXPECTED_TYPE short_vec_strategy::avx
+#    define EXPECTED_TYPE short_vec_strategy::avx
 #  else
-#  define EXPECTED_TYPE short_vec_strategy::sse
+#    define EXPECTED_TYPE short_vec_strategy::sse
 #  endif
 #else
-#define EXPECTED_TYPE short_vec_strategy::scalar
+#  define EXPECTED_TYPE short_vec_strategy::scalar
 #endif
-    checkForStrategy(streaming_short_vec<double, 4>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<double, 4>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 8x:
 #ifdef __MIC__
-#define EXPECTED_TYPE short_vec_strategy::mic
+#  define EXPECTED_TYPE short_vec_strategy::mic
 #endif
-
 #ifdef __VECTOR4DOUBLE___
-#define EXPECTED_TYPE short_vec_strategy::qpx
+#  define EXPECTED_TYPE short_vec_strategy::qpx
 #endif
-
 #ifdef __SSE__
 #  ifdef __AVX__
 #    ifdef __AVX512F__
-#    define EXPECTED_TYPE short_vec_strategy::avx512
+#      define EXPECTED_TYPE short_vec_strategy::avx512f
 #    else
-#    define EXPECTED_TYPE short_vec_strategy::avx
+#      define EXPECTED_TYPE short_vec_strategy::avx
 #    endif
 #  else
-#  define EXPECTED_TYPE short_vec_strategy::sse
+#    define EXPECTED_TYPE short_vec_strategy::sse
 #  endif
 #else
-#define EXPECTED_TYPE short_vec_strategy::scalar
+#  define EXPECTED_TYPE short_vec_strategy::scalar
 #endif
-    checkForStrategy(streaming_short_vec<double, 8>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<double, 8>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 16x:
 #ifdef __MIC__
-#define EXPECTED_TYPE short_vec_strategy::mic
+#  define EXPECTED_TYPE short_vec_strategy::mic
 #endif
-
 #ifdef __VECTOR4DOUBLE___
-#define EXPECTED_TYPE short_vec_strategy::qpx
+#  define EXPECTED_TYPE short_vec_strategy::qpx
 #endif
-
 #ifdef __AVX__
 #  ifdef __AVX512F__
-#    define EXPECTED_TYPE short_vec_strategy::avx512
+#    define EXPECTED_TYPE short_vec_strategy::avx512f
 #  else
 #    define EXPECTED_TYPE short_vec_strategy::avx
 #  endif
@@ -772,19 +891,18 @@ ADD_TEST(TestImplementationStrategyDouble)
 #    define EXPECTED_TYPE short_vec_strategy::scalar
 #  endif
 #endif
-    checkForStrategy(streaming_short_vec<double, 16>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<double, 16>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 32x:
 #ifdef __MIC__
-#define EXPECTED_TYPE short_vec_strategy::mic
+#  define EXPECTED_TYPE short_vec_strategy::mic
 #endif
-
 #ifdef __VECTOR4DOUBLE___
-#define EXPECTED_TYPE short_vec_strategy::qpx
+#  define EXPECTED_TYPE short_vec_strategy::qpx
 #endif
-
 #ifdef __AVX512F__
-#define EXPECTED_TYPE short_vec_strategy::avx512
+#  define EXPECTED_TYPE short_vec_strategy::avx512f
 #else
 #  ifdef __AVX__
 #    define EXPECTED_TYPE short_vec_strategy::avx
@@ -796,59 +914,57 @@ ADD_TEST(TestImplementationStrategyDouble)
 #    endif
 #  endif
 #endif
-    checkForStrategy(streaming_short_vec<double, 32>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<double, 32>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 }
 
 ADD_TEST(TestImplementationStrategyFloat)
 {
-    // fixme: doc!
+    // 1x, 2x:
 #define EXPECTED_TYPE short_vec_strategy::scalar
-    checkForStrategy(streaming_short_vec<float, 1>::strategy(), EXPECTED_TYPE());
-    checkForStrategy(streaming_short_vec<float, 2>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<float, 1>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<float, 2>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 4x:
 #ifdef __SSE__
-#define EXPECTED_TYPE short_vec_strategy::sse
-
+#  define EXPECTED_TYPE short_vec_strategy::sse
 #elif __ARM_NEON__
-#define EXPECTED_TYPE short_vec_strategy::neon
-
+#  define EXPECTED_TYPE short_vec_strategy::neon
 #else
-#define EXPECTED_TYPE short_vec_strategy::scalar
+#  define EXPECTED_TYPE short_vec_strategy::scalar
 #endif
-checkForStrategy(streaming_short_vec<float, 4>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<float, 4>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 8x:
 #ifdef __SSE__
 #  ifdef __AVX__
-#  define EXPECTED_TYPE short_vec_strategy::avx
+#    define EXPECTED_TYPE short_vec_strategy::avx
 #  else
-#  define EXPECTED_TYPE short_vec_strategy::sse
+#    define EXPECTED_TYPE short_vec_strategy::sse
 #  endif
 #endif
-
 #ifdef __ARM_NEON__
-#define EXPECTED_TYPE short_vec_strategy::neon
+#  define EXPECTED_TYPE short_vec_strategy::neon
 #endif
-
 #ifndef EXPECTED_TYPE
-#define EXPECTED_TYPE short_vec_strategy::scalar
+#  define EXPECTED_TYPE short_vec_strategy::scalar
 #endif
-    checkForStrategy(streaming_short_vec<float, 8>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<float, 8>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 16x:
 #ifdef __MIC__
-#define EXPECTED_TYPE short_vec_strategy::mic
+#  define EXPECTED_TYPE short_vec_strategy::mic
 #endif
 #ifdef __ARM_NEON__
-#define EXPECTED_TYPE short_vec_strategy::neon
+#  define EXPECTED_TYPE short_vec_strategy::neon
 #endif
-
 #ifdef __SSE__
 #  ifdef __AVX__
 #    ifdef __AVX512F__
-#      define EXPECTED_TYPE short_vec_strategy::avx512
+#      define EXPECTED_TYPE short_vec_strategy::avx512f
 #    else
 #      define EXPECTED_TYPE short_vec_strategy::avx
 #    endif
@@ -856,23 +972,22 @@ checkForStrategy(streaming_short_vec<float, 4>::strategy(), EXPECTED_TYPE());
 #    define EXPECTED_TYPE short_vec_strategy::sse
 #  endif
 #endif
-
 #ifndef EXPECTED_TYPE
-#define EXPECTED_TYPE short_vec_strategy::scalar
+#  define EXPECTED_TYPE short_vec_strategy::scalar
 #endif
-    checkForStrategy(streaming_short_vec<float, 16>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<float, 16>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 32x:
 #ifdef __MIC__
-#define EXPECTED_TYPE short_vec_strategy::mic
+#  define EXPECTED_TYPE short_vec_strategy::mic
 #endif
 #ifdef __ARM_NEON__
-#define EXPECTED_TYPE short_vec_strategy::neon
+#  define EXPECTED_TYPE short_vec_strategy::neon
 #endif
-
 #ifdef __AVX__
 #  ifdef __AVX512F__
-#    define EXPECTED_TYPE short_vec_strategy::avx512
+#    define EXPECTED_TYPE short_vec_strategy::avx512f
 #  else
 #    define EXPECTED_TYPE short_vec_strategy::avx
 #  endif
@@ -881,68 +996,75 @@ checkForStrategy(streaming_short_vec<float, 4>::strategy(), EXPECTED_TYPE());
 #    define EXPECTED_TYPE short_vec_strategy::sse
 #  endif
 #endif
-
 #ifndef EXPECTED_TYPE
-#define EXPECTED_TYPE short_vec_strategy::scalar
+#  define EXPECTED_TYPE short_vec_strategy::scalar
 #endif
-    checkForStrategy(streaming_short_vec<float, 32>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<float, 32>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 }
 
 ADD_TEST(TestImplementationStrategyInt)
 {
-    // fixme: doc!
+    // 1x, 2x:
 #define EXPECTED_TYPE short_vec_strategy::scalar
-    checkForStrategy(streaming_short_vec<int, 1>::strategy(), EXPECTED_TYPE());
-    checkForStrategy(streaming_short_vec<int, 2>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<int, 1>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<int, 2>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 4x:
 #ifdef __SSE2__
-#define EXPECTED_TYPE short_vec_strategy::sse
+#  define EXPECTED_TYPE short_vec_strategy::sse
 #else
-#define EXPECTED_TYPE short_vec_strategy::scalar
+#  define EXPECTED_TYPE short_vec_strategy::scalar
 #endif
-    checkForStrategy(streaming_short_vec<int, 4>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<int, 4>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 8x:
 #ifdef __AVX2__
-#define EXPECTED_TYPE short_vec_strategy::avx2
+#  define EXPECTED_TYPE short_vec_strategy::avx2
 #else
 #  ifdef __SSE2__
-#  define EXPECTED_TYPE short_vec_strategy::sse
+#    define EXPECTED_TYPE short_vec_strategy::sse
 #  else
-#  define EXPECTED_TYPE short_vec_strategy::scalar
+#    define EXPECTED_TYPE short_vec_strategy::scalar
 #  endif
 #endif
-    checkForStrategy(streaming_short_vec<int, 8>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<int, 8>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 16x:
 #ifdef __AVX512F__
-#define EXPECTED_TYPE short_vec_strategy::avx512
+#  define EXPECTED_TYPE short_vec_strategy::avx512f
 #else
 #  ifdef __AVX2__
-#  define EXPECTED_TYPE short_vec_strategy::avx2
+#    define EXPECTED_TYPE short_vec_strategy::avx2
 #  else
 #    ifdef __SSE2__
-#    define EXPECTED_TYPE short_vec_strategy::sse
+#      define EXPECTED_TYPE short_vec_strategy::sse
 #    else
-#    define EXPECTED_TYPE short_vec_strategy::scalar
+#      define EXPECTED_TYPE short_vec_strategy::scalar
 #    endif
 #  endif
 #endif
-    checkForStrategy(streaming_short_vec<int, 16>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<int, 16>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+    // 32x:
 #ifdef __AVX512F__
-#define EXPECTED_TYPE short_vec_strategy::avx512
+#  define EXPECTED_TYPE short_vec_strategy::avx512f
 #else
 #  ifdef __AVX2__
-#  define EXPECTED_TYPE short_vec_strategy::avx2
+#    define EXPECTED_TYPE short_vec_strategy::avx2
 #  else
-#  define EXPECTED_TYPE short_vec_strategy::scalar
+#    ifdef __SSE__
+#      define EXPECTED_TYPE short_vec_strategy::sse
+#    else
+#      define EXPECTED_TYPE short_vec_strategy::scalar
+#    endif
 #  endif
 #endif
-    checkForStrategy(streaming_short_vec<int, 32>::strategy(), EXPECTED_TYPE());
+    checkForStrategy(SHORT_VEC_TEMPLATE<int, 32>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 }
 
