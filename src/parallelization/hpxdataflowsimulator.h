@@ -207,6 +207,17 @@ public:
 
                 using std::swap;
                 swap(thisTimeStepFuture, lastTimeStepFuture);
+
+		// HPX Sliding semaphore
+		std::uint64_t chunkSize = 1000;
+		hpx::lcos::local::sliding_semaphore sem(chunkSize);
+
+		if ((globalNanoStep % chunkSize) == 0) {
+		  // inform semaphore
+		}
+		
+		sem.wait(globalNanoStep);
+
             }
         }
 
@@ -379,6 +390,7 @@ public:
         lastTimeStepFutures.reserve(localRegion.size());
         int maxTimeSteps = initializer->maxSteps();
 
+	/*
         for (int startStep = 0; startStep < maxTimeSteps; startStep += chunkSize) {
             int endStep = std::min(maxTimeSteps, startStep + chunkSize);
 
@@ -388,6 +400,15 @@ public:
             hpx::when_all(lastTimeStepFutures).get();
             lastTimeStepFutures.clear();
         }
+	*/
+
+	// HPX Sliding semaphore:
+	int startStep = 0;
+	for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+	  lastTimeStepFutures << components[i->x()].setupDataflow(startStep,maxTimeSteps);
+	}
+	
+
     }
 
     std::vector<Chronometer> gatherStatistics()
