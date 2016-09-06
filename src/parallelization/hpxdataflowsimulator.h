@@ -162,10 +162,8 @@ public:
         hpx::shared_future<void>(hpx::when_all(remoteIDFutures)).get(); // swallowing exceptions?
     }
 
-    hpx::shared_future<void> setupDataflow(int startStep, int endStep)
+    hpx::shared_future<void> setupDataflow(hpx::shared_future<void> lastTimeStepFuture, int startStep, int endStep)
     {
-        lastTimeStepFuture = hpx::make_ready_future();
-
         if (startStep == 0) {
             setupRemoteReceiverIDs();
         }
@@ -207,17 +205,6 @@ public:
 
                 using std::swap;
                 swap(thisTimeStepFuture, lastTimeStepFuture);
-
-		// HPX Sliding semaphore
-		std::uint64_t chunkSize = 1000;
-		hpx::lcos::local::sliding_semaphore sem(chunkSize);
-
-		if ((globalNanoStep % chunkSize) == 0) {
-		  // inform semaphore
-		}
-		
-		sem.wait(globalNanoStep);
-
             }
         }
 
@@ -244,7 +231,6 @@ public:
     }
 
 private:
-    hpx::shared_future<void> lastTimeStepFuture;
     std::string basename;
     std::vector<int> neighbors;
     typename SharedPtr<GridType>::Type grid;
@@ -387,7 +373,9 @@ public:
         typedef hpx::shared_future<void> UpdateResultFuture;
         typedef std::vector<UpdateResultFuture> TimeStepFutures;
         TimeStepFutures lastTimeStepFutures;
+        TimeStepFutures nextTimeStepFutures;
         lastTimeStepFutures.reserve(localRegion.size());
+        nextTimeStepFutures.reserve(localRegion.size());
         int maxTimeSteps = initializer->maxSteps();
 
 	/*
@@ -402,13 +390,34 @@ public:
         }
 	*/
 
-	// HPX Sliding semaphore:
-	int startStep = 0;
-	for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-	  lastTimeStepFutures << components[i->x()].setupDataflow(startStep,maxTimeSteps);
-	}
-	
+        // HPX Sliding semaphore
+        int chunkSize = 1000;
+        hpx::lcos::local::sliding_semaphore semaphore(chunkSize);
 
+        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+            lastTimeStepFutures << hpx::make_ready_future();
+        }
+
+        for (int startStep = 0; startStep < maxTimeSteps; startStep += chunkSize) {
+            int endStep = std::min(maxTimeSteps, startStep + chunkSize);
+            std::size_t index = 0;
+            for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
+                nextTimeStepFutures << components[i->x()].setupDataflow(lastTimeStepFutures[index], startStep, endStep);
+                ++index;
+            }
+
+            nextTimeStepFutures[0].then(
+                [&semaphore, startStep](hpx::shared_future<void>) {
+                    // inform semaphore about new lower limit
+                    semaphore.signal(startStep);
+                });
+
+            semaphore.wait(startStep);
+            using std::swap;
+            swap(lastTimeStepFutures, nextTimeStepFutures);
+        }
+
+        hpx::when_all(lastTimeStepFutures).get();
     }
 
     std::vector<Chronometer> gatherStatistics()
