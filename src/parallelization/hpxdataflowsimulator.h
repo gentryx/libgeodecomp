@@ -392,7 +392,10 @@ public:
 
         // HPX Sliding semaphore
         int chunkSize = 1000;
-        hpx::lcos::local::sliding_semaphore semaphore(chunkSize);
+        // allow larger look-ahead for dataflow generation to better
+        // overlap calculation and computation:
+        int lookAheadDistance = 2 * chunkSize;
+        hpx::lcos::local::sliding_semaphore semaphore(lookAheadDistance);
 
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
             lastTimeStepFutures << hpx::make_ready_future();
