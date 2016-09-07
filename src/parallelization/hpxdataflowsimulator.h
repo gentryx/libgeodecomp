@@ -372,23 +372,10 @@ public:
 
         typedef hpx::shared_future<void> UpdateResultFuture;
         typedef std::vector<UpdateResultFuture> TimeStepFutures;
-        TimeStepFutures lastTimeStepFutures;
+        TimeStepFutures lastTimeStepFutures(localRegion.size(), hpx::make_ready_future());
         TimeStepFutures nextTimeStepFutures;
-        lastTimeStepFutures.reserve(localRegion.size());
         nextTimeStepFutures.reserve(localRegion.size());
         int maxTimeSteps = initializer->maxSteps();
-
-	/*
-        for (int startStep = 0; startStep < maxTimeSteps; startStep += chunkSize) {
-            int endStep = std::min(maxTimeSteps, startStep + chunkSize);
-
-            for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-                lastTimeStepFutures << components[i->x()].setupDataflow(startStep, endStep);
-            }
-            hpx::when_all(lastTimeStepFutures).get();
-            lastTimeStepFutures.clear();
-        }
-	*/
 
         // HPX Sliding semaphore
         int chunkSize = 1000;
@@ -396,10 +383,6 @@ public:
         // overlap calculation and computation:
         int lookAheadDistance = 2 * chunkSize;
         hpx::lcos::local::sliding_semaphore semaphore(lookAheadDistance);
-
-        for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-            lastTimeStepFutures << hpx::make_ready_future();
-        }
 
         for (int startStep = 0; startStep < maxTimeSteps; startStep += chunkSize) {
             int endStep = std::min(maxTimeSteps, startStep + chunkSize);
