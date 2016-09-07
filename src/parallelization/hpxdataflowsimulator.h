@@ -418,6 +418,7 @@ public:
             semaphore.wait(startStep);
             using std::swap;
             swap(lastTimeStepFutures, nextTimeStepFutures);
+            nextTimeStepFutures.clear();
         }
 
         hpx::when_all(lastTimeStepFutures).get();
