@@ -22,9 +22,6 @@
 
 namespace LibFlatArray {
 
-template<typename CARGO, int ARITY, bool INCREASE_PRECISION = 1>
-class short_vec;
-
 template<>
 class short_vec<float, 16>
 {
@@ -123,8 +120,7 @@ public:
     {
         short_vec<float, 16> ret(
             vmulq_f32(val1, other.val1), vmulq_f32(val2, other.val2),
-            vmulq_f32(val3, other.val3), vmulq_f32(val4, other.val4)
-            );
+            vmulq_f32(val3, other.val3), vmulq_f32(val4, other.val4));
         return ret;
     }
 
@@ -147,10 +143,10 @@ public:
         // use a couple Newton-Raphson steps to refine the estimate.  Depending on your
         // application's accuracy requirements, you may be able to get away with only
         // one refinement (instead of the two used here).  Be sure to test!
-        if (INCREASE_PRECISION)
-            iterations = 2;
-        for (int i = 0; i < iterations; ++i)
-        {
+#ifdef LIBFLATARRAY_WITH_INCREASED_PRECISION
+        iterations = 2;
+#endif
+        for (int i = 0; i < iterations; ++i) {
             reciprocal1 = vmulq_f32(vrecpsq_f32(other.val1, reciprocal1), reciprocal1);
             reciprocal2 = vmulq_f32(vrecpsq_f32(other.val2, reciprocal2), reciprocal2);
             reciprocal3 = vmulq_f32(vrecpsq_f32(other.val3, reciprocal3), reciprocal3);
@@ -183,10 +179,10 @@ public:
         // use a couple Newton-Raphson steps to refine the estimate.  Depending on your
         // application's accuracy requirements, you may be able to get away with only
         // one refinement (instead of the two used here).  Be sure to test!
-        if (INCREASE_PRECISION)
-            iterations = 2;
-        for (int i = 0; i < iterations; ++i)
-        {
+#ifdef LIBFLATARRAY_WITH_INCREASED_PRECISION
+        iterations = 2;
+#endif
+        for (int i = 0; i < iterations; ++i) {
             reciprocal1 = vmulq_f32(vrecpsq_f32(other.val1, reciprocal1), reciprocal1);
             reciprocal2 = vmulq_f32(vrecpsq_f32(other.val2, reciprocal2), reciprocal2);
             reciprocal3 = vmulq_f32(vrecpsq_f32(other.val3, reciprocal3), reciprocal3);
@@ -243,22 +239,23 @@ public:
         // converges to (1/√d) if x0 is the result of VRSQRTE applied to d.
         //
         // Note: The precision did not improve after 2 iterations.
-        if (INCREASE_PRECISION)
-            iterations = 2;
-        for (i = 0; i < iterations; i++) {
-          x1 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x1, x1), val1), x1);
-          x2 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x2, x2), val2), x2);
-          x3 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x3, x3), val3), x3);
-          x4 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x4, x4), val4), x4);
+#ifdef LIBFLATARRAY_WITH_INCREASED_PRECISION
+        iterations = 2;
+#endif
+        for (i = 0; i < iterations; ++i) {
+            x1 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x1, x1), val1), x1);
+            x2 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x2, x2), val2), x2);
+            x3 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x3, x3), val3), x3);
+            x4 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x4, x4), val4), x4);
         }
+
         // sqrt(s) = s * 1/sqrt(s)
         float32x4_t result1 = vmulq_f32(val1, x1);
         float32x4_t result2 = vmulq_f32(val2, x2);
         float32x4_t result3 = vmulq_f32(val3, x3);
         float32x4_t result4 = vmulq_f32(val4, x4);
-        short_vec<float, 16> ret(
-            result1, result2, result3, result4
-            );
+        short_vec<float, 16> ret(result1, result2, result3, result4);
+
         return ret;
     }
 
@@ -304,30 +301,30 @@ public:
         // the mapping between Q registers and D registers
 
         // stnp is for arm 64 (armv16)
-        #if __LP64__
-            register float32x4_t tmp1 asm ("q0");
-            tmp1 = val1;
-            register float32x4_t tmp2 asm ("q1");
-            tmp2 = val2;
-            register float32x4_t tmp3 asm ("q2");
-            tmp3 = val3;
-            register float32x4_t tmp4 asm ("q3");
-            tmp4 = val4;
-            asm("stnp d0, d1, %[store]"
-                :[store] "=m" (data)
+#if __LP64__
+        register float32x4_t tmp1 asm ("q0");
+        tmp1 = val1;
+        register float32x4_t tmp2 asm ("q1");
+        tmp2 = val2;
+        register float32x4_t tmp3 asm ("q2");
+        tmp3 = val3;
+        register float32x4_t tmp4 asm ("q3");
+        tmp4 = val4;
+        asm("stnp d0, d1, %[store]"
+            :[store] "=m" (data)
             );
-            asm("stnp d2, d3, %[store]"
-                :[store] "=m" (data + 4)
+        asm("stnp d2, d3, %[store]"
+            :[store] "=m" (data + 4)
             );
-            asm("stnp d4, d5, %[store]"
-                :[store] "=m" (data + 8)
+        asm("stnp d4, d5, %[store]"
+            :[store] "=m" (data + 8)
             );
-            asm("stnp d6, d7, %[store]"
-                :[store] "=m" (data + 12)
+        asm("stnp d6, d7, %[store]"
+            :[store] "=m" (data + 12)
             );
-        #else
-            store(data);
-        #endif
+#else
+        store(data);
+#endif
     }
 
     // dummy approach. NEON only supports loading in fixed interleaving

@@ -133,6 +133,19 @@ public:
         ++elements;
     }
 
+    // fixme: needs test
+    inline
+    __host__ __device__
+    void clear()
+    {
+        elements = 0;
+    }
+
+    // fixme: add capacity
+    // fixme: add back
+    // fixme: add pop
+    // fixme: add begin()/end()
+
     inline
     __host__ __device__
     void push_back(const CELL& cell)

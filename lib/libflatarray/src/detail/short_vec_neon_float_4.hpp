@@ -22,15 +22,12 @@
 
 namespace LibFlatArray {
 
-template<typename CARGO, int ARITY, bool INCREASE_PRECISION = 1>
-class short_vec;
-
 template<>
 class short_vec<float, 4>
 {
 public:
     static const int ARITY = 4;
-
+    typedef uint32x4_t mask_type;
     typedef short_vec_strategy::neon strategy;
 
     template<typename _CharT, typename _Traits>
@@ -116,8 +113,9 @@ public:
         // application's accuracy requirements, you may be able to get away with only
         // one refinement (instead of the two used here).  Be sure to test!
         reciprocal1 = vmulq_f32(vrecpsq_f32(other.val1, reciprocal1), reciprocal1);
-        if (INCREASE_PRECISION)
-            reciprocal1 = vmulq_f32(vrecpsq_f32(other.val1, reciprocal1), reciprocal1);
+#ifdef LIBFLATARRAY_WITH_INCREASED_PRECISION
+        reciprocal1 = vmulq_f32(vrecpsq_f32(other.val1, reciprocal1), reciprocal1);
+#endif
 
         // and finally, compute a/b = a*(1/b)
         val1 = vmulq_f32(val1, reciprocal1);
@@ -139,14 +137,45 @@ public:
         // application's accuracy requirements, you may be able to get away with only
         // one refinement (instead of the two used here).  Be sure to test!
         reciprocal1 = vmulq_f32(vrecpsq_f32(other.val1, reciprocal1), reciprocal1);
-        if (INCREASE_PRECISION)
-            reciprocal1 = vmulq_f32(vrecpsq_f32(other.val1, reciprocal1), reciprocal1);
+#ifdef LIBFLATARRAY_WITH_INCREASED_PRECISION
+        reciprocal1 = vmulq_f32(vrecpsq_f32(other.val1, reciprocal1), reciprocal1);
+#endif
 
         // and finally, compute a/b = a*(1/b)
         float32x4_t result = vmulq_f32(val1, reciprocal1);
 
         short_vec<float, 4> ret(result);
         return ret;
+    }
+
+    inline
+    uint32x4_t operator<(const short_vec<float, 4>& other) const
+    {
+        return vcltq_f32(val1, other.val1);
+    }
+
+    inline
+    uint32x4_t operator<=(const short_vec<float, 4>& other) const
+    {
+        return vcaleq_f32(val1, other.val1);
+    }
+
+    inline
+    uint32x4_t operator==(const short_vec<float, 4>& other) const
+    {
+        return  vcltq_f32(val1, other.val1);
+    }
+
+    inline
+    uint32x4_t operator>(const short_vec<float, 4>& other) const
+    {
+        return vcgtq_f32(val1, other.val1);
+    }
+
+    inline
+    uint32x4_t operator>=(const short_vec<float, 4>& other) const
+    {
+        return vcgeq_f32(val1, other.val1);
     }
 
     // Copyright (c) 2011, The WebRTC project authors. All rights reserved.
@@ -172,8 +201,9 @@ public:
         //
         // Note: The precision did not improve after 2 iterations.
         x1 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x1, x1), val1), x1);
-        if (INCREASE_PRECISION)
-            x1 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x1, x1), val1), x1);
+#ifdef LIBFLATARRAY_WITH_INCREASED_PRECISION
+        x1 = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x1, x1), val1), x1);
+#endif
         // sqrt(s) = s * 1/sqrt(s)
         return vmulq_f32(val1, x1);
     }
@@ -214,15 +244,15 @@ public:
         // the mapping between Q registers and D registers
 
         // stnp is for arm 64 (armv8)
-        #if __LP64__
-            register float32x4_t val2 asm ("q0");
-            val2 = val1;
-            asm("stnp d0, d1, %[store]"
-                :[store] "=m" (data)
+#if __LP64__
+        register float32x4_t val2 asm ("q0");
+        val2 = val1;
+        asm("stnp d0, d1, %[store]"
+            :[store] "=m" (data)
             );
-        #else
-            store(data);
-        #endif
+#else
+        store(data);
+#endif
     }
 
     // dummy approach. NEON only supports loading in fixed interleaving

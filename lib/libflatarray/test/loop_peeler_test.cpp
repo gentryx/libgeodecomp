@@ -6,7 +6,7 @@
  */
 
 #include <libflatarray/aligned_allocator.hpp>
-#include <libflatarray/macros.hpp>
+#include <libflatarray/loop_peeler.hpp>
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/streaming_short_vec.hpp>
 #include <vector>
@@ -16,7 +16,7 @@
 template<typename SHORT_VEC>
 void scaler(int& i, int endX, double *data, double factor)
 {
-    for (; i < endX - (SHORT_VEC::ARITY - 1); i += SHORT_VEC::ARITY) {
+    for (; i < endX; i += SHORT_VEC::ARITY) {
         SHORT_VEC vec(data + i);
         vec *= factor;
         (data + i) << vec;
@@ -64,6 +64,34 @@ ADD_TEST(TestLoopPeelerInteroperabilityWithStreamingShortVecs)
         BOOST_TEST(expected == foo[i]);
     }
 }
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+
+ADD_TEST(TestCpp14StyleLoopPeeler)
+{
+    int i = 5;
+    int end = 43;
+    std::vector<double, LibFlatArray::aligned_allocator<double, 64> > foo(64, 0);
+
+    LibFlatArray::loop_peeler<LibFlatArray::short_vec<double, 8> >(&i, end, [&foo](auto my_float, int *i, int end) {
+            typedef decltype(my_float) FLOAT;
+            for (; *i < end; *i += FLOAT::ARITY) {
+                &foo[*i] << FLOAT(1.0);
+            }
+        });
+
+    for (int i = 0; i < 5; ++i) {
+        BOOST_TEST(0 == foo[i]);
+    }
+    for (int i = 5; i < 43; ++i) {
+        BOOST_TEST(1 == foo[i]);
+    }
+    for (int i = 43; i < 64; ++i) {
+        BOOST_TEST(0 == foo[i]);
+    }
+}
+
+#endif
 
 int main(int argc, char **argv)
 {
