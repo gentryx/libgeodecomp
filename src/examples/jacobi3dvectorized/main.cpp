@@ -46,7 +46,7 @@ public:
     {
         DOUBLE oneSixth = 1.0 / 6.0;
 
-        for (; x < (endX - DOUBLE::ARITY + 1); x += DOUBLE::ARITY) {
+        for (; x < endX; x += DOUBLE::ARITY) {
             DOUBLE buf = &hood[FixedCoord< 0,  0, -1>()].temp;
             buf += &hood[FixedCoord< 0,  -1,  0>()].temp;
             buf += &hood[FixedCoord<-1,   0,  0>()].temp;
