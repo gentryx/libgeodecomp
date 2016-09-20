@@ -1,5 +1,8 @@
 #include <libgeodecomp/misc/random.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 namespace LibGeoDecomp {
 
 // http://www.math.keio.ac.jp/~matumoto/ver980409.html
@@ -48,10 +51,6 @@ namespace LibGeoDecomp {
 //
 // It would be nice to CC: <Cokus@math.washington.edu> when you write.
 //
-
-#include <stdio.h>
-#include <stdlib.h>
-
 //
 // uint32 must be an unsigned integer type capable of holding at least 32
 // bits; exactly 32 should be fastest, but 64 is better on an Alpha with
