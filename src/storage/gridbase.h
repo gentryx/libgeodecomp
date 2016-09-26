@@ -22,6 +22,9 @@ template<int DIM>
 class LoadSaveRegionCharInterface
 {
 public:
+    virtual ~LoadSaveRegionCharInterface()
+    {}
+
     /**
      * This will typically be implemented by grids with Struct of
      * Arrays (SoA) layout.
