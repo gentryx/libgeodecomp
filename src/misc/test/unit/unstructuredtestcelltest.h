@@ -233,62 +233,58 @@ public:
     void testSoAVariant3()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        // fixme:
+        typedef UnstructuredTestCellSoA3 TestCellType;
+        typedef UnstructuredSoAGrid<TestCellType, 1, double, 8, 64> TestGridType;
 
-        // typedef UnstructuredTestCellSoA3 TestCellType;
-        // typedef UnstructuredSoAGrid<TestCellType, 1, double, 8, 64> TestGridType;
+        UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
+        TestGridType grid1 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
+        TestGridType grid2 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
+        init.grid(&grid1);
+        init.grid(&grid2);
 
-        // UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
-        // TestGridType grid1 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
-        // TestGridType grid2 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
-        // init.grid(&grid1);
-        // init.grid(&grid2);
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 340);
+        UnstructuredUpdateFunctor<TestCellType>()(
+            region,
+            grid1,
+            &grid2,
+            0,
+            UpdateFunctorHelpers::ConcurrencyNoP(),
+            APITraits::SelectThreadedUpdate<TestCellType>::Value());
 
-        // Region<1> region;
-        // region << Streak<1>(Coord<1>(0), 340);
-        // UnstructuredUpdateFunctor<TestCellType>()(
-        //     region,
-        //     grid1,
-        //     &grid2,
-        //     0,
-        //     UpdateFunctorHelpers::ConcurrencyNoP(),
-        //     APITraits::SelectThreadedUpdate<TestCellType>::Value());
-
-        // int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
-        // int expectedCycle2 = expectedCycle1 + 1;
-        // TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
-        // TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
+        int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
+        int expectedCycle2 = expectedCycle1 + 1;
+        TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
+        TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
 #endif
     }
 
     void testSoAVariant4()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        // fixme:
+        typedef UnstructuredTestCellSoA4 TestCellType;
+        typedef UnstructuredSoAGrid<TestCellType, 1, double, 16, 32> TestGridType;
 
-        // typedef UnstructuredTestCellSoA4 TestCellType;
-        // typedef UnstructuredSoAGrid<TestCellType, 1, double, 16, 32> TestGridType;
+        UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
+        TestGridType grid1 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
+        TestGridType grid2 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
+        init.grid(&grid1);
+        init.grid(&grid2);
 
-        // UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
-        // TestGridType grid1 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
-        // TestGridType grid2 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
-        // init.grid(&grid1);
-        // init.grid(&grid2);
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 340);
+        UnstructuredUpdateFunctor<TestCellType>()(
+            region,
+            grid1,
+            &grid2,
+            0,
+            UpdateFunctorHelpers::ConcurrencyNoP(),
+            APITraits::SelectThreadedUpdate<TestCellType>::Value());
 
-        // Region<1> region;
-        // region << Streak<1>(Coord<1>(0), 340);
-        // UnstructuredUpdateFunctor<TestCellType>()(
-        //     region,
-        //     grid1,
-        //     &grid2,
-        //     0,
-        //     UpdateFunctorHelpers::ConcurrencyNoP(),
-        //     APITraits::SelectThreadedUpdate<TestCellType>::Value());
-
-        // int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
-        // int expectedCycle2 = expectedCycle1 + 1;
-        // TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
-        // TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
+        int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
+        int expectedCycle2 = expectedCycle1 + 1;
+        TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
+        TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
 #endif
     }
 
