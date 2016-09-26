@@ -468,6 +468,24 @@ public:
             cycle);
     }
 
+    void testSoA()
+    {
+        int startStep = 0;
+        int endStep = 21;
+
+        StripingSimulator<TestCellSoA> sim(
+            new TestInitializer<TestCellSoA>(),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellSoA> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellSoA>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellSoA>(writer));
+
+        sim.run();
+    }
+
     void testUnstructured()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
