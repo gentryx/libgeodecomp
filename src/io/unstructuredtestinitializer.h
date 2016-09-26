@@ -51,9 +51,9 @@ public:
                 weights[Coord<2>(i->x(), actualNeighbor)] = edgeWeight;
             }
 
-            for (std::map<int, double>::iterator i = weightsReorderBuffer.begin(); i != weightsReorderBuffer.end(); ++i) {
-                cell.expectedNeighborIDs << i->first;
-                cell.expectedNeighborWeights << i->second;
+            for (std::map<int, double>::iterator j = weightsReorderBuffer.begin(); j != weightsReorderBuffer.end(); ++j) {
+                cell.expectedNeighborIDs << j->first;
+                cell.expectedNeighborWeights << j->second;
             }
 
             ret->set(*i, cell);
