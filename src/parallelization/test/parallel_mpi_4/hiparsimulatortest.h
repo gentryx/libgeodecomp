@@ -3,6 +3,7 @@
 #include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/teststeerer.h>
+#include <libgeodecomp/io/testwriter.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/paralleltestwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
@@ -97,6 +98,7 @@ public:
         memoryWriter = new MemoryWriterType(outputPeriod);
         sim->addWriter(mockWriter);
         sim->addWriter(memoryWriter);
+        rank = MPILayer().rank();
     }
 
     void tearDown()
@@ -116,7 +118,6 @@ public:
         TS_ASSERT_EQUALS((31 - 4)       * 27, sim->timeToNextEvent());
         TS_ASSERT_EQUALS((101 - 20 - 4) * 27, sim->timeToLastEvent());
 
-        std::size_t rank = MPILayer().rank();
         MockWriter<>::EventsStore expectedEvents;
         expectedEvents << MockWriter<>::Event(20, WRITER_INITIALIZED, rank, false)
                        << MockWriter<>::Event(20, WRITER_INITIALIZED, rank, true);
@@ -1272,6 +1273,126 @@ public:
         sim->run();
     }
 
+    void testSoA()
+    {
+        int startStep = 0;
+        int endStep = 21;
+
+        HiParSimulator<TestCellSoA, ZCurvePartition<3> > sim(
+            new TestInitializer<TestCellSoA>(),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellSoA> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellSoA>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellSoA>(writer));
+
+        sim.run();
+    }
+
+    void testUnstructured()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCell<> TestCellType;
+
+        int startStep = 7;
+        int endStep = 20;
+
+        HiParSimulator<TestCellType, ZCurvePartition<3> > sim(
+            new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA1()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA1 TestCellType;
+        int startStep = 7;
+        int endStep = 20;
+
+        HiParSimulator<TestCellType, ZCurvePartition<3> > sim(
+            new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA2()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA2 TestCellType;
+        int startStep = 7;
+        int endStep = 15;
+
+        HiParSimulator<TestCellType, ZCurvePartition<3> > sim(
+            new UnstructuredTestInitializer<TestCellType>(632, endStep, startStep),
+        rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA3()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA3 TestCellType;
+        int startStep = 7;
+        int endStep = 19;
+
+        HiParSimulator<TestCellType, ZCurvePartition<3> > sim(
+            new UnstructuredTestInitializer<TestCellType>(655, endStep, startStep),
+        rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA4()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA1 TestCellType;
+        int startStep = 5;
+        int endStep = 24;
+
+        HiParSimulator<TestCellType, ZCurvePartition<3> > sim(
+            new UnstructuredTestInitializer<TestCellType>(444, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        sim.run();
+#endif
+    }
+
 private:
     boost::shared_ptr<SimulatorType> sim;
     Coord<2> dim;
@@ -1284,6 +1405,7 @@ private:
     boost::shared_ptr<MockWriter<>::EventsStore> events;
     MockWriter<> *mockWriter;
     MemoryWriterType *memoryWriter;
+    std::size_t rank;
 };
 
 }
