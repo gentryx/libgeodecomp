@@ -162,7 +162,7 @@ public:
             globalNanoStep);
         TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
 
-        if (MPILayer().rank() == 0) {
+        if (rank == 0) {
             std::string expectedEvents;
             for (int i = 0; i < 2; ++i) {
                 expectedEvents += "balance() [1415, 1415, 1415, 1416] [1, 1, 1, 1]\n";
@@ -181,7 +181,6 @@ public:
 
         MockSteererType::EventsStore expected;
         typedef MockSteererType::Event Event;
-        int rank = MPILayer().rank();
         expected << Event(20, STEERER_INITIALIZED, rank, false)
                  << Event(20, STEERER_INITIALIZED, rank, true);
         for (unsigned i = 25; i < maxSteps; i += 5) {
@@ -1283,7 +1282,7 @@ public:
             rank? 0 : new NoOpBalancer());
 
         Writer<TestCellSoA> *writer = 0;
-        if (MPILayer().rank() == 0) {
+        if (rank == 0) {
             writer = new TestWriter<TestCellSoA>(3, startStep, endStep);
         }
         sim.addWriter(new CollectingWriter<TestCellSoA>(writer));
@@ -1304,7 +1303,7 @@ public:
             rank? 0 : new NoOpBalancer());
 
         Writer<TestCellType> *writer = 0;
-        if (MPILayer().rank() == 0) {
+        if (rank == 0) {
             writer = new TestWriter<TestCellType>(3, startStep, endStep);
         }
         sim.addWriter(new CollectingWriter<TestCellType>(writer));
@@ -1325,7 +1324,7 @@ public:
             rank? 0 : new NoOpBalancer());
 
         Writer<TestCellType> *writer = 0;
-        if (MPILayer().rank() == 0) {
+        if (rank == 0) {
             writer = new TestWriter<TestCellType>(3, startStep, endStep);
         }
         sim.addWriter(new CollectingWriter<TestCellType>(writer));
@@ -1345,7 +1344,7 @@ public:
         rank? 0 : new NoOpBalancer());
 
         Writer<TestCellType> *writer = 0;
-        if (MPILayer().rank() == 0) {
+        if (rank == 0) {
             writer = new TestWriter<TestCellType>(3, startStep, endStep);
         }
         sim.addWriter(new CollectingWriter<TestCellType>(writer));
@@ -1365,7 +1364,7 @@ public:
         rank? 0 : new NoOpBalancer());
 
         Writer<TestCellType> *writer = 0;
-        if (MPILayer().rank() == 0) {
+        if (rank == 0) {
             writer = new TestWriter<TestCellType>(3, startStep, endStep);
         }
         sim.addWriter(new CollectingWriter<TestCellType>(writer));
@@ -1385,7 +1384,7 @@ public:
             rank? 0 : new NoOpBalancer());
 
         Writer<TestCellType> *writer = 0;
-        if (MPILayer().rank() == 0) {
+        if (rank == 0) {
             writer = new TestWriter<TestCellType>(3, startStep, endStep);
         }
         sim.addWriter(new CollectingWriter<TestCellType>(writer));
