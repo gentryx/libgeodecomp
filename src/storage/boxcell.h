@@ -152,7 +152,7 @@ public:
         }
     }
 
-private:
+protected:
     FloatCoord<DIM> origin;
     FloatCoord<DIM> dimension;
     Container particles;
