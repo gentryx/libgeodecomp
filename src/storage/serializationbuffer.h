@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_STORAGE_SERIALIZATIONBUFFER_H
 
 #include <libflatarray/flat_array.hpp>
+#include <libgeodecomp/misc/apitraits.h>
 
 namespace LibGeoDecomp {
 
