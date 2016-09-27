@@ -153,7 +153,9 @@ public:
 
     CELL operator[](int index) const
     {
-        return grid[index];
+        // fixme: slow
+        // fixme: logical IDs vs. actual offsets in grid:
+        return grid.get(Coord<1>(index));
     }
 
 private:
