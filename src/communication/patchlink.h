@@ -135,7 +135,7 @@ public:
             }
 
             wait();
-            GridVecConv::gridToVector(grid, &buffer, region);
+            grid.saveRegion(&buffer, region);
             sendHeader(FixedSize());
             mpiLayer.send(&buffer[0], dest, buffer.size(), tag, cellMPIDatatype);
 
@@ -230,7 +230,7 @@ public:
             recvSecondPart(FixedSize());
             transmissionInFlight = false;
 
-            GridVecConv::vectorToGrid(buffer, grid, region);
+            grid->loadRegion(buffer, region);
 
             std::size_t nextNanoStep = (min)(storedNanoSteps) + stride;
             if ((lastNanoStep == infinity()) ||

@@ -54,7 +54,7 @@ public:
             throw std::logic_error("PatchBufferFixed capacity exceeded.");
         }
 
-        GridVecConv::gridToVector(grid, &buffer[indexWrite], region);
+        grid.saveRegion(&buffer[indexWrite], region);
         storedNanoSteps << (min)(requestedNanoSteps);
         erase_min(requestedNanoSteps);
         inc(&indexWrite);
@@ -70,8 +70,7 @@ public:
     {
         checkNanoStepGet(nanoStep);
 
-        GridVecConv::vectorToGrid(
-            buffer[indexRead], destinationGrid, region);
+        destinationGrid->loadRegion(buffer[indexRead], region);
 
         if (remove) {
             erase_min(storedNanoSteps);
