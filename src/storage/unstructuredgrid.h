@@ -24,14 +24,19 @@ namespace LibGeoDecomp {
 /**
  * A grid type for irregular structures
  */
-template<typename ELEMENT_TYPE, std::size_t MATRICES = 1, typename WEIGHT_TYPE = double, int C = 64, int SIGMA = 1>
+template<typename ELEMENT_TYPE, std::size_t MATRICES = 1, typename WEIGHT_TYPE = double, int C = 64, int MY_SIGMA = 1>
 class UnstructuredGrid : public GridBase<ELEMENT_TYPE, 1, WEIGHT_TYPE>
 {
 public:
+    typedef WEIGHT_TYPE WeightType;
     typedef std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> > NeighborList;
     typedef typename std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> >::iterator NeighborListIterator;
     const static int DIM = 1;
+    const static int SIGMA = MY_SIGMA;
 
+    // fixme: issue warnings in all c-tors if sigma != 1 (because we
+    // can then expect a missmatch between cells and their associated
+    // weights)
     explicit UnstructuredGrid(
         const Coord<DIM>& dim = Coord<DIM>(),
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
