@@ -52,6 +52,7 @@ public:
     using SellContainer = SellCSigmaSparseMatrixContainer<VALUETYPE, C, SIGMA>;
     using Matrix = std::map<Coord<2>, VALUETYPE>;
 
+    // fixme: do we really need two separate implementations?
     void operator()(SellContainer *container, const Matrix& matrix) const
     {
         std::vector<int> rowLengthCopy;
@@ -293,8 +294,8 @@ public:
     std::vector<std::pair<int, VALUETYPE> > getRow(int const row) const
     {
         std::vector< std::pair<int, VALUETYPE> > vec;
-        int const chunk (row/C);
-        int const offset (row%C);
+        int const chunk(row/C);
+        int const offset(row%C);
         int index = chunkOffset[chunk] + offset;
 
         for (int element = 0;
