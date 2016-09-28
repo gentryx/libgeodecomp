@@ -340,8 +340,11 @@ public:
         Coord<1> dim(10);
         CoordBox<1> box(origin, dim);
 
+        Region<1> boundingRegion;
+        boundingRegion << box;
         UnstructuredGrid<UnstructuredTestCellSoA1> grid(box);
         TS_ASSERT_EQUALS(box, grid.boundingBox());
+        TS_ASSERT_EQUALS(boundingRegion, grid.boundingRegion());
 
         dim.x() = 100;
         box = CoordBox<1>(origin, dim);

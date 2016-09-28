@@ -237,6 +237,10 @@ public:
 
         GridBase<int, 3>& gridReference = deviceGrid;
         TS_ASSERT_EQUALS(gridReference.boundingBox(), deviceGrid.boundingBox());
+
+        Region<3> boundingRegion;
+        boundingRegion << box;
+        TS_ASSERT_EQUALS(boundingRegion, deviceGrid.boundingRegion());
 #endif
     }
 

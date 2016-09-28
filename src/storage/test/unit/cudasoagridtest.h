@@ -47,6 +47,10 @@ public:
 
         TS_ASSERT_EQUALS(grid.getEdge(), edgeCell);
         TS_ASSERT_EQUALS(grid.boundingBox(), box);
+
+        Region<3> boundingRegion;
+        boundingRegion << box;
+        TS_ASSERT_EQUALS(boundingRegion, grid.boundingRegion());
     }
 
     void testTorus()
