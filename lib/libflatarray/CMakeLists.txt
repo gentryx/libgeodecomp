@@ -201,7 +201,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(WITH_CUDA)
-  set(CUDA_NVCC_FLAGS "--gpu-architecture=sm_20")
+  set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_50")
 endif()
 
 include_directories(${Boost_INCLUDE_DIRS})
