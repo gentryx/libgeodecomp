@@ -21,10 +21,11 @@ namespace LibGeoDecomp {
  * fixme: only implement this for SoA? AoS is slow anyway
  */
 template<typename DELEGATE_GRID>
-class ReorderingUnstructuredGrid : public GridBase<ELEMENT_TYPE, 1, WEIGHT_TYPE>
+class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellType, 1, typename DELEGATE_GRID::WeightType>
 {
 public:
-    typedef DELEGATE_GRID::WeightType WeightType;
+    typedef typename DELEGATE_GRID::CellType CellType;
+    typedef typename DELEGATE_GRID::WeightType WeightType;
     const static int DIM = 1;
     const static int SIGMA = DELEGATE_GRID::SIGMA;
 
@@ -42,10 +43,10 @@ public:
     // gridBase) and add accessors that work with these remapped regions. can probably be inside specialized updatefunctor
 
     inline
-    void setWeights(std::size_t matrixID, const std::map<Coord<2>, VALUE_TYPE>& matrix)
+    void setWeights(std::size_t matrixID, const std::map<Coord<2>, WeightType>& matrix)
     {
         std::map<int, int> rowLenghts;
-        for (std::map<Coord<2>, VALUE_TYPE>::const_iterator i = matrix.begin(); i != matrix.end(); ++i) {
+        for (typename std::map<Coord<2>, WeightType>::const_iterator i = matrix.begin(); i != matrix.end(); ++i) {
             ++rowLenghts[i->first.x()];
         }
 
@@ -54,8 +55,8 @@ public:
         RowLengthVec reorderedRowLengths;
         reorderedRowLengths.reserve(nodeSet.size());
 
-        for (Region<1>::StreakIterator i = nodeSet.begin(); i != nodeSet.end(); ++i) {
-            for (int j = i; j != i->endX; ++j) {
+        for (Region<1>::StreakIterator i = nodeSet.beginStreak(); i != nodeSet.endStreak(); ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
                 reorderedRowLengths << std::make_pair(j, rowLenghts[j]);
             }
         }
@@ -79,39 +80,42 @@ public:
         }
     }
 
-
-
+    /**
+     * The extent of this grid class is defined by its node set (given
+     * in the c-tor) and the edge weights. Resize doesn't make sense
+     * in this context.
+     */
     virtual void resize(const CoordBox<DIM>&)
     {
-        // fixme: does this even make sense?
+        throw std::logic_error("Resize not supported ReorderingUnstructuredGrid");
     }
 
-    virtual void set(const Coord<DIM>&, const CELL&)
+    virtual void set(const Coord<DIM>&, const CellType&)
     {
         // fixme
     }
 
-    virtual void set(const Streak<DIM>&, const CELL*)
+    virtual void set(const Streak<DIM>&, const CellType*)
     {
         // fixme
     }
 
-    virtual CELL get(const Coord<DIM>&) const
+    virtual CellType get(const Coord<DIM>&) const
     {
         // fixme
     }
 
-    virtual void get(const Streak<DIM>&, CELL *) const
+    virtual void get(const Streak<DIM>&, CellType *) const
     {
         // fixme
     }
 
-    virtual void setEdge(const CELL&)
+    virtual void setEdge(const CellType&)
     {
         // fixme
     }
 
-    virtual const CELL& getEdge() const
+    virtual const CellType& getEdge() const
     {
         // fixme
     }
@@ -143,12 +147,12 @@ private:
     // alternative: sorted std::vector<IntPair> also provides log(n)
     // lookup, but minimal memory overhead.
     std::map<int, int> logicalToPhysicalID;
-    std::vector<int> physicalToLogicalID
+    std::vector<int> physicalToLogicalID;
 
     virtual void saveMemberImplementation(
         char *target,
         MemoryLocation::Location targetLocation,
-        const Selector<CELL>& selector,
+        const Selector<CellType>& selector,
         const Region<DIM>& region) const
     {
         // fixme
@@ -157,7 +161,7 @@ private:
     virtual void loadMemberImplementation(
         const char *source,
         MemoryLocation::Location sourceLocation,
-        const Selector<CELL>& selector,
+        const Selector<CellType>& selector,
         const Region<DIM>& region)
     {
         // fixme

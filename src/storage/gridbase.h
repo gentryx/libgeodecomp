@@ -67,6 +67,7 @@ class GridBase : GridBaseHelpers::LoadSaveRegionCharInterface<DIMENSIONS>
 public:
     friend class ProxyGrid<CELL, DIMENSIONS, WEIGHT_TYPE>;
     typedef CELL CellType;
+
     using GridBaseHelpers::LoadSaveRegionCharInterface<DIMENSIONS>::saveRegion;
     using GridBaseHelpers::LoadSaveRegionCharInterface<DIMENSIONS>::loadRegion;
 
