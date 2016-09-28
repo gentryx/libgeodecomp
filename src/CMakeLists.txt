@@ -45,7 +45,7 @@ if(WITH_BOOST_MOVE)
 endif()
 
 if(WITH_CUDA)
-  set(CUDA_NVCC_FLAGS "--gpu-architecture=sm_20")
+  set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_50")
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${CUDA_INCLUDE_DIRS})
 endif()
 
