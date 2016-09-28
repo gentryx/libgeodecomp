@@ -20,15 +20,17 @@ namespace DefaultCUDAFilterHelpers {
  * Seems to be a bug in CUDA:
  *
  * http://stackoverflow.com/questions/23199824/c-cuda-pointer-to-member
+ *
+ * Update: problem is slightly different, but persists in CUDA 8.0.44.
  */
-template<typename MEMBER_POINTER>
+template<typename MEMBER, typename CLASS>
 class MemberPointerWrapper
 {
 public:
-    MEMBER_POINTER value;
+    MEMBER CLASS::* value;
 
     explicit inline
-    MemberPointerWrapper(MEMBER_POINTER value) :
+    MemberPointerWrapper(MEMBER CLASS::* value) :
         value(value)
     {}
 };
@@ -38,7 +40,7 @@ __global__
 void aggregateMember(
     const CELL *source,
     EXTERNAL *target,
-    MemberPointerWrapper<MEMBER CELL::*> memberPointerWrapper,
+    MemberPointerWrapper<MEMBER, CELL> memberPointerWrapper,
     const std::size_t num)
 {
     int index = blockDim.x * blockIdx.x + threadIdx.x;
@@ -52,7 +54,7 @@ __global__
 void distributeMember(
     const EXTERNAL *source,
     CELL *target,
-    MemberPointerWrapper<MEMBER CELL::*> memberPointerWrapper,
+    MemberPointerWrapper<MEMBER, CELL> memberPointerWrapper,
     const std::size_t num)
 {
     int index = blockDim.x * blockIdx.x + threadIdx.x;
@@ -75,7 +77,7 @@ void runAggregateMemberKernel(
     aggregateMember<CELL, EXTERNAL, MEMBER><<<gridDim, blockDim>>>(
         source,
         target,
-        MemberPointerWrapper<MEMBER CELL:: *>(memberPointer),
+        MemberPointerWrapper<MEMBER, CELL>(memberPointer),
         num);
 
     CUDAUtil::checkForError();
@@ -94,7 +96,7 @@ void runDistributeMemberKernel(
     distributeMember<CELL, EXTERNAL, MEMBER><<<gridDim, blockDim>>>(
         source,
         target,
-        MemberPointerWrapper<MEMBER CELL:: *>(memberPointer),
+        MemberPointerWrapper<MEMBER, CELL>(memberPointer),
         num);
 
     CUDAUtil::checkForError();
