@@ -39,13 +39,27 @@ class DisplacedGridTest : public CxxTest::TestSuite
 {
 public:
 
-    void testBox()
+    void testBoundingBox()
     {
         CoordBox<2> rect(Coord<2>(10, 11), Coord<2>(12, 13));
         DisplacedGrid<int> grid(rect);
         TS_ASSERT_EQUALS(rect, grid.boundingBox());
         TS_ASSERT_EQUALS(12, grid.getDimensions().x());
         TS_ASSERT_EQUALS(13, grid.getDimensions().y());
+    }
+
+    void testBoundingRegion()
+    {
+        Coord<3> origin(10, 11, 12);
+        Coord<3> dim(13, 14, 15);
+
+        CoordBox<3> rect(origin, dim);
+        DisplacedGrid<double, Topologies::Cube<3>::Topology> grid(rect);
+
+        Region<3> expectedRegion;
+        expectedRegion << rect;
+
+        TS_ASSERT_EQUALS(expectedRegion, grid.boundingRegion());
     }
 
     void testPaste()

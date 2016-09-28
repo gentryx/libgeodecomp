@@ -85,6 +85,29 @@ public:
         TS_ASSERT_EQUALS(0, (int)g.getDimensions().y());
     }
 
+    void testBoundingBox()
+    {
+        CoordBox<2> rect(Coord<2>(), Coord<2>(12, 13));
+        Grid<int> grid(rect.dimensions);
+        TS_ASSERT_EQUALS(rect, grid.boundingBox());
+        TS_ASSERT_EQUALS(12, grid.getDimensions().x());
+        TS_ASSERT_EQUALS(13, grid.getDimensions().y());
+    }
+
+    void testBoundingRegion()
+    {
+        Coord<3> origin;
+        Coord<3> dim(23, 24, 25);
+
+        CoordBox<3> rect(origin, dim);
+        Grid<double, Topologies::Cube<3>::Topology> grid(dim);
+
+        Region<3> expectedRegion;
+        expectedRegion << rect;
+
+        TS_ASSERT_EQUALS(expectedRegion, grid.boundingRegion());
+    }
+
     void testCopyConstructorFromGridBase()
     {
         Grid<int> a;

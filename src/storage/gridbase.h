@@ -126,6 +126,19 @@ public:
     virtual CoordBox<DIM> boundingBox() const = 0;
 
     /**
+     * Returns the set of coordinates contained by the grid. For
+     * regular grids this can be expected to be identical with the
+     * bounding box. Unstructured grids may opt to store less cells in
+     * order to increase space efficiency.
+     */
+    virtual Region<DIM> boundingRegion() const
+    {
+        Region<DIM> region;
+        region << boundingBox();
+        return region;
+    }
+
+    /**
      * Extract cells specified by the Region and serialize them in the
      * given buffer. An optional offset will be added to all
      * coordinates in the Region.
