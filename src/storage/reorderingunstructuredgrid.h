@@ -121,7 +121,6 @@ public:
         set(coord.x(), cell);
     }
 
-    // fixme: needs test
     virtual void set(const Streak<DIM>& streak, const CellType *cells)
     {
         int index = 0;
@@ -136,7 +135,6 @@ public:
         return get(coord.x());
     }
 
-    // fixme: needs test
     virtual void get(const Streak<DIM>& streak, CellType *cells) const
     {
         int index = 0;

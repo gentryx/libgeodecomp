@@ -92,6 +92,76 @@ public:
         }
     }
 
+    void testGetSetStreaksAoS()
+    {
+        typedef UnstructuredTestCell<> TestCell;
+        typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
+        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(111), 116)
+               << Streak<1>(Coord<1>(222), 301)
+               << Streak<1>(Coord<1>(409), 412);
+
+        GridType grid(region);
+
+        for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            std::vector<TestCell> cells;
+            for (int x = i->origin.x(); x != i->endX; ++x) {
+                cells << TestCell(x, x * 1000 + 666, x % 39, x % 11);
+            }
+            grid.set(*i, &cells[0]);
+        }
+
+        for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            std::vector<TestCell> actual(i->length());
+            grid.get(*i, &actual[0]);
+
+            std::vector<TestCell> expected;
+            for (int x = i->origin.x(); x != i->endX; ++x) {
+                expected << TestCell(x, x * 1000 + 666, x % 39, x % 11);
+            }
+
+            TS_ASSERT_EQUALS(actual, expected);
+        }
+    }
+
+    void testGetSetStreaksSoA()
+    {
+        typedef UnstructuredTestCellSoA3 TestCell;
+        typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
+        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(121), 126)
+               << Streak<1>(Coord<1>(322), 391)
+               << Streak<1>(Coord<1>(609), 662);
+
+        GridType grid(region);
+
+        for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            std::vector<TestCell> cells;
+            for (int x = i->origin.x(); x != i->endX; ++x) {
+                cells << TestCell(x, x * 1000 + 555, x % 39, x % 11);
+            }
+            grid.set(*i, &cells[0]);
+        }
+
+        for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            std::vector<TestCell> actual(i->length());
+            grid.get(*i, &actual[0]);
+
+            std::vector<TestCell> expected;
+            for (int x = i->origin.x(); x != i->endX; ++x) {
+                expected << TestCell(x, x * 1000 + 555, x % 39, x % 11);
+            }
+
+            TS_ASSERT_EQUALS(actual, expected);
+        }
+    }
+
     // fixme: also test AoS
     void testSetWeights()
     {
