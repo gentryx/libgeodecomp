@@ -15,10 +15,12 @@ namespace LibGeoDecomp {
  * and make the order yielded from the partial sortation in the
  * SELL-C-SIGMA format match the physical memory layout.
  *
- * One size fits both, SoA and AoS -- although SIGMA > 1 is only
- * really relevant for SoA layouts.
+ * This reordering slows down get()/set() and possibly
+ * loadRegion()/saveRegion(). Cell updates should not be harmed as the
+ * update functor needs to use reordered Regions anyway.
  *
- * fixme: only implement this for SoA? AoS is slow anyway
+ * One size fits both, SoA and AoS. SIGMA > 1 is only really relevant
+ * for SoA layouts, but compaction benefits both.
  */
 template<typename DELEGATE_GRID>
 class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellType, 1, typename DELEGATE_GRID::WeightType>
@@ -26,15 +28,31 @@ class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellT
 public:
     typedef typename DELEGATE_GRID::CellType CellType;
     typedef typename DELEGATE_GRID::WeightType WeightType;
+    typedef std::pair<int, int> IntPair;
+
     const static int DIM = 1;
     const static int SIGMA = DELEGATE_GRID::SIGMA;
 
     explicit ReorderingUnstructuredGrid(
         const Region<1>& nodeSet) :
         nodeSet(nodeSet)
-    {}
+    {
+        int physicalID = 0;
+        physicalToLogicalIDs.reserve(nodeSet.size());
+        logicalToPhysicalIDs.reserve(nodeSet.size());
 
-    // fixme: 1. finish GridBase interface with internal ID translation (via logicalToPhysicalID)
+        for (Region<1>::StreakIterator i = nodeSet.beginStreak(); i != nodeSet.endStreak(); ++i) {
+            for (int j = i->origin.x(); j != i->endX; ++j) {
+                logicalToPhysicalIDs << std::make_pair(j, physicalID);
+                physicalToLogicalIDs << j;
+                ++physicalID;
+            }
+        }
+
+        delegate.resize(CoordBox<1>(Coord<1>(0), Coord<1>(nodeSet.size())));
+    }
+
+    // fixme: 1. finish GridBase interface with internal ID translation (via logicalToPhysicalIDs)
     // fixme: 2. ID translation is slow, but acceptable for IO. not acceptable for updates.
     //           probably acceptable for ghost zone communication.
 
@@ -50,7 +68,6 @@ public:
             ++rowLenghts[i->first.x()];
         }
 
-        typedef std::pair<int, int> IntPair;
         typedef std::vector<IntPair> RowLengthVec;
         RowLengthVec reorderedRowLengths;
         reorderedRowLengths.reserve(nodeSet.size());
@@ -67,17 +84,26 @@ public:
             std::stable_sort(i, nextStop, [](const IntPair& a, const IntPair& b) {
                     return a.second > b.second;
                 });
+
+            i = nextStop;
         }
 
-        logicalToPhysicalID.clear();
-        physicalToLogicalID.clear();
-        physicalToLogicalID.reserve(nodeSet.size());
+        std::vector<IntPair> newLogicalToPhysicalIDs;
+        std::vector<int> newPhysicalToLogicalIDs;
+        newLogicalToPhysicalIDs.reserve(nodeSet.size());
+        newPhysicalToLogicalIDs.reserve(nodeSet.size());
 
         for (std::size_t i = 0; i < reorderedRowLengths.size(); ++i) {
             int logicalID = reorderedRowLengths[i].first;
-            logicalToPhysicalID[logicalID] = i;
-            physicalToLogicalID << logicalID;
+            newLogicalToPhysicalIDs << std::make_pair(logicalID, i);
+            newPhysicalToLogicalIDs << logicalID;
         }
+
+        std::sort(newLogicalToPhysicalIDs.begin(), newLogicalToPhysicalIDs.end(), [](const IntPair& a, const IntPair& b){
+                return a.first < b.first;
+            });
+
+        reorderDelegateGrid(std::move(newLogicalToPhysicalIDs), std::move(newPhysicalToLogicalIDs));
     }
 
     /**
@@ -90,29 +116,40 @@ public:
         throw std::logic_error("Resize not supported ReorderingUnstructuredGrid");
     }
 
-    virtual void set(const Coord<DIM>&, const CellType&)
+    virtual void set(const Coord<DIM>& coord, const CellType& cell)
     {
-        // fixme
+        set(coord.x(), cell);
     }
 
-    virtual void set(const Streak<DIM>&, const CellType*)
+    // fixme: needs test
+    virtual void set(const Streak<DIM>& streak, const CellType *cells)
     {
-        // fixme
+        int index = 0;
+        for (int i = streak.origin.x(); i != streak.endX; ++i) {
+            set(i, cells[index]);
+            ++index;
+        }
     }
 
-    virtual CellType get(const Coord<DIM>&) const
+    virtual CellType get(const Coord<DIM>& coord) const
     {
-        // fixme
+        return get(coord.x());
     }
 
-    virtual void get(const Streak<DIM>&, CellType *) const
+    // fixme: needs test
+    virtual void get(const Streak<DIM>& streak, CellType *cells) const
     {
-        // fixme
+        int index = 0;
+        for (int i = streak.origin.x(); i != streak.endX; ++i) {
+            cells[index] = get(i);
+            ++index;
+        }
     }
 
-    virtual void setEdge(const CellType&)
+    // fixme: needs test
+    virtual void setEdge(const CellType& cell)
     {
-        // fixme
+        delegate.setEdge(cell);
     }
 
     virtual const CellType& getEdge() const
@@ -142,12 +179,10 @@ public:
     }
 
 private:
+    DELEGATE_GRID delegate;
     Region<1> nodeSet;
-    // fixme: this type is probably shite (huge memory overhead).
-    // alternative: sorted std::vector<IntPair> also provides log(n)
-    // lookup, but minimal memory overhead.
-    std::map<int, int> logicalToPhysicalID;
-    std::vector<int> physicalToLogicalID;
+    std::vector<IntPair> logicalToPhysicalIDs;
+    std::vector<int> physicalToLogicalIDs;
 
     virtual void saveMemberImplementation(
         char *target,
@@ -167,6 +202,41 @@ private:
         // fixme
     }
 
+    void reorderDelegateGrid(std::vector<IntPair>&& newLogicalToPhysicalIDs, std::vector<int>&& newPhysicalToLogicalIDs)
+    {
+        logicalToPhysicalIDs = std::move(newLogicalToPhysicalIDs);
+        physicalToLogicalIDs = std::move(newPhysicalToLogicalIDs);
+    }
+
+    inline
+    CellType get(int logicalID) const
+    {
+        std::vector<IntPair>::const_iterator pos = std::lower_bound(
+            logicalToPhysicalIDs.begin(), logicalToPhysicalIDs.end(), logicalID,
+            [](const IntPair& a, const int logicalID) {
+                return a.first < logicalID;
+            });
+        if ((pos == logicalToPhysicalIDs.end() || (pos->first != logicalID))) {
+            return delegate.getEdge();
+        }
+
+        return delegate.get(Coord<1>(pos->second));
+    }
+
+    inline
+    void set(int logicalID, const CellType& cell)
+    {
+        std::vector<IntPair>::const_iterator pos = std::lower_bound(
+            logicalToPhysicalIDs.begin(), logicalToPhysicalIDs.end(), logicalID,
+            [](const IntPair& a, const int logicalID) {
+                return a.first < logicalID;
+            });
+        if ((pos == logicalToPhysicalIDs.end() || (pos->first != logicalID))) {
+            delegate.setEdge(cell);
+        }
+
+        delegate.set(Coord<1>(pos->second), cell);
+    }
 };
 
 }
