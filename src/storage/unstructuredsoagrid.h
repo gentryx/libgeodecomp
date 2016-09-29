@@ -14,6 +14,7 @@
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
+#include <libgeodecomp/storage/soagrid.h>
 
 #include <iostream>
 #include <vector>
@@ -336,39 +337,20 @@ public:
 
     inline void saveRegion(std::vector<char> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        char *dataIterator = target->data();
+        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
+        StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
+        StreakIteratorType end(  region.endStreak(),   Coord<3>(offset.x(), 0, 0));
 
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-
-            Streak<DIM> s = *i;
-            s.origin += offset;
-            s.endX += offset.x();
-
-            std::size_t length = s.length();
-            int x = s.origin.x();
-            elements.save(x - origin, 0, 0, dataIterator, length);
-            dataIterator += length * AGGREGATED_MEMBER_SIZE;
-        }
+        elements.save(start, end, target->data(), region.size());
     }
 
     inline void loadRegion(const std::vector<char> source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        const char *dataIterator = source.data();
+        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
+        StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
+        StreakIteratorType end(  region.endStreak(),   Coord<3>(offset.x(), 0, 0));
 
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-
-            Streak<DIM> s = *i;
-            s.origin += offset;
-            s.endX += offset.x();
-
-            std::size_t length = s.length();
-            elements.load(s.origin.x() - origin, 0, 0, dataIterator, length);
-            dataIterator += length * AGGREGATED_MEMBER_SIZE;
-        }
+        elements.load(start, end, source.data(), region.size());
     }
 
 protected:
