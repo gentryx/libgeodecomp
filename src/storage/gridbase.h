@@ -131,11 +131,11 @@ public:
      * bounding box. Unstructured grids may opt to store less cells in
      * order to increase space efficiency.
      */
-    virtual Region<DIM> boundingRegion() const
+    virtual const Region<DIM>& boundingRegion()
     {
-        Region<DIM> region;
-        region << boundingBox();
-        return region;
+        myBoundingRegion.clear();
+        myBoundingRegion << boundingBox();
+        return myBoundingRegion;
     }
 
     /**
@@ -277,6 +277,7 @@ protected:
         const Region<DIM>& region) = 0;
 
     Coord<DIM> topoDimensions;
+    Region<DIM> myBoundingRegion;
 };
 
 }

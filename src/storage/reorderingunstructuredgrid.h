@@ -159,7 +159,7 @@ public:
         return nodeSet.boundingBox();
     }
 
-    virtual Region<DIM> boundingRegion() const
+    virtual const Region<DIM>& boundingRegion()
     {
         return nodeSet;
     }
