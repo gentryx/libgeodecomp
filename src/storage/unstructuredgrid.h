@@ -210,9 +210,11 @@ public:
 
     inline void resize(const CoordBox<DIM>& newDim)
     {
+        const ELEMENT_TYPE defaultElement = elements.size() ? elements[0] : edgeElement;
+
         *this = UnstructuredGrid(
             newDim.dimensions,
-            elements[0],
+            defaultElement,
             edgeElement);
     }
 

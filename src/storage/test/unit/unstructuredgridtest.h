@@ -366,6 +366,14 @@ public:
 #endif
     }
 
+    void testResizeFromZero()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredGrid<UnstructuredTestCellSoA1> grid;
+        grid.resize(CoordBox<1>(Coord<1>(0), Coord<1>(10)));
+#endif
+    }
+
     void testOffset()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
