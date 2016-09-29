@@ -5,8 +5,6 @@
 #include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/reorderingunstructuredgrid.h>
 
-// fixme
-#include <typeinfo>
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -26,6 +24,8 @@ public:
                 << Streak<1>(Coord<1>(30), 35);
 
         GridType grid(nodeSet);
+        TS_ASSERT_EQUALS(grid.boundingBox(), CoordBox<1>(Coord<1>(10), Coord<1>(25)));
+        TS_ASSERT_EQUALS(grid.boundingRegion(), nodeSet);
 
         std::string expectedError = "Resize not supported ReorderingUnstructuredGrid";
 
@@ -51,6 +51,8 @@ public:
                << Streak<1>(Coord<1>(409), 412);
 
         GridType grid(region);
+        TS_ASSERT_EQUALS(grid.boundingBox(), CoordBox<1>(Coord<1>(111), Coord<1>(301)));
+        TS_ASSERT_EQUALS(grid.boundingRegion(), region);
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             TestCell cell(i->x(), i->x() * 1000 + 666, i->x() % 31, i->x() % 5);

@@ -156,7 +156,12 @@ public:
 
     virtual CoordBox<DIM> boundingBox() const
     {
-        // fixme
+        return nodeSet.boundingBox();
+    }
+
+    virtual Region<DIM> boundingRegion() const
+    {
+        return nodeSet;
     }
 
     virtual void saveRegion(std::vector<char> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
