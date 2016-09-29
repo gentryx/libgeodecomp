@@ -205,6 +205,114 @@ public:
         TS_ASSERT_EQUALS(grid.get(Coord<1>(-32)), edgeCell);
     }
 
+    void testLoadSaveRegionAoS()
+    {
+        typedef UnstructuredTestCell<> TestCell;
+        typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
+        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+
+        Region<1> region1;
+        Region<1> region2;
+        region1 << Streak<1>(Coord<1>(111), 166)
+                << Streak<1>(Coord<1>(400), 490);
+        region2 << Streak<1>(Coord<1>(  0), 150)
+                << Streak<1>(Coord<1>(440), 500);
+        Region<1> region3 = region1 & region2;
+
+        GridType grid1(region1);
+        GridType grid2(region2);
+
+        for (Region<1>::Iterator i = region1.begin(); i != region1.end(); ++i) {
+            grid1.set(*i, TestCell(-10));
+        }
+        for (Region<1>::Iterator i = region2.begin(); i != region2.end(); ++i) {
+            grid2.set(*i, TestCell(-20));
+        }
+
+        int counter = 0;
+        for (Region<1>::Iterator i = region1.begin(); i != region1.end(); ++i) {
+            grid1.set(*i, TestCell(counter, 10000 + counter));
+            ++counter;
+        }
+
+        std::vector<TestCell> buffer;
+        SerializationBuffer<TestCell>::resize(&buffer, region3);
+
+        grid1.saveRegion(&buffer, region3);
+        grid2.loadRegion(buffer, region3);
+
+        counter = 0;
+        for (Region<1>::Iterator i = region2.begin(); i != region2.end(); ++i) {
+            TestCell expected(-20);
+
+            if (region3.count(*i)) {
+                expected = TestCell(counter, 10000 + counter);
+                ++counter;
+                if (counter == 39) {
+                    counter = 95;
+                }
+            }
+
+            TestCell actual = grid2.get(*i);
+            TS_ASSERT_EQUALS(expected, actual);
+        }
+    }
+
+    void testLoadSaveRegionSoA()
+    {
+        typedef UnstructuredTestCellSoA3 TestCell;
+        typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
+        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+
+        Region<1> region1;
+        Region<1> region2;
+        region1 << Streak<1>(Coord<1>(111), 116)
+                << Streak<1>(Coord<1>(409), 452);
+        region2 << Streak<1>(Coord<1>(  0), 114)
+                << Streak<1>(Coord<1>(440), 460);
+        Region<1> region3 = region1 & region2;
+
+        GridType grid1(region1);
+        GridType grid2(region2);
+
+        for (Region<1>::Iterator i = region1.begin(); i != region1.end(); ++i) {
+            grid1.set(*i, TestCell(-1));
+        }
+        for (Region<1>::Iterator i = region2.begin(); i != region2.end(); ++i) {
+            grid2.set(*i, TestCell(-2));
+        }
+
+        int counter = 0;
+        for (Region<1>::Iterator i = region1.begin(); i != region1.end(); ++i) {
+            grid1.set(*i, TestCell(counter, 10000 + counter));
+            ++counter;
+        }
+
+        std::vector<char> buffer;
+        SerializationBuffer<TestCell>::resize(&buffer, region3);
+
+        grid1.saveRegion(&buffer, region3);
+        grid2.loadRegion(buffer, region3);
+
+        counter = 0;
+        for (Region<1>::Iterator i = region2.begin(); i != region2.end(); ++i) {
+            TestCell expected(-2);
+
+            if (region3.count(*i)) {
+                expected = TestCell(counter, 10000 + counter);
+                ++counter;
+                if (counter == 3) {
+                    counter = 36;
+                }
+            }
+
+            TestCell actual = grid2.get(*i);
+            TS_ASSERT_EQUALS(expected, actual);
+        }
+    }
+
     // fixme: also test AoS
     void testSetWeights()
     {

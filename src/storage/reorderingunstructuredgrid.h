@@ -8,6 +8,103 @@
 
 namespace LibGeoDecomp {
 
+namespace ReorderingUnstructuredGridHelpers {
+
+typedef std::pair<int, int> IntPair;
+
+std::vector<IntPair>::const_iterator mapLogicalToPhysicalID(int logicalID, const std::vector<IntPair>& logicalToPhysicalIDs)
+{
+    std::vector<IntPair>::const_iterator pos = std::lower_bound(
+        logicalToPhysicalIDs.begin(), logicalToPhysicalIDs.end(), logicalID,
+        [](const IntPair& a, const int logicalID) {
+            return a.first < logicalID;
+        });
+
+    if (pos->first != logicalID) {
+        return logicalToPhysicalIDs.end();
+    }
+
+    return pos;
+}
+
+template<int DIM>
+class ReorderingRegionIterator
+{
+public:
+
+    inline
+    ReorderingRegionIterator(const Region<1>::Iterator& iter, const std::vector<IntPair>& logicalToPhysicalIDs) :
+        iter(iter),
+        logicalToPhysicalIDs(logicalToPhysicalIDs)
+    {
+        updateOrigin();
+    }
+
+    inline
+    int length() const
+    {
+        return 1;
+    }
+
+    inline
+    void operator++()
+    {
+        ++iter;
+        updateOrigin();
+    }
+
+    inline
+    const ReorderingRegionIterator *operator->() const
+    {
+        return this;
+    }
+
+    inline
+    Streak<DIM> operator*() const
+    {
+        return Streak<DIM>(origin, origin.x() + 1);
+    }
+
+    Coord<DIM> origin;
+
+    inline
+    bool operator!=(const ReorderingRegionIterator& other)
+    {
+        return iter != other.iter;
+    }
+
+private:
+    Region<1>::Iterator iter;
+    const std::vector<IntPair>& logicalToPhysicalIDs;
+
+    void updateOrigin()
+    {
+        std::vector<IntPair>::const_iterator i = mapLogicalToPhysicalID(iter->x(), logicalToPhysicalIDs);
+        if (i != logicalToPhysicalIDs.end()) {
+            origin.x() = i->second;
+        }
+    }
+};
+
+template<typename T>
+class Selector;
+
+template<>
+class Selector<APITraits::TrueType>
+{
+public:
+    typedef ReorderingRegionIterator<3> Value;
+};
+
+template<>
+class Selector<APITraits::FalseType>
+{
+public:
+    typedef ReorderingRegionIterator<1> Value;
+};
+
+}
+
 /**
  * This grid will rearrange cells in its delegate grid to match the
  * order defined by a compaction (defined by a node set) and the
@@ -28,6 +125,11 @@ class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellT
 public:
     typedef typename DELEGATE_GRID::CellType CellType;
     typedef typename DELEGATE_GRID::WeightType WeightType;
+    typedef typename SerializationBuffer<CellType>::BufferType BufferType;
+    typedef typename APITraits::SelectSoA<CellType>::Value SoAFlag;
+    typedef typename ReorderingUnstructuredGridHelpers::Selector<SoAFlag>::Value ReorderingRegionIterator;
+
+
     typedef std::pair<int, int> IntPair;
 
     const static int DIM = 1;
@@ -164,20 +266,22 @@ public:
         return nodeSet;
     }
 
-    virtual void saveRegion(std::vector<char> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    virtual void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        // fixme: likely needs specialized re-implementation to carry
-        // region and remapping facility into soa_grid::callback().
-        // load/save need to observe ordering from original region to
-        // avoid clashes with remote side.
+        delegate.saveRegion(
+            buffer,
+            ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
+            ReorderingRegionIterator(region.end(), logicalToPhysicalIDs),
+            region.size());
     }
 
-    virtual void loadRegion(const std::vector<char>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    virtual void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        // fixme: likely needs specialized re-implementation to carry
-        // region and remapping facility into soa_grid::callback().
-        // load/save need to observe ordering from original region to
-        // avoid clashes with remote side.
+        delegate.loadRegion(
+            buffer,
+            ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
+            ReorderingRegionIterator(region.end(), logicalToPhysicalIDs),
+            region.size());
     }
 
 private:
