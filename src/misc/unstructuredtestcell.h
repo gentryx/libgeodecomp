@@ -22,6 +22,7 @@ class EmptyAPI
  * We'll check different values for C and Sigma.
  */
 class SoAAPI1 :
+        public LibFlatArray::api_traits::has_default_1d_sizes,
         public APITraits::HasSoA,
         public APITraits::HasUpdateLineX,
         public APITraits::HasSellC<32>,
@@ -32,6 +33,7 @@ class SoAAPI1 :
  * C=8, Sigma=1
  */
 class SoAAPI2 :
+        public LibFlatArray::api_traits::has_default_1d_sizes,
         public APITraits::HasSoA,
         public APITraits::HasUpdateLineX,
         public APITraits::HasSellC<8>,
@@ -42,6 +44,7 @@ class SoAAPI2 :
  * C=8, Sigma=64
  */
 class SoAAPI3 :
+        public LibFlatArray::api_traits::has_default_1d_sizes,
         public APITraits::HasSoA,
         public APITraits::HasUpdateLineX,
         public APITraits::HasSellC<8>,
@@ -52,6 +55,7 @@ class SoAAPI3 :
  * C=16, Sigma=32
  */
 class SoAAPI4 :
+        public LibFlatArray::api_traits::has_default_1d_sizes,
         public APITraits::HasSoA,
         public APITraits::HasUpdateLineX,
         public APITraits::HasSellC<16>,
