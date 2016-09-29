@@ -341,7 +341,13 @@ public:
         StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
         StreakIteratorType end(  region.endStreak(),   Coord<3>(offset.x(), 0, 0));
 
-        elements.save(start, end, target->data(), region.size());
+        saveRegion(target, start, end, region.size());
+    }
+
+    template<typename ITER1, typename ITER2>
+    inline void saveRegion(std::vector<char> *target, const ITER1& start, const ITER2& end, int size) const
+    {
+        elements.save(start, end, target->data(), size);
     }
 
     inline void loadRegion(const std::vector<char> source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
@@ -350,7 +356,13 @@ public:
         StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
         StreakIteratorType end(  region.endStreak(),   Coord<3>(offset.x(), 0, 0));
 
-        elements.load(start, end, source.data(), region.size());
+        loadRegion(source, start, end, region.size());
+    }
+
+    template<typename ITER1, typename ITER2>
+    inline void loadRegion(const std::vector<char> source, const ITER1& start, const ITER2& end, int size)
+    {
+        elements.load(start, end, source.data(), size);
     }
 
 protected:

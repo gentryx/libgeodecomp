@@ -294,10 +294,19 @@ public:
 
     inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>()) const
     {
+        saveRegion(
+            buffer,
+            region.beginStreak(offset),
+            region.endStreak(offset),
+            region.size());
+    }
+
+    template<typename ITER1, typename ITER2>
+    inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const ITER1& start, const ITER2& end, int size) const
+    {
         ELEMENT_TYPE *target = buffer->data();
 
-        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+        for (ITER1 i = start; i != end; ++i) {
             get(*i, target);
             target += i->length();
         }
@@ -305,15 +314,23 @@ public:
 
     inline void loadRegion(const std::vector<ELEMENT_TYPE> buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>())
     {
+        loadRegion(
+            buffer,
+            region.beginStreak(offset),
+            region.endStreak(offset),
+            region.size());
+    }
+
+    template<typename ITER1, typename ITER2>
+    inline void loadRegion(const std::vector<ELEMENT_TYPE> buffer, const ITER1& start, const ITER2& end, int size)
+    {
         const ELEMENT_TYPE *source = buffer.data();
 
-        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+        for (ITER1 i = start; i != end; ++i) {
             set(*i, source);
             source += i->length();
         }
     }
-
 protected:
     void saveMemberImplementation(
         char *target,
