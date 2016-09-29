@@ -162,6 +162,47 @@ public:
         }
     }
 
+    void testEdgeCellHandlingAoS()
+    {
+        typedef UnstructuredTestCell<> TestCell;
+        typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
+        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(111), 116)
+               << Streak<1>(Coord<1>(222), 301)
+               << Streak<1>(Coord<1>(409), 412);
+        GridType grid(region);
+
+        TestCell edgeCell(4711);
+        TS_ASSERT_DIFFERS(grid.getEdge(), edgeCell);
+
+        grid.setEdge(edgeCell);
+        TS_ASSERT_EQUALS(grid.getEdge(), edgeCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<1>(-13)), edgeCell);
+    }
+
+    void testEdgeCellHandlingSoA()
+    {
+        typedef UnstructuredTestCellSoA3 TestCell;
+        typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
+        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(111), 116)
+               << Streak<1>(Coord<1>(409), 412);
+        GridType grid(region);
+
+        TestCell edgeCell(54321);
+        TS_ASSERT_DIFFERS(grid.getEdge(), edgeCell);
+
+        grid.setEdge(edgeCell);
+        TS_ASSERT_EQUALS(grid.getEdge(), edgeCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<1>(-32)), edgeCell);
+    }
+
     // fixme: also test AoS
     void testSetWeights()
     {

@@ -144,7 +144,6 @@ public:
         }
     }
 
-    // fixme: needs test
     virtual void setEdge(const CellType& cell)
     {
         delegate.setEdge(cell);
@@ -152,7 +151,7 @@ public:
 
     virtual const CellType& getEdge() const
     {
-        // fixme
+        return delegate.getEdge();
     }
 
     virtual CoordBox<DIM> boundingBox() const
