@@ -331,6 +331,35 @@ public:
             source += i->length();
         }
     }
+
+    template<typename ITER1, typename ITER2>
+    void saveMemberImplementation(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<ELEMENT_TYPE>& selector,
+        const ITER1& start,
+        const ITER2& end) const
+    {
+        for (ITER1 i = start; i != end; ++i) {
+            selector.copyMemberOut(&(*this)[i->origin], MemoryLocation::HOST, target, targetLocation, i->length());
+            target += selector.sizeOfExternal() * i->length();
+        }
+    }
+
+    template<typename ITER1, typename ITER2>
+    void loadMemberImplementation(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<ELEMENT_TYPE>& selector,
+        const ITER1& start,
+        const ITER2& end)
+    {
+        for (ITER1 i = start; i != end; ++i) {
+            selector.copyMemberIn(source, sourceLocation, &(*this)[i->origin], MemoryLocation::HOST, i->length());
+            source += selector.sizeOfExternal() * i->length();
+        }
+    }
+
 protected:
     void saveMemberImplementation(
         char *target,
@@ -338,10 +367,7 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region) const
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            selector.copyMemberOut(&(*this)[i->origin], MemoryLocation::HOST, target, targetLocation, i->length());
-            target += selector.sizeOfExternal() * i->length();
-        }
+        saveMemberImplementation(target, targetLocation, selector, region.beginStreak(), region.endStreak());
     }
 
     void loadMemberImplementation(
@@ -350,10 +376,7 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region)
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            selector.copyMemberIn(source, sourceLocation, &(*this)[i->origin], MemoryLocation::HOST, i->length());
-            source += selector.sizeOfExternal() * i->length();
-        }
+        loadMemberImplementation(source, sourceLocation, selector, region.beginStreak(), region.endStreak());
     }
 
 private:

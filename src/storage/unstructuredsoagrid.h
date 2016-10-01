@@ -28,7 +28,7 @@ namespace UnstructuredSoAGridHelpers {
 /**
  * Internal helper class to save a region of a cell member.
  */
-template<typename CELL, int DIM>
+template<typename CELL, int DIM, typename ITER1, typename ITER2>
 class SaveMember
 {
 public:
@@ -36,11 +36,13 @@ public:
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region) :
+        const ITER1& start,
+        const ITER2& end) :
         target(target),
         targetLocation(targetLocation),
         selector(selector),
-        region(region)
+        start(start),
+        end(end)
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
@@ -48,7 +50,7 @@ public:
     {
         char *currentTarget = target;
 
-        for (auto i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (auto i = start; i != end; ++i) {
             accessor.index = i->origin.x();
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakOut(data, MemoryLocation::HOST, currentTarget,
@@ -61,13 +63,14 @@ private:
     char *target;
     MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
-    const Region<DIM>& region;
+    const ITER1& start;
+    const ITER2& end;
 };
 
 /**
  * Internal helper class to load a region of a cell member.
  */
-template<typename CELL, int DIM>
+template<typename CELL, int DIM, typename ITER1, typename ITER2>
 class LoadMember
 {
 public:
@@ -75,11 +78,13 @@ public:
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region) :
+        const ITER1& start,
+        const ITER2& end) :
         source(source),
         sourceLocation(sourceLocation),
         selector(selector),
-        region(region)
+        start(start),
+        end(end)
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
@@ -87,7 +92,7 @@ public:
     {
         const char *currentSource = source;
 
-        for (auto i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (auto i = start; i != end; ++i) {
             accessor.index = i->origin.x();
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakIn(currentSource, sourceLocation, currentTarget,
@@ -100,7 +105,8 @@ private:
     const char *source;
     MemoryLocation::Location sourceLocation;
     const Selector<CELL>& selector;
-    const Region<DIM>& region;
+    const ITER1& start;
+    const ITER2& end;
 };
 
 }
@@ -365,6 +371,32 @@ public:
         elements.load(start, end, source.data(), size);
     }
 
+    template<typename ITER1, typename ITER2>
+    void saveMemberImplementation(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<ELEMENT_TYPE>& selector,
+        const ITER1& start,
+        const ITER2& end) const
+    {
+        elements.callback(
+            UnstructuredSoAGridHelpers::SaveMember<ELEMENT_TYPE, DIM, ITER1, ITER2>(
+                target, targetLocation, selector, start, end));
+    }
+
+    template<typename ITER1, typename ITER2>
+    void loadMemberImplementation(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<ELEMENT_TYPE>& selector,
+        const ITER1& start,
+        const ITER2& end)
+    {
+        elements.callback(
+            UnstructuredSoAGridHelpers::LoadMember<ELEMENT_TYPE, DIM, ITER1, ITER2>(
+                source, sourceLocation, selector, start, end));
+    }
+
 protected:
     void saveMemberImplementation(
         char *target,
@@ -372,9 +404,7 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region) const
     {
-        elements.callback(
-            UnstructuredSoAGridHelpers::SaveMember<ELEMENT_TYPE, DIM>(
-                target, targetLocation, selector, region));
+        saveMemberImplementation(target, targetLocation, selector, region.beginStreak(), region.endStreak());
     }
 
     void loadMemberImplementation(
@@ -383,9 +413,7 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region)
     {
-        elements.callback(
-            UnstructuredSoAGridHelpers::LoadMember<ELEMENT_TYPE, DIM>(
-                source, sourceLocation, selector, region));
+        loadMemberImplementation(source, sourceLocation, selector, region.beginStreak(), region.endStreak());
     }
 
 private:
