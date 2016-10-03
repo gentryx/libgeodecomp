@@ -313,6 +313,110 @@ public:
         }
     }
 
+    void testLoadSaveMemberAoS()
+    {
+        typedef UnstructuredTestCell<> TestCell;
+        typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
+        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(122), 177)
+               << Streak<1>(Coord<1>(500), 599);
+
+        GridType grid(region);
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            grid.set(*i, TestCell(i->x(), 10 * i->x()));
+        }
+
+        Region<1> subset;
+        subset << Streak<1>(Coord<1>(122), 150)
+               << Streak<1>(Coord<1>(550), 599);
+
+        std::vector<int> buf(subset.size(), -1);
+        grid.saveMember(
+            &buf[0],
+            MemoryLocation::HOST,
+            Selector<TestCell>(&TestCell::id, "id"),
+            subset);
+
+        int counter = 0;
+        for (Region<1>::Iterator i = subset.begin(); i != subset.end(); ++i) {
+            TS_ASSERT_EQUALS(i->x(), buf[counter]);
+            ++counter;
+        }
+
+        for (int i = 0; i < buf.size(); ++i) {
+            buf[i] = i;
+        }
+
+        grid.loadMember(
+            (unsigned*)&buf[0],
+            MemoryLocation::HOST,
+            Selector<TestCell>(&TestCell::cycleCounter, "cycleCounter"),
+            subset);
+
+        counter = 0;
+        for (Region<1>::Iterator i = subset.begin(); i != subset.end(); ++i) {
+            TestCell cell = grid.get(*i);
+            TS_ASSERT_EQUALS(counter, cell.cycleCounter);
+            ++counter;
+        }
+    }
+
+    void testLoadSaveMemberSoA()
+    {
+        typedef UnstructuredTestCellSoA3 TestCell;
+        typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
+        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(222), 277)
+               << Streak<1>(Coord<1>(300), 399);
+
+        GridType grid(region);
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            grid.set(*i, TestCell(i->x(), 10 * i->x()));
+        }
+
+        Region<1> subset;
+        subset << Streak<1>(Coord<1>(250), 277)
+               << Streak<1>(Coord<1>(300), 350);
+
+        std::vector<int> buf(subset.size(), -1);
+        grid.saveMember(
+            &buf[0],
+            MemoryLocation::HOST,
+            Selector<TestCell>(&TestCell::id, "id"),
+            subset);
+
+        int counter = 0;
+        for (Region<1>::Iterator i = subset.begin(); i != subset.end(); ++i) {
+            TS_ASSERT_EQUALS(i->x(), buf[counter]);
+            ++counter;
+        }
+
+        for (int i = 0; i < buf.size(); ++i) {
+            buf[i] = i;
+        }
+
+        grid.loadMember(
+            (unsigned*)&buf[0],
+            MemoryLocation::HOST,
+            Selector<TestCell>(&TestCell::cycleCounter, "cycleCounter"),
+            subset);
+
+        counter = 0;
+        for (Region<1>::Iterator i = subset.begin(); i != subset.end(); ++i) {
+            TestCell cell = grid.get(*i);
+            TS_ASSERT_EQUALS(counter, cell.cycleCounter);
+            ++counter;
+        }
+    }
+
     // fixme: also test AoS
     void testSetWeights()
     {

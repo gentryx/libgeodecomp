@@ -296,7 +296,12 @@ private:
         const Selector<CellType>& selector,
         const Region<DIM>& region) const
     {
-        // fixme
+        delegate.saveMemberImplementation(
+            target,
+            targetLocation,
+            selector,
+            ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
+            ReorderingRegionIterator(region.end(), logicalToPhysicalIDs));
     }
 
     virtual void loadMemberImplementation(
@@ -305,7 +310,12 @@ private:
         const Selector<CellType>& selector,
         const Region<DIM>& region)
     {
-        // fixme
+        delegate.loadMemberImplementation(
+            source,
+            sourceLocation,
+            selector,
+            ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
+            ReorderingRegionIterator(region.end(), logicalToPhysicalIDs));
     }
 
     void reorderDelegateGrid(std::vector<IntPair>&& newLogicalToPhysicalIDs, std::vector<int>&& newPhysicalToLogicalIDs)
