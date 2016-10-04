@@ -45,7 +45,11 @@ if(WITH_BOOST_MOVE)
 endif()
 
 if(WITH_CUDA)
-  set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_35")
+  if (${CUDA_VERSION} VERSION_LESS 8.0)
+    set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_20")
+  else()
+    set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_35")
+  endif()
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${CUDA_INCLUDE_DIRS})
 endif()
 
