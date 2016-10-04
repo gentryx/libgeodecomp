@@ -152,6 +152,11 @@ public:
         }
     }
 
+    const FloatCoord<3>& getDimensions() const
+    {
+        return dimension;
+    }
+
 protected:
     FloatCoord<DIM> origin;
     FloatCoord<DIM> dimension;
