@@ -252,6 +252,7 @@ public:
     using AlignedIntVector   = std::vector<int, LibFlatArray::aligned_allocator<int, 64> >;
 
     friend SellHelpers::InitFromMatrix<VALUETYPE, C, SIGMA>;
+    friend class ReorderingUnstructuredGridTest;
 
     explicit
     SellCSigmaSparseMatrixContainer(const int N = 0) :

@@ -28,6 +28,8 @@ template<typename ELEMENT_TYPE, std::size_t MATRICES = 1, typename WEIGHT_TYPE =
 class UnstructuredGrid : public GridBase<ELEMENT_TYPE, 1, WEIGHT_TYPE>
 {
 public:
+    friend class ReorderingUnstructuredGridTest;
+
     typedef WEIGHT_TYPE WeightType;
     typedef std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> > NeighborList;
     typedef typename std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> >::iterator NeighborListIterator;

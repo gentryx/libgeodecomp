@@ -119,6 +119,8 @@ template<typename ELEMENT_TYPE, std::size_t MATRICES = 1,
 class UnstructuredSoAGrid : public GridBase<ELEMENT_TYPE, 1>
 {
 public:
+    friend class ReorderingUnstructuredGridTest;
+
     // fixme: rename VALUE_TYPE to WEIGHT_TYPE
     typedef VALUE_TYPE WeightType;
     const static int DIM = 1;
