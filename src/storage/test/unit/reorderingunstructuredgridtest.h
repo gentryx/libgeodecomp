@@ -450,42 +450,87 @@ public:
             TS_ASSERT_EQUALS(cell.cycleCounter, i->x());
         }
 
-        std::vector<TestCell> buf;
-        int counter = 0;
+        // test Streak-based get/set
+        {
+            std::vector<TestCell> buf;
+            int counter = 0;
 
-        for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            buf.resize(i->length());
+            for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+                buf.resize(i->length());
 
-            grid.get(*i, &buf[0]);
-            for (int j = 0; j < buf.size(); ++j) {
-                int expectedID = i->origin.x() + j;
-                TS_ASSERT_EQUALS(expectedID, buf[j].id);
+                grid.get(*i, &buf[0]);
+                for (int j = 0; j < buf.size(); ++j) {
+                    int expectedID = i->origin.x() + j;
+                    TS_ASSERT_EQUALS(expectedID, buf[j].id);
 
-                buf[j].id = counter;
+                    buf[j].id = counter;
+                    ++counter;
+                }
+
+                grid.set(*i, &buf[0]);
+            }
+
+            counter = 0;
+
+            for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+                buf.resize(i->length());
+
+                grid.get(*i, &buf[0]);
+                for (int j = 0; j < buf.size(); ++j) {
+                    TS_ASSERT_EQUALS(counter, buf[j].id);
+                    ++counter;
+                }
+            }
+        }
+
+        // test load/save member
+        {
+            std::vector<unsigned> buf(region.size());
+            int counter = 0;
+
+            grid.saveMember(&buf[0], MemoryLocation::HOST, Selector<TestCell>(&TestCell::cycleCounter, "cycleCounter"), region);
+
+            for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+                TS_ASSERT_EQUALS(i->x(), buf[counter]);
                 ++counter;
             }
 
-            grid.set(*i, &buf[0]);
-        }
+            counter = 1000;
+            for (int i = 0; i < buf.size(); ++i) {
+                buf[i] = counter;
+                ++counter;
+            }
+            grid.loadMember((int*)&buf[0], MemoryLocation::HOST, Selector<TestCell>(&TestCell::id, "id"), region);
 
-        counter = 0;
-
-        for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            buf.resize(i->length());
-
-            grid.get(*i, &buf[0]);
-            for (int j = 0; j < buf.size(); ++j) {
-                TS_ASSERT_EQUALS(counter, buf[j].id);
+            counter = 1000;
+            for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+                TS_ASSERT_EQUALS(grid.get(*i).id, counter);
                 ++counter;
             }
         }
 
-        std::cout << "========================================================================================\n";
-        for (int i = 0; i < region.size(); ++i) {
-            std::vector<std::pair<int, double> > row = grid.delegate.getWeights(0).getRow(i);
-            std::cout << "t: " << i << " =  " << grid.delegate.get(Coord<1>(i)).id << " -> " << row << " -- " <<  row.size() << "\n";
+        // test load/save Region
+        {
+            Region<1> region2;
+            region2 << Streak<1>(Coord<1>( 90), 150)
+                    << Streak<1>(Coord<1>(200), 400);
+
+            Region<1> intersection = region & region2;
+            GridType grid2(region2);
+            init.grid(&grid2);
+
+            std::vector<char> buffer;
+            SerializationBuffer<TestCell>::resize(&buffer, intersection);
+
+            grid.saveRegion(&buffer, intersection);
+            grid2.loadRegion(buffer, intersection);
+
+            for (Region<1>::Iterator i = intersection.begin(); i != intersection.end(); ++i) {
+                TestCell actual = grid2.get(*i);
+                TestCell expected = grid.get(*i);
+                TS_ASSERT_EQUALS(actual, expected);
+            }
         }
-        // fixme: test saveRegion, load Region, saveMember, loadMember after init (involves reordering)
     }
 };
 
