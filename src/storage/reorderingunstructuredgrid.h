@@ -167,8 +167,7 @@ public:
     void setWeights(std::size_t matrixID, const std::map<Coord<2>, WeightType>& matrix)
     {
         std::map<int, int> rowLengths;
-        // fixme: replace by Region<1>
-        std::set<int> mask;
+        Region<1> mask;
         for (typename std::map<Coord<2>, WeightType>::const_iterator i = matrix.begin(); i != matrix.end(); ++i) {
             int id = i->first.x();
             if (!nodeSet.count(Coord<1>(id))) {
@@ -176,11 +175,11 @@ public:
             }
 
             int neighborID = i->first.y();
-            if ((!nodeSet.count(Coord<1>(neighborID))) || (mask.count(id))) {
+            if ((!nodeSet.count(Coord<1>(neighborID))) || (mask.count(Coord<1>(id)))) {
                 // prune nodes with missing neighbors to have 0
                 // neighbors as we can safely assume they won't be
                 // updated anyway.
-                mask << id;
+                mask << Coord<1>(id);
                 rowLengths[id] = 0;
             } else {
                 ++rowLengths[id];
@@ -233,7 +232,7 @@ public:
                 continue;
             }
 
-            if (mask.count(id)) {
+            if (mask.count(Coord<1>(id))) {
                 continue;
             }
 
