@@ -78,7 +78,7 @@ public:
         chunkLength.resize(numberOfChunks);
         rowLength.resize(rowsPadded);
         rowLengthCopy.resize(rowsPadded);
-        realRowToSorted.resize(rowsPadded);
+        realRowToSorted.reserve(rowsPadded);
         chunkRowToReal.resize(rowsPadded);
 
         // get row lengths
@@ -99,11 +99,16 @@ public:
                              [] (const SortItem& a, const SortItem& b) -> bool
                              { return a.rowLength > b.rowLength; });
             for (int i = 0; i < numberOfRows; ++i) {
-                chunkRowToReal[nSigma * SIGMA + i]   = lengths[i].rowIndex;
-                realRowToSorted[lengths[i].rowIndex] = nSigma * SIGMA + i;
-                rowLengthCopy[nSigma * SIGMA + i] = lengths[i].rowLength;
+                int newID = nSigma * SIGMA + i;
+                chunkRowToReal[newID] = lengths[i].rowIndex;
+                realRowToSorted.push_back(std::make_pair(lengths[i].rowIndex, newID));
+                rowLengthCopy[newID] = lengths[i].rowLength;
             }
         }
+
+        std::stable_sort(realRowToSorted.begin(), realRowToSorted.end(),
+                         [] (const std::pair<int, int>& a, const std::pair<int, int>& b) -> bool
+                         { return a.first < b.first; });
 
         // save chunk lengths and offsets
         chunkOffset[0] = 0;
@@ -130,13 +135,24 @@ public:
         std::fill(begin(column), end(column), 0);
         int currentRow = 0;
         int index = 0;
+
         for (const auto& pair: matrix) {
             if (pair.first.x() != currentRow) {
                 currentRow = pair.first.x();
                 index = 0;
             }
-            const int chunk = realRowToSorted[pair.first.x()] / C;
-            const int row   = realRowToSorted[pair.first.x()] % C;
+            std::vector<std::pair<int, int> >::iterator iter = std::lower_bound(
+                realRowToSorted.begin(), realRowToSorted.end(), pair.first.x(),
+                [](const std::pair<int, int>& a, const int id) {
+                    return a.first < id;
+                });
+
+            if (iter == realRowToSorted.end()) {
+                throw std::logic_error("ID not found");
+            }
+
+            const int chunk = iter->second / C;
+            const int row   = iter->second % C;
             const int start = chunkOffset[chunk];
             const int idx   = start + index * C + row;
             values[idx]     = pair.second;
@@ -372,7 +388,7 @@ public:
         return chunkOffset;
     }
 
-    inline const std::vector<int>& realRowToSortedVec() const
+    inline const std::vector<std::pair<int, int> >& realRowToSortedVec() const
     {
         return realRowToSorted;
     }
@@ -389,12 +405,12 @@ public:
 
 private:
     AlignedValueVector values;
-    AlignedIntVector   column;
-    std::vector<int>   rowLength;       // = Non Zero Entres in Row
-    std::vector<int>   chunkLength;     // = Max rowLength in Chunk
-    std::vector<int>   chunkOffset;     // COffset[i+1]=COffset[i]+CLength[i]*C
-    std::vector<int>   realRowToSorted; // mapping between rows and real rows, used for SIGMA
-    std::vector<int>   chunkRowToReal;  // and the other way around
+    AlignedIntVector column;
+    std::vector<int> rowLength;       // = Non Zero Entres in Row
+    std::vector<int> chunkLength;     // = Max rowLength in Chunk
+    std::vector<int> chunkOffset;     // COffset[i+1]=COffset[i]+CLength[i]*C
+    std::vector<std::pair<int, int> > realRowToSorted; // mapping between rows and real rows, used for SIGMA
+    std::vector<int> chunkRowToReal;  // and the other way around
     std::size_t dimension;              // = N
 };
 
