@@ -32,7 +32,7 @@ public:
      * writeContainer.
      */
     template<typename UNUSED>
-    explicit NeighborhoodAdapter(
+    inline NeighborhoodAdapter(
         UNUSED *writeContainer,
         const NEIGHBORHOOD *neighbors) :
         neighbors(neighbors)
