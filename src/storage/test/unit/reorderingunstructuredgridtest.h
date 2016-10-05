@@ -417,7 +417,121 @@ public:
         }
     }
 
-    // fixme: also test AoS
+    void testSetWeightsAoS()
+    {
+        typedef UnstructuredTestCell<> TestCell;
+        typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
+        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+
+        UnstructuredTestInitializer<TestCell> init(1234, 66);
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>( 11),  44)
+               << Streak<1>(Coord<1>(100), 140)
+               << Streak<1>(Coord<1>(211), 214)
+               << Streak<1>(Coord<1>(333), 344)
+               << Streak<1>(Coord<1>(355), 450);
+
+        GridType grid(region);
+        init.grid(&grid);
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TestCell cell = grid.get(*i);
+            TS_ASSERT_EQUALS(cell.id, i->x());
+
+            cell.cycleCounter = cell.id;
+            grid.set(*i, cell);
+        }
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TestCell cell = grid.get(*i);
+            TS_ASSERT_EQUALS(cell.cycleCounter, i->x());
+        }
+
+        // test Streak-based get/set
+        {
+            std::vector<TestCell> buf;
+            int counter = 42195;
+
+            for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+                buf.resize(i->length());
+
+                grid.get(*i, &buf[0]);
+                for (int j = 0; j < buf.size(); ++j) {
+                    int expectedID = i->origin.x() + j;
+                    TS_ASSERT_EQUALS(expectedID, buf[j].id);
+
+                    buf[j].id = counter;
+                    ++counter;
+                }
+
+                grid.set(*i, &buf[0]);
+            }
+
+            counter = 42195;
+
+            for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+                buf.resize(i->length());
+
+                grid.get(*i, &buf[0]);
+                for (int j = 0; j < buf.size(); ++j) {
+                    TS_ASSERT_EQUALS(counter, buf[j].id);
+                    ++counter;
+                }
+            }
+        }
+
+        // test load/save member
+        {
+            std::vector<unsigned> buf(region.size());
+            int counter = 0;
+
+            grid.saveMember(&buf[0], MemoryLocation::HOST, Selector<TestCell>(&TestCell::cycleCounter, "cycleCounter"), region);
+
+            for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+                TS_ASSERT_EQUALS(i->x(), buf[counter]);
+                ++counter;
+            }
+
+            counter = 2000;
+            for (int i = 0; i < buf.size(); ++i) {
+                buf[i] = counter;
+                ++counter;
+            }
+            grid.loadMember((int*)&buf[0], MemoryLocation::HOST, Selector<TestCell>(&TestCell::id, "id"), region);
+
+            counter = 2000;
+            for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+                TS_ASSERT_EQUALS(grid.get(*i).id, counter);
+                ++counter;
+            }
+        }
+
+        // test load/save Region
+        {
+            Region<1> region2;
+            region2 << Streak<1>(Coord<1>( 90), 150)
+                    << Streak<1>(Coord<1>(200), 400);
+
+            Region<1> intersection = region & region2;
+            GridType grid2(region2);
+            init.grid(&grid2);
+
+            std::vector<TestCell> buffer;
+            SerializationBuffer<TestCell>::resize(&buffer, intersection);
+
+            grid.saveRegion(&buffer, intersection);
+            grid2.loadRegion(buffer, intersection);
+
+            for (Region<1>::Iterator i = intersection.begin(); i != intersection.end(); ++i) {
+                TestCell actual = grid2.get(*i);
+                TestCell expected = grid.get(*i);
+                TS_ASSERT_EQUALS(actual, expected);
+            }
+        }
+    }
+
     void testSetWeightsSoA()
     {
         typedef UnstructuredTestCellSoA3 TestCell;
