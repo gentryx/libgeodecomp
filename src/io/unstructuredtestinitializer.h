@@ -30,8 +30,7 @@ public:
     virtual void grid(GridBase<TEST_CELL, 1> *ret)
     {
         int cycle = NANO_STEPS * firstStep;
-        Region<1> boundingRegion;
-        boundingRegion << ret->boundingBox();
+        Region<1> boundingRegion = ret->boundingRegion();
         std::map<Coord<2>, double> weights;
 
         for (Region<1>::Iterator i = boundingRegion.begin(); i != boundingRegion.end(); ++i) {
