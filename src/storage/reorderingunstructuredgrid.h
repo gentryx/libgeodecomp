@@ -396,12 +396,9 @@ private:
     inline
     CellType get(int logicalID) const
     {
-        // fixme: use mapLogicalToPhysicalID()?
-        std::vector<IntPair>::const_iterator pos = std::lower_bound(
-            logicalToPhysicalIDs.begin(), logicalToPhysicalIDs.end(), logicalID,
-            [](const IntPair& a, const int logicalID) {
-                return a.first < logicalID;
-            });
+        using ReorderingUnstructuredGridHelpers::mapLogicalToPhysicalID;
+        std::vector<IntPair>::const_iterator pos = mapLogicalToPhysicalID(logicalID, logicalToPhysicalIDs);
+
         if ((pos == logicalToPhysicalIDs.end() || (pos->first != logicalID))) {
             return delegate.getEdge();
         }
@@ -412,12 +409,9 @@ private:
     inline
     void set(int logicalID, const CellType& cell)
     {
-        // fixme: use mapLogicalToPhysicalID()?
-        std::vector<IntPair>::const_iterator pos = std::lower_bound(
-            logicalToPhysicalIDs.begin(), logicalToPhysicalIDs.end(), logicalID,
-            [](const IntPair& a, const int logicalID) {
-                return a.first < logicalID;
-            });
+        using ReorderingUnstructuredGridHelpers::mapLogicalToPhysicalID;
+        std::vector<IntPair>::const_iterator pos = mapLogicalToPhysicalID(logicalID, logicalToPhysicalIDs);
+
         if ((pos == logicalToPhysicalIDs.end() || (pos->first != logicalID))) {
             delegate.setEdge(cell);
         }
