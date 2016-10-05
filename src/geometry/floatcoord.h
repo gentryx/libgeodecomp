@@ -43,12 +43,20 @@ public:
         c[0] = x;
     }
 
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
     template<template<int> class OTHER_COORD>
     inline
     FloatCoord(const OTHER_COORD<1>& p)
     {
         c[0] = p[0];
     }
+#ifdef __ICC
+#pragma warning pop
+#endif
 
     inline
     double length() const
@@ -264,6 +272,11 @@ public:
         c[1] = y;
     }
 
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
     template<template<int> class OTHER_COORD>
     inline
     FloatCoord(const OTHER_COORD<2>& p)
@@ -271,6 +284,9 @@ public:
         c[0] = p[0];
         c[1] = p[1];
     }
+#ifdef __ICC
+#pragma warning pop
+#endif
 
     inline
     double length() const
@@ -510,6 +526,11 @@ public:
         c[2] = z;
     }
 
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
     template<template<int> class OTHER_COORD>
     inline
     FloatCoord(const OTHER_COORD<3>& p)
@@ -518,6 +539,9 @@ public:
         c[1] = p[1];
         c[2] = p[2];
     }
+#ifdef __ICC
+#pragma warning pop
+#endif
 
     inline
     double length() const

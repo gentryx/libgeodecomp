@@ -26,12 +26,14 @@ class BasicTimerImplementation
 {
 public:
     template<typename CHRONOMETER>
+    inline explicit
     BasicTimerImplementation(CHRONOMETER *chrono) :
         totalTimes(chrono->rawTotalTimes()),
         t(ScopedTimer::time())
     {}
 
     template<typename CHRONOMETER>
+    inline
     BasicTimerImplementation(CHRONOMETER *chrono, double t) :
         totalTimes(chrono->rawTotalTimes()),
         t(t)
@@ -93,11 +95,13 @@ public:
         static const int ID = EVENT_ID;                             \
                                                                     \
         template<typename CHRONOMETER>                              \
+        inline explicit                                             \
         CLASS_NAME ## Implementation(CHRONOMETER *chrono) :         \
             PARENT ## Implementation(chrono)                        \
         {}                                                          \
                                                                     \
         template<typename CHRONOMETER>                              \
+        inline                                                      \
         CLASS_NAME ## Implementation(CHRONOMETER *chrono, double time) : \
             PARENT ## Implementation(chrono, time)                  \
         {}                                                          \
@@ -115,7 +119,8 @@ public:
         static const int ID = EVENT_ID;                             \
                                                                     \
         template<typename CHRONOMETER>                              \
-            CLASS_NAME(CHRONOMETER *chrono) :                       \
+        inline explicit                                             \
+        CLASS_NAME(CHRONOMETER *chrono) :                           \
             CLASS_NAME ## Implementation(chrono)                    \
         {}                                                          \
                                                                     \
