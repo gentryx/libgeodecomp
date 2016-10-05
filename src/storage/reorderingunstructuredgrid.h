@@ -31,7 +31,6 @@ template<int DIM>
 class ReorderingRegionIterator
 {
 public:
-
     inline
     ReorderingRegionIterator(const Region<1>::Iterator& iter, const std::vector<IntPair>& logicalToPhysicalIDs) :
         iter(iter),
@@ -123,6 +122,8 @@ template<typename DELEGATE_GRID>
 class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellType, 1, typename DELEGATE_GRID::WeightType>
 {
 public:
+    friend class ReorderingUnstructuredGridTest;
+
     typedef typename DELEGATE_GRID::CellType CellType;
     typedef typename DELEGATE_GRID::WeightType WeightType;
     typedef typename SerializationBuffer<CellType>::BufferType BufferType;
@@ -165,9 +166,24 @@ public:
     inline
     void setWeights(std::size_t matrixID, const std::map<Coord<2>, WeightType>& matrix)
     {
-        std::map<int, int> rowLenghts;
+        std::map<int, int> rowLengths;
+        std::set<int> mask;
         for (typename std::map<Coord<2>, WeightType>::const_iterator i = matrix.begin(); i != matrix.end(); ++i) {
-            ++rowLenghts[i->first.x()];
+            int id = i->first.x();
+            if (!nodeSet.count(Coord<1>(id))) {
+                continue;
+            }
+
+            int neighborID = i->first.y();
+            if ((!nodeSet.count(Coord<1>(neighborID))) || (mask.count(id))) {
+                // prune nodes with missing neighbors to have 0
+                // neighbors as we can safely assume they won't be
+                // updated anyway.
+                mask << id;
+                rowLengths[id] = 0;
+            } else {
+                ++rowLengths[id];
+            }
         }
 
         typedef std::vector<IntPair> RowLengthVec;
@@ -176,7 +192,7 @@ public:
 
         for (Region<1>::StreakIterator i = nodeSet.beginStreak(); i != nodeSet.endStreak(); ++i) {
             for (int j = i->origin.x(); j != i->endX; ++j) {
-                reorderedRowLengths << std::make_pair(j, rowLenghts[j]);
+                reorderedRowLengths << std::make_pair(j, rowLengths[j]);
             }
         }
 
@@ -206,6 +222,37 @@ public:
             });
 
         reorderDelegateGrid(std::move(newLogicalToPhysicalIDs), std::move(newPhysicalToLogicalIDs));
+
+        using ReorderingUnstructuredGridHelpers::mapLogicalToPhysicalID;
+        std::map<Coord<2>, WeightType> newMatrix;
+
+        for (typename std::map<Coord<2>, WeightType>::const_iterator i = matrix.begin(); i != matrix.end(); ++i) {
+            int id = i->first.x();
+            if (nodeSet.count(Coord<1>(id)) == 0) {
+                continue;
+            }
+
+            if (mask.count(id)) {
+                continue;
+            }
+
+            std::vector<std::pair<int, int> >::const_iterator iter;
+            iter = mapLogicalToPhysicalID(i->first.x(), logicalToPhysicalIDs);
+            if (iter == logicalToPhysicalIDs.end()) {
+                throw std::logic_error("unknown ID in matrix");
+            }
+            int id1 = iter->second;
+
+            iter = mapLogicalToPhysicalID(i->first.y(), logicalToPhysicalIDs);
+            if (iter == logicalToPhysicalIDs.end()) {
+                throw std::logic_error("unknown neighbor ID in matrix");
+            }
+            int id2 = iter->second;
+
+            newMatrix[Coord<2>(id1, id2)] = i->second;
+        }
+
+        delegate.setWeights(matrixID, std::move(newMatrix));
     }
 
     /**
@@ -320,6 +367,28 @@ private:
 
     void reorderDelegateGrid(std::vector<IntPair>&& newLogicalToPhysicalIDs, std::vector<int>&& newPhysicalToLogicalIDs)
     {
+        CoordBox<1> box(Coord<1>(), nodeSet.boundingBox().dimensions);
+        DELEGATE_GRID newDelegate(box);
+        for (Region<1>::Iterator i = nodeSet.begin(); i != nodeSet.end(); ++i) {
+            using ReorderingUnstructuredGridHelpers::mapLogicalToPhysicalID;
+            std::vector<IntPair>::const_iterator iter;
+
+            iter = mapLogicalToPhysicalID(i->x(), newLogicalToPhysicalIDs);
+            if (iter == newLogicalToPhysicalIDs.end()) {
+                throw std::logic_error("ID not found in new ID map");
+            }
+            Coord<1> newPhysicalID(iter->second);
+
+            iter = mapLogicalToPhysicalID(i->x(), logicalToPhysicalIDs);
+            if (iter == logicalToPhysicalIDs.end()) {
+                throw std::logic_error("ID not found in old ID map");
+            }
+            Coord<1> oldPhysicalID(iter->second);
+
+            newDelegate.set(newPhysicalID, delegate.get(oldPhysicalID));
+        }
+        delegate = std::move(newDelegate);
+
         logicalToPhysicalIDs = std::move(newLogicalToPhysicalIDs);
         physicalToLogicalIDs = std::move(newPhysicalToLogicalIDs);
     }
@@ -327,6 +396,7 @@ private:
     inline
     CellType get(int logicalID) const
     {
+        // fixme: use mapLogicalToPhysicalID()?
         std::vector<IntPair>::const_iterator pos = std::lower_bound(
             logicalToPhysicalIDs.begin(), logicalToPhysicalIDs.end(), logicalID,
             [](const IntPair& a, const int logicalID) {
@@ -342,6 +412,7 @@ private:
     inline
     void set(int logicalID, const CellType& cell)
     {
+        // fixme: use mapLogicalToPhysicalID()?
         std::vector<IntPair>::const_iterator pos = std::lower_bound(
             logicalToPhysicalIDs.begin(), logicalToPhysicalIDs.end(), logicalID,
             [](const IntPair& a, const int logicalID) {

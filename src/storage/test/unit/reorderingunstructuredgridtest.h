@@ -418,7 +418,7 @@ public:
     }
 
     // fixme: also test AoS
-    void testSetWeights()
+    void testSetWeightsSoA()
     {
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
@@ -434,9 +434,14 @@ public:
                << Streak<1>(Coord<1>(333), 344)
                << Streak<1>(Coord<1>(355), 366);
 
-        // GridType grid(region);
-        // init.grid(&grid);
+        GridType grid(region);
+        init.grid(&grid);
 
+        std::cout << "========================================================================================\n";
+        for (int i = 0; i < 64; ++i) {
+            std::vector<std::pair<int, double> > row = grid.delegate.getWeights(0).getRow(i);
+            std::cout << "t: " << i << " =  " << grid.delegate.get(Coord<1>(i)).id << " -> " << row << " -- " <<  row.size() << "\n";
+        }
         // fixme: test get (coord, streak), set (coord, streak), saveRegion, load Region, saveMember, loadMember after init (involves reordering)
     }
 };
