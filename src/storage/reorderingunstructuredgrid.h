@@ -167,6 +167,7 @@ public:
     void setWeights(std::size_t matrixID, const std::map<Coord<2>, WeightType>& matrix)
     {
         std::map<int, int> rowLengths;
+        // fixme: replace by Region<1>
         std::set<int> mask;
         for (typename std::map<Coord<2>, WeightType>::const_iterator i = matrix.begin(); i != matrix.end(); ++i) {
             int id = i->first.x();
@@ -329,6 +330,28 @@ public:
             ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
             ReorderingRegionIterator(region.end(), logicalToPhysicalIDs),
             region.size());
+    }
+
+    /**
+     * Convert coordinates from Region to the internal reordering of
+     * the grid so they can be used directly by an UpdateFunctor.
+     */
+    virtual Region<1> remapRegion(const Region<1>& region)
+    {
+        Region<1> ret;
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            using ReorderingUnstructuredGridHelpers::mapLogicalToPhysicalID;
+            std::vector<IntPair>::const_iterator iter = mapLogicalToPhysicalID(i->x(), logicalToPhysicalIDs);
+
+            if (iter == logicalToPhysicalIDs.end()) {
+                throw std::logic_error("cannot remap Coord from Region -- Region needs to be a subset of nodeSet");
+            }
+
+            ret << Coord<1>(iter->second);
+        }
+
+        return ret;
     }
 
 private:

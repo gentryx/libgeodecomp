@@ -530,6 +530,52 @@ public:
                 TS_ASSERT_EQUALS(actual, expected);
             }
         }
+
+        // test remapRegion()
+        Region<1> remappedRegion = grid.remapRegion(region);
+        TS_ASSERT_EQUALS(remappedRegion.size(), region.size());
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TestCell cell = grid.get(*i);
+            cell.id = i->x();
+            grid.set(*i, cell);
+        }
+
+        for (Region<1>::Iterator i = remappedRegion.begin(); i != remappedRegion.end(); ++i) {
+            TestCell cell = grid.delegate.get(*i);
+
+            std::vector<std::pair<int, double> > expectedRow;
+            int numNeighbors = cell.id % 20 + 1;
+            for (int j = 0; j != numNeighbors; ++j) {
+                int neighborID = cell.id + 1 + j;
+                double weight = neighborID + 0.1;
+
+                std::vector<std::pair<int, int> >::const_iterator iter = std::find_if(
+                    grid.logicalToPhysicalIDs.begin(),
+                    grid.logicalToPhysicalIDs.end(),
+                    [neighborID](const std::pair<int, double>& pair){
+                        return pair.first == neighborID;
+                    });
+
+                if (iter == grid.logicalToPhysicalIDs.end()) {
+                    expectedRow.clear();
+                    break;
+                }
+
+                expectedRow << std::make_pair(iter->second, weight);
+            }
+
+            std::stable_sort(
+                expectedRow.begin(),
+                expectedRow.end(),
+                [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
+                    return a.first < b.first;
+                });
+
+            std::vector<std::pair<int, double> > actualRow = grid.delegate.matrices[0].getRow(i->x());
+
+            TS_ASSERT_EQUALS(actualRow, expectedRow);
+        }
     }
 
     void testSetWeightsSoA()
@@ -644,6 +690,52 @@ public:
                 TestCell expected = grid.get(*i);
                 TS_ASSERT_EQUALS(actual, expected);
             }
+        }
+
+        // test remapRegion()
+        Region<1> remappedRegion = grid.remapRegion(region);
+        TS_ASSERT_EQUALS(remappedRegion.size(), region.size());
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TestCell cell = grid.get(*i);
+            cell.id = i->x();
+            grid.set(*i, cell);
+        }
+
+        for (Region<1>::Iterator i = remappedRegion.begin(); i != remappedRegion.end(); ++i) {
+            TestCell cell = grid.delegate.get(*i);
+
+            std::vector<std::pair<int, double> > expectedRow;
+            int numNeighbors = cell.id % 20 + 1;
+            for (int j = 0; j != numNeighbors; ++j) {
+                int neighborID = cell.id + 1 + j;
+                double weight = neighborID + 0.1;
+
+                std::vector<std::pair<int, int> >::const_iterator iter = std::find_if(
+                    grid.logicalToPhysicalIDs.begin(),
+                    grid.logicalToPhysicalIDs.end(),
+                    [neighborID](const std::pair<int, double>& pair){
+                        return pair.first == neighborID;
+                    });
+
+                if (iter == grid.logicalToPhysicalIDs.end()) {
+                    expectedRow.clear();
+                    break;
+                }
+
+                expectedRow << std::make_pair(iter->second, weight);
+            }
+
+            std::stable_sort(
+                expectedRow.begin(),
+                expectedRow.end(),
+                [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
+                    return a.first < b.first;
+                });
+
+            std::vector<std::pair<int, double> > actualRow = grid.delegate.matrices[0].getRow(i->x());
+
+            TS_ASSERT_EQUALS(actualRow, expectedRow);
         }
     }
 };
