@@ -432,17 +432,60 @@ public:
                << Streak<1>(Coord<1>(100), 140)
                << Streak<1>(Coord<1>(211), 214)
                << Streak<1>(Coord<1>(333), 344)
-               << Streak<1>(Coord<1>(355), 366);
+               << Streak<1>(Coord<1>(355), 450);
 
         GridType grid(region);
         init.grid(&grid);
 
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TestCell cell = grid.get(*i);
+            TS_ASSERT_EQUALS(cell.id, i->x());
+
+            cell.cycleCounter = cell.id;
+            grid.set(*i, cell);
+        }
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TestCell cell = grid.get(*i);
+            TS_ASSERT_EQUALS(cell.cycleCounter, i->x());
+        }
+
+        std::vector<TestCell> buf;
+        int counter = 0;
+
+        for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            buf.resize(i->length());
+
+            grid.get(*i, &buf[0]);
+            for (int j = 0; j < buf.size(); ++j) {
+                int expectedID = i->origin.x() + j;
+                TS_ASSERT_EQUALS(expectedID, buf[j].id);
+
+                buf[j].id = counter;
+                ++counter;
+            }
+
+            grid.set(*i, &buf[0]);
+        }
+
+        counter = 0;
+
+        for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            buf.resize(i->length());
+
+            grid.get(*i, &buf[0]);
+            for (int j = 0; j < buf.size(); ++j) {
+                TS_ASSERT_EQUALS(counter, buf[j].id);
+                ++counter;
+            }
+        }
+
         std::cout << "========================================================================================\n";
-        for (int i = 0; i < 64; ++i) {
+        for (int i = 0; i < region.size(); ++i) {
             std::vector<std::pair<int, double> > row = grid.delegate.getWeights(0).getRow(i);
             std::cout << "t: " << i << " =  " << grid.delegate.get(Coord<1>(i)).id << " -> " << row << " -- " <<  row.size() << "\n";
         }
-        // fixme: test get (coord, streak), set (coord, streak), saveRegion, load Region, saveMember, loadMember after init (involves reordering)
+        // fixme: test saveRegion, load Region, saveMember, loadMember after init (involves reordering)
     }
 };
 
