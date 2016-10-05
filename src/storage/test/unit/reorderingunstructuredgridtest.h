@@ -347,7 +347,7 @@ public:
             ++counter;
         }
 
-        for (int i = 0; i < buf.size(); ++i) {
+        for (std::size_t i = 0; i < buf.size(); ++i) {
             buf[i] = i;
         }
 
@@ -399,7 +399,7 @@ public:
             ++counter;
         }
 
-        for (int i = 0; i < buf.size(); ++i) {
+        for (std::size_t i = 0; i < buf.size(); ++i) {
             buf[i] = i;
         }
 
@@ -458,7 +458,7 @@ public:
                 buf.resize(i->length());
 
                 grid.get(*i, &buf[0]);
-                for (int j = 0; j < buf.size(); ++j) {
+                for (std::size_t j = 0; j < buf.size(); ++j) {
                     int expectedID = i->origin.x() + j;
                     TS_ASSERT_EQUALS(expectedID, buf[j].id);
 
@@ -475,7 +475,7 @@ public:
                 buf.resize(i->length());
 
                 grid.get(*i, &buf[0]);
-                for (int j = 0; j < buf.size(); ++j) {
+                for (std::size_t j = 0; j < buf.size(); ++j) {
                     TS_ASSERT_EQUALS(counter, buf[j].id);
                     ++counter;
                 }
@@ -495,7 +495,7 @@ public:
             }
 
             counter = 2000;
-            for (int i = 0; i < buf.size(); ++i) {
+            for (std::size_t i = 0; i < buf.size(); ++i) {
                 buf[i] = counter;
                 ++counter;
             }
@@ -573,7 +573,7 @@ public:
                 buf.resize(i->length());
 
                 grid.get(*i, &buf[0]);
-                for (int j = 0; j < buf.size(); ++j) {
+                for (std::size_t j = 0; j < buf.size(); ++j) {
                     int expectedID = i->origin.x() + j;
                     TS_ASSERT_EQUALS(expectedID, buf[j].id);
 
@@ -590,7 +590,7 @@ public:
                 buf.resize(i->length());
 
                 grid.get(*i, &buf[0]);
-                for (int j = 0; j < buf.size(); ++j) {
+                for (std::size_t j = 0; j < buf.size(); ++j) {
                     TS_ASSERT_EQUALS(counter, buf[j].id);
                     ++counter;
                 }
@@ -610,7 +610,7 @@ public:
             }
 
             counter = 1000;
-            for (int i = 0; i < buf.size(); ++i) {
+            for (std::size_t i = 0; i < buf.size(); ++i) {
                 buf[i] = counter;
                 ++counter;
             }
