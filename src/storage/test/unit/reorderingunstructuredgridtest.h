@@ -576,6 +576,24 @@ public:
 
             TS_ASSERT_EQUALS(actualRow, expectedRow);
         }
+
+        // test expandChunksInRemappedRegion()
+        remappedRegion.clear();
+        remappedRegion << Streak<1>(Coord<1>(  9),  20)
+                       << Streak<1>(Coord<1>( 48),  51)
+                       << Streak<1>(Coord<1>( 70),  80)
+                       << Streak<1>(Coord<1>( 90), 100)
+                       << Streak<1>(Coord<1>(102), 119);
+
+        Region<1> actual = grid.expandChunksInRemappedRegion(remappedRegion);
+
+        Region<1> expected;
+        expected << Streak<1>(Coord<1>(  8),  20)
+                 << Streak<1>(Coord<1>( 48),  52)
+                 << Streak<1>(Coord<1>( 68),  80)
+                 << Streak<1>(Coord<1>( 88), 120);
+
+        TS_ASSERT_EQUALS(expected, actual);
     }
 
     void testSetWeightsSoA()
@@ -737,6 +755,24 @@ public:
 
             TS_ASSERT_EQUALS(actualRow, expectedRow);
         }
+
+        // test expandChunksInRemappedRegion()
+        remappedRegion.clear();
+        remappedRegion << Streak<1>(Coord<1>( 10),  20)
+                       << Streak<1>(Coord<1>( 48),  51)
+                       << Streak<1>(Coord<1>( 70),  80)
+                       << Streak<1>(Coord<1>( 90), 100)
+                       << Streak<1>(Coord<1>(102), 120);
+
+        Region<1> actual = grid.expandChunksInRemappedRegion(remappedRegion);
+
+        Region<1> expected;
+        expected << Streak<1>(Coord<1>(  8),  24)
+                 << Streak<1>(Coord<1>( 48),  56)
+                 << Streak<1>(Coord<1>( 64),  80)
+                 << Streak<1>(Coord<1>( 88), 120);
+
+        TS_ASSERT_EQUALS(expected, actual);
     }
 };
 

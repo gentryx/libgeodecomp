@@ -135,6 +135,7 @@ public:
 
     const static int DIM = 1;
     const static int SIGMA = DELEGATE_GRID::SIGMA;
+    const static int C = DELEGATE_GRID::C;
 
     explicit ReorderingUnstructuredGrid(
         const Region<1>& nodeSet) :
@@ -348,6 +349,26 @@ public:
             }
 
             ret << Coord<1>(iter->second);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Expands a Region so that all chunks it touches are filled up.
+     * This can be used by an UpdateFunktor to reduce the amount of
+     * conditionals but comes at the expense of additional
+     * computations.
+     */
+    virtual Region<1> expandChunksInRemappedRegion(const Region<1>& region)
+    {
+        Region<1> ret;
+        for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            Streak<1> streak = *i;
+            streak.origin.x() = streak.origin.x() / C * C;
+            streak.endX = (streak.endX + C - 1) / C * C;
+
+            ret << streak;
         }
 
         return ret;
