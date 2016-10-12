@@ -115,7 +115,7 @@ private:
  * A unstructured grid for irregular structures using SoA memory layout.
  */
 template<typename ELEMENT_TYPE, std::size_t MATRICES = 1,
-         typename VALUE_TYPE = double, int C = 64, int MY_SIGMA = 1>
+         typename VALUE_TYPE = double, int MY_C = 64, int MY_SIGMA = 1>
 class UnstructuredSoAGrid : public GridBase<ELEMENT_TYPE, 1>
 {
 public:
@@ -125,6 +125,7 @@ public:
     typedef VALUE_TYPE WeightType;
     const static int DIM = 1;
     const static int SIGMA = MY_SIGMA;
+    const static int C = MY_C;
 
     static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<ELEMENT_TYPE>::VALUE;
 
