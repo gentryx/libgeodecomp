@@ -2,6 +2,7 @@
 #include <libgeodecomp/io/unstructuredtestinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/misc/unstructuredtestcell.h>
+#include <libgeodecomp/storage/reorderingunstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
@@ -53,7 +54,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage weights
-        TS_ASSERT_EQUALS(grid1[Coord<1>(40)].expectedNeighborIDs[0], 41);
+        TS_ASSERT_EQUALS(grid1[Coord<1>(40)].expectedNeighborWeights[0], 41.1);
         grid1[Coord<1>(40)].expectedNeighborWeights[0] = 4711;
 
         for (int x = 0; x < 200; ++x, ++hood) {
@@ -164,10 +165,6 @@ public:
         TS_ASSERT_DIFFERS(cell1, cell2);
 
         cell2 = cell1;
-        cell2.expectedNeighborIDs << 4711;
-        TS_ASSERT_DIFFERS(cell1, cell2);
-
-        cell2 = cell1;
         cell2.expectedNeighborWeights << 1234;
         TS_ASSERT_DIFFERS(cell1, cell2);
     }
@@ -234,16 +231,18 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA3 TestCellType;
-        typedef UnstructuredSoAGrid<TestCellType, 1, double, 8, 64> TestGridType;
+        typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<TestCellType, 1, double, 8, 64> > TestGridType;
+
+        // fixme: update only a subset of the grid's bounding region
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 340);
 
         UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
-        TestGridType grid1 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
-        TestGridType grid2 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
+        TestGridType grid1 = TestGridType(region);
+        TestGridType grid2 = TestGridType(region);
         init.grid(&grid1);
         init.grid(&grid2);
 
-        Region<1> region;
-        region << Streak<1>(Coord<1>(0), 340);
         UnstructuredUpdateFunctor<TestCellType>()(
             region,
             grid1,
@@ -263,16 +262,17 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA4 TestCellType;
-        typedef UnstructuredSoAGrid<TestCellType, 1, double, 16, 32> TestGridType;
-
-        UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
-        TestGridType grid1 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
-        TestGridType grid2 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
-        init.grid(&grid1);
-        init.grid(&grid2);
+        typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<TestCellType, 1, double, 16, 32> > TestGridType;
 
         Region<1> region;
         region << Streak<1>(Coord<1>(0), 340);
+
+        UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
+        TestGridType grid1 = TestGridType(region);
+        TestGridType grid2 = TestGridType(region);
+        init.grid(&grid1);
+        init.grid(&grid2);
+
         UnstructuredUpdateFunctor<TestCellType>()(
             region,
             grid1,
