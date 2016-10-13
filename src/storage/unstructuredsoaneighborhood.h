@@ -23,16 +23,24 @@ namespace LibGeoDecomp {
  * Both pointers can be used to load LFA short_vec classes accordingly.
  */
 template<
-    typename CELL, long DIM_X, long DIM_Y, long DIM_Z, long INDEX,
-    std::size_t MATRICES = 1, typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
+    typename GRID_TYPE,
+    typename CELL,
+    long DIM_X,
+    long DIM_Y,
+    long DIM_Z,
+    long INDEX,
+    std::size_t MATRICES = 1,
+    typename VALUE_TYPE = double,
+    int C = 64,
+    int SIGMA = 1>
 class UnstructuredSoANeighborhood
 {
 public:
     static const int ARITY = C;
 
-    using Grid = UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
     using IteratorPair = std::pair<const int*, const VALUE_TYPE*>;
     using SoAAccessor = LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>;
+    using ConstSoAAccessor = LibFlatArray::const_soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>;
 
     /**
      * This iterator returns objects/values needed to update
@@ -91,7 +99,7 @@ public:
     };
 
     inline
-    UnstructuredSoANeighborhood(const SoAAccessor& acc, const Grid& grid, long startX) :
+    UnstructuredSoANeighborhood(const SoAAccessor& acc, const GRID_TYPE& grid, long startX) :
         grid(grid),
         currentChunk(startX / C),
         currentMatrixID(0),
@@ -151,15 +159,15 @@ public:
         return &accessor;
     }
 
-    CELL operator[](int index) const
+    inline
+    const ConstSoAAccessor operator[](int offset) const
     {
-        // fixme: slow
-        // fixme: logical IDs vs. actual offsets in grid:
-        return grid.get(Coord<1>(index));
+        return ConstSoAAccessor(accessor.get_data(), accessor.index + offset);
     }
 
 private:
-    const Grid& grid;            /**< old grid */
+    // fixme: get rid of grid reference, only reference weight vector
+    const GRID_TYPE& grid;       /**< old grid */
     int currentChunk;            /**< current chunk */
     int currentMatrixID;         /**< current id for matrices */
     const SoAAccessor& accessor; /**< accessor to old grid */

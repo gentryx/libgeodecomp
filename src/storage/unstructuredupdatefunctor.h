@@ -33,7 +33,7 @@ namespace UnstructuredUpdateFunctorHelpers {
  * Functor to be used from with LibFlatArray from within
  * UnstructuredUpdateFunctor. Hides much of the boilerplate code.
  */
-template<typename CELL>
+template<typename CELL, typename GRID_TYPE>
 class UnstructuredGridSoAUpdateHelper
 {
 public:
@@ -43,11 +43,10 @@ public:
     static const auto C = APITraits::SelectSellC<CELL>::VALUE;
     static const auto SIGMA = APITraits::SelectSellSigma<CELL>::VALUE;
     static const auto DIM = Topology::DIM;
-    using Grid = UnstructuredSoAGrid<CELL, MATRICES, ValueType, C, SIGMA>;
 
     UnstructuredGridSoAUpdateHelper(
-        const Grid& gridOld,
-        Grid *gridNew,
+        const GRID_TYPE& gridOld,
+        GRID_TYPE *gridNew,
         const Region<DIM>& region,
         unsigned nanoStep) :
         gridOld(gridOld),
@@ -63,8 +62,10 @@ public:
         LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& oldAccessor,
         LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& newAccessor) const
     {
+        typedef UnstructuredSoAScalarNeighborhood<GRID_TYPE, CELL, MATRICES, ValueType, C, SIGMA> HoodType;
         // fixme: threading!
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            // fixme: is this assumption still required?
             // Assumption: Cell has both (updateLineX and update())
 
             // loop peeling: streak's start might point to middle of chunks
@@ -72,9 +73,9 @@ public:
             // update the first and last chunk of complete streak scalar by
             // calling update() instead
             int startX = i->origin.x();
+            // fixme: kill this. this is the job of updateLineX()
             if ((startX % C) != 0) {
-                UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-                    hoodOld(gridOld, startX);
+                HoodType hoodOld(gridOld, startX);
                 const int cellsToUpdate = C - (startX % C);
                 FixedArray<CELL, C> cells;
                 Streak<1> cellStreak(Coord<1>(startX), startX + cellsToUpdate);
@@ -92,35 +93,36 @@ public:
             }
 
             // call updateLineX with adjusted indices
-            UnstructuredSoANeighborhood<CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1,
+            UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1,
                                         MATRICES, ValueType, C, SIGMA>
                 hoodOld(oldAccessor, gridOld, startX);
 
             UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessor);
             CELL::updateLineX(hoodNew, i->endX, hoodOld, nanoStep);
 
-            // call scalar updates for last chunk
-            if ((i->endX % C) != 0) {
-                const int cellsToUpdate = i->endX % C;
-                UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-                    hoodOld(gridOld, i->endX - cellsToUpdate);
-                std::array<CELL, C> cells;
-                Streak<1> cellStreak(Coord<1>(i->endX - cellsToUpdate), i->endX);
+            // fixme: kill this
+            // // call scalar updates for last chunk
+            // if ((i->endX % C) != 0) {
+            //     const int cellsToUpdate = i->endX % C;
+            //     HoodType hoodOld(gridOld, i->endX - cellsToUpdate);
+            //     std::array<CELL, C> cells;
+            //     Streak<1> cellStreak(Coord<1>(i->endX - cellsToUpdate), i->endX);
 
-                // update SoA grid: copy cells to local buffer, update, copy data back to grid
-                gridNew->get(cellStreak, cells.begin());
-                // call update
-                for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
-                    cells[i].update(hoodOld, nanoStep);
-                }
-                gridNew->set(cellStreak, cells.begin());
-            }
+            //     // update SoA grid: copy cells to local buffer, update, copy data back to grid
+            //     gridNew->get(cellStreak, cells.begin());
+            //     // call update
+            //     for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
+            //         std::cout << "updating i: " << i << ", cellStreak: "
+            //         cells[i].update(hoodOld, nanoStep);
+            //     }
+            //     gridNew->set(cellStreak, cells.begin());
+            // }
         }
     }
 
 private:
-    const Grid& gridOld;
-    Grid *gridNew;
+    const GRID_TYPE& gridOld;
+    GRID_TYPE *gridNew;
     const Region<DIM>& region;
     unsigned nanoStep;
 };
@@ -282,7 +284,7 @@ public:
         gridOld.callback(
             gridNew,
             // fixme: is missing concurrencySpec, modelThreadingSpec
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, GRID1>(
                 gridOld,
                 gridNew,
                 region,

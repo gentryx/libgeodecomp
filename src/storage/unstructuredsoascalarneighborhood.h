@@ -13,20 +13,22 @@ namespace LibGeoDecomp {
  * may be called due to loop peeling. The only differences to
  * UnstructuredNeighborhood are the grid type and the []-operator.
  */
-template<typename CELL, std::size_t MATRICES = 1,
-         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
+template<
+    typename GRID,
+    typename CELL,
+    std::size_t MATRICES = 1,
+    typename VALUE_TYPE = double,
+    int C = 64,
+    int SIGMA = 1>
 class UnstructuredSoAScalarNeighborhood : public UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<
-    CELL, UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>, MATRICES, VALUE_TYPE, C, SIGMA, false>
+    CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, false>
 {
 public:
-    using Grid = UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
-    using UnstructuredNeighborhoodHelpers::
-    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, false>::grid;
+    using UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, false>::grid;
 
     inline
-    UnstructuredSoAScalarNeighborhood(const Grid& grid, long startX) :
-        UnstructuredNeighborhoodHelpers::
-        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, false>(grid, startX)
+    UnstructuredSoAScalarNeighborhood(const GRID& grid, long startX) :
+        UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, false>(grid, startX)
     {}
 
     CELL operator[](int index) const
