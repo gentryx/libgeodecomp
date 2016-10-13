@@ -315,9 +315,7 @@ public:
         int const offset(row%C);
         int index = chunkOffset[chunk] + offset;
 
-        for (int element = 0;
-             element < rowLength[row];
-             ++element, index += C) {
+        for (int element = 0; element < rowLength[row]; ++element, index += C) {
             vec.push_back(std::pair<int, VALUETYPE>(column[index], values[index]));
         }
 
