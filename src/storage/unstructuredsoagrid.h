@@ -420,22 +420,24 @@ protected:
     }
 
 private:
-    inline ELEMENT_TYPE get(int x) const
-    {
-        return elements.get(x, 0, 0);
-    }
-
-    inline void set(int x, const ELEMENT_TYPE& cell)
-    {
-        elements.set(x, 0, 0, cell);
-    }
-
     LibFlatArray::soa_grid<ELEMENT_TYPE> elements;
     int origin;
     // TODO wrapper for different types of sell c sigma containers
     SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;
+
+    inline
+    ELEMENT_TYPE get(int x) const
+    {
+        return elements.get(x, 0, 0);
+    }
+
+    inline
+    void set(int x, const ELEMENT_TYPE& cell)
+    {
+        elements.set(x, 0, 0, cell);
+    }
 };
 
 template<typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
