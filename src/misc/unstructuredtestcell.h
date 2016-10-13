@@ -150,7 +150,6 @@ public:
             (cycleCounter            == other.cycleCounter) &&
             (isValid                 == other.isValid) &&
             (isEdgeCell              == other.isEdgeCell) &&
-            (expectedNeighborIDs     == other.expectedNeighborIDs) &&
             (expectedNeighborWeights == other.expectedNeighborWeights);
     }
 
@@ -180,15 +179,16 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
     {
         // Important: index is actually the index in the chunkVector, not necessarily a cell id.
-        for (; hoodOld.index() < indexEnd / HOOD_OLD::ARITY; ++hoodOld) {
+        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
+            int chunkSize = std::min(HOOD_OLD::ARITY, indexEnd - hoodOld.index() * HOOD_OLD::ARITY);
 
             // assemble weight maps:
-            std::vector<std::map<int, double> > weights(HOOD_OLD::ARITY);
+            std::vector<std::map<int, double> > weights(chunkSize);
             for (typename HOOD_OLD::Iterator i = hoodOld.begin(); i != hoodOld.end(); ++i) {
                 const int *columnPointer = i.first();
                 const double *weightPointer = i.second();
 
-                for (int i = 0; i < HOOD_OLD::ARITY; ++i) {
+                for (int i = 0; i < chunkSize; ++i) {
                     // ignore 0-padding
                     if ((columnPointer[i] != 0) || (weightPointer[i] != 0.0)) {
                         weights[i][columnPointer[i]] = weightPointer[i];
@@ -200,7 +200,7 @@ public:
             // member functions. users would not do this (because
             // it's slow), but it's good for testing.
             std::vector<UnstructuredTestCell> cells;
-            for (int i = 0; i < HOOD_OLD::ARITY; ++i) {
+            for (int i = 0; i < chunkSize; ++i) {
                 int index = hoodOld.index() * HOOD_OLD::ARITY + i;
                 cells << hoodOld[index];
 
@@ -212,7 +212,7 @@ public:
             }
 
             // copy back to new grid:
-            for (int i = 0; i < HOOD_OLD::ARITY; ++i) {
+            for (int i = 0; i < chunkSize; ++i) {
                 hoodNew << cells[i];
                 ++hoodNew;
             }
@@ -226,7 +226,6 @@ public:
             << "  id: " << id << "\n"
             << "  cycleCounter: " << cycleCounter << "\n"
             << "  isEdgeCell: " << (isEdgeCell ? "true" : "false") << "\n"
-            << "  expectedNeighborIDs: " << expectedNeighborIDs << "\n"
             << "  expectedNeighborWeights: " << expectedNeighborWeights << "\n"
             << "  isValid: " << (isValid ? "true" : "false") << "\n";
         return ret.str();
@@ -236,7 +235,6 @@ public:
     unsigned cycleCounter;
     bool isValid;
     bool isEdgeCell;
-    FixedArray<int, 100> expectedNeighborIDs;
     FixedArray<double, 100> expectedNeighborWeights;
 
 private:
@@ -270,17 +268,19 @@ private:
         FixedArray<double, 100> actualNeighborWeights;
 
         for (ITERATOR1 i = begin; i != end; ++i) {
-            checkNeighbor(i.first(), hood[i.first()]);
+            int expectedID = i.second();
+            UnstructuredTestCell neighbor = hood[i.first()];
+            checkNeighbor(expectedID, neighbor);
             actualNeighborIDs << i.first();
             actualNeighborWeights << i.second();
         }
+        // SELL-C-Sigma may reorder weights, but our reference is sorted:
+        std::sort(actualNeighborWeights.begin(), actualNeighborWeights.end());
 
-        if ((expectedNeighborIDs     != actualNeighborIDs) ||
-            (expectedNeighborWeights != actualNeighborWeights)) {
+        if (expectedNeighborWeights != actualNeighborWeights) {
             OUTPUT() << "UnstructuredTestCell error: id " << id
                      << " is not valid on cycle " << cycleCounter
                      << ", nanoStep: " << nanoStep << "\n"
-                     << "  expected IDs: " << expectedNeighborIDs << "\n"
                      << "  actual IDs:   " << actualNeighborIDs << "\n"
                      << "  expected weights: " << expectedNeighborWeights << "\n"
                      << "  actual weights:   " << actualNeighborWeights << "\n";
@@ -298,8 +298,8 @@ private:
         if (!isValid) {
             OUTPUT() << "UnstructuredTestCell error: id " << id << " is invalid\n";
         }
-        ++cycleCounter;
 
+        ++cycleCounter;
     }
 };
 
@@ -338,7 +338,6 @@ LIBFLATARRAY_REGISTER_SOA(
     ((unsigned)(cycleCounter))
     ((bool)(isValid))
     ((bool)(isEdgeCell))
-    ((LibGeoDecomp::IDsVec)(expectedNeighborIDs))
     ((LibGeoDecomp::WeightsVec)(expectedNeighborWeights)) )
 
 LIBFLATARRAY_REGISTER_SOA(
@@ -347,7 +346,6 @@ LIBFLATARRAY_REGISTER_SOA(
     ((unsigned)(cycleCounter))
     ((bool)(isValid))
     ((bool)(isEdgeCell))
-    ((LibGeoDecomp::IDsVec)(expectedNeighborIDs))
     ((LibGeoDecomp::WeightsVec)(expectedNeighborWeights)) )
 
 LIBFLATARRAY_REGISTER_SOA(
@@ -356,7 +354,6 @@ LIBFLATARRAY_REGISTER_SOA(
     ((unsigned)(cycleCounter))
     ((bool)(isValid))
     ((bool)(isEdgeCell))
-    ((LibGeoDecomp::IDsVec)(expectedNeighborIDs))
     ((LibGeoDecomp::WeightsVec)(expectedNeighborWeights)) )
 
 LIBFLATARRAY_REGISTER_SOA(
@@ -365,7 +362,6 @@ LIBFLATARRAY_REGISTER_SOA(
     ((unsigned)(cycleCounter))
     ((bool)(isValid))
     ((bool)(isEdgeCell))
-    ((LibGeoDecomp::IDsVec)(expectedNeighborIDs))
     ((LibGeoDecomp::WeightsVec)(expectedNeighborWeights)) )
 
 #endif

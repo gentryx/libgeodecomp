@@ -903,13 +903,12 @@ Typemaps::generateMapLibGeoDecomp_UnstructuredTestCell_UnstructuredTestCellHelpe
     char fakeObject[sizeof(LibGeoDecomp::UnstructuredTestCell<UnstructuredTestCellHelpers::EmptyAPI >)];
     LibGeoDecomp::UnstructuredTestCell<UnstructuredTestCellHelpers::EmptyAPI > *obj = (LibGeoDecomp::UnstructuredTestCell<UnstructuredTestCellHelpers::EmptyAPI >*)fakeObject;
 
-    const int count = 6;
+    const int count = 5;
     int lengths[count];
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
         MemberSpec(getAddress(&obj->cycleCounter), lookup<unsigned >(), 1),
-        MemberSpec(getAddress(&obj->expectedNeighborIDs), lookup<FixedArray<int,100 > >(), 1),
         MemberSpec(getAddress(&obj->expectedNeighborWeights), lookup<FixedArray<double,100 > >(), 1),
         MemberSpec(getAddress(&obj->id), lookup<int >(), 1),
         MemberSpec(getAddress(&obj->isEdgeCell), lookup<bool >(), 1),

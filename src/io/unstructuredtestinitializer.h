@@ -52,7 +52,6 @@ public:
             }
 
             for (std::map<int, double>::iterator j = weightsReorderBuffer.begin(); j != weightsReorderBuffer.end(); ++j) {
-                cell.expectedNeighborIDs << j->first;
                 cell.expectedNeighborWeights << j->second;
             }
 
