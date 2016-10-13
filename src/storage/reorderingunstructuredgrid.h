@@ -5,6 +5,8 @@
 #ifdef LIBGEODECOMP_WITH_CPP14
 
 #include <algorithm>
+#include <libgeodecomp/storage/serializationbuffer.h>
+#include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
 
 namespace LibGeoDecomp {
 
@@ -123,6 +125,7 @@ class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellT
 {
 public:
     friend class ReorderingUnstructuredGridTest;
+    friend class UnstructuredTestCellTest;
 
     typedef typename DELEGATE_GRID::CellType CellType;
     typedef typename DELEGATE_GRID::WeightType WeightType;
@@ -372,6 +375,30 @@ public:
         }
 
         return ret;
+    }
+
+    template<typename FUNCTOR>
+    void callback(FUNCTOR functor) const
+    {
+        delegate.callback(functor);
+    }
+
+    template<typename FUNCTOR>
+    void callback(ReorderingUnstructuredGrid *newGrid, FUNCTOR functor) const
+    {
+        delegate.callback(&newGrid->delegate, functor);
+    }
+
+    inline
+    const SellCSigmaSparseMatrixContainer<WeightType, C, SIGMA>& getWeights(const std::size_t matrixID) const
+    {
+        return delegate.getWeights(matrixID);
+    }
+
+    inline
+    SellCSigmaSparseMatrixContainer<WeightType, C, SIGMA>& getWeights(const std::size_t matrixID)
+    {
+        return delegate.getWeights(matrixID);
     }
 
 private:
