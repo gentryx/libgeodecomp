@@ -370,6 +370,24 @@ public:
                 actualDimensions, edgeRadii, edgeCell, defaultCell));
     }
 
+    explicit SoAGrid(
+        const Region<DIM>& region,
+        const CELL& defaultCell = CELL(),
+        const CELL& edgeCell = CELL(),
+        const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CELL, TOPOLOGY::DIM>(topologicalDimensions),
+        edgeRadii(calcEdgeRadii()),
+        edgeCell(edgeCell),
+        box(region.boundingBox())
+    {
+        // don't set edges here, but...
+        resize(box, false);
+        // ...init edges AND interior here in one go
+        delegate.callback(
+            SoAGridHelpers::SetContent<CELL, true>(
+                actualDimensions, edgeRadii, edgeCell, defaultCell));
+    }
+
     inline void resize(const CoordBox<DIM>& newBox)
     {
         resize(newBox, true);

@@ -43,6 +43,18 @@ public:
         hostEdgeCell(edgeCell)
     {}
 
+    explicit inline CUDAGrid(
+        const Region<DIM>& region,
+        const CellType& defaultCell = CellType(),
+        const CellType& edgeCell = CellType(),
+        const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CellType, DIM>(topologicalDimensions),
+        box(region.boundingBox()),
+        array(box.dimensions.prod(), defaultCell),
+        edgeCellStore(1, edgeCell),
+        hostEdgeCell(edgeCell)
+    {}
+
     inline
     void resize(const CoordBox<DIM>& newBox)
     {

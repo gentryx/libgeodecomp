@@ -156,6 +156,28 @@ public:
                 defaultCell));
     }
 
+    explicit CUDASoAGrid(
+        const Region<DIM>& region,
+        const CELL& defaultCell = CELL(),
+        const CELL& edgeCell = CELL(),
+        const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CELL, DIM>(topologicalDimensions),
+        edgeRadii(calcEdgeRadii()),
+        edgeCell(edgeCell),
+        box(region.boundingBox())
+    {
+        // don't set edges here, but...
+        resize(box, false);
+        // ...init edges AND interior here in one go
+        delegate.callback(
+            CUDASoAGridHelpers::SetContent<CELL, true>(
+                delegate.get_data(),
+                actualDimensions,
+                edgeRadii,
+                edgeCell,
+                defaultCell));
+    }
+
     inline void resize(const CoordBox<DIM>& newBox)
     {
         resize(newBox, true);

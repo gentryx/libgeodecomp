@@ -1,4 +1,5 @@
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/cudagrid.h>
@@ -44,6 +45,49 @@ public:
 
         Region<2> region;
         for (int y = 0; y < 10; ++y) {
+            region << Streak<2>(Coord<2>(10 + y, y), 25 + y / 2);
+        }
+
+        int counter = 0;
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            source[*i] = counter++;
+        }
+
+        buffer.loadRegion(source,  region);
+        buffer.saveRegion(&target, region);
+        buffer.setEdge(-4711);
+
+        counter = 0;
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            int expected = -2;
+            if (region.count(*i)) {
+                expected = counter++;
+            }
+
+            TS_ASSERT_EQUALS(target[*i], expected);
+        }
+
+        TS_ASSERT_EQUALS(buffer.getEdge(), -4711);
+        buffer.setEdge(123);
+        TS_ASSERT_EQUALS(buffer.getEdge(), 123);
+#endif
+    }
+
+    void testRegionConstructor()
+    {
+#ifdef LIBGEODECOMP_WITH_CUDA
+        Coord<2> dim(40, 20);
+        CoordBox<2> box(Coord<2>(), dim);
+        Region<2> boundingRegion;
+        boundingRegion << box;
+
+        DisplacedGrid<int> source(box, -1);
+        DisplacedGrid<int> target(box, -2);
+        CUDAGrid<int> buffer(boundingRegion);
+        TS_ASSERT_EQUALS(buffer.boundingBox(), box);
+
+        Region<2> region;
+        for (int y = 0; y < 20; ++y) {
             region << Streak<2>(Coord<2>(10 + y, y), 25 + y / 2);
         }
 

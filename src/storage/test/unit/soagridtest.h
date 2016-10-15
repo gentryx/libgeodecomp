@@ -191,6 +191,34 @@ public:
         TS_ASSERT_EQUALS(grid.get(Coord<3>(2, 2, 3) + box.origin), SoATestCell(4));
     }
 
+    void testRegionConstructor()
+    {
+        CoordBox<3> box(Coord<3>(12, 11, 10), Coord<3>(60, 70, 80));
+        SoATestCell defaultCell(1);
+        SoATestCell edgeCell(2);
+
+        Region<3> region;
+        region << box;
+
+        SoAGrid<SoATestCell, Topologies::Cube<3>::Topology> grid(region, defaultCell, edgeCell);
+        grid.set(Coord<3>(1, 1, 1) + box.origin, SoATestCell(3));
+        grid.set(Coord<3>(2, 2, 3) + box.origin, SoATestCell(4));
+
+        TS_ASSERT_EQUALS(grid.actualDimensions, Coord<3>(64, 74, 84));
+        TS_ASSERT_EQUALS(grid.boundingBox(), box);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0)), edgeCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0) + box.origin), defaultCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(1, 1, 1) + box.origin), SoATestCell(3));
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(2, 2, 3) + box.origin), SoATestCell(4));
+
+        edgeCell = SoATestCell(-1);
+        grid.setEdge(edgeCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0)), edgeCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0) + box.origin), defaultCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(1, 1, 1) + box.origin), SoATestCell(3));
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(2, 2, 3) + box.origin), SoATestCell(4));
+    }
+
     void test2d()
     {
         CoordBox<2> box(Coord<2>(10, 15), Coord<2>(50, 40));

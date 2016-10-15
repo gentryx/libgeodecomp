@@ -42,6 +42,16 @@ public:
     {}
 
     explicit DisplacedGrid(
+        const Region<DIM>& region,
+        const CELL_TYPE& defaultCell = CELL_TYPE(),
+        const CELL_TYPE& edgeCell = CELL_TYPE(),
+        const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        delegate(region.boundingBox().dimensions, defaultCell, edgeCell),
+        origin(region.boundingBox().origin),
+        topoDimensions(topologicalDimensions)
+    {}
+
+    explicit DisplacedGrid(
         const Delegate& grid,
         const Coord<DIM>& origin=Coord<DIM>()) :
         delegate(grid),

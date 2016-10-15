@@ -53,6 +53,45 @@ public:
         TS_ASSERT_EQUALS(boundingRegion, grid.boundingRegion());
     }
 
+    void testRegionConstructor()
+    {
+        TestCellSoA defaultCell(
+            Coord<3>(1, 2, 3),
+            Coord<3>(4, 5, 6),
+            7,
+            8);
+        TestCellSoA edgeCell(
+            Coord<3>( 9, 10, 11),
+            Coord<3>(12, 13, 14),
+            15,
+            16);
+
+        Coord<3> dim(51, 43, 21);
+        Coord<3> origin(12, 41, 12);
+        CoordBox<3> box(origin, dim);
+
+        Region<3> region;
+        region << box;
+        Region<3> edgeRegion = region.expand(1) - region;
+
+        CUDASoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> grid(region, defaultCell, edgeCell);
+
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_EQUALS(defaultCell, grid.get(*i));
+        }
+
+        for (Region<3>::Iterator i = edgeRegion.begin(); i != edgeRegion.end(); ++i) {
+            TS_ASSERT_EQUALS(edgeCell, grid.get(*i));
+        }
+
+        TS_ASSERT_EQUALS(grid.getEdge(), edgeCell);
+        TS_ASSERT_EQUALS(grid.boundingBox(), box);
+
+        Region<3> boundingRegion;
+        boundingRegion << box;
+        TS_ASSERT_EQUALS(boundingRegion, grid.boundingRegion());
+    }
+
     void testTorus()
     {
         TestCellSoA defaultCell(

@@ -43,9 +43,22 @@ public:
     {
         CoordBox<2> rect(Coord<2>(10, 11), Coord<2>(12, 13));
         DisplacedGrid<int> grid(rect);
+
         TS_ASSERT_EQUALS(rect, grid.boundingBox());
         TS_ASSERT_EQUALS(12, grid.getDimensions().x());
         TS_ASSERT_EQUALS(13, grid.getDimensions().y());
+    }
+
+    void testRegionConstructor()
+    {
+        CoordBox<2> rect(Coord<2>(44, 77), Coord<2>(55, 66));
+        Region<2> region;
+        region << rect;
+
+        DisplacedGrid<int> grid(region);
+        TS_ASSERT_EQUALS(rect, grid.boundingBox());
+        TS_ASSERT_EQUALS(55, grid.getDimensions().x());
+        TS_ASSERT_EQUALS(66, grid.getDimensions().y());
     }
 
     void testBoundingRegion()
