@@ -50,13 +50,13 @@ public:
     {
         stepNum = initializer->startStep();
         Coord<DIM> dim = initializer->gridBox().dimensions;
-        curGrid = new GridType(CoordBox<DIM>(Coord<DIM>(), dim));
-        newGrid = new GridType(CoordBox<DIM>(Coord<DIM>(), dim));
+        simArea << CoordBox<DIM>(Coord<DIM>(), dim);
+        curGrid = new GridType(simArea);
+        newGrid = new GridType(simArea);
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
-        CoordBox<DIM> box = curGrid->boundingBox();
-        simArea << box;
+        simArea = curGrid.remapRegion(region);
     }
 
     virtual ~SerialSimulator()
