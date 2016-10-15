@@ -16,8 +16,7 @@ public:
     void testResize()
     {
         typedef UnstructuredTestCellSoA1 TestCell;
-        typedef GridTypeSelector<TestCell, Topology, false, APITraits::TrueType>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, APITraits::TrueType>::Value GridType;
 
         Region<1> nodeSet;
         nodeSet << Streak<1>(Coord<1>(10), 20)
@@ -42,8 +41,7 @@ public:
     {
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         Region<1> region;
         region << Streak<1>(Coord<1>(111), 116)
@@ -71,8 +69,7 @@ public:
     {
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         Region<1> region;
         region << Streak<1>(Coord<1>( 11),  16)
@@ -98,8 +95,7 @@ public:
     {
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         Region<1> region;
         region << Streak<1>(Coord<1>(111), 116)
@@ -133,8 +129,7 @@ public:
     {
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         Region<1> region;
         region << Streak<1>(Coord<1>(121), 126)
@@ -168,8 +163,7 @@ public:
     {
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         Region<1> region;
         region << Streak<1>(Coord<1>(111), 116)
@@ -189,8 +183,7 @@ public:
     {
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         Region<1> region;
         region << Streak<1>(Coord<1>(111), 116)
@@ -209,8 +202,7 @@ public:
     {
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         Region<1> region1;
         Region<1> region2;
@@ -263,8 +255,7 @@ public:
     {
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         Region<1> region1;
         Region<1> region2;
@@ -317,8 +308,7 @@ public:
     {
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         Region<1> region;
         region << Streak<1>(Coord<1>(122), 177)
@@ -369,8 +359,7 @@ public:
     {
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         Region<1> region;
         region << Streak<1>(Coord<1>(222), 277)
@@ -421,8 +410,7 @@ public:
     {
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         UnstructuredTestInitializer<TestCell> init(1234, 66);
 
@@ -542,7 +530,7 @@ public:
         }
 
         for (Region<1>::Iterator i = remappedRegion.begin(); i != remappedRegion.end(); ++i) {
-            TestCell cell = grid.delegate.get(*i);
+            TestCell cell = grid.delegate[i->x()];
 
             std::vector<std::pair<int, double> > expectedRow;
             int numNeighbors = cell.id % 20 + 1;
@@ -600,8 +588,7 @@ public:
     {
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
-        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value DelegateGrid;
-        typedef ReorderingUnstructuredGrid<DelegateGrid> GridType;
+        typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
 
         UnstructuredTestInitializer<TestCell> init(1234, 66);
 

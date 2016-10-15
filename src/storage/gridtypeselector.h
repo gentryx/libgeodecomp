@@ -4,6 +4,7 @@
 #include <libgeodecomp/config.h>
 
 #include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/reorderingunstructuredgrid.h>
 #include <libgeodecomp/storage/soagrid.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
@@ -53,7 +54,7 @@ private:
     static const int C = APITraits::SelectSellC<CELL_TYPE>::VALUE;
     static const int SIGMA = APITraits::SelectSellSigma<CELL_TYPE>::VALUE;
 public:
-    typedef UnstructuredGrid<CELL_TYPE, MATRICES, ValueType, C, SIGMA> Value;
+    typedef ReorderingUnstructuredGrid<UnstructuredGrid<CELL_TYPE, MATRICES, ValueType, C, SIGMA> > Value;
 };
 
 /**
@@ -68,7 +69,7 @@ private:
     static const int C = APITraits::SelectSellC<CELL_TYPE>::VALUE;
     static const int SIGMA = APITraits::SelectSellSigma<CELL_TYPE>::VALUE;
 public:
-    typedef UnstructuredSoAGrid<CELL_TYPE, MATRICES, ValueType, C, SIGMA> Value;
+    typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<CELL_TYPE, MATRICES, ValueType, C, SIGMA> > Value;
 };
 #endif
 
