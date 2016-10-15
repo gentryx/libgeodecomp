@@ -266,30 +266,26 @@ public:
     void testUnstructuredSoA2()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        // fixme:
+        typedef UnstructuredTestCellSoA2 TestCellType;
+        int startStep = 7;
+        int endStep = 15;
 
-        // typedef UnstructuredTestCellSoA2 TestCellType;
-        // int startStep = 7;
-        // int endStep = 15;
-
-        // SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(632, endStep, startStep));
-        // sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
-        // sim.run();
+        SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(632, endStep, startStep));
+        sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
+        sim.run();
 #endif
     }
 
     void testUnstructuredSoA3()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        // fixme:
+        typedef UnstructuredTestCellSoA3 TestCellType;
+        int startStep = 7;
+        int endStep = 19;
 
-        // typedef UnstructuredTestCellSoA3 TestCellType;
-        // int startStep = 7;
-        // int endStep = 19;
-
-        // SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(655, endStep, startStep));
-        // sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
-        // sim.run();
+        SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(655, endStep, startStep));
+        sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
+        sim.run();
 #endif
     }
 
