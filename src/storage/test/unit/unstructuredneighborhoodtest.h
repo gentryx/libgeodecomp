@@ -28,13 +28,15 @@ public:
     }
 };
 
-class UntructuredNeighborhoodTest : public CxxTest::TestSuite
+class UnstructuredNeighborhoodTest : public CxxTest::TestSuite
 {
 public:
     void testSquareBracketsOperator()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        UnstructuredGrid<MyCell, 1, double, 1, 1> grid(Coord<1>(4), MyCell(), MyCell());
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 4);
+        ReorderingUnstructuredGrid<UnstructuredGrid<MyCell, 1, double, 1, 1> > grid(region, MyCell(), MyCell());
 
         // init elements
         grid[0] = MyCell(0.5);
@@ -56,7 +58,9 @@ public:
     void testNeighborhoodSimple()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        UnstructuredGrid<MyCell, 1, double, 1, 1> grid(Coord<1>(4), MyCell(), MyCell());
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 4);
+        ReorderingUnstructuredGrid<UnstructuredGrid<MyCell, 1, double, 1, 1> > grid(region, MyCell(), MyCell());
 
         // init elements
         grid[0] = MyCell(0.5);
@@ -113,7 +117,9 @@ public:
     void testNeighborhood()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        UnstructuredGrid<MyCell, 1, double, 1, 1> grid(Coord<1>(8), MyCell(), MyCell());
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 8);
+        ReorderingUnstructuredGrid<UnstructuredGrid<MyCell, 1, double, 1, 1> > grid(region, MyCell(), MyCell());
 
         // init weights
         // matrix:
