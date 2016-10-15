@@ -20,7 +20,7 @@ template<
 class UnstructuredNeighborhoodNew
 {
 public:
-    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
+    using Grid = ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >;
 
     inline explicit
     UnstructuredNeighborhoodNew(Grid& grid) :

@@ -5,6 +5,7 @@
 #ifdef LIBGEODECOMP_WITH_CPP14
 
 #include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/storage/reorderingunstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 
 #include <iterator>
@@ -317,10 +318,10 @@ template<typename CELL, std::size_t MATRICES,
          typename VALUE_TYPE, int C, int SIGMA>
 class UnstructuredNeighborhood :
         public UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<
-    CELL, UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>, MATRICES, VALUE_TYPE, C, SIGMA, true>
+    CELL, ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >, MATRICES, VALUE_TYPE, C, SIGMA, true>
 {
 public:
-    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
+    using Grid = ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >;
     using UnstructuredNeighborhoodHelpers::
     UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, true>::grid;
 
@@ -343,10 +344,10 @@ public:
 template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C>
 class UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, 1> :
         public UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<
-    CELL, UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1>, MATRICES, VALUE_TYPE, C, 1, false>
+    CELL, ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1> >, MATRICES, VALUE_TYPE, C, 1, false>
 {
 public:
-    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1>;
+    using Grid = ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1> >;
     using UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, 1, false>::grid;
 
     inline
