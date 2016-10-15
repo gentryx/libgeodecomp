@@ -61,6 +61,16 @@ public:
         TS_ASSERT_EQUALS(66, grid.getDimensions().y());
     }
 
+    void testRemapRegion()
+    {
+        Region<3> region;
+        region << Streak<3>(Coord<3>(11, 12, 13), 14);
+
+        DisplacedGrid<int> grid;
+        Region<3> remappedRegion = grid.remapRegion(region);
+        TS_ASSERT_EQUALS(region, remappedRegion);
+    }
+
     void testBoundingRegion()
     {
         Coord<3> origin(10, 11, 12);

@@ -263,6 +263,21 @@ public:
         return topoDimensions;
     }
 
+    /**
+     * This function can be used to obtain a Region which implements
+     * transformations required by the grid for efficient element
+     * access. Regular grids, e.g. DisplacedGrid, renerally only
+     * require an affine transformation which can be done efficiently
+     * in place (hence no remapping is required), but unstructured
+     * grids may need extensive reordering due to sparse IDs and the
+     * SELL-C-Sigma format.
+     */
+    virtual
+    Region<DIM> remapRegion(const Region<DIM>& region) const
+    {
+        return region;
+    }
+
 protected:
     virtual void saveMemberImplementation(
         char *target,
