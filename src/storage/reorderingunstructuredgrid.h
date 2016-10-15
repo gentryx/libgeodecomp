@@ -14,6 +14,7 @@ namespace ReorderingUnstructuredGridHelpers {
 
 typedef std::pair<int, int> IntPair;
 
+inline
 std::vector<IntPair>::const_iterator mapLogicalToPhysicalID(int logicalID, const std::vector<IntPair>& logicalToPhysicalIDs)
 {
     std::vector<IntPair>::const_iterator pos = std::lower_bound(
@@ -124,7 +125,12 @@ template<typename DELEGATE_GRID>
 class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellType, 1, typename DELEGATE_GRID::WeightType>
 {
 public:
+    template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
+    friend class UnstructuredNeighborhoodNew;
+    template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
+    friend class UnstructuredNeighborhood;
     friend class ReorderingUnstructuredGridTest;
+    friend class UnstructuredNeighborhoodTest;
     friend class UnstructuredTestCellTest;
 
     typedef typename DELEGATE_GRID::CellType CellType;
@@ -141,7 +147,9 @@ public:
     const static int C = DELEGATE_GRID::C;
 
     explicit ReorderingUnstructuredGrid(
-        const Region<1>& nodeSet) :
+        const Region<1>& nodeSet,
+        const CellType& defaultElement = CellType(),
+        const CellType& edgeElement = CellType()) :
         nodeSet(nodeSet)
     {
         int physicalID = 0;
@@ -156,7 +164,8 @@ public:
             }
         }
 
-        delegate.resize(CoordBox<1>(Coord<1>(0), Coord<1>(nodeSet.size())));
+        CoordBox<1> delegateBox(Coord<1>(0), Coord<1>(nodeSet.size()));
+        delegate = DELEGATE_GRID(delegateBox, defaultElement, edgeElement);
     }
 
     // fixme: 1. finish GridBase interface with internal ID translation (via logicalToPhysicalIDs)
@@ -406,6 +415,32 @@ private:
     Region<1> nodeSet;
     std::vector<IntPair> logicalToPhysicalIDs;
     std::vector<int> physicalToLogicalIDs;
+
+    /**
+     * This operator is private as it gives access access to the
+     * underlying delegate without mapping the id to the physical ID.
+     * This interface is required by update functor and neighborhood
+     * objects for performance reasons, but a potential source of
+     * errors if used unintentionally. Hence users must be "friends"
+     * with this class.
+     */
+    CellType& operator[](int index)
+    {
+        return delegate[index];
+    }
+
+    /**
+     * This operator is private as it gives access access to the
+     * underlying delegate without mapping the id to the physical ID.
+     * This interface is required by update functor and neighborhood
+     * objects for performance reasons, but a potential source of
+     * errors if used unintentionally. Hence users must be "friends"
+     * with this class.
+     */
+    const CellType& operator[](int index) const
+    {
+        return delegate[index];
+    }
 
     virtual void saveMemberImplementation(
         char *target,
