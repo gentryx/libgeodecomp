@@ -62,61 +62,15 @@ public:
         LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& oldAccessor,
         LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& newAccessor) const
     {
-        typedef UnstructuredSoAScalarNeighborhood<GRID_TYPE, CELL, MATRICES, ValueType, C, SIGMA> HoodType;
         // fixme: threading!
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            // fixme: is this assumption still required?
-            // Assumption: Cell has both (updateLineX and update())
-
-            // loop peeling: streak's start might point to middle of chunks
-            // if so: vectorization cannot be done -> solution: additionally
-            // update the first and last chunk of complete streak scalar by
-            // calling update() instead
-            int startX = i->origin.x();
-            // fixme: kill this. this is the job of updateLineX()
-            if ((startX % C) != 0) {
-                HoodType hoodOld(gridOld, startX);
-                const int cellsToUpdate = C - (startX % C);
-                FixedArray<CELL, C> cells;
-                Streak<1> cellStreak(Coord<1>(startX), startX + cellsToUpdate);
-
-                // update SoA grid: copy cells to local buffer, update, copy data back to grid
-                gridNew->get(cellStreak, cells.begin());
-                // call update
-                for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
-                    cells[i].update(hoodOld, nanoStep);
-                }
-                // fixme: woah, avoid these copies!
-                gridNew->set(cellStreak, cells.begin());
-
-                startX += cellsToUpdate;
-            }
-
             // call updateLineX with adjusted indices
             UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1,
                                         MATRICES, ValueType, C, SIGMA>
-                hoodOld(oldAccessor, gridOld, startX);
+                hoodOld(oldAccessor, gridOld, i->origin.x());
 
             UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessor);
-            CELL::updateLineX(hoodNew, i->endX, hoodOld, nanoStep);
-
-            // fixme: kill this
-            // // call scalar updates for last chunk
-            // if ((i->endX % C) != 0) {
-            //     const int cellsToUpdate = i->endX % C;
-            //     HoodType hoodOld(gridOld, i->endX - cellsToUpdate);
-            //     std::array<CELL, C> cells;
-            //     Streak<1> cellStreak(Coord<1>(i->endX - cellsToUpdate), i->endX);
-
-            //     // update SoA grid: copy cells to local buffer, update, copy data back to grid
-            //     gridNew->get(cellStreak, cells.begin());
-            //     // call update
-            //     for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
-            //         std::cout << "updating i: " << i << ", cellStreak: "
-            //         cells[i].update(hoodOld, nanoStep);
-            //     }
-            //     gridNew->set(cellStreak, cells.begin());
-            // }
+            CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep);
         }
     }
 
@@ -245,7 +199,7 @@ public:
             hoodOld(gridOld, i->origin.x());                            \
         UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA> \
             hoodNew(*gridNew);                                          \
-        CELL::updateLineX(hoodNew, i->endX, hoodOld, nanoStep);         \
+        CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep); \
         /**/
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
