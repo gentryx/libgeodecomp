@@ -176,12 +176,13 @@ public:
     }
 
     template<typename HOOD_OLD, typename HOOD_NEW>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
+    static void updateLineX(HOOD_NEW& hoodNew, int startX, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
     {
+        // fixme: add test that doesn't start at multiple of HOOD_OLD::ARITY for SoA
+        
         // Important: index is actually the index in the chunkVector, not necessarily a cell id.
         for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
             int chunkSize = std::min(HOOD_OLD::ARITY, indexEnd - hoodOld.index() * HOOD_OLD::ARITY);
-
             // assemble weight maps:
             std::vector<std::map<int, double> > weights(chunkSize);
             for (typename HOOD_OLD::Iterator i = hoodOld.begin(); i != hoodOld.end(); ++i) {

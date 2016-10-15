@@ -45,10 +45,10 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
-            hoodNew[i].sum = 0.;
+            hoodNew[i].sum = 0.0;
             for (const auto& j: hoodOld.weights(0)) {
                 hoodNew[i].sum += hoodOld[j.first()].value * j.second();
             }
@@ -103,9 +103,15 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (int i = hoodOld.index(); i < indexEnd / HOOD_OLD::ARITY; ++i, ++hoodOld) {
+        // fixme: replace i by hoodOld.index()
+        // fixme: use LGD loop peeler
+
+        int chunkStart = indexStart % HOOD_OLD::ARITY;
+
+        for (int i = hoodOld.index(); i < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++i, ++hoodOld) {
+            int chunkSize = std::min(HOOD_OLD::ARITY, indexEnd - hoodOld.index() * HOOD_OLD::ARITY);
             ShortVec tmp;
             tmp.load_aligned(&hoodNew->sum() + i * 4);
             for (const auto& j: hoodOld.weights(0)) {
@@ -114,7 +120,16 @@ public:
                 values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
-            tmp.store_aligned(&hoodNew->sum() + i * 4);
+
+            // fixme: we could use normal store if we were using the
+            // loop peeler:
+            double buf[ShortVec::ARITY];
+            buf << tmp;
+            for (int j = chunkStart; j < chunkSize; ++j) {
+                (&hoodNew->sum())[i * 4 + j] = buf[j];
+            }
+
+            chunkStart = 0;
         }
     }
 
@@ -155,13 +170,16 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         Coord<1> dim(DIM);
+        Region<1> boundingRegion;
+        boundingRegion << CoordBox<1>(Coord<1>(0), dim);
 
         typedef SimpleUnstructuredTestCell<1, EmptyUnstructuredTestCellAPI> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
-        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<TestCellType, 1, double, 4, 1> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
         Region<1> region;
         region << Streak<1>(Coord<1>(10),   30);
@@ -201,13 +219,16 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         Coord<1> dim(DIM);
+        Region<1> boundingRegion;
+        boundingRegion << CoordBox<1>(Coord<1>(0), dim);
 
         typedef SimpleUnstructuredTestCell<1> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
-        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<TestCellType, 1, double, 4, 1> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
         Region<1> region;
         region << Streak<1>(Coord<1>(10),   30);
@@ -247,18 +268,16 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         Coord<1> dim(DIM);
+        Region<1> boundingRegion;
+        boundingRegion << CoordBox<1>(Coord<1>(0), dim);
 
         typedef SimpleUnstructuredTestCell<128, EmptyUnstructuredTestCellAPI> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
-        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridNew(dim, defaultCell, edgeCell);
-
-        Region<1> region;
-        region << Streak<1>(Coord<1>(10),   30);
-        region << Streak<1>(Coord<1>(40),   60);
-        region << Streak<1>(Coord<1>(100), 150);
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<TestCellType, 1, double, 4, 128> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
         // weights matrix looks like this:
         // 0
@@ -274,6 +293,13 @@ public:
             }
         }
         gridOld.setWeights(0, matrix);
+        gridNew.setWeights(0, matrix);
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(40),   60);
+        region << Streak<1>(Coord<1>(100), 150);
+        region = gridOld.remapRegion(region);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -300,18 +326,16 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         Coord<1> dim(DIM);
+        Region<1> boundingRegion;
+        boundingRegion << CoordBox<1>(Coord<1>(0), dim);
 
         typedef SimpleUnstructuredTestCell<128> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
-        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridNew(dim, defaultCell, edgeCell);
-
-        Region<1> region;
-        region << Streak<1>(Coord<1>(10),   30);
-        region << Streak<1>(Coord<1>(40),   60);
-        region << Streak<1>(Coord<1>(100), 150);
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<TestCellType, 1, double, 4, 128> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
         // weights matrix looks like this:
         // 0
@@ -327,6 +351,13 @@ public:
             }
         }
         gridOld.setWeights(0, matrix);
+        gridNew.setWeights(0, matrix);
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(40),   60);
+        region << Streak<1>(Coord<1>(100), 150);
+        region = gridOld.remapRegion(region);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -352,20 +383,15 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         CoordBox<1> dim(Coord<1>(0), Coord<1>(DIM));
+        Region<1> boundingRegion;
+        boundingRegion << dim;
 
         SimpleUnstructuredSoATestCell<1> defaultCell(200);
         SimpleUnstructuredSoATestCell<1> edgeCell(-1);
 
-        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<1>, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<1>, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
-
-        Region<1> region;
-        // "normal" streak
-        region << Streak<1>(Coord<1>(10),   30);
-        // loop peeling in first chunk
-        region << Streak<1>(Coord<1>(37),   60);
-        // loop peeling in last chunk
-        region << Streak<1>(Coord<1>(100), 149);
+        typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<1>, 1, double, 4, 1> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
         // weights matrix looks like this:
         // 0
@@ -380,6 +406,16 @@ public:
             }
         }
         gridOld.setWeights(0, matrix);
+        gridNew.setWeights(0, matrix);
+
+        Region<1> region;
+        // "normal" streak
+        region << Streak<1>(Coord<1>(10),   30);
+        // loop peeling in first chunk
+        region << Streak<1>(Coord<1>(37),   60);
+        // loop peeling in last chunk
+        region << Streak<1>(Coord<1>(100), 149);
+        region = gridOld.remapRegion(region);
 
         UnstructuredUpdateFunctor<SimpleUnstructuredSoATestCell<1> > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -405,20 +441,15 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         CoordBox<1> dim(Coord<1>(0), Coord<1>(DIM));
+        Region<1> boundingRegion;
+        boundingRegion << dim;
 
         SimpleUnstructuredSoATestCell<150> defaultCell(200);
         SimpleUnstructuredSoATestCell<150> edgeCell(-1);
 
-        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<150>, 1, double, 4, 150> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<150>, 1, double, 4, 150> gridNew(dim, defaultCell, edgeCell);
-
-        Region<1> region;
-        // "normal" streak
-        region << Streak<1>(Coord<1>(10),   30);
-        // loop peeling in first chunk
-        region << Streak<1>(Coord<1>(37),   60);
-        // loop peeling in last chunk
-        region << Streak<1>(Coord<1>(100), 149);
+        typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<150>, 1, double, 4, 150> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
         // weights matrix looks like this:
         // 0
@@ -433,6 +464,16 @@ public:
             }
         }
         gridOld.setWeights(0, matrix);
+        gridNew.setWeights(0, matrix);
+
+        Region<1> region;
+        // "normal" streak
+        region << Streak<1>(Coord<1>(10),   30);
+        // loop peeling in first chunk
+        region << Streak<1>(Coord<1>(37),   60);
+        // loop peeling in last chunk
+        region << Streak<1>(Coord<1>(100), 149);
+        region = gridOld.remapRegion(region);
 
         UnstructuredUpdateFunctor<SimpleUnstructuredSoATestCell<150> > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -444,7 +485,7 @@ public:
             if (((coord.x() >=  10) && (coord.x() <  30)) ||
                 ((coord.x() >=  37) && (coord.x() <  60)) ||
                 ((coord.x() >= 100) && (coord.x() < 149))) {
-                const double sum = (149 - coord.x()) * 200.0;
+                const double sum = coord.x() * 200.0;
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
                 TS_ASSERT_EQUALS(0.0, gridNew.get(coord).sum);
