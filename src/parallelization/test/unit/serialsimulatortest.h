@@ -239,7 +239,6 @@ public:
     void testUnstructured()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        // fixme: test different threading strategies?
         typedef UnstructuredTestCell<> TestCellType;
         int startStep = 7;
         int endStep = 20;

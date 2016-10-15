@@ -55,6 +55,7 @@ public:
         newGrid = new GridType(simArea);
         initializer->grid(curGrid);
         initializer->grid(newGrid);
+        simArea = curGrid->remapRegion(simArea);
     }
 
     virtual ~SerialSimulator()
