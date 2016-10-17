@@ -251,16 +251,16 @@ public:
          *
          */
 
+        CoordBox<2> box(Coord<2>(-3, -2), Coord<2>(8, 6));
         DisplacedGrid<int, Topologies::Torus<2>::Topology, true> grid(
-            CoordBox<2>(Coord<2>(-3, -2),
-                        Coord<2>(8, 6)),
+            box,
             -2,
             -2,
             Coord<2>(15, 10));
 
         for (int y = -2; y < 4; ++y) {
             for (int x = -3; x < 5; ++x) {
-                grid[Coord<2>(x, y)] = (y+3) * 10 + (x+3);
+                grid[Coord<2>(x, y)] = (y + 3) * 10 + (x + 3);
             }
         }
 
@@ -270,6 +270,36 @@ public:
         TS_ASSERT_EQUALS(32, grid[Coord<2>(14, 0)]);
 
         TS_ASSERT_EQUALS(21, grid.getNeighborhood(Coord<2>(12, 9))[Coord<2>(1, 0)]);
+
+        Region<2> region;
+        region << CoordBox<2>(Coord<2>( 0, 0), Coord<2>(5, 4))
+               << CoordBox<2>(Coord<2>(12, 0), Coord<2>(3, 4))
+               << CoordBox<2>(Coord<2>( 0, 8), Coord<2>(5, 2))
+               << CoordBox<2>(Coord<2>(12, 8), Coord<2>(3, 2));
+
+        std::vector<int> actual(region.size());
+        grid.saveRegion(&actual, region);
+
+        std::vector<int> expected;
+        for (int y = 2; y < 6; ++y) {
+            for (int x = 3; x < 8; ++x) {
+                expected << (y + 1) * 10 + (x + 0);
+            }
+            for (int x = 0; x < 3; ++x) {
+                expected << (y + 1) * 10 + (x + 0);
+            }
+        }
+
+        for (int y = 0; y < 2; ++y) {
+            for (int x = 3; x < 8; ++x) {
+                expected << (y + 1) * 10 + (x + 0);
+            }
+            for (int x = 0; x < 3; ++x) {
+                expected << (y + 1) * 10 + (x + 0);
+            }
+        }
+
+        TS_ASSERT_EQUALS(actual, expected);
     }
 
     void testLoadSaveMember()

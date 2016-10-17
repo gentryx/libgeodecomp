@@ -176,12 +176,36 @@ public:
 
     void saveRegion(std::vector<CELL_TYPE> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        delegate.saveRegion(buffer, region, offset - origin);
+        CELL_TYPE *source = buffer->data();
+        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+            Coord<DIM> relativeCoord = i->origin - origin;
+            if (TOPOLOGICALLY_CORRECT) {
+                relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+            }
+
+            Streak<DIM> streak(relativeCoord, relativeCoord.x() + i->length());
+
+            delegate.get(streak, source);
+            source += i->length();
+        }
     }
 
     void loadRegion(const std::vector<CELL_TYPE>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        delegate.loadRegion(buffer, region, offset - origin);
+        const CELL_TYPE *source = buffer.data();
+        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+            Coord<DIM> relativeCoord = i->origin - origin;
+            if (TOPOLOGICALLY_CORRECT) {
+                relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+            }
+
+            Streak<DIM> streak(relativeCoord, relativeCoord.x() + i->length());
+
+            delegate.set(streak, source);
+            source += i->length();
+        }
     }
 
     inline CoordMapType getNeighborhood(const Coord<DIM>& center) const
