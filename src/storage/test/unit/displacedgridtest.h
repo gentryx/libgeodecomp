@@ -66,7 +66,7 @@ public:
         Region<3> region;
         region << Streak<3>(Coord<3>(11, 12, 13), 14);
 
-        DisplacedGrid<int> grid;
+        DisplacedGrid<int, Topologies::Torus<3>::Topology> grid;
         Region<3> remappedRegion = grid.remapRegion(region);
         TS_ASSERT_EQUALS(region, remappedRegion);
     }
@@ -258,17 +258,18 @@ public:
             -2,
             Coord<2>(15, 10));
 
-        for (int y = -2; y < 4; ++y)
-            for (int x = -3; x < 5; ++x)
+        for (int y = -2; y < 4; ++y) {
+            for (int x = -3; x < 5; ++x) {
                 grid[Coord<2>(x, y)] = (y+3) * 10 + (x+3);
+            }
+        }
 
         TS_ASSERT_EQUALS(10, grid[Coord<2>(-3, -2)]);
         TS_ASSERT_EQUALS(33, grid[Coord<2>( 0,  0)]);
         TS_ASSERT_EQUALS(20, grid[Coord<2>(12, 9)]);
         TS_ASSERT_EQUALS(32, grid[Coord<2>(14, 0)]);
 
-        TS_ASSERT_EQUALS(21, grid.getNeighborhood(
-                             Coord<2>(12, 9))[Coord<2>(1, 0)]);
+        TS_ASSERT_EQUALS(21, grid.getNeighborhood(Coord<2>(12, 9))[Coord<2>(1, 0)]);
     }
 
     void testLoadSaveMember()
