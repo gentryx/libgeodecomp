@@ -31,7 +31,6 @@ public:
             TS_ASSERT_EQUALS(cell.id, i);
             TS_ASSERT_EQUALS(cell.cycleCounter, expectedCycle);
             TS_ASSERT_EQUALS(cell.isValid, true);
-            TS_ASSERT_EQUALS(cell.expectedNeighborIDs.size(),     i % 20 + 1);
             TS_ASSERT_EQUALS(cell.expectedNeighborWeights.size(), i % 20 + 1);
 
             // we need to insert ID/weight pairs here so can retrieve them sorted by ID below:
@@ -50,7 +49,6 @@ public:
                 expectedWeights << i->second;
             }
 
-            TS_ASSERT_EQUALS(expectedIDs,     cell.expectedNeighborIDs);
             TS_ASSERT_EQUALS(expectedWeights, cell.expectedNeighborWeights);
         }
 
