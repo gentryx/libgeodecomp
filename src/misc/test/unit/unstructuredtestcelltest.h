@@ -17,7 +17,7 @@ class UnstructuredTestCellTest : public CxxTest::TestSuite
 public:
 #ifdef LIBGEODECOMP_WITH_CPP14
     typedef UnstructuredTestCell<UnstructuredTestCellHelpers::EmptyAPI, TestCellHelpers::NoOutput> TestCellType;
-    typedef UnstructuredGrid<TestCellType> TestGridType;
+    typedef ReorderingUnstructuredGrid<UnstructuredGrid<TestCellType> > TestGridType;
 #endif
 
     void setUp()
@@ -26,8 +26,10 @@ public:
         startStep = 5;
         endStep = 60;
         UnstructuredTestInitializer<TestCellType> init(200, endStep, startStep);
-        grid1 = TestGridType(Coord<1>(200));
-        grid2 = TestGridType(Coord<1>(200));
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 200);
+        grid1 = TestGridType(region);
+        grid2 = TestGridType(region);
         init.grid(&grid1);
         init.grid(&grid2);
 #endif
@@ -39,7 +41,7 @@ public:
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
 
         for (int x = 0; x < 200; ++x, ++hood) {
-            grid2[Coord<1>(x)].update(hood, 0);
+            grid2.delegate[Coord<1>(x)].update(hood, 0);
         }
 
         int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
@@ -54,11 +56,11 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage weights
-        TS_ASSERT_EQUALS(grid1[Coord<1>(40)].expectedNeighborWeights[0], 41.1);
-        grid1[Coord<1>(40)].expectedNeighborWeights[0] = 4711;
+        TS_ASSERT_EQUALS(grid1.delegate[Coord<1>(40)].expectedNeighborWeights[0], 41.1);
+        grid1.delegate[Coord<1>(40)].expectedNeighborWeights[0] = 4711;
 
         for (int x = 0; x < 200; ++x, ++hood) {
-            grid2[Coord<1>(x)].update(hood, 0);
+            grid2.delegate[Coord<1>(x)].update(hood, 0);
         }
 
         for (int x = 0; x < 200; ++x, ++hood) {
@@ -67,7 +69,7 @@ public:
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.delegate[Coord<1>(x)].valid(), flag);
         }
 #endif
     }
@@ -77,10 +79,10 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage nano step
-        grid1[Coord<1>(40)].cycleCounter += 1;
+        grid1.delegate[Coord<1>(40)].cycleCounter += 1;
 
         for (int x = 0; x < 200; ++x, ++hood) {
-            grid2[Coord<1>(x)].update(hood, 0);
+            grid2.delegate[Coord<1>(x)].update(hood, 0);
         }
 
         for (int x = 0; x < 200; ++x, ++hood) {
@@ -90,7 +92,7 @@ public:
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.delegate[Coord<1>(x)].valid(), flag);
         }
 #endif
     }
@@ -100,10 +102,10 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage ID
-        grid1[Coord<1>(40)].id += 1;
+        grid1.delegate[Coord<1>(40)].id += 1;
 
         for (int x = 0; x < 200; ++x, ++hood) {
-            grid2[Coord<1>(x)].update(hood, 0);
+            grid2.delegate[Coord<1>(x)].update(hood, 0);
         }
 
         for (int x = 0; x < 200; ++x, ++hood) {
@@ -113,7 +115,7 @@ public:
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.delegate[Coord<1>(x)].valid(), flag);
         }
 #endif
     }
@@ -123,10 +125,10 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage validity bit
-        grid1[Coord<1>(40)].isValid = false;
+        grid1.delegate[Coord<1>(40)].isValid = false;
 
         for (int x = 0; x < 200; ++x, ++hood) {
-            grid2[Coord<1>(x)].update(hood, 0);
+            grid2.delegate[Coord<1>(x)].update(hood, 0);
         }
 
         for (int x = 0; x < 200; ++x, ++hood) {
@@ -136,7 +138,7 @@ public:
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.delegate[Coord<1>(x)].valid(), flag);
         }
 #endif
     }
