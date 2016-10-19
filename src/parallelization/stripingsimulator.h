@@ -49,8 +49,7 @@ public:
     enum WaitTags {
         GENERAL,
         BALANCELOADS,
-        GHOSTREGION_ALPHA,
-        GHOSTREGION_BETA
+        GHOSTREGION
     };
 
     explicit StripingSimulator(
@@ -64,11 +63,11 @@ public:
     {
         validateConstructorParams();
 
-        CoordBox<DIM> box = adaptDimensions(partitions);
+        initRegions(partitions);
         adaptBuffers();
 
-        curStripe = new GridType(box);
-        newStripe = new GridType(box);
+        curStripe = new GridType(regionWithOuterGhosts);
+        newStripe = new GridType(regionWithOuterGhosts);
         initSimulation();
     }
 
@@ -83,10 +82,11 @@ public:
     {
         validateConstructorParams();
 
-        CoordBox<DIM> box = adaptDimensions(partitions);
+        initRegions(partitions);
         adaptBuffers();
-        curStripe = new GridType(box);
-        newStripe = new GridType(box);
+
+        curStripe = new GridType(regionWithOuterGhosts);
+        newStripe = new GridType(regionWithOuterGhosts);
         initSimulation();
     }
 
@@ -157,35 +157,55 @@ private:
      * we assume the inner and outer rims to be of the same size. "rim" is the
      * same as "ghost" and "ghost region".
      */
-    unsigned ghostHeightLower;
-    unsigned ghostHeightUpper;
     GridType *curStripe;
     GridType *newStripe;
     Region<DIM> region;
-    Region<DIM> innerRegion;
-    Region<DIM> innerUpperGhostRegion;
-    Region<DIM> innerLowerGhostRegion;
-    Region<DIM> outerUpperGhostRegion;
-    Region<DIM> outerLowerGhostRegion;
     Region<DIM> regionWithOuterGhosts;
-    BufferType upperSendBuffer;
-    BufferType upperRecvBuffer;
-    BufferType lowerSendBuffer;
-    BufferType lowerRecvBuffer;
+    Region<DIM> innerRegion;
+    Region<DIM> innerGhostRegion;
+    Region<DIM> remappedInnerRegion;
+    Region<DIM> remappedInnerGhostRegion;
+    std::map<int, Region<DIM> > innerGhostRegions;
+    std::map<int, Region<DIM> > outerGhostRegions;
+    std::map<int, BufferType>  sendBuffers;
+    std::map<int, BufferType>  recvBuffers;
 
     // contains the start and stop rows for each node's stripe
     WeightVec partitions;
     unsigned loadBalancingPeriod;
 
     /**
+     * these Regions will only be used by the UpdateFunctor. They
+     * need to be remapped because some grid implementations may
+     * use different IDs internally.
+     */
+    void remapUpdateRegions()
+    {
+        remappedInnerRegion = curStripe->remapRegion(innerRegion);
+        remappedInnerGhostRegion = curStripe->remapRegion(innerGhostRegion);
+    }
+
+    /**
      * Send and receive buffers need to be resized whenever our ghost zones have changed
      */
     void adaptBuffers()
     {
-        SerializationBuffer<CELL_TYPE>::resize(&upperSendBuffer, innerUpperGhostRegion);
-        SerializationBuffer<CELL_TYPE>::resize(&lowerSendBuffer, innerLowerGhostRegion);
-        SerializationBuffer<CELL_TYPE>::resize(&upperRecvBuffer, outerUpperGhostRegion);
-        SerializationBuffer<CELL_TYPE>::resize(&lowerRecvBuffer, outerLowerGhostRegion);
+        sendBuffers.clear();
+        recvBuffers.clear();
+
+        for (typename std::map<int, Region<DIM> >::iterator i = innerGhostRegions.begin();
+             i != innerGhostRegions.end();
+             ++i) {
+            sendBuffers[i->first] = BufferType();
+            SerializationBuffer<CELL_TYPE>::resize(&sendBuffers[i->first], i->second);
+        }
+
+        for (typename std::map<int, Region<DIM> >::iterator i = outerGhostRegions.begin();
+             i != outerGhostRegions.end();
+             ++i) {
+            recvBuffers[i->first] = BufferType();
+            SerializationBuffer<CELL_TYPE>::resize(&recvBuffers[i->first], i->second);
+        }
     }
 
     void swapGrids()
@@ -252,6 +272,7 @@ private:
         // nanoStep()). actually we could stretch one cycle further to
         // have two concurrent communication requests per ghostregion,
         // but this would be a hell to code and debug.
+
         waitForGhostRegions(curStripe);
         recvOuterGhostRegion();
         updateInnerGhostRegion(nanoStep);
@@ -265,16 +286,15 @@ private:
     {
         TimeCommunication t(&chronometer);
 
-        bool hadPendingRequests1 = mpilayer.wait(GHOSTREGION_ALPHA);
-        bool hadPendingRequests2 = mpilayer.wait(GHOSTREGION_BETA);
+        bool hadPendingRequests = mpilayer.wait(GHOSTREGION);
 
-        if (hadPendingRequests1 || hadPendingRequests2) {
-            if (!hadPendingRequests1 || !hadPendingRequests2) {
-                throw std::logic_error("should have had pending requests on both tags");
+        if (hadPendingRequests) {
+            for (typename std::map<int, BufferType>::iterator i = recvBuffers.begin();
+                 i != recvBuffers.end();
+                 ++i) {
+
+                stripe->loadRegion(i->second, outerGhostRegions[i->first]);
             }
-
-            stripe->loadRegion(upperRecvBuffer, outerUpperGhostRegion);
-            stripe->loadRegion(lowerRecvBuffer, outerLowerGhostRegion);
         }
     }
 
@@ -346,7 +366,7 @@ private:
         return CoordBox<DIM>(startCorner, dim);
     }
 
-    void updateRegion(const Region<DIM> &region, unsigned nanoStep)
+    void updateRegion(const Region<DIM>& region, unsigned nanoStep)
     {
         UpdateFunctor<CELL_TYPE>()(
             region,
@@ -363,33 +383,23 @@ private:
     void updateInnerGhostRegion(unsigned nanoStep)
     {
         TimeComputeGhost t(&chronometer);
-
-        updateRegion(innerUpperGhostRegion, nanoStep);
-        updateRegion(innerLowerGhostRegion, nanoStep);
+        updateRegion(remappedInnerGhostRegion, nanoStep);
     }
 
     void recvOuterGhostRegion()
     {
         TimeCommunication t(&chronometer);
 
-        int upperNeighborRank = upperNeighbor();
-        int lowerNeighborRank = lowerNeighbor();
+        for (typename std::map<int, BufferType>::iterator i = recvBuffers.begin();
+             i != recvBuffers.end();
+             ++i) {
+            mpilayer.recv(
+                i->second.data(),
+                i->first,
+                i->second.size(),
+                GHOSTREGION,
+                SerializationBuffer<CELL_TYPE>::cellMPIDataType());
 
-        if ((upperNeighborRank != -1) && (upperRecvBuffer.size() > 0)) {
-            mpilayer.recv(
-                upperRecvBuffer.data(),
-                upperNeighborRank,
-                upperRecvBuffer.size(),
-                GHOSTREGION_ALPHA,
-                SerializationBuffer<CELL_TYPE>::cellMPIDataType());
-        }
-        if ((lowerNeighborRank != -1) && (lowerRecvBuffer.size() > 0)) {
-            mpilayer.recv(
-                lowerRecvBuffer.data(),
-                lowerNeighborRank,
-                lowerRecvBuffer.size(),
-                GHOSTREGION_BETA,
-                SerializationBuffer<CELL_TYPE>::cellMPIDataType());
         }
     }
 
@@ -397,27 +407,15 @@ private:
     {
         TimeCommunication t(&chronometer);
 
-        int upperNeighborRank = upperNeighbor();
-        int lowerNeighborRank = lowerNeighbor();
-
-        if ((upperNeighborRank != -1) && (upperSendBuffer.size() > 0)) {
-            stripe->saveRegion(&upperSendBuffer, innerUpperGhostRegion);
-
+        for (typename std::map<int, BufferType>::iterator i = sendBuffers.begin();
+             i != sendBuffers.end();
+             ++i) {
+            stripe->saveRegion(&i->second, innerGhostRegions[i->first]);
             mpilayer.send(
-                upperSendBuffer.data(),
-                upperNeighborRank,
-                upperSendBuffer.size(),
-                GHOSTREGION_BETA,
-                SerializationBuffer<CELL_TYPE>::cellMPIDataType());
-        }
-        if ((lowerNeighborRank != -1) && (lowerSendBuffer.size() > 0)) {
-            stripe->saveRegion(&lowerSendBuffer, innerLowerGhostRegion);
-
-            mpilayer.send(
-                lowerSendBuffer.data(),
-                lowerNeighborRank,
-                lowerSendBuffer.size(),
-                GHOSTREGION_ALPHA,
+                i->second.data(),
+                i->first,
+                i->second.size(),
+                GHOSTREGION,
                 SerializationBuffer<CELL_TYPE>::cellMPIDataType());
         }
     }
@@ -425,8 +423,7 @@ private:
     void updateInside(unsigned nanoStep)
     {
         TimeComputeInner t(&chronometer);
-
-        updateRegion(innerRegion, nanoStep);
+        updateRegion(remappedInnerRegion, nanoStep);
     }
 
     Region<DIM> fillRegion(int startRow, int endRow)
@@ -436,15 +433,57 @@ private:
         return ret;
     }
 
-    void initRegions(int startRow, int endRow)
+    /**
+     * resets various sizes, heights etc. according to
+     * newPartitions, returns the new bounding box of the stripes. It
+     * doesn't actually resize the stripes since different actions are
+     * required during load balancing and initialization.
+     */
+    void initRegions(const WeightVec& newPartitions)
     {
-        region      = fillRegion(startRow, endRow);
-        innerRegion = fillRegion(startRow + ghostHeightUpper, endRow - ghostHeightLower);
-        innerUpperGhostRegion = fillRegion(startRow, startRow +  ghostHeightUpper);
-        innerLowerGhostRegion = fillRegion(endRow - ghostHeightLower, endRow);
-        outerUpperGhostRegion = fillRegion(startRow - ghostHeightUpper, startRow);
-        outerLowerGhostRegion = fillRegion(endRow, endRow + ghostHeightLower);
-        regionWithOuterGhosts = outerUpperGhostRegion + region + outerLowerGhostRegion;
+        unsigned startRow = newPartitions[mpilayer.rank() + 0];
+        unsigned endRow   = newPartitions[mpilayer.rank() + 1];
+        region = fillRegion(startRow, endRow);
+        {
+            boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency(region);
+            regionWithOuterGhosts = region.expandWithTopology(
+                1,
+                initializer->gridDimensions(),
+                Topology(),
+                *adjacency);
+        }
+
+        innerGhostRegion.clear();
+        innerGhostRegions.clear();
+        outerGhostRegions.clear();
+
+        for (int i = 0; i < mpilayer.size(); ++i) {
+            if (i != mpilayer.rank()) {
+                startRow = newPartitions[i + 0];
+                endRow   = newPartitions[i + 1];
+                Region<DIM> otherRegion = fillRegion(startRow, endRow);
+                boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency(otherRegion);
+                Region<DIM> otherRegionExpanded = otherRegion.expandWithTopology(
+                    1,
+                    initializer->gridDimensions(),
+                    Topology(),
+                    *adjacency);
+
+                Region<DIM> outerGhost = regionWithOuterGhosts & otherRegion;
+                Region<DIM> innerGhost = region & otherRegionExpanded;
+
+                if (!outerGhost.empty()) {
+                    outerGhostRegions[i] = outerGhost;
+                }
+                if (!innerGhost.empty()) {
+                    innerGhostRegions[i] = innerGhost;
+                    innerGhostRegion += innerGhost;
+                }
+            }
+        }
+
+        innerRegion = region - innerGhostRegion;
+        partitions = newPartitions;
     }
 
     /**
@@ -454,54 +493,14 @@ private:
     {
         chronometer.reset();
 
-        CoordBox<DIM> box = curStripe->boundingBox();
-        curStripe->resize(box);
-        newStripe->resize(box);
+        delete curStripe;
+        delete newStripe;
+        curStripe = new GridType(regionWithOuterGhosts);
+        newStripe = new GridType(regionWithOuterGhosts);
         initializer->grid(curStripe);
-        newStripe->setEdge(curStripe->getEdge());
+        initializer->grid(newStripe);
         stepNum = initializer->startStep();
-    }
-
-    /**
-     * resets various sizes, heights etc. according to
-     * newPartitions, returns the new bounding box of the stripes. It
-     * doesn't actually resize the stripes since different actions are
-     * required during load balancing and initialization.
-     */
-    CoordBox<DIM> adaptDimensions(const WeightVec& newPartitions)
-    {
-        unsigned startRow =
-            newPartitions[mpilayer.rank()    ];
-        unsigned endRow =
-            newPartitions[mpilayer.rank() + 1];
-
-        // no need for ghostzones if zero-height stripe
-        if (startRow == endRow) {
-            ghostHeightUpper = 0;
-            ghostHeightLower = 0;
-        } else {
-            if (WRAP_EDGES) {
-                ghostHeightUpper = 1;
-                ghostHeightLower = 1;
-            } else {
-                ghostHeightUpper = (startRow > 0? 1 : 0);
-                ghostHeightLower = (endRow   < newPartitions.back()? 1 : 0);
-            }
-        }
-
-        // no need for upper/lower ghost if only one node is present
-        if (newPartitions.size() == 2) {
-            ghostHeightUpper = 0;
-            ghostHeightLower = 0;
-        }
-
-        initRegions(startRow, endRow);
-        partitions = newPartitions;
-
-        CoordBox<DIM> box = boundingBox(
-            startRow - ghostHeightUpper,
-            endRow   + ghostHeightLower);
-        return box;
+        remapUpdateRegions();
     }
 
     int lowerNeighbor() const
@@ -579,9 +578,11 @@ private:
         if (newPartitions == oldPartitions) {
             return;
         }
-        CoordBox<DIM> box = adaptDimensions(newPartitions);
+        initRegions(newPartitions);
         adaptBuffers();
-        newStripe->resize(box);
+        delete newStripe;
+        newStripe = new GridType(regionWithOuterGhosts);
+        initializer->grid(newStripe);
 
         // collect newStripe from others
         unsigned newStartRow = newPartitions[mpilayer.rank() + 0];
@@ -645,10 +646,14 @@ private:
             newStripe->loadRegion(receiveBuffers[i], receiveRegions[i]);
         }
 
-        curStripe->resize(box);
+        delete curStripe;
+        curStripe = new GridType(regionWithOuterGhosts);
+        initializer->grid(curStripe);
         swapGrids();
         sendInnerGhostRegion(curStripe);
         recvOuterGhostRegion();
+
+        remapUpdateRegions();
     }
 
     /**
