@@ -78,6 +78,26 @@ public:
         return firstStep;
     }
 
+    boost::shared_ptr<Adjacency> getAdjacency(const Region<1>& region) const
+    {
+        boost::shared_ptr<Adjacency> ret(new RegionBasedAdjacency());
+
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            int startNeighbors = i->x() + 1;
+            int numNeighbors   = i->x() % maxNeighbors + 1;
+            int endNeighbors   = startNeighbors + numNeighbors;
+
+            // we need to insert ID/weight pairs here so can retrieve them sorted by ID below:
+            std::map<int, double> weightsReorderBuffer;
+
+            for (int j = startNeighbors; j != endNeighbors; ++j) {
+                int actualNeighbor = j % dim;
+                ret->insert(i->x(), actualNeighbor);
+            }
+        }
+
+        return ret;
+    }
 
 private:
     int dim;
