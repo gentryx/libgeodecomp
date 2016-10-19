@@ -147,7 +147,7 @@ public:
     const static int C = DELEGATE_GRID::C;
 
     explicit ReorderingUnstructuredGrid(
-        const Region<1>& nodeSet,
+        const Region<1>& nodeSet = Region<1>(),
         const CellType& defaultElement = CellType(),
         const CellType& edgeElement = CellType()) :
         nodeSet(nodeSet)
