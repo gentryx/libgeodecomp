@@ -69,6 +69,7 @@ public:
                                         MATRICES, ValueType, C, SIGMA>
                 hoodOld(oldAccessor, gridOld, i->origin.x());
 
+            newAccessor.index = i->origin.x();
             UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessor);
             CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep);
         }
