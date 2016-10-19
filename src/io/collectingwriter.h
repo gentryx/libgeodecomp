@@ -71,7 +71,9 @@ public:
 
         if (mpiLayer.rank() == root) {
             if (globalGrid.boundingBox().dimensions != globalDimensions) {
-                globalGrid.resize(CoordBox<DIM>(Coord<DIM>(), globalDimensions));
+                Region<DIM> region;
+                region << CoordBox<DIM>(Coord<DIM>(), globalDimensions);
+                globalGrid = StorageGridType(region);
             }
 
             globalGrid.loadRegion(buffer, validRegion);
