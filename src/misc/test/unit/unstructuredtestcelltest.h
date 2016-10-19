@@ -56,7 +56,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage weights
-        TS_ASSERT_EQUALS(grid1.delegate[Coord<1>(40)].expectedNeighborWeights[0], 41.1);
+        TS_ASSERT_EQUALS(grid1.get(Coord<1>(40)).expectedNeighborWeights[0], 41.1);
         grid1.delegate[Coord<1>(40)].expectedNeighborWeights[0] = 4711;
 
         for (int x = 0; x < 200; ++x, ++hood) {
@@ -69,7 +69,7 @@ public:
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2.delegate[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.get(Coord<1>(x)).valid(), flag);
         }
 #endif
     }
@@ -92,7 +92,7 @@ public:
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2.delegate[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.get(Coord<1>(x)).valid(), flag);
         }
 #endif
     }
@@ -115,7 +115,7 @@ public:
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2.delegate[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.get(Coord<1>(x)).valid(), flag);
         }
 #endif
     }
@@ -138,7 +138,7 @@ public:
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2.delegate[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.get(Coord<1>(x)).valid(), flag);
         }
 #endif
     }
