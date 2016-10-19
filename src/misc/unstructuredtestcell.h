@@ -178,10 +178,12 @@ public:
     template<typename HOOD_OLD, typename HOOD_NEW>
     static void updateLineX(HOOD_NEW& hoodNew, int startX, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
     {
-        // fixme: add test that doesn't start at multiple of HOOD_OLD::ARITY for SoA
-        
+        // correct for Streaks not starting at chunk boundaries:
+        int startOffset = startX % HOOD_OLD::ARITY;
+
         // Important: index is actually the index in the chunkVector, not necessarily a cell id.
         for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
+            // correct for Streaks not ending on chunk boundaries:
             int chunkSize = std::min(HOOD_OLD::ARITY, indexEnd - hoodOld.index() * HOOD_OLD::ARITY);
             // assemble weight maps:
             std::vector<std::map<int, double> > weights(chunkSize);
@@ -201,7 +203,7 @@ public:
             // member functions. users would not do this (because
             // it's slow), but it's good for testing.
             std::vector<UnstructuredTestCell> cells;
-            for (int i = 0; i < chunkSize; ++i) {
+            for (int i = startOffset; i < chunkSize; ++i) {
                 int index = hoodOld.index() * HOOD_OLD::ARITY + i;
                 cells << hoodOld[index];
 
@@ -213,10 +215,12 @@ public:
             }
 
             // copy back to new grid:
-            for (int i = 0; i < chunkSize; ++i) {
+            for (int i = 0; i < (chunkSize - startOffset); ++i) {
                 hoodNew << cells[i];
                 ++hoodNew;
             }
+
+            startOffset = 0;
         }
     }
 
