@@ -65,11 +65,9 @@ public:
         // fixme: threading!
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             // call updateLineX with adjusted indices
-            UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1,
-                                        MATRICES, ValueType, C, SIGMA>
-                hoodOld(oldAccessor, gridOld, i->origin.x());
-
-            newAccessor.index = i->origin.x();
+            typedef UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1, MATRICES, ValueType, C, SIGMA> HoodOld;
+            HoodOld hoodOld(oldAccessor, gridOld, i->origin.x());
+            newAccessor.index = hoodOld.index() * HoodOld::ARITY;
             UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessor);
             CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep);
         }
@@ -198,8 +196,7 @@ public:
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
         UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>   \
             hoodOld(gridOld, i->origin.x());                            \
-        UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA> \
-            hoodNew(*gridNew);                                          \
+        CELL *hoodNew = &(*gridNew)[i->origin.x()];                     \
         CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep); \
         /**/
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1

@@ -48,11 +48,11 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
-            // fixme: don't use i here
-            hoodNew[i].sum = 0.0;
+            hoodNew->sum = 0.0;
             for (const auto& j: hoodOld.weights(0)) {
-                hoodNew[i].sum += hoodOld[j.first()].value * j.second();
+                hoodNew->sum += hoodOld[j.first()].value * j.second();
             }
+            ++hoodNew;
         }
     }
 

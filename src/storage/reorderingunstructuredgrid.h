@@ -125,10 +125,13 @@ template<typename DELEGATE_GRID>
 class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellType, 1, typename DELEGATE_GRID::WeightType>
 {
 public:
+    // fixme: kill this
     template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
     friend class UnstructuredNeighborhoodNew;
     template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
     friend class UnstructuredNeighborhood;
+    template<typename CELL>
+    friend class UnstructuredUpdateFunctor;
     friend class ReorderingUnstructuredGridTest;
     friend class UnstructuredNeighborhoodTest;
     friend class UnstructuredTestCellTest;
