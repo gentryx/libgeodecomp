@@ -48,6 +48,7 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+            // fixme: don't use i here
             hoodNew[i].sum = 0.0;
             for (const auto& j: hoodOld.weights(0)) {
                 hoodNew[i].sum += hoodOld[j.first()].value * j.second();
@@ -113,7 +114,8 @@ public:
         for (int i = hoodOld.index(); i < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++i, ++hoodOld) {
             int chunkSize = std::min(HOOD_OLD::ARITY, indexEnd - hoodOld.index() * HOOD_OLD::ARITY);
             ShortVec tmp;
-            tmp.load_aligned(&hoodNew->sum() + i * 4);
+            tmp.load_aligned(&hoodNew->sum());
+
             for (const auto& j: hoodOld.weights(0)) {
                 ShortVec weights, values;
                 weights.load_aligned(j.second());
@@ -125,8 +127,10 @@ public:
             // loop peeler:
             double buf[ShortVec::ARITY];
             buf << tmp;
+            hoodNew += chunkStart;
             for (int j = chunkStart; j < chunkSize; ++j) {
-                (&hoodNew->sum())[i * 4 + j] = buf[j];
+                hoodNew->sum() = buf[j];
+                ++hoodNew;
             }
 
             chunkStart = 0;

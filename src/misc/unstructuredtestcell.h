@@ -215,6 +215,8 @@ public:
             }
 
             // copy back to new grid:
+            hoodNew +=startOffset;
+
             for (int i = 0; i < (chunkSize - startOffset); ++i) {
                 hoodNew << cells[i];
                 ++hoodNew;
