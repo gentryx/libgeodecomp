@@ -80,10 +80,16 @@ public:
     bool any() const
     {
         __m128d buf1 = _mm_or_pd(_mm_or_pd(val1, val2),
-                                _mm_or_pd(val3, val4));
-        __m128d buf2 = _mm_shuffle_pd(buf1, buf1, 1);
+                                 _mm_or_pd(val3, val4));
 
+#ifdef __SSE4_1__
+        return (0 == _mm_testz_si128(
+                    _mm_castpd_si128(buf1),
+                    _mm_castpd_si128(buf1)));
+#else
+        __m128d buf2 = _mm_shuffle_pd(buf1, buf1, 1);
         return _mm_cvtsd_f64(buf1) || _mm_cvtsd_f64(buf2);
+#endif
     }
 
     inline
@@ -325,6 +331,30 @@ public:
         _mm_storeh_pd(ptr + offsets[5], val3);
         _mm_storel_pd(ptr + offsets[6], val4);
         _mm_storeh_pd(ptr + offsets[7], val4);
+    }
+
+    inline
+    void blend(const mask_type& mask, const short_vec<double, 8>& other)
+    {
+#ifdef __SSE4_1__
+        val1  = _mm_blendv_pd(val1,  other.val1,  mask.val1);
+        val2  = _mm_blendv_pd(val2,  other.val2,  mask.val2);
+        val3  = _mm_blendv_pd(val3,  other.val3,  mask.val3);
+        val4  = _mm_blendv_pd(val4,  other.val4,  mask.val4);
+#else
+        val1 = _mm_or_pd(
+            _mm_and_pd(mask.val1, other.val1),
+            _mm_andnot_pd(mask.val1, val1));
+        val2 = _mm_or_pd(
+            _mm_and_pd(mask.val2, other.val2),
+            _mm_andnot_pd(mask.val2, val2));
+        val3 = _mm_or_pd(
+            _mm_and_pd(mask.val3, other.val3),
+            _mm_andnot_pd(mask.val3, val3));
+        val4 = _mm_or_pd(
+            _mm_and_pd(mask.val4, other.val4),
+            _mm_andnot_pd(mask.val4, val4));
+#endif
     }
 
 private:

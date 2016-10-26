@@ -38,7 +38,10 @@ public:
     bool alive;
 };
 
-LIBFLATARRAY_REGISTER_SOA(HeatedGameOfLifeCell, ((double)(temperature))((bool)(alive)))
+LIBFLATARRAY_REGISTER_SOA(
+    HeatedGameOfLifeCell,
+    ((double)(temperature))
+    ((bool)(alive)))
 
 class CellWithMultipleMembersOfSameType
 {
@@ -57,7 +60,11 @@ private:
     double memberC;
 };
 
-LIBFLATARRAY_REGISTER_SOA(CellWithMultipleMembersOfSameType, ((double)(memberA))((double)(memberB))((double)(memberC)))
+LIBFLATARRAY_REGISTER_SOA(
+    CellWithMultipleMembersOfSameType,
+    ((double)(memberA))
+    ((double)(memberB))
+    ((double)(memberC)))
 
 class CellWithArrayMember
 {
@@ -69,7 +76,7 @@ public:
 
 LIBFLATARRAY_REGISTER_SOA(
     CellWithArrayMember,
-    ((double)(temp)(40)) )
+    ((double)(temp)(40)))
 
 template<typename _CharT, typename _Traits>
 std::basic_ostream<_CharT, _Traits>&
@@ -1164,6 +1171,10 @@ ADD_TEST(TestCopyConstructor1)
     BOOST_TEST(grid1.dim_y() == 10);
     BOOST_TEST(grid1.dim_z() ==  1);
 
+    BOOST_TEST_EQ(grid1.extent_x(), 32);
+    BOOST_TEST_EQ(grid1.extent_y(), 32);
+    BOOST_TEST_EQ(grid1.extent_z(),  1);
+
     BOOST_TEST(grid2.dim_x() == 20);
     BOOST_TEST(grid2.dim_y() == 10);
     BOOST_TEST(grid2.dim_z() ==  1);
@@ -1213,6 +1224,41 @@ ADD_TEST(TestCopyConstructor2)
             BOOST_TEST(cell == HeatedGameOfLifeCell(-1, false));
         }
     }
+}
+
+ADD_TEST(TestBroadcast)
+{
+    soa_grid<HeatedGameOfLifeCell> grid(20, 10, 1);
+    HeatedGameOfLifeCell hotCell(200);
+
+    grid.broadcast(5, 7, 0, hotCell, 10);
+
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            HeatedGameOfLifeCell actual = grid.get(x, y, 0);
+            HeatedGameOfLifeCell expected(0, false);
+            if ((y == 7) && (x >= 5) && (x < 15)) {
+                expected.temperature = 200;
+            }
+
+            BOOST_TEST_EQ(actual, expected);
+        }
+    }
+}
+
+ADD_TEST(TestDefaultSizesFor1D2D3D)
+{
+    // should require approx. 1 GB RAM:
+    soa_grid<HeatedGameOfLifeCell> grid3D(500, 500, 500);
+
+    // should require approx. 1 GB RAM, but would fail if allocated as
+    // 3D grid (in that case memory requirement would be 9 TB).
+    soa_grid<HeatedGameOfLifeCell> grid2D(10000, 10000, 1);
+
+    // should require approx. 1 GB RAM, but would fail if allocated as
+    // 2D grid (in that case memory requirement would be 80 PB). Worse
+    // for 3D.
+    soa_grid<HeatedGameOfLifeCell> grid1D(100000000, 1, 1);
 }
 
 }

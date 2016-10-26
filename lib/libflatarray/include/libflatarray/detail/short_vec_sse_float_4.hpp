@@ -88,10 +88,16 @@ public:
     inline
     bool any() const
     {
+#ifdef __SSE4_1__
+        return (0 == _mm_testz_si128(
+                    _mm_castps_si128(val1),
+                    _mm_castps_si128(val1)));
+#else
         __m128 buf1 = _mm_shuffle_ps(val1, val1, (3 << 2) | (2 << 0));
         buf1 = _mm_or_ps(val1, buf1);
         __m128 buf2 = _mm_shuffle_ps(buf1, buf1, (1 << 0));
         return _mm_cvtss_f32(buf1) || _mm_cvtss_f32(buf2);
+#endif
     }
 
     inline
@@ -293,6 +299,18 @@ public:
         _mm_store_ss(ptr + offsets[3], tmp);
     }
 #endif
+
+    inline
+    void blend(const mask_type& mask, const short_vec<float, 4>& other)
+    {
+#ifdef __SSE4_1__
+        val1 = _mm_blendv_ps(val1, other.val1, mask.val1);
+#else
+        val1 = _mm_or_ps(
+            _mm_and_ps(mask.val1, other.val1),
+            _mm_andnot_ps(mask.val1, val1));
+#endif
+    }
 
 private:
     __m128 val1;

@@ -404,6 +404,10 @@ void testImplementationReal()
 
     // test comparison
     {
+        // test any() member
+        ShortVec test1(0.0);
+        BOOST_TEST_EQ(0, test1.any());
+
         for (int test_value = 0; test_value <= ARITY; ++test_value) {
             std::vector<CARGO, aligned_allocator<CARGO, 64> > array1(ARITY);
             std::vector<CARGO, aligned_allocator<CARGO, 64> > array2(ARITY);
@@ -416,6 +420,14 @@ void testImplementationReal()
             ShortVec v1(&array1[0]);
             ShortVec v2(&array2[0]);
             typename ShortVec::mask_type res;
+
+            // test any() member
+            if (test_value < ARITY) {
+                std::vector<CARGO, aligned_allocator<CARGO, 64> > array(ARITY, 0);
+                array[test_value] = 0.1234;
+                ShortVec test2(&array[0]);
+                BOOST_TEST(0 != test2.any());
+            }
 
             // test operator<()
             res = (v1 < v2);
@@ -545,6 +557,34 @@ void testImplementationReal()
             TEST_REAL_ACCURACY(expected, actual, 0.001);
         }
     }
+
+    // test blend with mask
+    {
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > array1(ARITY * 10);
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > array2(ARITY * 10);
+        std::vector<CARGO, aligned_allocator<CARGO, 64> > actual(ARITY * 10);
+
+        for (int i = 0; i < (ARITY * 10); ++i) {
+            array1[i] = i;
+            array2[i] = i / ARITY * (ARITY - 4) + ARITY;
+        }
+
+        for (int i = 0; i < (ARITY * 10); i += ARITY) {
+            ShortVec a(&array1[i]);
+            ShortVec b(&array2[i]);
+
+            typename ShortVec::mask_type mask = a < b;
+            ShortVec res = 1;
+            res.blend(mask, ShortVec(-1));
+            &actual[i] << res;
+        }
+
+        for (int i = 0; i < (ARITY * 10); ++i) {
+            float expected = (array1[i] < array2[i]) ? -1 : 1;
+            BOOST_TEST_EQ(expected, actual[i]);
+        }
+    }
+
 
     // fixme: add all tests for int, too
 }

@@ -103,8 +103,13 @@ public:
         swap(my_dim_x, other.my_dim_x);
         swap(my_dim_x, other.my_dim_x);
         swap(my_dim_x, other.my_dim_x);
+        swap(my_extent_x, other.my_extent_x);
+        swap(my_extent_x, other.my_extent_x);
+        swap(my_extent_x, other.my_extent_x);
         swap(my_byte_size, other.my_byte_size);
         swap(my_data, other.my_data);
+        swap(cell_staging_buffer, other.cell_staging_buffer);
+        swap(raw_staging_buffer, other.raw_staging_buffer);
     }
 
     /**
@@ -124,7 +129,11 @@ public:
         my_dim_y = new_dim_y;
         my_dim_z = new_dim_z;
         // we need callback() to round up our grid size
-        callback(detail::flat_array::set_byte_size_functor<value_type>(&my_byte_size));
+        callback(detail::flat_array::set_byte_size_functor<value_type>(
+                     &my_byte_size,
+                     &my_extent_x,
+                     &my_extent_y,
+                     &my_extent_z));
         my_data = ALLOCATOR().allocate(byte_size());
         init();
     }
@@ -160,7 +169,7 @@ public:
         cell_staging_buffer.resize(1);
         cell_staging_buffer.load(&cell);
 
-        callback(detail::flat_array::set_instance_functor<value_type, USE_CUDA_FUNCTORS>(
+        callback(detail::flat_array::set_instance_functor<value_type, 1, USE_CUDA_FUNCTORS>(
                      cell_staging_buffer.data(),
                      x,
                      y,
@@ -173,7 +182,7 @@ public:
         cell_staging_buffer.resize(count);
         cell_staging_buffer.load(cells);
 
-        callback(detail::flat_array::set_instance_functor<value_type, USE_CUDA_FUNCTORS>(
+        callback(detail::flat_array::set_instance_functor<value_type, 1, USE_CUDA_FUNCTORS>(
                      cell_staging_buffer.data(),
                      x,
                      y,
@@ -211,6 +220,22 @@ public:
                      count));
 
         cell_staging_buffer.save(cells);
+    }
+
+    /**
+     * Like set(), but will copy the same cell to all count target cells.
+     */
+    void broadcast(std::size_t x, std::size_t y, std::size_t z, const value_type& cell, std::size_t count)
+    {
+        cell_staging_buffer.resize(1);
+        cell_staging_buffer.load(&cell);
+
+        callback(detail::flat_array::set_instance_functor<value_type, 0, USE_CUDA_FUNCTORS>(
+                     cell_staging_buffer.data(),
+                     x,
+                     y,
+                     z,
+                     count));
     }
 
     void load(
@@ -329,10 +354,28 @@ public:
         return my_dim_z;
     }
 
+    std::size_t extent_x() const
+    {
+        return my_extent_x;
+    }
+
+    std::size_t extent_y() const
+    {
+        return my_extent_y;
+    }
+
+    std::size_t extent_z() const
+    {
+        return my_extent_z;
+    }
+
 private:
     std::size_t my_dim_x;
     std::size_t my_dim_y;
     std::size_t my_dim_z;
+    std::size_t my_extent_x;
+    std::size_t my_extent_y;
+    std::size_t my_extent_z;
     std::size_t my_byte_size;
     // We can't use std::vector here since the code needs to work with CUDA, too.
     char *my_data;

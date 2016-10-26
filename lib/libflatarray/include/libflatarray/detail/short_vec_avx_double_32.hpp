@@ -101,18 +101,9 @@ public:
             _mm256_or_pd(
                 _mm256_or_pd(val5, val6),
                 _mm256_or_pd(val7, val8)));
-
-        // merge both 128-bit lanes of AVX register:
-        __m128d buf1 = _mm_or_pd(
-            _mm256_extractf128_pd(buf0, 0),
-            _mm256_extractf128_pd(buf0, 1));
-        // shuffle upper 64-bit half down to first 64 bits so we can
-        // "or" both together:
-        __m128d buf2 = _mm_shuffle_pd(buf1, buf1, 1 << 0);
-        buf2 = _mm_or_pd(buf1, buf2);
-        // another shuffle to extract the upper 64-bit half:
-        buf1 = _mm_shuffle_pd(buf2, buf2, 1 << 0);
-        return _mm_cvtsd_f64(buf1) || _mm_cvtsd_f64(buf2);
+        return (0 == _mm256_testz_si256(
+                    _mm256_castpd_si256(buf0),
+                    _mm256_castpd_si256(buf0)));
     }
 
     inline
@@ -571,6 +562,19 @@ public:
         tmp = _mm256_extractf128_pd(val8, 1);
         _mm_storel_pd(ptr + offsets[30], tmp);
         _mm_storeh_pd(ptr + offsets[31], tmp);
+    }
+
+    inline
+    void blend(const mask_type& mask, const short_vec<double, 32>& other)
+    {
+        val1  = _mm256_blendv_pd(val1,  other.val1,  mask.val1);
+        val2  = _mm256_blendv_pd(val2,  other.val2,  mask.val2);
+        val3  = _mm256_blendv_pd(val3,  other.val3,  mask.val3);
+        val4  = _mm256_blendv_pd(val4,  other.val4,  mask.val4);
+        val5  = _mm256_blendv_pd(val5,  other.val5,  mask.val5);
+        val6  = _mm256_blendv_pd(val6,  other.val6,  mask.val6);
+        val7  = _mm256_blendv_pd(val7,  other.val7,  mask.val7);
+        val8  = _mm256_blendv_pd(val8,  other.val8,  mask.val8);
     }
 
 private:

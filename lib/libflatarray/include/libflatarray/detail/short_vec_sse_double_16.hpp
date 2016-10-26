@@ -102,9 +102,15 @@ public:
             _mm_or_pd(
                 _mm_or_pd(val5, val6),
                 _mm_or_pd(val7, val8)));
-        __m128d buf2 = _mm_shuffle_pd(buf1, buf1, 1);
 
+#ifdef __SSE4_1__
+        return (0 == _mm_testz_si128(
+                    _mm_castpd_si128(buf1),
+                    _mm_castpd_si128(buf1)));
+#else
+        __m128d buf2 = _mm_shuffle_pd(buf1, buf1, 1);
         return _mm_cvtsd_f64(buf1) || _mm_cvtsd_f64(buf2);
+#endif
     }
 
     inline
@@ -454,6 +460,46 @@ public:
         _mm_storeh_pd(ptr + offsets[13], val7);
         _mm_storel_pd(ptr + offsets[14], val8);
         _mm_storeh_pd(ptr + offsets[15], val8);
+    }
+
+    inline
+    void blend(const mask_type& mask, const short_vec<double, 16>& other)
+    {
+#ifdef __SSE4_1__
+        val1  = _mm_blendv_pd(val1,  other.val1,  mask.val1);
+        val2  = _mm_blendv_pd(val2,  other.val2,  mask.val2);
+        val3  = _mm_blendv_pd(val3,  other.val3,  mask.val3);
+        val4  = _mm_blendv_pd(val4,  other.val4,  mask.val4);
+        val5  = _mm_blendv_pd(val5,  other.val5,  mask.val5);
+        val6  = _mm_blendv_pd(val6,  other.val6,  mask.val6);
+        val7  = _mm_blendv_pd(val7,  other.val7,  mask.val7);
+        val8  = _mm_blendv_pd(val8,  other.val8,  mask.val8);
+#else
+        val1 = _mm_or_pd(
+            _mm_and_pd(mask.val1, other.val1),
+            _mm_andnot_pd(mask.val1, val1));
+        val2 = _mm_or_pd(
+            _mm_and_pd(mask.val2, other.val2),
+            _mm_andnot_pd(mask.val2, val2));
+        val3 = _mm_or_pd(
+            _mm_and_pd(mask.val3, other.val3),
+            _mm_andnot_pd(mask.val3, val3));
+        val4 = _mm_or_pd(
+            _mm_and_pd(mask.val4, other.val4),
+            _mm_andnot_pd(mask.val4, val4));
+        val5 = _mm_or_pd(
+            _mm_and_pd(mask.val5, other.val5),
+            _mm_andnot_pd(mask.val5, val5));
+        val6 = _mm_or_pd(
+            _mm_and_pd(mask.val6, other.val6),
+            _mm_andnot_pd(mask.val6, val6));
+        val7 = _mm_or_pd(
+            _mm_and_pd(mask.val7, other.val7),
+            _mm_andnot_pd(mask.val7, val7));
+        val8 = _mm_or_pd(
+            _mm_and_pd(mask.val8, other.val8),
+            _mm_andnot_pd(mask.val8, val8));
+#endif
     }
 
 private:

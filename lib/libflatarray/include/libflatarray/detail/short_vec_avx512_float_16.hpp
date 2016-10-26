@@ -78,22 +78,9 @@ public:
     inline
     bool any() const
     {
-        __m128 buf0 = _mm_or_ps(
-            _mm_or_ps(
-                _mm512_extractf32x4_ps(val1, 0),
-                _mm512_extractf32x4_ps(val1, 1)),
-            _mm_or_ps(
-                _mm512_extractf32x4_ps(val1, 2),
-                _mm512_extractf32x4_ps(val1, 3)));
-        // shuffle upper 64-bit half down to first 64 bits so we can
-        // "or" both together:
-        __m128 buf1 = _mm_shuffle_ps(buf0, buf0, (3 << 2) | (2 << 0));
-        buf1 = _mm_or_ps(buf0, buf1);
-        // another shuffle to extract 2nd least significant float
-        // member and or it together with least significant float
-        // member:
-        buf0 = _mm_shuffle_ps(buf1, buf1, (1 << 0));
-        return _mm_cvtss_f32(buf0) || _mm_cvtss_f32(buf1);
+        return _mm512_test_epi64_mask(
+            _mm512_castps_si512(val1),
+            _mm512_castps_si512(val1));
     }
 
     inline
@@ -278,6 +265,12 @@ public:
         SHORTVEC_ASSERT_ALIGNED(offsets, 64);
         indices = _mm512_load_epi32(offsets);
         _mm512_i32scatter_ps(ptr, indices, val1, 4);
+    }
+
+    inline
+    void blend(const mask_type& mask, const short_vec<float, 16>& other)
+    {
+        val1 = _mm512_mask_blend_ps((mask >>  0)        , val1, other.val1);
     }
 
 private:
