@@ -59,7 +59,7 @@ if(NOT libflatarray_FOUND)
   # add this include paths only to BUILD_INCLUDE_DIRECTORIES as must
   # not be exported during install in any case (the build tree must be
   # considered a temporary directory, and CMake would complain).
-  list(APPEND BUILD_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/libflatarray/src")
+  list(APPEND BUILD_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/libflatarray/include")
 else()
   message(STATUS External LibFlatArray at ${libflatarray_INCLUDE_DIR})
   # if LibFlatArray was found outside, we'll assume we're not using
