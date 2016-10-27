@@ -54,5 +54,6 @@
 #include <libgeodecomp/storage/multicontainercell.h>
 #include <libgeodecomp/storage/simplearrayfilter.h>
 #include <libgeodecomp/storage/simplefilter.h>
+#include <libgeodecomp/storage/passthroughcontainer.h>
 
 #endif
