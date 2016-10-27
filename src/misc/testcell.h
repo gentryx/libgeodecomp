@@ -29,7 +29,8 @@ class EmptyAPI
 class SoAAPI :
         public APITraits::HasSoA,
         public APITraits::HasFixedCoordsOnlyUpdate,
-        public APITraits::HasUpdateLineX
+        public APITraits::HasUpdateLineX,
+        public LibFlatArray::api_traits::has_default_3d_sizes_uniform
 {};
 
 /**

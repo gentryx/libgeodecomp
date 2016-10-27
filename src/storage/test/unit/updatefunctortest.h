@@ -92,7 +92,8 @@ public:
         public APITraits::HasUpdateLineX,
         public APITraits::HasStencil<Stencils::Moore<3, 1> >,
         public APITraits::HasTorusTopology<3>,
-        public LibFlatArray::api_traits::has_asymmetric_dual_callback
+        public LibFlatArray::api_traits::has_asymmetric_dual_callback,
+        public LibFlatArray::api_traits::has_default_3d_sizes_uniform
     {};
 
     explicit MySoATestCellWithDoubleAndBool(
