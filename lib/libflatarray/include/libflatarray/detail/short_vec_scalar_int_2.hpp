@@ -10,6 +10,7 @@
 #define FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_INT_2_HPP
 
 #include <libflatarray/config.h>
+#include <libflatarray/short_vec_base.hpp>
 
 #ifdef LIBFLATARRAY_WITH_CPP14
 #include <initializer_list>
@@ -17,7 +18,7 @@
 
 namespace LibFlatArray {
 
-template<typename CARGO, int ARITY>
+template<typename CARGO, std::size_t ARITY>
 class short_vec;
 
 #ifdef __ICC
@@ -27,10 +28,10 @@ class short_vec;
 #endif
 
 template<>
-class short_vec<int, 2>
+class short_vec<int, 2> : public short_vec_base<int, 2>
 {
 public:
-    static const int ARITY = 2;
+    static const std::size_t ARITY = 2;
 
     typedef short_vec_strategy::scalar strategy;
 
@@ -130,8 +131,8 @@ public:
     short_vec<int, 2> sqrt() const
     {
         return short_vec<int, 2>(
-            std::sqrt(val1),
-            std::sqrt(val2));
+            static_cast<int>(std::sqrt(val1)),
+            static_cast<int>(std::sqrt(val2)));
     }
 
     inline

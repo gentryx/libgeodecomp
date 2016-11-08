@@ -20,7 +20,7 @@
 #include <libflatarray/detail/sqrt_reference.hpp>
 #include <libflatarray/detail/short_vec_helpers.hpp>
 #include <libflatarray/config.h>
-#include <iostream>
+#include <libflatarray/short_vec_base.hpp>
 
 #ifdef __SSE4_1__
 #include <smmintrin.h>
@@ -32,10 +32,10 @@
 
 namespace LibFlatArray {
 
-template<typename CARGO, int ARITY>
+template<typename CARGO, std::size_t ARITY>
 class short_vec;
 
-template<typename CARGO, int ARITY>
+template<typename CARGO, std::size_t ARITY>
 class sqrt_reference;
 
 #ifdef __ICC
@@ -45,10 +45,10 @@ class sqrt_reference;
 #endif
 
 template<>
-class short_vec<int, 4>
+class short_vec<int, 4> : public short_vec_base<int, 4>
 {
 public:
-    static const int ARITY = 4;
+    static const std::size_t ARITY = 4;
 
     typedef short_vec_strategy::sse strategy;
 
@@ -270,7 +270,7 @@ template<>
 class sqrt_reference<int, 4>
 {
 public:
-    template<typename OTHER_CARGO, int OTHER_ARITY>
+    template<typename OTHER_CARGO, std::size_t OTHER_ARITY>
     friend class short_vec;
 
     sqrt_reference(const short_vec<int, 4>& vec) :

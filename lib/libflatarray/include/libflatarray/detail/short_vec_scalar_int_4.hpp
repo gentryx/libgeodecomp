@@ -15,6 +15,7 @@
     (LIBFLATARRAY_WIDEST_VECTOR_ISA == LIBFLATARRAY_QPX)
 
 #include <libflatarray/config.h>
+#include <libflatarray/short_vec_base.hpp>
 
 #ifdef LIBFLATARRAY_WITH_CPP14
 #include <initializer_list>
@@ -22,7 +23,7 @@
 
 namespace LibFlatArray {
 
-template<typename CARGO, int ARITY>
+template<typename CARGO, std::size_t ARITY>
 class short_vec;
 
 #ifdef __ICC
@@ -32,10 +33,10 @@ class short_vec;
 #endif
 
 template<>
-class short_vec<int, 4>
+class short_vec<int, 4> : public short_vec_base<int, 4>
 {
 public:
-    static const int ARITY = 4;
+    static const std::size_t ARITY = 4;
 
     typedef short_vec_strategy::scalar strategy;
 
@@ -159,10 +160,10 @@ public:
     short_vec<int, 4> sqrt() const
     {
         return short_vec<int, 4>(
-            std::sqrt(val1),
-            std::sqrt(val2),
-            std::sqrt(val3),
-            std::sqrt(val4));
+            static_cast<int>(std::sqrt(val1)),
+            static_cast<int>(std::sqrt(val2)),
+            static_cast<int>(std::sqrt(val3)),
+            static_cast<int>(std::sqrt(val4)));
     }
 
     inline

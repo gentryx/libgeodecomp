@@ -15,6 +15,7 @@
 #include <libflatarray/detail/sqrt_reference.hpp>
 #include <libflatarray/detail/short_vec_helpers.hpp>
 #include <libflatarray/config.h>
+#include <libflatarray/short_vec_base.hpp>
 
 #ifdef LIBFLATARRAY_WITH_CPP14
 #include <initializer_list>
@@ -22,7 +23,7 @@
 
 namespace LibFlatArray {
 
-template<typename CARGO, int ARITY>
+template<typename CARGO, std::size_t ARITY>
 class short_vec;
 
 #ifdef __ICC
@@ -32,10 +33,10 @@ class short_vec;
 #endif
 
 template<>
-class short_vec<double, 8>
+class short_vec<double, 8> : public short_vec_base<double, 8>
 {
 public:
-    static const int ARITY = 8;
+    static const std::size_t ARITY = 8;
     typedef short_vec<double, 8> mask_type;
     typedef short_vec_strategy::avx strategy;
 
@@ -81,7 +82,7 @@ public:
     }
 
     inline
-    double get(int i) const
+    double operator[](int i) const
     {
         __m256d buf0;
         if (i < 4) {
