@@ -35,10 +35,6 @@ namespace LibGeoDecomp {
  *   MemberFilter<Cell, ComplexMember>(&ComplexMember::foo));
  */
 template<typename CELL, typename MEMBER>
-// fixme: check external type, e.g. via loadmember/savemember
-// fixme: should be identical to members_member
-// fixme: how to handle array members_member?
-// fixme: solution: inherit from filterbase, handle initial extraction via selector and using the selector's internal filter
 class MemberFilter : public FilterBase<CELL>
 {
 public:
@@ -49,12 +45,11 @@ public:
     {}
 
     template<typename MEMBERS_MEMBER, int ARITY>
-    MemberFilter(MEMBERS_MEMBER (MEMBER:: *membersMemberPointer[ARITY])) :
+    MemberFilter(MEMBERS_MEMBER (MEMBER:: *membersMemberPointer)[ARITY]) :
         outerFilter(makeDefaultFilter<CELL, MEMBER>()),
         innerSelector(new Selector<MEMBER>(membersMemberPointer, "foo"))
     {}
 
-    // fixme: needs test
     template<typename MEMBERS_MEMBER>
     MemberFilter(
         MEMBERS_MEMBER MEMBER:: *membersMemberPointer,
@@ -71,14 +66,12 @@ public:
         innerSelector(new Selector<MEMBER>(membersMemberPointer, "foo", filter))
     {}
 
-    // fixme: needs test
     std::size_t sizeOf() const
     {
-        return innerSelector->sizeOfMember();
+        return innerSelector->sizeOfExternal();
     }
 
 #ifdef LIBGEODECOMP_WITH_SILO
-    // fixme: needs test
     int siloTypeID() const
     {
         return innerSelector->siloTypeID();
@@ -93,13 +86,11 @@ public:
     }
 #endif
 
-    // fixme: needs test
     std::string typeName() const
     {
         return innerSelector->typeName();
     }
 
-    // fixme: needs test
     int arity() const
     {
         return innerSelector->arity();

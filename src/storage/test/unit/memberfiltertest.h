@@ -12,6 +12,27 @@ namespace LibGeoDecomp {
 class MemberFilterTest : public CxxTest::TestSuite
 {
 public:
+    void testBasics()
+    {
+        typedef SharedPtr<FilterBase<TestCell<2> > >::Type FilterPtr;
+        FilterPtr filter(new MemberFilter<TestCell<2>, Coord<2> >(&Coord<2>::c));
+
+        Selector<TestCell<2> > selector(
+            &TestCell<2>::dimensions,
+            "pos",
+            filter);
+
+        TS_ASSERT_EQUALS(8, filter->sizeOf());
+#ifdef LIBGEODECOMP_WITH_SILO
+        TS_ASSERT_EQUALS(DB_INT, selector.siloTypeID());
+#endif
+#ifdef LIBGEODECOMP_WITH_MPI
+        // fixme
+#endif
+        TS_ASSERT_EQUALS("INT", selector.typeName());
+        TS_ASSERT_EQUALS(2, selector.arity());
+    }
+
     void testHostAoS()
     {
         typedef SharedPtr<FilterBase<TestCell<2> > >::Type FilterPtr;
@@ -49,9 +70,11 @@ public:
         for (std::size_t i = 0; i < vec.size(); ++i) {
             TS_ASSERT_EQUALS(Coord<2>(i + 500, i + 600), vec[i].dimensions.dimensions);
         }
+
+        TS_ASSERT_EQUALS(sizeof(Coord<2>), filter->sizeOf());
+        TS_ASSERT_EQUALS(1, selector.arity());
     }
 
-    // fixme: add tests with array member member
     // fixme: also add cuda tests
     // fixme: add test for nesting
 
@@ -111,6 +134,9 @@ public:
                 Coord<3>(i + 7777, i + 8888, i + 9999),
                 grid.get(Coord<3>(100 + i, 200, 300)).dimensions.dimensions);
         }
+
+        TS_ASSERT_EQUALS(sizeof(Coord<3>), filter->sizeOf());
+        TS_ASSERT_EQUALS(1, selector.arity());
     }
 };
 
