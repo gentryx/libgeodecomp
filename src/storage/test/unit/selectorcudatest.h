@@ -16,8 +16,6 @@
 
 using namespace LibGeoDecomp;
 
-namespace LibGeoDecomp {
-
 class YetAnotherDummyCell
 {
 public:
@@ -39,9 +37,7 @@ public:
     float z[3];
 };
 
-}
-
-LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::YetAnotherDummyCell, ((double)(x))((int)(y))((float)(z)(3)) )
+LIBFLATARRAY_REGISTER_SOA(YetAnotherDummyCell, ((double)(x))((int)(y))((float)(z)(3)) )
 
 namespace LibGeoDecomp {
 
