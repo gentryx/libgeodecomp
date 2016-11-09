@@ -319,6 +319,11 @@ public:
         return filter->checkExternalTypeID(typeid(MEMBER));
     }
 
+    bool checkExternalTypeID(const std::type_info& otherID) const
+    {
+        return filter->checkExternalTypeID(otherID);
+    }
+
     /**
      * The member's offset in LibFlatArray's SoA memory layout
      */
