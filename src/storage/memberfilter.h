@@ -9,18 +9,30 @@
 namespace LibGeoDecomp {
 
 /**
- * This filter relies on Selectors to extract data from a member of a
- * cell. This is useful if a user wants to write out data that's not a
- * plain member of a cell. For example, in the following Cell class, a
- * user might want to output Cell::member::foo:
+ * This filter is useful if an IO object (Writer or Steerer) needs to
+ * work with a nested member of a simulation model, e.g. a member of a
+ * member of a cell.
+ *
+ * It relies on existing Filters and Selectors to extract that data.
+ * This is useful for limiting the volume of IO as well as relieving
+ * users from writing custom filters.
+ *
+ * Example: consider the following Cell class. A user might want to
+ * output Cell::sampleMember::foo. This could be achieved by creating
+ * a Selector<Cell> and adding to that a suitable MemberFilter:
  *
  * class Cell {
  *   class ComplexMember {
  *     int foo;
  *   };
  *
- *  ComplexMember member;
+ *  ComplexMember sampleMember;
  * };
+ *
+ * Selector<Cell> selector(
+ *   &Cell::sampleMember,
+ *   "sample",
+ *   MemberFilter<Cell, ComplexMember>(&ComplexMember::foo));
  */
 template<typename CELL, typename MEMBER>
 // fixme: check external type, e.g. via loadmember/savemember
