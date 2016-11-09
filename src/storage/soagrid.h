@@ -309,6 +309,16 @@ public:
                 actualDimensions, edgeRadii, edgeCell, defaultCell));
     }
 
+    char *data()
+    {
+        return delegate.data();
+    }
+
+    const char *data() const
+    {
+        return delegate.data();
+    }
+
     virtual void set(const Coord<DIM>& absoluteCoord, const CELL& cell)
     {
         Coord<DIM> relativeCoord = absoluteCoord - box.origin;
