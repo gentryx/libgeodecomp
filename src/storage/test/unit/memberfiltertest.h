@@ -48,7 +48,12 @@ public:
         }
 
         std::vector<Coord<2> > extract(vec.size());
-        selector.copyMemberOut(&vec[0], MemoryLocation::HOST, (char*)&extract[0], MemoryLocation::HOST, vec.size());
+        selector.copyMemberOut(
+            &vec[0],
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(&extract[0]),
+            MemoryLocation::HOST,
+            vec.size());
 
         for (std::size_t i = 0; i < vec.size(); ++i) {
             TS_ASSERT_EQUALS(Coord<2>(i + 300, i + 400), extract[i]);
@@ -58,7 +63,7 @@ public:
             extract[i] = Coord<2>(i + 500, i + 600);
         }
         selector.copyMemberIn(
-            (char*)&extract[0],
+            reinterpret_cast<char*>(&extract[0]),
             MemoryLocation::HOST,
             &vec[0],
             MemoryLocation::HOST,
@@ -100,12 +105,12 @@ public:
         std::vector<Coord<3> > vec(30);
 
         LibFlatArray::soa_accessor<TestCellSoA, 32, 32, 32, 0> accessor(
-            (char*)grid.data(), 0);
+            reinterpret_cast<char*>(grid.data()), 0);
 
         selector.copyStreakOut(
             accessor.access_member(sizeof(CoordBox<3>), selector.offset()),
             MemoryLocation::HOST,
-            (char*)&vec[0],
+            reinterpret_cast<char*>(&vec[0]),
             MemoryLocation::HOST,
             30,
             32 * 32 * 32);
@@ -119,7 +124,7 @@ public:
         }
 
         selector.copyStreakIn(
-            (char*)&vec[0],
+            reinterpret_cast<char*>(&vec[0]),
             MemoryLocation::HOST,
             accessor.access_member(sizeof(CoordBox<3>), selector.offset()),
             MemoryLocation::HOST,

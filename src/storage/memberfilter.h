@@ -109,7 +109,7 @@ public:
         innerSelector->copyMemberIn(
             source,
             sourceLocation,
-            (MEMBER*)target,
+            reinterpret_cast<MEMBER*>(target),
             targetLocation,
             num);
     }
@@ -126,8 +126,7 @@ public:
         const std::size_t stride)
     {
         innerSelector->copyMemberOut(
-            // fixme: get rid of c-style casts
-            (MEMBER*)source,
+            reinterpret_cast<const MEMBER*>(source),
             sourceLocation,
             target,
             targetLocation,
@@ -148,17 +147,43 @@ public:
 #ifdef __CUDACC__
         if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
             (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+
             // fixme: needs test
             LibFlatArray::cuda_array<MEMBER> buf(num);
-            innerSelector->copyMemberIn((char*)source, sourceLocation, &buf[0], MemoryLocation::CUDA_DEVICE, num);
-            outerFilter->copyMemberIn((char*)&buf[0], MemoryLocation::CUDA_DEVICE, target, targetLocation, num, memberPointer);
+            innerSelector->copyMemberIn(
+                reinterpret_cast<char*>(source),
+                sourceLocation,
+                &buf[0],
+                MemoryLocation::CUDA_DEVICE,
+                num);
+
+            outerFilter->copyMemberIn(
+                reinterpret_cast<MEMBER>(&buf[0]),
+                MemoryLocation::CUDA_DEVICE,
+                target,
+                targetLocation,
+                num,
+                memberPointer);
+
             return;
         }
 #endif
 
         std::vector<MEMBER> buf(num);
-        innerSelector->copyMemberIn((char*)source, sourceLocation, &buf[0], MemoryLocation::HOST, num);
-        outerFilter->copyMemberIn((char*)&buf[0], MemoryLocation::HOST, target, targetLocation, num, memberPointer);
+        innerSelector->copyMemberIn(
+            reinterpret_cast<const char*>(source),
+            sourceLocation,
+            &buf[0],
+            MemoryLocation::HOST,
+            num);
+
+        outerFilter->copyMemberIn(
+            reinterpret_cast<char*>(&buf[0]),
+            MemoryLocation::HOST,
+            target,
+            targetLocation,
+            num,
+            memberPointer);
     }
 
     /**
@@ -177,15 +202,40 @@ public:
             (targetLocation == MemoryLocation::CUDA_DEVICE)) {
             // fixme: needs test
             LibFlatArray::cuda_array<MEMBER> buf(num);
-            outerFilter->copyMemberOut(source, sourceLocation, (char*)&buf[0], MemoryLocation::CUDA_DEVICE, num, memberPointer);
-            innerSelector->copyMemberOut(&buf[0], MemoryLocation::CUDA_DEVICE, (char*)target, targetLocation, num);
+            outerFilter->copyMemberOut(
+                source,
+                sourceLocation,
+                reinterpret_cast<(char*>(&buf[0]),
+                MemoryLocation::CUDA_DEVICE,
+                num,
+                memberPointer);
+
+            innerSelector->copyMemberOut(
+                &buf[0],
+                MemoryLocation::CUDA_DEVICE,
+                reinterpret_cast<char*>(target),
+                targetLocation,
+                num);
+
             return;
         }
 #endif
 
         std::vector<MEMBER> buf(num);
-        outerFilter->copyMemberOut(source, sourceLocation, (char*)&buf[0], MemoryLocation::HOST, num, memberPointer);
-        innerSelector->copyMemberOut(&buf[0], MemoryLocation::HOST, (char*)target, targetLocation, num);
+        outerFilter->copyMemberOut(
+            source,
+            sourceLocation,
+            reinterpret_cast<char*>(&buf[0]),
+            MemoryLocation::HOST,
+            num,
+            memberPointer);
+
+        innerSelector->copyMemberOut(
+            &buf[0],
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(target),
+            targetLocation,
+            num);
     }
 
     bool checkExternalTypeID(const std::type_info& otherID) const
