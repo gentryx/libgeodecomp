@@ -71,12 +71,14 @@ public:
         innerSelector(new Selector<MEMBER>(membersMemberPointer, "foo", filter))
     {}
 
+    // fixme: needs test
     std::size_t sizeOf() const
     {
         return innerSelector->sizeOfMember();
     }
 
 #ifdef LIBGEODECOMP_WITH_SILO
+    // fixme: needs test
     int siloTypeID() const
     {
         return innerSelector->siloTypeID();
@@ -84,18 +86,21 @@ public:
 #endif
 
 #ifdef LIBGEODECOMP_WITH_MPI
+    // fixme: needs test
     MPI_Datatype mpiDatatype() const
     {
         return innerSelector->mpiDatatype();
     }
 #endif
 
-    virtual std::string typeName() const
+    // fixme: needs test
+    std::string typeName() const
     {
         return innerSelector->typeName();
     }
 
-    virtual int arity() const
+    // fixme: needs test
+    int arity() const
     {
         return innerSelector->arity();
     }
@@ -103,7 +108,7 @@ public:
     /**
      * Copy a Streak of variables to an AoS layout.
      */
-    virtual void copyStreakIn(
+    void copyStreakIn(
         const char *source,
         MemoryLocation::Location sourceLocation,
         char *target,
@@ -111,13 +116,18 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
-        // fixme: needs test
+        innerSelector->copyMemberIn(
+            source,
+            sourceLocation,
+            (MEMBER*)target,
+            targetLocation,
+            num);
     }
 
     /**
      * Extract a Streak of members from an AoS layout.
      */
-    virtual void copyStreakOut(
+    void copyStreakOut(
         const char *source,
         MemoryLocation::Location sourceLocation,
         char *target,
@@ -125,13 +135,19 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
-        // fixme: needs test
+        innerSelector->copyMemberOut(
+            // fixme: get rid of c-style casts
+            (MEMBER*)source,
+            sourceLocation,
+            target,
+            targetLocation,
+            num);
     }
 
     /**
      * Copy a Streak of variables to the members of a Streak of cells.
      */
-    virtual void copyMemberIn(
+    void copyMemberIn(
         const char *source,
         MemoryLocation::Location sourceLocation,
         CELL *target,
@@ -158,7 +174,7 @@ public:
     /**
      * Extract a Streak of members from a Streak of cells.
      */
-    virtual void copyMemberOut(
+    void copyMemberOut(
         const CELL *source,
         MemoryLocation::Location sourceLocation,
         char *target,
