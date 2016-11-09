@@ -26,9 +26,6 @@ public:
 #ifdef LIBGEODECOMP_WITH_SILO
         TS_ASSERT_EQUALS(DB_INT, selector.siloTypeID());
 #endif
-#ifdef LIBGEODECOMP_WITH_MPI
-        // fixme
-#endif
         TS_ASSERT_EQUALS("INT", selector.typeName());
         TS_ASSERT_EQUALS(2, selector.arity());
     }

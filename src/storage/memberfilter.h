@@ -79,7 +79,6 @@ public:
 #endif
 
 #ifdef LIBGEODECOMP_WITH_MPI
-    // fixme: needs test
     MPI_Datatype mpiDatatype() const
     {
         return innerSelector->mpiDatatype();
