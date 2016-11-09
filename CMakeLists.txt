@@ -61,10 +61,10 @@ if(NOT libflatarray_FOUND)
   # considered a temporary directory, and CMake would complain).
   list(APPEND BUILD_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/libflatarray/include")
 else()
-  message(STATUS External LibFlatArray at ${libflatarray_INCLUDE_DIR})
+  message(STATUS External LibFlatArray at ${libflatarray_INCLUDE_DIRS})
   # if LibFlatArray was found outside, we'll assume we're not using
   # the bundled version and we need export the relevant directory:
-  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${libflatarray_INCLUDE_DIR})
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${libflatarray_INCLUDE_DIRS})
 endif()
 
 # currently VisIt only supports Python 2.x. This (undocumented?)
