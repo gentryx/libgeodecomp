@@ -82,8 +82,11 @@ class Coord<1>
 public:
     friend class BoostSerialization;
     friend class HPXSerialization;
+    friend class MemberFilterTest;
     friend class Typemaps;
+
     typedef int ValueType;
+
     static const int DIM = 1;
 
     __host__ __device__
@@ -314,7 +317,10 @@ public:
     friend class BoostSerialization;
     friend class HPXSerialization;
     friend class Typemaps;
+    friend class MemberFilterTest;
+
     typedef int ValueType;
+
     static const int DIM = 2;
 
     __host__ __device__
@@ -576,7 +582,10 @@ public:
     friend class BoostSerialization;
     friend class HPXSerialization;
     friend class Typemaps;
+    friend class MemberFilterTest;
+
     typedef int ValueType;
+
     static const int DIM = 3;
 
     __host__ __device__
