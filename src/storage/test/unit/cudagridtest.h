@@ -300,7 +300,7 @@ public:
         CoordBox<2> box(origin, dim);
 
         CUDAGrid<TestCell<2> > grid(box);
-        Selector<TestCell<2> > selector = MAKE_SELECTOR(TestCell<2>, testValue);
+        Selector<TestCell<2> > selector(&TestCell<2>::testValue, "testValue");
 
         std::vector<double> buffer;
         for (int i = 0; i < 90; ++i) {

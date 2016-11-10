@@ -37,7 +37,11 @@ public:
     float z[3];
 };
 
-LIBFLATARRAY_REGISTER_SOA(YetAnotherDummyCell, ((double)(x))((int)(y))((float)(z)(3)) )
+LIBFLATARRAY_REGISTER_SOA(
+    YetAnotherDummyCell,
+    ((double)(x))
+    ((int)(y))
+    ((float)(z)(3)) )
 
 namespace LibGeoDecomp {
 
@@ -146,7 +150,7 @@ public:
         // from NVCC and the host compiler, where earch gets a
         // different filter (DefaultCUDAFilter vs. DefaultFilter).
 
-        Selector<TestCell<2> > selector = MAKE_SELECTOR(TestCell<2>, testValue);
+        Selector<TestCell<2> > selector(&TestCell<2>::testValue, "testValue");
         selector.copyMemberIn(
             0, MemoryLocation::CUDA_DEVICE, 0, MemoryLocation::CUDA_DEVICE, 0);
     }

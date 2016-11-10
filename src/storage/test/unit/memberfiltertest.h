@@ -77,7 +77,6 @@ public:
         TS_ASSERT_EQUALS(1, selector.arity());
     }
 
-    // fixme: also add cuda tests
     // fixme: add test for nesting
 
     void testHostSoA()
