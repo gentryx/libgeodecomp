@@ -71,13 +71,18 @@ public:
             vec << cell;
         }
 
+        LibFlatArray::cuda_array<TestCell<2> > deviceBuf1(&vec[0], vec.size());
+        LibFlatArray::cuda_array<Coord<2> > deviceBuf2(vec.size());
+
         std::vector<Coord<2> > extract(vec.size());
         selector.copyMemberOut(
-            &vec[0],
-            MemoryLocation::HOST,
-            reinterpret_cast<char*>(&extract[0]),
-            MemoryLocation::HOST,
+            deviceBuf1.data(),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(deviceBuf2.data()),
+            MemoryLocation::CUDA_DEVICE,
             vec.size());
+
+        deviceBuf2.save(&extract[0]);
 
         for (std::size_t i = 0; i < vec.size(); ++i) {
             TS_ASSERT_EQUALS(Coord<2>(i + 300, i + 400), extract[i]);
@@ -86,12 +91,17 @@ public:
         for (std::size_t i = 0; i < vec.size(); ++i) {
             extract[i] = Coord<2>(i + 500, i + 600);
         }
+
+        deviceBuf2.load(&extract[0]);
+
         selector.copyMemberIn(
-            reinterpret_cast<char*>(&extract[0]),
-            MemoryLocation::HOST,
-            &vec[0],
-            MemoryLocation::HOST,
+            reinterpret_cast<char*>(deviceBuf2.data()),
+            MemoryLocation::CUDA_DEVICE,
+            deviceBuf1.data(),
+            MemoryLocation::CUDA_DEVICE,
             vec.size());
+
+        deviceBuf1.save(vec.data());
 
         for (std::size_t i = 0; i < vec.size(); ++i) {
             TS_ASSERT_EQUALS(Coord<2>(i + 500, i + 600), vec[i].dimensions.dimensions);
@@ -100,8 +110,6 @@ public:
         TS_ASSERT_EQUALS(sizeof(Coord<2>), filter->sizeOf());
         TS_ASSERT_EQUALS(1, selector.arity());
     }
-
-    // fixme: add test for nesting
 
     void testHostSoA()
     {
