@@ -82,6 +82,7 @@ class Coord<1>
 public:
     friend class BoostSerialization;
     friend class HPXSerialization;
+    friend class MemberFilterCudaTest;
     friend class MemberFilterTest;
     friend class Typemaps;
 
@@ -316,8 +317,9 @@ class Coord<2>
 public:
     friend class BoostSerialization;
     friend class HPXSerialization;
-    friend class Typemaps;
+    friend class MemberFilterCudaTest;
     friend class MemberFilterTest;
+    friend class Typemaps;
 
     typedef int ValueType;
 
@@ -581,8 +583,9 @@ class Coord<3>
 public:
     friend class BoostSerialization;
     friend class HPXSerialization;
-    friend class Typemaps;
+    friend class MemberFilterCudaTest;
     friend class MemberFilterTest;
+    friend class Typemaps;
 
     typedef int ValueType;
 
