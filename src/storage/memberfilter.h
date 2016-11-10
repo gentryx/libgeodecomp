@@ -38,31 +38,55 @@ template<typename CELL, typename MEMBER>
 class MemberFilter : public FilterBase<CELL>
 {
 public:
-    template<typename MEMBERS_MEMBER>
+    template<typename MEMBERS_MEMBER, bool FORCE_CUDA =
+#ifdef __CUDACC__
+             true
+#else
+             false
+#endif
+             >
     MemberFilter(MEMBERS_MEMBER MEMBER:: *membersMemberPointer) :
-        outerFilter(makeDefaultFilter<CELL, MEMBER>()),
+        outerFilter(DefaultFilterFactory<FORCE_CUDA>().template make<CELL, MEMBER>()),
         innerSelector(new Selector<MEMBER>(membersMemberPointer, "foo"))
     {}
 
-    template<typename MEMBERS_MEMBER, int ARITY>
+    template<typename MEMBERS_MEMBER, int ARITY, bool FORCE_CUDA =
+#ifdef __CUDACC__
+             true
+#else
+             false
+#endif
+             >
     MemberFilter(MEMBERS_MEMBER (MEMBER:: *membersMemberPointer)[ARITY]) :
-        outerFilter(makeDefaultFilter<CELL, MEMBER>()),
+        outerFilter(DefaultFilterFactory<FORCE_CUDA>().template make<CELL, MEMBER>()),
         innerSelector(new Selector<MEMBER>(membersMemberPointer, "foo"))
     {}
 
-    template<typename MEMBERS_MEMBER>
+    template<typename MEMBERS_MEMBER, bool FORCE_CUDA =
+#ifdef __CUDACC__
+             true
+#else
+             false
+#endif
+             >
     MemberFilter(
         MEMBERS_MEMBER MEMBER:: *membersMemberPointer,
         const typename SharedPtr<FilterBase<MEMBER> >::Type& filter) :
-        outerFilter(makeDefaultFilter<CELL, MEMBER>()),
+        outerFilter(DefaultFilterFactory<FORCE_CUDA>().template make<CELL, MEMBER>()),
         innerSelector(new Selector<MEMBER>(membersMemberPointer, "foo", filter))
     {}
 
-    template<typename MEMBERS_MEMBER, int ARITY>
+    template<typename MEMBERS_MEMBER, int ARITY, bool FORCE_CUDA =
+#ifdef __CUDACC__
+             true
+#else
+             false
+#endif
+             >
     MemberFilter(
         MEMBERS_MEMBER (MEMBER:: *membersMemberPointer)[ARITY],
         const typename SharedPtr<FilterBase<MEMBER> >::Type& filter) :
-        outerFilter(makeDefaultFilter<CELL, MEMBER>()),
+        outerFilter(DefaultFilterFactory<FORCE_CUDA>().template make<CELL, MEMBER>()),
         innerSelector(new Selector<MEMBER>(membersMemberPointer, "foo", filter))
     {}
 
@@ -148,17 +172,16 @@ public:
         if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
             (targetLocation == MemoryLocation::CUDA_DEVICE)) {
 
-            // fixme: needs test
             LibFlatArray::cuda_array<MEMBER> buf(num);
             innerSelector->copyMemberIn(
-                reinterpret_cast<char*>(source),
+                reinterpret_cast<const char*>(source),
                 sourceLocation,
-                &buf[0],
+                buf.data(),
                 MemoryLocation::CUDA_DEVICE,
                 num);
 
             outerFilter->copyMemberIn(
-                reinterpret_cast<MEMBER>(&buf[0]),
+                reinterpret_cast<const char*>(buf.data()),
                 MemoryLocation::CUDA_DEVICE,
                 target,
                 targetLocation,
@@ -200,18 +223,18 @@ public:
 #ifdef __CUDACC__
         if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
             (targetLocation == MemoryLocation::CUDA_DEVICE)) {
-            // fixme: needs test
+
             LibFlatArray::cuda_array<MEMBER> buf(num);
             outerFilter->copyMemberOut(
                 source,
                 sourceLocation,
-                reinterpret_cast<(char*>(&buf[0]),
+                reinterpret_cast<char*>(buf.data()),
                 MemoryLocation::CUDA_DEVICE,
                 num,
                 memberPointer);
 
             innerSelector->copyMemberOut(
-                &buf[0],
+                buf.data(),
                 MemoryLocation::CUDA_DEVICE,
                 reinterpret_cast<char*>(target),
                 targetLocation,
