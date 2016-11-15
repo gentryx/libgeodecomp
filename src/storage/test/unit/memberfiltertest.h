@@ -7,6 +7,33 @@
 
 using namespace LibGeoDecomp;
 
+class MemberMemberMember
+{
+public:
+    double a;
+    int b;
+};
+
+class MemberMember
+{
+public:
+    MemberMemberMember member;
+};
+
+class Member
+{
+public:
+    MemberMember member;
+    float c;
+};
+
+class TestClassForMultiLevelNesting
+{
+public:
+    Member member;
+    double d;
+};
+
 namespace LibGeoDecomp {
 
 class MemberFilterTest : public CxxTest::TestSuite
@@ -77,7 +104,54 @@ public:
         TS_ASSERT_EQUALS(1, selector.arity());
     }
 
-    // fixme: add test for nesting
+    void testNesting()
+    {
+        typedef SharedPtr<FilterBase<MemberMember> >::Type FilterPtr1;
+        FilterPtr1 filter1(new MemberFilter<MemberMember, MemberMemberMember>(&MemberMemberMember::a));
+
+        typedef SharedPtr<FilterBase<Member> >::Type FilterPtr2;
+        FilterPtr2 filter2(new MemberFilter<Member, MemberMember>(&MemberMember::member, filter1));
+
+        typedef SharedPtr<FilterBase<TestClassForMultiLevelNesting> >::Type FilterPtr3;
+        FilterPtr3 filter3(new MemberFilter<TestClassForMultiLevelNesting, Member>(&Member::member, filter2));
+
+        Selector<TestClassForMultiLevelNesting> selector(
+            &TestClassForMultiLevelNesting::member,
+            "member",
+            filter3);
+
+        std::vector<TestClassForMultiLevelNesting> vec(55);
+        for (int i = 0; i < 55; ++i) {
+            vec[i].member.member.member.a = i + 0.1;
+        }
+
+        std::vector<double> buf(55);
+        selector.copyMemberOut(
+            vec.data(),
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(buf.data()),
+            MemoryLocation::HOST,
+            55);
+
+        for (int i = 0; i < 55; ++i) {
+            TS_ASSERT_EQUALS((i + 0.1), buf[i]);
+        }
+
+        for (int i = 0; i < 55; ++i) {
+            buf[i] = i + 0.2;
+        }
+
+        selector.copyMemberIn(
+            reinterpret_cast<char*>(buf.data()),
+            MemoryLocation::HOST,
+            vec.data(),
+            MemoryLocation::HOST,
+            55);
+
+        for (int i = 0; i < 55; ++i) {
+            TS_ASSERT_EQUALS((i + 0.2), vec[i].member.member.member.a);
+        }
+    }
 
     void testHostSoA()
     {
