@@ -8,6 +8,9 @@
 
 namespace LibGeoDecomp {
 
+template<typename CELL>
+class Selector;
+
 /**
  * This filter is useful if an IO object (Writer or Steerer) needs to
  * work with a nested member of a simulation model, e.g. a member of a

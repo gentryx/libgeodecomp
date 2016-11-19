@@ -43,6 +43,28 @@ LIBFLATARRAY_REGISTER_SOA(
     ((int)(y))
     ((float)(z)(3)) )
 
+class AnotherMemberMember
+{
+public:
+    double a;
+    int b[3];
+};
+
+class AnotherMember
+{
+public:
+    AnotherMemberMember member;
+    float c[5];
+    double d;
+};
+
+class AnotherTestClassForMultiLevelNesting
+{
+public:
+    AnotherMember member;
+    int e;
+};
+
 namespace LibGeoDecomp {
 
 class SelectorCUDATest : public CxxTest::TestSuite
@@ -155,6 +177,109 @@ public:
             0, MemoryLocation::CUDA_DEVICE, 0, MemoryLocation::CUDA_DEVICE, 0);
     }
 
+    void testNesting()
+    {
+        Selector<AnotherTestClassForMultiLevelNesting> selectorE(
+            &AnotherTestClassForMultiLevelNesting::e,
+            "varE");
+
+        Selector<AnotherTestClassForMultiLevelNesting> selectorD(
+            &AnotherTestClassForMultiLevelNesting::member,
+            &AnotherMember::d,
+            "varD");
+
+        Selector<AnotherTestClassForMultiLevelNesting> selectorC(
+            &AnotherTestClassForMultiLevelNesting::member,
+            &AnotherMember::c,
+            "varC");
+
+        Selector<AnotherTestClassForMultiLevelNesting> selectorB(
+            &AnotherTestClassForMultiLevelNesting::member,
+            &AnotherMember::member,
+            &AnotherMemberMember::b,
+            "varB");
+
+        Selector<AnotherTestClassForMultiLevelNesting> selectorA(
+            &AnotherTestClassForMultiLevelNesting::member,
+            &AnotherMember::member,
+            &AnotherMemberMember::a,
+            "varA");
+
+        std::size_t size = 123;
+        std::vector<AnotherTestClassForMultiLevelNesting> hostVec(size);
+
+        for (std::size_t i = 0; i < size; ++i) {
+            hostVec[i].e                  = i +  1000;
+            hostVec[i].member.d           = i +  2000;
+            hostVec[i].member.c[0]        = i +  3000;
+            hostVec[i].member.c[1]        = i +  4000;
+            hostVec[i].member.c[2]        = i +  5000;
+            hostVec[i].member.c[3]        = i +  6000;
+            hostVec[i].member.c[4]        = i +  7000;
+            hostVec[i].member.member.b[0] = i +  8000;
+            hostVec[i].member.member.b[1] = i +  9000;
+            hostVec[i].member.member.b[2] = i + 10000;
+            hostVec[i].member.member.a    = i + 11000;
+        }
+
+        CUDAArray<AnotherTestClassForMultiLevelNesting> deviceVec(size);
+        deviceVec.load(&hostVec[0]);
+
+        std::vector<double> bufA(1 * size);
+        std::vector<int> bufB(3 * size);
+        std::vector<float> bufC(5 * size);
+        std::vector<double> bufD(1 * size);
+        std::vector<int> bufE(1 * size);
+
+        selectorA.copyMemberOut(
+            deviceVec.data(),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(&bufA[0]),
+            MemoryLocation::HOST,
+            size);
+
+        selectorB.copyMemberOut(
+            deviceVec.data(),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(&bufB[0]),
+            MemoryLocation::HOST,
+            size);
+
+        selectorC.copyMemberOut(
+            deviceVec.data(),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(&bufC[0]),
+            MemoryLocation::HOST,
+            size);
+
+        selectorD.copyMemberOut(
+            deviceVec.data(),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(&bufD[0]),
+            MemoryLocation::HOST,
+            size);
+
+        selectorE.copyMemberOut(
+            deviceVec.data(),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(&bufE[0]),
+            MemoryLocation::HOST,
+            size);
+
+        for (std::size_t i = 0; i < size; ++i) {
+            TS_ASSERT_EQUALS(bufE[i]        , i +  1000);
+            TS_ASSERT_EQUALS(bufD[i]        , i +  2000);
+            TS_ASSERT_EQUALS(bufC[5 * i + 0], i +  3000);
+            TS_ASSERT_EQUALS(bufC[5 * i + 1], i +  4000);
+            TS_ASSERT_EQUALS(bufC[5 * i + 2], i +  5000);
+            TS_ASSERT_EQUALS(bufC[5 * i + 3], i +  6000);
+            TS_ASSERT_EQUALS(bufC[5 * i + 4], i +  7000);
+            TS_ASSERT_EQUALS(bufB[3 * i + 0], i +  8000);
+            TS_ASSERT_EQUALS(bufB[3 * i + 1], i +  9000);
+            TS_ASSERT_EQUALS(bufB[3 * i + 2], i + 10000);
+            TS_ASSERT_EQUALS(bufA[i]        , i + 11000);
+        }
+    }
 };
 
 }
