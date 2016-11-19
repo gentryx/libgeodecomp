@@ -25,6 +25,13 @@ public:
 #endif
 };
 
+template<typename CARGO>
+typename SharedPtr<CARGO>::Type makeShared(CARGO *pointer)
+{
+    typedef typename SharedPtr<CARGO>::Type SharedPointer;
+    return SharedPointer(pointer);
+}
+
 }
 
 #endif

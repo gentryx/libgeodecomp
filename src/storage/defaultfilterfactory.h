@@ -30,14 +30,14 @@ public:
     inline
     typename SharedPtr<FilterBase<CELL> >::Type make() const
     {
-        return typename SharedPtr<FilterBase<CELL> >::Type(new DefaultCUDAFilter<CELL, MEMBER, MEMBER>);
+        return makeShared(new DefaultCUDAFilter<CELL, MEMBER, MEMBER>);
     }
 
     template<typename CELL, typename MEMBER, int ARITY>
     inline
     typename SharedPtr<FilterBase<CELL> >::Type make() const
     {
-        return typename SharedPtr<FilterBase<CELL> >::Type(new DefaultCUDAArrayFilter<CELL, MEMBER, MEMBER, ARITY>);
+        return makeShared(new DefaultCUDAArrayFilter<CELL, MEMBER, MEMBER, ARITY>);
     }
 };
 #endif
@@ -50,14 +50,14 @@ public:
     inline
     typename SharedPtr<FilterBase<CELL> >::Type make() const
     {
-        return typename SharedPtr<FilterBase<CELL> >::Type(new DefaultFilter<CELL, MEMBER, MEMBER>);
+        return makeShared(new DefaultFilter<CELL, MEMBER, MEMBER>);
     }
 
     template<typename CELL, typename MEMBER, int ARITY>
     inline
     typename SharedPtr<FilterBase<CELL> >::Type make() const
     {
-        return typename SharedPtr<FilterBase<CELL> >::Type(new DefaultArrayFilter<CELL, MEMBER, MEMBER, ARITY>);
+        return makeShared(new DefaultArrayFilter<CELL, MEMBER, MEMBER, ARITY>);
     }
 };
 

@@ -43,7 +43,7 @@ public:
                 weights));
 
         resetRegions(
-            typename SharedPtr<DummyAdjacencyManufacturer<DIM> >::Type(new DummyAdjacencyManufacturer<DIM>()),
+            makeShared(new DummyAdjacencyManufacturer<DIM>()),
             simulationArea,
             partition,
             0,
