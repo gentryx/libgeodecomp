@@ -175,7 +175,17 @@ lgd_detect_distro()
 #                     libgeodecomp_FLAGS          Exported via the CMake module
 #
 set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -Wall")
-set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wall -Wno-sign-conversion -Wnon-virtual-dtor")
+set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wall")
+
+check_cxx_compiler_flag("-Wno-sign-conversion" SUPPORTS_WARN_NO_WSIGN)
+if(SUPPORTS_WARN_NO_WSIGN)
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wno-sign-conversion")
+endif()
+
+check_cxx_compiler_flag("-Wnon-virtual-dtor" SUPPORTS_WARN_NON_VIRTUAL_DTOR)
+if(SUPPORTS_WARN_NON_WSIGN)
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wnon-virtual-dtor")
+endif()
 
 check_cxx_compiler_flag("-fdiagnostics-color=always" SUPPORTS_COLOR)
 if(SUPPORTS_COLOR)
