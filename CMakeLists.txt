@@ -24,7 +24,7 @@ get_directory_property(lgd_has_parent PARENT_DIRECTORY)
 
 #============= 1. FIND PACKAGES WE DEPEND ON =========================
 
-find_package(HPX)
+find_package(HPX QUIET)
 
 if(NOT HPX_FOUND)
   if(NOT DEFINED BOOST_ROOT)
@@ -41,19 +41,19 @@ if(NOT HPX_FOUND)
   # The reason for this ugly multi-stage discovery is the following:
   # since CMAKE 2.8.11 each call to find_package(Boost...) will reset
   # Boost_LIBRARIES.
-  find_package(Boost COMPONENTS thread)
+  find_package(Boost QUIET COMPONENTS thread)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-  find_package(Boost COMPONENTS move)
+  find_package(Boost QUIET COMPONENTS move)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 else()
   # If HPX was found, we use the Boost libraries found by HPX
   set(ALL_BOOST_LIBS ${HPX_LIBRARIES})
 endif()
 
-find_package(Boost COMPONENTS serialization)
+find_package(Boost QUIET COMPONENTS serialization)
 set(Boost_SERIALIZATION_LIBRARIES "${Boost_LIBRARIES}")
 
-find_package(Boost COMPONENTS mpi)
+find_package(Boost QUIET COMPONENTS mpi)
 set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
 
 # search for external LibFlatArray, but -- if none was found -- default to bundled version:
@@ -77,7 +77,7 @@ set(PythonLibs_FIND_VERSION 2)
 # setting this variable is required since CMake 3.0
 set(PythonLibs_FIND_VERSION_MAJOR 2)
 
-find_package(CUDA)
+find_package(CUDA QUIET)
 find_package(Doxygen)
 find_package(OpenCL)
 find_package(MPI)
