@@ -162,7 +162,6 @@ public:
     static void serialize(ARCHIVE& archive, LibGeoDecomp::UnstructuredTestCell<ADDITIONAL_API, OUTPUT>& object, const unsigned /*version*/)
     {
         archive & object.cycleCounter;
-        archive & object.expectedNeighborIDs;
         archive & object.expectedNeighborWeights;
         archive & object.id;
         archive & object.isEdgeCell;
