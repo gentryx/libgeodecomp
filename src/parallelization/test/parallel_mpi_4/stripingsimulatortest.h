@@ -228,23 +228,32 @@ public:
 
     void testRedistributeGrid2()
     {
-        // fixme
-        // NoOpBalancer::WeightVec weights1 = testSim->partitions;
-        // NoOpBalancer::WeightVec weights2 = toWeirdoPartitions(weights1);
+        NoOpBalancer::WeightVec weights1 = testSim->partitions;
+        NoOpBalancer::WeightVec weights2 = toWeirdoPartitions(weights1);
 
-        // testSim->redistributeGrid(weights1, weights2);
-        // testSim->waitForGhostRegions(testSim->curStripe);
+        testSim->redistributeGrid(weights1, weights2);
+        testSim->waitForGhostRegions(testSim->curStripe);
 
-        // unsigned s = weights2[rank    ] - testSim->ghostHeightUpper;
-        // unsigned e = weights2[rank + 1] + testSim->ghostHeightLower;
+        unsigned ghostHeightUpper = (rank > 0) ? 1 : 0;
+        unsigned ghostHeightLower = (rank < 3) ? 1 : 0;
+        int width = init->gridBox().dimensions.x();
 
-        // int width = init->gridBox().dimensions.x();
-        // DisplacedGrid<TestCell<2> > expectedStripe(
-        //     CoordBox<2>(Coord<2>(0, s), Coord<2>(width, e - s)));
-        // init->grid(&expectedStripe);
-        // Grid<TestCell<2> > actualStripe = *testSim->curStripe->vanillaGrid();
+        if (weights2[rank] == weights2[rank + 1]) {
+            ghostHeightUpper = 0;
+            ghostHeightLower = 0;
+            width = 0;
+        }
 
-        // TS_ASSERT_EQUALS(actualStripe, *expectedStripe.vanillaGrid());
+        unsigned s = weights2[rank    ] - ghostHeightUpper;
+        unsigned e = weights2[rank + 1] + ghostHeightLower;
+
+        DisplacedGrid<TestCell<2> > expectedStripe(
+            CoordBox<2>(Coord<2>(0, s), Coord<2>(width, e - s)));
+        init->grid(&expectedStripe);
+        Grid<TestCell<2> > actualStripe = *testSim->curStripe->vanillaGrid();
+
+        TS_ASSERT_EQUALS(actualStripe.boundingBox(), expectedStripe.vanillaGrid()->boundingBox());
+        TS_ASSERT_EQUALS(actualStripe, *expectedStripe.vanillaGrid());
     }
 
     void checkRunWithDifferentPartitions(NoOpBalancer::WeightVec weights2)
@@ -293,35 +302,26 @@ public:
         NoOpBalancer::WeightVec weights2 = toWeirdoPartitions(weights1);
 
         testSim->redistributeGrid(weights1, weights2);
+        TS_ASSERT_EQUALS(testSim->partitions, weights2);
 
-        // fixme
-        // TS_ASSERT_EQUALS(testSim->partitions, weights2);
-        // switch (rank) {
-        // case 0:
-        //     TS_ASSERT_EQUALS((int)testSim->ghostHeightUpper, 0);
-        //     TS_ASSERT_EQUALS((int)testSim->ghostHeightLower, 1);
-        //     TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 4);
-        //     TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 4);
-        //     break;
-        // case 1:
-        //     TS_ASSERT_EQUALS((int)testSim->ghostHeightUpper, 0);
-        //     TS_ASSERT_EQUALS((int)testSim->ghostHeightLower, 0);
-        //     TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 0);
-        //     TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 0);
-        //     break;
-        // case 2:
-        //     TS_ASSERT_EQUALS((int)testSim->ghostHeightUpper, 1);
-        //     TS_ASSERT_EQUALS((int)testSim->ghostHeightLower, 1);
-        //     TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 9);
-        //     TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 9);
-        //     break;
-        // case 3:
-        //     TS_ASSERT_EQUALS((int)testSim->ghostHeightUpper, 1);
-        //     TS_ASSERT_EQUALS((int)testSim->ghostHeightLower, 0);
-        //     TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 3);
-        //     TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 3);
-        //     break;
-        // }
+        switch (rank) {
+        case 0:
+            TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 4);
+            TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 4);
+            break;
+        case 1:
+            TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 0);
+            TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 0);
+            break;
+        case 2:
+            TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 9);
+            TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 9);
+            break;
+        case 3:
+            TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 3);
+            TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 3);
+            break;
+        }
     }
 
     void checkLoadBalancingRealistically(unsigned balanceEveryN)
