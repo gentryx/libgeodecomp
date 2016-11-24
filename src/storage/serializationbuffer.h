@@ -10,7 +10,8 @@ namespace SerializationBufferHelpers {
 
 /**
  * This is an n-way switch to allow other classes to select the
- * appropriate type to buffer regions of a grid; for use with GridVecConv.
+ * appropriate type to buffer regions of a grid; for use with
+ * GridBase::loadRegion() and saveRegion().
  */
 template<typename CELL, typename SUPPORTS_SOA = void, typename SUPPORTS_BOOST_SERIALIZATION = void>
 class Implementation
