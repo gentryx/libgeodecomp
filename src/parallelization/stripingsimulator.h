@@ -503,55 +503,6 @@ private:
         remapUpdateRegions();
     }
 
-    int lowerNeighbor() const
-    {
-        int lowerNeighbor;
-        int size = mpilayer.size();
-        int rank = mpilayer.rank();
-
-        if (WRAP_EDGES) {
-            lowerNeighbor = (size + rank + 1) % size;
-            while (lowerNeighbor != rank &&
-                   partitions[lowerNeighbor] == partitions[lowerNeighbor + 1]) {
-                lowerNeighbor = (size + lowerNeighbor + 1) % size;
-            }
-        } else {
-            lowerNeighbor = rank + 1;
-            while (lowerNeighbor != size &&
-                   partitions[lowerNeighbor] == partitions[lowerNeighbor + 1]) {
-                lowerNeighbor++;
-            }
-            if (lowerNeighbor == size) {
-                lowerNeighbor = -1;
-            }
-        }
-
-        return lowerNeighbor;
-    }
-
-    int upperNeighbor() const
-    {
-        int upperNeighbor;
-        int rank = mpilayer.rank();
-
-        if (WRAP_EDGES) {
-            int size = mpilayer.size();
-            upperNeighbor = (size + rank - 1) % size;
-            while (upperNeighbor != rank &&
-                   partitions[upperNeighbor] == partitions[upperNeighbor + 1]) {
-                upperNeighbor = (size + upperNeighbor - 1) % size;
-            }
-        } else {
-            upperNeighbor = rank - 1;
-            while (upperNeighbor >= 0 &&
-                   partitions[upperNeighbor] == partitions[upperNeighbor + 1]) {
-                --upperNeighbor;
-            }
-        }
-
-        return upperNeighbor;
-    }
-
     WeightVec partitionsToWorkloads(const WeightVec& partitions) const
     {
         WeightVec ret(partitions.size() - 1);

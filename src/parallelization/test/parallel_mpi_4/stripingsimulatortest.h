@@ -74,23 +74,22 @@ public:
 
     void testNeighbors()
     {
-        // fixme: check neigbhor regions instead
-        // fixme: kill upperNeighbor, lowerNeighbor functions
-        if (rank == 0) {
-            TS_ASSERT_EQUALS(-1, testSim->upperNeighbor());
-            TS_ASSERT_EQUALS( 1, testSim->lowerNeighbor());
+        if ((rank > 0) && (rank < 3)) {
+            TS_ASSERT_EQUALS(2, testSim->outerGhostRegions.size());
+            TS_ASSERT_EQUALS(2, testSim->innerGhostRegions.size());
+        } else {
+            TS_ASSERT_EQUALS(1, testSim->outerGhostRegions.size());
+            TS_ASSERT_EQUALS(1, testSim->innerGhostRegions.size());
         }
-        if (rank == 1) {
-            TS_ASSERT_EQUALS( 0, testSim->upperNeighbor());
-            TS_ASSERT_EQUALS( 2, testSim->lowerNeighbor());
+
+        if (rank > 0) {
+            TS_ASSERT(!testSim->outerGhostRegions[rank - 1].empty());
+            TS_ASSERT(!testSim->innerGhostRegions[rank - 1].empty());
         }
-        if (rank == 2) {
-            TS_ASSERT_EQUALS( 1, testSim->upperNeighbor());
-            TS_ASSERT_EQUALS( 3, testSim->lowerNeighbor());
-        }
-        if (rank == 3) {
-            TS_ASSERT_EQUALS( 2, testSim->upperNeighbor());
-            TS_ASSERT_EQUALS(-1, testSim->lowerNeighbor());
+
+        if (rank < 3) {
+            TS_ASSERT(!testSim->outerGhostRegions[rank + 1].empty());
+            TS_ASSERT(!testSim->innerGhostRegions[rank + 1].empty());
         }
     }
 
