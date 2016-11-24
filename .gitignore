@@ -12,6 +12,7 @@ src/geometry/partitions/test/parallel_mpi_2/main.cpp
 src/geometry/partitions/test/parallel_mpi_4/main.cpp
 src/geometry/partitions/test/unit/main.cpp
 src/geometry/test/parallel_hpx_1/main.cpp
+src/geometry/test/parallel_mpi_4/main.cpp
 src/geometry/test/parallel_mpi_9/main.cpp
 src/geometry/test/unit/main.cpp
 src/io/remotesteerer/test/parallel_mpi_1/main.cpp
