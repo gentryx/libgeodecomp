@@ -2963,7 +2963,7 @@ private:
                        GRID *gridNew, unsigned nanoStep)
     {
         UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOld(gridOld, streak.origin.x());
-        UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA> hoodNew(*gridNew);
+        CELL *hoodNew = &(*gridNew)[0];
 
         // call update()
         for (int i = hoodOld.index(); i < streak.endX; ++i, ++hoodOld) {
