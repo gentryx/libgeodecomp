@@ -72,10 +72,18 @@ public:
             partition,
             1,
             ghostZoneWidth);
+
         std::vector<CoordBox<2> > boundingBoxes;
-        for (int i = 0; i < 3; ++i)
-            boundingBoxes.push_back(partition->getRegion(i).boundingBox());
-        partitionManager->resetGhostZones(boundingBoxes);
+        std::vector<CoordBox<2> > expandedBoundingBoxes;
+        for (int i = 0; i < 3; ++i) {
+            Region<2> region = partition->getRegion(i);
+            Region<2> expandedRegion = region.expandWithTopology(ghostZoneWidth, rect.dimensions, Topologies::Cube<2>::Topology());
+
+            boundingBoxes.push_back(region.boundingBox());
+            expandedBoundingBoxes.push_back(expandedRegion.boundingBox());
+        }
+
+        partitionManager->resetGhostZones(boundingBoxes, expandedBoundingBoxes);
 
         // The Unit Under Test: the stepper
         stepper.reset(new StepperType(partitionManager, init));
