@@ -19,7 +19,6 @@
 #include <libgeodecomp/storage/fixedarray.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
-#include <libgeodecomp/storage/unstructuredneighborhoodnew.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhoodnew.h>
 #include <libgeodecomp/storage/unstructuredsoascalarneighborhood.h>
@@ -126,52 +125,51 @@ public:
         // HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld,
         // UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
         //     hoodOld(gridOld, streak.origin.x());
-        // UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA>
-        //     hoodNew(*gridNew);
 
 
-#ifdef LIBGEODECOMP_WITH_HPX
-        // fixme: manual hack, should use infrastructure from updatefunctormacros.
-        // fixme: also desirable: user-selectable switch for granularity
-        // fixme: hotfix for zach
-        if (concurrencySpec.enableHPX()) {
-        // if (concurrencySpec.enableHPX() && concurrencySpec.preferFineGrainedParallelism()) {
-            std::vector<hpx::future<void> > updateFutures;
-            for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-                UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOld(gridOld, i->origin.x());
-                UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA> hoodNew(*gridNew);
-                int origin = i->origin.x();
-                for (int offset = 0; offset < i->length(); ++offset) {
-                    updateFutures << hpx::async(
-                        [&hoodOld, &hoodNew, origin, offset, nanoStep]() {
-                            UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOldMoved = hoodOld;
-                            hoodOldMoved += long(offset);
-                            hoodNew[origin + offset].update(hoodOldMoved, nanoStep);
-                        });
-                }
-            }
+// #ifdef LIBGEODECOMP_WITH_HPX
+//         // fixme: manual hack, should use infrastructure from updatefunctormacros.
+//         // fixme: also desirable: user-selectable switch for granularity
+//         // fixme: hotfix for zach
+//         if (concurrencySpec.enableHPX()) {
+//             std::cout << "in HPX loop\n";
+//         // if (concurrencySpec.enableHPX() && concurrencySpec.preferFineGrainedParallelism()) {
+//             std::vector<hpx::future<void> > updateFutures;
+//             for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+//                 UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOld(gridOld, i->origin.x());
+//                 CELL *hoodNew = &(*gridNew)[i->origin.x()];
+//                 int origin = i->origin.x();
+//                 for (int offset = 0; offset < i->length(); ++offset) {
+//                     updateFutures << hpx::async(
+//                         [&hoodOld, &hoodNew, origin, offset, nanoStep]() {
+//                             UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOldMoved = hoodOld;
+//                             hoodOldMoved += long(offset);
+//                             hoodNew[offset].update(hoodOldMoved, nanoStep);
+//                         });
+//                 }
+//             }
 
-            hpx::lcos::wait_all(std::move(updateFutures));
-            // hpx::parallel::for_each(
-            //     hpx::parallel::par,
-            //     boost::make_counting_iterator(hoodOld.index()),
-            //     boost::make_counting_iterator(long(endX)),
-            //     [&](std::size_t i) {
-            //         HOOD_OLD hoodOldMoved = hoodOld;
-            //         hoodOldMoved += long(i);
-            //         hoodNew[i].update(hoodOldMoved, nanoStep);
-            //     });
+//             hpx::lcos::wait_all(std::move(updateFutures));
+//             // hpx::parallel::for_each(
+//             //     hpx::parallel::par,
+//             //     boost::make_counting_iterator(hoodOld.index()),
+//             //     boost::make_counting_iterator(long(endX)),
+//             //     [&](std::size_t i) {
+//             //         HOOD_OLD hoodOldMoved = hoodOld;
+//             //         hoodOldMoved += long(i);
+//             //         hoodNew[i].update(hoodOldMoved, nanoStep);
+//             //     });
 
-            return;
-        }
-#endif
+//             return;
+//         }
+// #endif
+
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
         UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>   \
             hoodOld(gridOld, i->origin.x());                            \
-        UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA>         \
-            hoodNew(*gridNew);                                          \
-        for (int id = i->origin.x(); id != i->endX; ++id, ++hoodOld) {  \
-            hoodNew[id].update(hoodOld, nanoStep);                      \
+        CELL *hoodNew = &(*gridNew)[i->origin.x()];                     \
+        for (int offset = 0; offset != i->length(); ++offset, ++hoodOld) { \
+            hoodNew[offset].update(hoodOld, nanoStep);                  \
         }                                                               \
         /**/
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
