@@ -125,9 +125,6 @@ template<typename DELEGATE_GRID>
 class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellType, 1, typename DELEGATE_GRID::WeightType>
 {
 public:
-    // fixme: kill this
-    template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
-    friend class UnstructuredNeighborhoodNew;
     template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
     friend class UnstructuredNeighborhood;
     template<typename CELL>
@@ -152,7 +149,8 @@ public:
     explicit ReorderingUnstructuredGrid(
         const Region<1>& nodeSet = Region<1>(),
         const CellType& defaultElement = CellType(),
-        const CellType& edgeElement = CellType()) :
+        const CellType& edgeElement = CellType(),
+        const Coord<1>& topologicalDimensions = Coord<1>()) :
         nodeSet(nodeSet)
     {
         int physicalID = 0;
@@ -351,7 +349,7 @@ public:
      * Convert coordinates from Region to the internal reordering of
      * the grid so they can be used directly by an UpdateFunctor.
      */
-    virtual Region<1> remapRegion(const Region<1>& region)
+    virtual Region<1> remapRegion(const Region<1>& region) const
     {
         Region<1> ret;
 
