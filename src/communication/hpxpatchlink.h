@@ -2,7 +2,6 @@
 #define LIBGEODECOMP_COMMUNICATION_HPXPATCHLINK_H
 
 #include <libgeodecomp/communication/hpxreceiver.h>
-#include <libgeodecomp/storage/gridvecconv.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 #include <libgeodecomp/storage/patchprovider.h>
 
@@ -114,7 +113,7 @@ public:
                 return;
             }
 
-            GridVecConv::gridToVector(grid, &buffer, region);
+            grid.saveRegion(&buffer, region);
             hpx::apply(typename HPXReceiver<BufferType>::receiveAction(), receiverID,  nanoStep, buffer);
 
             std::size_t nextNanoStep = (min)(requestedNanoSteps) + stride;
@@ -174,7 +173,7 @@ public:
 
             checkNanoStepGet(nanoStep);
 
-            GridVecConv::vectorToGrid(receiver->get(nanoStep).get(), grid, region);
+            grid->loadRegion(receiver->get(nanoStep).get(), region);
 
             std::size_t nextNanoStep = (min)(storedNanoSteps) + stride;
             if ((lastNanoStep == infinity()) ||
