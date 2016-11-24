@@ -69,8 +69,7 @@ public:
 
     inline virtual void update(std::size_t nanoSteps)
     {
-        for (std::size_t i = 0; i < nanoSteps; ++i)
-        {
+        for (std::size_t i = 0; i < nanoSteps; ++i) {
             update1();
         }
     }
@@ -91,6 +90,8 @@ public:
     virtual void update1() = 0;
 
 protected:
+    std::vector<Region<DIM> > remappedInnerSets;
+    std::vector<Region<DIM> > remappedRims;
     std::size_t curStep;
     std::size_t curNanoStep;
     unsigned validGhostZoneWidth;
@@ -157,11 +158,13 @@ protected:
         CoordBox<DIM> gridBox;
         guessOffset(&gridBox.origin, &gridBox.dimensions);
 
-        oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
-        newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
+        oldGrid.reset(makeGrid(partitionManager->ownExpandedRegion(), gridBox, topoDim, Topology()));
+        newGrid.reset(makeGrid(partitionManager->ownExpandedRegion(), gridBox, topoDim, Topology()));
 
         initializer->grid(&*oldGrid);
         initializer->grid(&*newGrid);
+
+        remapRegions(*oldGrid);
 
         notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST,     globalNanoStep());
         notifyPatchProviders(partitionManager->ownRegion(),   ParentType::INNER_SET, globalNanoStep());
@@ -190,9 +193,19 @@ protected:
         return rim(ghostZoneWidth());
     }
 
+    inline const Region<DIM>& remappedRim(unsigned offset) const
+    {
+        return remappedRims[offset];
+    }
+
     inline const Region<DIM>& innerSet(unsigned offset) const
     {
         return partitionManager->innerSet(offset);
+    }
+
+    inline const Region<DIM>& remappedInnerSet(unsigned offset) const
+    {
+        return remappedInnerSets[offset];
     }
 
     inline const Region<DIM>& getVolatileKernel() const
@@ -252,6 +265,36 @@ protected:
             globalNanoStep(),
             partitionManager->rank(),
             true);
+    }
+
+    inline GridType *makeGrid(
+        const Region<DIM>& region,
+        const CoordBox<DIM>& /* unused: boundingBox */,
+        const Coord<DIM>& topoDim,
+        const Topologies::Unstructured::Topology& topo) const
+    {
+        return new GridType(region, CELL_TYPE(), CELL_TYPE(), topoDim);
+    }
+
+    template<typename TOPOLOGY>
+    inline GridType *makeGrid(
+        const Region<DIM>& /* unused: region */,
+        const CoordBox<DIM>& boundingBox,
+        const Coord<DIM>& topoDim,
+        const TOPOLOGY& topo) const
+    {
+        return new GridType(boundingBox, CELL_TYPE(), CELL_TYPE(), topoDim);
+    }
+
+    void remapRegions(const GridType& grid)
+    {
+        remappedInnerSets.reserve(ghostZoneWidth() + 1);
+        remappedRims.reserve(ghostZoneWidth() + 1);
+
+        for (unsigned i = 0; i <= ghostZoneWidth(); ++i) {
+            remappedInnerSets.push_back(grid.remapRegion(partitionManager->innerSet(i)));
+            remappedRims.push_back(grid.remapRegion(partitionManager->rim(i)));
+        }
     }
 };
 
