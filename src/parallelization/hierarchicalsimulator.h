@@ -57,7 +57,11 @@ protected:
     inline void insertNextLoadBalancingEvent()
     {
         long nextLoadBalancing = currentNanoStep() + loadBalancingPeriod;
-        events[nextLoadBalancing] << LOAD_BALANCING;
+        long lastNanoStep = initializer->maxSteps() * NANO_STEPS;
+
+        if (nextLoadBalancing <= lastNanoStep) {
+            events[nextLoadBalancing] << LOAD_BALANCING;
+        }
     }
 
     virtual long currentNanoStep() const = 0;
