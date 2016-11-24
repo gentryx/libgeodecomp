@@ -19,6 +19,11 @@ public:
     {
         return boost::make_shared<RegionBasedAdjacency>(RegionBasedAdjacency());
     }
+
+    virtual boost::shared_ptr<Adjacency> getReverseAdjacency(const Region<DIM>& region) const
+    {
+        return boost::make_shared<RegionBasedAdjacency>(RegionBasedAdjacency());
+    }
 };
 
 }

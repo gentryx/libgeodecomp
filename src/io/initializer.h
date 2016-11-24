@@ -97,9 +97,25 @@ public:
 
     /**
      * Returns the list of neighboring nodes for at least all IDs
-     * stored in the Region.
+     * stored in the Region. Given a node n_1 \in region, a node n_2
+     * is assumed to be a neighbor of n_1, iff there is a directed
+     * edge (n_1, n_2) in the adjacency list of the unstructured grid.
      */
     boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const
+    {
+        return boost::make_shared<RegionBasedAdjacency>();
+    }
+
+    /**
+     * For all nodes n_1 in the Region, return a list of neighbor
+     * nodes n_2 where (n_2, n_1) is in the edge list of the
+     * unstructured grid.
+     *
+     * Attention: the direction of the edges in the returned adjacency
+     * is the opposite of the direction in the original unstructured
+     * grid. See UnstructuredTestInitializer for an example.
+     */
+    boost::shared_ptr<Adjacency> getReverseAdjacency(const Region<DIM>& region) const
     {
         return boost::make_shared<RegionBasedAdjacency>();
     }
