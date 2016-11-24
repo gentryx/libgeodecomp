@@ -1725,6 +1725,7 @@ public:
                        << WRITER_STEP_FINISHED
                        << WRITER_ALL_DONE;
         sim.addWriter(new ParallelTestWriter<TestCellType>(3, expectedSteps, expectedEvents));
+
         sim.run();
 #endif
     }
@@ -1768,6 +1769,7 @@ public:
                        << WRITER_STEP_FINISHED
                        << WRITER_ALL_DONE;
         sim.addWriter(new ParallelTestWriter<TestCellType>(3, expectedSteps, expectedEvents));
+
         sim.run();
 #endif
     }

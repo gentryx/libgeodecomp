@@ -7,6 +7,7 @@
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/paralleltestwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/unstructuredtestinitializer.h>
 #include <libgeodecomp/loadbalancer/mockbalancer.h>
 #include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -1298,15 +1299,25 @@ public:
         int startStep = 7;
         int endStep = 20;
 
-        HiParSimulator<TestCellType, ZCurvePartition<3> > sim(
+        HiParSimulator<TestCellType, UnstructuredStripingPartition> sim(
             new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
             rank? 0 : new NoOpBalancer());
 
-        Writer<TestCellType> *writer = 0;
-        if (rank == 0) {
-            writer = new TestWriter<TestCellType>(3, startStep, endStep);
-        }
-        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
+        expectedSteps << 7
+                      << 10
+                      << 13
+                      << 16
+                      << 19
+                      << 20;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+        sim.addWriter(new ParallelTestWriter<TestCellType>(3, expectedSteps, expectedEvents));
 
         sim.run();
 #endif
@@ -1319,15 +1330,24 @@ public:
         int startStep = 7;
         int endStep = 20;
 
-        HiParSimulator<TestCellType, ZCurvePartition<3> > sim(
+        HiParSimulator<TestCellType, UnstructuredStripingPartition> sim(
             new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
             rank? 0 : new NoOpBalancer());
 
-        Writer<TestCellType> *writer = 0;
-        if (rank == 0) {
-            writer = new TestWriter<TestCellType>(3, startStep, endStep);
-        }
-        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
+        expectedSteps << 7
+                      << 11
+                      << 15
+                      << 19
+                      << 20;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+        sim.addWriter(new ParallelTestWriter<TestCellType>(4, expectedSteps, expectedEvents));
+
         sim.run();
 #endif
     }
@@ -1339,15 +1359,24 @@ public:
         int startStep = 7;
         int endStep = 15;
 
-        HiParSimulator<TestCellType, ZCurvePartition<3> > sim(
+        HiParSimulator<TestCellType, UnstructuredStripingPartition> sim(
             new UnstructuredTestInitializer<TestCellType>(632, endStep, startStep),
         rank? 0 : new NoOpBalancer());
 
-        Writer<TestCellType> *writer = 0;
-        if (rank == 0) {
-            writer = new TestWriter<TestCellType>(3, startStep, endStep);
-        }
-        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
+        expectedSteps << 7
+                      << 9
+                      << 11
+                      << 13
+                      << 15;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+        sim.addWriter(new ParallelTestWriter<TestCellType>(2, expectedSteps, expectedEvents));
+
         sim.run();
 #endif
     }
@@ -1359,15 +1388,24 @@ public:
         int startStep = 7;
         int endStep = 19;
 
-        HiParSimulator<TestCellType, ZCurvePartition<3> > sim(
+        HiParSimulator<TestCellType, UnstructuredStripingPartition> sim(
             new UnstructuredTestInitializer<TestCellType>(655, endStep, startStep),
         rank? 0 : new NoOpBalancer());
 
-        Writer<TestCellType> *writer = 0;
-        if (rank == 0) {
-            writer = new TestWriter<TestCellType>(3, startStep, endStep);
-        }
-        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
+        expectedSteps << 7
+                      << 10
+                      << 13
+                      << 16
+                      << 19;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+        sim.addWriter(new ParallelTestWriter<TestCellType>(3, expectedSteps, expectedEvents));
+
         sim.run();
 #endif
     }
@@ -1379,15 +1417,30 @@ public:
         int startStep = 5;
         int endStep = 24;
 
-        HiParSimulator<TestCellType, ZCurvePartition<3> > sim(
+        HiParSimulator<TestCellType, UnstructuredStripingPartition> sim(
             new UnstructuredTestInitializer<TestCellType>(444, endStep, startStep),
             rank? 0 : new NoOpBalancer());
 
-        Writer<TestCellType> *writer = 0;
-        if (rank == 0) {
-            writer = new TestWriter<TestCellType>(3, startStep, endStep);
-        }
-        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
+        expectedSteps << 5
+                      << 8
+                      << 11
+                      << 14
+                      << 17
+                      << 20
+                      << 23
+                      << 24;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+        sim.addWriter(new ParallelTestWriter<TestCellType>(3, expectedSteps, expectedEvents));
+
         sim.run();
 #endif
     }
