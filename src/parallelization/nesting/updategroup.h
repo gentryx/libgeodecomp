@@ -163,9 +163,12 @@ protected:
             partition,
             rank,
             ghostZoneWidth);
+        std::size_t size = partition->getWeights().size();
         std::vector<CoordBox<DIM> > boundingBoxes =
-            gatherBoundingBoxes(partitionManager->ownRegion().boundingBox(), partition);
-        partitionManager->resetGhostZones(boundingBoxes);
+            gatherBoundingBoxes(partitionManager->ownRegion().boundingBox(), size, 0);
+        std::vector<CoordBox<DIM> > expandedBoundingBoxes =
+            gatherBoundingBoxes(partitionManager->ownExpandedRegion().boundingBox(), size, 1);
+        partitionManager->resetGhostZones(boundingBoxes, expandedBoundingBoxes);
 
         long firstSyncPoint =
             initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +
@@ -242,7 +245,8 @@ protected:
 
     virtual std::vector<CoordBox<DIM> > gatherBoundingBoxes(
         const CoordBox<DIM>& ownBoundingBox,
-        boost::shared_ptr<Partition<DIM> > partition) const = 0;
+        std::size_t size,
+        std::size_t tag) const = 0;
 
     virtual boost::shared_ptr<PatchLinkAccepter> makePatchLinkAccepter(int target, const Region<DIM>& region) = 0;
     virtual boost::shared_ptr<PatchLinkProvider> makePatchLinkProvider(int source, const Region<DIM>& region) = 0;

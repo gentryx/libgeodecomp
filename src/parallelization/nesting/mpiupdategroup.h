@@ -68,7 +68,8 @@ private:
 
     std::vector<CoordBox<DIM> > gatherBoundingBoxes(
         const CoordBox<DIM>& ownBoundingBox,
-        boost::shared_ptr<Partition<DIM> > partition) const
+        std::size_t /* unused: size */,
+        std::size_t /* unused: tag */) const
     {
         std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
