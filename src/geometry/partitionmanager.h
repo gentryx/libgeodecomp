@@ -50,7 +50,7 @@ public:
             0,
             1);
 
-        resetGhostZones(std::vector<CoordBox<DIM> >(1));
+        resetGhostZones(std::vector<CoordBox<DIM> >(1), std::vector<CoordBox<DIM> >(1));
     }
 
     /**
@@ -84,14 +84,22 @@ public:
     }
 
     inline void resetGhostZones(
-        const std::vector<CoordBox<DIM> >& newBoundingBoxes)
+        const std::vector<CoordBox<DIM> >& newBoundingBoxes,
+        const std::vector<CoordBox<DIM> >& newExpandedBoundingBoxes)
     {
+        if (newBoundingBoxes.size() != newExpandedBoundingBoxes.size()) {
+            throw std::logic_error("number of bounding boxes doesn't match");
+        }
+
         boundingBoxes = newBoundingBoxes;
-        CoordBox<DIM> ownBoundingBox = ownExpandedRegion().boundingBox();
+        expandedBoundingBoxes = newExpandedBoundingBoxes;
+        CoordBox<DIM> ownBoundingBox = ownRegion().boundingBox();
+        CoordBox<DIM> ownExpandedBoundingBox = ownExpandedRegion().boundingBox();
 
         for (unsigned i = 0; i < boundingBoxes.size(); ++i) {
             if ((i != myRank) &&
-                boundingBoxes[i].intersects(ownBoundingBox) &&
+                (boundingBoxes[i].intersects(ownExpandedBoundingBox) ||
+                 expandedBoundingBoxes[i].intersects(ownBoundingBox)) &&
                 (!(getRegion(myRank, ghostZoneWidth) &
                    getRegion(i,      0)).empty() ||
                  !(getRegion(i,      ghostZoneWidth) &
@@ -182,11 +190,6 @@ public:
         return ownInnerSets[dist];
     }
 
-    inline const std::vector<CoordBox<DIM> >& getBoundingBoxes() const
-    {
-        return boundingBoxes;
-    }
-
     inline unsigned getGhostZoneWidth() const
     {
         return ghostZoneWidth;
@@ -250,10 +253,16 @@ private:
     unsigned myRank;
     unsigned ghostZoneWidth;
     std::vector<CoordBox<DIM> > boundingBoxes;
+    std::vector<CoordBox<DIM> > expandedBoundingBoxes;
 
     const boost::shared_ptr<Adjacency> adjacency(const Region<DIM>& region) const
     {
         return adjacencyManufacturer->getAdjacency(region);
+    }
+
+    const boost::shared_ptr<Adjacency> reverseAdjacency(const Region<DIM>& region) const
+    {
+        return adjacencyManufacturer->getReverseAdjacency(region);
     }
 
     inline void fillRegion(unsigned node)
@@ -281,7 +290,7 @@ private:
                 1,
                 simulationArea.dimensions,
                 Topology(),
-                *adjacency(ownRegion())) - ownRegion());
+                *reverseAdjacency(ownRegion())) - ownRegion());
         Region<DIM> kernel(
             ownRegion() -
             surface.expandWithTopology(
@@ -302,20 +311,13 @@ private:
                 *adjacency(ownRims[i + 1]));
         }
 
-        ownInnerSets.front() = ownRegion();
-        Region<DIM> minuend = surface.expandWithTopology(
-            1,
-            simulationArea.dimensions,
-            Topology(),
-            *adjacency(surface));
-
-        for (std::size_t i = 1; i <= getGhostZoneWidth(); ++i) {
-            ownInnerSets[i] = ownInnerSets[i - 1] - minuend;
-            minuend = minuend.expandWithTopology(
+        ownInnerSets[getGhostZoneWidth()] = kernel;
+        for (std::size_t i = getGhostZoneWidth(); i > 0; --i) {
+            ownInnerSets[i - 1] = ownInnerSets[i].expandWithTopology(
                 1,
                 simulationArea.dimensions,
                 Topology(),
-                *adjacency(minuend));
+                *adjacency(ownInnerSets[i]));
         }
 
         volatileKernel = ownInnerSets.back() & rim(0);
@@ -328,9 +330,24 @@ private:
         std::vector<Region<DIM> >& innerGhosts = innerGhostZoneFragments[node];
         outerGhosts.resize(getGhostZoneWidth() + 1);
         innerGhosts.resize(getGhostZoneWidth() + 1);
+
+        bool outerFragmentsAllEmpty = true;
+        bool innerFragmentsAllEmpty = true;
+
         for (unsigned i = 0; i <= getGhostZoneWidth(); ++i) {
             outerGhosts[i] = getRegion(myRank, i) & getRegion(node, 0);
             innerGhosts[i] = getRegion(myRank, 0) & getRegion(node, i);
+
+            outerFragmentsAllEmpty &= outerGhosts[i].empty();
+            innerFragmentsAllEmpty &= innerGhosts[i].empty();
+        }
+
+        if (outerFragmentsAllEmpty) {
+            outerGhostZoneFragments.erase(node);
+        }
+
+        if (innerFragmentsAllEmpty) {
+            innerGhostZoneFragments.erase(node);
         }
     }
 };

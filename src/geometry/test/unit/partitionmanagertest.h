@@ -67,6 +67,13 @@ public:
                 ghostZoneWidth,
                 weights,
                 partition);
+        expandedBoundingBoxes =
+            fakeExpandedBoundingBoxes(
+                offset,
+                weights.size(),
+                ghostZoneWidth,
+                weights,
+                partition);
 
         boost::shared_ptr<AdjacencyManufacturer<2> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<2>);
 
@@ -76,7 +83,7 @@ public:
             partition,
             rank,
             ghostZoneWidth);
-        partitionManager.resetGhostZones(boundingBoxes);
+        partitionManager.resetGhostZones(boundingBoxes, expandedBoundingBoxes);
     }
 
     void testResetRegionsAndGhostRegionFragments()
@@ -127,7 +134,7 @@ public:
 
     void testResetRegionsAndInnerSets()
     {
-        TS_ASSERT(!partitionManager.innerSet(0).empty());
+        TS_ASSERT(partitionManager.innerSet(0).empty());
         TS_ASSERT(partitionManager.innerSet(1).empty());
         TS_ASSERT(partitionManager.innerSet(2).empty());
         TS_ASSERT(partitionManager.innerSet(3).empty());
@@ -140,7 +147,7 @@ public:
         TS_ASSERT_EQUALS(expected, partitionManager.getOuterRim());
     }
 
-    void test3D()
+    void test3DFirst()
     {
         int ghostZoneWidth = 4;
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 31));
@@ -162,38 +169,105 @@ public:
             ghostZoneWidth);
 
         std::vector<CoordBox<3> > boundingBoxes;
-        for (int i = 0; i < 4; ++i)
+        std::vector<CoordBox<3> > expandedBoundingBoxes;
+        for (int i = 0; i < 4; ++i) {
             boundingBoxes << partitionManager.getRegion(i, 0).boundingBox();
+            expandedBoundingBoxes << partitionManager.getRegion(i, ghostZoneWidth).boundingBox();
+        }
 
-        partitionManager.resetGhostZones(boundingBoxes);
+        partitionManager.resetGhostZones(boundingBoxes, expandedBoundingBoxes);
 
         Region<3> expected;
-        for (int z = 0; z < 3; ++z) {
+        TS_ASSERT_EQUALS(expected, partitionManager.innerSet(0));
+        TS_ASSERT_EQUALS(expected, partitionManager.innerSet(1));
+    }
+
+    void test3DSecond()
+    {
+        int ghostZoneWidth = 3;
+        CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 55));
+
+        std::vector<std::size_t> weights;
+        weights += 40000, 15000, 25000;
+        weights << box.dimensions.prod() - sum(weights);
+        boost::shared_ptr<Partition<3> > partition(
+            new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
+
+        boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
+
+        PartitionManager<Topologies::Torus<3>::Topology> partitionManager;
+        partitionManager.resetRegions(
+            dummyAdjacencyManufacturer,
+            box,
+            partition,
+            0,
+            ghostZoneWidth);
+
+        std::vector<CoordBox<3> > boundingBoxes;
+        std::vector<CoordBox<3> > expandedBoundingBoxes;
+        for (int i = 0; i < 4; ++i) {
+            boundingBoxes << partitionManager.getRegion(i, 0).boundingBox();
+            expandedBoundingBoxes << partitionManager.getRegion(i, ghostZoneWidth).boundingBox();
+        }
+
+        partitionManager.resetGhostZones(boundingBoxes, expandedBoundingBoxes);
+
+        // index 0:
+        Region<3> expected;
+        for (int z = 0; z < 15; ++z) {
             for (int y = 0; y < 47; ++y) {
                 expected << Streak<3>(Coord<3>(0, y, z), 55);
             }
         }
-
-        for (int y = 0; y < 40; ++y) {
-            expected << Streak<3>(Coord<3>(0, y, 3), 55);
+        for (int y = 0; y < 22; ++y) {
+            expected << Streak<3>(Coord<3>(0, y, 15), 55);
         }
+        expected << Streak<3>(Coord<3>(0, 22, 15), 15);
 
-        expected << Streak<3>(Coord<3>(0,  40, 3), 45);
         TS_ASSERT_EQUALS(expected, partitionManager.innerSet(0));
 
+        // index 1:
         expected.clear();
-        for (int z = 1; z < 2; ++z) {
+        for (int z = 1; z < 14; ++z) {
             for (int y = 0; y < 47; ++y) {
                 expected << Streak<3>(Coord<3>(0, y, z), 55);
             }
         }
-
-        for (int y = 1; y < 39; ++y) {
-            expected << Streak<3>(Coord<3>(0, y, 2), 55);
+        for (int y = 1; y < 21; ++y) {
+            expected << Streak<3>(Coord<3>(0, y, 14), 55);
         }
+        expected << Streak<3>(Coord<3>(1, 21, 14), 14);
 
-        expected << Streak<3>(Coord<3>(1,  39, 2), 44);
         TS_ASSERT_EQUALS(expected, partitionManager.innerSet(1));
+
+        // index 2:
+        expected.clear();
+        for (int z = 2; z < 13; ++z) {
+            for (int y = 0; y < 47; ++y) {
+                expected << Streak<3>(Coord<3>(0, y, z), 55);
+            }
+        }
+        for (int y = 2; y < 20; ++y) {
+            expected << Streak<3>(Coord<3>(0, y, 13), 55);
+        }
+        expected << Streak<3>(Coord<3>(2, 20, 13), 13);
+
+        TS_ASSERT_EQUALS(expected, partitionManager.innerSet(2));
+
+        // index 3:
+        expected.clear();
+        for (int z = 3; z < 12; ++z) {
+            for (int y = 0; y < 47; ++y) {
+                expected << Streak<3>(Coord<3>(0, y, z), 55);
+            }
+        }
+        for (int y = 3; y < 19; ++y) {
+            expected << Streak<3>(Coord<3>(0, y, 12), 55);
+        }
+        expected << Streak<3>(Coord<3>(3, 19, 12), 12);
+
+        TS_ASSERT_EQUALS(expected, partitionManager.innerSet(3));
+
     }
 
 private:
@@ -204,9 +278,38 @@ private:
     unsigned rank;
     unsigned ghostZoneWidth;
     std::vector<CoordBox<2> > boundingBoxes;
+    std::vector<CoordBox<2> > expandedBoundingBoxes;
     PartitionManager<Topologies::Cube<2>::Topology> partitionManager;
 
     std::vector<CoordBox<2> > fakeBoundingBoxes(
+        unsigned offset,
+        unsigned size,
+        unsigned ghostZoneWidth,
+        const std::vector<std::size_t>& weights,
+        const boost::shared_ptr<StripingPartition<2> > partition)
+    {
+        std::vector<CoordBox<2> > boundingBoxes(size);
+        long startOffset = offset;
+        long endOffset = offset;
+
+        for (unsigned i = 0; i < size; ++i) {
+            endOffset += weights[i];
+            Region<2> s;
+
+            for (StripingPartition<2>::Iterator coords = (*partition)[startOffset];
+                 coords != (*partition)[endOffset];
+                 ++coords) {
+                s << *coords;
+            }
+
+            boundingBoxes[i] = s.boundingBox();
+            startOffset = endOffset;
+        }
+
+        return boundingBoxes;
+    }
+
+    std::vector<CoordBox<2> > fakeExpandedBoundingBoxes(
         unsigned offset,
         unsigned size,
         unsigned ghostZoneWidth,
