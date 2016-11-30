@@ -1,6 +1,5 @@
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 
-#include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;

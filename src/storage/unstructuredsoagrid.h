@@ -51,7 +51,7 @@ public:
         char *currentTarget = target;
 
         for (auto i = start; i != end; ++i) {
-            accessor.index = i->origin.x();
+            accessor.index() = i->origin.x();
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakOut(data, MemoryLocation::HOST, currentTarget,
                                    targetLocation, i->length(), DIM_X);
@@ -93,7 +93,7 @@ public:
         const char *currentSource = source;
 
         for (auto i = start; i != end; ++i) {
-            accessor.index = i->origin.x();
+            accessor.index() = i->origin.x();
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakIn(currentSource, sourceLocation, currentTarget,
                                   MemoryLocation::HOST, i->length(), DIM_X);

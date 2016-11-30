@@ -162,7 +162,7 @@ public:
     inline
     const ConstSoAAccessor operator[](int offset) const
     {
-        return ConstSoAAccessor(accessor.get_data(), accessor.index + offset);
+        return ConstSoAAccessor(accessor.data(), accessor.index() + offset);
     }
 
 private:

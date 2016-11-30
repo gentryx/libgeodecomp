@@ -368,8 +368,8 @@ public:
         SiloWriter<CellWithPointMesh> writer(prefix, 1);
         writer.addSelector(&CellWithPointMesh::dummyValue, "dummyValue");
 
-        boost::shared_ptr<FilterBase<DummyParticle> > filterX(new ParticleFilterX());
-        boost::shared_ptr<FilterBase<DummyParticle> > filterY(new ParticleFilterY());
+        SharedPtr<FilterBase<DummyParticle> >::Type filterX(new ParticleFilterX());
+        SharedPtr<FilterBase<DummyParticle> >::Type filterY(new ParticleFilterY());
 
         writer.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
         writer.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
@@ -562,8 +562,8 @@ public:
             prefix,
             1);
 
-        boost::shared_ptr<FilterBase<DummyParticle> > filterX(new ParticleFilterX());
-        boost::shared_ptr<FilterBase<DummyParticle> > filterY(new ParticleFilterY());
+        SharedPtr<FilterBase<DummyParticle> >::Type filterX(new ParticleFilterX());
+        SharedPtr<FilterBase<DummyParticle> >::Type filterY(new ParticleFilterY());
 
         writerA.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
         writerA.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
@@ -639,7 +639,7 @@ public:
         }
 
         // dump to disk:
-        boost::shared_ptr<FilterBase<DummyParticle> > filterX(new ParticleFilterX());
+        SharedPtr<FilterBase<DummyParticle> >::Type filterX(new ParticleFilterX());
 
         SiloWriter<CellWithPointMeshAndUnstructuredGrid> writer(
             &CellWithPointMeshAndUnstructuredGrid::particles,
@@ -743,7 +743,7 @@ public:
 
 private:
 #ifdef LIBGEODECOMP_WITH_QT5
-    boost::shared_ptr<QApplication> app;
+    SharedPtr<QApplication>::Type app;
 #endif
     std::string prefix;
     std::string siloFile1;

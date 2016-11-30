@@ -69,7 +69,7 @@ public:
     {
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
-                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(dimension.x());
+                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(box.origin.x() + dimension.x());
         }
     }
 

@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_IO_UNSTRUCTUREDTESTINITIALIZER_H
 
 #include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/unstructuredtestcell.h>
 
 namespace LibGeoDecomp {
@@ -78,9 +79,9 @@ public:
         return firstStep;
     }
 
-    boost::shared_ptr<Adjacency> getAdjacency(const Region<1>& region) const
+    SharedPtr<Adjacency>::Type getAdjacency(const Region<1>& region) const
     {
-        boost::shared_ptr<Adjacency> ret(new RegionBasedAdjacency());
+        SharedPtr<Adjacency>::Type ret(new RegionBasedAdjacency());
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             int startNeighbors = i->x() + 1;
@@ -96,9 +97,9 @@ public:
         return ret;
     }
 
-    boost::shared_ptr<Adjacency> getReverseAdjacency(const Region<1>& region) const
+    SharedPtr<Adjacency>::Type getReverseAdjacency(const Region<1>& region) const
     {
-        boost::shared_ptr<Adjacency> ret(new RegionBasedAdjacency());
+        SharedPtr<Adjacency>::Type ret(new RegionBasedAdjacency());
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             int startNeighbors = i->x() - maxNeighbors;

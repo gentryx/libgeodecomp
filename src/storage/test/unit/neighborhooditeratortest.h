@@ -111,11 +111,11 @@ public:
     void testBasic()
     {
         typedef CoordMap<Container, Grid<Container> > Neighborhood;
-        typedef NeighborhoodIterator<Neighborhood, 2> HoodIterator;
+        typedef NeighborhoodIterator<Container, Neighborhood, 2> HoodIterator;
 
         Neighborhood hood = grid.getNeighborhood(Coord<2>(1, 1));
-        HoodIterator begin = HoodIterator::begin(hood);
-        HoodIterator end = HoodIterator::end(hood);
+        HoodIterator begin = HoodIterator::begin(&grid[Coord<2>(1, 1)], hood);
+        HoodIterator end = HoodIterator::end(&grid[Coord<2>(1, 1)], hood);
         HoodIterator iter = begin;
         TS_ASSERT_DIFFERS(iter, end);
 
@@ -242,13 +242,13 @@ public:
     void testSkippingOfEmptyCells()
     {
         typedef CoordMap<Container, Grid<Container> > Neighborhood;
-        typedef NeighborhoodIterator<Neighborhood, 2> HoodIterator;
+        typedef NeighborhoodIterator<Container, Neighborhood, 2> HoodIterator;
 
         grid[Coord<2>(0, 0)].clear();
         grid[Coord<2>(0, 1)].clear();
 
         Neighborhood hood = grid.getNeighborhood(Coord<2>(1, 1));
-        HoodIterator begin = HoodIterator::begin(hood);
+        HoodIterator begin = HoodIterator::begin(&grid[Coord<2>(1, 1)], hood);
         HoodIterator iter = begin;
 
         // skipping one value from (0, 0)
@@ -281,7 +281,7 @@ public:
     void testSkippingOfAllEmptyCells()
     {
         typedef CoordMap<Container, Grid<Container> > Neighborhood;
-        typedef NeighborhoodIterator<Neighborhood, 2> HoodIterator;
+        typedef NeighborhoodIterator<Container, Neighborhood, 2> HoodIterator;
 
         grid[Coord<2>(0, 0)].clear();
         grid[Coord<2>(1, 0)].clear();
@@ -296,8 +296,8 @@ public:
 
         Neighborhood hood = grid.getNeighborhood(Coord<2>(1, 1));
 
-        HoodIterator begin = HoodIterator::begin(hood);
-        HoodIterator end = HoodIterator::end(hood);
+        HoodIterator begin = HoodIterator::begin(&grid[Coord<2>(1, 1)], hood);
+        HoodIterator end = HoodIterator::end(&grid[Coord<2>(1, 1)], hood);
 
         TS_ASSERT_EQUALS(begin, end);
     }

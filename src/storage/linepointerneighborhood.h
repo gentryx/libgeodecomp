@@ -269,7 +269,15 @@ public:
  *   Y >=  0 -> use center pointers + X
  *
  */
-template<typename CELL, class STENCIL, bool BOUNDARY_WEST, bool BOUNDARY_EAST, bool BOUNDARY_TOP, bool BOUNDARY_BOTTOM, bool BOUNDARY_SOUTH, bool BOUNDARY_NORTH>
+template<
+    typename CELL,
+    class STENCIL,
+    bool BOUNDARY_WEST,
+    bool BOUNDARY_EAST,
+    bool BOUNDARY_TOP,
+    bool BOUNDARY_BOTTOM,
+    bool BOUNDARY_SOUTH,
+    bool BOUNDARY_NORTH>
 class LinePointerNeighborhood :
     public LinePointerNeighborhoodHelper::West<  CELL, STENCIL, BOUNDARY_WEST>,
     public LinePointerNeighborhoodHelper::East<  CELL, STENCIL, BOUNDARY_EAST>,

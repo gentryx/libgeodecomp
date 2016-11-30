@@ -1,6 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 using namespace LibGeoDecomp;
 
@@ -38,9 +39,9 @@ public:
 
     void testSerializationViaSharedPointer()
     {
-        boost::shared_ptr<CoordBox<1> > ca1(new CoordBox<1>(Coord<1>(1),       Coord<1>(2)));
-        boost::shared_ptr<CoordBox<2> > ca2(new CoordBox<2>(Coord<2>(3, 4),    Coord<2>(5, 6)));
-        boost::shared_ptr<CoordBox<3> > ca3(new CoordBox<3>(Coord<3>(7, 8, 9), Coord<3>(10, 11, 12)));
+        SharedPtr<CoordBox<1> >::Type ca1(new CoordBox<1>(Coord<1>(1),       Coord<1>(2)));
+        SharedPtr<CoordBox<2> >::Type ca2(new CoordBox<2>(Coord<2>(3, 4),    Coord<2>(5, 6)));
+        SharedPtr<CoordBox<3> >::Type ca3(new CoordBox<3>(Coord<3>(7, 8, 9), Coord<3>(10, 11, 12)));
 
         std::vector<char> buffer;
         hpx::serialization::output_archive outputArchive(buffer);
@@ -48,9 +49,9 @@ public:
         outputArchive << ca2;
         outputArchive << ca3;
 
-        boost::shared_ptr<CoordBox<1> > cb1;
-        boost::shared_ptr<CoordBox<2> > cb2;
-        boost::shared_ptr<CoordBox<3> > cb3;
+        SharedPtr<CoordBox<1> >::Type cb1;
+        SharedPtr<CoordBox<2> >::Type cb2;
+        SharedPtr<CoordBox<3> >::Type cb3;
 
         hpx::serialization::input_archive inputArchive(buffer);
         inputArchive >> cb1;

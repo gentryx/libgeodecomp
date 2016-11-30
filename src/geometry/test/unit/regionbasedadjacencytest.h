@@ -1,9 +1,7 @@
 #include <libgeodecomp/geometry/regionbasedadjacency.h>
 
-#include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {

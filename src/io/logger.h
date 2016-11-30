@@ -6,7 +6,9 @@
 #include <hpx/config.hpp>
 #endif
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <iomanip>
+#include <libgeodecomp/io/time.h>
+#include <libgeodecomp/misc/scopedtimer.h>
 
 namespace LibGeoDecomp {
 
@@ -35,8 +37,7 @@ public:
 #define LOG(LEVEL, MESSAGE)                                             \
     if ((LibGeoDecomp::Logger::LEVEL) <= LIBGEODECOMP_DEBUG_LEVEL) {    \
         std::cout << #LEVEL[0] << ", ["                                 \
-                  << boost::posix_time::to_iso_string(                  \
-                      boost::posix_time::second_clock::local_time())    \
+                  << Time::renderISO(ScopedTimer::time())               \
                   << "] " << std::right                                 \
                   << std::setw(5) << #LEVEL                             \
                   << " -- " << MESSAGE << "\n";                         \

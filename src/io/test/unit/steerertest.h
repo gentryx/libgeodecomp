@@ -3,10 +3,9 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
-
-#include <boost/shared_ptr.hpp>
 
 using namespace LibGeoDecomp;
 
@@ -94,7 +93,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<SerialSimulator<MyTestCell> > simulator;
+    SharedPtr<SerialSimulator<MyTestCell> >::Type simulator;
 };
 
 }

@@ -144,11 +144,11 @@ public:
     template<typename ACCESSOR>
     void operator()(ACCESSOR accessor)
     {
-        accessor.index += startOffset;
+        accessor.index() += startOffset;
 
         for (long offset = startOffset; offset < endOffset; ++offset) {
             TS_ASSERT_EQUALS(expected, accessor.v());
-            ++accessor.index;
+            ++accessor.index();
         }
     }
 

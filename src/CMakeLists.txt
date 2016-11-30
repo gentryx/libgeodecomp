@@ -1,10 +1,9 @@
 # LIBDIRS is used to find source files and headers
-set(LIBDIRS communication io geometry geometry/partitions loadbalancer misc parallelization parallelization/nesting storage)
+set(LIBDIRS communication io io/remotesteerer geometry geometry/partitions loadbalancer misc parallelization parallelization/nesting storage)
 # AUXDIRS lists auxiliary directories to be included in the main
 # build. They may for instance include additionally libraries to be
 # linked into the main lib.
 set(AUXDIRS)
-# set(AUXDIRS misc/testbed/cell/spustuff)
 set(SUBDIRS communication examples io geometry loadbalancer misc parallelization storage testbed)
 
 set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
@@ -14,16 +13,44 @@ set(LGD_AGGREGATED_CXX_FLAGS "${LGD_ADDITIONAL_CXX_COMPILE_FLAGS}")
 list(APPEND BUILD_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 lgd_generate_sourcelists("./")
 
-if(WITH_BOOST_MPI)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
+if(NOT WITH_CPP14)
+  check_cxx_compiler_flag("-std=c++0x" SUPPORTS_CPP0X)
+  if(NOT SUPPORTS_CPP0X)
+    message(WARNING "LibGeoDecomp requires support for some C++11 features (e.g. shared pointers), but your compiler doesn't seem to support this.")
+  endif()
+
+  set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -std=c++0x")
+endif()
+
+if(WITH_BOOST_SHARED_PTR)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif()
+
+if(WITH_BOOST_ASIO)
+  include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
 if(WITH_BOOST_SERIALIZATION)
+  include_directories(${Boost_INCLUDE_DIRS})
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_SERIALIZATION_LIBRARIES}")
 endif()
 
+if(WITH_BOOST_MPI)
+  include_directories(${Boost_INCLUDE_DIRS})
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
+endif()
+
+if(WITH_BOOST_MOVE)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif()
+
 if(WITH_CUDA)
-  set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_50")
+  if (${CUDA_VERSION} VERSION_LESS 8.0)
+    set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_20")
+  else()
+    set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_35")
+  endif()
+
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${CUDA_INCLUDE_DIRS})
 endif()
 
@@ -46,6 +73,8 @@ endif()
 if(WITH_QT5)
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5OpenGL_INCLUDE_DIRS})
   set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS}")
+  # Qt5 needs -fPIC, but on some nodes Qt5Core_EXECUTABLE_COMPILE_FLAGS lacks that flag:
+  set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -fPIC")
 endif()
 
 if(WITH_SCOTCH)
@@ -65,8 +94,6 @@ if(WITH_THREADS)
     set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -pthread")
   endif()
 endif()
-
-list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 
 set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} ${libflatarray_FLAGS}")
 
@@ -247,6 +274,10 @@ set(ALL_HEADERS ${HEADERS})
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 set_property(TARGET geodecomp PROPERTY VERSION ${PACKAGE_VERSION})
 
+if(CMAKE_VERSION VERSION_GREATER 2.8.12)
+  set_property(TARGET geodecomp PROPERTY MACOSX_RPATH On)
+endif()
+
 # CMake <2.8.11 doesn't have target_include_directories()
 if(CMAKE_VERSION VERSION_GREATER 2.8.11)
   target_include_directories(geodecomp INTERFACE ${INSTALL_INCLUDE_DIRECTORIES})
@@ -297,17 +328,6 @@ if(WITH_QT5)
     ${Qt5Gui_location}
     ${Qt5OpenGL_location}
     ${Qt5Widgets_location})
-endif()
-
-if(WITH_THREADS)
-  if (WITH_LIBPTHREAD)
-    # some systems (e.g. my devel notebook) require manually linking pthreads for OpenMP...
-    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-      set(LIBGEODECOMP_LINK_LIBRARIES
-        ${LIBGEODECOMP_LINK_LIBRARIES}
-        pthread)
-    endif()
-  endif()
 endif()
 
 if(WITH_MPI)

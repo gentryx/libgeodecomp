@@ -32,12 +32,13 @@ public:
     template<typename NEIGHBORHOOD>
     static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, const int nanoStep)
     {
-        LIBFLATARRAY_LOOP_PEELER(double, 16, long, x, endX, updateLineImplementation, target, hood, nanoStep);
+        typedef LibFlatArray::short_vec<double, 16> MyShortVec;
+        LIBFLATARRAY_LOOP_PEELER(MyShortVec, long, (*x), endX, updateLineImplementation, target, hood, nanoStep);
     }
 
     template<typename DOUBLE, typename NEIGHBORHOOD>
     static void updateLineImplementation(
-        long *x,
+        long& x,
         long endX,
         Cell *target,
         const NEIGHBORHOOD& hood,
@@ -45,7 +46,7 @@ public:
     {
         DOUBLE oneSixth = 1.0 / 6.0;
 
-        for (; *x < (endX - DOUBLE::ARITY + 1); *x += DOUBLE::ARITY) {
+        for (; x < endX; x += DOUBLE::ARITY) {
             DOUBLE buf = &hood[FixedCoord< 0,  0, -1>()].temp;
             buf += &hood[FixedCoord< 0,  -1,  0>()].temp;
             buf += &hood[FixedCoord<-1,   0,  0>()].temp;
@@ -53,7 +54,7 @@ public:
             buf += &hood[FixedCoord< 0,   1,  0>()].temp;
             buf += &hood[FixedCoord< 0,   0,  1>()].temp;
             buf *= oneSixth;
-            &target[*x].temp << buf;
+            &target[x].temp << buf;
         }
     }
 

@@ -5,6 +5,7 @@
 #include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/regionbasedadjacency.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 namespace LibGeoDecomp {
 
@@ -18,6 +19,8 @@ template<int DIM>
 class AdjacencyManufacturer
 {
 public:
+    typedef typename SharedPtr<Adjacency>::Type AdjacencyPtr;
+
     virtual ~AdjacencyManufacturer()
     {}
 
@@ -25,7 +28,7 @@ public:
      * yields an Adjacency object with all outgoing edges of the node
      * set in the given Region.
      */
-    virtual boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const = 0;
+    virtual AdjacencyPtr getAdjacency(const Region<DIM>& region) const = 0;
 
     /**
      * Same a getAdjacency, but returns all edges pointing to the
@@ -33,7 +36,7 @@ public:
      * edges. Used in the PartitionManager to grow inverse rims around
      * a region. See UnstructuredTestInitializer for an example.
      */
-    virtual boost::shared_ptr<Adjacency> getReverseAdjacency(const Region<DIM>& region) const = 0;
+    virtual AdjacencyPtr getReverseAdjacency(const Region<DIM>& region) const = 0;
 };
 
 }

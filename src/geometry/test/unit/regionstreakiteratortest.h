@@ -123,6 +123,22 @@ public:
         }
     }
 
+    void testOffsetAndEndX()
+    {
+        Region<3> region;
+        region << CoordBox<3>(Coord<3>(100, 200, 300), Coord<3>(300, 600, 900));
+
+        Region<3> actual;
+        for (Region<3>::StreakIterator i = region.beginStreak(Coord<3>(-2, -3, -4), 10); i != region.endStreak(); ++i) {
+            actual << *i;
+        }
+
+        Region<3> expected;
+        expected << CoordBox<3>(Coord<3>(98, 197, 296), Coord<3>(310, 600, 900));
+
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
 };
 
 }

@@ -33,14 +33,14 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
     typedef typename ParentType::PatchProviderVec PatchProviderVec;
+    typedef typename ParentType::InitPtr InitPtr;
+    typedef typename ParentType::PartitionManagerPtr PartitionManagerPtr;
 
     using ParentType::initializer;
     using ParentType::patchAccepters;
     using ParentType::patchProviders;
     using ParentType::partitionManager;
     using ParentType::chronometer;
-    using ParentType::notifyPatchAccepters;
-    using ParentType::notifyPatchProviders;
 
     using ParentType::innerSet;
     using ParentType::remappedInnerSet;
@@ -68,11 +68,12 @@ public:
     using ParentType::enableFineGrainedParallelism;
 
     inline VanillaStepper(
-        boost::shared_ptr<PartitionManagerType> partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        PartitionManagerPtr partitionManager,
+        InitPtr initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
-        const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase0 = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase1 = PatchProviderVec(),
         const PatchProviderVec& innerSetPatchProviders = PatchProviderVec(),
         bool enableFineGrainedParallelism = false) :
         ParentType(
@@ -80,7 +81,8 @@ public:
             initializer,
             ghostZonePatchAccepters,
             innerSetPatchAccepters,
-            ghostZonePatchProviders,
+            ghostZonePatchProvidersPhase0,
+            ghostZonePatchProvidersPhase1,
             innerSetPatchProviders,
             enableFineGrainedParallelism)
     {
@@ -114,7 +116,7 @@ private:
             }
         }
 
-        notifyPatchAccepters(innerSet(ghostZoneWidth()), ParentType::INNER_SET, globalNanoStep());
+        this->notifyPatchAccepters(innerSet(ghostZoneWidth()), ParentType::INNER_SET, globalNanoStep());
 
         if (validGhostZoneWidth == 0) {
             updateGhost();
@@ -123,18 +125,18 @@ private:
 
         index = ghostZoneWidth() - validGhostZoneWidth;
         const Region<DIM>& nextRegion = innerSet(index);
-        notifyPatchProviders(nextRegion, ParentType::INNER_SET, globalNanoStep());
+        this->notifyPatchProviders(nextRegion, ParentType::INNER_SET, globalNanoStep());
     }
 
     inline void initGrids()
     {
         initGridsCommon();
 
-        notifyPatchAccepters(
+        this->notifyPatchAccepters(
             rim(),
-            ParentType::GHOST,
+            ParentType::GHOST_PHASE_0,
             globalNanoStep());
-        notifyPatchAccepters(
+        this->notifyPatchAccepters(
             innerSet(ghostZoneWidth()),
             ParentType::INNER_SET,
             globalNanoStep());
@@ -176,7 +178,8 @@ private:
         std::size_t curGlobalNanoStep = globalNanoStep();
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
-            notifyPatchProviders(rim(t), ParentType::GHOST, globalNanoStep());
+            this->notifyPatchProviders(rim(t), ParentType::GHOST_PHASE_0, globalNanoStep());
+            this->notifyPatchProviders(rim(t), ParentType::GHOST_PHASE_1, globalNanoStep());
 
             {
                 TimeComputeGhost timer(&chronometer);
@@ -202,7 +205,7 @@ private:
                 ++curGlobalNanoStep;
             }
 
-            notifyPatchAccepters(rim(ghostZoneWidth()), ParentType::GHOST, curGlobalNanoStep);
+            this->notifyPatchAccepters(rim(ghostZoneWidth()), ParentType::GHOST_PHASE_0, curGlobalNanoStep);
         }
 
         {

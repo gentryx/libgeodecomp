@@ -38,11 +38,15 @@ public:
 
     const static int DIM = Topology::DIM;
 
-    template<typename NEIGHBORHOOD, typename COLLECTION_INTERFACE>
+    template<
+        typename WRITE_CONTAINER,
+        typename NEIGHBORHOOD,
+        typename COLLECTION_INTERFACE>
     class NeighborhoodAdapter
     {
     public:
-        typedef typename NeighborhoodIterator<NEIGHBORHOOD, DIM, COLLECTION_INTERFACE>::Adapter Value;
+        typedef NeighborhoodIterator<WRITE_CONTAINER, NEIGHBORHOOD, DIM, COLLECTION_INTERFACE> IteratorType;
+        typedef typename NeighborhoodIteratorHelpers::Adapter<WRITE_CONTAINER, IteratorType>::Adapter Value;
     };
 
     inline explicit BoxCell(
@@ -77,6 +81,11 @@ public:
         particles << particle;
     }
 
+    inline void remove(const std::size_t i)
+    {
+        particles.remove(i);
+    }
+
     inline std::size_t size() const
     {
         return particles.size();
@@ -102,34 +111,53 @@ public:
     }
 
     template<class HOOD>
-    inline void update(const HOOD& hood, const int nanoStep)
+    inline void update(HOOD& hood, const int nanoStep)
     {
-        *this = hood[Coord<DIM>()];
-
         typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
-        typedef typename NeighborhoodAdapter<HOOD, PassThroughType>::Value NeighborhoodAdapterType;
-        NeighborhoodAdapterType adapter(&hood);
+        typedef typename NeighborhoodAdapter<BoxCell, HOOD, PassThroughType>::Value NeighborhoodAdapterType;
+        NeighborhoodAdapterType adapter(this, &hood);
 
-        updateCargo(adapter, adapter, nanoStep);
+        copyOver(hood[Coord<DIM>()], adapter, nanoStep);
+        updateCargo(adapter, nanoStep);
     }
 
-    template<class NEIGHBORHOOD_ADAPTER_SELF, class NEIGHBORHOOD_ADAPTER_ALL>
-    inline void updateCargo(
-        const NEIGHBORHOOD_ADAPTER_SELF& ownNeighbors,
-        const NEIGHBORHOOD_ADAPTER_ALL& allNeighbors,
-        const int nanoStep)
+    template<class NEIGHBORHOOD_ADAPTER_SELF>
+    inline void copyOver(
+        const BoxCell& oldSelf,
+        NEIGHBORHOOD_ADAPTER_SELF& ownNeighbors,
+        int nanoStep)
     {
+        origin    = oldSelf.origin;
+        dimension = oldSelf.dimension;
+
         if (nanoStep == 0) {
             particles.clear();
             addContainedParticles(ownNeighbors.begin(), ownNeighbors.end());
+        } else {
+            particles = oldSelf.particles;
         }
+    }
 
-        for (typename Container::iterator i = particles.begin(); i != particles.end(); ++i) {
+    template<class NEIGHBORHOOD_ADAPTER_ALL>
+    inline void updateCargo(
+        NEIGHBORHOOD_ADAPTER_ALL& allNeighbors,
+        int nanoStep)
+    {
+        // we need to fix end here so particles inserted by update()
+        // won't be immediately updated, too:
+        typename Container::iterator end = particles.end();
+
+        for (typename Container::iterator i = particles.begin(); i != end; ++i) {
             i->update(allNeighbors, nanoStep);
         }
     }
 
-private:
+    const FloatCoord<3>& getDimensions() const
+    {
+        return dimension;
+    }
+
+protected:
     FloatCoord<DIM> origin;
     FloatCoord<DIM> dimension;
     Container particles;
@@ -145,7 +173,6 @@ private:
             }
         }
     }
-
 };
 
 }

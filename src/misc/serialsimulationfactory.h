@@ -16,8 +16,10 @@ class SerialSimulationFactory : public SimulationFactory<CELL>
 public:
     using SimulationFactory<CELL>::addSteerers;
     using SimulationFactory<CELL>::addWriters;
+    typedef typename SimulationFactory<CELL>::InitPtr InitPtr;
 
-    SerialSimulationFactory(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
+    explicit
+    SerialSimulationFactory(InitPtr initializer) :
         SimulationFactory<CELL>(initializer)
     {
         // SerialSimulator has no parameters to optimize
@@ -30,7 +32,7 @@ public:
 
 protected:
     virtual Simulator<CELL> *buildSimulator(
-        boost::shared_ptr<ClonableInitializer<CELL> > initializer,
+        InitPtr initializer,
         const SimulationParameters& params) const
     {
         SerialSimulator<CELL> *sim = new SerialSimulator<CELL>(initializer->clone());

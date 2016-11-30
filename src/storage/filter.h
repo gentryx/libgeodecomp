@@ -5,6 +5,7 @@
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/storage/filterbase.h>
 #include <libgeodecomp/storage/memorylocation.h>
+#include <typeinfo>
 
 #ifdef LIBGEODECOMP_WITH_SILO
 #include <silo.h>
@@ -235,7 +236,7 @@ public:
     }
 
     /**
-     * Copy a streak of variables to an AoS layout.
+     * Copy a Streak of variables to an AoS layout.
      */
     virtual void copyStreakInImpl(
         const EXTERNAL *source,
@@ -246,7 +247,7 @@ public:
         const std::size_t stride) = 0;
 
     /**
-     * Extract a steak of members from an AoS layout.
+     * Extract a Streak of members from an AoS layout.
      */
     virtual void copyStreakOutImpl(
         const MEMBER *source,
@@ -257,7 +258,7 @@ public:
         const std::size_t stride) = 0;
 
     /**
-     * Copy a streak of variables to the members of a streak of cells.
+     * Copy a Streak of variables to the members of a Streak of cells.
      */
     virtual void copyMemberInImpl(
         const EXTERNAL *source,
@@ -268,7 +269,7 @@ public:
         MEMBER CELL:: *memberPointer) = 0;
 
     /**
-     * Extract a streak of members from a streak of cells.
+     * Extract a Streak of members from a Streak of cells.
      */
     virtual void copyMemberOutImpl(
         const CELL *source,

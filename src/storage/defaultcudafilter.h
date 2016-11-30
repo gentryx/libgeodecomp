@@ -23,14 +23,14 @@ namespace DefaultCUDAFilterHelpers {
  *
  * Update: problem is slightly different, but persists in CUDA 8.0.44.
  */
-template<typename MEMBER, typename CLASS>
+template<typename MEMBER, typename MEMBER_POINTER>
 class MemberPointerWrapper
 {
 public:
-    MEMBER CLASS::* value;
+    MEMBER_POINTER value;
 
     explicit inline
-    MemberPointerWrapper(MEMBER CLASS::* value) :
+    MemberPointerWrapper(MEMBER_POINTER value) :
         value(value)
     {}
 };
@@ -40,12 +40,12 @@ __global__
 void aggregateMember(
     const CELL *source,
     EXTERNAL *target,
-    MemberPointerWrapper<MEMBER, CELL> memberPointerWrapper,
+    MemberPointerWrapper<MEMBER, char CELL::*> memberPointerWrapper,
     const std::size_t num)
 {
     int index = blockDim.x * blockIdx.x + threadIdx.x;
     if (index < num) {
-        target[index] = source[index].*memberPointerWrapper.value;
+        target[index] = source[index].*reinterpret_cast<MEMBER CELL::*>(memberPointerWrapper.value);
     }
 }
 
@@ -54,12 +54,12 @@ __global__
 void distributeMember(
     const EXTERNAL *source,
     CELL *target,
-    MemberPointerWrapper<MEMBER, CELL> memberPointerWrapper,
+    MemberPointerWrapper<MEMBER, char CELL::*> memberPointerWrapper,
     const std::size_t num)
 {
     int index = blockDim.x * blockIdx.x + threadIdx.x;
     if (index < num) {
-        target[index].*memberPointerWrapper.value = source[index];
+        target[index].*reinterpret_cast<MEMBER CELL::*>(memberPointerWrapper.value) = source[index];
     }
 }
 
@@ -77,7 +77,7 @@ void runAggregateMemberKernel(
     aggregateMember<CELL, EXTERNAL, MEMBER><<<gridDim, blockDim>>>(
         source,
         target,
-        MemberPointerWrapper<MEMBER, CELL>(memberPointer),
+        MemberPointerWrapper<MEMBER, char CELL:: *>(reinterpret_cast<char CELL::*>(memberPointer)),
         num);
 
     CUDAUtil::checkForError();
@@ -96,7 +96,7 @@ void runDistributeMemberKernel(
     distributeMember<CELL, EXTERNAL, MEMBER><<<gridDim, blockDim>>>(
         source,
         target,
-        MemberPointerWrapper<MEMBER, CELL>(memberPointer),
+        MemberPointerWrapper<MEMBER, char CELL:: *>(reinterpret_cast<char CELL::*>(memberPointer)),
         num);
 
     CUDAUtil::checkForError();

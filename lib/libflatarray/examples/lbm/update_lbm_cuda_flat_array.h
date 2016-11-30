@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 Andreas Schäfer
+ * Copyright 2013-2016 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -7,6 +7,8 @@
 
 #ifndef LIBFLATARRAY_EXAMPLES_LBM_UPDATE_LBM_CUDA_FLAT_ARRAY_H
 #define LIBFLATARRAY_EXAMPLES_LBM_UPDATE_LBM_CUDA_FLAT_ARRAY_H
+
+#include <libflatarray/soa_grid.hpp>
 
 #include "util.h"
 #include "cudalineupdatefunctorprototype.h"
@@ -19,8 +21,8 @@ class benchmark_lbm_cuda_flat_array : public benchmark_lbm_cuda
         LibFlatArray::soa_grid<CellLBM> gridB(dim, dim, 256);
         // fixme: init grid?
 
-        char *dataA = gridA.get_data();
-        char *dataB = gridB.get_data();
+        char *dataA = gridA.data();
+        char *dataB = gridB.data();
 
         char *buf;
         cudaMalloc(reinterpret_cast<void**>(&buf), gridA.byte_size());
@@ -45,8 +47,8 @@ class benchmark_lbm_cuda_flat_array : public benchmark_lbm_cuda
         long long t_end = time_usec();
         check_cuda_error();
 
-        cudaFree(gridA.get_data());
-        cudaFree(gridB.get_data());
+        cudaFree(gridA.data());
+        cudaFree(gridB.data());
 
         gridA.set_data(dataA);
         gridB.set_data(dataB);

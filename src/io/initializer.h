@@ -7,6 +7,7 @@
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/geometry/regionbasedadjacency.h>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 
@@ -23,6 +24,7 @@ class Initializer : public AdjacencyManufacturer<APITraits::SelectTopology<CELL>
 public:
     typedef typename APITraits::SelectTopology<CELL>::Value Topology;
     typedef CELL Cell;
+    typedef typename SharedPtr<Adjacency>::Type AdjacencyPtr;
 
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
     static const int DIM = Topology::DIM;
@@ -101,9 +103,27 @@ public:
      * is assumed to be a neighbor of n_1, iff there is a directed
      * edge (n_1, n_2) in the adjacency list of the unstructured grid.
      */
-    boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const
+    AdjacencyPtr getAdjacency(const Region<DIM>& region) const
     {
-        return boost::make_shared<RegionBasedAdjacency>();
+        checkTopologyIfAdjacencyIsNeeded(Topology());
+        return AdjacencyPtr();
+    }
+
+private:
+    template<typename TOPOLOGY>
+    void checkTopologyIfAdjacencyIsNeeded(const TOPOLOGY /* unused */) const
+    {
+        // intentionally left blank
+    }
+
+    void checkTopologyIfAdjacencyIsNeeded(const Topologies::Unstructured::Topology /* unused */) const
+    {
+        std::string message(
+            "You are using an unstructured topology but the Initializer did not re-implement getAdjacency()."
+            "You really need to implement getAdjacency() otherwise ghost zone (halo) synchronization will not work.");
+
+        LOG(FATAL, message);
+        throw std::logic_error(message);
     }
 
     /**
@@ -115,9 +135,9 @@ public:
      * is the opposite of the direction in the original unstructured
      * grid. See UnstructuredTestInitializer for an example.
      */
-    boost::shared_ptr<Adjacency> getReverseAdjacency(const Region<DIM>& region) const
+    SharedPtr<Adjacency>::Type getReverseAdjacency(const Region<DIM>& region) const
     {
-        return boost::make_shared<RegionBasedAdjacency>();
+        return makeShared<Adjacency>(new RegionBasedAdjacency());
     }
 };
 

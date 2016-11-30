@@ -310,9 +310,9 @@ public:
             // consistent initialization of overlapping cells on all
             // nodes.
             seedRNG(*j);
-            double pseudo_rand1 = (Random::gen_d() - 0.5) / 16.0;
-            double pseudo_rand2 = (Random::gen_d() - 0.5) / 16.0;
-            double pseudo_rand3 = (Random::gen_d() - 0.5) / 16.0;
+            double pseudo_rand1 = (Random::genDouble() - 0.5) / 16.0;
+            double pseudo_rand2 = (Random::genDouble() - 0.5) / 16.0;
+            double pseudo_rand3 = (Random::genDouble() - 0.5) / 16.0;
 
             FloatCoord<3> center(
                 (j->x() + 0.5) * CONTAINER_DIM,

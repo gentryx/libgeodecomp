@@ -37,8 +37,7 @@ public:
             linkName(linkName),
             lastNanoStep(0),
             stride(1),
-            region(region),
-            buffer(SerializationBuffer<CellType>::create(region))
+            region(region)
         {}
 
         virtual ~Link()
@@ -113,8 +112,9 @@ public:
                 return;
             }
 
+            buffer = SerializationBuffer<CellType>::create(region);
             grid.saveRegion(&buffer, region);
-            hpx::apply(typename HPXReceiver<BufferType>::receiveAction(), receiverID,  nanoStep, buffer);
+            hpx::apply(typename HPXReceiver<BufferType>::receiveAction(), receiverID,  nanoStep, std::move(buffer));
 
             std::size_t nextNanoStep = (min)(requestedNanoSteps) + stride;
             if ((lastNanoStep == infinity()) ||
@@ -159,7 +159,7 @@ public:
             recv(next);
         }
 
-        virtual void get(
+        virtual hpx::future<void> getAsync(
             GRID_TYPE *grid,
             const Region<DIM>& patchableRegion,
             const Coord<DIM>& globalGridDimensions,
@@ -168,20 +168,35 @@ public:
             const bool remove = true)
         {
             if (storedNanoSteps.empty() || (nanoStep < (min)(storedNanoSteps))) {
-                return;
+                return hpx::make_ready_future();
             }
 
             checkNanoStepGet(nanoStep);
 
-            grid->loadRegion(receiver->get(nanoStep).get(), region);
+            return receiver->get(nanoStep).then(
+                [grid, this](hpx::future<BufferType> f) -> void {
+                    grid->loadRegion(f.get(), region);
 
-            std::size_t nextNanoStep = (min)(storedNanoSteps) + stride;
-            if ((lastNanoStep == infinity()) ||
-                (nextNanoStep < lastNanoStep)) {
-                recv(nextNanoStep);
-            }
+                    std::size_t nextNanoStep = (min)(storedNanoSteps) + stride;
+                    if ((lastNanoStep == infinity()) ||
+                        (nextNanoStep < lastNanoStep)) {
+                        recv(nextNanoStep);
+                    }
 
-            erase_min(storedNanoSteps);
+                    erase_min(storedNanoSteps);
+                }
+            );
+        }
+
+        virtual void get(
+            GRID_TYPE *grid,
+            const Region<DIM>& patchableRegion,
+            const Coord<DIM>& globalGridDimensions,
+            const std::size_t nanoStep,
+            const std::size_t rank,
+            const bool remove = true)
+        {
+            getAsync(grid, patchableRegion, globalGridDimensions, nanoStep, rank, remove).get();
         }
 
         void recv(const std::size_t nanoStep)

@@ -92,7 +92,8 @@ public:
         public APITraits::HasUpdateLineX,
         public APITraits::HasStencil<Stencils::Moore<3, 1> >,
         public APITraits::HasTorusTopology<3>,
-        public LibFlatArray::api_traits::has_asymmetric_dual_callback
+        public LibFlatArray::api_traits::has_asymmetric_dual_callback,
+        public LibFlatArray::api_traits::has_default_3d_sizes_uniform
     {};
 
     explicit MySoATestCellWithDoubleAndBool(
@@ -112,7 +113,7 @@ public:
         ACCESSOR1& hoodOld, int indexEnd,
         ACCESSOR2& hoodNew, int nanoStep)
     {
-        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index) {
+        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index()) {
             hoodNew.temp()  = hoodOld[FixedCoord<0, 0, 0>()].temp();
             hoodNew.alive() = hoodOld[FixedCoord<0, 0, 0>()].alive();
         }

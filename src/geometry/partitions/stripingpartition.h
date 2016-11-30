@@ -22,13 +22,14 @@ public:
     friend class StripingPartitionTest;
     const static int DIM = DIMENSIONS;
     typedef typename CoordBox<DIM>::Iterator Iterator;
+    typedef typename Partition<DIM>::AdjacencyPtr AdjacencyPtr;
 
     explicit StripingPartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& newDimensions = Coord<DIM>(),
         const long& offset = 0,
         const std::vector<std::size_t>& weights = std::vector<std::size_t>(2),
-        const boost::shared_ptr<Adjacency>& /* unused: adjacency */ = boost::make_shared<RegionBasedAdjacency>()) :
+        const AdjacencyPtr& /* unused: adjacency */ = AdjacencyPtr()) :
         SpaceFillingCurve<DIM>(offset, weights),
         origin(origin),
         dimensions(newDimensions)

@@ -2,8 +2,6 @@
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 
-#include <boost/assign/std/vector.hpp>
-
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -31,7 +29,7 @@ public:
         TS_ASSERT_EQUALS(sum(weights) + offset, product);
 
         partition.reset(new StripingPartition<2>(Coord<2>(0, 0), dimensions, offset, weights));
-        boost::shared_ptr<AdjacencyManufacturer<2> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<2>);
+        SharedPtr<AdjacencyManufacturer<2> >::Type dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<2>);
 
         manager.resetRegions(
             dummyAdjacencyManufacturer,
@@ -112,11 +110,13 @@ public:
             unsigned startLine = startingLine(layer->rank()) - 1 * ghostZoneWidth + i;
             unsigned endLine   = startingLine(layer->rank()) + 2 * ghostZoneWidth - i;
             Region<2> rim = fillLines(startLine, endLine);
+
             if (layer->rank() != layer->size() - 1) {
                 startLine = startingLine(layer->rank() + 1) - 2 * ghostZoneWidth + i;
                 endLine   = startingLine(layer->rank() + 1) + 1 * ghostZoneWidth - i;
                 rim += fillLines(startLine, endLine);
             }
+
             TS_ASSERT_EQUALS(rim, manager.rim(i));
         }
     }
@@ -191,8 +191,8 @@ public:
 
 private:
     PartitionManager<Topologies::Cube<2>::Topology> manager;
-    boost::shared_ptr<StripingPartition<2> > partition;
-    boost::shared_ptr<MPILayer> layer;
+    SharedPtr<StripingPartition<2> >::Type partition;
+    SharedPtr<MPILayer>::Type layer;
     Coord<2> dimensions;
     std::vector<std::size_t> weights;
     unsigned offset;

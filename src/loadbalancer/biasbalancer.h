@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_LOADBALANCER_BIASBALANCER_H
 
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <boost/shared_ptr.hpp>
+#include <libgeodecomp/misc/sharedptr.h>
 
 namespace LibGeoDecomp {
 
@@ -19,7 +19,7 @@ public:
 
 private:
     bool pristine;
-    boost::shared_ptr<LoadBalancer> balancer;
+    SharedPtr<LoadBalancer>::Type balancer;
 
     WeightVec loadOnOneNodeOnly(WeightVec weights) const;
 };

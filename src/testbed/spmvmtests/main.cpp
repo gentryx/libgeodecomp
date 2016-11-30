@@ -118,17 +118,19 @@ public:
     }
 #else
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
+        // fixme: LFA loop peeler
         ShortVec tmp, weights, values;
-        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
-            tmp.load_aligned(&hoodNew->sum() + i * C);
+        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
+            tmp.load_aligned(&hoodNew->sum());
             for (const auto& j: hoodOld.weights(0)) {
                 weights.load_aligned(j.second());
                 values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
-            tmp.store_aligned(&hoodNew->sum() + i * C);
+            tmp.store_aligned(&hoodNew->sum());
+            hoodNew += C;
         }
     }
 #endif
@@ -362,7 +364,7 @@ private:
     {
         gridOld.callback(
             gridNew,
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, Grid>(
                 gridOld, gridNew, region, nanoStep));
     }
 

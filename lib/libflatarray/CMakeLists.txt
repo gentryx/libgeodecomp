@@ -1,36 +1,39 @@
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 include(CheckCXXCompilerFlag)
 
+if (CMAKE_VERSIPN VERSION_GREATER 2.7)
+  cmake_policy(SET CMP0012 NEW)
+endif()
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
+
 # 1. GENERIC PACKAGE INFORMATION
 if(PACKAGE_NAME)
   set(GLOBAL_PACKAGE_NAME ${PACKAGE_NAME})
 endif()
 
 set(PACKAGE_NAME libflatarray)
-set(PACKAGE_VERSION "0.2.0")
+set(PACKAGE_VERSION "0.3.0")
 set(PACKAGE_VENDOR "Chair for Computer Science 3, FAU Erlangen, Germany")
 set(PACKAGE_HOMEPAGE "http://www.libgeodecomp.org/libflatarray.html")
 set(PACKAGE_EMAIL "users@libgeodecomp.org")
 project(${PACKAGE_NAME})
 
-set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-conversion -Wnon-virtual-dtor")
-include(CheckCXXCompilerFlag)
+set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall")
+
+check_cxx_compiler_flag("-Wno-sign-conversion" SUPPORTS_WARN_NO_WSIGN)
+if(SUPPORTS_WARN_NO_WSIGN)
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wno-sign-conversion")
+endif()
+
+check_cxx_compiler_flag("-Wnon-virtual-dtor" SUPPORTS_WARN_NON_VIRTUAL_DTOR)
+if(SUPPORTS_WARN_NON_WSIGN)
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wnon-virtual-dtor")
+endif()
+
 check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
 if(SUPPORTS_MARCH_NATIVE AND NOT APPLE)
   set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
-endif()
-
-find_package(Boost)
-# use bundled Boost if none is found
-if(NOT Boost_FOUND)
-  set(Boost_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/boost")
-  set(Boost_INCLUDE_DIRS "${Boost_INCLUDE_DIR}")
-  mark_as_advanced(FORCE Boost_INCLUDE_DIR)
-
-  get_directory_property(lfa_has_parent PARENT_DIRECTORY)
-  if(lfa_has_parent)
-    set(USING_BUNDLED_BOOST 1 PARENT_SCOPE)
-  endif()
 endif()
 
 find_package(CUDA)
@@ -94,6 +97,8 @@ lfa_add_config_option(UNITEXEC "May be used to specify a wrapper which then call
 lfa_add_config_option(WITH_CUDA "Enable modules which harness NVIDIA CUDA GPUs" ${CUDA_FOUND} true)
 lfa_add_config_option(LIB_INSTALL_DIR "Directory where libraries will be installed to, may be overridden for 64-bit installations" "lib" false)
 lfa_add_config_option(WITH_CPP14 "Enable C++ 14 features of LibFlatArray" ${SUPPORTS_CPP14} true)
+lfa_add_config_option(WITH_FORCED_CPP11 "Some C++11-compatible compilers support sufficient features of C++14 to allow LibFlatArray to enable C++14 mode. Use this setting in conjunction with WITH_CPP14" false false)
+lfa_add_config_option(WITH_INCREASED_PRECISION "Some architectures (*cough*ARM*cough*) yield poor accuracy when using fast estimates. This option enforces mitigates that flaw at the expense of a few extra cycles." false true)
 
 if(WITH_CUDA AND NOT CUDA_FOUND)
   message(FATAL_ERROR "WITH_CUDA selected, but could not find the NVIDIA CUDA toolkit.")
@@ -102,12 +107,14 @@ endif()
 if(WITH_CPP14)
   # At the moment, CUDA doesn't support C++14, so we limt ourselves to
   # C++11 and hope for the best.
-  IF(WITH_CUDA)
+  IF(WITH_CUDA OR WITH_FORCED_CPP11)
     set(libflatarray_FLAGS "-std=c++11")
   else()
     set(libflatarray_FLAGS "-std=c++14")
   endif()
 endif()
+
+set(libflatarray_FLAGS "${libflatarray_FLAGS} ${LFA_ADDITIONAL_COMPILE_FLAGS}")
 
 get_directory_property(lfa_has_parent PARENT_DIRECTORY)
 if(lfa_has_parent)
@@ -122,8 +129,8 @@ endif()
 set(LFA_C_FLAGS_BACKUP    "${CMAKE_C_FLAGS}")
 set(LFA_CXX_FLAGS_BACKUP  "${CMAKE_CXX_FLAGS}")
 set(LFA_NVCC_FLAGS_BACKUP "${CUDA_NVCC_FLAGS}")
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${libflatarray_FLAGS} ${LFA_ADDITIONAL_COMPILE_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libflatarray_FLAGS} ${LFA_ADDITIONAL_COMPILE_FLAGS}")
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -std=c99")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libflatarray_FLAGS}")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${libflatarray_FLAGS}")
 
 lfa_dump_config("config.h")
@@ -160,27 +167,32 @@ endif()
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake"
   "
-get_filename_component(LIBFLATARRAY_CMAKE_DIR \${CMAKE_CURRENT_LIST_FILE} PATH)
-set(libflatarray_INCLUDE_DIR \"\${LIBFLATARRAY_CMAKE_DIR}/../../../include\")
+set(libflatarray_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}\" \"${CMAKE_CURRENT_LIST_DIR}/include\")
+set(libflatarray_FLAGS \"${libflatarray_FLAGS}\")
+")
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/${PACKAGE_NAME}Config.cmake"
+  "
+set(libflatarray_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/../../../include\")
 set(libflatarray_FLAGS \"${libflatarray_FLAGS}\")
 ")
 
 set(ConfigPackageLocation ${LIB_INSTALL_DIR}/cmake/${PACKAGE_NAME})
 install(
-  FILES "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake"
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/${PACKAGE_NAME}Config.cmake"
   DESTINATION "${ConfigPackageLocation}")
 
-file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp")
+file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/libflatarray/*.hpp")
 foreach(i ${HEADERS})
   install(FILES ${i} DESTINATION include/${PACKAGE_NAME})
 endforeach()
 
-file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/src/detail/*.hpp")
+file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/libflatarray/detail/*.hpp")
 foreach(i ${HEADERS})
   install(FILES ${i} DESTINATION include/${PACKAGE_NAME}/detail)
 endforeach()
 
-file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/src/testbed/*.hpp")
+file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/libflatarray/testbed/*.hpp")
 foreach(i ${HEADERS})
   install(FILES ${i} DESTINATION include/${PACKAGE_NAME}/testbed)
 endforeach()
@@ -189,23 +201,20 @@ install(
   FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/config.h"
   DESTINATION include/${PACKAGE_NAME})
 
-if(USING_BUNDLED_BOOST)
-  install(
-    DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/boost/boost"
-    DESTINATION include/)
-endif()
-
 # 3. BUILD DESCRIPTION
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 if(WITH_CUDA)
-  set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_50")
+  if (${CUDA_VERSION} VERSION_LESS 8.0)
+    set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_20")
+  else()
+    set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_35")
+  endif()
 endif()
 
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_BINARY_DIR})
 
 add_custom_target(check echo "Tests passed.")

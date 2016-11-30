@@ -39,7 +39,11 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(
+        HOOD_NEW& hoodNew,
+        int indexEnd,
+        HOOD_OLD& hoodOld,
+        unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
             hoodNew[i].sum = 0.;

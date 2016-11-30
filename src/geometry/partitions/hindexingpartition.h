@@ -3,10 +3,9 @@
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/grid.h>
-
-#include <boost/shared_ptr.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -118,7 +117,7 @@ public:
     static int triangleTransitions[4][4];
     // (dimensions.x(), dimensions.y(), type) -> coord sequence
     typedef Grid<CoordVector, Topologies::Cube<3>::Topology> CacheType;
-    static boost::shared_ptr<CacheType> triangleCoordsCache;
+    static SharedPtr<CacheType>::Type triangleCoordsCache;
     static Coord<2> maxCachedDimensions;
     static std::map<std::pair<Coord<2>, unsigned>, unsigned> triangleLengthCache;
     static bool cachesInitialized;

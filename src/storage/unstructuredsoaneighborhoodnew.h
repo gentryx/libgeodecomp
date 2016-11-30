@@ -46,7 +46,7 @@ public:
     inline
     int index() const
     {
-        return accessor->index;
+        return accessor->index();
     }
 
     inline

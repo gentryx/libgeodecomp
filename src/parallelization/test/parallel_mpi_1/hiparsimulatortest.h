@@ -5,15 +5,13 @@
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 
-#include <boost/assign/std/vector.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -104,7 +102,7 @@ public:
 
         std::vector<unsigned> actualSteps;
         std::vector<unsigned> expectedSteps;
-        expectedSteps += 20, 21;
+        expectedSteps << 20 << 21;
 
         MemoryWriterType::GridMap grids = memoryWriter->getGrids();
         for (MemoryWriterType::GridMap::iterator iter = grids.begin(); iter != grids.end(); ++iter) {
@@ -146,7 +144,7 @@ public:
 
     void testSteererCallback()
     {
-        boost::shared_ptr<MockSteererType::EventsStore> events(new MockSteererType::EventsStore);
+        SharedPtr<MockSteererType::EventsStore>::Type events(new MockSteererType::EventsStore);
         s->addSteerer(new MockSteererType(5, events));
         s->run();
         s.reset();
@@ -183,7 +181,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<SimulatorType> s;
+    SharedPtr<SimulatorType>::Type s;
     Coord<2> dim;
     unsigned maxSteps;
     unsigned firstStep;
@@ -191,7 +189,7 @@ private:
     unsigned loadBalancingPeriod;
     unsigned ghostzZoneWidth;
     MockWriter<> *mockWriter;
-    boost::shared_ptr<MockWriter<>::EventsStore> events;
+    SharedPtr<MockWriter<>::EventsStore>::Type events;
     MemoryWriterType *memoryWriter;
 };
 

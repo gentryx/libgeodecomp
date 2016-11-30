@@ -4,7 +4,6 @@
 #include <libgeodecomp/parallelization/nesting/vanillastepper.h>
 #include <libgeodecomp/storage/patchbuffer.h>
 
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
@@ -59,10 +58,10 @@ public:
         weights[0] = 4*17 + 7;
         weights[1] = 2*17 - 1;
         weights[2] = 12*17 - weights[0] - weights[1];
-        boost::shared_ptr<Partition<2> > partition(
+        SharedPtr<Partition<2> >::Type partition(
             new StripingPartition<2>(Coord<2>(0, 0), rect.dimensions, 0, weights));
 
-        boost::shared_ptr<AdjacencyManufacturer<2> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<2>);
+        SharedPtr<AdjacencyManufacturer<2> >::Type dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<2>);
 
         // Feed the partition into the partition manager
         partitionManager.reset(new PartitionManager<Topologies::Cube<2>::Topology>());
@@ -100,9 +99,9 @@ public:
 
 private:
     int ghostZoneWidth;
-    boost::shared_ptr<TestInitializer<TestCell<2> > > init;
-    boost::shared_ptr<PartitionManager<Topologies::Cube<2>::Topology> > partitionManager;
-    boost::shared_ptr<StepperType> stepper;
+    SharedPtr<TestInitializer<TestCell<2> > >::Type init;
+    SharedPtr<PartitionManager<Topologies::Cube<2>::Topology> >::Type partitionManager;
+    SharedPtr<StepperType>::Type stepper;
 
     void checkInnerSet(
         unsigned shrink,

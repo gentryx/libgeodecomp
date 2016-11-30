@@ -175,7 +175,7 @@ public:
     void testInvalidHandler()
     {
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO && 0
-        boost::shared_ptr<Interactor> interactor;
+        SharedPtr<Interactor>::Type interactor;
 
         if (mpiLayer->rank() == 0) {
             steerer->addAction(new PassThroughAction<TestCell<2> >("nonExistentHandler", "blah"));
@@ -210,7 +210,7 @@ public:
             steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
         mpiLayer->barrier();
-        boost::shared_ptr<Interactor> interactor;
+        SharedPtr<Interactor>::Type interactor;
 
         if (mpiLayer->rank() == 1) {
             steerer->addHandler(new EchoHandler());
@@ -243,7 +243,7 @@ public:
             steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
         mpiLayer->barrier();
-        boost::shared_ptr<Interactor> interactor;
+        SharedPtr<Interactor>::Type interactor;
 
         if (mpiLayer->rank() == 0) {
             steerer->addHandler(new EchoHandler());
@@ -276,7 +276,7 @@ public:
             steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
         mpiLayer->barrier();
-        boost::shared_ptr<Interactor> interactor;
+        SharedPtr<Interactor>::Type interactor;
 
         if (mpiLayer->rank() == 1) {
             interactor.reset(new Interactor("echo romeo,tango,yankee,papa,echo", 2, true, port));
@@ -305,7 +305,7 @@ public:
     {
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO && 0
         steerer->addDataAccessor(new TestValueAccessor());
-        boost::shared_ptr<Interactor> interactor;
+        SharedPtr<Interactor>::Type interactor;
         mpiLayer->barrier();
 
         if (mpiLayer->rank() == 0) {
@@ -331,8 +331,8 @@ public:
 
 private:
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
-    boost::shared_ptr<MPILayer> mpiLayer;
-    boost::shared_ptr<StripingSimulator<TestCell<2> > > sim;
+    SharedPtr<MPILayer>::Type mpiLayer;
+    SharedPtr<StripingSimulator<TestCell<2> > >::Type sim;
     RemoteSteerer<TestCell<2> > *steerer;
     ParallelMemoryWriter<TestCell<2> > *writer;
     int port;

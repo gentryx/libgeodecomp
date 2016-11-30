@@ -32,6 +32,7 @@ src/parallelization/nesting/test/parallel_mpi_1/main.cpp
 src/parallelization/nesting/test/parallel_mpi_14/main.cpp
 src/parallelization/nesting/test/parallel_mpi_4/main.cpp
 src/parallelization/nesting/test/parallel_hpx_4/main.cpp
+src/parallelization/nesting/test/unit/main.cpp
 src/parallelization/test/parallel_hpx_4_1/main.cpp
 src/parallelization/test/parallel_mpi_1/main.cpp
 src/parallelization/test/parallel_mpi_4/main.cpp

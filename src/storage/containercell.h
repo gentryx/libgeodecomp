@@ -39,6 +39,9 @@ public:
     const static std::size_t MAX_SIZE = SIZE;
 
     template<
+        // currently unused as we don't yet allow unstructed grid
+        // codes to add cells to ContainerCells at runtime:
+        typename WRITE_CONTAINER,
         typename NEIGHBORHOOD,
         typename COLLECTION_INTERFACE>
     class NeighborhoodAdapter
@@ -162,13 +165,18 @@ public:
     template<class HOOD>
     inline void update(const HOOD& neighbors, const int nanoStep)
     {
-        *this = neighbors[Coord<DIM>()];
-
         typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
-        typedef typename NeighborhoodAdapter<HOOD, PassThroughType>::Value NeighborhoodAdapterType;
-        NeighborhoodAdapterType adapter(&neighbors);
+        typedef typename NeighborhoodAdapter<ContainerCell, HOOD, PassThroughType>::Value NeighborhoodAdapterType;
+        NeighborhoodAdapterType adapter(this, &neighbors);
 
-        updateCargo(adapter, adapter, nanoStep);
+        copyOver(neighbors[Coord<DIM>()], adapter, nanoStep);
+        updateCargo(adapter, nanoStep);
+    }
+
+    template<class HOOD_SELF>
+    inline void copyOver(const ContainerCell& oldSelf, HOOD_SELF& ownNeighbors, const int nanoStep)
+    {
+        *this = oldSelf;
     }
 
     /**
@@ -176,8 +184,8 @@ public:
      * initializing this container's cargo, we also provide
      * updateCargo(), which doesn't copy over the old state:
      */
-    template<class HOOD_SELF, class HOOD_ALL>
-    inline void updateCargo(HOOD_SELF& ownNeighbors, HOOD_ALL& allNeighbors, const int nanoStep)
+    template<class HOOD_ALL>
+    inline void updateCargo(HOOD_ALL& allNeighbors, const int nanoStep)
     {
         for (std::size_t i = 0; i < numElements; ++i) {
             cells[i].update(allNeighbors, nanoStep);

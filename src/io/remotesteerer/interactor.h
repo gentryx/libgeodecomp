@@ -5,15 +5,9 @@
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/stringvec.h>
 
-#include <boost/asio.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread.hpp>
-
 namespace LibGeoDecomp {
 
 namespace RemoteSteererHelpers {
-
-using boost::asio::ip::tcp;
 
 /**
  * This class can be used to encapsulate synchronous/asynchronous
@@ -43,24 +37,28 @@ public:
         // are set in advance. But this is crucial as otherwise the
         // results of the thread might be overwritten.
         if (threaded) {
-            thread = boost::thread(ThreadWrapper<Interactor>(this));
+            // fixme
+            // thread = boost::thread(ThreadWrapper<Interactor>(this));
             waitForStartup();
         }
     }
 
     ~Interactor()
     {
-        if (thread.joinable()) {
-            thread.join();
-        }
+        // fixme
+        // if (thread.joinable()) {
+        //     thread.join();
+        // }
     }
 
     void waitForCompletion()
     {
-        boost::unique_lock<boost::mutex> lock(mutex);
-        while(!completed) {
-            signal.wait(lock);
-        }
+        // fixme
+
+        // boost::unique_lock<boost::mutex> lock(mutex);
+        // while(!completed) {
+        //     signal.wait(lock);
+        // }
     }
 
     StringVec feedback()
@@ -71,99 +69,100 @@ public:
     int operator()()
     {
         LOG(DBG, "Interactor::operator(" << command << ")");
-        boost::asio::io_service ioService;
-        tcp::resolver resolver(ioService);
-        tcp::resolver::query query(host, StringOps::itoa(port));
-        tcp::resolver::iterator endpointIterator = resolver.resolve(query);
-        tcp::socket socket(ioService);
-        boost::asio::connect(socket, endpointIterator);
-        boost::system::error_code errorCode;
+        // fixme
+        // boost::asio::io_service ioService;
+        // tcp::resolver resolver(ioService);
+        // tcp::resolver::query query(host, StringOps::itoa(port));
+        // tcp::resolver::iterator endpointIterator = resolver.resolve(query);
+        // tcp::socket socket(ioService);
+        // boost::asio::connect(socket, endpointIterator);
+        // boost::system::error_code errorCode;
 
-        std::string commandSuffix = "\nwait " + StringOps::itoa(feedbackLines) + "\n";
-        boost::asio::write(
-            socket,
-            boost::asio::buffer(command + commandSuffix),
-            boost::asio::transfer_all(),
-            errorCode);
+        // std::string commandSuffix = "\nwait " + StringOps::itoa(feedbackLines) + "\n";
+        // boost::asio::write(
+        //     socket,
+        //     boost::asio::buffer(command + commandSuffix),
+        //     boost::asio::transfer_all(),
+        //     errorCode);
 
-        if (errorCode) {
-            LOG(Logger::WARN, "error while writing to socket: " << errorCode.message());
-        }
+        // if (errorCode) {
+        //     LOG(Logger::WARN, "error while writing to socket: " << errorCode.message());
+        // }
 
-        notifyStartup();
+        // notifyStartup();
 
-        for (;;) {
-            LOG(DBG, "Interactor::operator() reading... [" << feedbackBuffer.size() << "/" << feedbackLines << "]");
-            if (feedbackBuffer.size() >= feedbackLines) {
-                break;
-            }
+        // for (;;) {
+        //     LOG(DBG, "Interactor::operator() reading... [" << feedbackBuffer.size() << "/" << feedbackLines << "]");
+        //     if (feedbackBuffer.size() >= feedbackLines) {
+        //         break;
+        //     }
 
-            boost::array<char, 1024> buf;
-            boost::system::error_code errorCode;
-            std::size_t length = socket.read_some(boost::asio::buffer(buf), errorCode);
-            std::string input(buf.data(), length);
-            StringVec lines = StringOps::tokenize(input, "\n");
-            handleInput(lines);
-        }
+        //     boost::array<char, 1024> buf;
+        //     boost::system::error_code errorCode;
+        //     std::size_t length = socket.read_some(boost::asio::buffer(buf), errorCode);
+        //     std::string input(buf.data(), length);
+        //     StringVec lines = StringOps::tokenize(input, "\n");
+        //     handleInput(lines);
+        // }
 
-        notifyCompletion();
+        // notifyCompletion();
 
-        LOG(DBG, "Interactor::operator() done");
+        // LOG(DBG, "Interactor::operator() done");
         return 0;
     }
 
 private:
     StringVec feedbackBuffer;
-    boost::condition_variable signal;
-    boost::mutex mutex;
+    // boost::condition_variable signal;
+    // boost::mutex mutex;
     std::string command;
     std::size_t feedbackLines;
     int port;
     std::string host;
     bool started;
     bool completed;
-    boost::thread thread;
+    // boost::thread thread;
 
     void waitForStartup()
     {
-        boost::unique_lock<boost::mutex> lock(mutex);
-        while(!started) {
-            signal.wait(lock);
-        }
+        // boost::unique_lock<boost::mutex> lock(mutex);
+        // while(!started) {
+        //     signal.wait(lock);
+        // }
     }
 
     void notifyStartup()
     {
-        boost::unique_lock<boost::mutex> lock(mutex);
-        started = true;
-        signal.notify_one();
+        // boost::unique_lock<boost::mutex> lock(mutex);
+        // started = true;
+        // signal.notify_one();
     }
 
     void notifyCompletion()
     {
-        boost::unique_lock<boost::mutex> lock(mutex);
-        completed = true;
-        signal.notify_one();
+        // boost::unique_lock<boost::mutex> lock(mutex);
+        // completed = true;
+        // signal.notify_one();
     }
 
     void handleInput(const StringVec& lines)
     {
         LOG(DBG, "Interactor::handleInput(" << lines << ")");
-        // only add lines which are not equal to "\0"
-        for (std::size_t i = 0; i < lines.size(); ++i) {
-            const std::string& line = lines[i];
-            if (line == "") {
-                LOG(WARN, "Interactor rejects empty line as feedback");
-                continue;
-            }
-            if ((line.size() == 1) || (line[0] == 0)) {
-                LOG(WARN, "Interactor rejects null line as feedback");
-                continue;
-            }
+        // // only add lines which are not equal to "\0"
+        // for (std::size_t i = 0; i < lines.size(); ++i) {
+        //     const std::string& line = lines[i];
+        //     if (line == "") {
+        //         LOG(WARN, "Interactor rejects empty line as feedback");
+        //         continue;
+        //     }
+        //     if ((line.size() == 1) || (line[0] == 0)) {
+        //         LOG(WARN, "Interactor rejects null line as feedback");
+        //         continue;
+        //     }
 
-            LOG(DBG, "Interactor accepted line »" << line << "«");
-            feedbackBuffer << line;
-        }
+        //     LOG(DBG, "Interactor accepted line »" << line << "«");
+        //     feedbackBuffer << line;
+        // }
     }
 
     template<typename DELEGATE>

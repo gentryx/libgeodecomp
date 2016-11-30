@@ -22,12 +22,15 @@ public:
     friend class SimulationFactoryWithoutCudaTest;
     friend class SimulationFactoryWithCudaTest;
 
+    using typename Initializer<CELL>::AdjacencyPtr;
+
     typedef typename Initializer<CELL>::Topology Topology;
     const static int DIM = Topology::DIM;
 
+    explicit
     VarStepInitializerProxy(Initializer<CELL> *proxyObj) :
         ClonableInitializer<CELL>(),
-        proxyObj(boost::shared_ptr<Initializer<CELL> >(proxyObj)),
+        proxyObj(typename SharedPtr<Initializer<CELL> >::Type(proxyObj)),
         newMaxSteps(proxyObj->maxSteps())
     {}
 
@@ -77,7 +80,7 @@ public:
         return proxyObj->startStep() + newMaxSteps;
     }
 
-    virtual boost::shared_ptr<Adjacency> getAdjacency(const Region<DIM>& region) const override
+    virtual AdjacencyPtr getAdjacency(const Region<DIM>& region) const override
     {
         return proxyObj->getAdjacency(region);
     }
@@ -89,12 +92,13 @@ public:
     }
 
 private:
+    explicit
     VarStepInitializerProxy(VarStepInitializerProxy<CELL>* o) :
         proxyObj(o->proxyObj),
         newMaxSteps(o->newMaxSteps)
     {}
 
-    boost::shared_ptr<Initializer<CELL> > proxyObj;
+    typename SharedPtr<Initializer<CELL> >::Type proxyObj;
     unsigned newMaxSteps;
 };
 

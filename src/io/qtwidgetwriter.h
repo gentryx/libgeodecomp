@@ -9,6 +9,7 @@
 #include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/palette.h>
 #include <libgeodecomp/misc/quickpalette.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:
@@ -220,7 +221,7 @@ public:
         myWindow->requestUpdate();
     }
 
-    boost::shared_ptr<QtWidgetWriterHelpers::Window> window()
+    SharedPtr<QtWidgetWriterHelpers::Window>::Type window()
     {
         return myWindow;
     }
@@ -229,7 +230,7 @@ private:
     Plotter<CELL_TYPE, CELL_PLOTTER> plotter;
     Coord<2> cellDimensions;
     // we can't use multiple inheritance as Q_OBJECT doesn't support template classes.
-    boost::shared_ptr<QtWidgetWriterHelpers::Window> myWindow;
+    SharedPtr<QtWidgetWriterHelpers::Window>::Type myWindow;
 };
 
 }

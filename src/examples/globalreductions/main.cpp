@@ -153,10 +153,10 @@ private:
     Grid<double> createPlasmaField(const Coord<2>& dim, const double amplitude, const double coarseness)
     {
         Grid<double> ret(dim);
-        ret[Coord<2>(0,           0          )] = (Random::gen_d(1.0) - 0.5) * amplitude;
-        ret[Coord<2>(dim.x() - 1, 0          )] = (Random::gen_d(1.0) - 0.5) * amplitude;
-        ret[Coord<2>(0,           dim.y() - 1)] = (Random::gen_d(1.0) - 0.5) * amplitude;
-        ret[Coord<2>(dim.x() - 1, dim.y() - 1)] = (Random::gen_d(1.0) - 0.5) * amplitude;
+        ret[Coord<2>(0,           0          )] = (Random::genDouble(1.0) - 0.5) * amplitude;
+        ret[Coord<2>(dim.x() - 1, 0          )] = (Random::genDouble(1.0) - 0.5) * amplitude;
+        ret[Coord<2>(0,           dim.y() - 1)] = (Random::genDouble(1.0) - 0.5) * amplitude;
+        ret[Coord<2>(dim.x() - 1, dim.y() - 1)] = (Random::genDouble(1.0) - 0.5) * amplitude;
 
         CoordBox<2> box(Coord<2>(), dim - Coord<2>::diagonal(1));
 
@@ -208,7 +208,7 @@ private:
                         ret->get(upperRight) +
                         ret->get(lowerLeft) +
                         ret->get(lowerRight)) +
-                (Random::gen_d(1.0) - 0.5) * (amplitude + coarseness));
+                (Random::genDouble(1.0) - 0.5) * (amplitude + coarseness));
         }
 
         Coord<2> halfDim = box.dimensions / 2;

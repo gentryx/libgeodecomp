@@ -78,11 +78,13 @@ public:
     inline RegionStreakIterator(
         const REGION *region,
         INIT_HELPER initHelper,
-        const Coord<DIM>& offset = Coord<DIM>()) :
-        offset(offset),
+        const Coord<DIM>& originOffset = Coord<DIM>(),
+        int additionalLength = 0) :
+        offset(originOffset),
+        additionalLength(additionalLength),
         region(region)
     {
-        initHelper(&streak, iterators, *region, offset);
+        initHelper(&streak, iterators, *region, offset, additionalLength);
     }
 
     inline void operator++()
@@ -95,7 +97,7 @@ public:
             return;
         } else {
             streak.origin[0] = iterators[0]->first + offset[0];
-            streak.endX = iterators[0]->second + offset[0];
+            streak.endX = iterators[0]->second + offset[0] + additionalLength;
         }
 
         for (int i = 1; i < DIM; ++i) {
@@ -148,6 +150,7 @@ private:
     IndexVectorType::const_iterator iterators[DIM];
     Streak<DIM> streak;
     Coord<DIM> offset;
+    int additionalLength;
     const REGION *region;
 };
 

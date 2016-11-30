@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/storage/memorylocation.h>
+#include <typeinfo>
 
 #ifdef LIBGEODECOMP_WITH_MPI
 #include <libgeodecomp/communication/typemaps.h>

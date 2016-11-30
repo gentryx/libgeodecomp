@@ -1,11 +1,8 @@
 #include <libgeodecomp/geometry/partitions/hindexingpartition.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 
-#include <boost/assign/std/vector.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -18,30 +15,42 @@ public:
     void testFillRectangles()
     {
         std::map<Coord<2>, CoordVector> expected;
-        expected[Coord<2>(4, 1)] += Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(2, 0), Coord<2>(3, 0);
-        expected[Coord<2>(1, 5)] += Coord<2>(0, 0), Coord<2>(0, 1), Coord<2>(0, 2), Coord<2>(0, 3), Coord<2>(0, 4);
-        expected[Coord<2>(2, 2)] += Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(1, 1), Coord<2>(0, 1);
-        expected[Coord<2>(3, 2)] += Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(2, 0), Coord<2>(1, 1), Coord<2>(2, 1), Coord<2>(0, 1);
-        expected[Coord<2>(2, 3)] += Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(1, 1), Coord<2>(1, 2), Coord<2>(0, 2), Coord<2>(0, 1);
-        expected[Coord<2>(3, 3)] +=
-            // 1st half
-            Coord<2>(0, 0),
-            Coord<2>(1, 0), Coord<2>(2, 0),
-            Coord<2>(1, 1), Coord<2>(2, 1), Coord<2>(2, 2),
+        expected[Coord<2>(4, 1)] << Coord<2>(0, 0) << Coord<2>(1, 0) << Coord<2>(2, 0) << Coord<2>(3, 0);
+
+        expected[Coord<2>(1, 5)] << Coord<2>(0, 0)
+                                 << Coord<2>(0, 1)
+                                 << Coord<2>(0, 2)
+                                 << Coord<2>(0, 3)
+                                 << Coord<2>(0, 4);
+
+        expected[Coord<2>(2, 2)] << Coord<2>(0, 0) << Coord<2>(1, 0)
+                                 << Coord<2>(1, 1) << Coord<2>(0, 1);
+
+        expected[Coord<2>(3, 2)] << Coord<2>(0, 0) << Coord<2>(1, 0) << Coord<2>(2, 0)
+                                 << Coord<2>(1, 1) << Coord<2>(2, 1) << Coord<2>(0, 1);
+
+        expected[Coord<2>(2, 3)] << Coord<2>(0, 0) << Coord<2>(1, 0)
+                                 << Coord<2>(1, 1)
+                                 << Coord<2>(1, 2) << Coord<2>(0, 2)
+                                 << Coord<2>(0, 1);
+
+        // 1st half
+        expected[Coord<2>(3, 3)] << Coord<2>(0, 0) << Coord<2>(1, 0) << Coord<2>(2, 0)
+                                 << Coord<2>(1, 1) << Coord<2>(2, 1)
+                                 << Coord<2>(2, 2)
             // 2nd half
-            Coord<2>(1, 2),
-            Coord<2>(0, 2), Coord<2>(0, 1);
-        expected[Coord<2>(4, 4)] +=
-            // 1st half
-            Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(1, 1),
-            Coord<2>(2, 1), Coord<2>(2, 0), Coord<2>(3, 0),
-            Coord<2>(3, 1),
-            Coord<2>(2, 2), Coord<2>(3, 2), Coord<2>(3, 3),
+                                 << Coord<2>(1, 2) << Coord<2>(0, 2)
+                                 << Coord<2>(0, 1);
+        // 1st half
+        expected[Coord<2>(4, 4)] << Coord<2>(0, 0) << Coord<2>(1, 0)
+                                 << Coord<2>(1, 1) << Coord<2>(2, 1)
+                                 << Coord<2>(2, 0) << Coord<2>(3, 0)
+                                 << Coord<2>(3, 1)
+                                 << Coord<2>(2, 2) << Coord<2>(3, 2) << Coord<2>(3, 3)
             // 2nd half
-            Coord<2>(2, 3),
-            Coord<2>(1, 3),
-            Coord<2>(0, 3), Coord<2>(0, 2), Coord<2>(1, 2),
-            Coord<2>(0, 1);
+                                 << Coord<2>(2, 3) << Coord<2>(1, 3) << Coord<2>(0, 3)
+                                 << Coord<2>(0, 2) << Coord<2>(1, 2)
+                                 << Coord<2>(0, 1);
 
         for (std::map<Coord<2>, CoordVector>::iterator i = expected.begin();
              i != expected.end();
@@ -52,8 +61,9 @@ public:
 
             unsigned c = 0;
             HIndexingPartition h(origin, dimension);
-            for (HIndexingPartition::Iterator j = h.begin(); j != h.end(); ++j)
+            for (HIndexingPartition::Iterator j = h.begin(); j != h.end(); ++j) {
                 TS_ASSERT_EQUALS(origin + coords[c++], *j);
+            }
 
             TS_ASSERT_EQUALS(coords.size(), c);
         }
@@ -62,31 +72,34 @@ public:
     void testBeginEnd()
     {
         HIndexingPartition h(Coord<2>(10, 20), Coord<2>(3, 5));
-        CoordVector expected, actual;
+        CoordVector expected;
         // expected traversal order:
         // 034
         // 125
         // e67
         // db8
         // ca9
-        expected +=
-            Coord<2>(10, 20),
-            Coord<2>(10, 21),
-            Coord<2>(11, 21),
-            Coord<2>(11, 20),
-            Coord<2>(12, 20),
-            Coord<2>(12, 21),
-            Coord<2>(11, 22),
-            Coord<2>(12, 22),
-            Coord<2>(12, 23),
-            Coord<2>(12, 24),
-            Coord<2>(11, 24),
-            Coord<2>(11, 23),
-            Coord<2>(10, 24),
-            Coord<2>(10, 23),
-            Coord<2>(10, 22);
-        for (HIndexingPartition::Iterator i = h.begin(); i != h.end(); ++i)
-            actual += *i;
+        expected << Coord<2>(10, 20)
+                 << Coord<2>(10, 21)
+                 << Coord<2>(11, 21)
+                 << Coord<2>(11, 20)
+                 << Coord<2>(12, 20)
+                 << Coord<2>(12, 21)
+                 << Coord<2>(11, 22)
+                 << Coord<2>(12, 22)
+                 << Coord<2>(12, 23)
+                 << Coord<2>(12, 24)
+                 << Coord<2>(11, 24)
+                 << Coord<2>(11, 23)
+                 << Coord<2>(10, 24)
+                 << Coord<2>(10, 23)
+                 << Coord<2>(10, 22);
+
+        CoordVector actual;
+        for (HIndexingPartition::Iterator i = h.begin(); i != h.end(); ++i) {
+            actual << *i;
+        }
+
         TS_ASSERT_EQUALS(expected, actual);
     }
 
@@ -130,8 +143,10 @@ public:
             HIndexingPartition h(Coord<2>(10, 20), dimensions);
             HIndexingPartition::Iterator testIter = h[prolog];
             HIndexingPartition::Iterator normalIter = h.begin();
-            for (int i = 0; i < prolog; ++i)
+            for (int i = 0; i < prolog; ++i) {
                 ++normalIter;
+            }
+
             while (normalIter != h.end()) {
                 TS_ASSERT_EQUALS(*normalIter, *testIter);
                 TS_ASSERT_EQUALS(normalIter, testIter);
@@ -150,8 +165,11 @@ public:
             HIndexingPartition h(Coord<2>(10, 20), dimensions);
             HIndexingPartition::Iterator testIter = h[prolog];
             HIndexingPartition::Iterator normalIter = h.begin();
-            for (int i = 0; i < prolog; ++i)
+
+            for (int i = 0; i < prolog; ++i) {
                 ++normalIter;
+            }
+
             while (normalIter != h.end()) {
                 TS_ASSERT_EQUALS(*normalIter, *testIter);
                 TS_ASSERT_EQUALS(normalIter, testIter);
@@ -164,18 +182,24 @@ public:
 
     void testSquareBracketsOperatorForPartialIteration()
     {
-        CoordVector expected, actual, buffer;
+        CoordVector expected;
+        CoordVector actual;
+        CoordVector buffer;
         unsigned start = 11;
         unsigned end = 47;
 
         HIndexingPartition h(Coord<2>(10, 20), Coord<2>(30, 20));
-        for (HIndexingPartition::Iterator i = h.begin(); i != h.end(); ++i)
-            buffer += *i;
-        for (unsigned i = start; i < end; ++i)
-            expected += buffer[i];
+        for (HIndexingPartition::Iterator i = h.begin(); i != h.end(); ++i) {
+            buffer << *i;
+        }
 
-        for (HIndexingPartition::Iterator i = h[start]; i != h[end]; ++i)
-            actual += *i;
+        for (unsigned i = start; i < end; ++i) {
+            expected << buffer[i];
+        }
+
+        for (HIndexingPartition::Iterator i = h[start]; i != h[end]; ++i) {
+            actual << *i;
+        }
 
         TS_ASSERT_EQUALS(expected, actual);
     }

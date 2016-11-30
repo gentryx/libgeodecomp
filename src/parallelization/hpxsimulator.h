@@ -14,12 +14,13 @@
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/hierarchicalsimulator.h>
 #include <libgeodecomp/parallelization/nesting/hpxupdategroup.h>
 #include <libgeodecomp/parallelization/nesting/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/nesting/steereradapter.h>
 #include <libgeodecomp/parallelization/nesting/stepper.h>
-#include <libgeodecomp/parallelization/nesting/vanillastepper.h>
+#include <libgeodecomp/parallelization/nesting/hpxstepper.h>
 
 namespace LibGeoDecomp {
 namespace HpxSimulatorHelpers {
@@ -36,7 +37,7 @@ void gatherAndBroadcastLocalityIndices(
 template<
     class CELL_TYPE,
     class PARTITION,
-    class STEPPER=LibGeoDecomp::VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableHPX>
+    class STEPPER=LibGeoDecomp::HPXStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableHPX>
 >
 class HpxSimulator : public HierarchicalSimulator<CELL_TYPE>
 {
@@ -51,6 +52,9 @@ public:
     using HierarchicalSimulator<CELL_TYPE>::timeToLastEvent;
     using HierarchicalSimulator<CELL_TYPE>::timeToNextEvent;
 
+    using typename DistributedSimulator<CELL_TYPE>::SteererPtr;
+    using typename DistributedSimulator<CELL_TYPE>::WriterPtr;
+    // fixme:
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef LibGeoDecomp::HierarchicalSimulator<CELL_TYPE> ParentType;
     typedef HPXUpdateGroup<CELL_TYPE> UpdateGroupType;
@@ -61,6 +65,7 @@ public:
     typedef typename UpdateGroupType::PatchProviderVec PatchProviderVec;
     typedef typename UpdateGroupType::PatchAccepterPtr PatchAccepterPtr;
     typedef typename UpdateGroupType::PatchProviderPtr PatchProviderPtr;
+    typedef typename SharedPtr<UpdateGroupType>::Type UpdateGroupPtr;
 
     static const int DIM = Topology::DIM;
 
@@ -128,7 +133,7 @@ public:
     virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
     {
         for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
-            boost::shared_ptr<Steerer<CELL_TYPE> > steererSharedPointer(steerer);
+            SteererPtr steererSharedPointer(steerer);
 
             // two adapters needed, just as for the writers
             typename UpdateGroupType::PatchProviderPtr adapterGhost(
@@ -157,7 +162,7 @@ public:
     virtual void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
         for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
-            boost::shared_ptr<ParallelWriter<CELL_TYPE> > writerSharedPointer(writer);
+            WriterPtr writerSharedPointer(writer);
             // we need two adapters as each ParallelWriter needs to be
             // notified twice: once for the (inner) ghost zone, and once
             // for the inner set.
@@ -190,9 +195,16 @@ public:
 
     std::vector<Chronometer> gatherStatistics()
     {
-        // fixme
-        Chronometer statistics;
-        return std::vector<Chronometer>(1, statistics);
+        // fixme: gather from all updategroups
+
+        std::vector<Chronometer> statistics;
+        statistics.reserve(updateGroups.size());
+
+        for (auto& i: updateGroups) {
+            statistics << i->statistics();
+        }
+
+        return statistics;
     }
 
 private:
@@ -201,11 +213,11 @@ private:
     using DistributedSimulator<CELL_TYPE>::writers;
 
     std::vector<double> updateGroupSpeeds;
-    boost::shared_ptr<LoadBalancer> balancer;
+    SharedPtr<LoadBalancer>::Type balancer;
     unsigned ghostZoneWidth;
     std::string basename;
 
-    std::vector<boost::shared_ptr<UpdateGroupType> > updateGroups;
+    std::vector<UpdateGroupPtr> updateGroups;
     std::vector<double> globalUpdateGroupSpeeds;
     std::vector<std::size_t> localityIndices;
     std::size_t rank;
@@ -229,7 +241,7 @@ private:
             box.dimensions.prod(),
             globalUpdateGroupSpeeds);
 
-        boost::shared_ptr<PARTITION> partition(
+        typename SharedPtr<PARTITION>::Type partition(
             new PARTITION(
                 box.origin,
                 box.dimensions,
@@ -237,7 +249,7 @@ private:
                 weights,
                 initializer->getAdjacency(globalRegion)));
 
-        std::vector<hpx::future<boost::shared_ptr<UpdateGroupType> > > updateGroupCreationFutures;
+        std::vector<hpx::future<UpdateGroupPtr> > updateGroupCreationFutures;
 
         for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
             updateGroupCreationFutures << hpx::async(&HpxSimulator::createUpdateGroup, this, i, partition);
@@ -277,27 +289,26 @@ private:
         hpx::lcos::wait_all(std::move(updateFutures));
     }
 
-    boost::shared_ptr<UpdateGroupType> createUpdateGroup(
+    UpdateGroupPtr createUpdateGroup(
         std::size_t rank,
-        boost::shared_ptr<PARTITION> partition)
+        typename SharedPtr<PARTITION>::Type partition)
     {
         CoordBox<DIM> box = initializer->gridBox();
 
-        boost::shared_ptr<UpdateGroupType> ret;
-        ret.reset(new UpdateGroupType(
-                      partition,
-                      box,
-                      ghostZoneWidth,
-                      initializer,
-                      reinterpret_cast<STEPPER*>(0),
-                      writerAdaptersGhost[rank],
-                      writerAdaptersInner[rank],
-                      steererAdaptersGhost[rank],
-                      steererAdaptersInner[rank],
-                      enableFineGrainedParallelism,
-                      basename,
-                      rank));
-        return ret;
+        return UpdateGroupPtr(
+            new UpdateGroupType(
+                partition,
+                box,
+                ghostZoneWidth,
+                initializer,
+                reinterpret_cast<STEPPER*>(0),
+                writerAdaptersGhost[rank],
+                writerAdaptersInner[rank],
+                steererAdaptersGhost[rank],
+                steererAdaptersInner[rank],
+                enableFineGrainedParallelism,
+                basename,
+                rank));
     }
 };
 

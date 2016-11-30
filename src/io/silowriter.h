@@ -7,6 +7,7 @@
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/storage/collectioninterface.h>
 #include <libgeodecomp/storage/filterbase.h>
 
@@ -298,7 +299,7 @@ public:
     void addSelectorForPointMesh(
         MEMBER CARGO:: *memberPointer,
         const std::string& memberName,
-        const boost::shared_ptr<FilterBase<CARGO> >& filter)
+        const typename SharedPtr<FilterBase<CARGO> >::Type& filter)
     {
         addSelectorForPointMesh(Selector<CARGO>(memberPointer, memberName, filter));
     }
@@ -320,7 +321,7 @@ public:
     void addSelectorForUnstructuredGrid(
         MEMBER CARGO:: *memberPointer,
         const std::string& memberName,
-        const boost::shared_ptr<FilterBase<CARGO> >& filter)
+        const typename SharedPtr<FilterBase<CARGO> >::Type& filter)
     {
         addSelectorForUnstructuredGrid(Selector<CARGO>(memberPointer, memberName, filter));
     }
@@ -340,7 +341,7 @@ public:
     void addSelector(
         MEMBER Cell:: *memberPointer,
         const std::string& memberName,
-        const boost::shared_ptr<FilterBase<Cell> >& filter)
+        const typename SharedPtr<FilterBase<Cell> >::Type& filter)
     {
         addSelector(Selector<Cell>(memberPointer, memberName, filter));
     }
@@ -384,8 +385,8 @@ private:
     std::vector<int> shapeCounts;
     std::vector<char> variableData;
     std::vector<int> nodeList;
-    boost::shared_ptr<SiloWriterHelpers::SelectorContainer<SiloWriter<CELL> > > pointMeshSelectors;
-    boost::shared_ptr<SiloWriterHelpers::SelectorContainer<SiloWriter<CELL> > > unstructuredGridSelectors;
+    typename SharedPtr<SiloWriterHelpers::SelectorContainer<SiloWriter<CELL> > >::Type pointMeshSelectors;
+    typename SharedPtr<SiloWriterHelpers::SelectorContainer<SiloWriter<CELL> > >::Type unstructuredGridSelectors;
     CellSelectorVec cellSelectors;
     Region<DIM> region;
     std::string regularGridLabel;

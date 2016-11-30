@@ -5,14 +5,12 @@
 #include <libgeodecomp.h>
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/nesting/mpiupdategroup.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
-#include <boost/assign/std/deque.hpp>
-
 using namespace LibGeoDecomp;
-using namespace boost::assign;
 
 namespace LibGeoDecomp {
 
@@ -28,7 +26,14 @@ public:
     {
         rank = MPILayer().rank();
         dimensions = Coord<2>(231, 350);
-        weights = genWeights(dimensions.x(), dimensions.y(), MPILayer().size());
+
+        weights.clear();
+        weights << (231 / 2) * (350 * 3 / 4)
+                << (231 / 2) * (350 / 2)
+                << (231 / 2) * (350 / 4);
+        int remainder = dimensions.prod() - sum(weights);
+        weights << remainder;
+
         partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
         ghostZoneWidth = 9;
         init.reset(new TestInitializer<TestCell<2> >(dimensions));
@@ -40,13 +45,15 @@ public:
                 init,
                 reinterpret_cast<StepperType*>(0)));
         expectedNanoSteps.clear();
-        expectedNanoSteps += 5, 7, 8, 33, 55;
+        expectedNanoSteps << 5 << 7 << 8 << 33 << 55;
         mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
+
         for (std::deque<std::size_t>::iterator i = expectedNanoSteps.begin();
              i != expectedNanoSteps.end();
              ++i) {
             mockPatchAccepter->pushRequest(*i);
         }
+
         updateGroup->addPatchAccepter(mockPatchAccepter, StepperType::INNER_SET);
     }
 
@@ -68,28 +75,10 @@ private:
     Coord<2> dimensions;
     std::vector<std::size_t> weights;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<PartitionType> partition;
-    boost::shared_ptr<Initializer<TestCell<2> > > init;
-    boost::shared_ptr<MPIUpdateGroup<TestCell<2> > > updateGroup;
-    boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
-
-    std::vector<std::size_t> genWeights(
-        unsigned width,
-        unsigned height,
-        unsigned size)
-    {
-        std::vector<std::size_t> ret(size);
-        unsigned totalSize = width * height;
-        for (std::size_t i = 0; i < ret.size(); ++i) {
-            ret[i] = pos(i+1, ret.size(), totalSize) - pos(i, ret.size(), totalSize);
-        }
-        return ret;
-    }
-
-    long pos(unsigned i, unsigned size, unsigned totalSize)
-    {
-        return i * totalSize / size;
-    }
+    SharedPtr<PartitionType>::Type partition;
+    SharedPtr<Initializer<TestCell<2> > >::Type init;
+    SharedPtr<MPIUpdateGroup<TestCell<2> > >::Type updateGroup;
+    SharedPtr<MockPatchAccepter<GridType> >::Type mockPatchAccepter;
 };
 
 }

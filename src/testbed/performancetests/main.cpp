@@ -559,7 +559,8 @@ private:
         Coord<2> chunkOffset = gridIndex.scale(chunkDim);
 
         for (int i = 0; i < elementsPerChunk; ++i) {
-            Coord<2> randomCoord = Coord<2>(Random::gen_u(chunkDim.x()), Random::gen_u(chunkDim.y()));
+            Coord<2> randomCoord = Coord<2>(Random::genUnsigned(chunkDim.x()),
+                                            Random::genUnsigned(chunkDim.y()));
             randomCoord += chunkOffset;
 
             if (doesNotCollide(randomCoord, *grid, gridIndex, minDistance)) {
@@ -1302,7 +1303,7 @@ public:
         if (hoodOld.index() % 2 == 1) {
             updateSingle(hoodOld, hoodNew);
             ++hoodOld.index();
-            ++hoodNew.index;
+            ++hoodNew.index();
         }
 
         __m128d oneSeventh = _mm_set1_pd(1.0 / 7.0);
@@ -1310,7 +1311,7 @@ public:
         same.a = _mm_load_pd( &hoodOld[FixedCoord< 0, 0, 0>()].temp());
         __m128d odds0 = _mm_loadu_pd(&hoodOld[FixedCoord<-1, 0, 0>()].temp());
 
-        for (; hoodOld.index() < (indexEnd - 8 + 1); hoodOld.index() += 8, hoodNew.index += 8) {
+        for (; hoodOld.index() < (indexEnd - 8 + 1); hoodOld.index() += 8, hoodNew.index() += 8) {
 
             load(&same, hoodOld, FixedCoord<0, 0, 0>());
 
@@ -1392,7 +1393,7 @@ public:
             same.a = same.e;
         }
 
-        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index) {
+        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index()) {
             updateSingle(hoodOld, hoodNew);
         }
     }
@@ -1455,7 +1456,8 @@ public:
         typedef SoAGrid<
             JacobiCellStreakUpdate,
             APITraits::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
-        CoordBox<3> box(Coord<3>(), dim);
+        Coord<3> topoDim = dim + Coord<3>(2, 2, 2);
+        CoordBox<3> box(Coord<3>(), topoDim);
         GridType gridA(box, JacobiCellStreakUpdate(1.0));
         GridType gridB(box, JacobiCellStreakUpdate(2.0));
         GridType *gridOld = &gridA;
@@ -1464,7 +1466,7 @@ public:
         int maxT = 20;
 
         Region<3> region;
-        region << box;
+        region << CoordBox<3>(Coord<3>(), dim);
 
         double seconds = 0;
         {
@@ -1476,7 +1478,7 @@ public:
                         UpdateFunctorHelpers::ConcurrencyNoP, APITraits::SelectThreadedUpdate<void>::Value> Updater;
 
                 Coord<3> offset(1, 1, 1);
-                Updater updater(&region, &offset, &offset, &box.dimensions, 0, 0, 0);
+                Updater updater(&region, &offset, &offset, &box.dimensions, &box.dimensions, &topoDim, 0, 0, 0);
                 gridNew->callback(gridOld, updater);
                 swap(gridOld, gridNew);
             }
@@ -2282,7 +2284,7 @@ public:
         const int z = 0;
         Double velX, velY, velZ;
 
-        for (; hoodOld.index() < indexEnd; hoodNew.index += Double::ARITY, hoodOld.index() += Double::ARITY) {
+        for (; hoodOld.index() < indexEnd; hoodNew.index() += Double::ARITY, hoodOld.index() += Double::ARITY) {
             velX  =
                 GET_COMP(x-1,y,z,E) + GET_COMP(x-1,y-1,z,NE) +
                 GET_COMP(x-1,y+1,z,SE) + GET_COMP(x-1,y,z-1,TE) +
@@ -2784,18 +2786,20 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (int i = hoodOld.index(); i < indexEnd / C; ++i, ++hoodOld) {
+        // fixme: indexStart handling...
+        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
             ShortVec tmp;
-            tmp.load_aligned(&hoodNew->sum() + i * C);
+            tmp.load_aligned(&hoodNew->sum());
             for (const auto& j: hoodOld.weights(0)) {
                 ShortVec weights, values;
                 weights.load_aligned(j.second());
                 values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
-            tmp.store_aligned(&hoodNew->sum() + i * C);
+            tmp.store_aligned(&hoodNew->sum());
+            hoodNew += HOOD_OLD::ARITY;
         }
     }
 
@@ -2844,17 +2848,19 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         REAL tmp, weights, values;
-        for (int i = hoodOld.index(); i < (indexEnd / C); ++i, ++hoodOld) {
-            tmp = &hoodNew->sum() + i * C;
+        // fixme: indexStart handling...
+        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
+            tmp = &hoodNew->sum();
             for (const auto& j: hoodOld.weights(0)) {
                 weights = j.second();
                 values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
-            (&hoodNew->sum() + i * C) << tmp;
+            (&hoodNew->sum()) << tmp;
+            hoodNew += C;
         }
     }
 
@@ -2986,10 +2992,12 @@ public:
     {
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
-        typedef UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> Grid;
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> > Grid;
         const Coord<1> size(dim.x());
-        Grid gridOld(size);
-        Grid gridNew(size);
+        Region<1> region;
+        region << CoordBox<1>(Coord<1>(), size);
+        Grid gridOld(region);
+        Grid gridNew(region);
 
         // 2. init grid old
         const int maxT = 1;
@@ -3032,7 +3040,7 @@ private:
     {
         gridOld.callback(
             gridNew,
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, GRID>(
                 gridOld, gridNew, region, nanoStep));
     }
 
@@ -3095,7 +3103,7 @@ private:
     {
         gridOld.callback(
             gridNew,
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, GRID>(
                 gridOld,
                 gridNew,
                 region,

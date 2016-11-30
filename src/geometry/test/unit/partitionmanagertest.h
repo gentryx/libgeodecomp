@@ -2,9 +2,6 @@
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 
-#include <boost/assign/std/vector.hpp>
-
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -17,7 +14,13 @@ public:
         dimensions = Coord<2>(20, 20);
         offset = 10 * 20 + 8;
         weights.clear();
-        weights += 15, 12, 1, 32, 25, 40, 67;
+        weights << 15
+                << 12
+                <<  1
+                << 32
+                << 25
+                << 40
+                << 67;
         /**
          * the grid should look like this: (line no. at beginning of
          * the rows, n means that the corresponding cell belongs to
@@ -75,7 +78,7 @@ public:
                 weights,
                 partition);
 
-        boost::shared_ptr<AdjacencyManufacturer<2> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<2>);
+        SharedPtr<AdjacencyManufacturer<2> >::Type dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<2>);
 
         partitionManager.resetRegions(
             dummyAdjacencyManufacturer,
@@ -153,12 +156,12 @@ public:
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 31));
 
         std::vector<std::size_t> weights;
-        weights += 10000, 15000, 25000;
+        weights << 10000 << 15000 << 25000;
         weights << box.dimensions.prod() - sum(weights);
-        boost::shared_ptr<Partition<3> > partition(
+        SharedPtr<Partition<3> >::Type partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
-        boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
+        SharedPtr<AdjacencyManufacturer<3> >::Type dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
 
         PartitionManager<Topologies::Torus<3>::Topology> partitionManager;
         partitionManager.resetRegions(
@@ -188,12 +191,14 @@ public:
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 55));
 
         std::vector<std::size_t> weights;
-        weights += 40000, 15000, 25000;
-        weights << box.dimensions.prod() - sum(weights);
-        boost::shared_ptr<Partition<3> > partition(
+        weights << 40000
+                << 15000
+                << 25000
+                << (box.dimensions.prod() - sum(weights));
+        SharedPtr<Partition<3> >::Type partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
-        boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
+        SharedPtr<AdjacencyManufacturer<3> >::Type dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
 
         PartitionManager<Topologies::Torus<3>::Topology> partitionManager;
         partitionManager.resetRegions(
@@ -273,7 +278,7 @@ public:
 private:
     Coord<2> dimensions;
     unsigned offset;
-    boost::shared_ptr<StripingPartition<2> > partition;
+    SharedPtr<StripingPartition<2> >::Type partition;
     std::vector<std::size_t> weights;
     unsigned rank;
     unsigned ghostZoneWidth;
@@ -286,7 +291,7 @@ private:
         unsigned size,
         unsigned ghostZoneWidth,
         const std::vector<std::size_t>& weights,
-        const boost::shared_ptr<StripingPartition<2> > partition)
+        const SharedPtr<StripingPartition<2> >::Type& partition)
     {
         std::vector<CoordBox<2> > boundingBoxes(size);
         long startOffset = offset;
@@ -314,7 +319,7 @@ private:
         unsigned size,
         unsigned ghostZoneWidth,
         const std::vector<std::size_t>& weights,
-        const boost::shared_ptr<StripingPartition<2> > partition)
+        const SharedPtr<StripingPartition<2> >::Type& partition)
     {
         std::vector<CoordBox<2> > boundingBoxes(size);
         long startOffset = offset;
@@ -338,21 +343,23 @@ private:
         return boundingBoxes;
     }
 
-    template<class PARTITION>
     void checkRegion(
         const Region<2>& region,
         unsigned start,
         unsigned end,
-        const boost::shared_ptr<PARTITION> partition)
+        const SharedPtr<StripingPartition<2> >::Type& partition)
     {
         std::vector<Coord<2> > expected;
         std::vector<Coord<2> > actual;
-        for (typename PARTITION::Iterator i = (*partition)[start];
+        for (StripingPartition<2>::Iterator i = (*partition)[start];
              i != (*partition)[end];
-             ++i)
-            expected += *i;
-        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i)
-            actual += *i;
+             ++i) {
+            expected << *i;
+        }
+
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            actual << *i;
+        }
 
         TS_ASSERT_EQUALS(expected, actual);
     }

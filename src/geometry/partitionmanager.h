@@ -6,8 +6,7 @@
 #include <libgeodecomp/geometry/dummyadjacencymanufacturer.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/regionbasedadjacency.h>
-
-#include <boost/shared_ptr.hpp>
+#include <libgeodecomp/misc/sharedptr.h>
 
 namespace LibGeoDecomp {
 
@@ -36,7 +35,7 @@ public:
         const CoordBox<DIM>& simulationArea = CoordBox<DIM>())
     {
         std::vector<std::size_t> weights(1, simulationArea.size());
-        boost::shared_ptr<Partition<DIM> > partition(
+        typename SharedPtr<Partition<DIM> >::Type partition(
             new StripingPartition<DIM>(
                 Coord<DIM>(),
                 simulationArea.dimensions,
@@ -44,7 +43,7 @@ public:
                 weights));
 
         resetRegions(
-            boost::make_shared<DummyAdjacencyManufacturer<DIM> >(DummyAdjacencyManufacturer<DIM>()),
+            makeShared(new DummyAdjacencyManufacturer<DIM>()),
             simulationArea,
             partition,
             0,
@@ -66,9 +65,9 @@ public:
      * accelerators).
      */
     inline void resetRegions(
-        boost::shared_ptr<AdjacencyManufacturer<DIM> > newAdjacencyManufacturer,
+        typename SharedPtr<AdjacencyManufacturer<DIM> >::Type newAdjacencyManufacturer,
         const CoordBox<DIM>& newSimulationArea,
-        boost::shared_ptr<Partition<DIM> > newPartition,
+        typename SharedPtr<Partition<DIM> >::Type newPartition,
         unsigned newRank,
         unsigned newGhostZoneWidth)
     {
@@ -239,8 +238,8 @@ public:
     }
 
 private:
-    boost::shared_ptr<AdjacencyManufacturer<DIM> > adjacencyManufacturer;
-    boost::shared_ptr<Partition<DIM> > partition;
+    typename SharedPtr<AdjacencyManufacturer<DIM> >::Type adjacencyManufacturer;
+    typename SharedPtr<Partition<DIM> >::Type partition;
     CoordBox<DIM> simulationArea;
     Region<DIM> outerRim;
     Region<DIM> volatileKernel;
@@ -255,12 +254,12 @@ private:
     std::vector<CoordBox<DIM> > boundingBoxes;
     std::vector<CoordBox<DIM> > expandedBoundingBoxes;
 
-    const boost::shared_ptr<Adjacency> adjacency(const Region<DIM>& region) const
+    const SharedPtr<Adjacency>::Type adjacency(const Region<DIM>& region) const
     {
         return adjacencyManufacturer->getAdjacency(region);
     }
 
-    const boost::shared_ptr<Adjacency> reverseAdjacency(const Region<DIM>& region) const
+    const SharedPtr<Adjacency>::Type reverseAdjacency(const Region<DIM>& region) const
     {
         return adjacencyManufacturer->getReverseAdjacency(region);
     }

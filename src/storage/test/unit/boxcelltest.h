@@ -29,7 +29,7 @@ public:
         maxDistance2(maxDistance * maxDistance)
     {}
 
-    template<class HOOD>
+    template<typename HOOD>
     inline void update(const HOOD& hood, const int nanoStep)
     {
         neighbors = 0;
@@ -67,6 +67,40 @@ private:
     double positionFactor;
     double maxDistance2;
     int neighbors;
+};
+
+/**
+ * Another simple test particle which simply spawns new particles
+ */
+class SpawningParticle
+{
+public:
+    class API : public APITraits::HasCubeTopology<3>
+    {};
+
+    explicit SpawningParticle(
+        const FloatCoord<3>& pos = FloatCoord<3>(),
+        const int numParticlesToBeSpawned = 0) :
+        pos(pos),
+        numParticlesToBeSpawned(numParticlesToBeSpawned)
+    {}
+
+    inline const FloatCoord<3>& getPos() const
+    {
+        return pos;
+    }
+
+    template<typename HOOD>
+    inline void update(HOOD& hood, const int nanoStep)
+    {
+        for (int i = 0; i < numParticlesToBeSpawned; ++i) {
+            hood << SpawningParticle(pos, 0);
+        }
+    }
+
+private:
+    FloatCoord<3> pos;
+    int numParticlesToBeSpawned;
 };
 
 class BoxCellTest : public CxxTest::TestSuite
@@ -179,7 +213,6 @@ public:
                 std::size_t expected = 4;
 
                 TS_ASSERT_EQUALS(grid2[Coord<2>(x, y)].size(), expected);
-
             }
         }
 
@@ -265,7 +298,7 @@ public:
             &grid2,
             0);
 
-        // we assume that after the first update step all four
+        // we assume that after the first update step all eight
         // particles still reside in their original cell:
         for (int z = 0; z < gridDim.z(); ++z) {
             for (int y = 0; y < gridDim.y(); ++y) {
@@ -273,11 +306,107 @@ public:
                     std::size_t expected = 8;
 
                     TS_ASSERT_EQUALS(grid2[Coord<3>(x, y, z)].size(), expected);
-
                 }
             }
         }
 
+        UpdateFunctor<CellType>()(
+            region,
+            Coord<3>(),
+            Coord<3>(),
+            grid2,
+            &grid1,
+            0);
+
+        // after the second step we assume that particles on the
+        // boundaries have transitioned to neighboring cells:
+        for (int z = 0; z < gridDim.z(); ++z) {
+            for (int y = 0; y < gridDim.y(); ++y) {
+                for (int x = 0; x < gridDim.x(); ++x) {
+
+                    Coord<3> expectedCubeDim(2, 2, 2);
+                    if (x == 0) {
+                        expectedCubeDim.x() += 1;
+                    }
+                    if (y == 0) {
+                        expectedCubeDim.y() += 1;
+                    }
+                    if (z == 0) {
+                        expectedCubeDim.z() += 1;
+                    }
+
+                    if (x == (gridDim.x() - 1)) {
+                        expectedCubeDim.x() -= 1;
+                    }
+                    if (y == (gridDim.y() - 1)) {
+                        expectedCubeDim.y() -= 1;
+                    }
+                    if (z == (gridDim.z() - 1)) {
+                        expectedCubeDim.z() -= 1;
+                    }
+
+                    std::size_t expected = expectedCubeDim.prod();
+
+                    TS_ASSERT_EQUALS(grid1[Coord<3>(x, y, z)].size(), expected);
+                }
+            }
+        }
+    }
+
+    void testParticleSpawn()
+    {
+        // we need space for (6 * 5 * 4 + 1) particles
+        typedef BoxCell<FixedArray<SpawningParticle, 121> > CellType;
+        typedef APITraits::SelectTopology<CellType>::Value Topology;
+
+        Coord<3> gridDim(7, 6, 5);
+        FloatCoord<3> cellDim(2.0, 3.0, 5.0);
+        CoordBox<3> box(Coord<3>(0, 0), gridDim);
+        Region<3> region;
+        region << box;
+
+        Grid<CellType, Topology> grid1(gridDim);
+        Grid<CellType, Topology> grid2(gridDim);
+
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            FloatCoord<3> origin = cellDim.scale(*i);
+            FloatCoord<3> particlePos = origin + cellDim.scale(FloatCoord<3>(0.5, 0.5, 0.5));
+            int numParticlesToBeSpawned = i->prod();
+
+            CellType cell(origin, cellDim);
+            cell.insert(SpawningParticle(particlePos, numParticlesToBeSpawned));
+
+            grid1[*i] = cell;
+        }
+
+        UpdateFunctor<CellType>()(
+            region,
+            Coord<3>(),
+            Coord<3>(),
+            grid1,
+            &grid2,
+            0);
+
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            int expectedParticles = 1 + i->prod();
+
+            TS_ASSERT_EQUALS(grid2[*i].size(), expectedParticles);
+        }
+    }
+
+    void testRemove()
+    {
+        typedef BoxCell<FixedArray<SpawningParticle, 222> > CellType;
+
+        FloatCoord<3> origin(3.0, 3.0, 3.0);
+        FloatCoord<3> cellDim(2.0, 2.0, 2.0);
+
+        CellType cell(origin, cellDim);
+        cell.insert(SpawningParticle(FloatCoord<3>(3.5, 3.5, 3.5), 100));
+
+        TS_ASSERT_EQUALS(cell.size(), 1);
+        cell.remove(0);
+        TS_ASSERT_EQUALS(cell.size(), 0);
     }
 
 private:

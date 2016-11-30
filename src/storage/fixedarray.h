@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_STORAGE_FIXEDARRAY_H
 #define LIBGEODECOMP_STORAGE_FIXEDARRAY_H
 
+#include <algorithm>
 #include <stdexcept>
 #include <libgeodecomp/config.h>
 
@@ -63,12 +64,16 @@ public:
         return store + elements;
     }
 
+    inline static std::size_t capacity()
+    {
+        return SIZE;
+    }
+
     void push_back(const T& t)
     {
         if (elements >= SIZE) {
             throw std::out_of_range("capacity exceeded");
         }
-
         store[elements++] = t;
     }
 
@@ -78,163 +83,40 @@ public:
         return *this;
     }
 
-    FixedArray<T, SIZE>& operator-=(const FixedArray<T, SIZE>& other)
+    FixedArray<T, SIZE> operator+(const FixedArray<T, SIZE>& other) const
     {
-        std::size_t minSize = std::min(elements, other.elements);
-        std::size_t maxSize = std::max(elements, other.elements);
-        std::size_t i = 0;
-
-        for (; i < minSize; ++i) {
-            store[i] -= other[i];
+        if ((elements + other.elements) > SIZE) {
+            throw std::out_of_range("FixedArray capacity exceeded in concatenation");
         }
 
-        for (; i < other.size(); ++i) {
-            store[i] = -other[i];
+        FixedArray<T, SIZE> ret;
+
+        for (std::size_t i = 0; i < elements; ++i) {
+            ret << (*this)[i];
         }
 
-        elements = maxSize;
-        return *this;
+        for (std::size_t i = 0; i < other.elements; ++i) {
+            ret << other[i];
+        }
+
+        return ret;
     }
 
     FixedArray<T, SIZE>& operator+=(const FixedArray<T, SIZE>& other)
     {
-        std::size_t minSize = std::min(elements, other.elements);
-        std::size_t maxSize = std::max(elements, other.elements);
-        std::size_t i = 0;
-
-        for (; i < minSize; ++i) {
-            store[i] += other[i];
+        if ((elements + other.elements) > SIZE) {
+            throw std::out_of_range("FixedArray capacity exceeded in concatenation");
         }
 
-        for (; i < other.size(); ++i) {
-            store[i] = other[i];
-        }
-
-        elements = maxSize;
-        return *this;
-    }
-
-    FixedArray<T, SIZE> operator-(const FixedArray<T, SIZE>& other) const
-    {
-        std::size_t minSize = std::min(elements, other.elements);
-        std::size_t maxSize = std::max(elements, other.elements);
-        FixedArray<T, SIZE> ret(maxSize);
-        std::size_t i = 0;
-
-        for (; i < minSize; ++i) {
-            ret[i] = store[i] - other[i];
-        }
-
-        for (; i < size(); ++i) {
-            ret[i] = store[i];
-        }
-
-        for (; i < other.size(); ++i) {
-            ret[i] = -other[i];
-        }
-
-        return ret;
-    }
-
-    FixedArray<T, SIZE> operator+(const FixedArray<T, SIZE>& other) const
-    {
-        std::size_t minSize = std::min(elements, other.elements);
-        std::size_t maxSize = std::max(elements, other.elements);
-        FixedArray<T, SIZE> ret(maxSize);
-        std::size_t i = 0;
-
-        for (; i < minSize; ++i) {
-            ret[i] = store[i] + other[i];
-        }
-
-        for (; i < size(); ++i) {
-            ret[i] = store[i];
-        }
-
-        for (; i < other.size(); ++i) {
-            ret[i] = other[i];
-        }
-
-        return ret;
-    }
-
-    template<typename F>
-    FixedArray<T, SIZE>& operator/=(F f)
-    {
-        for (std::size_t i = 0; i < size(); ++i) {
-            (*this)[i] /= f;
+        for (std::size_t i = 0; i < other.elements; ++i) {
+            (*this) << other[i];
         }
 
         return *this;
     }
 
-    template<typename F>
-    FixedArray<T, SIZE>& operator*=(F f)
-    {
-        FixedArray<T, SIZE> ret(size());
-
-        for (std::size_t i = 0; i < size(); ++i) {
-            (*this)[i] *= f;
-        }
-
-        return *this;
-    }
-
-    template<typename F>
-    FixedArray<T, SIZE> operator/(F f) const
-    {
-        FixedArray<T, SIZE> ret(size());
-
-        for (std::size_t i = 0; i < size(); ++i) {
-            ret[i] = (*this)[i] / f;
-        }
-
-        return ret;
-    }
-
-    template<typename F>
-    FixedArray<T, SIZE> operator*(F f) const
-    {
-        FixedArray<T, SIZE> ret(size());
-
-        for (std::size_t i = 0; i < size(); ++i) {
-            ret[i] = (*this)[i] * f;
-        }
-
-        return ret;
-    }
-
-    bool operator<(const FixedArray<T, SIZE>& other) const
-    {
-        if (size() != other.size()) {
-            return size() < other.size();
-        }
-
-        for (std::size_t i = 0; i < size(); ++i) {
-            if ((*this)[i] != other[i]) {
-                return (*this)[i] < other[i];
-            }
-        }
-
-        return false;
-    }
-
-    bool operator>(const FixedArray<T, SIZE>& other) const
-    {
-        if (size() != other.size()) {
-            return size() > other.size();
-        }
-
-        for (std::size_t i = 0; i < size(); ++i) {
-            if ((*this)[i] != other[i]) {
-                return (*this)[i] > other[i];
-            }
-        }
-
-        return false;
-    }
-
-    bool operator==(const FixedArray<T, SIZE>& other) const
+    template<int SIZE2>
+    bool operator==(const FixedArray<T, SIZE2>& other) const
     {
         if (size() != other.size()) {
             return false;
@@ -261,7 +143,16 @@ public:
 
     void erase(T *elem)
     {
-        for (T *i = elem; i != end(); ++i) {
+        for (T *i = elem; i != (end() - 1); ++i) {
+            *i = *(i + 1);
+        }
+
+        --elements;
+    }
+
+    void remove(std::size_t index)
+    {
+        for (T *i = begin() + index; i != (end() - 1); ++i) {
             *i = *(i + 1);
         }
 
@@ -274,6 +165,12 @@ public:
             throw std::out_of_range("reserving too many elements");
         }
 
+        // this is a NOP since we don't reallocate
+    }
+
+    void resize(int num)
+    {
+        reserve(num);
         elements = num;
     }
 

@@ -34,8 +34,6 @@ class CUDAGridTest : public CxxTest::TestSuite
 public:
     void testBasic()
     {
-#ifdef LIBGEODECOMP_WITH_CUDA
-
         Coord<2> dim(30, 10);
         CoordBox<2> box(Coord<2>(), dim);
 
@@ -70,7 +68,6 @@ public:
         TS_ASSERT_EQUALS(buffer.getEdge(), -4711);
         buffer.setEdge(123);
         TS_ASSERT_EQUALS(buffer.getEdge(), 123);
-#endif
     }
 
     void testRegionConstructor()
@@ -118,8 +115,6 @@ public:
 
     void test3d()
     {
-#ifdef LIBGEODECOMP_WITH_CUDA
-
         typedef TestInitializer<TestCell<3> > TestCellInitializer;
         typedef TestCellInitializer::Topology Topology;
 
@@ -154,14 +149,10 @@ public:
 
             TS_ASSERT_EQUALS(expected, target[*i]);
         }
-
-#endif
     }
 
     void testTopologicalCorrectness()
     {
-#ifdef LIBGEODECOMP_WITH_CUDA
-
         // simulation space: (0,0), (100, 100),
         //
         // coordinates covered by topologically correct grids are
@@ -227,12 +218,10 @@ public:
             TS_ASSERT_EQUALS(target[c], expected);
         }
 
-#endif
     }
 
     void testConstructor()
     {
-#ifdef LIBGEODECOMP_WITH_CUDA
         Coord<2> dim(30, 10);
         CoordBox<2> box(Coord<2>(), dim);
         Region<2> region;
@@ -269,12 +258,10 @@ public:
             TS_ASSERT_EQUALS(counter, hostGrid2[*i]);
             TS_ASSERT_EQUALS(counter, hostGrid3[*i]);
         }
-#endif
     }
 
     void testGridBaseCompatibilityAndBoundingBox()
     {
-#ifdef LIBGEODECOMP_WITH_CUDA
         Coord<3> dim(30, 10, 5);
         CoordBox<3> box(Coord<3>(), dim);
         CUDAGrid<int, Topologies::Torus<3>::Topology> deviceGrid(box);
@@ -285,12 +272,10 @@ public:
         Region<3> boundingRegion;
         boundingRegion << box;
         TS_ASSERT_EQUALS(boundingRegion, deviceGrid.boundingRegion());
-#endif
     }
 
     void testGetSetOfSingleCells2D()
     {
-#ifdef LIBGEODECOMP_WITH_CUDA
         Coord<2> dim(40, 50);
         Coord<2> origin(30, 20);
         CoordBox<2> box(origin, dim);
@@ -315,12 +300,10 @@ public:
         // this ensures topology is honored and the edge cell has been
         // set in the out-of-bounds access above:
         TS_ASSERT_EQUALS(SimpleCUDATestCell(-4, -8), grid.getEdge());
-#endif
     }
 
     void testGetSetOfSingleCells3D()
     {
-#ifdef LIBGEODECOMP_WITH_CUDA
         Coord<3> dim(30, 10, 5);
         Coord<3> origin(-3, -2, -1);
         CoordBox<3> box(origin, dim);
@@ -342,12 +325,10 @@ public:
         // important for ensuring the torus topology was honored in
         // the out-of-bounds access above:
         TS_ASSERT_EQUALS(SimpleCUDATestCell(6.6, 6), grid.get(Coord<3>(26, -2, -1)));
-#endif
     }
 
     void testGetSetOfMultipleCells2D()
     {
-#ifdef LIBGEODECOMP_WITH_CUDA
         Coord<2> dim(40, 50);
         Coord<2> origin(30, 20);
         CoordBox<2> box(origin, dim);
@@ -368,7 +349,6 @@ public:
         grid.get(streak, &target[0]);
 
         TS_ASSERT_EQUALS(source, target);
-#endif
     }
 
     void testSelectorLoadSaveMember()
@@ -378,7 +358,7 @@ public:
         CoordBox<2> box(origin, dim);
 
         CUDAGrid<TestCell<2> > grid(box);
-        Selector<TestCell<2> > selector = MAKE_SELECTOR(TestCell<2>, testValue);
+        Selector<TestCell<2> > selector(&TestCell<2>::testValue, "testValue");
 
         std::vector<double> buffer;
         for (int i = 0; i < 90; ++i) {

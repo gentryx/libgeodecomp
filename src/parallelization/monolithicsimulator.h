@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/simulator.h>
 
 namespace LibGeoDecomp {
@@ -18,7 +19,8 @@ class MonolithicSimulator : public Simulator<CELL_TYPE>
 public:
     using typename Simulator<CELL_TYPE>::Topology;
     using Simulator<CELL_TYPE>::chronometer;
-    typedef std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > WriterVector;
+    typedef typename SharedPtr<Writer<CELL_TYPE> >::Type WriterPtr;
+    typedef std::vector<WriterPtr> WriterVector;
 
     inline explicit MonolithicSimulator(Initializer<CELL_TYPE> *initializer) :
         Simulator<CELL_TYPE>(initializer)
@@ -36,7 +38,7 @@ public:
      */
     virtual void addWriter(Writer<CELL_TYPE> *writer)
     {
-        writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer));
+        writers.push_back(WriterPtr(writer));
     }
 
     std::vector<Chronometer> gatherStatistics()

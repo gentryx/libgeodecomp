@@ -167,11 +167,12 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    inline static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    inline static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         typedef LibFlatArray::short_vec<double, C> ShortVec;
 
-        for (; hoodOld.index() < indexEnd / C; ++hoodOld, ++hoodNew) {
+        // fixme: indexStart handling...
+        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
             ShortVec x = &hoodOld->x();
             ShortVec y = &hoodOld->y();
             ShortVec cReal = &hoodOld->cReal();
@@ -201,6 +202,7 @@ public:
             &hoodNew->y() << y;
             &hoodNew->cReal() << cReal;
             &hoodNew->cImag() << cImag;
+            hoodNew += C;
         }
     }
 };
@@ -226,6 +228,8 @@ template<typename CELL_TYPE>
 class CellInitializer : public SimpleInitializer<CELL_TYPE>
 {
 public:
+    using typename SimpleInitializer<CELL_TYPE>::AdjacencyPtr;
+
     CellInitializer(Coord<2> dim, int steps) :
         SimpleInitializer<CELL_TYPE>(Coord<1>(dim.prod()), steps),
         dim(dim)
@@ -240,9 +244,9 @@ public:
         }
     }
 
-    boost::shared_ptr<Adjacency> getAdjacency(const Region<1>& region) const
+    AdjacencyPtr getAdjacency(const Region<1>& region) const
     {
-        boost::shared_ptr<Adjacency> adjacency(new RegionBasedAdjacency);
+        AdjacencyPtr adjacency(new RegionBasedAdjacency);
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             int id = i->x();

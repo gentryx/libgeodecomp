@@ -22,10 +22,11 @@
 #include <string>
 #include <sstream>
 
-
 #include <libgeodecomp/geometry/fixedcoord.h>
+#include <libgeodecomp/geometry/floatcoord.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+#include <boost/mpl/bool.hpp>
 #include <boost/serialization/is_bitwise_serializable.hpp>
 #endif
 
@@ -81,8 +82,12 @@ class Coord<1>
 public:
     friend class BoostSerialization;
     friend class HPXSerialization;
+    friend class MemberFilterCudaTest;
+    friend class MemberFilterTest;
     friend class Typemaps;
+
     typedef int ValueType;
+
     static const int DIM = 1;
 
     __host__ __device__
@@ -102,6 +107,11 @@ public:
     inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)
     {
         c[0] = X;
+    }
+
+    inline explicit Coord(const FloatCoord<1>& other)
+    {
+        c[0] = other[0];
     }
 
 #ifdef __CUDACC__
@@ -221,13 +231,11 @@ public:
         return Coord(scale * x());
     }
 
-
     __host__ __device__
     inline Coord operator*(float scale) const
     {
         return Coord(scale * x());
     }
-
 
     __host__ __device__
     inline Coord operator*(double scale) const
@@ -309,8 +317,12 @@ class Coord<2>
 public:
     friend class BoostSerialization;
     friend class HPXSerialization;
+    friend class MemberFilterCudaTest;
+    friend class MemberFilterTest;
     friend class Typemaps;
+
     typedef int ValueType;
+
     static const int DIM = 2;
 
     __host__ __device__
@@ -341,6 +353,12 @@ public:
     {
         c[0] = X;
         c[1] = Y;
+    }
+
+    inline explicit Coord(const FloatCoord<2>& other)
+    {
+        c[0] = other[0];
+        c[1] = other[1];
     }
 
 #ifdef __CUDACC__
@@ -565,8 +583,12 @@ class Coord<3>
 public:
     friend class BoostSerialization;
     friend class HPXSerialization;
+    friend class MemberFilterCudaTest;
+    friend class MemberFilterTest;
     friend class Typemaps;
+
     typedef int ValueType;
+
     static const int DIM = 3;
 
     __host__ __device__
@@ -590,6 +612,13 @@ public:
         c[0] = X;
         c[1] = Y;
         c[2] = Z;
+    }
+
+    inline explicit Coord(const FloatCoord<3>& other)
+    {
+        c[0] = other[0];
+        c[1] = other[1];
+        c[2] = other[2];
     }
 
 #ifdef __CUDACC__

@@ -8,6 +8,8 @@
 #include <libgeodecomp/storage/serializationbuffer.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
 
+class SparseMatrixVectorMultiplication;
+
 namespace LibGeoDecomp {
 
 namespace ReorderingUnstructuredGridHelpers {
@@ -125,6 +127,8 @@ template<typename DELEGATE_GRID>
 class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellType, 1, typename DELEGATE_GRID::WeightType>
 {
 public:
+    template<typename CELL, typename GRID>
+    friend class SparseMatrixInitializer;
     template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
     friend class UnstructuredNeighborhood;
     template<typename CELL>
@@ -132,6 +136,7 @@ public:
     friend class ReorderingUnstructuredGridTest;
     friend class UnstructuredNeighborhoodTest;
     friend class UnstructuredTestCellTest;
+    friend class ::SparseMatrixVectorMultiplication;
 
     typedef typename DELEGATE_GRID::CellType CellType;
     typedef typename DELEGATE_GRID::WeightType WeightType;

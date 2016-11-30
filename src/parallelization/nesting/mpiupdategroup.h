@@ -28,18 +28,22 @@ public:
     typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchProviderVec PatchProviderVec;
     typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkAccepter PatchLinkAccepter;
     typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkProvider PatchLinkProvider;
-
+    typedef typename UpdateGroup<CELL_TYPE, PatchLink>::InitPtr InitPtr;
+    typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PartitionPtr PartitionPtr;
+    typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkAccepterPtr PatchLinkAccepterPtr;
+    typedef typename UpdateGroup<CELL_TYPE, PatchLink>::PatchLinkProviderPtr PatchLinkProviderPtr;
 
     using UpdateGroup<CELL_TYPE, PatchLink>::init;
     using UpdateGroup<CELL_TYPE, PatchLink>::rank;
+
     const static int DIM = UpdateGroup<CELL_TYPE, PatchLink>::DIM;
 
     template<typename STEPPER>
     MPIUpdateGroup(
-        boost::shared_ptr<Partition<DIM> > partition,
+        PartitionPtr partition,
         const CoordBox<DIM>& box,
         unsigned ghostZoneWidth,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        InitPtr initializer,
         STEPPER *stepperType,
         PatchAccepterVec patchAcceptersGhost = PatchAccepterVec(),
         PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
@@ -76,9 +80,9 @@ private:
         return boundingBoxes;
     }
 
-    virtual boost::shared_ptr<PatchLinkAccepter> makePatchLinkAccepter(int target, const Region<DIM>& region)
+    virtual PatchLinkAccepterPtr makePatchLinkAccepter(int target, const Region<DIM>& region)
     {
-        return boost::shared_ptr<PatchLinkAccepter>(
+        return PatchLinkAccepterPtr(
             new PatchLinkAccepter(
                 region,
                 target,
@@ -88,9 +92,9 @@ private:
 
     }
 
-    virtual boost::shared_ptr<PatchLinkProvider> makePatchLinkProvider(int source, const Region<DIM>& region)
+    virtual PatchLinkProviderPtr makePatchLinkProvider(int source, const Region<DIM>& region)
     {
-        return boost::shared_ptr<PatchLinkProvider>(
+        return PatchLinkProviderPtr(
             new PatchLinkProvider(
                 region,
                 source,

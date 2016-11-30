@@ -2,10 +2,8 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testhelper.h>
 
-#include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -95,7 +93,9 @@ public:
         MPILayer layer;
         int root = 0;
         std::vector<double> expected;
-        expected += 2,4,24;
+        expected <<  2
+                 <<  4
+                 << 24;
         std::vector<double> actual;
         std::vector<double> source;
 
@@ -170,8 +170,10 @@ public:
         MPILayer layer;
         int i = layer.rank() + 1000;
         std::vector<int> actual, expected;
-        actual += 4711, 4712;
-        expected += 1000, 1001;
+        actual << 4711
+               << 4712;
+        expected << 1000
+                 << 1001;
         layer.allGather(i, &actual);
         TS_ASSERT_EQUALS(actual, expected);
     }
@@ -181,16 +183,30 @@ public:
         MPILayer layer;
         std::vector<unsigned> values;
         std::vector<int> lengths;
-        lengths += 3, 5;
+        lengths << 3
+                << 5;
         if (layer.rank() == 0) {
-            values += 1, 2, 3;
+            values << 1
+                   << 2
+                   << 3;
         } else {
-            values += 4, 5, 6, 7, 8;
+            values << 4
+                   << 5
+                   << 6
+                   << 7
+                   << 8;
         }
         std::vector<unsigned> target(8);
         layer.allGatherV(&values[0], lengths, &target);
         std::vector<unsigned> expected;
-        expected += 1, 2, 3, 4, 5, 6, 7, 8;
+        expected << 1
+                 << 2
+                 << 3
+                 << 4
+                 << 5
+                 << 6
+                 << 7
+                 << 8;
         TS_ASSERT_EQUALS(expected, target);
     }
 
@@ -199,15 +215,29 @@ public:
         MPILayer layer;
         std::vector<unsigned> values;
         std::vector<int> lengths;
-        lengths += 3, 5;
+        lengths << 3
+                << 5;
         if (layer.rank() == 0) {
-            values += 1, 2, 3;
+            values << 1
+                   << 2
+                   << 3;
         } else {
-            values += 4, 5, 6, 7, 8;
+            values << 4
+                   << 5
+                   << 6
+                   << 7
+                   << 8;
         }
         std::vector<unsigned> target(layer.allGatherV(&values[0], lengths));
         std::vector<unsigned> expected;
-        expected += 1, 2, 3, 4, 5, 6, 7, 8;
+        expected << 1
+                 << 2
+                 << 3
+                 << 4
+                 << 5
+                 << 6
+                 << 7
+                 << 8;
         TS_ASSERT_EQUALS(expected, target);
     }
 

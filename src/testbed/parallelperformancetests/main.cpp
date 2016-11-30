@@ -9,6 +9,7 @@
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/nesting/stepper.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/testbed/parallelperformancetests/mysimplecell.h>
@@ -215,10 +216,10 @@ public:
             weights << dim.prod()
                     << dim.prod();
 
-            boost::shared_ptr<PARTITION> partition(new PARTITION(Coord<3>(), box.dimensions, 0, weights));
+            typename SharedPtr<PARTITION>::Type partition(new PARTITION(Coord<3>(), box.dimensions, 0, weights));
 
             PartitionManager<Topologies::Torus<3>::Topology> myPartitionManager;
-            boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
+            typename SharedPtr<AdjacencyManufacturer<3> >::Type dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
 
             myPartitionManager.resetRegions(
                 dummyAdjacencyManufacturer,
@@ -228,11 +229,17 @@ public:
                 ghostZoneWidth);
 
             std::vector<CoordBox<3> > boundingBoxes;
+            std::vector<CoordBox<3> > expandedBoundingBoxes;
+
             for (int i = 0; i < 2; ++i) {
                 boundingBoxes << myPartitionManager.getRegion(i, 0).boundingBox();
             }
 
-            myPartitionManager.resetGhostZones(boundingBoxes);
+            for (int i = 0; i < 2; ++i) {
+                boundingBoxes << myPartitionManager.getRegion(i, ghostZoneWidth).boundingBox();
+            }
+
+            myPartitionManager.resetGhostZones(boundingBoxes, expandedBoundingBoxes);
 
             for (int i = 0; i < 2; ++i) {
                 if (myPartitionManager.getRegion(i, 0).boundingBox() == CoordBox<3>()) {

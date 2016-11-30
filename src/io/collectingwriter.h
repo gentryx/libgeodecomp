@@ -8,6 +8,7 @@
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/storage/gridtypeselector.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 namespace LibGeoDecomp {
 
@@ -116,7 +117,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<Writer<CELL_TYPE> > writer;
+    typename SharedPtr<Writer<CELL_TYPE> >::Type writer;
     MPILayer mpiLayer;
     int root;
     StorageGridType globalGrid;

@@ -26,7 +26,7 @@ namespace AutoTuningSimulatorHelpers {
 template<typename CELL_TYPE>
 class Simulation{
 public:
-    typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
+    typedef typename SharedPtr<SimulationFactory<CELL_TYPE> >::Type SimFactoryPtr;
 
     Simulation(
         const std::string& name,
@@ -52,6 +52,8 @@ public:
  * facilities to select the most efficient Simulator implementation
  * and suitable parameters for the given simulation model and
  * hardware.
+ *
+ * fixme: shouldn't we inherit from Monolithic- or DistributedSimulator?
  */
 template<typename CELL_TYPE, typename OPTIMIZER_TYPE>
 class AutoTuningSimulator
@@ -61,9 +63,13 @@ public:
     friend class AutotuningSimulatorWithCUDATest;
 
     typedef AutoTuningSimulatorHelpers::Simulation<CELL_TYPE>  Simulation;
-    typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
-    typedef boost::shared_ptr<Simulation> SimulationPtr;
+    typedef typename SharedPtr<SimulationFactory<CELL_TYPE> >::Type SimFactoryPtr;
+    typedef typename SharedPtr<Simulation>::Type SimulationPtr;
 
+    typedef typename Simulator<CELL_TYPE>::InitPtr InitPtr;
+    typedef typename Simulator<CELL_TYPE>::SteererPtr SteererPtr;
+
+    explicit
     AutoTuningSimulator(Initializer<CELL_TYPE> *initializer, unsigned optimizationSteps = 10);
 
     void addWriter(ParallelWriter<CELL_TYPE> *writer);
@@ -77,10 +83,10 @@ public:
 private:
     std::map<const std::string, SimulationPtr> simulations;
     unsigned optimizationSteps; // maximum number of Steps for the optimizer
-    boost::shared_ptr<VarStepInitializerProxy<CELL_TYPE> > varStepInitializer;
-    std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > parallelWriters;
-    std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
-    std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
+    typename SharedPtr<VarStepInitializerProxy<CELL_TYPE> >::Type varStepInitializer;
+    std::vector<typename SharedPtr<ParallelWriter<CELL_TYPE> >::Type> parallelWriters;
+    std::vector<typename SharedPtr<Writer<CELL_TYPE> >::Type> writers;
+    std::vector<typename SharedPtr<Steerer<CELL_TYPE> >::Type> steerers;
 
     template<typename FACTORY_TYPE>
     void addSimulation(const std::string& name, const FACTORY_TYPE& factory)
@@ -140,19 +146,19 @@ AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::AutoTuningSimulator(Initializer<
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addWriter(ParallelWriter<CELL_TYPE> *writer)
 {
-    parallelWriters.push_back(boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer));
+    parallelWriters.push_back(typename SharedPtr<ParallelWriter<CELL_TYPE> >::Type(writer));
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addWriter(Writer<CELL_TYPE> *writer)
 {
-    writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer));
+    writers.push_back(typename SharedPtr<Writer<CELL_TYPE> >::Type(writer));
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 void AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::addSteerer(const Steerer<CELL_TYPE> *steerer)
 {
-    steerers.push_back(boost::shared_ptr<Steerer<CELL_TYPE> >(steerer));
+    steerers.push_back(SteererPtr(steerer));
 }
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>

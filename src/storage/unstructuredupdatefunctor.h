@@ -11,8 +11,6 @@
 #include <hpx/parallel/algorithms/for_each.hpp>
 #endif
 
-#include <boost/iterator/counting_iterator.hpp>
-
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/coord.h>
@@ -66,7 +64,7 @@ public:
             // call updateLineX with adjusted indices
             typedef UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1, MATRICES, ValueType, C, SIGMA> HoodOld;
             HoodOld hoodOld(oldAccessor, gridOld, i->origin.x());
-            newAccessor.index = hoodOld.index() * HoodOld::ARITY;
+            newAccessor.index() = hoodOld.index() * HoodOld::ARITY;
             UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessor);
             CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep);
         }
@@ -125,7 +123,6 @@ public:
         // HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld,
         // UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
         //     hoodOld(gridOld, streak.origin.x());
-
 
 // #ifdef LIBGEODECOMP_WITH_HPX
 //         // fixme: manual hack, should use infrastructure from updatefunctormacros.

@@ -16,16 +16,17 @@ namespace LibGeoDecomp {
 template<int DIM>
 class RecursiveBisectionPartition : public Partition<DIM>
 {
-    friend class RecursiveBisectionPartitionTest;
 public:
+    friend class RecursiveBisectionPartitionTest;
     typedef std::vector<std::size_t> SizeTVec;
+    typedef typename Partition<DIM>::AdjacencyPtr AdjacencyPtr;
 
     inline explicit RecursiveBisectionPartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,
         const SizeTVec weights = SizeTVec(),
-        const boost::shared_ptr<Adjacency>& adjacency = boost::make_shared<RegionBasedAdjacency>(),
+        const AdjacencyPtr& adjacency = AdjacencyPtr(),
         const Coord<DIM>& dimWeights = Coord<DIM>::diagonal(1)) :
         Partition<DIM>(0, weights),
         origin(origin),

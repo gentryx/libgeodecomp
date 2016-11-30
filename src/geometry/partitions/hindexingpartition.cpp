@@ -11,7 +11,7 @@ int HIndexingPartition::triangleTransitions[4][4] = {
 
 Coord<2> HIndexingPartition::maxCachedDimensions;
 
-boost::shared_ptr<HIndexingPartition::CacheType> HIndexingPartition::triangleCoordsCache;
+SharedPtr<HIndexingPartition::CacheType>::Type HIndexingPartition::triangleCoordsCache;
 
 std::map<std::pair<Coord<2>, unsigned>, unsigned> HIndexingPartition::triangleLengthCache;
 

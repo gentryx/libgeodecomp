@@ -1,9 +1,9 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_PARTITION_H
 
-#include <libgeodecomp/geometry/adjacencymanufacturer.h>
-#include <libgeodecomp/geometry/regionbasedadjacency.h>
+#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
@@ -18,13 +18,15 @@ template<int DIM>
 class Partition
 {
 public:
+    typedef typename SharedPtr<Adjacency>::Type AdjacencyPtr;
+
     /**
      * initializes the partition so that the domain will be split up
      * in chucks with sizes proportional to the weights specified in
      * _weights. For most applications offset should be set to 0.
      * Also, _weights.sum() should equal simulationArea.size() (where
      * simulationArea is stored in PartitionManager). This basically
-     * means that each simulation cell corresponds to Adjacencya weight of 1.
+     * means that each simulation cell corresponds to a weight of 1.
      * Each entry in the weight vector will usually correspond to an
      * MPI process, identified by its rank.
      */

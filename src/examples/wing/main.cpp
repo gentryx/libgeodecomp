@@ -11,6 +11,7 @@
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
 using namespace LibGeoDecomp;
@@ -455,7 +456,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<Setup> setup;
+    SharedPtr<Setup>::Type setup;
 };
 
 int main(int argc, char **argv)

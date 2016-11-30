@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_LOADBALANCER_TRACINGBALANCER_H
 
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <boost/shared_ptr.hpp>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <iostream>
 
 namespace LibGeoDecomp {
@@ -30,7 +30,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<LoadBalancer> balancer;
+    SharedPtr<LoadBalancer>::Type balancer;
     std::ostream& stream;
 };
 

@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_DISTRIBUTEDSIMULATOR_H
 
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/simulator.h>
 #include <libgeodecomp/storage/displacedgrid.h>
@@ -20,14 +21,17 @@ class DistributedSimulator : public Simulator<CELL_TYPE>
 public:
     typedef typename Simulator<CELL_TYPE>::Topology Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
-    typedef std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > WriterVector;
+    typedef typename SharedPtr<ParallelWriter<CELL_TYPE> >::Type WriterPtr;
+    typedef std::vector<WriterPtr> WriterVector;
+    typedef typename Simulator<CELL_TYPE>::InitPtr InitPtr;
+
     using Simulator<CELL_TYPE>::chronometer;
 
     inline explicit DistributedSimulator(Initializer<CELL_TYPE> *initializer) :
         Simulator<CELL_TYPE>(initializer)
     {}
 
-    inline explicit DistributedSimulator(const boost::shared_ptr<Initializer<CELL_TYPE> >& initializer) :
+    inline explicit DistributedSimulator(InitPtr initializer) :
         Simulator<CELL_TYPE>(initializer)
     {}
 
@@ -38,7 +42,7 @@ public:
      */
     virtual void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
-        writers << boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer);
+        writers << WriterPtr(writer);
     }
 
 protected:

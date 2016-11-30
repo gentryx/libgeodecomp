@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_COMMONSTEPPER_H
 #define LIBGEODECOMP_PARALLELIZATION_NESTING_COMMONSTEPPER_H
 
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/nesting/stepper.h>
 #include <libgeodecomp/storage/patchbufferfixed.h>
 
@@ -36,12 +37,16 @@ public:
     using Stepper<CELL_TYPE>::patchAccepters;
     using Stepper<CELL_TYPE>::patchProviders;
 
+    typedef typename Stepper<CELL_TYPE>::InitPtr InitPtr;
+    typedef typename Stepper<CELL_TYPE>::PartitionManagerPtr PartitionManagerPtr;
+
     CommonStepper(
-        boost::shared_ptr<PartitionManagerType> partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        PartitionManagerPtr partitionManager,
+        InitPtr initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters  = PatchAccepterVec(),
-        const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase0 = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase1 = PatchProviderVec(),
         const PatchProviderVec& innerSetPatchProviders  = PatchProviderVec(),
         bool enableFineGrainedParallelism = false) :
         Stepper<CELL_TYPE>(
@@ -53,14 +58,17 @@ public:
         curNanoStep = 0;
 
         for (std::size_t i = 0; i < ghostZonePatchAccepters.size(); ++i) {
-            addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
+            addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST_PHASE_0);
         }
         for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
             addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
         }
 
-        for (std::size_t i = 0; i < ghostZonePatchProviders.size(); ++i) {
-            addPatchProvider(ghostZonePatchProviders[i], ParentType::GHOST);
+        for (std::size_t i = 0; i < ghostZonePatchProvidersPhase0.size(); ++i) {
+            addPatchProvider(ghostZonePatchProvidersPhase0[i], ParentType::GHOST_PHASE_0);
+        }
+        for (std::size_t i = 0; i < ghostZonePatchProvidersPhase1.size(); ++i) {
+            addPatchProvider(ghostZonePatchProvidersPhase1[i], ParentType::GHOST_PHASE_1);
         }
         for (std::size_t i = 0; i < innerSetPatchProviders.size(); ++i) {
             addPatchProvider(innerSetPatchProviders[i], ParentType::INNER_SET);
@@ -95,14 +103,14 @@ protected:
     std::size_t curStep;
     std::size_t curNanoStep;
     unsigned validGhostZoneWidth;
-    boost::shared_ptr<GridType> oldGrid;
-    boost::shared_ptr<GridType> newGrid;
+    typename SharedPtr<GridType>::Type oldGrid;
+    typename SharedPtr<GridType>::Type newGrid;
     PatchBufferType2 rimBuffer;
     PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;
     bool enableFineGrainedParallelism;
 
-    inline void notifyPatchAccepters(
+    virtual inline void notifyPatchAccepters(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
@@ -124,7 +132,7 @@ protected:
         }
     }
 
-    inline void notifyPatchProviders(
+    virtual inline void notifyPatchProviders(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
@@ -162,11 +170,12 @@ protected:
         newGrid.reset(makeGrid(partitionManager->ownExpandedRegion(), gridBox, topoDim, Topology()));
 
         initializer->grid(&*oldGrid);
-        initializer->grid(&*newGrid);
+        *newGrid = *oldGrid;
 
         remapRegions(*oldGrid);
 
-        notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST,     globalNanoStep());
+        notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST_PHASE_0, globalNanoStep());
+        notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST_PHASE_1, globalNanoStep());
         notifyPatchProviders(partitionManager->ownRegion(),   ParentType::INNER_SET, globalNanoStep());
 
         newGrid->setEdge(oldGrid->getEdge());

@@ -1,22 +1,5 @@
-#include <libgeodecomp/communication/mpilayer.h>
-#include <libgeodecomp/communication/typemaps.h>
-#include <libgeodecomp/io/bovwriter.h>
-#include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/io/ppmwriter.h>
-#include <libgeodecomp/io/remotesteerer.h>
-#include <libgeodecomp/io/simplecellplotter.h>
-#include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/io/tracingwriter.h>
-#include <libgeodecomp/io/visitwriter.h>
-#include <libgeodecomp/io/remotesteerer/commandserver.h>
-#include <libgeodecomp/loadbalancer/oozebalancer.h>
-#include <libgeodecomp/loadbalancer/tracingbalancer.h>
-#include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/parallelization/stripingsimulator.h>
-#include <libgeodecomp/storage/image.h>
-#include <boost/assign/std/vector.hpp>
+#include <libgeodecomp.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 class ConwayCell
@@ -71,30 +54,28 @@ public:
         //          x
         //           x
         //         xxx
-        startCells +=
-            Coord<2>(11, 10),
-            Coord<2>(12, 11),
-            Coord<2>(10, 12), Coord<2>(11, 12), Coord<2>(12, 12);
+        startCells << Coord<2>(11, 10)
+                   << Coord<2>(12, 11)
+                   << Coord<2>(10, 12) << Coord<2>(11, 12) << Coord<2>(12, 12);
 
 
         // ...add a Diehard pattern...
         //                x
         //          xx
         //           x   xxx
-        startCells +=
-            Coord<2>(55, 70), Coord<2>(56, 70), Coord<2>(56, 71),
-            Coord<2>(60, 71), Coord<2>(61, 71), Coord<2>(62, 71),
-            Coord<2>(61, 69);
+        startCells << Coord<2>(61, 69)
+                   << Coord<2>(55, 70) << Coord<2>(56, 70)
+                   << Coord<2>(56, 71)
+                   << Coord<2>(60, 71) << Coord<2>(61, 71) << Coord<2>(62, 71);
 
         // ...and an Acorn pattern:
         //        x
         //          x
         //       xx  xxx
-        startCells +=
-            Coord<2>(111, 30),
-            Coord<2>(113, 31),
-            Coord<2>(110, 32), Coord<2>(111, 32),
-            Coord<2>(113, 32), Coord<2>(114, 32), Coord<2>(115, 32);
+        startCells << Coord<2>(111, 30)
+                   << Coord<2>(113, 31)
+                   << Coord<2>(110, 32) << Coord<2>(111, 32)
+                   << Coord<2>(113, 32) << Coord<2>(114, 32) << Coord<2>(115, 32);
 
         for (std::vector<Coord<2> >::iterator i = startCells.begin();
              i != startCells.end();

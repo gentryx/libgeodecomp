@@ -66,6 +66,7 @@ class IterAdapter
 {
 public:
     inline
+    explicit
     IterAdapter(std::map<int, double>::iterator iter) :
         iter(iter)
     {}

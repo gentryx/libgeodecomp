@@ -8,9 +8,6 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/nesting/vanillastepper.h>
 
-#include <boost/assign/std/vector.hpp>
-
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -22,8 +19,8 @@ public:
     typedef PartitionManager<Topology> PartitionManagerType;
     typedef VanillaStepper<TestCell<3>, UpdateFunctorHelpers::ConcurrencyNoP> StepperType;
     typedef PatchLink<StepperType::GridType> PatchLinkType;
-    typedef boost::shared_ptr<PatchLinkType::Accepter> PatchAccepterPtrType;
-    typedef boost::shared_ptr<PatchLinkType::Provider> PatchProviderPtrType;
+    typedef SharedPtr<PatchLinkType::Accepter>::Type PatchAccepterPtrType;
+    typedef SharedPtr<PatchLinkType::Provider>::Type PatchProviderPtrType;
 
     void setUp()
     {
@@ -45,12 +42,12 @@ public:
         CoordBox<3> box = init->gridBox();
 
         std::vector<std::size_t> weights;
-        weights += 10000, 15000, 25000;
+        weights << 10000 << 15000 << 25000;
         weights << box.dimensions.prod() - sum(weights);
-        boost::shared_ptr<Partition<3> > partition(
+        SharedPtr<Partition<3> >::Type partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
-        boost::shared_ptr<AdjacencyManufacturer<3> > dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
+        SharedPtr<AdjacencyManufacturer<3> >::Type dummyAdjacencyManufacturer(new DummyAdjacencyManufacturer<3>);
 
         partitionManager.reset(new PartitionManagerType());
         partitionManager->resetRegions(
@@ -75,11 +72,11 @@ public:
         Coord<3> expectedDimensions;
         switch (mpiLayer->rank()) {
         case 0:
-            expectedOffset = Coord<3>(0, 0, -4);
+            expectedOffset = Coord<3>(0, 0, 27);
             expectedDimensions = Coord<3>(55, 47, 12);
             break;
         case 1:
-            expectedOffset = Coord<3>(0, 0, -1);
+            expectedOffset = Coord<3>(0, 0, 30);
             expectedDimensions = Coord<3>(55, 47, 15);
             break;
         case 2:
@@ -150,7 +147,7 @@ public:
                             tag,
                             Typemaps::lookup<TestCell<3> >()));
                     providers << p;
-                    stepper->addPatchProvider(p, StepperType::GHOST);
+                    stepper->addPatchProvider(p, StepperType::GHOST_PHASE_0);
                 }
             }
         }
@@ -167,7 +164,7 @@ public:
                             tag,
                             Typemaps::lookup<TestCell<3> >()));
                     accepters << p;
-                    stepper->addPatchAccepter(p, StepperType::GHOST);
+                    stepper->addPatchAccepter(p, StepperType::GHOST_PHASE_0);
                 }
             }
         }
@@ -206,10 +203,10 @@ public:
 
 private:
     int ghostZoneWidth;
-    boost::shared_ptr<TestInitializer<TestCell<3> > > init;
-    boost::shared_ptr<PartitionManagerType> partitionManager;
-    boost::shared_ptr<StepperType> stepper;
-    boost::shared_ptr<MPILayer> mpiLayer;
+    SharedPtr<TestInitializer<TestCell<3> > >::Type init;
+    SharedPtr<PartitionManagerType>::Type partitionManager;
+    SharedPtr<StepperType>::Type stepper;
+    SharedPtr<MPILayer>::Type mpiLayer;
 
     void checkInnerSet(
         unsigned shrink,

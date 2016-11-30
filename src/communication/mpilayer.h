@@ -11,7 +11,6 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/storage/grid.h>
-#include <boost/shared_ptr.hpp>
 
 namespace LibGeoDecomp {
 

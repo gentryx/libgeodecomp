@@ -11,8 +11,10 @@ RandomBalancer::WeightVec RandomBalancer::balance(
     LoadVec randomBase(weights.size());
 
     // independent random fill
-    for (unsigned i = 0; i < randomBase.size(); i++)
-        randomBase[i] = Random::gen_d(1.0);
+    for (unsigned i = 0; i < randomBase.size(); i++) {
+        randomBase[i] = Random::genDouble(1.0);
+    }
+
     // calc. scaling wheights
     double randSum = 0;
     long loadsSum = 0;
@@ -20,15 +22,18 @@ RandomBalancer::WeightVec RandomBalancer::balance(
         randSum += randomBase[i];
         loadsSum += weights[i];
     }
+
     // scaled fill & calc. remainder
     long remainder = loadsSum;
     for (unsigned i = 0; i < ret.size(); i++) {
         ret[i] = (long)(randomBase[i] * loadsSum / randSum);
         remainder -= ret[i];
     }
+
     // scatter remainder
-    for (unsigned i = remainder; i > 0; i--)
-        ret[Random::gen_u(ret.size())]++;
+    for (unsigned i = remainder; i > 0; i--) {
+        ret[Random::genUnsigned(ret.size())]++;
+    }
 
     return ret;
 }

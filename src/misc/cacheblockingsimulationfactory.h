@@ -17,8 +17,10 @@ class CacheBlockingSimulationFactory : public SimulationFactory<CELL>
 public:
     using SimulationFactory<CELL>::addSteerers;
     using SimulationFactory<CELL>::addWriters;
+    typedef typename SimulationFactory<CELL>::InitPtr InitPtr;
 
-    CacheBlockingSimulationFactory<CELL>(boost::shared_ptr<ClonableInitializer<CELL> > initializer):
+    explicit
+    CacheBlockingSimulationFactory<CELL>(InitPtr initializer):
         SimulationFactory<CELL>(initializer)
     {
         SimulationFactory<CELL>::parameterSet.addParameter("WavefrontWidth", 10, 1000);
@@ -33,7 +35,7 @@ public:
 
 protected:
     virtual Simulator<CELL> *buildSimulator(
-        boost::shared_ptr<ClonableInitializer<CELL> > initializer,
+        typename SharedPtr<ClonableInitializer<CELL> >::Type initializer,
         const SimulationParameters& params) const
     {
         int pipelineLength  = params["PipelineLength"];

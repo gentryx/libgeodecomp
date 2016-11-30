@@ -7,8 +7,6 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
 #include <unistd.h>
 #include <cxxtest/TestSuite.h>
 
@@ -31,7 +29,7 @@ public:
     {
         if (rank == 0) {
             for (std::size_t i = 0; i < files.size(); ++i) {
-                boost::filesystem::remove(files[i]);
+                unlink(files[i].c_str());
             }
         }
     }

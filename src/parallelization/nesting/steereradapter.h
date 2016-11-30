@@ -17,6 +17,7 @@ class SteererAdapter : public PatchProvider<GRID_TYPE>
 {
 public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename SharedPtr<Steerer<CELL_TYPE> >::Type SteererPtr;
 
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
     static const int DIM = Topology::DIM;
@@ -25,7 +26,7 @@ public:
     using PatchProvider<GRID_TYPE>::get;
 
     SteererAdapter(
-        boost::shared_ptr<Steerer<CELL_TYPE> > steerer,
+        SteererPtr steerer,
         const std::size_t firstStep,
         const std::size_t lastStep,
         bool lastCall) :
@@ -102,7 +103,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<Steerer<CELL_TYPE> > steerer;
+    SteererPtr steerer;
     std::size_t firstNanoStep;
     std::size_t lastNanoStep;
     bool lastCall;

@@ -18,7 +18,7 @@ hpx::future<std::vector<double> > getUpdateGroupSpeeds(const std::string& basena
     // and myLocalityInidices
     hpx::future<void> initFuture;
     {
-        boost::lock_guard<hpx::lcos::local::spinlock> lock(mapMutex);
+        std::lock_guard<hpx::lcos::local::spinlock> lock(mapMutex);
         initFuture = initPromise[basename].get_future();
     }
     return initFuture.then(
@@ -82,7 +82,7 @@ void gatherAndBroadcastLocalityIndices(
         = myLocalityIndices[basename].get_future();
     // We are now save to proceed ...
     {
-        boost::lock_guard<hpx::lcos::local::spinlock> lock(mapMutex);
+        std::lock_guard<hpx::lcos::local::spinlock> lock(mapMutex);
         initPromise[basename].set_value();
     }
 

@@ -1,10 +1,8 @@
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 
-#include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
-using namespace boost::assign;
 
 namespace LibGeoDecomp {
 
@@ -14,21 +12,22 @@ public:
     void testSearchNodeCuboid()
     {
         std::vector<std::size_t> weights;
-        weights += 25, 25;
+        weights << 25
+                << 25;
 
         checkCuboid(weights, 0, Coord<2>( 0, 0), Coord<2>(15, 20));
         checkCuboid(weights, 1, Coord<2>(15, 0), Coord<2>(15, 20));
 
-        weights += 50;
+        weights << 50;
 
         checkCuboid(weights, 1, Coord<2>( 0, 10), Coord<2>(15, 10));
         checkCuboid(weights, 2, Coord<2>(15,  0), Coord<2>(15, 20));
 
-        weights += 200;
+        weights << 200;
 
         checkCuboid(weights, 3, Coord<2>(10,  0), Coord<2>(20, 20));
 
-        weights += 100;
+        weights << 100;
 
         checkCuboid(weights, 4, Coord<2>(23,  0), Coord<2>( 7, 20));
     }
@@ -36,7 +35,11 @@ public:
     void testGetRegion()
     {
         std::vector<std::size_t> weights;
-        weights += 200, 100, 50, 25, 25;
+        weights << 200
+                << 100
+                <<  50
+                <<  25
+                <<  25;
 
         Coord<3> origin(100, 200, 300);
         Coord<3> dimensions(64, 32, 64);
@@ -45,7 +48,7 @@ public:
             dimensions,
             0,
             weights,
-            boost::make_shared<RegionBasedAdjacency>(),
+            RecursiveBisectionPartition<3>::AdjacencyPtr(),
             Coord<3>::diagonal(1));
 
         TS_ASSERT_EQUALS(
@@ -76,7 +79,10 @@ public:
     void testDimWeights()
     {
         std::vector<std::size_t> weights;
-        weights += 16, 16, 16, 16;
+        weights << 16
+                << 16
+                << 16
+                << 16;
         Coord<2> dim(96, 32);
         Coord<2> dimWeights(1, 3);
 
@@ -89,7 +95,9 @@ public:
     void testDegradedDimensions()
     {
         std::vector<std::size_t> weights;
-        weights += 0, 0;
+        weights << 0
+                << 0;
+
         Coord<3> dim(128, 0, 0);
         TS_ASSERT_THROWS(
             RecursiveBisectionPartition<3> p(
@@ -100,7 +108,13 @@ public:
             std::invalid_argument);
     }
 
-    void checkCuboid(std::vector<std::size_t> weights, long node, Coord<2> expectedOffset, Coord<2> expectedDim, Coord<2> dimensions=Coord<2>(30, 20), Coord<2> dimWeights=Coord<2>::diagonal(1))
+    void checkCuboid(
+        std::vector<std::size_t> weights,
+        long node,
+        Coord<2> expectedOffset,
+        Coord<2> expectedDim,
+        Coord<2> dimensions=Coord<2>(30, 20),
+        Coord<2> dimWeights=Coord<2>::diagonal(1))
     {
         Coord<2> origin(0, 0);
         RecursiveBisectionPartition<2> p(
@@ -108,7 +122,7 @@ public:
             dimensions,
             0,
             weights,
-            boost::make_shared<RegionBasedAdjacency>(),
+            RecursiveBisectionPartition<2>::AdjacencyPtr(),
             dimWeights);
 
         TS_ASSERT_EQUALS(
@@ -125,6 +139,7 @@ public:
         CoordBox<3> box(Coord<3>(o1, o2, o3), Coord<3>(d1, d2, d3));
         Region<3> r;
         r << box;
+
         return r;
     }
 

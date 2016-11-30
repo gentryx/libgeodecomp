@@ -13,7 +13,10 @@ namespace LibGeoDecomp {
  * LibGeoDecomp. It can retrieve cells matching a certain id from the
  * ContainerCells in the current neighborhood.
  */
-template<class NEIGHBORHOOD, int DIM, typename COLLECTION_INTERFACE=CollectionInterface::PassThrough<typename NEIGHBORHOOD::Cell> >
+template<
+    class NEIGHBORHOOD,
+    int DIM,
+    typename COLLECTION_INTERFACE = CollectionInterface::PassThrough<typename NEIGHBORHOOD::Cell> >
 class NeighborhoodAdapter
 {
 public:
@@ -21,7 +24,17 @@ public:
     typedef typename COLLECTION_INTERFACE::Container::Key Key;
     typedef typename COLLECTION_INTERFACE::Container::Cargo Cargo;
 
-    explicit NeighborhoodAdapter(const NEIGHBORHOOD *neighbors) :
+    /**
+     * The UNUSED parameter is here only for compatibility with N-body
+     * codes based on BoxCell, which may be pulled in
+     * MultiContainerCells, together with ContainerCells. BoxCells
+     * need to spawn new particles and store those in the
+     * writeContainer.
+     */
+    template<typename UNUSED>
+    inline NeighborhoodAdapter(
+        UNUSED *writeContainer,
+        const NEIGHBORHOOD *neighbors) :
         neighbors(neighbors)
     {}
 

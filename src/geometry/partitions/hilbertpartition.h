@@ -3,9 +3,8 @@
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/storage/grid.h>
-
-#include <boost/shared_ptr.hpp>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -25,7 +24,10 @@ private:
 
 public:
     typedef Grid<std::vector<Coord<2> >, Topologies::Cube<3>::Topology> CacheType;
-    static boost::shared_ptr<CacheType> squareCoordsCache;
+
+    using Partition<2>::AdjacencyPtr;
+
+    static SharedPtr<CacheType>::Type squareCoordsCache;
     static Form squareFormTransitions[4][4];
     static int squareSectorTransitions[4][4];
     static Coord<2> maxCachedDimensions;
@@ -306,7 +308,7 @@ public:
         const Coord<2>& dimensions = Coord<2>(0, 0),
         const long& offset = 0,
         const std::vector<std::size_t>& weights = std::vector<std::size_t>(2),
-        const boost::shared_ptr<Adjacency>& /* unused: adjacency */ = boost::make_shared<RegionBasedAdjacency>()) :
+        const AdjacencyPtr& /* unused: adjacency */ = AdjacencyPtr()) :
         SpaceFillingCurve<2>(offset, weights),
         origin(origin),
         dimensions(dimensions)

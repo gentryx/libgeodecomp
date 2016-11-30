@@ -3,6 +3,7 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/qtwidgetwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 #ifdef LIBGEODECOMP_WITH_QT5
 
@@ -88,7 +89,7 @@ public:
         TS_ASSERT_EQUALS(palette[1.0], Color::YELLOW);
 
         QtWidgetWriter<MyQtTestCell> writer(&MyQtTestCell::temp, palette, cellDim);
-        boost::shared_ptr<QtWidgetWriterHelpers::Window> window = writer.window();
+        SharedPtr<QtWidgetWriterHelpers::Window>::Type window = writer.window();
         window->resize(1200, 900);
 
         Grid<MyQtTestCell> grid(Coord<2>(100, 50));
@@ -141,7 +142,7 @@ public:
         Coord<2> cellDim(10, 20);
 
         QtWidgetWriter<MyQtTestCell> writer(&MyQtTestCell::temp, -10.0, 10.0, cellDim);
-        boost::shared_ptr<QWindow> window = writer.window();
+        SharedPtr<QWindow>::Type window = writer.window();
         window->resize(1000, 1000);
 
         Grid<MyQtTestCell> grid(Coord<2>(10, 20));

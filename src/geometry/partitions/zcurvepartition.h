@@ -4,10 +4,10 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
 #include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/storage/grid.h>
 
 #include <bitset>
-#include <boost/shared_ptr.hpp>
 #include <sstream>
 #include <stdexcept>
 #include <list>
@@ -22,14 +22,16 @@ namespace LibGeoDecomp {
 template<int DIMENSIONS>
 class ZCurvePartition : public SpaceFillingCurve<DIMENSIONS>
 {
-    friend class ZCurvePartitionTest;
 public:
+    friend class ZCurvePartitionTest;
+
     const static int DIM = DIMENSIONS;
 
     typedef std::vector<Coord<DIM> > CoordVector;
     typedef Grid<CoordVector, typename Topologies::Cube<DIM>::Topology> CacheType;
-    typedef boost::shared_ptr<CacheType> Cache;
+    typedef typename SharedPtr<CacheType>::Type Cache;
     typedef typename Topologies::Cube<DIM>::Topology Topology;
+    typedef typename Partition<DIM>::AdjacencyPtr AdjacencyPtr;
 
     class Square
     {
@@ -279,7 +281,7 @@ public:
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,
         const std::vector<std::size_t>& weights = std::vector<std::size_t>(2),
-        const boost::shared_ptr<Adjacency>& /* unused: adjacency */ = boost::make_shared<RegionBasedAdjacency>()) :
+        const AdjacencyPtr& /* unused: adjacency */ = AdjacencyPtr()) :
         SpaceFillingCurve<DIM>(offset, weights),
         origin(origin),
         dimensions(dimensions)

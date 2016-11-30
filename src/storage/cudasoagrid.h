@@ -149,7 +149,7 @@ public:
         // ...init edges AND interior here in one go
         delegate.callback(
             CUDASoAGridHelpers::SetContent<CELL, true>(
-                delegate.get_data(),
+                delegate.data(),
                 actualDimensions,
                 edgeRadii,
                 edgeCell,
@@ -171,7 +171,7 @@ public:
         // ...init edges AND interior here in one go
         delegate.callback(
             CUDASoAGridHelpers::SetContent<CELL, true>(
-                delegate.get_data(),
+                delegate.data(),
                 actualDimensions,
                 edgeRadii,
                 edgeCell,
@@ -200,7 +200,7 @@ public:
         if (setEdges) {
             delegate.callback(
                 CUDASoAGridHelpers::SetContent<CELL, false>(
-                    delegate.get_data(),
+                    delegate.data(),
                     actualDimensions,
                     edgeRadii,
                     edgeCell,
@@ -261,7 +261,7 @@ public:
 
         delegate.callback(
             CUDASoAGridHelpers::SetContent<CELL, false>(
-                delegate.get_data(),
+                delegate.data(),
                 actualDimensions,
                 edgeRadii,
                 edgeCell,

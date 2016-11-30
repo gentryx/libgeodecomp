@@ -1,9 +1,9 @@
 #ifndef LIBGEODECOMP_STORAGE_MULTICONTAINERCELL_H
 #define LIBGEODECOMP_STORAGE_MULTICONTAINERCELL_H
 
+#include <libflatarray/preprocessor.hpp>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/storage/containercell.h>
-#include <boost/preprocessor/seq.hpp>
 
 namespace LibGeoDecomp {
 
@@ -12,7 +12,7 @@ namespace MultiContainerCellHelpers {
 /**
  * Below we'll use template instantiations with multiple parameters as
  * parameters for macros. Unfortunately the preprocessor gets confused
- * when arguements to macros contain commas, so we need to enclose
+ * when arguments to macros contain commas, so we need to enclose
  * those with parentheses. That however turns a datatype into a
  * function type. This helper class can deduce an argument's type from
  * such a function type.
@@ -40,32 +40,42 @@ public:
     {                                                                   \
     public:                                                             \
         typedef typename LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<  \
-            void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value Container;      \
+            void (LIBFLATARRAY_ELEM(0, MEMBER))>::Value Container;      \
                                                                         \
         inline                                                          \
         const Container& operator()(                                    \
             const CELL& cell)                                           \
         {                                                               \
-            return cell.BOOST_PP_SEQ_ELEM(1, MEMBER);                   \
+            return cell.LIBFLATARRAY_ELEM(1, MEMBER);                   \
         }                                                               \
                                                                         \
     };
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_ADAPTER(INDEX, CELL, MEMBER) \
-    typedef typename LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value::NeighborhoodAdapter<NEIGHBORHOOD, CollectionInterface ## INDEX>::Value AdapterHelper ## INDEX;
+    typedef typename LibGeoDecomp::MultiContainerCellHelpers::ArgumentType< \
+        void (LIBFLATARRAY_ELEM(0, MEMBER))>::Value::NeighborhoodAdapter< \
+            CELL,                                                       \
+            NEIGHBORHOOD,                                               \
+            CollectionInterface ## INDEX>::Value AdapterHelper ## INDEX;
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_MEMBER(INDEX, CELL, MEMBER)  \
     AdapterHelper ## INDEX                                              \
-        BOOST_PP_SEQ_ELEM(1, MEMBER);
+        LIBFLATARRAY_ELEM(1, MEMBER);
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_INIT(INDEX, CELL, MEMBER)    \
-    BOOST_PP_SEQ_ELEM(1, MEMBER)(hood),
+    LIBFLATARRAY_ELEM(1, MEMBER)(writeContainer, hood),
 
 #define DECLARE_MULTI_CONTAINER_CELL_MEMBER(INDEX, UNUSED, MEMBER)      \
-    LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value BOOST_PP_SEQ_ELEM(1, MEMBER);
+    LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<void (LIBFLATARRAY_ELEM(0, MEMBER))>::Value LIBFLATARRAY_ELEM(1, MEMBER);
+
+#define DECLARE_MULTI_CONTAINER_COPY_MEMBER(INDEX, CELL, MEMBER)        \
+    LIBFLATARRAY_ELEM(1, MEMBER).copyOver(                              \
+        hood[Coord<DIM>()].LIBFLATARRAY_ELEM(1, MEMBER),                \
+        multiHood.LIBFLATARRAY_ELEM(1, MEMBER),                         \
+        nanoStep);
 
 #define DECLARE_MULTI_CONTAINER_CELL_UPDATE(INDEX, CELL, MEMBER)        \
-    BOOST_PP_SEQ_ELEM(1, MEMBER).updateCargo(multiHood.BOOST_PP_SEQ_ELEM(1, MEMBER), multiHood, nanoStep);
+    LIBFLATARRAY_ELEM(1, MEMBER).updateCargo(multiHood, nanoStep);
 
 /**
  * This cell is a wrapper around ContainerCell and BoxCell to allow
@@ -100,34 +110,42 @@ public:
         {                                                               \
         public:                                                         \
                                                                         \
-            BOOST_PP_SEQ_FOR_EACH(                                      \
+            LIBFLATARRAY_FOR_EACH(                                      \
                 DECLARE_MULTI_NEIGHBORHOOD_COLLECTION_INTERFACE,        \
                 NAME,                                                   \
                 MEMBERS)                                                \
                                                                         \
-            BOOST_PP_SEQ_FOR_EACH(                                      \
+            LIBFLATARRAY_FOR_EACH(                                      \
                 DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_ADAPTER,             \
                 NAME,                                                   \
                 MEMBERS)                                                \
                                                                         \
-            explicit MultiNeighborhoodAdapter(                          \
+            MultiNeighborhoodAdapter(                                   \
+                NAME *writeContainer,                                   \
                 const NEIGHBORHOOD *hood) :                             \
-                BOOST_PP_SEQ_FOR_EACH(                                  \
+                LIBFLATARRAY_FOR_EACH(                                  \
                     DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_INIT,            \
                     NAME,                                               \
                     MEMBERS)                                            \
+                writeContainer(writeContainer),                         \
                 hood(hood)                                              \
             {}                                                          \
                                                                         \
-            BOOST_PP_SEQ_FOR_EACH(                                      \
+            NAME *operator->()                                          \
+            {                                                           \
+                return writeContainer;                                  \
+            }                                                           \
+                                                                        \
+            LIBFLATARRAY_FOR_EACH(                                      \
                 DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_MEMBER,              \
                 NAME,                                                   \
                 MEMBERS)                                                \
                                                                         \
+            NAME *writeContainer;                                       \
             const NEIGHBORHOOD *hood;                                   \
         };                                                              \
                                                                         \
-        BOOST_PP_SEQ_FOR_EACH(                                          \
+        LIBFLATARRAY_FOR_EACH(                                          \
             DECLARE_MULTI_CONTAINER_CELL_MEMBER,                        \
             NAME,                                                       \
             MEMBERS)                                                    \
@@ -136,10 +154,16 @@ public:
         inline void update(const NEIGHBORHOOD& hood,                    \
                            int nanoStep)                                \
         {                                                               \
-            *this = hood[LibGeoDecomp::Coord<DIM>()];                   \
-            MultiNeighborhoodAdapter<NEIGHBORHOOD> multiHood(&hood);    \
+            MultiNeighborhoodAdapter<NEIGHBORHOOD> multiHood(           \
+                this,                                                   \
+                &hood);                                                 \
                                                                         \
-            BOOST_PP_SEQ_FOR_EACH(                                      \
+            LIBFLATARRAY_FOR_EACH(                                      \
+                DECLARE_MULTI_CONTAINER_COPY_MEMBER,                    \
+                NAME,                                                   \
+                MEMBERS)                                                \
+                                                                        \
+            LIBFLATARRAY_FOR_EACH(                                      \
                 DECLARE_MULTI_CONTAINER_CELL_UPDATE,                    \
                 NAME,                                                   \
                 MEMBERS)                                                \

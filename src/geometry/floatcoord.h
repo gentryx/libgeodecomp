@@ -1,8 +1,6 @@
 #ifndef LIBGEODECOMP_GEOMETRY_FLOATCOORD_H
 #define LIBGEODECOMP_GEOMETRY_FLOATCOORD_H
 
-#include <libgeodecomp/geometry/coord.h>
-
 #include <cmath>
 #include <sstream>
 
@@ -45,12 +43,20 @@ public:
         c[0] = x;
     }
 
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
     template<template<int> class OTHER_COORD>
     inline
     FloatCoord(const OTHER_COORD<1>& p)
     {
         c[0] = p[0];
     }
+#ifdef __ICC
+#pragma warning pop
+#endif
 
     inline
     double length() const
@@ -215,12 +221,12 @@ public:
             (std::min)(c[0], other[0]));
     }
 
-    inline int minElement() const
+    inline double minElement() const
     {
         return c[0];
     }
 
-    inline int maxElement() const
+    inline double maxElement() const
     {
         return c[0];
     }
@@ -266,6 +272,11 @@ public:
         c[1] = y;
     }
 
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
     template<template<int> class OTHER_COORD>
     inline
     FloatCoord(const OTHER_COORD<2>& p)
@@ -273,6 +284,9 @@ public:
         c[0] = p[0];
         c[1] = p[1];
     }
+#ifdef __ICC
+#pragma warning pop
+#endif
 
     inline
     double length() const
@@ -457,12 +471,12 @@ public:
             (std::min)(c[1], other[1]));
     }
 
-    inline int minElement() const
+    inline double minElement() const
     {
         return c[0] < c[1] ? c[0] : c[1];
     }
 
-    inline int maxElement() const
+    inline double maxElement() const
     {
         return c[0] > c[1] ? c[0] : c[1];
     }
@@ -512,6 +526,11 @@ public:
         c[2] = z;
     }
 
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
     template<template<int> class OTHER_COORD>
     inline
     FloatCoord(const OTHER_COORD<3>& p)
@@ -520,6 +539,9 @@ public:
         c[1] = p[1];
         c[2] = p[2];
     }
+#ifdef __ICC
+#pragma warning pop
+#endif
 
     inline
     double length() const
@@ -720,16 +742,24 @@ public:
             (std::min)(c[2], other[2]));
     }
 
-    inline int minElement() const
+    inline double minElement() const
     {
         return c[0] < c[1] ?
                   (c[0] < c[2] ? c[0] : c[2]) : (c[1] < c[2] ? c[1] : c[2]);
     }
 
-    inline int maxElement() const
+    inline double maxElement() const
     {
         return c[0] > c[1] ?
                   (c[0] > c[2] ? c[0] : c[2]) : (c[1] > c[2] ? c[1] : c[2]);
+    }
+
+    inline FloatCoord<3> crossProduct(const FloatCoord<3>& other) const
+    {
+        return FloatCoord<3>(
+            c[1] * other[2] - c[2] * other[1],
+            c[2] * other[0] - c[0] * other[2],
+            c[0] * other[1] - c[1] * other[0]);
     }
 
     inline

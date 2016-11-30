@@ -3,12 +3,11 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/storage/defaultarrayfilter.h>
-#include <libgeodecomp/storage/defaultcudafilter.h>
-#include <libgeodecomp/storage/defaultcudaarrayfilter.h>
-#include <libgeodecomp/storage/defaultfilter.h>
+#include <libgeodecomp/misc/sharedptr.h>
+#include <libflatarray/member_ptr_to_offset.hpp>
+#include <libgeodecomp/storage/defaultfilterfactory.h>
 #include <libgeodecomp/storage/filterbase.h>
-#include <libflatarray/flat_array.hpp>
+#include <libgeodecomp/storage/memberfilter.h>
 #include <stdexcept>
 #include <typeinfo>
 
@@ -23,6 +22,9 @@
 namespace LibGeoDecomp {
 
 class APITraits;
+
+template<typename CELL, typename MEMBER>
+class MemberFilter;
 
 namespace SelectorHelpers {
 
@@ -173,14 +175,6 @@ private:
 
 }
 
-#ifdef __CUDACC__
-#define MAKE_SELECTOR(CELL, MEMBER)                             \
-    LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER, true)
-#else
-#define MAKE_SELECTOR(CELL, MEMBER)                             \
-    LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER)
-#endif
-
 /**
  * A Selector can be used by library code to extract data from user
  * code, e.g. so that writers can access a cell's member variable.
@@ -208,7 +202,13 @@ public:
     virtual ~Selector()
     {}
 
-    template<typename MEMBER>
+    template<typename MEMBER, bool FORCE_CUDA =
+#ifdef __CUDACC__
+             true
+#else
+             false
+#endif
+             >
     Selector(
         MEMBER CELL:: *memberPointer,
         const std::string& memberName) :
@@ -219,31 +219,16 @@ public:
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
+        filter(DefaultFilterFactory<FORCE_CUDA>().template make<CELL, MEMBER>())
+    {}
+
+    template<typename MEMBER, int ARITY, bool FORCE_CUDA =
 #ifdef __CUDACC__
-        filter(new DefaultCUDAFilter<CELL, MEMBER, MEMBER>)
+             true
 #else
-        filter(new DefaultFilter<CELL, MEMBER, MEMBER>)
+             false
 #endif
-    {}
-
-#ifdef __CUDACC__
-    template<typename MEMBER>
-    Selector(
-        MEMBER CELL:: *memberPointer,
-        const std::string& memberName,
-        bool forceCUDA) :
-        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
-        memberSize(sizeof(MEMBER)),
-        externalSize(sizeof(MEMBER)),
-        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
-                         memberPointer,
-                         typename APITraits::SelectSoA<CELL>::Value())),
-        memberName(memberName),
-        filter(new DefaultCUDAFilter<CELL, MEMBER, MEMBER>)
-    {}
-#endif
-
-    template<typename MEMBER, int ARITY>
+             >
     Selector(
         MEMBER (CELL:: *memberPointer)[ARITY],
         const std::string& memberName) :
@@ -254,35 +239,14 @@ public:
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
-#ifdef __CUDACC__
-        filter(new DefaultCUDAArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
-#else
-        filter(new DefaultArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
-#endif
+        filter(DefaultFilterFactory<FORCE_CUDA>().template make<CELL, MEMBER, ARITY>())
     {}
-
-#ifdef __CUDACC__
-    template<typename MEMBER, int ARITY>
-    Selector(
-        MEMBER (CELL:: *memberPointer)[ARITY],
-        const std::string& memberName,
-        bool forceCUDA) :
-        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
-        memberSize(sizeof(MEMBER)),
-        externalSize(sizeof(MEMBER) * ARITY),
-        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
-                         memberPointer,
-                         typename APITraits::SelectSoA<CELL>::Value())),
-        memberName(memberName),
-        filter(new DefaultCUDAArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
-    {}
-#endif
 
     template<typename MEMBER>
     Selector(
         MEMBER CELL:: *memberPointer,
         const std::string& memberName,
-        const boost::shared_ptr<FilterBase<CELL> >& filter) :
+        const typename SharedPtr<FilterBase<CELL> >::Type& filter) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
         externalSize(filter->sizeOf()),
@@ -297,7 +261,7 @@ public:
     Selector(
         MEMBER (CELL:: *memberPointer)[ARITY],
         const std::string& memberName,
-        const boost::shared_ptr<FilterBase<CELL> >& filter) :
+        const typename SharedPtr<FilterBase<CELL> >::Type& filter) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
         externalSize(filter->sizeOf()),
@@ -306,6 +270,99 @@ public:
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
         filter(filter)
+    {}
+
+    template<typename MEMBER, typename MEMBERS_MEMBER, bool FORCE_CUDA =
+#ifdef __CUDACC__
+             true
+#else
+             false
+#endif
+             >
+    Selector(
+        MEMBER CELL:: *memberPointer,
+        MEMBERS_MEMBER MEMBER:: *membersMemberPointer,
+        const std::string& memberName) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(sizeof(MEMBER)),
+        externalSize(sizeof(MEMBERS_MEMBER)),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+        filter(makeShared(new MemberFilter<CELL, MEMBER>(membersMemberPointer)))
+    {}
+
+    template<typename MEMBER, typename MEMBERS_MEMBER, int ARITY, bool FORCE_CUDA =
+#ifdef __CUDACC__
+             true
+#else
+             false
+#endif
+             >
+    Selector(
+        MEMBER CELL:: *memberPointer,
+        MEMBERS_MEMBER (MEMBER:: *membersMemberPointer)[ARITY],
+        const std::string& memberName) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(sizeof(MEMBER)),
+        externalSize(sizeof(MEMBERS_MEMBER) * ARITY),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+        filter(makeShared(new MemberFilter<CELL, MEMBER>(membersMemberPointer)))
+    {}
+
+    template<typename MEMBER, typename MEMBERS_MEMBER, typename MEMBERS_MEMBERS_MEMBER, bool FORCE_CUDA =
+#ifdef __CUDACC__
+             true
+#else
+             false
+#endif
+             >
+    Selector(
+        MEMBER CELL:: *memberPointer,
+        MEMBERS_MEMBER MEMBER:: *membersMemberPointer,
+        MEMBERS_MEMBERS_MEMBER MEMBERS_MEMBER:: *membersMembersMemberPointer,
+        const std::string& memberName) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(sizeof(MEMBER)),
+        externalSize(sizeof(MEMBERS_MEMBERS_MEMBER)),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+        filter(makeShared(
+                   new MemberFilter<CELL, MEMBER>(
+                       membersMemberPointer,
+                       makeShared(
+                           new MemberFilter<MEMBER, MEMBERS_MEMBER>(membersMembersMemberPointer)))))
+    {}
+
+    template<typename MEMBER, typename MEMBERS_MEMBER, typename MEMBERS_MEMBERS_MEMBER, int ARITY, bool FORCE_CUDA =
+#ifdef __CUDACC__
+             true
+#else
+             false
+#endif
+             >
+    Selector(
+        MEMBER CELL:: *memberPointer,
+        MEMBERS_MEMBER MEMBER:: *membersMemberPointer,
+        MEMBERS_MEMBERS_MEMBER (MEMBERS_MEMBER:: *membersMembersMemberPointer)[ARITY],
+        const std::string& memberName) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(sizeof(MEMBER)),
+        externalSize(sizeof(MEMBERS_MEMBERS_MEMBER) * ARITY),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+        filter(makeShared(
+                   new MemberFilter<CELL, MEMBER>(
+                       membersMemberPointer,
+                       makeShared(new MemberFilter<MEMBER, MEMBERS_MEMBER>(membersMembersMemberPointer)))))
     {}
 
     inline const std::string& name() const
@@ -327,6 +384,11 @@ public:
     inline bool checkTypeID() const
     {
         return filter->checkExternalTypeID(typeid(MEMBER));
+    }
+
+    bool checkExternalTypeID(const std::type_info& otherID) const
+    {
+        return filter->checkExternalTypeID(otherID);
     }
 
     /**
@@ -440,7 +502,7 @@ private:
     std::size_t externalSize;
     int memberOffset;
     std::string memberName;
-    boost::shared_ptr<FilterBase<CELL> > filter;
+    typename SharedPtr<FilterBase<CELL> >::Type filter;
 };
 
 /**

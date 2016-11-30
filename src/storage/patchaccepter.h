@@ -7,6 +7,10 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/serializationbuffer.h>
 
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/include/async.hpp>
+#endif
+
 namespace LibGeoDecomp {
 
 /**
@@ -34,6 +38,20 @@ public:
         const Coord<DIM>& globalGridDimensions,
         const std::size_t nanoStep,
         const std::size_t rank) = 0;
+
+#ifdef LIBGEODECOMP_WITH_HPX
+    virtual hpx::future<void> putAsync(
+        const GRID_TYPE& grid,
+        const Region<DIM>& validRegion,
+        const Coord<DIM>& globalGridDimensions,
+        const std::size_t nanoStep,
+        const std::size_t rank)
+    {
+        return hpx::async(&PatchAccepter::put, this,
+            std::cref(grid), std::cref(validRegion),
+            std::cref(globalGridDimensions), nanoStep, rank);
+    }
+#endif
 
     virtual void setRegion(const Region<DIM>& region)
     {

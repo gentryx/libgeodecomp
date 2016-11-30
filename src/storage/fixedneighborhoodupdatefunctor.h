@@ -5,7 +5,6 @@
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/runtime/launch_policy.hpp>
 #include <hpx/parallel/algorithms/for_each.hpp>
-#include <boost/iterator/counting_iterator.hpp>
 #endif
 
 #include <libgeodecomp/geometry/region.h>
@@ -42,52 +41,72 @@ public:
         ACCESSOR2& hoodNew,
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
-        const Coord<DIM> *dimensions,
+        const Coord<DIM> *dimensionsOld,
+        const Coord<DIM> *dimensionsNew,
+        const Coord<DIM> *topologicalDimensions,
         int nanoStep,
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) const
     {
+        Coord<DIM> normalizedOriginOld = streak.origin + *offsetOld;
+        if (*topologicalDimensions != Coord<DIM>()) {
+            normalizedOriginOld = TOPOLOGY::normalize(streak.origin + *offsetOld, *topologicalDimensions);
+        }
+
+#define LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS         \
+            streak,                                                     \
+            hoodOld,                                                    \
+            hoodNew,                                                    \
+            offsetOld,                                                  \
+            offsetNew,                                                  \
+            dimensionsOld,                                              \
+            dimensionsNew,                                              \
+            topologicalDimensions,                                      \
+            nanoStep,                                                   \
+            concurrencySpec,                                            \
+            modelThreadingSpec                                          \
+
         if ((CUR_DIM == 2) && (HIGH == true)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
-                ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == ((*dimensions)[CUR_DIM] - 1))) {
+                (normalizedOriginOld[CUR_DIM] == ((*dimensionsOld)[CUR_DIM] - 1))) {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, true>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             } else {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, false>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             }
         }
 
         if ((CUR_DIM == 2) && (HIGH == false)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
-                ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == 0)) {
+                (normalizedOriginOld[CUR_DIM] == 0)) {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, true,  BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             } else {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, BOUNDARY_TOP, BOUNDARY_BOTTOM, false, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             }
         }
 
         if ((CUR_DIM == 1) && (HIGH == true)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
-                ((streak.origin[CUR_DIM] + (*offsetOld)[CUR_DIM]) == ((*dimensions)[CUR_DIM] - 1))) {
+                (normalizedOriginOld[CUR_DIM] == ((*dimensionsOld)[CUR_DIM] - 1))) {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, true,  BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             } else {
                 Invoke<CELL, CUR_DIM, false, TOPOLOGY, BOUNDARY_TOP, false, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             }
         }
 
         if ((CUR_DIM == 1) && (HIGH == false)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
-                ((streak.origin[CUR_DIM]+ (*offsetOld)[CUR_DIM]) == 0)) {
+                (normalizedOriginOld[CUR_DIM] == 0)) {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, true,  BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             } else {
                 Invoke<CELL, CUR_DIM - 1, true, TOPOLOGY, false, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(
-                    streak, hoodOld, hoodNew, offsetOld, offsetNew, dimensions, nanoStep, concurrencySpec, modelThreadingSpec);
+                    LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             }
         }
     }
@@ -116,24 +135,38 @@ public:
         ACCESSOR2& hoodNew,
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
+        const Coord<DIM> *dimensionsOld,
         const Coord<DIM> *dimensionsNew,
+        const Coord<DIM> *topologicalDimensions,
         int nanoStep,
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) const
     {
-        // this copy is required to blow our potentially 1D or 2D
+        Coord<DIM> normalizedOriginOld = streak.origin + *offsetOld;
+        Coord<DIM> normalizedOriginNew = streak.origin + *offsetNew;
+        // don't normalize out of bounds accesses because SoA uses
+        // padding for constant boundary conditions:
+        if ((*topologicalDimensions != Coord<DIM>()) &&
+            !(TOPOLOGY::isOutOfBounds(normalizedOriginOld, *topologicalDimensions))) {
+            normalizedOriginOld = TOPOLOGY::normalize(normalizedOriginOld, *topologicalDimensions);
+            normalizedOriginNew = TOPOLOGY::normalize(normalizedOriginNew, *topologicalDimensions);
+        }
+
+        // this copy is required to expand our potentially 1D or 2D
         // input coords to 3D, which is required by LibFlatArray.
         Coord<3> originOld;
         Coord<3> originNew;
         for (int i = 0; i < DIM; ++i) {
-            originOld[i] = streak.origin[i] + (*offsetOld)[i];
-            originNew[i] = streak.origin[i] + (*offsetNew)[i];
+            originOld[i] = normalizedOriginOld[i];
+            originNew[i] = normalizedOriginNew[i];
         }
+
         long indexOld = hoodOld.gen_index(originOld.x(), originOld.y(), originOld.z());
         long indexNew = hoodNew.gen_index(originNew.x(), originNew.y(), originNew.z());
-        hoodOld.index = indexOld;
-        hoodNew.index = indexNew;
-        long indexEnd = hoodOld.index + streak.length();
+
+        hoodOld.index() = indexOld;
+        hoodNew.index() = indexNew;
+        long indexEnd = hoodOld.index() + streak.length();
         long tempIndex;
 
         long boundaryWest;
@@ -143,18 +176,20 @@ public:
         long boundarySouth;
         long boundaryNorth;
 
+        boundaryTop    = BOUNDARY_TOP    ?  (*dimensionsNew)[1] : 0;
+        boundaryBottom = BOUNDARY_BOTTOM ? -(*dimensionsNew)[1] : 0;
+        boundarySouth  = BOUNDARY_SOUTH  ?  (*dimensionsNew)[2] : 0;
+        boundaryNorth  = BOUNDARY_NORTH  ? -(*dimensionsNew)[2] : 0;
+
         // special case: on left boundary
         if (TOPOLOGY::template WrapsAxis<0>::VALUE && (originOld.x() == 0)) {
             boundaryWest   = (*dimensionsNew)[0];
             boundaryEast   = 0;
-            boundaryTop    = BOUNDARY_TOP    ?  (*dimensionsNew)[1] : 0;
-            boundaryBottom = BOUNDARY_BOTTOM ? -(*dimensionsNew)[1] : 0;
-            boundarySouth  = BOUNDARY_SOUTH  ?  (*dimensionsNew)[2] : 0;
-            boundaryNorth  = BOUNDARY_NORTH  ? -(*dimensionsNew)[2] : 0;
+            if (TOPOLOGY::template WrapsAxis<0>::VALUE &&
+                ((originOld.x() + 1) == (*dimensionsNew).x())) {
+                boundaryEast   = -(*dimensionsNew)[0];
+            }
 
-            // fixme: handle special case for boundingBoxNew with width 1 (i.e.
-            // we're on the western and eastern boundary
-            // simultaneously)
             FixedNeighborhood<
                 CELL,
                 ACCESSOR1::DIM_X, ACCESSOR1::DIM_Y, ACCESSOR1::DIM_Z, 0> hoodLeft(
@@ -167,16 +202,12 @@ public:
                     boundarySouth,
                     boundaryNorth);
 
-            long indexEnd = hoodOld.index + 1;
+            long indexEnd = hoodOld.index() + 1;
             CELL::updateLineX(hoodLeft, indexEnd, hoodNew, nanoStep);
         }
 
         boundaryWest   = 0;
         boundaryEast   = 0;
-        boundaryTop    = BOUNDARY_TOP    ?  (*dimensionsNew)[1] : 0;
-        boundaryBottom = BOUNDARY_BOTTOM ? -(*dimensionsNew)[1] : 0;
-        boundarySouth  = BOUNDARY_SOUTH  ?  (*dimensionsNew)[2] : 0;
-        boundaryNorth  = BOUNDARY_NORTH  ? -(*dimensionsNew)[2] : 0;
 
         FixedNeighborhood<
             CELL,
@@ -190,7 +221,6 @@ public:
                 boundarySouth,
                 boundaryNorth);
 
-
         // other special case: right boundary
         if (TOPOLOGY::template WrapsAxis<0>::VALUE &&
             ((originOld.x() + streak.length()) == (*dimensionsNew).x())) {
@@ -199,10 +229,6 @@ public:
 
             boundaryWest   = 0;
             boundaryEast   = -(*dimensionsNew)[0];
-            boundaryTop    = BOUNDARY_TOP    ?  (*dimensionsNew)[1] : 0;
-            boundaryBottom = BOUNDARY_BOTTOM ? -(*dimensionsNew)[1] : 0;
-            boundarySouth  = BOUNDARY_SOUTH  ?  (*dimensionsNew)[2] : 0;
-            boundaryNorth  = BOUNDARY_NORTH  ? -(*dimensionsNew)[2] : 0;
 
             FixedNeighborhood<
                 CELL,
@@ -218,7 +244,7 @@ public:
 
             CELL::updateLineX(hoodRight, indexEnd, hoodNew, nanoStep);
         } else {
-            CELL::updateLineX(hood,      indexEnd, hoodNew, nanoStep);
+            CELL::updateLineX(hood, indexEnd, hoodNew, nanoStep);
         }
     }
 };
@@ -240,14 +266,18 @@ public:
         const Region<DIM> *region,
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
+        const Coord<DIM> *dimensionsOld,
         const Coord<DIM> *dimensionsNew,
+        const Coord<DIM> *topologicalDimensions,
         int nanoStep,
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) :
         myRegion(region),
         offsetOld(offsetOld),
         offsetNew(offsetNew),
+        dimensionsOld(dimensionsOld),
         dimensionsNew(dimensionsNew),
+        topologicalDimensions(topologicalDimensions),
         nanoStep(nanoStep),
         myConcurrencySpec(concurrencySpec),
         myModelThreadingSpec(modelThreadingSpec)
@@ -271,7 +301,9 @@ public:
             hoodNewCopy,                                                \
             offsetOld,                                                  \
             offsetNew,                                                  \
+            dimensionsOld,                                              \
             dimensionsNew,                                              \
+            topologicalDimensions,                                      \
             nanoStep,                                                   \
             &concurrencySpec,                                           \
             &modelThreadingSpec);
@@ -287,7 +319,9 @@ private:
     const Region<DIM> *myRegion;
     const Coord<DIM> *offsetOld;
     const Coord<DIM> *offsetNew;
+    const Coord<DIM> *dimensionsOld;
     const Coord<DIM> *dimensionsNew;
+    const Coord<DIM> *topologicalDimensions;
     int nanoStep;
     const CONCURRENCY_FUNCTOR *myConcurrencySpec;
     const ANY_THREADED_UPDATE *myModelThreadingSpec;

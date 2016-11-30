@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <list>
 #include <libflatarray/flat_array.hpp>
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
@@ -336,8 +337,8 @@ public:
                     long indexStart = accessor1.gen_index(1,        y, z);
                     long indexEnd   = accessor1.gen_index(dim_x - 1, y, z);
 
-                    for (accessor1.index = indexStart, accessor2.index = indexStart;
-                         accessor1.index < indexEnd;
+                    for (accessor1.index() = indexStart, accessor2.index() = indexStart;
+                         accessor1.index() < indexEnd;
                          accessor1 += 1, accessor2 += 1) {
 
                         accessor2.temp() =
@@ -453,8 +454,8 @@ public:
                     long indexStart = accessor1.gen_index(1,         y, z);
                     long indexEnd   = accessor1.gen_index(dim_x - 1, y, z);
 
-                    accessor1.index = indexStart;
-                    accessor2.index = indexStart;
+                    accessor1.index() = indexStart;
+                    accessor2.index() = indexStart;
 
                     accessor2.temp() =
                         accessor1[coord< 0,  0, -1>()].temp() * WEIGHT_S +
@@ -465,12 +466,12 @@ public:
                         accessor1[coord< 0,  1,  0>()].temp() * WEIGHT_B +
                         accessor1[coord< 0,  0,  1>()].temp() * WEIGHT_N;
 
-                    accessor1.index += 1;
-                    accessor2.index += 1;
+                    accessor1.index() += 1;
+                    accessor2.index() += 1;
 
                     for (;
-                         accessor1.index < (indexEnd - 7);
-                         accessor1.index += 8, accessor2.index += 8) {
+                         accessor1.index() < (indexEnd - 7);
+                         accessor1.index() += 8, accessor2.index() += 8) {
 
                         // load south row:
                         __m128d bufA = _mm_load_pd(&accessor1[coord<0, 0, -1>()].temp() + 0);
@@ -557,8 +558,8 @@ public:
 
 
                     for (;
-                         accessor1.index < (indexEnd - 1);
-                         accessor1.index += 1, accessor2.index += 1) {
+                         accessor1.index() < (indexEnd - 1);
+                         accessor1.index() += 1, accessor2.index() += 1) {
                         accessor2.temp() =
                             accessor1[coord< 0,  0, -1>()].temp() * WEIGHT_S +
                             accessor1[coord< 0, -1,  0>()].temp() * WEIGHT_T +
@@ -642,6 +643,151 @@ private:
 };
 
 #endif
+
+class JacobiD3Q7Gold : public JacobiD3Q7
+{
+public:
+    class UpdateFunctor
+    {
+    public:
+        UpdateFunctor(long dim_x, long dim_y, long dim_z) :
+            dim_x(dim_x),
+            dim_y(dim_y),
+            dim_z(dim_z)
+        {}
+
+        template<typename accessor_type1, typename accessor_type2>
+        void operator()(accessor_type1& accessor_old,
+                        accessor_type2& accessor_new) const
+        {
+            typedef typename LibFlatArray::estimate_optimum_short_vec_type<double, accessor_type1>::VALUE my_short_vec;
+
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) firstprivate(accessorOld, accessorNew)
+#endif
+            for (std::size_t z = 1; z < (dim_z - 1); ++z) {
+                for (std::size_t y = 1; y < (dim_y - 1); ++y) {
+                    std::size_t x = 1;
+                    std::size_t end_x = dim_x - 1;
+
+                    LIBFLATARRAY_LOOP_PEELER_TEMPLATE(
+                        my_short_vec,
+                        std::size_t,
+                        x,
+                        end_x,
+                        update_line,
+                        y,
+                        z,
+                        accessor_old,
+                        accessor_new);
+                }
+            }
+        }
+
+        template<typename SHORT_VEC, typename SOA_ACCESSOR_1, typename SOA_ACCESSOR_2>
+        void update_line(
+            std::size_t& x,
+            std::size_t end_x,
+            std::size_t y,
+            std::size_t z,
+            SOA_ACCESSOR_1& accessor_old,
+            SOA_ACCESSOR_2& accessor_new) const
+        {
+            accessor_old.index() = SOA_ACCESSOR_1::gen_index(x, y, z);
+            accessor_new.index() = SOA_ACCESSOR_2::gen_index(x, y, z);
+
+            SHORT_VEC buf;
+            SHORT_VEC factorS = WEIGHT_S;
+            SHORT_VEC factorT = WEIGHT_T;
+            SHORT_VEC factorW = WEIGHT_W;
+            SHORT_VEC factorE = WEIGHT_E;
+            SHORT_VEC factorB = WEIGHT_B;
+            SHORT_VEC factorN = WEIGHT_N;
+
+            for (; x < end_x; x += SHORT_VEC::ARITY) {
+                using LibFlatArray::coord;
+                buf =  SHORT_VEC(&accessor_old[coord< 0,  0, -1>()].temp()) * factorS;
+                buf += SHORT_VEC(&accessor_old[coord< 0, -1,  0>()].temp()) * factorT;
+                buf += SHORT_VEC(&accessor_old[coord<-1,  0,  0>()].temp()) * factorW;
+                buf += SHORT_VEC(&accessor_old[coord< 1,  0,  0>()].temp()) * factorE;
+                buf += SHORT_VEC(&accessor_old[coord< 0,  1,  0>()].temp()) * factorB;
+                buf += SHORT_VEC(&accessor_old[coord< 0,  0,  1>()].temp()) * factorN;
+
+                &accessor_new.temp() << buf;
+
+                accessor_new += SHORT_VEC::ARITY;
+                accessor_old += SHORT_VEC::ARITY;
+            }
+
+        }
+
+    private:
+        std::size_t dim_x;
+        std::size_t dim_y;
+        std::size_t dim_z;
+    };
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        long dim_x = dim[0];
+        long dim_y = dim[1];
+        long dim_z = dim[2];
+        int maxT = 200000000 / dim_x / dim_y / dim_z;
+        maxT = std::max(16, maxT);
+
+        soa_grid<JacobiCell> gridOld(dim_x, dim_y, dim_z);
+        soa_grid<JacobiCell> gridNew(dim_x, dim_y, dim_z);
+
+        for (long z = 0; z < dim_z; ++z) {
+            for (long y = 0; y < dim_y; ++y) {
+                for (long x = 0; x < dim_x; ++x) {
+                    gridOld.set(x, y, z, JacobiCell(x + y + z));
+                    gridNew.set(x, y, z, JacobiCell(x + y + z));
+                }
+            }
+        }
+
+        double tStart = time();
+
+        UpdateFunctor functor(dim_x, dim_y, dim_z);
+        for (int t = 0; t < maxT; ++t) {
+            gridOld.callback(&gridNew, functor);
+            using std::swap;
+            swap(gridOld, gridNew);
+        }
+
+        double tEnd = time();
+
+        if (gridOld.get(20, 20, 20).temp ==
+            gridNew.get(10, 10, 10).temp) {
+            std::cout << "this is a debug statement to prevent the compiler from optimizing away the update routine\n";
+        }
+
+        return glups(dim, maxT, tEnd - tStart);
+    }
+
+private:
+    void updateLine(double *gridOld, double *gridNew,
+                    const long xStart, const long y,       const long z,
+                    const long xEnd,   const long offsetY, const long offsetZ) const
+    {
+        for (long x = xStart; x < xEnd; ++x) {
+            gridNew[x + y * offsetY + z * offsetZ] =
+                gridOld[x + y * offsetY + z * offsetZ - 1 * offsetZ] * WEIGHT_S +
+                gridOld[x + y * offsetY + z * offsetZ - 1 * offsetY] * WEIGHT_T +
+                gridOld[x + y * offsetY + z * offsetZ - 1          ] * WEIGHT_W +
+                gridOld[x + y * offsetY + z * offsetZ + 0          ] * WEIGHT_C +
+                gridOld[x + y * offsetY + z * offsetZ + 1          ] * WEIGHT_E +
+                gridOld[x + y * offsetY + z * offsetZ + 1 * offsetY] * WEIGHT_B +
+                gridOld[x + y * offsetY + z * offsetZ + 1 * offsetZ] * WEIGHT_N;
+        }
+    }
+};
 
 class Particle
 {
@@ -1165,7 +1311,7 @@ public:
             soa_accessor<Particle, 8192, 1, 1, 0> accessorA = particlesA[0];
             soa_accessor<Particle, 8192, 1, 1, 0> accessorB = particlesB[0];
 
-            for (; accessorA.index < numParticles; ++accessorA, ++accessorB ) {
+            for (; accessorA.index() < numParticles; ++accessorA, ++accessorB ) {
                 float posX = accessorA.posX();
                 float posY = accessorA.posY();
                 float posZ = accessorA.posZ();
@@ -1182,7 +1328,7 @@ public:
 
                 soa_accessor<Particle, 8192, 1, 1, 0> accessorA2 = particlesA[0];
 
-                for (accessorA2.index = 0; accessorA2.index < numParticles; ++accessorA2) {
+                for (accessorA2.index() = 0; accessorA2.index() < numParticles; ++accessorA2) {
                     float deltaX = posX - accessorA2.posX();
                     float deltaY = posY - accessorA2.posY();
                     float deltaZ = posZ - accessorA2.posZ();
@@ -1287,7 +1433,7 @@ public:
             soa_accessor<Particle, DIM, 1, 1, 0> accessorB = particlesB[0];
             soa_accessor<Particle, DIM, 1, 1, 0> accessorA2 = particlesA[0];
 
-            for (; accessorA.index < (numParticles - 7); accessorA += 8, accessorB += 8) {
+            for (; accessorA.index() < (numParticles - 7); accessorA += 8, accessorB += 8) {
                 __m256 posX = _mm256_loadu_ps(&accessorA.posX());
                 __m256 posY = _mm256_loadu_ps(&accessorA.posY());
                 __m256 posZ = _mm256_loadu_ps(&accessorA.posZ());
@@ -1304,7 +1450,7 @@ public:
 
                 __m256 deltaT = _mm256_set1_ps(DELTA_T);
 
-                for (accessorA2.index = 0; accessorA2.index < numParticles; ++accessorA2) {
+                for (accessorA2.index() = 0; accessorA2.index() < numParticles; ++accessorA2) {
                     __m256 deltaX = _mm256_sub_ps(posX, _mm256_broadcast_ss(&accessorA2.posX()));
                     __m256 deltaY = _mm256_sub_ps(posY, _mm256_broadcast_ss(&accessorA2.posY()));
                     __m256 deltaZ = _mm256_sub_ps(posZ, _mm256_broadcast_ss(&accessorA2.posZ()));
@@ -1430,7 +1576,7 @@ public:
             soa_accessor<Particle, DIM, 1, 1, 0> accessorB = particlesB[0];
             soa_accessor<Particle, DIM, 1, 1, 0> accessorA2 = particlesA[0];
 
-            for (; accessorA.index < (numParticles - REAL::ARITY + 1); accessorA += REAL::ARITY, accessorB += REAL::ARITY) {
+            for (; accessorA.index() < numParticles; accessorA += REAL::ARITY, accessorB += REAL::ARITY) {
                 REAL posX = &accessorA.posX();
                 REAL posY = &accessorA.posY();
                 REAL posZ = &accessorA.posZ();
@@ -1445,7 +1591,7 @@ public:
                 REAL accelerationY = 0.0;
                 REAL accelerationZ = 0.0;
 
-                for (accessorA2.index = 0; accessorA2.index < numParticles; ++accessorA2) {
+                for (accessorA2.index() = 0; accessorA2.index() < numParticles; ++accessorA2) {
                     REAL deltaX = posX - REAL(accessorA2.posX());
                     REAL deltaY = posY - REAL(accessorA2.posY());
                     REAL deltaZ = posZ - REAL(accessorA2.posZ());
@@ -1549,7 +1695,7 @@ public:
             soa_accessor<ArrayParticle, DIM, 1, 1, 0> accessorB = particlesB[0];
             soa_accessor<ArrayParticle, DIM, 1, 1, 0> accessorA2 = particlesA[0];
 
-            for (; accessorA.index < (numParticles - REAL::ARITY + 1); accessorA += REAL::ARITY, accessorB += REAL::ARITY) {
+            for (; accessorA.index() < numParticles; accessorA += REAL::ARITY, accessorB += REAL::ARITY) {
                 REAL posX = &accessorA.pos()[0];
                 REAL posY = &accessorA.pos()[1];
                 REAL posZ = &accessorA.pos()[2];
@@ -1564,7 +1710,7 @@ public:
                 REAL accelerationY = 0.0;
                 REAL accelerationZ = 0.0;
 
-                for (accessorA2.index = 0; accessorA2.index < numParticles; ++accessorA2) {
+                for (accessorA2.index() = 0; accessorA2.index() < numParticles; ++accessorA2) {
                     REAL deltaX = posX - REAL(accessorA2.pos()[0]);
                     REAL deltaY = posY - REAL(accessorA2.pos()[1]);
                     REAL deltaZ = posZ - REAL(accessorA2.pos()[2]);
@@ -1602,6 +1748,612 @@ public:
         }
 
         return gflops(numParticles, repeats, tStart, tEnd);
+    }
+};
+
+class ParticleMover : public cpu_benchmark
+{
+public:
+    std::string family()
+    {
+        return "ParticleMover";
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class ParticleMoverVanilla : public ParticleMover
+{
+public:
+    std::string species()
+    {
+        return "vanilla";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        int gridDim = dim[0];
+        double boundary = 0.5 + dim[1] * 0.01;
+        int repeats = dim[2];
+
+        std::list<Particle> left;
+        std::list<Particle> right;
+
+        for (int z = 0; z < gridDim; ++z) {
+            for (int y = 0; y < gridDim; ++y) {
+                for (int x = 0; x < gridDim; ++x) {
+                    left.push_back(Particle(1.0 * x / gridDim,
+                                            1.0 * y / gridDim,
+                                            1.0 * z / gridDim));
+                }
+            }
+        }
+
+        double tStart = time();
+
+        for (int t = 0; t < repeats; ++t) {
+            std::list<Particle>::iterator leftStart = left.begin();
+            std::list<Particle>::iterator rightStart = right.begin();
+
+            for (std::list<Particle>::iterator i = leftStart; i != left.end();) {
+                if (i->posX >= boundary) {
+                    std::list<Particle>::iterator here = i;
+                    ++i;
+                    right.splice(rightStart, left, here);
+                } else {
+                    ++i;
+                }
+            }
+
+            leftStart = left.begin();
+            for (std::list<Particle>::iterator i = rightStart; i != right.end();) {
+                if (i->posX < boundary) {
+                    std::list<Particle>::iterator here = i;
+                    ++i;
+                    left.splice(leftStart, right, here);
+                } else {
+                    ++i;
+                }
+            }
+
+            boundary = 1.0 - boundary;
+        }
+
+        double tEnd = time();
+        // std::cout << "size left: " << left.size() << "\n"
+        //           << "size right: " << right.size() << "\n";
+        return tEnd - tStart;
+    }
+
+};
+
+class ParticleMoverPepper : public ParticleMover
+{
+public:
+    std::string species()
+    {
+        return "pepper";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        int gridDim = dim[0];
+        double boundary = 0.5 + dim[1] * 0.01;
+        int repeats = dim[2];
+
+        std::vector<Particle> left;
+        std::vector<Particle> right;
+
+        for (int z = 0; z < gridDim; ++z) {
+            for (int y = 0; y < gridDim; ++y) {
+                for (int x = 0; x < gridDim; ++x) {
+                    left.push_back(Particle(1.0 * x / gridDim,
+                                            1.0 * y / gridDim,
+                                            1.0 * z / gridDim));
+                }
+            }
+        }
+
+        double tStart = time();
+        std::vector<Particle> newLeft;
+        std::vector<Particle> newRight;
+
+        for (int t = 0; t < repeats; ++t) {
+            newLeft.clear();
+            newRight.clear();
+
+            for (std::vector<Particle>::iterator i = left.begin(); i != left.end(); ++i) {
+                if (i->posX >= boundary) {
+                    newRight.push_back(*i);
+                } else {
+                    newLeft.push_back(*i);
+                }
+            }
+
+            for (std::vector<Particle>::iterator i = right.begin(); i != right.end(); ++i) {
+                if (i->posX >= boundary) {
+                    newRight.push_back(*i);
+                } else {
+                    newLeft.push_back(*i);
+                }
+            }
+
+            swap(left, newLeft);
+            swap(right, newRight);
+
+            boundary = 1.0 - boundary;
+        }
+
+        double tEnd = time();
+        // std::cout << "size left: " << left.size() << "\n"
+        //           << "size right: " << right.size() << "\n";
+        return tEnd - tStart;
+    }
+
+};
+
+class ParticleMoverGold : public ParticleMover
+{
+public:
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        int gridDim = dim[0];
+        float boundary = 0.5 + dim[1] * 0.01;
+        short_vec<float, 8> boundaryVec = boundary;
+        int repeats = dim[2];
+
+        soa_array<Particle, (8192+16)> left;
+        soa_array<Particle, (8192+16)> right;
+
+        for (int z = 0; z < gridDim; ++z) {
+            for (int y = 0; y < gridDim; ++y) {
+                for (int x = 0; x < gridDim; ++x) {
+                    left.push_back(Particle(1.0 * x / gridDim,
+                                            1.0 * y / gridDim,
+                                            1.0 * z / gridDim));
+                }
+            }
+        }
+
+        double tStart = time();
+        soa_array<Particle, (8192+16)> newLeft;
+        soa_array<Particle, (8192+16)> newRight;
+
+        for (int t = 0; t < repeats; ++t) {
+            newLeft.clear();
+            newRight.clear();
+
+            for (std::size_t i = 0; i < left.size(); i += 8) {
+                if (any(short_vec<float, 8>(&left[i].posX()) >= boundaryVec)) {
+                    for (std::size_t j = i; j < (i + 8); ++j) {
+                        if (left[j].posX() >= boundary) {
+                            newRight.push_back(Particle(left[j]));
+                        } else {
+                            newLeft.push_back(Particle(left[j]));
+                        }
+                    }
+                    // newRight[newRight.size()].load(left.data(), 1, i, (8192+16));
+                    // ++newRight.elements;
+                } else {
+                    // for (int j = i; j < (i + 8); ++j) {
+                    //     newLeft.push_back(Particle(left[j]));
+                    // }
+                    newLeft.load(left[i], 8);
+                }
+            }
+
+            for (std::size_t i = 0; i < right.size(); i += 8) {
+                if (any(short_vec<float, 8>(&right[i].posX()) < boundaryVec)) {
+                    for (std::size_t j = i; j < (i + 8); ++j) {
+                        if (right[j].posX() < boundary) {
+                            newLeft.push_back(Particle(right[j]));
+                        } else {
+                            newRight.push_back(Particle(right[j]));
+                        }
+                    }
+                    // newRight[newRight.size()].load(right.data(), 1, i, (8192+16));
+                    // ++newRight.elements;
+                } else {
+                    // for (int j = i; j < (i + 8); ++j) {
+                    //     newRight.push_back(Particle(right[j]));
+                    // }
+                    newRight.load(right[i], 8);
+                }
+            }
+
+            swap(left, newLeft);
+            swap(right, newRight);
+
+            boundary = 1.0 - boundary;
+        }
+
+        double tEnd = time();
+        // std::cout << "size left: " << left.size() << "\n"
+        //           << "size right: " << right.size() << "\n";
+        return tEnd - tStart;
+    }
+
+};
+
+class ParticleInteractor : public cpu_benchmark
+{
+public:
+    std::string family()
+    {
+        return "ParticleInteractor";
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class ParticleInteractorVanilla : public ParticleInteractor
+{
+public:
+    std::string species()
+    {
+        return "vanilla";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        int gridDim = dim[0];
+        float radius = dim[1] * 0.01;
+        float radius2 = radius * radius;
+        int repeats = dim[2];
+
+        std::list<Particle> particles;
+
+        for (int z = 0; z < gridDim; ++z) {
+            for (int y = 0; y < gridDim; ++y) {
+                for (int x = 0; x < gridDim; ++x) {
+                    particles.push_back(Particle(1.0 * x / gridDim,
+                                                 1.0 * y / gridDim,
+                                                 1.0 * z / gridDim));
+                }
+            }
+        }
+
+        std::vector<std::list<Particle*> > neighbors(particles.size());
+        double tStart = time();
+
+        for (int t = 0; t < repeats; ++t) {
+            int counter = 0;
+
+            for (std::list<Particle>::iterator i = particles.begin(); i != particles.end(); ++i) {
+                neighbors[counter].clear();
+
+                for (std::list<Particle>::iterator j = particles.begin(); j != particles.end(); ++j) {
+                    float deltaX = i->posX - j->posX;
+                    float deltaY = i->posY - j->posY;
+                    float deltaZ = i->posZ - j->posZ;
+                    float dist2 = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+                    if (dist2 < radius2) {
+                        neighbors[counter].push_back(&*j);
+                        i->velX += j->velX;
+                    }
+                }
+                ++counter;
+            }
+
+            counter = 0;
+
+            for (std::list<Particle>::iterator i = particles.begin(); i != particles.end(); ++i) {
+                for (std::list<Particle*>::iterator j = neighbors[counter].begin(); j != neighbors[counter].end(); ++j) {
+                    i->velY += (*j)->velY;
+                }
+                ++counter;
+            }
+
+            counter = 0;
+
+            for (std::list<Particle>::iterator i = particles.begin(); i != particles.end(); ++i) {
+                for (std::list<Particle*>::iterator j = neighbors[counter].begin(); j != neighbors[counter].end(); ++j) {
+                    i->velZ += (*j)->velZ;
+                }
+                ++counter;
+            }
+
+        }
+
+        double tEnd = time();
+        return tEnd - tStart;
+    }
+
+};
+
+class ParticleInteractorGold : public ParticleInteractor
+{
+public:
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        int gridDim = dim[0];
+        float radius = dim[1] * 0.01;
+        short_vec<float, 8> radius2 = radius * radius;
+        int repeats = dim[2];
+
+        soa_array<Particle, (8192+16)> particles;
+
+        for (int z = 0; z < gridDim; ++z) {
+            for (int y = 0; y < gridDim; ++y) {
+                for (int x = 0; x < gridDim; ++x) {
+                    particles.push_back(Particle(1.0 * x / gridDim,
+                                                 1.0 * y / gridDim,
+                                                 1.0 * z / gridDim));
+                }
+            }
+        }
+
+        double tStart = time();
+
+        for (int t = 0; t < repeats; ++t) {
+            for (std::size_t i = 0; i != particles.size(); ++i) {
+                float posX = particles[i].posX();
+                float posY = particles[i].posY();
+                float posZ = particles[i].posZ();
+
+                for (std::size_t j = 0; j != particles.size(); j += 8) {
+                    short_vec<float, 8> deltaX = short_vec<float, 8>(&particles[j].posX()) - posX;
+                    short_vec<float, 8> deltaY = short_vec<float, 8>(&particles[j].posY()) - posY;
+                    short_vec<float, 8> deltaZ = short_vec<float, 8>(&particles[j].posZ()) - posZ;
+                    short_vec<float, 8> dist2 = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+                    if (any(dist2 < radius2)) {
+                        for (std::size_t k = j; k < (j + 8); ++k) {
+                            float deltaX = particles[k].posX() - posX;
+                            float deltaY = particles[k].posY() - posY;
+                            float deltaZ = particles[k].posZ() - posZ;
+                            float dist2 = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+                            if (dist2 < (radius * radius)) {
+                                particles[k].velX() += particles[i].velX();
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (std::size_t i = 0; i != particles.size(); ++i) {
+                float posX = particles[i].posX();
+                float posY = particles[i].posY();
+                float posZ = particles[i].posZ();
+
+                for (std::size_t j = 0; j != particles.size(); j += 8) {
+                    short_vec<float, 8> deltaX = short_vec<float, 8>(&particles[j].posX()) - posX;
+                    short_vec<float, 8> deltaY = short_vec<float, 8>(&particles[j].posY()) - posY;
+                    short_vec<float, 8> deltaZ = short_vec<float, 8>(&particles[j].posZ()) - posZ;
+                    short_vec<float, 8> dist2 = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+                    if (any(dist2 < radius2)) {
+                        for (std::size_t k = j; k < (j + 8); ++k) {
+                            float deltaX = particles[k].posX() - posX;
+                            float deltaY = particles[k].posY() - posY;
+                            float deltaZ = particles[k].posZ() - posZ;
+                            float dist2 = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+                            if (dist2 < (radius * radius)) {
+                                particles[k].velY() += particles[i].velY();
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (std::size_t i = 0; i != particles.size(); ++i) {
+                float posX = particles[i].posX();
+                float posY = particles[i].posY();
+                float posZ = particles[i].posZ();
+
+                for (std::size_t j = 0; j != particles.size(); j += 8) {
+                    short_vec<float, 8> deltaX = short_vec<float, 8>(&particles[j].posX()) - posX;
+                    short_vec<float, 8> deltaY = short_vec<float, 8>(&particles[j].posY()) - posY;
+                    short_vec<float, 8> deltaZ = short_vec<float, 8>(&particles[j].posZ()) - posZ;
+                    short_vec<float, 8> dist2 = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+                    if (any(dist2 < radius2)) {
+                        for (std::size_t k = j; k < (j + 8); ++k) {
+                            float deltaX = particles[k].posX() - posX;
+                            float deltaY = particles[k].posY() - posY;
+                            float deltaZ = particles[k].posZ() - posZ;
+                            float dist2 = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+                            if (dist2 < (radius * radius)) {
+                                particles[k].velZ() += particles[i].velZ();
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        double tEnd = time();
+        return tEnd - tStart;
+    }
+
+};
+
+class ConditionalAny : public cpu_benchmark
+{
+public:
+    std::string family()
+    {
+        return "ConditionalAny";
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class ConditionalAnyVanilla : public ConditionalAny
+{
+public:
+    std::string species()
+    {
+        return "vanilla";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        int gridDim = dim[0];
+        float radius = dim[1] * 0.01;
+        float radius2 = radius * radius;
+        int repeats = dim[2];
+
+        std::vector<Particle> particles;
+
+        for (int z = 0; z < gridDim; ++z) {
+            for (int y = 0; y < gridDim; ++y) {
+                for (int x = 0; x < gridDim; ++x) {
+                    particles.push_back(Particle(1.0 * x / gridDim,
+                                                 1.0 * y / gridDim,
+                                                 1.0 * z / gridDim));
+                }
+            }
+        }
+
+        int counter = 0;
+
+        double tStart = time();
+
+        for (int t = 0; t < repeats; ++t) {
+            for (std::vector<Particle>::iterator i = particles.begin(); i != particles.end(); ++i) {
+                for (std::vector<Particle>::iterator j = particles.begin(); j != particles.end(); ++j) {
+                    float delta_x = i->posX - j->posX;
+                    float delta_y = i->posY - j->posY;
+                    float delta_z = i->posZ - j->posZ;
+                    float distance2 = delta_x * delta_x + delta_y * delta_y + delta_z * delta_z;
+                    if (distance2 < radius2) {
+                        ++counter;
+                    }
+                }
+            }
+        }
+
+        double tEnd = time();
+
+        if (counter == 4711) {
+            std::cout << "this is really only here to prevent the compiler from optimizing away any code: " << counter << "\n";
+        }
+
+        return tEnd - tStart;
+
+    }
+};
+
+class ConditionalUpdater
+{
+public:
+    ConditionalUpdater(int repeats, long n, float radius2, int *counter) :
+        repeats(repeats),
+        n(n),
+        radius2(radius2),
+        counter(counter)
+    {}
+
+    template<typename ACCESSOR>
+    void operator()(ACCESSOR& particle) {
+        for (int t = 0; t < repeats; ++t) {
+            typedef short_vec<float, 16> Float;
+
+            ACCESSOR i = particle;
+            LIBFLATARRAY_LOOP_PEELER(Float, long, i.index(), n, update, i);
+        }
+    }
+
+    template<typename Float, typename ACCESSOR>
+    void update(long& unused_counter, long end, ACCESSOR& i)
+    {
+        Float sum = 0.0f;
+
+        for (; i.index() < end; i += Float::ARITY) {
+            for (ACCESSOR j(i.data(), 0); j.index() < n; ++j) {
+                Float delta_x = Float(&i.posX()) - j.posX();
+                Float delta_y = Float(&i.posY()) - j.posY();
+                Float delta_z = Float(&i.posZ()) - j.posZ();
+                Float distance2 = delta_x * delta_x + delta_y * delta_y + delta_z * delta_z;
+
+                typename Float::mask_type mask = (distance2 < radius2);
+                if (any(mask)) {
+                    sum += blend(Float(0.0f), 1.0f, mask);
+                }
+            }
+        }
+        float foo[Float::ARITY];
+        foo << sum;
+        for (std::size_t i = 0; i < Float::ARITY; ++i) {
+            *counter += foo[i];
+        }
+    }
+
+private:
+    int repeats;
+    long n;
+    float radius2;
+    int *counter;
+};
+
+
+class ConditionalAnyGold : public ConditionalAny
+{
+public:
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        int gridDim = dim[0];
+        float radius = dim[1] * 0.01;
+        float radius2 = radius * radius;
+        int repeats = dim[2];
+
+        soa_vector<Particle> particles;
+
+        for (int z = 0; z < gridDim; ++z) {
+            for (int y = 0; y < gridDim; ++y) {
+                for (int x = 0; x < gridDim; ++x) {
+                    particles.push_back(Particle(1.0 * x / gridDim,
+                                                 1.0 * y / gridDim,
+                                                 1.0 * z / gridDim));
+                }
+            }
+        }
+
+        int counter = 0;
+        std::size_t n = particles.size();
+
+        double tStart = time();
+
+        particles.callback(ConditionalUpdater(repeats, n, radius2, &counter));
+
+        double tEnd = time();
+
+        if (counter == 4711) {
+            std::cout << "this is really only here to prevent the compiler from optimizing away any code: " << counter << "\n";
+        }
+
+        return tEnd - tStart;
+
     }
 };
 
@@ -1660,6 +2412,10 @@ int main(int argc, char **argv)
     }
 #endif
 
+    for (std::vector<std::vector<int> >::iterator i = sizes.begin(); i != sizes.end(); ++i) {
+        eval(JacobiD3Q7Gold(), *i);
+    }
+
     sizes.clear();
 
     for (int n = 128; n <= 8192; n *= 2) {
@@ -1701,6 +2457,58 @@ int main(int argc, char **argv)
 
     for (std::vector<std::vector<int> >::iterator i = sizes.begin(); i != sizes.end(); ++i) {
         eval(NBodyGold(),  *i);
+    }
+
+    sizes.clear();
+    sizes.push_back(std::vector<int>());
+    sizes[0].push_back(20);
+    sizes[0].push_back(10);
+    sizes[0].push_back(100000);
+    eval(ParticleMoverVanilla(),  sizes[0]);
+    eval(ParticleMoverPepper(),   sizes[0]);
+    eval(ParticleMoverGold(),     sizes[0]);
+    sizes[0][1] = 50;
+    eval(ParticleMoverVanilla(),  sizes[0]);
+    eval(ParticleMoverPepper(),   sizes[0]);
+    eval(ParticleMoverGold(),     sizes[0]);
+    sizes[0][1] = 90;
+    eval(ParticleMoverVanilla(),  sizes[0]);
+    eval(ParticleMoverPepper(),   sizes[0]);
+    eval(ParticleMoverGold(),     sizes[0]);
+
+    sizes[0].clear();
+    sizes[0].push_back(20);
+    sizes[0].push_back(10);
+    sizes[0].push_back(10);
+    eval(ParticleInteractorVanilla(), sizes[0]);
+    eval(ParticleInteractorGold(),    sizes[0]);
+    sizes[0][1] = 20;
+    eval(ParticleInteractorVanilla(), sizes[0]);
+    eval(ParticleInteractorGold(),    sizes[0]);
+
+    sizes.clear();
+
+    sizes.push_back(std::vector<int>());
+    sizes.back().push_back(20);
+    sizes.back().push_back( 4);
+    sizes.back().push_back(70);
+
+    sizes.push_back(std::vector<int>());
+    sizes.back().push_back(20);
+    sizes.back().push_back(16);
+    sizes.back().push_back(70);
+
+    sizes.push_back(std::vector<int>());
+    sizes.back().push_back(20);
+    sizes.back().push_back(64);
+    sizes.back().push_back(70);
+
+    for (std::vector<std::vector<int> >::iterator i = sizes.begin(); i != sizes.end(); ++i) {
+        eval(ConditionalAnyVanilla(), *i);
+    }
+
+    for (std::vector<std::vector<int> >::iterator i = sizes.begin(); i != sizes.end(); ++i) {
+        eval(ConditionalAnyGold(), *i);
     }
 
     return 0;

@@ -303,12 +303,16 @@ public:
     using CommonStepper<CELL_TYPE>::kernelBuffer;
     using CommonStepper<CELL_TYPE>::kernelFraction;
 
+    using typename ParentType::InitPtr;
+    using typename ParentType::PartitionManagerPtr;
+
     inline CUDAStepper(
-        boost::shared_ptr<PartitionManagerType> partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        PartitionManagerPtr partitionManager,
+        InitPtr initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
-        const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase0 = PatchProviderVec(),
+        const PatchProviderVec& ghostZonePatchProvidersPhase1 = PatchProviderVec(),
         const PatchProviderVec& innerSetPatchProviders = PatchProviderVec(),
         bool enableFineGrainedParallelism = false) :
         CommonStepper<CELL_TYPE>(
@@ -316,7 +320,8 @@ public:
             initializer,
             ghostZonePatchAccepters,
             innerSetPatchAccepters,
-            ghostZonePatchProviders,
+            ghostZonePatchProvidersPhase0,
+            ghostZonePatchProvidersPhase1,
             innerSetPatchProviders,
             enableFineGrainedParallelism)
     {
@@ -324,9 +329,9 @@ public:
     }
 
 private:
-    boost::shared_ptr<CUDAGridType> oldDeviceGrid;
-    boost::shared_ptr<CUDAGridType> newDeviceGrid;
-    std::vector<boost::shared_ptr<CUDARegion<DIM> > > deviceInnerSets;
+    typename SharedPtr<CUDAGridType>::Type oldDeviceGrid;
+    typename SharedPtr<CUDAGridType>::Type newDeviceGrid;
+    std::vector<typename SharedPtr<CUDARegion<DIM> >::Type> deviceInnerSets;
 
     inline void update1()
     {
@@ -378,14 +383,15 @@ private:
         const Region<DIM>& region,
         std::size_t nanoStep)
     {
-        notifyPatchAccepters(region, ParentType::GHOST, nanoStep);
+        notifyPatchAccepters(region, ParentType::GHOST_PHASE_0, nanoStep);
     }
 
     inline void notifyPatchProvidersGhostZones(
         const Region<DIM>& region,
         std::size_t nanoStep)
     {
-        notifyPatchProviders(region, ParentType::GHOST, nanoStep);
+        notifyPatchProviders(region, ParentType::GHOST_PHASE_0, nanoStep);
+        notifyPatchProviders(region, ParentType::GHOST_PHASE_1, nanoStep);
     }
 
     inline void notifyPatchAcceptersInnerSet(
@@ -484,7 +490,7 @@ private:
         deviceInnerSets.resize(0);
         for (std::size_t i = 0; i <= ghostZoneWidth(); ++i) {
             deviceInnerSets.push_back(
-                boost::shared_ptr<CUDARegion<DIM> >(
+                typename SharedPtr<CUDARegion<DIM> >::Type(
                     new CUDARegion<DIM>(innerSet(i))));
         }
 

@@ -279,6 +279,9 @@ public:
     }
 
 protected:
+    Coord<DIM> topoDimensions;
+    Region<DIM> myBoundingRegion;
+
     virtual void saveMemberImplementation(
         char *target,
         MemoryLocation::Location targetLocation,
@@ -290,9 +293,6 @@ protected:
         MemoryLocation::Location sourceLocation,
         const Selector<CELL>& selector,
         const Region<DIM>& region) = 0;
-
-    Coord<DIM> topoDimensions;
-    Region<DIM> myBoundingRegion;
 };
 
 }

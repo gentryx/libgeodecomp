@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_NESTING_PARALLELWRITERADAPTER_H
 
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 
 namespace LibGeoDecomp {
@@ -19,6 +20,7 @@ class ParallelWriterAdapter : public PatchAccepter<GRID_TYPE>
 {
 public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename SharedPtr<ParallelWriter<CELL_TYPE> >::Type WriterPtr;
 
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
@@ -27,7 +29,7 @@ public:
     using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
     ParallelWriterAdapter(
-        boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer,
+        WriterPtr writer,
         const std::size_t firstStep,
         const std::size_t lastStep,
         bool lastCall) :
@@ -83,7 +85,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
+    WriterPtr writer;
     std::size_t firstNanoStep;
     std::size_t lastNanoStep;
     std::size_t stride;

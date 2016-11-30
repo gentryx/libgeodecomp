@@ -7,6 +7,6 @@ dependencies:
 
 test:
     override:
-        - cd build && make -j2
-        - cd build && make -j2 tests
+        - cd build && make
+        - cd build && make tests
         - cd build && make check

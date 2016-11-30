@@ -7,9 +7,7 @@
 #include <libgeodecomp/io/testinitializer.h>
 
 #include <cxxtest/TestSuite.h>
-#include <boost/assign/std/vector.hpp>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -64,22 +62,24 @@ public:
         std::ifstream infile(firstFile.c_str());
 
         std::vector<char> expected;
-        expected += 0x50, 0x36, 0x20, // P6_
-            0x32, 0x30, 0x30, 0x20,   // width,
-            0x32, 0x32, 0x30, 0x20,   // height,
-            0x32, 0x35, 0x35, 0x0a;   // and maxcolor (space separated)
+        expected << 0x50 << 0x36 << 0x20 // P6_
+                 << 0x32 << 0x30 << 0x30 << 0x20 // width,
+                 << 0x32 << 0x32 << 0x30 << 0x20 // height,
+                 << 0x32 << 0x35 << 0x35 << 0x0a; // and maxcolor (space separated)
+
         // each cell gets plotted as a tile. we check the first lines
         // of the two leftmost cells in the upper grid line
         for (int i = 0; i < 20; i++) {
-            expected += 0x01, 0x2f, 0x0b; // rgb rgb...
+            expected << 0x01 << 0x2f << 0x0b; // rgb rgb...
         }
+
         for (int i = 0; i < 20; i++) {
-            expected += 0x02, 0x2f, 0x0b; // rgb rgb...
+            expected << 0x02 << 0x2f << 0x0b; // rgb rgb...
         }
 
         std::vector<char> content;
         for (unsigned i = 0; i < expected.size(); i++) {
-            content.push_back(infile.get());
+            content << infile.get();
         }
 
         TS_ASSERT_EQUALS(content, expected);
@@ -97,6 +97,7 @@ public:
             std::ostringstream filename;
             filename << tempFile << "." << std::setfill('0') << std::setw(4)
                      << i << ".ppm";
+
             if (i % period == 0) {
                 TS_ASSERT_FILE(filename.str());
             } else {

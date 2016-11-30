@@ -1,16 +1,16 @@
+#include <atomic>
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 #include <hpx/include/lcos.hpp>
 #include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
-#include <boost/assign/std/deque.hpp>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/parallelization/nesting/vanillastepper.h>
+#include <libgeodecomp/parallelization/nesting/hpxstepper.h>
 #include <libgeodecomp/parallelization/nesting/hpxupdategroup.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
@@ -168,7 +168,7 @@ public:
 
     HPX_DEFINE_COMPONENT_ACTION(DummyUpdateGroup, step, step_action);
 
-    static boost::atomic<std::size_t> localIndexCounter;
+    static std::atomic<std::size_t> localIndexCounter;
 
 private:
     std::size_t stepCounter;
@@ -179,7 +179,7 @@ private:
 };
 
 template<typename CELL>
-boost::atomic<std::size_t> DummyUpdateGroup<CELL>::localIndexCounter;
+std::atomic<std::size_t> DummyUpdateGroup<CELL>::localIndexCounter;
 
 std::size_t getNumberOfUpdateGroups(const std::string& basename)
 {
@@ -368,7 +368,7 @@ class UpdateGroupTest : public CxxTest::TestSuite
 public:
 
     typedef RecursiveBisectionPartition<2> PartitionType;
-    typedef LibGeoDecomp::VanillaStepper<TestCell<2>, UpdateFunctorHelpers::ConcurrencyEnableHPX> StepperType;
+    typedef LibGeoDecomp::HPXStepper<TestCell<2>, UpdateFunctorHelpers::ConcurrencyEnableHPX> StepperType;
     typedef HPXUpdateGroup<TestCell<2> > UpdateGroupType;
     typedef StepperType::GridType GridType;
 
@@ -393,9 +393,7 @@ public:
 
     void testCreation()
     {
-        using namespace boost::assign;
-
-        boost::shared_ptr<UpdateGroupType> updateGroup;
+        SharedPtr<UpdateGroupType>::Type updateGroup;
 
         rank = hpx::get_locality_id();
         dimensions = Coord<2>(231, 350);
@@ -411,7 +409,7 @@ public:
                 init,
                 reinterpret_cast<StepperType*>(0)));
         expectedNanoSteps.clear();
-        expectedNanoSteps += 5, 7, 8, 33, 55;
+        expectedNanoSteps << 5 << 7 << 8 << 33 << 55;
         mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
         for (std::deque<std::size_t>::iterator i = expectedNanoSteps.begin();
              i != expectedNanoSteps.end();
@@ -432,10 +430,10 @@ private:
     Coord<2> dimensions;
     std::vector<std::size_t> weights;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<PartitionType> partition;
-    boost::shared_ptr<Initializer<TestCell<2> > > init;
-    boost::shared_ptr<UpdateGroupType> updateGroup;
-    boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
+    SharedPtr<PartitionType>::Type partition;
+    SharedPtr<Initializer<TestCell<2> > >::Type init;
+    SharedPtr<UpdateGroupType>::Type updateGroup;
+    SharedPtr<MockPatchAccepter<GridType> >::Type mockPatchAccepter;
 
     std::vector<std::size_t> genWeights(
         unsigned width,

@@ -56,11 +56,11 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
             ShortVec tmp;
-            tmp.load_aligned(&hoodNew->sum() + i * C);
+            tmp.load_aligned(&hoodNew->sum());
             for (const auto& j: hoodOld.weights(0)) {
                 ShortVec weights;
                 ShortVec values;
@@ -69,7 +69,8 @@ public:
                 values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
-            tmp.store_aligned(&hoodNew->sum() + i * C);
+            tmp.store_aligned(&hoodNew->sum());
+            hoodNew += C;
         }
     }
 
@@ -213,8 +214,9 @@ void runSimulation(int argc, char *argv[])
         sim.addWriter(new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency));
     } else {
         auto asciiWriter = new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency);
-        sim.addWriter(new SellSortingWriter<Cell, ASCIIWriter<Cell> >(
-                          asciiWriter, 0, "sum", &Cell::sum, outputFrequency));
+        // fixme
+        // sim.addWriter(new SellSortingWriter<Cell, ASCIIWriter<Cell> >(
+        //                   asciiWriter, 0, "sum", &Cell::sum, outputFrequency));
     }
     sim.run();
 }

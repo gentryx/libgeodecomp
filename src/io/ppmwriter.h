@@ -38,7 +38,7 @@ public:
      * is mapped to the value range defined by [minValue, maxValue].
      */
     template<typename MEMBER>
-    explicit PPMWriter(
+    PPMWriter(
         MEMBER CELL_TYPE:: *member,
         MEMBER minValue,
         MEMBER maxValue,
@@ -55,7 +55,7 @@ public:
      * custom palette object.
      */
     template<typename MEMBER, typename PALETTE>
-    explicit PPMWriter(
+    PPMWriter(
         MEMBER CELL_TYPE:: *member,
         const PALETTE& palette,
         const std::string& prefix,

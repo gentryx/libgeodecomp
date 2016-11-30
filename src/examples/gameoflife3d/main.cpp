@@ -1,12 +1,7 @@
-#include <libgeodecomp/io/remotesteerer.h>
-#include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/io/visitwriter.h>
-#include <libgeodecomp/parallelization/serialsimulator.h>
-#include <boost/assign/std/vector.hpp>
+#include <libgeodecomp.h>
+// fixme: kill this
+#include <libgeodecomp/storage/dataaccessor.h>
 
-#include <libgeodecomp/storage/grid.h>
-
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 class ConwayCell
@@ -68,7 +63,7 @@ public:
                     tmp = (x+y+z) % 2;
                     if (tmp) {
                         if (rect.inBounds(Coord<3>(x, y, z))) {
-                            startCells += Coord<3>(x, y, z);
+                            startCells << Coord<3>(x, y, z);
                         }
                     }
                 }

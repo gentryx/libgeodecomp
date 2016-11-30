@@ -20,7 +20,7 @@
     HPX_REGISTER_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction);     \
     HPX_REGISTER_BROADCAST_APPLY_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
     HPX_REGISTER_BROADCAST_APPLY_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
-    typedef hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> > receiver_type_ ## CARGO; \
+    typedef hpx::components::managed_component<LibGeoDecomp::HPXReceiver<CARGO> > receiver_type_ ## CARGO; \
     HPX_REGISTER_COMPONENT(receiver_type_ ## CARGO , DummyReceiver_ ## CARGO); \
                                                                         \
     typedef LibGeoDecomp::HPXReceiver<std::vector<CARGO> >::receiveAction DummyReceiver_vector_ ## CARGO ## _ReceiveAction; \
@@ -28,13 +28,13 @@
     HPX_REGISTER_ACTION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction);     \
     HPX_REGISTER_BROADCAST_APPLY_ACTION_DECLARATION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
     HPX_REGISTER_BROADCAST_APPLY_ACTION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
-    typedef hpx::components::simple_component<LibGeoDecomp::HPXReceiver<std::vector<CARGO>> > receiver_type_vector_ ## CARGO; \
+    typedef hpx::components::managed_component<LibGeoDecomp::HPXReceiver<std::vector<CARGO>> > receiver_type_vector_ ## CARGO; \
     HPX_REGISTER_COMPONENT(receiver_type_vector_ ## CARGO , DummyReceiver_vector_ ## CARGO);
 
 namespace LibGeoDecomp {
 
 template <typename CARGO, typename BUFFER=hpx::lcos::local::receive_buffer<CARGO> >
-class HPXReceiver : public hpx::components::simple_component_base<HPXReceiver<CARGO> >
+class HPX_COMPONENT_EXPORT HPXReceiver : public hpx::components::managed_component_base<HPXReceiver<CARGO> >
 {
 public:
     typedef CARGO Cargo;
@@ -79,11 +79,11 @@ public:
     virtual ~HPXReceiver()
     {}
 
-    void receive(std::size_t step, Cargo&& val)
+    void receive(std::size_t step, Cargo val)
     {
-        buffer.store_received(step, std::forward<Cargo>(val));
+        buffer.store_received(step, std::move(val));
     }
-    HPX_DEFINE_COMPONENT_ACTION(HPXReceiver, receive, receiveAction);
+    HPX_DEFINE_COMPONENT_DIRECT_ACTION(HPXReceiver, receive, receiveAction);
 
     hpx::future<Cargo> get(std::size_t step)
     {

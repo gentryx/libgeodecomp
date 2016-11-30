@@ -5,9 +5,9 @@
 #ifdef LIBGEODECOMP_WITH_MPI
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/storage/gridtypeselector.h>
@@ -27,6 +27,7 @@ class StripingSimulator : public DistributedSimulator<CELL_TYPE>
 public:
     friend class StripingSimulatorTest;
     friend class ParallelStripingSimulatorTest;
+
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef LoadBalancer::WeightVec WeightVec;
     typedef LoadBalancer::LoadVec LoadVec;
@@ -34,6 +35,8 @@ public:
     typedef typename GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value GridType;
     typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
     typedef typename SerializationBuffer<CELL_TYPE>::BufferType BufferType;
+    typedef typename DistributedSimulator<CELL_TYPE>::InitPtr InitPtr;
+
     static const int DIM = Topology::DIM;
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
@@ -72,7 +75,7 @@ public:
     }
 
     explicit StripingSimulator(
-        const boost::shared_ptr<Initializer<CELL_TYPE> >& initializer,
+        const InitPtr& initializer,
         LoadBalancer *balancer = 0,
         unsigned loadBalancingPeriod = 1):
         DistributedSimulator<CELL_TYPE>(initializer),
@@ -145,7 +148,7 @@ public:
 
 private:
     MPILayer mpilayer;
-    boost::shared_ptr<LoadBalancer> balancer;
+    typename SharedPtr<LoadBalancer>::Type balancer;
     /**
      * we need to distinguish four types of rims:
      *   - the inner rim is sent to neighboring nodes (and lies whithin our own stripe)
@@ -445,7 +448,7 @@ private:
         unsigned endRow   = newPartitions[mpilayer.rank() + 1];
         region = fillRegion(startRow, endRow);
         {
-            boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency(region);
+            SharedPtr<Adjacency>::Type adjacency = initializer->getAdjacency(region);
             regionWithOuterGhosts = region.expandWithTopology(
                 1,
                 initializer->gridDimensions(),
@@ -462,7 +465,7 @@ private:
                 startRow = newPartitions[i + 0];
                 endRow   = newPartitions[i + 1];
                 Region<DIM> otherRegion = fillRegion(startRow, endRow);
-                boost::shared_ptr<Adjacency> adjacency = initializer->getAdjacency(otherRegion);
+                SharedPtr<Adjacency>::Type adjacency = initializer->getAdjacency(otherRegion);
                 Region<DIM> otherRegionExpanded = otherRegion.expandWithTopology(
                     1,
                     initializer->gridDimensions(),
@@ -634,13 +637,13 @@ private:
         }
 
         // node 0 needs a (central) LoadBalancer...
-        if (mpilayer.rank() == 0 && balancer == 0) {
+        if ((mpilayer.rank() == 0) && (balancer.get() == 0)) {
             throw std::invalid_argument(
                 "Rank " + StringOps::itoa(mpilayer.rank()) +
                 "(Root) needs a non-empty LoadBalancer");
         }
         // ...while the others shouldn't have one (they rely on the central one).
-        if (mpilayer.rank() != 0 && balancer != 0) {
+        if ((mpilayer.rank() != 0) && (balancer.get() != 0)) {
             throw std::invalid_argument(
                 "Rank " + StringOps::itoa(mpilayer.rank()) +
                 "(Non-Root) needs an empty LoadBalancer");

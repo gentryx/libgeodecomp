@@ -1087,6 +1087,37 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    class SelectMessageType
+    {
+    public:
+        typedef CELL Value;
+    };
+
+    template<typename CELL>
+    class SelectMessageType<CELL, typename CELL::API::SupportsCustomMessageType>
+    {
+    public:
+        typedef typename CELL::API::MessageType Value;
+    };
+
+    /**
+     * Use this trait if your simulation model would rather send
+     * objects of a specific type to neighbors, rather than
+     * synchronizing whole instances of cells. This can, depending on
+     * the model, save considerable amounts of communication volume
+     * (e.g. DG-SWEM).
+     */
+    template<typename MESSAGE_TYPE>
+    class HasCustomMessageType
+    {
+    public:
+        typedef MESSAGE_TYPE MessageType;
+        typedef void SupportsCustomMessageType;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
     // Trait Template:
 
     // template<typename CELL, typename HAS_TEMPLATE_NAME = void>

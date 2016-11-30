@@ -13,9 +13,7 @@
 #include <iomanip>
 #include <cxxtest/TestSuite.h>
 #include <stdio.h>
-#include <boost/assign/std/vector.hpp>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {

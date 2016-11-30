@@ -29,7 +29,8 @@ class EmptyAPI
 class SoAAPI :
         public APITraits::HasSoA,
         public APITraits::HasFixedCoordsOnlyUpdate,
-        public APITraits::HasUpdateLineX
+        public APITraits::HasUpdateLineX,
+        public LibFlatArray::api_traits::has_default_3d_sizes_uniform
 {};
 
 /**
@@ -273,7 +274,7 @@ public:
         ACCESSOR1 hoodOld, int indexEnd,
         ACCESSOR2 hoodNew, unsigned nanoStep)
     {
-        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index) {
+        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index()) {
             TestCell cell;
             cell.update(hoodOld, nanoStep);
             hoodNew << cell;
@@ -414,8 +415,8 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
 
 LIBFLATARRAY_REGISTER_SOA(
     LibGeoDecomp::TestCellSoA,
-    ((LibGeoDecomp::CoordBox<3>)(dimensions))
     ((double)(testValue))
+    ((LibGeoDecomp::CoordBox<3>)(dimensions))
     ((LibGeoDecomp::Coord<3>)(pos))
     ((unsigned)(cycleCounter))
     ((bool)(isEdgeCell))

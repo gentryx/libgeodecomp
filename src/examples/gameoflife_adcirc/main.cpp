@@ -4,7 +4,6 @@
 
 #include <libgeodecomp/examples/gameoflife_adcirc/hull.h>
 
-using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 extern "C" {

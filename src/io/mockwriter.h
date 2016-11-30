@@ -129,7 +129,7 @@ public:
     std::map<std::size_t, std::vector<MockWriterEvent> > delegate;
 
 private:
-    boost::shared_ptr<hpx::lcos::local::spinlock> insertMutex;
+    typename SharedPtr<hpx::lcos::local::spinlock>::Type insertMutex;
 };
 
 #endif
@@ -157,7 +157,7 @@ public:
     using Writer<CELL_TYPE>::DIM;
 
     explicit MockWriter(
-        boost::shared_ptr<EventsStore> events,
+        SharedPtr<EventsStore>::Type events,
         unsigned period = 1) :
         Clonable<Writer<CELL_TYPE>, MockWriter>("", period),
         Clonable<ParallelWriter<CELL_TYPE>, MockWriter>("", period),
@@ -190,7 +190,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<MockWriter::EventsStore> events;
+    SharedPtr<MockWriter::EventsStore>::Type events;
 
     void stepFinished(unsigned step, WriterEvent event, std::size_t rank, bool lastCall)
 

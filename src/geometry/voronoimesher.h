@@ -150,7 +150,7 @@ protected:
     {
         FloatCoord<DIM> ret;
         for (int i = 0; i < DIM; ++i) {
-            ret[i] = Random::gen_d(quadrantSize[i]);
+            ret[i] = Random::genDouble(quadrantSize[i]);
         }
 
         return ret;

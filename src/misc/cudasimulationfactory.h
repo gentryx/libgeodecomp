@@ -7,6 +7,7 @@
 #ifdef LIBGEODECOMP_WITH_CUDA
 
 #include <libgeodecomp/parallelization/cudasimulator.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 namespace LibGeoDecomp {
 
@@ -20,8 +21,9 @@ class CUDASimulationFactory : public SimulationFactory<CELL>
 public:
     using SimulationFactory<CELL>::addSteerers;
     using SimulationFactory<CELL>::addWriters;
+    typedef typename SimulationFactory<CELL>::InitPtr InitPtr;
 
-    CUDASimulationFactory<CELL>(boost::shared_ptr<ClonableInitializer<CELL> > initializer) :
+    CUDASimulationFactory<CELL>(InitPtr initializer) :
         SimulationFactory<CELL>(initializer)
     {
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimX", 1, 128);
@@ -31,8 +33,8 @@ public:
 
     virtual double operator()(const SimulationParameters& params)
     {
-        boost::shared_ptr<ClonableInitializer<CELL> > init(SimulationFactory<CELL>::initializer->clone());
-        boost::shared_ptr<Simulator<CELL> > sim(buildSimulator(init, params));
+        InitPtr init(SimulationFactory<CELL>::initializer->clone());
+        typename SharedPtr<Simulator<CELL> >::Type sim(buildSimulator(init, params));
         Chronometer chrono;
 
         {
@@ -54,7 +56,7 @@ public:
 
 protected:
     virtual Simulator<CELL> *buildSimulator(
-        boost::shared_ptr<ClonableInitializer<CELL> > initializer,
+        InitPtr initializer,
         const SimulationParameters& params) const
     {
         Coord<3> blockSize(params["BlockDimX"], params["BlockDimY"], params["BlockDimZ"]);

@@ -2,7 +2,6 @@
 #include <libgeodecomp/misc/testhelper.h>
 
 #include <cxxtest/TestSuite.h>
-#include <boost/math/tools/precision.hpp>
 
 using namespace LibGeoDecomp;
 
@@ -110,28 +109,29 @@ public:
 
     void testMaxElement()
     {
-        TS_ASSERT_EQUALS(FloatCoord<1>(5).maxElement(), 5);
+        TS_ASSERT_EQUALS(FloatCoord<1>(5.5).maxElement(), 5.5);
 
-        TS_ASSERT_EQUALS(FloatCoord<2>(6, 1).maxElement(), 6);
-        TS_ASSERT_EQUALS(FloatCoord<2>(5, 7).maxElement(), 7);
+        TS_ASSERT_EQUALS(FloatCoord<2>(6.1, 1.1).maxElement(), 6.1);
+        TS_ASSERT_EQUALS(FloatCoord<2>(5.1, 7.1).maxElement(), 7.1);
 
-        TS_ASSERT_EQUALS(FloatCoord<3>( 8,  1, 0).maxElement(), 8);
-        TS_ASSERT_EQUALS(FloatCoord<3>( 5,  9, 0).maxElement(), 9);
-        TS_ASSERT_EQUALS(FloatCoord<3>(-5, -7, 0).maxElement(), 0);
-        TS_ASSERT_EQUALS(FloatCoord<3>(-7, -5, 0).maxElement(), 0);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 8.3,  1.4, 0.2).maxElement(), 8.3);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 5.3,  9.4, 0.2).maxElement(), 9.4);
+        TS_ASSERT_EQUALS(FloatCoord<3>(-5.3, -7.4, 0.2).maxElement(), 0.2);
+        TS_ASSERT_EQUALS(FloatCoord<3>(-7.3, -5.4, 0.2).maxElement(), 0.2);
     }
 
     void testMinElement()
     {
-        TS_ASSERT_EQUALS(FloatCoord<1>(5).minElement(), 5);
+        TS_ASSERT_EQUALS(FloatCoord<1>(5.5).minElement(), 5.5);
 
-        TS_ASSERT_EQUALS(FloatCoord<2>(6, 1).minElement(), 1);
-        TS_ASSERT_EQUALS(FloatCoord<2>(5, 7).minElement(), 5);
+        TS_ASSERT_EQUALS(FloatCoord<2>(6.5, 1.5).minElement(), 1.5);
+        TS_ASSERT_EQUALS(FloatCoord<2>(5.5, 7.5).minElement(), 5.5);
 
-        TS_ASSERT_EQUALS(FloatCoord<3>( 8, 10, 100).minElement(), 8);
-        TS_ASSERT_EQUALS(FloatCoord<3>( 5, 90, 100).minElement(), 5);
-        TS_ASSERT_EQUALS(FloatCoord<3>( 5,  7,   1).minElement(), 1);
-        TS_ASSERT_EQUALS(FloatCoord<3>( 7,  5,   0).minElement(), 0);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 8.5, 10.5, 100.1).minElement(), 8.5);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 5.5, 90.5, 100.9).minElement(), 5.5);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 5.5,  7.5,   1.4).minElement(), 1.4);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 9.5,  7.4,   9.4).minElement(), 7.4);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 7.5,  5.5,   0.4).minElement(), 0.4);
     }
 
     void testOperatorPlus()
@@ -583,6 +583,18 @@ public:
         TS_ASSERT_EQUALS(1, FloatCoord<1>::DIM);
         TS_ASSERT_EQUALS(2, FloatCoord<2>::DIM);
         TS_ASSERT_EQUALS(3, FloatCoord<3>::DIM);
+    }
+
+    void testCrossProduct()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<3>( 1, 0, 0), FloatCoord<3>(0, 1, 0).crossProduct(FloatCoord<3>(0, 0, 1)));
+        TS_ASSERT_EQUALS(FloatCoord<3>(-1, 0, 0), FloatCoord<3>(0, 0, 1).crossProduct(FloatCoord<3>(0, 1, 0)));
+
+        TS_ASSERT_EQUALS(FloatCoord<3>(0, -1, 0), FloatCoord<3>(1, 0, 0).crossProduct(FloatCoord<3>(0, 0, 1)));
+        TS_ASSERT_EQUALS(FloatCoord<3>(0,  1, 0), FloatCoord<3>(0, 0, 1).crossProduct(FloatCoord<3>(1, 0, 0)));
+
+        TS_ASSERT_EQUALS(FloatCoord<3>(0, 0, -1), FloatCoord<3>(0, 1, 0).crossProduct(FloatCoord<3>(1, 0, 0)));
+        TS_ASSERT_EQUALS(FloatCoord<3>(0, 0,  1), FloatCoord<3>(1, 0, 0).crossProduct(FloatCoord<3>(0, 1, 0)));
     }
 };
 

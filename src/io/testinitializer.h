@@ -31,6 +31,7 @@ public:
     {
         CoordBox<DIM> rect = ret->boundingBox();
         unsigned cycle = startStep() * NANO_STEPS;
+
         for (typename CoordBox<DIM>::Iterator i = rect.begin(); i != rect.end(); ++i) {
             Coord<DIM> coord = Topology::normalize(*i, dimensions);
             double index = 1 + coord.toIndex(dimensions);
