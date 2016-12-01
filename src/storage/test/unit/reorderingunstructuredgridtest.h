@@ -530,7 +530,7 @@ public:
         }
 
         for (Region<1>::Iterator i = remappedRegion.begin(); i != remappedRegion.end(); ++i) {
-            TestCell cell = grid.delegate[i->x()];
+            TestCell cell = grid.delegate[*i];
 
             std::vector<std::pair<int, double> > expectedRow;
             int numNeighbors = cell.id % 20 + 1;
