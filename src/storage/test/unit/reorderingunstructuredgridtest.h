@@ -15,6 +15,7 @@ public:
     typedef Topologies::Unstructured::Topology Topology;
     void testResize()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA1 TestCell;
         typedef GridTypeSelector<TestCell, Topology, false, APITraits::TrueType>::Value GridType;
 
@@ -35,10 +36,12 @@ public:
                 expectedError.c_str(),
                 exception.what(),
                 expectedError.size()));
+#endif
     }
 
     void testGetSetAoS()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -63,10 +66,12 @@ public:
 
             TS_ASSERT_EQUALS(actual, expected);
         }
+#endif
     }
 
     void testGetSetSoA()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -89,10 +94,12 @@ public:
 
             TS_ASSERT_EQUALS(actual, expected);
         }
+#endif
     }
 
     void testGetSetStreaksAoS()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -123,10 +130,12 @@ public:
 
             TS_ASSERT_EQUALS(actual, expected);
         }
+#endif
     }
 
     void testGetSetStreaksSoA()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -157,10 +166,12 @@ public:
 
             TS_ASSERT_EQUALS(actual, expected);
         }
+#endif
     }
 
     void testEdgeCellHandlingAoS()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -177,10 +188,12 @@ public:
         grid.setEdge(edgeCell);
         TS_ASSERT_EQUALS(grid.getEdge(), edgeCell);
         TS_ASSERT_EQUALS(grid.get(Coord<1>(-13)), edgeCell);
+#endif
     }
 
     void testEdgeCellHandlingSoA()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -196,10 +209,12 @@ public:
         grid.setEdge(edgeCell);
         TS_ASSERT_EQUALS(grid.getEdge(), edgeCell);
         TS_ASSERT_EQUALS(grid.get(Coord<1>(-32)), edgeCell);
+#endif
     }
 
     void testLoadSaveRegionAoS()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -249,10 +264,12 @@ public:
             TestCell actual = grid2.get(*i);
             TS_ASSERT_EQUALS(expected, actual);
         }
+#endif
     }
 
     void testLoadSaveRegionSoA()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -302,10 +319,12 @@ public:
             TestCell actual = grid2.get(*i);
             TS_ASSERT_EQUALS(expected, actual);
         }
+#endif
     }
 
     void testLoadSaveMemberAoS()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -353,10 +372,12 @@ public:
             TS_ASSERT_EQUALS(counter, cell.cycleCounter);
             ++counter;
         }
+#endif
     }
 
     void testLoadSaveMemberSoA()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -404,10 +425,12 @@ public:
             TS_ASSERT_EQUALS(counter, cell.cycleCounter);
             ++counter;
         }
+#endif
     }
 
     void testSetWeightsAoS()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCell<> TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -530,7 +553,7 @@ public:
         }
 
         for (Region<1>::Iterator i = remappedRegion.begin(); i != remappedRegion.end(); ++i) {
-            TestCell cell = grid.delegate[*i];
+            TestCell cell = grid.delegate.get(*i);
 
             std::vector<std::pair<int, double> > expectedRow;
             int numNeighbors = cell.id % 20 + 1;
@@ -582,10 +605,12 @@ public:
                  << Streak<1>(Coord<1>( 88), 120);
 
         TS_ASSERT_EQUALS(expected, actual);
+#endif
     }
 
     void testSetWeightsSoA()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA3 TestCell;
         typedef APITraits::SelectSoA<TestCell>::Value SoAFlag;
         typedef GridTypeSelector<TestCell, Topology, false, SoAFlag>::Value GridType;
@@ -760,6 +785,7 @@ public:
                  << Streak<1>(Coord<1>( 88), 120);
 
         TS_ASSERT_EQUALS(expected, actual);
+#endif
     }
 };
 
