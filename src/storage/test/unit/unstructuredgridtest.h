@@ -1,6 +1,7 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/unstructuredtestcell.h>
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <fstream>
