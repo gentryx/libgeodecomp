@@ -173,6 +173,19 @@ private:
     const SoAAccessor& accessor; /**< accessor to old grid */
 };
 
+template<
+    typename GRID_TYPE,
+    typename CELL,
+    long DIM_X,
+    long DIM_Y,
+    long DIM_Z,
+    long INDEX,
+    std::size_t MATRICES,
+    typename VALUE_TYPE,
+    int C,
+    int SIGMA>
+const int UnstructuredSoANeighborhood<GRID_TYPE, CELL, DIM_X, DIM_Y, DIM_Z, INDEX, MATRICES, VALUE_TYPE, C, SIGMA>::ARITY;
+
 }
 
 #endif

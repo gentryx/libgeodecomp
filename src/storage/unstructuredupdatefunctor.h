@@ -64,7 +64,7 @@ public:
             // call updateLineX with adjusted indices
             typedef UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1, MATRICES, ValueType, C, SIGMA> HoodOld;
             HoodOld hoodOld(oldAccessor, gridOld, i->origin.x());
-            newAccessor.index() = hoodOld.index() * C;
+            newAccessor.index() = hoodOld.index() * HoodOld::ARITY;
             UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessor);
             CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep);
         }
