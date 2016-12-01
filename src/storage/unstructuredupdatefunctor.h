@@ -192,7 +192,7 @@ public:
         UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>   \
             hoodOld(gridOld, i->origin.x());                            \
         CELL *hoodNew = &(*gridNew)[i->origin.x()];                     \
-        CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep); \
+        CELL::updateLineX(hoodNew, i->endX, hoodOld, nanoStep); \
         /**/
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
