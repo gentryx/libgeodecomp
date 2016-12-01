@@ -2,6 +2,7 @@
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/io/unstructuredtestinitializer.h>
+#include <libgeodecomp/misc/sharedptr.h>
 
 using namespace LibGeoDecomp;
 
@@ -30,8 +31,8 @@ public:
                 << 153
                 << 154;
         int ghostZoneWidth = 1;
-        boost::shared_ptr<Partition<1> > partition(new UnstructuredStripingPartition(Coord<1>(), Coord<1>(), 0, weights));
-        boost::shared_ptr<AdjacencyManufacturer<1> > init(new UnstructuredTestInitializer<UnstructuredTestCell<> >(614, 100, 0));
+        SharedPtr<Partition<1> >::Type partition(new UnstructuredStripingPartition(Coord<1>(), Coord<1>(), 0, weights));
+        SharedPtr<AdjacencyManufacturer<1> >::Type init(new UnstructuredTestInitializer<UnstructuredTestCell<> >(614, 100, 0));
 
         PartitionManager<Topology> manager(box);
         manager.resetRegions(
@@ -73,7 +74,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<MPILayer> layer;
+    SharedPtr<MPILayer>::Type layer;
 };
 
 }
