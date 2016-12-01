@@ -236,7 +236,7 @@ public:
             }
 
             for (int i = 0; i < 2; ++i) {
-                boundingBoxes << myPartitionManager.getRegion(i, ghostZoneWidth).boundingBox();
+                expandedBoundingBoxes << myPartitionManager.getRegion(i, ghostZoneWidth).boundingBox();
             }
 
             myPartitionManager.resetGhostZones(boundingBoxes, expandedBoundingBoxes);
