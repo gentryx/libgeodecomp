@@ -115,10 +115,12 @@ public:
             ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1])));
     }
 
+#ifndef __NVCC__
 #ifdef __GNUG__
 #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6) )
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-overflow"
+#endif
 #endif
 #endif
     __host__ __device__
@@ -129,9 +131,11 @@ public:
             ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1]))) ||
             ((!WrapsAxis<2, TOPOLOGY>::VALUE) && ((coord[2] < 0) || (coord[2] >= dim[2])));
     }
+#ifndef __NVCC__
 #ifdef __GNUG__
 #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6) )
 #pragma GCC diagnostic pop
+#endif
 #endif
 #endif
 };
