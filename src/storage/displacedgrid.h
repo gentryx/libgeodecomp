@@ -143,18 +143,6 @@ public:
         return getEdgeCell();
     }
 
-    void fill(const CoordBox<DIM>& box, const CELL_TYPE& cell)
-    {
-        delegate.fill(CoordBox<DIM>(box.origin - origin, box.dimensions), cell);
-    }
-
-    inline void paste(const GridBase<CELL_TYPE, DIM>& grid, const Region<DIM>& region)
-    {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            grid.get(*i, &(*this)[i->origin]);
-        }
-    }
-
     inline const Coord<DIM>& getDimensions() const
     {
         return delegate.getDimensions();

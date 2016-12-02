@@ -85,50 +85,6 @@ public:
         TS_ASSERT_EQUALS(expectedRegion, grid.boundingRegion());
     }
 
-    void testPaste()
-    {
-        DisplacedGrid<double> source(
-            CoordBox<2>(Coord<2>( 0,  0), Coord<2>(100, 100)), 47.11);
-        DisplacedGrid<double> target(
-            CoordBox<2>(Coord<2>(40, 60), Coord<2>( 30,  30)), -1.23);
-        DisplacedGrid<double> target2(
-            CoordBox<2>(Coord<2>(40, 60), Coord<2>( 30,  30)), -5);
-
-        Region<2> innerSquare;
-        Region<2> outerSquare;
-        for (int i = 70; i < 80; ++i) {
-            innerSquare << Streak<2>(Coord<2>(50, i), 60);
-        }
-        for (int i = 60; i < 90; ++i) {
-            outerSquare << Streak<2>(Coord<2>(40, i), 70);
-        }
-
-        Region<2> outerRing = outerSquare - innerSquare;
-
-        for (Region<2>::Iterator i = outerSquare.begin(); i != outerSquare.end(); ++i) {
-            TS_ASSERT_EQUALS(-1.23, target[*i]);
-        }
-
-        target.paste(source, innerSquare);
-
-        for (Region<2>::Iterator i = outerRing.begin(); i != outerRing.end(); ++i) {
-            TS_ASSERT_EQUALS(-1.23, target[*i]);
-        }
-        for (Region<2>::Iterator i = innerSquare.begin(); i != innerSquare.end(); ++i) {
-            TS_ASSERT_EQUALS(47.11, target[*i]);
-        }
-
-        target2.paste(target, outerRing);
-
-        for (Region<2>::Iterator i = outerRing.begin(); i != outerRing.end(); ++i) {
-            TS_ASSERT_EQUALS(-1.23, target2[*i]);
-        }
-
-        for (Region<2>::Iterator i = innerSquare.begin(); i != innerSquare.end(); ++i) {
-            TS_ASSERT_EQUALS(-5, target2[*i]);
-        }
-    }
-
     void testSetOrigin()
     {
         DisplacedGrid<int> grid(CoordBox<2>(Coord<2>(10, 20), Coord<2>(2, 3)));
@@ -197,34 +153,6 @@ public:
 
         for (int i = 0; i < 5; ++i) {
             TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
-        }
-    }
-
-    void testFill3D()
-    {
-        CoordBox<3> insert(Coord<3>(10, 20, 15), Coord<3>(4, 7, 5));
-        Coord<3> origin(10, 10, 10);
-        Coord<3> dim(40, 70, 30);
-
-        DisplacedGrid<int, Topologies::Cube<3>::Topology> g(CoordBox<3>(origin, dim), -1);
-        g.fill(insert, 2);
-
-        for (int z = 0; z < dim.z(); ++z) {
-            for (int y = 0; y < dim.y(); ++y) {
-                for (int x = 0; x < dim.x(); ++x) {
-                    Coord<3> c = Coord<3>(x, y, z) + origin;
-                    int expected = -1;
-                    if (insert.inBounds(c)) {
-                        expected = 2;
-                    }
-
-                    if (expected != g[c]) {
-                        std::cout << c << " expected: " << expected << " actual: " << g[c] << "\n";
-
-                    }
-                    TS_ASSERT_EQUALS(expected, g[c]);
-                }
-            }
         }
     }
 
