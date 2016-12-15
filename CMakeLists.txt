@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/CMakeMod
 include(util)
 include(CheckCXXCompilerFlag)
 
-if (CMAKE_VERSIPN VERSION_GREATER 2.7)
+if (CMAKE_VERSION VERSION_GREATER 2.7)
   cmake_policy(SET CMP0012 NEW)
 endif()
 
