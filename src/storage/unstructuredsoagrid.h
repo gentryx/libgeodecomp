@@ -359,7 +359,7 @@ public:
         elements.save(start, end, target->data(), size);
     }
 
-    inline void loadRegion(const std::vector<char> source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    inline void loadRegion(const std::vector<char>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
         typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
         StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
@@ -369,7 +369,7 @@ public:
     }
 
     template<typename ITER1, typename ITER2>
-    inline void loadRegion(const std::vector<char> source, const ITER1& start, const ITER2& end, int size)
+    inline void loadRegion(const std::vector<char>& source, const ITER1& start, const ITER2& end, int size)
     {
         elements.load(start, end, source.data(), size);
     }
