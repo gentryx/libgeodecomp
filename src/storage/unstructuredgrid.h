@@ -315,7 +315,7 @@ public:
         }
     }
 
-    inline void loadRegion(const std::vector<ELEMENT_TYPE> buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>())
+    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>())
     {
         loadRegion(
             buffer,
@@ -325,7 +325,7 @@ public:
     }
 
     template<typename ITER1, typename ITER2>
-    inline void loadRegion(const std::vector<ELEMENT_TYPE> buffer, const ITER1& start, const ITER2& end, int size)
+    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const ITER1& start, const ITER2& end, int size)
     {
         const ELEMENT_TYPE *source = buffer.data();
 

@@ -147,6 +147,9 @@ public:
 
     typedef std::pair<int, int> IntPair;
 
+    using GridBase<CellType, 1>::saveRegion;
+    using GridBase<CellType, 1>::loadRegion;
+
     const static int DIM = 1;
     const static int SIGMA = DELEGATE_GRID::SIGMA;
     const static int C = DELEGATE_GRID::C;
