@@ -383,7 +383,7 @@ public:
 class MessageType
 {
 public:
-    inline MessageType(int step = -1, int id = -1, int messageSize = 69) :
+    inline MessageType(int step = -1, int id = -1, std::size_t messageSize = 69) :
         step(step),
         id(id),
         dummyData(std::vector<int>(messageSize, -1))
@@ -412,7 +412,7 @@ public:
         public APITraits::HasCustomMessageType<MessageType>
     {};
 
-    inline DataflowTestModel(int id = 0, int step = 0, int messageSize = 0, const std::vector<int>& neighbors = std::vector<int>()) :
+    inline DataflowTestModel(int id = 0, int step = 0, std::size_t messageSize = 0, const std::vector<int>& neighbors = std::vector<int>()) :
         id(id),
         step(step),
         messageSize(messageSize),
@@ -455,7 +455,7 @@ public:
 private:
     int id;
     int step;
-    int messageSize;
+    std::size_t messageSize;
     std::vector<int> neighbors;
 };
 
@@ -572,7 +572,7 @@ public:
             ScopedTimer t(&seconds);
 
             Initializer<DataflowTestModel> *initializer = new DataflowTestInitializer(gridDim, maxSteps);
-            HPXDataflowSimulator<DataflowTestModel> sim(initializer, "HPXDataflowGoldPerformance", 1);
+            HPXDataflowSimulator<DataflowTestModel> sim(initializer, "HPXDataflowGoldPerformance");
             sim.run();
         }
 
