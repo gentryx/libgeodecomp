@@ -52,11 +52,9 @@ public:
         const std::map<int, hpx::id_type>& remoteIDs) :
         targetGlobalNanoStep(targetGlobalNanoStep),
         messageNeighborIDs(messageNeighborIDs),
-        messagesFromNeighbors(hpx::util::unwrapped(messagesFromNeighbors)),
+        messagesFromNeighbors(messagesFromNeighbors),
         remoteIDs(remoteIDs)
-    {
-        sentNeighbors.reserve(messageNeighborIDs.size());
-    }
+    {}
 
     inline
     const std::vector<int>& neighbors() const
@@ -72,7 +70,7 @@ public:
             throw std::logic_error("ID not found for incoming messages");
         }
 
-        return messagesFromNeighbors[i - messageNeighborIDs.begin()];
+        return messagesFromNeighbors[i - messageNeighborIDs.begin()].get();
     }
 
     /**
@@ -110,9 +108,9 @@ public:
 private:
     int targetGlobalNanoStep;
     std::vector<int> messageNeighborIDs;
-    std::vector<MESSAGE> messagesFromNeighbors;
+    std::vector<hpx::shared_future<MESSAGE> > messagesFromNeighbors;
     std::map<int, hpx::id_type> remoteIDs;
-    // fixme: make this optional?
+    // fixme: make this optional!
     std::vector<int> sentNeighbors;
 };
 
