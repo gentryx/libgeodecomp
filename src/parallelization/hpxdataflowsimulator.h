@@ -122,7 +122,6 @@ public:
     typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
     typedef DisplacedGrid<CELL, Topologies::Unstructured::Topology> GridType;
 
-
     // fixme: move semantics
     explicit CellComponent(
         const std::string& basename = "",
@@ -262,16 +261,15 @@ private:
  * operator. Primary use case (for now) is DGSWEM.
  */
 template<typename CELL, typename PARTITION = UnstructuredStripingPartition>
-class HPXDataflowSimulator : public HierarchicalSimulator<CELL>
+class HPXDataflowSimulator : public DistributedSimulator<CELL>
 {
 public:
     typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
-    typedef HierarchicalSimulator<CELL> ParentType;
+    typedef DistributedSimulator<CELL> ParentType;
     typedef typename DistributedSimulator<CELL>::Topology Topology;
     typedef PartitionManager<Topology> PartitionManagerType;
     using DistributedSimulator<CELL>::NANO_STEPS;
     using DistributedSimulator<CELL>::initializer;
-    using HierarchicalSimulator<CELL>::initialWeights;
 
     /**
      * basename will be added to IDs for use in AGAS lookup, so for
@@ -283,13 +281,8 @@ public:
     inline HPXDataflowSimulator(
         Initializer<CELL> *initializer,
         const std::string& basename,
-        int loadBalancingPeriod = 10000,
-        bool enableFineGrainedParallelism = true,
         int chunkSize = 1000) :
-        ParentType(
-            initializer,
-            loadBalancingPeriod * NANO_STEPS,
-            enableFineGrainedParallelism),
+        ParentType(initializer),
         basename(basename),
         chunkSize(chunkSize)
     {}
@@ -309,6 +302,7 @@ public:
     {
         throw std::logic_error("HPXDataflowSimulator::balanceLoad() not implemented");
     }
+
     void run()
     {
         Region<1> localRegion;
@@ -317,7 +311,7 @@ public:
         std::size_t numLocalities = hpx::get_num_localities().get();
 
         std::vector<double> rankSpeeds(numLocalities, 1.0);
-        std::vector<std::size_t> weights = initialWeights(
+        std::vector<std::size_t> weights = HierarchicalSimulatorHelpers::initialWeights(
             box.dimensions.prod(),
             rankSpeeds);
 
@@ -378,7 +372,6 @@ public:
         int maxTimeSteps = initializer->maxSteps();
 
         // HPX Sliding semaphore
-        int chunkSize = 1000;
         // allow larger look-ahead for dataflow generation to better
         // overlap calculation and computation:
         int lookAheadDistance = 2 * chunkSize;
