@@ -387,7 +387,11 @@ public:
         step(step),
         id(id),
         dummyData(std::vector<int>(messageSize, -1))
-    {}
+    {
+        for (std::size_t i = 0; i < messageSize; ++i) {
+            dummyData[i] = step * i;
+        }
+    }
 
     template<typename ARCHIVE>
     void serialize(ARCHIVE& archive, int)
@@ -566,12 +570,13 @@ public:
     {
         Coord<2> gridDim(dim[0], dim[1]);
         int maxSteps = dim[2];
+        int messageSize = 27;
 
         double seconds;
         {
             ScopedTimer t(&seconds);
 
-            Initializer<DataflowTestModel> *initializer = new DataflowTestInitializer(gridDim, maxSteps);
+            Initializer<DataflowTestModel> *initializer = new DataflowTestInitializer(gridDim, maxSteps, messageSize);
             HPXDataflowSimulator<DataflowTestModel> sim(initializer, "HPXDataflowGoldPerformance");
             sim.run();
         }
