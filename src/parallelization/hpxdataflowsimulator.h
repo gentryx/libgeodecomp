@@ -281,7 +281,7 @@ public:
     inline HPXDataflowSimulator(
         Initializer<CELL> *initializer,
         const std::string& basename,
-        int chunkSize = 1000) :
+        int chunkSize = 5) :
         ParentType(initializer),
         basename(basename),
         chunkSize(chunkSize)
