@@ -44,11 +44,10 @@ template<typename MESSAGE>
 class Neighborhood
 {
 public:
-    // fixme: move semantics
     inline Neighborhood(
         int targetGlobalNanoStep,
-        std::vector<int> messageNeighborIDs,
-        std::vector<hpx::shared_future<MESSAGE> > messagesFromNeighbors,
+        const std::vector<int>& messageNeighborIDs,
+        std::vector<hpx::shared_future<MESSAGE> >& messagesFromNeighbors,
         const std::map<int, hpx::id_type>& remoteIDs) :
         targetGlobalNanoStep(targetGlobalNanoStep),
         messageNeighborIDs(messageNeighborIDs),
@@ -75,9 +74,9 @@ public:
         return messagesFromNeighbors[i - messageNeighborIDs.begin()];
     }
 
-    // fixme: move semantics
+    template<typename MESSAGE_PARAM>
     inline
-    void send(int remoteCellID, const MESSAGE& message)
+    void send(int remoteCellID, MESSAGE_PARAM&& message)
     {
         std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
         if (iter == remoteIDs.end()) {
@@ -90,7 +89,7 @@ public:
             typename HPXReceiver<MESSAGE>::receiveAction(),
             iter->second,
             targetGlobalNanoStep,
-            message);
+            std::forward<MESSAGE_PARAM>(message));
     }
 
     inline
@@ -105,9 +104,10 @@ public:
 
 private:
     int targetGlobalNanoStep;
-    std::vector<int> messageNeighborIDs;
+    const std::vector<int>& messageNeighborIDs;
     std::vector<MESSAGE> messagesFromNeighbors;
-    std::map<int, hpx::id_type> remoteIDs;
+    const std::map<int, hpx::id_type>& remoteIDs;
+    // fixme: optimize this away?
     std::vector<int> sentNeighbors;
 };
 
@@ -177,7 +177,7 @@ public:
                     if ((globalNanoStep) > 0) {
                         receiveMessagesFutures << receivers[neighbor]->get(globalNanoStep);
                     } else {
-                        receiveMessagesFutures <<  hpx::make_ready_future(MessageType());
+                        receiveMessagesFutures << hpx::make_ready_future(MessageType());
                     }
                 }
 
@@ -188,13 +188,11 @@ public:
                     std::placeholders::_1,
                     std::placeholders::_2,
                     std::placeholders::_3,
-                    std::placeholders::_4,
-                    std::placeholders::_5);
+                    std::placeholders::_4);
 
                 hpx::shared_future<void> thisTimeStepFuture = hpx::dataflow(
                     hpx::launch::async,
                     Operation,
-                    neighbors,
                     receiveMessagesFutures,
                     lastTimeStepFuture,
                     nanoStep,
@@ -208,9 +206,7 @@ public:
         return lastTimeStepFuture;
     }
 
-    // fixme: use move semantics here
     void update(
-        std::vector<int> neighbors,
         std::vector<hpx::shared_future<MESSAGE> > inputFutures,
         // Unused, just here to ensure correct ordering of updates per cell:
         const hpx::shared_future<void>& lastTimeStepReady,
@@ -218,12 +214,13 @@ public:
         int step)
     {
         // fixme: lastTimeStepReady.get();
-
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
         Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
-        UpdateEvent event(nanoStep, step);
 
-        cell()->update(hood, event);
+        cell()->update(
+            hood,
+            UpdateEvent(nanoStep, step));
+
         hood.sendEmptyMessagesToUnnotifiedNeighbors();
     }
 
