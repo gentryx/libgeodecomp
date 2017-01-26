@@ -4,6 +4,7 @@
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
+#include <libgeodecomp/parallelization/hpxdataflowsimulator.h>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 
 #include <libflatarray/short_vec.hpp>
@@ -379,6 +380,209 @@ public:
     }
 };
 
+class MessageType
+{
+public:
+    inline MessageType(int step = -1, int id = -1, int messageSize = 69) :
+        step(step),
+        id(id),
+        dummyData(std::vector<int>(messageSize, -1))
+    {}
+
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& archive, int)
+    {
+        archive & step;
+        archive & id;
+        archive & dummyData;
+    }
+
+    int step;
+    int id;
+    std::vector<int> dummyData;
+};
+
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(MessageType)
+
+class DataflowTestModel
+{
+public:
+    class API :
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasCustomMessageType<MessageType>
+    {};
+
+    inline DataflowTestModel(int id = 0, int step = 0, int messageSize = 0, const std::vector<int>& neighbors = std::vector<int>()) :
+        id(id),
+        step(step),
+        messageSize(messageSize),
+        neighbors(neighbors)
+    {}
+
+    template<typename NEIGHBORHOOD, typename EVENT>
+    inline void update(NEIGHBORHOOD& hood, const EVENT& event)
+    {
+        if (step > 0) {
+            if (neighbors != hood.neighbors()) {
+                std::cerr << "found bad neighbors list on cell " << id << "\n"
+                          << " got: " << hood.neighbors() << "\n"
+                          << " want: " << neighbors << "\n";
+            }
+
+            for (auto&& i: hood.neighbors()) {
+                if (hood[i].id != i) {
+                    std::cout << "cell id " << id << " saw bad ID on cell " << i
+                              << " (saw " << hood[i].id << ", expected: " << i << ")\n";
+                }
+                if (hood[i].step != step) {
+                    std::cout << "cell id " << id << " saw bad time step on cell " << i
+                              << " (saw " << hood[i].step << ", expected: " << step << ")\n";
+                }
+                if (hood[i].dummyData.size() != messageSize) {
+                    std::cout << "cell id " << id << " saw bad dummy data on  cell " << i << "\n";
+                }
+            }
+        }
+
+        ++step;
+
+        for (auto&& i: hood.neighbors()) {
+            hood.send(i, MessageType(step, id, messageSize));
+        }
+
+    }
+
+private:
+    int id;
+    int step;
+    int messageSize;
+    std::vector<int> neighbors;
+};
+
+class DataflowTestInitializer : public Initializer<DataflowTestModel>
+{
+public:
+    using typename Initializer<DataflowTestModel>::AdjacencyPtr;
+
+    DataflowTestInitializer(const Coord<2>& dim, int myMaxSteps, int messageSize = 27) :
+        dim(dim),
+        myMaxSteps(myMaxSteps),
+        messageSize(messageSize)
+    {}
+
+    void grid(GridBase<DataflowTestModel, 1> *grid)
+    {
+        Region<1> boundingRegion = grid->boundingRegion();
+        std::map<Coord<2>, double> weights;
+
+        for (auto&& i: boundingRegion) {
+            std::vector<int> neighbors = genNeighborList(i.x());
+            DataflowTestModel cell(i.x(), 0, messageSize, neighbors);
+            grid->set(i, cell);
+
+            for (auto&& j: neighbors) {
+                weights[Coord<2>(i.x(), j)] = i.x() * 1000 + j;
+            }
+        }
+
+        // fixme: grid->setWeights(0, weights);
+    }
+
+    Coord<1> gridDimensions() const
+    {
+	return Coord<1>(dim.prod());
+    }
+
+    unsigned startStep() const
+    {
+	return 0;
+    }
+
+    unsigned maxSteps() const
+    {
+	return myMaxSteps;
+    }
+
+    AdjacencyPtr getAdjacency(const Region<1>& region) const
+    {
+	AdjacencyPtr adjacency(new RegionBasedAdjacency());
+
+	for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            std::vector<int> neighbors = genNeighborList(i->x());
+            for (auto&& neighbor: neighbors) {
+                adjacency->insert(i->x(), neighbor);
+            }
+	}
+
+	return adjacency;
+    }
+
+private:
+    Coord<2> dim;
+    int myMaxSteps;
+    int messageSize;
+
+    std::vector<int> genNeighborList(int id) const
+    {
+        Coord<2> c(id % dim.x(), id / dim.x());
+
+        std::vector<int> ret;
+        if (c.y() > 0) {
+            ret << (id - dim.x());
+        }
+        if (c.x() > 0) {
+            ret << (id - 1);
+        }
+        if (c.x() < (dim.x() - 1)) {
+            ret << (id + 1);
+        }
+        if (c.y() < (dim.y() - 1)) {
+            ret << (id + dim.x());
+        }
+
+        return ret;
+    }
+};
+
+class HPXDataflowGold : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "HPXDataflow";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    std::string unit()
+    {
+        return "GLUPS";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        Coord<2> gridDim(dim[0], dim[1]);
+        int maxSteps = dim[2];
+
+        double seconds;
+        {
+            ScopedTimer t(&seconds);
+
+            Initializer<DataflowTestModel> *initializer = new DataflowTestInitializer(gridDim, maxSteps);
+            HPXDataflowSimulator<DataflowTestModel> sim(initializer, "HPXDataflowGoldPerformance", 1);
+            sim.run();
+        }
+
+        double latticeUpdates = 1.0 * gridDim.prod() * maxSteps;
+        double glups = latticeUpdates / seconds * 1e-9;
+
+        return glups;
+    }
+};
+
 int hpx_main(int argc, char **argv)
 {
     // fixme: we need tests {update, updateLineX} x {AoS, SoA} x {fine-grained parallelism / no fine-grained parallelism} x {structured, unstructured} x {HPX, OpenMP, CUDA} x {memory bound, compute bound}:
@@ -538,6 +742,13 @@ int hpx_main(int argc, char **argv)
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
         eval(HPXBusyworkCellTitanium(), toVector(sizes[i]));
+    }
+
+    sizes.clear();
+    sizes << Coord<3>(100, 100, 1000);
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(HPXDataflowGold(), toVector(sizes[i]));
     }
 
     return hpx::finalize();
