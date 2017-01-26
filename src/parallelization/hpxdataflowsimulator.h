@@ -75,7 +75,11 @@ public:
         return messagesFromNeighbors[i - messageNeighborIDs.begin()];
     }
 
-    // fixme: move semantics
+    /**
+     * Send a message to the cell known by the given ID. Odd: move
+     * semantics seem to make this code run slower according to our
+     * performance tests.
+     */
     inline
     void send(int remoteCellID, const MESSAGE& message)
     {
@@ -108,6 +112,7 @@ private:
     std::vector<int> messageNeighborIDs;
     std::vector<MESSAGE> messagesFromNeighbors;
     std::map<int, hpx::id_type> remoteIDs;
+    // fixme: make this optional?
     std::vector<int> sentNeighbors;
 };
 
