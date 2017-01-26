@@ -20,8 +20,7 @@ class UpdateEvent
 {
 public:
     inline
-    UpdateEvent(const std::vector<int>& neighbors, int nanoStep, int step) :
-        myNeighbors(neighbors),
+    UpdateEvent(int nanoStep, int step) :
         myNanoStep(nanoStep),
         myStep(step)
     {}
@@ -37,7 +36,6 @@ public:
     }
 
 private:
-    const std::vector<int>& myNeighbors;
     int myNanoStep;
     int myStep;
 };
@@ -223,7 +221,7 @@ public:
 
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
         Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
-        UpdateEvent event(neighbors, nanoStep, step);
+        UpdateEvent event(nanoStep, step);
 
         cell()->update(hood, event);
         hood.sendEmptyMessagesToUnnotifiedNeighbors();
