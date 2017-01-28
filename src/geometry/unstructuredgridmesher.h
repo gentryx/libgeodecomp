@@ -52,7 +52,7 @@ public:
         return logicalGridDim;
     }
 
-    Coord<DIM>  positionToLogicalCoord(const FloatCoord<DIM>& pos)
+    Coord<DIM> positionToLogicalCoord(const FloatCoord<DIM>& pos)
     {
         FloatCoord<DIM> rawCoord = (pos - minCoord) / cellDim;
         Coord<DIM> ret;
