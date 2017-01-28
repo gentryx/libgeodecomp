@@ -563,7 +563,7 @@ public:
 
     std::string unit()
     {
-        return "GLUPS";
+        return "MLUPS";
     }
 
     double performance(std::vector<int> dim)
@@ -582,7 +582,7 @@ public:
         }
 
         double latticeUpdates = 1.0 * gridDim.prod() * maxSteps;
-        double glups = latticeUpdates / seconds * 1e-9;
+        double glups = latticeUpdates / seconds * 1e-6;
 
         return glups;
     }
@@ -660,7 +660,7 @@ public:
 
     std::string unit()
     {
-        return "GLUPS";
+        return "MLUPS";
     }
 
     double performance(std::vector<int> dim)
@@ -698,7 +698,7 @@ public:
         }
 
         double latticeUpdates = 1.0 * gridDim.prod() * maxSteps;
-        double glups = latticeUpdates / seconds * 1e-9;
+        double glups = latticeUpdates / seconds * 1e-6;
 
         return glups;
     }
