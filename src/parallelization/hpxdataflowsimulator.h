@@ -8,7 +8,9 @@
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/communication/hpxreceiver.h>
-#include <libgeodecomp/parallelization/hierarchicalsimulator.h>
+#include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <mutex>
 #include <stdexcept>
 
@@ -307,7 +309,7 @@ public:
         std::size_t numLocalities = hpx::get_num_localities().get();
 
         std::vector<double> rankSpeeds(numLocalities, 1.0);
-        std::vector<std::size_t> weights = HierarchicalSimulatorHelpers::initialWeights(
+        std::vector<std::size_t> weights = LoadBalancer::initialWeights(
             box.dimensions.prod(),
             rankSpeeds);
 

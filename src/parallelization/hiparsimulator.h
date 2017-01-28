@@ -42,7 +42,6 @@ public:
     using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
     using DistributedSimulator<CELL_TYPE>::chronometer;
     using HierarchicalSimulator<CELL_TYPE>::handleEvents;
-    using HierarchicalSimulator<CELL_TYPE>::initialWeights;
     using HierarchicalSimulator<CELL_TYPE>::enableFineGrainedParallelism;
     using HierarchicalSimulator<CELL_TYPE>::events;
     using HierarchicalSimulator<CELL_TYPE>::initEvents;
@@ -198,7 +197,7 @@ private:
 
         double mySpeed = APITraits::SelectSpeedGuide<CELL_TYPE>::value();
         std::vector<double> rankSpeeds = mpiLayer.allGather(mySpeed);
-        std::vector<std::size_t> weights = initialWeights(
+        std::vector<std::size_t> weights = LoadBalancer::initialWeights(
             box.dimensions.prod(),
             rankSpeeds);
 
