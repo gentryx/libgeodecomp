@@ -47,30 +47,30 @@ public:
     // fixme: move semantics
     inline Neighborhood(
         int targetGlobalNanoStep,
-        std::vector<int> messageNeighborIDs,
-        std::vector<hpx::shared_future<MESSAGE> > messagesFromNeighbors,
+        std::vector<int> *messageNeighborIDs,
+        std::vector<hpx::shared_future<MESSAGE> > *messagesFromNeighbors,
         const std::map<int, hpx::id_type>& remoteIDs) :
         targetGlobalNanoStep(targetGlobalNanoStep),
         messageNeighborIDs(messageNeighborIDs),
         messagesFromNeighbors(messagesFromNeighbors),
-        remoteIDs(remoteIDs)
+        remoteIDs(&remoteIDs)
     {}
 
     inline
     const std::vector<int>& neighbors() const
     {
-        return messageNeighborIDs;
+        return *messageNeighborIDs;
     }
 
     inline
     const MESSAGE& operator[](int index) const
     {
-        std::vector<int>::const_iterator i = std::find(messageNeighborIDs.begin(), messageNeighborIDs.end(), index);
-        if (i == messageNeighborIDs.end()) {
+        std::vector<int>::const_iterator i = std::find(messageNeighborIDs->begin(), messageNeighborIDs->end(), index);
+        if (i == messageNeighborIDs->end()) {
             throw std::logic_error("ID not found for incoming messages");
         }
 
-        return messagesFromNeighbors[i - messageNeighborIDs.begin()].get();
+        return (*messagesFromNeighbors)[i - messageNeighborIDs->begin()].get();
     }
 
     /**
@@ -81,8 +81,8 @@ public:
     inline
     void send(int remoteCellID, const MESSAGE& message)
     {
-        std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
-        if (iter == remoteIDs.end()) {
+        std::map<int, hpx::id_type>::const_iterator iter = remoteIDs->find(remoteCellID);
+        if (iter == remoteIDs->end()) {
             throw std::logic_error("ID not found for outgoing messages");
         }
 
@@ -98,7 +98,7 @@ public:
     inline
     void sendEmptyMessagesToUnnotifiedNeighbors()
     {
-        for (int neighbor: messageNeighborIDs) {
+        for (int neighbor: *messageNeighborIDs) {
             if (std::find(sentNeighbors.begin(), sentNeighbors.end(), neighbor) == sentNeighbors.end()) {
                 send(neighbor, MESSAGE());
             }
@@ -107,9 +107,9 @@ public:
 
 private:
     int targetGlobalNanoStep;
-    std::vector<int> messageNeighborIDs;
-    std::vector<hpx::shared_future<MESSAGE> > messagesFromNeighbors;
-    std::map<int, hpx::id_type> remoteIDs;
+    std::vector<int> *messageNeighborIDs;
+    std::vector<hpx::shared_future<MESSAGE> > *messagesFromNeighbors;
+    const std::map<int, hpx::id_type> *remoteIDs;
     // fixme: make this optional!
     std::vector<int> sentNeighbors;
 };
@@ -223,7 +223,7 @@ public:
         // fixme: lastTimeStepReady.get();
 
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
-        Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
+        Neighborhood<MESSAGE> hood(targetGlobalNanoStep, &neighbors, &inputFutures, remoteIDs);
         UpdateEvent event(nanoStep, step);
 
         cell()->update(hood, event);
