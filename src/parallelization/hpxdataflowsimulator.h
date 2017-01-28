@@ -44,16 +44,15 @@ template<typename MESSAGE>
 class Neighborhood
 {
 public:
-    // fixme: move semantics
     inline Neighborhood(
         int targetGlobalNanoStep,
         std::vector<int> *messageNeighborIDs,
         std::vector<hpx::shared_future<MESSAGE> > *messagesFromNeighbors,
-        const std::map<int, hpx::id_type>& remoteIDs) :
+        const std::map<int, hpx::id_type> *remoteIDs) :
         targetGlobalNanoStep(targetGlobalNanoStep),
         messageNeighborIDs(messageNeighborIDs),
         messagesFromNeighbors(messagesFromNeighbors),
-        remoteIDs(&remoteIDs)
+        remoteIDs(remoteIDs)
     {}
 
     inline
@@ -223,7 +222,8 @@ public:
         // fixme: lastTimeStepReady.get();
 
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
-        Neighborhood<MESSAGE> hood(targetGlobalNanoStep, &neighbors, &inputFutures, remoteIDs);
+        Neighborhood<MESSAGE> hood(targetGlobalNanoStep, &neighbors, &inputFutures, &remoteIDs);
+
         UpdateEvent event(nanoStep, step);
 
         cell()->update(hood, event);
