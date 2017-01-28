@@ -588,6 +588,122 @@ public:
     }
 };
 
+class HPXDataflowVanilla : public CPUBenchmark
+{
+public:
+    typedef typename SharedPtr<Adjacency>::Type AdjacencyPtr;
+
+    class DummyHood
+    {
+    public:
+        inline DummyHood(int numCells, const AdjacencyPtr& adjacency) :
+            messagesOld(numCells),
+            messagesNew(numCells),
+            neighborVec(numCells)
+        {
+            for (int i = 0; i < numCells; ++i) {
+                adjacency->getNeighbors(i, &neighborVec[i]);
+
+                for (auto&& j: neighborVec[i]) {
+                    messagesOld[i][j] = MessageType();
+                    messagesNew[i][j] = MessageType();
+                }
+            }
+        }
+
+        inline
+        const MessageType& operator[](const int i)
+        {
+            return messagesOld[index][i];
+        }
+
+        template<typename MESSAGE_TYPE>
+        inline
+        void send(const int i, MESSAGE_TYPE&& message)
+        {
+            messagesNew[i][index] = std::forward<MESSAGE_TYPE>(message);
+        }
+
+        inline
+        const std::vector<int>& neighbors() const
+        {
+            return neighborVec[index];
+        }
+
+        inline
+        void setIndex(int i)
+        {
+            index = i;
+        }
+
+        inline
+        void swapMessages()
+        {
+            std::swap(messagesOld, messagesNew);
+        }
+
+    private:
+        std::vector<std::map<int, MessageType> > messagesOld;
+        std::vector<std::map<int, MessageType> > messagesNew;
+        std::vector<std::vector<int> > neighborVec;
+        int index;
+    };
+    std::string family()
+    {
+        return "HPXDataflow";
+    }
+
+    std::string species()
+    {
+        return "vanilla";
+    }
+
+    std::string unit()
+    {
+        return "GLUPS";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        Coord<2> gridDim(dim[0], dim[1]);
+        int maxSteps = dim[2];
+        int messageSize = 27;
+
+        double seconds;
+        {
+            ScopedTimer t(&seconds);
+
+            Initializer<DataflowTestModel> *initializer = new DataflowTestInitializer(gridDim, maxSteps, messageSize);
+            Grid<DataflowTestModel, Topologies::Cube<1>::Topology> grid(initializer->gridDimensions());
+            initializer->grid(&grid);
+            int endX = initializer->gridDimensions().x();
+
+            Region<1> region;
+            region << initializer->gridBox();
+            AdjacencyPtr adjacency = initializer->getAdjacency(region);
+
+            DummyHood hood(endX, adjacency);
+
+            DataflowTestModel *cells = grid.baseAddress();
+
+            int maxSteps = initializer->maxSteps();
+            for (int t = 0; t < maxSteps; ++t) {
+                for (int i = 0; i < endX; ++i) {
+                    hood.setIndex(i);
+                    cells[i].update(hood, i);
+                }
+
+                hood.swapMessages();
+            }
+        }
+
+        double latticeUpdates = 1.0 * gridDim.prod() * maxSteps;
+        double glups = latticeUpdates / seconds * 1e-9;
+
+        return glups;
+    }
+};
+
 int hpx_main(int argc, char **argv)
 {
     // fixme: we need tests {update, updateLineX} x {AoS, SoA} x {fine-grained parallelism / no fine-grained parallelism} x {structured, unstructured} x {HPX, OpenMP, CUDA} x {memory bound, compute bound}:
@@ -753,7 +869,8 @@ int hpx_main(int argc, char **argv)
     sizes << Coord<3>(100, 100, 1000);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(HPXDataflowGold(), toVector(sizes[i]));
+        eval(HPXDataflowVanilla(), toVector(sizes[i]));
+        eval(HPXDataflowGold(),    toVector(sizes[i]));
     }
 
     return hpx::finalize();
