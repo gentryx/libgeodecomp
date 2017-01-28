@@ -46,7 +46,7 @@ class Neighborhood
 public:
     inline Neighborhood(
         int targetGlobalNanoStep,
-        std::vector<int> *messageNeighborIDs,
+        const std::vector<int> *messageNeighborIDs,
         std::vector<hpx::shared_future<MESSAGE> > *messagesFromNeighbors,
         const std::map<int, hpx::id_type> *remoteIDs) :
         targetGlobalNanoStep(targetGlobalNanoStep),
@@ -106,7 +106,7 @@ public:
 
 private:
     int targetGlobalNanoStep;
-    std::vector<int> *messageNeighborIDs;
+    const std::vector<int> *messageNeighborIDs;
     std::vector<hpx::shared_future<MESSAGE> > *messagesFromNeighbors;
     const std::map<int, hpx::id_type> *remoteIDs;
     // fixme: make this optional!
@@ -122,14 +122,12 @@ public:
     typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
     typedef DisplacedGrid<CELL, Topologies::Unstructured::Topology> GridType;
 
-    // fixme: move semantics
     explicit CellComponent(
         const std::string& basename = "",
         typename SharedPtr<GridType>::Type grid = 0,
         int id = -1,
         const std::vector<int> neighbors = std::vector<int>()) :
         basename(basename),
-        // fixme: move semantics
         neighbors(neighbors),
         grid(grid),
         id(id)
@@ -210,17 +208,14 @@ public:
         return lastTimeStepFuture;
     }
 
-    // fixme: use move semantics here
     void update(
-        std::vector<int> neighbors,
-        std::vector<hpx::shared_future<MESSAGE> > inputFutures,
+        const std::vector<int>& neighbors,
+        std::vector<hpx::shared_future<MESSAGE> >&& inputFutures,
         // Unused, just here to ensure correct ordering of updates per cell:
         const hpx::shared_future<void>& lastTimeStepReady,
         int nanoStep,
         int step)
     {
-        // fixme: lastTimeStepReady.get();
-
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
         Neighborhood<MESSAGE> hood(targetGlobalNanoStep, &neighbors, &inputFutures, &remoteIDs);
 
@@ -339,7 +334,7 @@ public:
         SharedPtr<Adjacency>::Type adjacency = initializer->getAdjacency(localRegion);
 
 
-        // fixme: instantiate components in agas and only hold ids of those
+        // fixme: instantiate components in agas and only hold ids of those to ease migration
         typedef HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> ComponentType;
         typedef typename ComponentType::GridType GridType;
 
