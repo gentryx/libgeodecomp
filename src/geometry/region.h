@@ -501,6 +501,9 @@ class RegionInsertHelper;
 template<int DIM>
 class RegionRemoveHelper;
 
+/**
+ * Internal helper class
+ */
 template<class STENCIL, int INDEX>
 class AddCoord
 {

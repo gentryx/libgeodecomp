@@ -62,6 +62,10 @@ class SoAAPI4 :
         public APITraits::HasSellSigma<32>
 {};
 
+/**
+ * Helper class used in updateLineX() to reuse neighbor verification
+ * functions.
+ */
 class IterAdapter
 {
 public:
@@ -319,6 +323,10 @@ typedef UnstructuredTestCell<UnstructuredTestCellHelpers::SoAAPI2> UnstructuredT
 typedef UnstructuredTestCell<UnstructuredTestCellHelpers::SoAAPI3> UnstructuredTestCellSoA3;
 typedef UnstructuredTestCell<UnstructuredTestCellHelpers::SoAAPI4> UnstructuredTestCellSoA4;
 
+/**
+ * Helper class that enforces an MPI datatype to be created for
+ * UnstructuredTestCell with the template parameters given here.
+ */
 class UnstructuredTestCellMPIDatatypeHelper
 {
     friend class Typemaps;
