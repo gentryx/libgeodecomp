@@ -192,7 +192,7 @@ public:
         TS_ASSERT_EQUALS(expected, actual);
     }
 
-    void testStreakIterator3D()
+    void testStreakIterator3DFirst()
     {
         CoordBox<3> box(Coord<3>(10, 15, 20), Coord<3>(13, 11, 12));
 
@@ -207,6 +207,28 @@ public:
 
         for (CoordBox<3>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
             actual << *i;
+        }
+
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testStreakIterator3DSecond()
+    {
+        CoordBox<3> box(Coord<3>(110, 115, 120), Coord<3>(13, 11, 12));
+
+        std::vector<Streak<3> > expected;
+        std::vector<Streak<3> > actual;
+
+        for (int z = 120; z < 32; ++z) {
+            for (int y = 115; y < 26; ++y) {
+                expected << Streak<3>(Coord<3>(110, y, z), 123);
+            }
+        }
+
+        for (CoordBox<3>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+            Coord<3> origin = i->origin;
+            int endX = i->endX;
+            actual << Streak<3>(origin, endX);
         }
 
         TS_ASSERT_EQUALS(expected, actual);

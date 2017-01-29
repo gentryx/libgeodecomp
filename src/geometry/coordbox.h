@@ -178,8 +178,8 @@ public:
         inline StreakIterator(
             const Coord<DIM>& origin,
             const Coord<DIM>& dimensions) :
-            iter(origin, origin, dimensions),
-            endX(origin.x() + dimensions.x())
+            streak(origin, origin.x() + dimensions.x()),
+            iter(origin, origin, dimensions)
         {
             iter.end.x() = origin.x() + 1;
         }
@@ -194,20 +194,26 @@ public:
             return !(*this == other);
         }
 
-        inline Streak<DIM> operator*() const
+        inline const Streak<DIM>& operator*() const
         {
-            return Streak<DIM>(*iter, endX);
+            return streak;
+        }
+
+        inline const Streak<DIM> *operator->() const
+        {
+            return &streak;
         }
 
         inline StreakIterator& operator++()
         {
             ++iter;
+            streak.origin = *iter;
             return *this;
         }
 
     private:
+        Streak<DIM> streak;
         Iterator iter;
-        int endX;
     };
 
 private:
