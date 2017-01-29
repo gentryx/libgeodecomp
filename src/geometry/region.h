@@ -590,6 +590,13 @@ public:
         geometryCacheTainted(false)
     {}
 
+    explicit inline Region(const CoordBox<DIMENSIONS>& box) :
+        mySize(0),
+        geometryCacheTainted(false)
+    {
+        *this << box;
+    }
+
 #ifdef LIBGEODECOMP_WITH_CPP14
     inline Region(const Region<DIMENSIONS>& other) = default;
 

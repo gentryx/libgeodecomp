@@ -293,6 +293,16 @@ public:
                                   IntPair(30, 49)));
     }
 
+    void testCoordBoxConstructor()
+    {
+        CoordBox<2> box(Coord<2>(10, 20), Coord<2>(30, 40));
+        Region<2> region1(box);
+        Region<2> region2;
+        region2 << box;
+
+        TS_ASSERT_EQUALS(region1, region2);
+    }
+
     void testInsert1a()
     {
         c << Coord<2>(10, 10)
