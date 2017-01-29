@@ -32,6 +32,10 @@ std::vector<IntPair>::const_iterator mapLogicalToPhysicalID(int logicalID, const
     return pos;
 }
 
+/**
+ * Helper class which converts logical coordinates to physical ones
+ * (i.e. those that are actually used to address memory).
+ */
 template<int DIM>
 class ReorderingRegionIterator
 {
@@ -90,9 +94,15 @@ private:
     }
 };
 
+/**
+ * Type switch
+ */
 template<typename T>
 class Selector;
 
+/**
+ * see above
+ */
 template<>
 class Selector<APITraits::TrueType>
 {
@@ -100,6 +110,9 @@ public:
     typedef ReorderingRegionIterator<3> Value;
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<APITraits::FalseType>
 {
