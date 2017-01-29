@@ -1,3 +1,6 @@
+#ifndef LIBGEODECOMP_STORAGE_PASSTHROUGHCONTAINER_H
+#define LIBGEODECOMP_STORAGE_PASSTHROUGHCONTAINER_H
+
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/apitraits.h>
 
@@ -76,3 +79,5 @@ private:
 };
 
 }
+
+#endif
