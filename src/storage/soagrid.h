@@ -259,66 +259,6 @@ private:
     long memberOffset;
 };
 
-template<typename ITERATOR, int DIM>
-class OffsetStreakIterator
-{
-public:
-    inline OffsetStreakIterator(const ITERATOR& delegate, Coord<3> offset) :
-        delegate(delegate),
-        offset(offset)
-    {
-        reset();
-    }
-
-    inline bool operator==(const OffsetStreakIterator other)
-    {
-        return delegate == other.delegate;
-    }
-
-    inline bool operator!=(const OffsetStreakIterator other)
-    {
-        return delegate != other.delegate;
-    }
-
-    inline const OffsetStreakIterator& operator*() const
-    {
-        return *this;
-    }
-
-    inline const OffsetStreakIterator *operator->() const
-    {
-        return this;
-    }
-
-    inline OffsetStreakIterator& operator++()
-    {
-        ++delegate;
-        reset();
-
-        return *this;
-    }
-
-    inline int length() const
-    {
-        return delegate->length();
-    }
-
-    Coord<3> origin;
-
-private:
-    ITERATOR delegate;
-    Coord<3> offset;
-
-    inline void reset()
-    {
-        origin = offset;
-
-        for (int i = 0; i < DIM; ++i) {
-            origin[i] += delegate->origin[i];
-        }
-    }
-};
-
 }
 
 /**
@@ -516,11 +456,11 @@ public:
             actualOffset[i] += -box.origin[i] + offset[i];
         }
 
-        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
-        StreakIteratorType start(region.beginStreak(), actualOffset);
-        StreakIteratorType end(  region.endStreak(),   actualOffset);
-
-        delegate.save(start, end, target->data(), region.size());
+        delegate.save(
+            region.beginStreak(actualOffset),
+            region.endStreak(actualOffset),
+            target->data(),
+            region.size());
     }
 
     void loadRegion(const std::vector<char>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
@@ -537,11 +477,11 @@ public:
             actualOffset[i] += -box.origin[i] + offset[i];
         }
 
-        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
-        StreakIteratorType start(region.beginStreak(), actualOffset);
-        StreakIteratorType end(  region.endStreak(),   actualOffset);
-
-        delegate.load(start, end, source.data(), region.size());
+        delegate.load(
+            region.beginStreak(actualOffset),
+            region.endStreak(actualOffset),
+            source.data(),
+            region.size());
     }
 
     static Coord<3> calcEdgeRadii()
