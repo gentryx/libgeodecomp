@@ -126,6 +126,7 @@ public:
 
     // fixme: rename VALUE_TYPE to WEIGHT_TYPE
     typedef VALUE_TYPE WeightType;
+    typedef char StorageType;
     const static int DIM = 1;
     const static int SIGMA = MY_SIGMA;
     const static int C = MY_C;
@@ -161,6 +162,25 @@ public:
         for (std::size_t i = 0; i < rowsPadded; ++i) {
             set(i, defaultElement);
         }
+    }
+
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    inline
+    char *data()
+    {
+        return elements.data();
+    }
+
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    inline
+    const char *data() const
+    {
+        return elements.data();
     }
 
     inline

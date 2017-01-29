@@ -59,14 +59,23 @@ public:
         origin(origin)
     {}
 
-    inline CELL_TYPE *baseAddress()
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    inline
+    CELL_TYPE *data()
     {
-        return delegate.baseAddress();
+        return delegate.data();
     }
 
-    inline const CELL_TYPE *baseAddress() const
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    inline
+    const CELL_TYPE *data() const
     {
-        return delegate.baseAddress();
+        return delegate.data();
     }
 
     inline const Coord<DIM>& getOrigin() const

@@ -178,6 +178,25 @@ public:
                 defaultCell));
     }
 
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    inline
+    char *data()
+    {
+        return delegate.data();
+    }
+
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    inline
+    const char *data() const
+    {
+        return delegate.data();
+    }
+
     inline void resize(const CoordBox<DIM>& newBox)
     {
         resize(newBox, true);

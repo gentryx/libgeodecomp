@@ -33,6 +33,8 @@ public:
     typedef WEIGHT_TYPE WeightType;
     typedef std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> > NeighborList;
     typedef typename std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> >::iterator NeighborListIterator;
+    typedef ELEMENT_TYPE StorageType;
+
     const static int DIM = 1;
     const static int SIGMA = MY_SIGMA;
     const static int C = MY_C;
@@ -71,6 +73,25 @@ public:
             matrices[i] =
                 SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(box.origin.x() + dimension.x());
         }
+    }
+
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    inline
+    ELEMENT_TYPE *data()
+    {
+        return elements.data();
+    }
+
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    inline
+    const ELEMENT_TYPE *data() const
+    {
+        return elements.data();
     }
 
     void setWeights(std::size_t matrixID, const std::map<Coord<2>, WEIGHT_TYPE>& matrix)

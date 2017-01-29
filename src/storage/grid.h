@@ -100,14 +100,23 @@ public:
         return edgeCell;
     }
 
-    inline CELL_TYPE *baseAddress()
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    inline
+    CELL_TYPE *data()
     {
-        return &(*this)[Coord<DIM>()];
+        return cellVector.data();
     }
 
-    inline const CELL_TYPE *baseAddress() const
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    inline
+    const CELL_TYPE *data() const
     {
-        return &(*this)[Coord<DIM>()];
+        return cellVector.data();
     }
 
     inline CELL_TYPE& operator[](const Coord<DIM>& coord)

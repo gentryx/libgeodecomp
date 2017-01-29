@@ -143,7 +143,7 @@ public:
     typedef typename SerializationBuffer<CellType>::BufferType BufferType;
     typedef typename APITraits::SelectSoA<CellType>::Value SoAFlag;
     typedef typename ReorderingUnstructuredGridHelpers::Selector<SoAFlag>::Value ReorderingRegionIterator;
-
+    typedef typename DELEGATE_GRID::StorageType StorageType;
 
     typedef std::pair<int, int> IntPair;
 
@@ -175,6 +175,25 @@ public:
 
         CoordBox<1> delegateBox(Coord<1>(0), Coord<1>(nodeSet.size()));
         delegate = DELEGATE_GRID(delegateBox, defaultElement, edgeElement);
+    }
+
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    inline
+    StorageType *data()
+    {
+        return delegate.data();
+    }
+
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    inline
+    const StorageType *data() const
+    {
+        return delegate.data();
     }
 
     // fixme: 1. finish GridBase interface with internal ID translation (via logicalToPhysicalIDs)

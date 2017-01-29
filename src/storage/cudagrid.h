@@ -55,6 +55,25 @@ public:
         hostEdgeCell(edgeCell)
     {}
 
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    inline
+    CellType *data()
+    {
+        return array.data();
+    }
+
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    inline
+    const CellType *data() const
+    {
+        return array.data();
+    }
+
     inline
     void resize(const CoordBox<DIM>& newBox)
     {
