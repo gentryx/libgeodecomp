@@ -61,10 +61,9 @@ public:
         neighbors(neighbors)
     {}
 
-    // fixme: use move semantics here
     template<typename HOOD, typename EVENT>
     void update(
-        HOOD& hood,
+        HOOD&& hood,
         const EVENT& event)
     {
         int globalNanoStep = event.step() * NANO_STEPS + event.nanoStep();
@@ -110,10 +109,9 @@ public:
         neighbors(neighbors)
     {}
 
-    // fixme: use move semantics here
     template<typename HOOD, typename EVENT>
     void update(
-        HOOD& hood,
+        HOOD&& hood,
         const EVENT& event)
     {
         int globalNanoStep = event.step() * NANO_STEPS + event.nanoStep();
