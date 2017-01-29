@@ -6,6 +6,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This is the base class for all simulators that are using our nested
+ * parallelism architecture. The latter is built on UpdateGroups and
+ * Steppers.
+ */
 template<typename CELL>
 class HierarchicalSimulator : public DistributedSimulator<CELL>
 {

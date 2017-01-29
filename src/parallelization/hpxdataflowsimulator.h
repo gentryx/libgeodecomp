@@ -19,6 +19,10 @@ namespace LibGeoDecomp {
 
 namespace HPXDataFlowSimulatorHelpers {
 
+/**
+ * A draft for the event type to be passed to all cells in the future
+ * -- instead of a plain integer representing the nano step.
+ */
 class UpdateEvent
 {
 public:
@@ -43,6 +47,10 @@ private:
     int myStep;
 };
 
+/**
+ * A lightweight implementation of the Neighborhood concept, tailored
+ * for HPX dataflow.
+ */
 template<typename MESSAGE>
 class Neighborhood
 {
