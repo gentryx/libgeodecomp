@@ -9,7 +9,8 @@
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/reorderingunstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <mutex>
 #include <stdexcept>
@@ -122,7 +123,7 @@ class CellComponent
 public:
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
     typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
-    typedef DisplacedGrid<CELL, Topologies::Unstructured::Topology> GridType;
+    typedef ReorderingUnstructuredGrid<UnstructuredGrid<CELL> > GridType;
 
     explicit CellComponent(
         const std::string& basename = "",
@@ -248,7 +249,7 @@ private:
 
     CELL *cell()
     {
-        return grid->baseAddress();
+        return grid->data();
     }
 };
 

@@ -489,7 +489,7 @@ public:
             }
         }
 
-        // fixme: grid->setWeights(0, weights);
+        grid->setWeights(0, weights);
     }
 
     Coord<1> gridDimensions() const
@@ -684,7 +684,7 @@ public:
 
             DummyHood hood(endX, adjacency);
 
-            DataflowTestModel *cells = grid.baseAddress();
+            DataflowTestModel *cells = grid.data();
 
             int maxSteps = initializer->maxSteps();
             for (int t = 0; t < maxSteps; ++t) {
