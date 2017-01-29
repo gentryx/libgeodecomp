@@ -154,8 +154,9 @@ public:
     const static int SIGMA = DELEGATE_GRID::SIGMA;
     const static int C = DELEGATE_GRID::C;
 
+    template<typename NODE_SET_TYPE = Region<1> >
     explicit ReorderingUnstructuredGrid(
-        const Region<1>& nodeSet = Region<1>(),
+        const NODE_SET_TYPE& nodeSet = Region<1>(),
         const CellType& defaultElement = CellType(),
         const CellType& edgeElement = CellType(),
         const Coord<1>& topologicalDimensions = Coord<1>()) :
@@ -165,7 +166,7 @@ public:
         physicalToLogicalIDs.reserve(nodeSet.size());
         logicalToPhysicalIDs.reserve(nodeSet.size());
 
-        for (Region<1>::StreakIterator i = nodeSet.beginStreak(); i != nodeSet.endStreak(); ++i) {
+        for (typename NODE_SET_TYPE::StreakIterator i = nodeSet.beginStreak(); i != nodeSet.endStreak(); ++i) {
             for (int j = i->origin.x(); j != i->endX; ++j) {
                 logicalToPhysicalIDs << std::make_pair(j, physicalID);
                 physicalToLogicalIDs << j;
