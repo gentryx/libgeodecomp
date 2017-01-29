@@ -9,6 +9,9 @@
 #include <QObject>
 #include <libgeodecomp/examples/latticegas/interactivesimulator.h>
 
+/**
+ * Dumps images, possibly grabbed from a camera, to disk.
+ */
 class CameraTester : public QObject
 {
     Q_OBJECT
@@ -34,8 +37,9 @@ private:
     void writeImage(std::string filename, char *rawFrame, unsigned width, unsigned height, bool passThrough)
     {
         std::ofstream outfile(filename.c_str());
-        if (!outfile)
+        if (!outfile) {
             throw std::runtime_error("Cannot open output file");
+        }
 
         // header first:
         outfile << "P6 " << width
@@ -59,8 +63,9 @@ private:
             }
         }
 
-        if (!outfile.good())
+        if (!outfile.good()) {
             throw std::runtime_error("Cannot write output file");
+        }
         outfile.close();
     }
 };
