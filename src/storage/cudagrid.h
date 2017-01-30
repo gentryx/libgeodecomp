@@ -58,6 +58,7 @@ public:
     /**
      * Return a pointer to the underlying data storage. Use with care!
      */
+    __host__ __device__
     inline
     CellType *data()
     {
@@ -68,6 +69,7 @@ public:
      * Return a const pointer to the underlying data storage. Use with
      * care!
      */
+    __host__ __device__
     inline
     const CellType *data() const
     {
@@ -189,18 +191,6 @@ public:
     const CoordBox<DIM>& boundingBox()
     {
         return box;
-    }
-
-    __host__ __device__
-    CellType *data()
-    {
-        return array.data();
-    }
-
-    __host__ __device__
-    const CellType *data() const
-    {
-        return array.data();
     }
 
     __host__ __device__
