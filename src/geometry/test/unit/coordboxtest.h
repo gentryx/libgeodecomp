@@ -219,7 +219,7 @@ public:
         std::vector<Streak<3> > expected;
         std::vector<Streak<3> > actual;
 
-        for (int z = 120; z < 32; ++z) {
+        for (int z = 120; z < 132; ++z) {
             for (int y = 115; y < 126; ++y) {
                 expected << Streak<3>(Coord<3>(110, y, z), 123);
             }
