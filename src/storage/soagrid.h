@@ -259,6 +259,12 @@ private:
     long memberOffset;
 };
 
+/**
+ * This class duplicates some functionality from RegionStreakIterator,
+ * but is still necessary as we always need 3D coordinates (because of
+ * LibFlatArray::soa_grid) while a Region may alternatively yield 1D
+ * or 2D coordinates.
+ */
 template<typename ITERATOR, int DIM>
 class OffsetStreakIterator
 {
