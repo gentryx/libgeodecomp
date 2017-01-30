@@ -674,7 +674,7 @@ public:
             ScopedTimer t(&seconds);
 
             Initializer<DataflowTestModel> *initializer = new DataflowTestInitializer(gridDim, maxSteps, messageSize);
-            Grid<DataflowTestModel, Topologies::Cube<1>::Topology> grid(initializer->gridDimensions());
+            ReorderingUnstructuredGrid<UnstructuredGrid<DataflowTestModel> > grid(initializer->gridBox());
             initializer->grid(&grid);
             int endX = initializer->gridDimensions().x();
 
