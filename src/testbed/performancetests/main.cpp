@@ -3264,6 +3264,105 @@ public:
 #endif
 #endif
 
+class UpdateFunctorThreadingBase : public CPUBenchmark
+{
+public:
+    typedef UpdateFunctorHelpers::ConcurrencyEnableOpenMP MyConcurrencySpec;
+    typedef UpdateFunctor<JacobiCellFixedHood, MyConcurrencySpec> MyUpdateFunctor;
+
+    std::string family()
+    {
+        return "UpdateFunctorThreading";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        int size = rawDim[0];
+        // stencil radius:
+        int radius = 1;
+
+        int dimX = 10 - 1 - 2 * radius;
+        int endY = size - 2 - radius;
+        int steps = rawDim[1];
+
+        Coord<3> dim(10, size, 10);
+        typedef Grid<JacobiCellFixedHood, Topologies::Cube<3>::Topology> GridType;
+        GridType *gridOld = new GridType(dim, JacobiCellFixedHood(1.0));
+        GridType *gridNew = new GridType(dim, JacobiCellFixedHood(0.0));
+
+        Region<3> region;
+        for (int i = radius; i < endY; i += 2) {
+            region << CoordBox<3>(Coord<3>(radius, i, radius + 0), Coord<3>(dimX, 1, 1));
+        }
+        for (int i = radius; i < (endY / 2); i += 2) {
+            region << CoordBox<3>(Coord<3>(radius, i, radius + 1), Coord<3>(dimX, 1, 1));
+        }
+
+        using std::swap;
+
+        double seconds = 0;
+        {
+            ScopedTimer timer(&seconds);
+
+            for (int i = 0; i < steps; ++i) {
+                MyUpdateFunctor()(region, Coord<3>(), Coord<3>(), *gridOld, gridNew, 0, generateConcurrencySpec());
+
+                swap(gridOld, gridNew);
+            }
+
+        }
+
+        if (gridNew->get(Coord<3>(radius, radius, radius)).temp == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        const double numOps = region.size() * steps;
+        const double gflops = 1.0e-9 * numOps / seconds;
+        return gflops;
+    }
+
+    std::string unit()
+    {
+        return "GLUPS";
+    }
+
+private:
+    virtual MyConcurrencySpec generateConcurrencySpec() = 0;
+};
+
+class UpdateFunctorThreadingGold : public UpdateFunctorThreadingBase
+{
+public:
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+private:
+    MyConcurrencySpec generateConcurrencySpec()
+    {
+        return MyConcurrencySpec(true, true);
+    }
+};
+
+class UpdateFunctorThreadingSilver : public UpdateFunctorThreadingBase
+{
+public:
+
+    std::string species()
+    {
+        return "silver";
+    }
+
+private:
+    MyConcurrencySpec generateConcurrencySpec()
+    {
+        return MyConcurrencySpec(true, false);
+    }
+};
+
 #ifdef LIBGEODECOMP_WITH_CUDA
 void cudaTests(std::string name, std::string revision, int cudaDevice);
 #endif
@@ -3437,7 +3536,6 @@ int main(int argc, char **argv)
     }
 
     sizes.clear();
-
     sizes << Coord<3>(22, 22, 22)
           << Coord<3>(64, 64, 64)
           << Coord<3>(68, 68, 68)
@@ -3459,6 +3557,10 @@ int main(int argc, char **argv)
     eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
     eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
     eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
+
+    dim = toVector(Coord<3>(10000, 2000, 0));
+    eval(UpdateFunctorThreadingSilver(), dim);
+    eval(UpdateFunctorThreadingGold(), dim);
 
 #ifdef LIBGEODECOMP_WITH_CUDA
     cudaTests(name, revision, cudaDevice);
