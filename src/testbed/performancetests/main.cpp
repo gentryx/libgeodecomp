@@ -3017,7 +3017,7 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double numOps = 2.0 * (size.x() / 100) * (size.x());
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3083,7 +3083,7 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.dimensions.x() / 100) * (size.dimensions.x());
+        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x());
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3149,7 +3149,7 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.dimensions.x() / 100) * (size.dimensions.x());
+        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x());
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3251,7 +3251,7 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.dimensions.x() / 100) * (size.dimensions.x());
+        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x());
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
