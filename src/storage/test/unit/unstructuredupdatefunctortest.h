@@ -47,7 +47,7 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+        for (; hoodOld.index() < indexEnd; ++hoodOld) {
             hoodNew->sum = 0.0;
             for (const auto& j: hoodOld.weights(0)) {
                 hoodNew->sum += hoodOld[j.first()].value * j.second();
@@ -106,12 +106,10 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        // fixme: replace i by hoodOld.index()
         // fixme: use LGD loop peeler
-
         int chunkStart = indexStart % HOOD_OLD::ARITY;
 
-        for (int i = hoodOld.index(); i < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++i, ++hoodOld) {
+        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
             int chunkSize = std::min(HOOD_OLD::ARITY, indexEnd - hoodOld.index() * HOOD_OLD::ARITY);
             ShortVec tmp;
             tmp.load_aligned(&hoodNew->sum());
