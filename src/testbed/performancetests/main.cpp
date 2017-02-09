@@ -2692,6 +2692,7 @@ private:
     std::string name;
 };
 
+// fixme: try ILP here, maybe switch to C=8?
 #ifdef LIBGEODECOMP_WITH_CPP14
 typedef double ValueType;
 static const std::size_t MATRICES = 1;
@@ -3007,9 +3008,12 @@ public:
         // 3. call updateFunctor()
         double seconds = 0;
         Streak<1> streak(Coord<1>(0), size.x());
+        UnstructuredUpdateFunctor<SPMVMCell> updateFunctor;
+        UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
+        APITraits::SelectThreadedUpdate<SPMVMCell>::Value threadedUpdateSpec;
         {
             ScopedTimer t(&seconds);
-            updateFunctor<SPMVMCell, Grid>(streak, gridOld, &gridNew, 0);
+            updateFunctor(region, gridOld, &gridNew, 0, concurrencySpec, threadedUpdateSpec);
         }
 
         if (gridNew.get(Coord<1>(1)).sum == 4711) {
@@ -3030,20 +3034,6 @@ public:
 
 class SparseMatrixVectorMultiplicationVectorized : public CPUBenchmark
 {
-private:
-    template<typename CELL, typename GRID>
-    void updateFunctor(
-        const Region<1>& region,
-        const GRID& gridOld,
-        GRID *gridNew,
-        unsigned nanoStep)
-    {
-        gridOld.callback(
-            gridNew,
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, GRID>(
-                gridOld, gridNew, region, nanoStep));
-    }
-
 public:
     std::string family()
     {
@@ -3073,9 +3063,12 @@ public:
         double seconds = 0;
         Region<1> region;
         region << Streak<1>(Coord<1>(0), size.dimensions.x());
+        UnstructuredUpdateFunctor<SPMVMSoACell> updateFunctor;
+        UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
+        APITraits::SelectThreadedUpdate<SPMVMSoACell>::Value threadedUpdateSpec;
         {
             ScopedTimer t(&seconds);
-            updateFunctor<SPMVMSoACell, Grid>(region, gridOld, &gridNew, 0);
+            updateFunctor(region, gridOld, &gridNew, 0, concurrencySpec, threadedUpdateSpec);
         }
 
         if (gridNew.get(Coord<1>(1)).sum == 4711) {
@@ -3096,20 +3089,6 @@ public:
 
 class SparseMatrixVectorMultiplicationVectorizedInf : public CPUBenchmark
 {
-private:
-    template<typename CELL, typename GRID>
-    void updateFunctor(const Region<1>& region, const GRID& gridOld,
-                       GRID *gridNew, unsigned nanoStep)
-    {
-        gridOld.callback(
-            gridNew,
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, GRID>(
-                gridOld,
-                gridNew,
-                region,
-                nanoStep));
-    }
-
 public:
     std::string family()
     {
@@ -3139,9 +3118,12 @@ public:
         double seconds = 0;
         Region<1> region;
         region << Streak<1>(Coord<1>(0), size.dimensions.x());
+        UnstructuredUpdateFunctor<SPMVMSoACellInf> updateFunctor;
+        UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
+        APITraits::SelectThreadedUpdate<SPMVMSoACellInf>::Value threadedUpdateSpec;
         {
             ScopedTimer t(&seconds);
-            updateFunctor<SPMVMSoACellInf, Grid>(region, gridOld, &gridNew, 0);
+            updateFunctor(region, gridOld, &gridNew, 0, concurrencySpec, threadedUpdateSpec);
         }
 
         if (gridNew.get(Coord<1>(1)).sum == 4711) {
