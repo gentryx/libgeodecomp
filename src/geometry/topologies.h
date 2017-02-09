@@ -115,7 +115,7 @@ public:
             ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1])));
     }
 
-#ifndef __NVCC__
+#if !defined(__NVCC__) || (__CUDACC_VER_MAJOR__ >= 8)
 #ifdef __GNUG__
 #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6) )
 #pragma GCC diagnostic push
@@ -131,7 +131,7 @@ public:
             ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1]))) ||
             ((!WrapsAxis<2, TOPOLOGY>::VALUE) && ((coord[2] < 0) || (coord[2] >= dim[2])));
     }
-#ifndef __NVCC__
+#if !defined(__NVCC__) || (__CUDACC_VER_MAJOR__ >= 8)
 #ifdef __GNUG__
 #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6) )
 #pragma GCC diagnostic pop
