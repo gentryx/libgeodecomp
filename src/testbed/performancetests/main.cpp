@@ -2772,6 +2772,7 @@ public:
         public APITraits::HasSellSigma<SIGMA>
     {
     public:
+        // fixme: use dedicated 1d macro here
         // uniform sizes lead to std::bad_alloc,
         // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
         // as dimension (DIM = 1)
@@ -2804,6 +2805,7 @@ public:
         }
     }
 
+    // fixme: get rid of this?
     template<typename NEIGHBORHOOD>
     void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
     {
@@ -2834,6 +2836,7 @@ public:
         public APITraits::HasSellSigma<SIGMA>
     {
     public:
+        // fixme: use dedicated 1d macro here
         // uniform sizes lead to std::bad_alloc,
         // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
         // as dimension (DIM = 1)
@@ -2865,6 +2868,7 @@ public:
         }
     }
 
+    // fixme: get rid of this?
     template<typename NEIGHBORHOOD>
     void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
     {
@@ -2997,13 +3001,14 @@ public:
         const Coord<1> size(dim.x());
         Region<1> region;
         region << CoordBox<1>(Coord<1>(), size);
-        Grid gridOld(region);
-        Grid gridNew(region);
+        Grid grid1(region);
 
         // 2. init grid old
-        const int maxT = 1;
+        double factor = 100000.0 / dim.x();
+        const int maxT = 100 * factor * factor;
         SparseMatrixInitializer<SPMVMCell, Grid> init(dim, maxT);
-        init.grid(&gridOld);
+        init.grid(&grid1);
+        Grid grid2 = grid1;
 
         // 3. call updateFunctor()
         double seconds = 0;
@@ -3012,16 +3017,23 @@ public:
         UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
         APITraits::SelectThreadedUpdate<SPMVMCell>::Value threadedUpdateSpec;
         {
-            ScopedTimer t(&seconds);
-            updateFunctor(region, gridOld, &gridNew, 0, concurrencySpec, threadedUpdateSpec);
+            ScopedTimer timer(&seconds);
+            Grid *gridOld = &grid1;
+            Grid *gridNew = &grid2;
+
+            for (int t = 0; t < maxT; ++t) {
+                using std::swap;
+                updateFunctor(region, *gridOld, gridNew, 0, concurrencySpec, threadedUpdateSpec);
+                swap(gridOld, gridNew);
+            }
         }
 
-        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+        if (grid1.get(Coord<1>(1)).sum == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2.0 * (size.x() / 100) * (size.x());
+        const double numOps = 2.0 * (size.x() / 100) * (size.x()) * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3051,13 +3063,14 @@ public:
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
         const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
-        Grid gridOld(size);
-        Grid gridNew(size);
+        Grid grid1(size);
 
         // 2. init grid old
-        const int maxT = 1;
+        double factor = 100000.0 / dim.x();
+        const int maxT = 100 * factor * factor;
         SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
-        init.grid(&gridOld);
+        init.grid(&grid1);
+        Grid grid2 = grid1;
 
         // 3. call updateFunctor()
         double seconds = 0;
@@ -3067,16 +3080,23 @@ public:
         UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
         APITraits::SelectThreadedUpdate<SPMVMSoACell>::Value threadedUpdateSpec;
         {
-            ScopedTimer t(&seconds);
-            updateFunctor(region, gridOld, &gridNew, 0, concurrencySpec, threadedUpdateSpec);
+            ScopedTimer timer(&seconds);
+            Grid *gridOld = &grid1;
+            Grid *gridNew = &grid2;
+
+            for (int t = 0; t < maxT; ++t) {
+                using std::swap;
+                updateFunctor(region, *gridOld, gridNew, 0, concurrencySpec, threadedUpdateSpec);
+                swap(gridOld, gridNew);
+            }
         }
 
-        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+        if (grid1.get(Coord<1>(1)).sum == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x());
+        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x()) * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3106,13 +3126,14 @@ public:
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACellInf, MATRICES, ValueType, C, SIGMA> Grid;
         const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
-        Grid gridOld(size);
-        Grid gridNew(size);
+        Grid grid1(size);
 
         // 2. init grid old
-        const int maxT = 1;
+        double factor = 100000.0 / dim.x();
+        const int maxT = 100 * factor * factor;
         SparseMatrixInitializer<SPMVMSoACellInf, Grid> init(dim, maxT);
-        init.grid(&gridOld);
+        init.grid(&grid1);
+        Grid grid2 = grid1;
 
         // 3. call updateFunctor()
         double seconds = 0;
@@ -3122,16 +3143,23 @@ public:
         UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
         APITraits::SelectThreadedUpdate<SPMVMSoACellInf>::Value threadedUpdateSpec;
         {
-            ScopedTimer t(&seconds);
-            updateFunctor(region, gridOld, &gridNew, 0, concurrencySpec, threadedUpdateSpec);
+            ScopedTimer timer(&seconds);
+            Grid *gridOld = &grid1;
+            Grid *gridNew = &grid2;
+
+            for (int t = 0; t < maxT; ++t) {
+                using std::swap;
+                updateFunctor(region, *gridOld, gridNew, 0, concurrencySpec, threadedUpdateSpec);
+                swap(gridOld, gridNew);
+            }
         }
 
-        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+        if (grid1.get(Coord<1>(1)).sum == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x());
+        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x()) * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3192,7 +3220,8 @@ public:
         Grid gridNew(size);
 
         // 2. init grid old
-        const int maxT = 1;
+        double factor = 100000.0 / dim.x();
+        const int maxT = 100 * factor * factor;
         SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
         init.grid(&gridOld);
 
@@ -3208,23 +3237,25 @@ public:
         const int rowsPadded = ((size.dimensions.x() - 1) / C + 1) * C;
         double seconds = 0;
         {
-            ScopedTimer t(&seconds);
-            for (int i = 0; i < rowsPadded / C; ++i) {
-                int offs = cs[i];
-                __m256d tmp = _mm256_load_pd(resPtr + i*C);
-                for (int j = 0; j < cl[i]; ++j) {
-                    __m256d rhs;
-                    __m256d val;
-                    rhs = _mm256_set_pd(
-                        *(rhsPtr + col[offs + 3]),
-                        *(rhsPtr + col[offs + 2]),
-                        *(rhsPtr + col[offs + 1]),
-                        *(rhsPtr + col[offs + 0]));
-                    val    = _mm256_load_pd(values + offs);
-                    tmp    = _mm256_add_pd(tmp, _mm256_mul_pd(val, rhs));
-                    offs += 4;
+            ScopedTimer timer(&seconds);
+            for (int t = 0; t < maxT; ++t) {
+                for (int i = 0; i < rowsPadded / C; ++i) {
+                    int offs = cs[i];
+                    __m256d tmp = _mm256_load_pd(resPtr + i*C);
+                    for (int j = 0; j < cl[i]; ++j) {
+                        __m256d rhs;
+                        __m256d val;
+                        rhs = _mm256_set_pd(
+                            *(rhsPtr + col[offs + 3]),
+                            *(rhsPtr + col[offs + 2]),
+                            *(rhsPtr + col[offs + 1]),
+                            *(rhsPtr + col[offs + 0]));
+                        val    = _mm256_load_pd(values + offs);
+                        tmp    = _mm256_add_pd(tmp, _mm256_mul_pd(val, rhs));
+                        offs += 4;
+                    }
+                    _mm256_store_pd(resPtr + i*C, tmp);
                 }
-                _mm256_store_pd(resPtr + i*C, tmp);
             }
         }
 
@@ -3233,7 +3264,7 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x());
+        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x()) * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
