@@ -365,6 +365,7 @@ public:
 
     /**
      * Replaces the grid type from regular grid to an unstructured grid.
+     * fixme: stress that this is for topology discovery, not IO.
      */
     class HasUnstructuredTopology: public HasTopology<Topologies::Unstructured::Topology>
     {};
@@ -736,6 +737,11 @@ public:
             {
                 return FalseType();
             }
+
+            inline int granularity() const
+            {
+                return 16384;
+            }
         };
     };
 
@@ -743,7 +749,33 @@ public:
     class SelectThreadedUpdate<CELL, typename CELL::API::SupportsThreadedUpdate>
     {
     public:
-        typedef TrueType Value;
+        class Value
+        {
+        public:
+            typedef typename CELL::API::HasOpenMP HasOpenMP;
+            typedef typename CELL::API::HasHPX    HasHPX;
+            typedef typename CELL::API::HasCUDA   HasCUDA;
+
+            inline HasOpenMP hasOpenMP() const
+            {
+                return HasOpenMP();
+            }
+
+            inline HasHPX hasHPX() const
+            {
+                return HasHPX();
+            }
+
+            inline HasCUDA hasCUDA() const
+            {
+                return HasCUDA();
+            }
+
+            inline int granularity() const
+            {
+                return CELL::API::GRANULARITY_VALUE;
+            }
+        };
     };
 
     /**
@@ -755,11 +787,21 @@ public:
      * is responsible to provide a suitable implementation (e.g. based
      * on OpenMP or HPX). On CUDA each cell will get its own thread
      * block.
+     *
+     * fixme: needs test
+     * fixme: explain granularity
      */
+    template<int GRANULARITY, typename HAS_OPENMP = FalseType, typename HAS_HPX = FalseType, typename HAS_CUDA = FalseType>
     class HasThreadedUpdate
     {
     public:
         typedef void SupportsThreadedUpdate;
+
+        typedef HAS_OPENMP HasOpenMP;
+        typedef HAS_HPX    HasHPX;
+        typedef HAS_CUDA   HasCUDA;
+
+        static const int GRANULARITY_VALUE = GRANULARITY;
     };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -1010,6 +1052,7 @@ public:
      * each zone will be represented by a sequence of coordinates. See
      * the Voronoi example for instructions on how to use this
      * feature.
+     * fixme: stress that this is just IO, not topology
      */
     class HasUnstructuredGrid
     {
