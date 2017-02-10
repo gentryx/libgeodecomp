@@ -44,7 +44,13 @@ public:
     }
 
     inline
-    int index() const
+    long& index()
+    {
+        return accessor->index();
+    }
+
+    inline
+    const long& index() const
     {
         return accessor->index();
     }
