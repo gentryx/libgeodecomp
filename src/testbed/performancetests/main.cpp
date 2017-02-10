@@ -2708,7 +2708,8 @@ public:
         public APITraits::HasSellType<ValueType>,
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
+        public APITraits::HasSellSigma<SIGMA>,
+        public APITraits::HasThreadedUpdate<4096>
     {};
 
     inline explicit SPMVMCell(double v = 8.0) :
