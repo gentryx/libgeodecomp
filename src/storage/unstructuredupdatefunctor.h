@@ -63,8 +63,9 @@ public:
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             // call updateLineX with adjusted indices
             typedef UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1, MATRICES, ValueType, C, SIGMA> HoodOld;
-            HoodOld hoodOld(oldAccessor, gridOld, i->origin.x());
-            newAccessor.index() = hoodOld.index() * HoodOld::ARITY;
+            int intraChunkOffset = i->origin.x() % HoodOld::ARITY;
+            HoodOld hoodOld(oldAccessor, gridOld, i->origin.x(), intraChunkOffset);
+            newAccessor.index() = i->origin.x();
             UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessor);
             CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep);
         }
