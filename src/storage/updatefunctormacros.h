@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROS_H
 #define LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROS_H
 
-// fixme: rename this to LIBGEODECOMP_CHUNK_THRESHOLD
+// fixme: get rid of this or rename to LIBGEODECOMP_CHUNK_THRESHOLD
 #if !defined(LGD_CHUNK_THRESHOLD)
 #define LGD_CHUNK_THRESHOLD 0
 #endif
@@ -38,21 +38,31 @@
                     }                                                   \
                 }                                                       \
     /**/
+// fixme: get rid of operator%
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3                         \
             } else {                                                    \
                 typedef typename Region<DIM>::StreakIterator Iter;      \
                 std::vector<Streak<DIM> > streaks;                      \
-                streaks.resize(region.numStreaks());                    \
-                int c = 0;                                              \
-                for (Iter i = region.beginStreak(); i != region.endStreak(); ++i) { \
-                    streaks[c] = *i;                                    \
-                    ++c;                                                \
+                streaks.reserve(region.numStreaks());                   \
+                for (Iter i = region.beginStreak();                     \
+                     i != region.endStreak();                           \
+                     ++i) {                                             \
+                    Streak<DIM> s = *i;                                 \
+                    auto granularity = modelThreadingSpec.granularity(); \
+                    while (s.length() > granularity) {                  \
+                        Streak<DIM> tranche = s;                        \
+                        tranche.endX = s.origin.x() + granularity -     \
+                            (s.origin.x() % granularity);               \
+                        streaks.push_back(tranche);                     \
+                        s.origin.x() = tranche.endX;                    \
+                    }                                                   \
+                    streaks.push_back(s);                               \
                 }                                                       \
                 _Pragma("omp parallel for schedule(static)")            \
-                for (std::size_t j = 0; j < streaks.size(); ++j) {      \
-                    Streak<DIM> *i = &streaks[j];                       \
+                    for (std::size_t j = 0; j < streaks.size(); ++j) {  \
+                        Streak<DIM> *i = &streaks[j];                   \
                         LGD_UPDATE_FUNCTOR_BODY;                        \
-                }                                                       \
+                    }                                                   \
             }                                                           \
     /**/
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4                         \
