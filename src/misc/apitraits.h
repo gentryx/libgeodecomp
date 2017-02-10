@@ -364,8 +364,9 @@ public:
     {};
 
     /**
-     * Replaces the grid type from regular grid to an unstructured grid.
-     * fixme: stress that this is for topology discovery, not IO.
+     * Enforces that an unstructured grid is to be used for the
+     * simulation. Not to be confused with HasUnstructuredGrid, which
+     * is a trait for IO.
      */
     class HasUnstructuredTopology: public HasTopology<Topologies::Unstructured::Topology>
     {};
@@ -779,6 +780,12 @@ public:
     };
 
     /**
+     * This trait gives models control over the threading strategy
+     * taken inside LibGeoDecomp. The GRANULARITY may be used to
+     * suggest LibGeoDecomp to give smaller heaps of work to each
+     * thread. This can improve scalability when the amount of Streaks
+     * is low compared to the number of cores.
+     *
      * Some models (e.g. n-body codes) are so compute intensive, that
      * it may be advisable to use multiple threads for updating a
      * single cell -- as opposed to using multiple threads for dijunct
@@ -787,9 +794,6 @@ public:
      * is responsible to provide a suitable implementation (e.g. based
      * on OpenMP or HPX). On CUDA each cell will get its own thread
      * block.
-     *
-     * fixme: needs test
-     * fixme: explain granularity
      */
     template<int GRANULARITY, typename HAS_OPENMP = FalseType, typename HAS_HPX = FalseType, typename HAS_CUDA = FalseType>
     class HasThreadedUpdate
@@ -1047,12 +1051,16 @@ public:
     };
 
     /**
-     * If a model is based on an unstructred grid, then we assume that
-     * it can be represented a set of polygonal zones. The shape of
-     * each zone will be represented by a sequence of coordinates. See
-     * the Voronoi example for instructions on how to use this
-     * feature.
-     * fixme: stress that this is just IO, not topology
+     * This trait can be used by Writers and other IO components to
+     * discover that a cell has an unstructured grid whose nodes are
+     * stored in its cells (e.g. a regular grid of cells, which act as
+     * containers for the unstructured grid). This has no influence on
+     * the grid type to be used by the simulator (see
+     * HasUnstructuredTopology).
+     *
+     * The shape of each zone (element) will be represented by a sequence of
+     * coordinates. See the Voronoi example for instructions on how to
+     * use this feature.
      */
     class HasUnstructuredGrid
     {
