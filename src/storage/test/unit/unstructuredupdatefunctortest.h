@@ -103,36 +103,62 @@ public:
         value(v), sum(0)
     {}
 
+    template<typename SHORT_VEC_TYPE, typename COUNTER_TYPE1, typename COUNTER_TYPE2, typename HOOD_OLD, typename LAMBDA>
+    static
+    void unstructuredLoopPeeler(COUNTER_TYPE1 *counter, const COUNTER_TYPE2& end, HOOD_OLD& hoodOld, const LAMBDA& lambda)
+    {
+        typedef SHORT_VEC_TYPE lfa_local_short_vec;
+        typedef typename LibFlatArray::detail::flat_array::
+            sibling_short_vec_switch<SHORT_VEC_TYPE, 1>::VALUE
+            lfa_local_scalar;
+
+        // fixme: get rid of % operator by using & with (SHORT_VEC_TYPE::ARITY - 1)
+        COUNTER_TYPE1 nextStop = *counter;
+        COUNTER_TYPE1 remainder = *counter % SHORT_VEC_TYPE::ARITY;
+        if (remainder != 0) {
+            nextStop += SHORT_VEC_TYPE::ARITY - remainder;
+        }
+        COUNTER_TYPE1 lastStop = end - end % SHORT_VEC_TYPE::ARITY;
+
+        if (*counter != nextStop) {
+            lambda(lfa_local_scalar(), counter, nextStop);
+            ++hoodOld;
+        }
+        lambda(lfa_local_short_vec(), counter, lastStop);
+        lambda(lfa_local_scalar(),    counter, end     );
+    }
+
+    // fixme: duplicate these tests and rerun them as OpenMP tests,
+    // with different OpenMP threading specs (true, true), (true,
+    // false), (false, true), (false, false).
+    // optionally add public APITraits::HasThreadedUpdate<16> to API for fine-grained updates
+
+
+    // fixme: get rid of indexStart
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        // fixme: use LGD loop peeler
-        int chunkStart = indexStart % HOOD_OLD::ARITY;
+        unstructuredLoopPeeler<ShortVec>(&hoodNew.index(), indexEnd, hoodOld, [&hoodNew, &hoodOld](auto REAL, auto *counter, const auto& end) {
+                typedef decltype(REAL) ShortVec;
+                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY) {
+                    ShortVec tmp;
+                    tmp.load_aligned(&hoodNew->sum());
 
-        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
-            int chunkSize = std::min(HOOD_OLD::ARITY, indexEnd - hoodOld.index() * HOOD_OLD::ARITY);
-            ShortVec tmp;
-            tmp.load_aligned(&hoodNew->sum());
+                    for (const auto& j: hoodOld.weights(ShortVec())) {
+                        ShortVec weights, values;
+                        weights.load_aligned(j.second());
+                        values.gather(&hoodOld->value(), j.first());
+                        tmp += values * weights;
 
-            for (const auto& j: hoodOld.weights(0)) {
-                ShortVec weights, values;
-                weights.load_aligned(j.second());
-                values.gather(&hoodOld->value(), j.first());
-                tmp += values * weights;
-            }
+                    }
 
-            // fixme: we could use normal store if we were using the
-            // loop peeler:
-            double buf[ShortVec::ARITY];
-            buf << tmp;
-            hoodNew += chunkStart;
-            for (int j = chunkStart; j < chunkSize; ++j) {
-                hoodNew->sum() = buf[j];
-                ++hoodNew;
-            }
-
-            chunkStart = 0;
-        }
+                    &hoodNew->sum() << tmp;
+                    // fixme
+                    if (ShortVec::ARITY == 4) {
+                        ++hoodOld;
+                    }
+                }
+            });
     }
 
     template<typename NEIGHBORHOOD>
@@ -158,8 +184,8 @@ public:
     double sum;
 };
 
-LIBFLATARRAY_REGISTER_SOA(SimpleUnstructuredSoATestCell<1  >, ((double)(sum))((double)(value)))
-LIBFLATARRAY_REGISTER_SOA(SimpleUnstructuredSoATestCell<150>, ((double)(sum))((double)(value)))
+LIBFLATARRAY_REGISTER_SOA(SimpleUnstructuredSoATestCell<1 >, ((double)(sum))((double)(value)))
+LIBFLATARRAY_REGISTER_SOA(SimpleUnstructuredSoATestCell<60>, ((double)(sum))((double)(value)))
 #endif
 
 namespace LibGeoDecomp {
@@ -371,7 +397,8 @@ public:
             if (((coord.x() >=  10) && (coord.x() <  30)) ||
                 ((coord.x() >=  40) && (coord.x() <  60)) ||
                 ((coord.x() >= 100) && (coord.x() < 150))) {
-                const double sum = coord.x() * 200.0;
+
+                const double sum = coord.x() * 200;
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
                 TS_ASSERT_EQUALS(0.0, gridNew.get(coord).sum);
@@ -395,26 +422,33 @@ public:
         GridType gridOld(boundingRegion, defaultCell, edgeCell);
         GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
+        for (int i = 0; i < DIM; ++i) {
+            gridOld.set(Coord<1>(i), SimpleUnstructuredSoATestCell<1>(2000 + i));
+        }
+
         // weights matrix looks like this:
         // 0
         // 1
-        // 1 1
-        // 1 1 1
+        // 2 12
+        // 3 13 23
         // ...
         std::map<Coord<2>, double> matrix;
+        // fixme: use non-uniform weights in all tests, make factor differ
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix[Coord<2>(row, col)] = row + col * 10;
             }
         }
         gridOld.setWeights(0, matrix);
         gridNew.setWeights(0, matrix);
 
         Region<1> region;
-        // "normal" streak
+        // loop peeling in first and last chunk
         region << Streak<1>(Coord<1>(10),   30);
         // loop peeling in first chunk
         region << Streak<1>(Coord<1>(37),   60);
+        // "normal" streak
+        region << Streak<1>(Coord<1>(64),   80);
         // loop peeling in last chunk
         region << Streak<1>(Coord<1>(100), 149);
         region = gridOld.remapRegion(region);
@@ -426,10 +460,12 @@ public:
         functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
-            if (((coord.x() >=  10) && (coord.x() <  30)) ||
-                ((coord.x() >=  37) && (coord.x() <  60)) ||
-                ((coord.x() >= 100) && (coord.x() < 149))) {
-                const double sum = coord.x() * 200.0;
+            if (region.count(coord)) {
+                double sum = 0;
+                for (int i = 0; i < coord.x(); ++i) {
+                    double weight = coord.x() + i * 10;
+                    sum += weight * (2000 + i);
+                }
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
                 TS_ASSERT_EQUALS(0.0, gridNew.get(coord).sum);
@@ -446,48 +482,56 @@ public:
         Region<1> boundingRegion;
         boundingRegion << dim;
 
-        SimpleUnstructuredSoATestCell<150> defaultCell(200);
-        SimpleUnstructuredSoATestCell<150> edgeCell(-1);
+        SimpleUnstructuredSoATestCell<60> defaultCell(200);
+        SimpleUnstructuredSoATestCell<60> edgeCell(-1);
 
-        typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<150>, 1, double, 4, 150> > GridType;
+        typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<60>, 1, double, 4, 60> > GridType;
         GridType gridOld(boundingRegion, defaultCell, edgeCell);
         GridType gridNew(boundingRegion, defaultCell, edgeCell);
+
+        for (int i = 0; i < DIM; ++i) {
+            gridOld.set(Coord<1>(i), SimpleUnstructuredSoATestCell<60>(3000 + i));
+        }
 
         // weights matrix looks like this:
         // 0
         // 1
-        // 1 1
-        // 1 1 1
+        // 2 12
+        // 3 13 23
         // ...
         std::map<Coord<2>, double> matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix[Coord<2>(row, col)] = row + col * 10;
             }
         }
         gridOld.setWeights(0, matrix);
         gridNew.setWeights(0, matrix);
 
         Region<1> region;
-        // "normal" streak
+        // use the same variation of Streaks as in the previous
+        // example, even though they will not correspond to the same
+        // special cases (with regard to starting/ending on chunk
+        // boundaries) as the Region get's remapped anyway.
         region << Streak<1>(Coord<1>(10),   30);
-        // loop peeling in first chunk
         region << Streak<1>(Coord<1>(37),   60);
-        // loop peeling in last chunk
+        region << Streak<1>(Coord<1>(64),   80);
         region << Streak<1>(Coord<1>(100), 149);
-        region = gridOld.remapRegion(region);
+        Region<1> updateRegion = gridOld.remapRegion(region);
 
-        UnstructuredUpdateFunctor<SimpleUnstructuredSoATestCell<150> > functor;
+        UnstructuredUpdateFunctor<SimpleUnstructuredSoATestCell<60> > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
-        APITraits::SelectThreadedUpdate<SimpleUnstructuredSoATestCell<150> >::Value modelThreadingSpec;
+        APITraits::SelectThreadedUpdate<SimpleUnstructuredSoATestCell<60> >::Value modelThreadingSpec;
 
-        functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
+        functor(updateRegion, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
-            if (((coord.x() >=  10) && (coord.x() <  30)) ||
-                ((coord.x() >=  37) && (coord.x() <  60)) ||
-                ((coord.x() >= 100) && (coord.x() < 149))) {
-                const double sum = coord.x() * 200.0;
+            if (region.count(coord)) {
+                double sum = 0;
+                for (int i = 0; i < coord.x(); ++i) {
+                    double weight = coord.x() + i * 10;
+                    sum += weight * (3000 + i);
+                }
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
                 TS_ASSERT_EQUALS(0.0, gridNew.get(coord).sum);
