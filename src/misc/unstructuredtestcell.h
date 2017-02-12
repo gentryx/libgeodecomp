@@ -186,6 +186,7 @@ public:
         // correct for Streaks not starting at chunk boundaries:
         int startOffset = startX % HOOD_OLD::ARITY;
 
+        // fixme: use loop peeler here
         // Important: index is actually the index in the chunkVector, not necessarily a cell id.
         for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
             // correct for Streaks not ending on chunk boundaries:
@@ -220,8 +221,6 @@ public:
             }
 
             // copy back to new grid:
-            hoodNew +=startOffset;
-
             for (int i = 0; i < (chunkSize - startOffset); ++i) {
                 hoodNew << cells[i];
                 ++hoodNew;
