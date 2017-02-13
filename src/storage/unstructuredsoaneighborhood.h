@@ -25,17 +25,12 @@ class WrappedNeighborhood
 {
 public:
     typedef typename HOOD::ScalarIterator Iterator;
+    typedef typename HOOD::SoAAccessor SoAAccessor;
 
     inline
     WrappedNeighborhood(HOOD& hood) :
         hood(hood)
     {}
-
-    inline
-    ~WrappedNeighborhood()
-    {
-        hood.intraChunkOffset = (hood.intraChunkOffset + 1) % HOOD::ARITY;
-    }
 
     inline
     Iterator begin()
@@ -47,6 +42,28 @@ public:
     Iterator end()
     {
         return hood.endScalar();
+    }
+
+    inline
+    void operator++()
+    {
+        hood.intraChunkOffset = (hood.intraChunkOffset + 1) % HOOD::ARITY;
+        if (hood.intraChunkOffset == 0) {
+            ++hood;
+        }
+    }
+
+    inline
+    const SoAAccessor *operator->() const
+    {
+        return &hood.accessor;
+    }
+
+    inline
+    WrappedNeighborhood& weights(std::size_t matrixID = 0)
+    {
+        hood.weights(matrixID);
+        return *this;
     }
 
 private:

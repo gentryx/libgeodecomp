@@ -120,12 +120,12 @@ public:
         }
         COUNTER_TYPE1 lastStop = end - end % SHORT_VEC_TYPE::ARITY;
 
-        if (*counter != nextStop) {
-            lambda(lfa_local_scalar(), counter, nextStop);
-            ++hoodOld;
-        }
-        lambda(lfa_local_short_vec(), counter, lastStop);
-        lambda(lfa_local_scalar(),    counter, end     );
+        typedef UnstructuredSoANeighborhoodHelpers::WrappedNeighborhood<HOOD_OLD> WrappedHood;
+        WrappedHood wrappedHood(hoodOld);
+
+        lambda(lfa_local_scalar(),    counter, nextStop, wrappedHood);
+        lambda(lfa_local_short_vec(), counter, lastStop, hoodOld);
+        lambda(lfa_local_scalar(),    counter, end,      wrappedHood);
     }
 
     // fixme: duplicate these tests and rerun them as OpenMP tests,
@@ -138,13 +138,13 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        unstructuredLoopPeeler<ShortVec>(&hoodNew.index(), indexEnd, hoodOld, [&hoodNew, &hoodOld](auto REAL, auto *counter, const auto& end) {
+        unstructuredLoopPeeler<ShortVec>(&hoodNew.index(), indexEnd, hoodOld, [&hoodNew](auto REAL, auto *counter, const auto& end, auto& hoodOld) {
                 typedef decltype(REAL) ShortVec;
                 for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY) {
                     ShortVec tmp;
                     tmp.load_aligned(&hoodNew->sum());
 
-                    for (const auto& j: hoodOld.weights(ShortVec())) {
+                    for (const auto& j: hoodOld.weights()) {
                         ShortVec weights, values;
                         weights.load_aligned(j.second());
                         values.gather(&hoodOld->value(), j.first());
@@ -153,10 +153,7 @@ public:
                     }
 
                     &hoodNew->sum() << tmp;
-                    // fixme
-                    if (ShortVec::ARITY == 4) {
-                        ++hoodOld;
-                    }
+                    ++hoodOld;
                 }
             });
     }
