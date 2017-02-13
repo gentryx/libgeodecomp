@@ -112,13 +112,12 @@ public:
             sibling_short_vec_switch<SHORT_VEC_TYPE, 1>::VALUE
             lfa_local_scalar;
 
-        // fixme: get rid of % operator by using & with (SHORT_VEC_TYPE::ARITY - 1)
         COUNTER_TYPE1 nextStop = *counter;
-        COUNTER_TYPE1 remainder = *counter % SHORT_VEC_TYPE::ARITY;
+        COUNTER_TYPE1 remainder = *counter & (SHORT_VEC_TYPE::ARITY - 1);
         if (remainder != 0) {
             nextStop += SHORT_VEC_TYPE::ARITY - remainder;
         }
-        COUNTER_TYPE1 lastStop = end - end % SHORT_VEC_TYPE::ARITY;
+        COUNTER_TYPE1 lastStop = end - end & (SHORT_VEC_TYPE::ARITY - 1);
 
         typedef UnstructuredSoANeighborhoodHelpers::WrappedNeighborhood<HOOD_OLD> WrappedHood;
         WrappedHood wrappedHood(hoodOld);
