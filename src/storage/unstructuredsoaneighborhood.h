@@ -70,51 +70,6 @@ private:
     HOOD& hood;
 };
 
-/**
- * fixme: doc
- */
-template<typename HOOD, int CHUNK_SIZE, int ITERATOR_ARITY>
-class NeighborhoodWrapper;
-
-template<typename HOOD>
-class NeighborhoodWrapper<HOOD, 1, 1>
-{
-public:
-    typedef HOOD& Value;
-
-    inline
-    Value& operator()(HOOD& hood)
-    {
-        return hood;
-    }
-};
-
-template<typename HOOD, int CHUNK_SIZE>
-class NeighborhoodWrapper<HOOD, CHUNK_SIZE, 1>
-{
-public:
-    typedef WrappedNeighborhood<HOOD> Value;
-
-    inline
-    Value operator()(HOOD& hood)
-    {
-        return Value(hood);
-    }
-};
-
-template<typename HOOD, int CHUNK_SIZE>
-class NeighborhoodWrapper<HOOD, CHUNK_SIZE, CHUNK_SIZE>
-{
-public:
-    typedef HOOD& Value;
-
-    inline
-    Value& operator()(HOOD& hood)
-    {
-        return hood;
-    }
-};
-
 }
 
 /**
@@ -298,15 +253,6 @@ public:
     {
         currentMatrixID = matrixID;
         return *this;
-    }
-
-    template<typename SHORT_VEC>
-    inline
-    typename UnstructuredSoANeighborhoodHelpers::NeighborhoodWrapper<UnstructuredSoANeighborhood, C, SHORT_VEC::ARITY>::Value weights(SHORT_VEC, std::size_t matrixID = 0)
-    {
-        currentMatrixID = matrixID;
-        typedef typename UnstructuredSoANeighborhoodHelpers::NeighborhoodWrapper<UnstructuredSoANeighborhood, C, SHORT_VEC::ARITY> Fixme;
-        return Fixme()(*this);
     }
 
     inline
