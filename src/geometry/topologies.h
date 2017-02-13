@@ -292,7 +292,6 @@ public:
                 static const bool VALUE = false;
             };
 
-            // fixme: kill all locate functions?
             template<typename GRID>
             static inline const typename GRID::value_type& locate(
                 const GRID& grid,

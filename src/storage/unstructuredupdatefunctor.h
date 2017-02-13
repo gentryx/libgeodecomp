@@ -192,7 +192,6 @@ public:
         // has cell updateLineX()?
         APITraits::TrueType)
     {
-        // fixme: fine-grained parallelism?
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
         UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>   \
             hoodOld(gridOld, i->origin.x());                            \
