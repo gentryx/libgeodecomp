@@ -117,7 +117,7 @@ public:
         if (remainder != 0) {
             nextStop += SHORT_VEC_TYPE::ARITY - remainder;
         }
-        COUNTER_TYPE1 lastStop = end - end & (SHORT_VEC_TYPE::ARITY - 1);
+        COUNTER_TYPE1 lastStop = end - (end & (SHORT_VEC_TYPE::ARITY - 1));
 
         typedef UnstructuredSoANeighborhoodHelpers::WrappedNeighborhood<HOOD_OLD> WrappedHood;
         WrappedHood wrappedHood(hoodOld);
