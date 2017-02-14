@@ -23,6 +23,7 @@
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredupdatefunctor.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/testbed/spmvmtests/mmio.h>
 
 #include <libflatarray/short_vec.hpp>
@@ -362,10 +363,12 @@ private:
     void updateFunctor(const Region<1>& region, const Grid& gridOld,
                        Grid *gridNew, unsigned nanoStep)
     {
+        typedef LibGeoDecomp::UpdateFunctorHelpers::ConcurrencyEnableOpenMP ConcurrencySpec;
+        typedef typename APITraits::SelectThreadedUpdate<CELL>::Value ModelThreadingSpec;
         gridOld.callback(
             gridNew,
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, Grid>(
-                gridOld, gridNew, region, nanoStep));
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, Grid, ConcurrencySpec, ModelThreadingSpec>(
+                gridOld, gridNew, region, nanoStep, ConcurrencySpec(true, true), ModelThreadingSpec()));
     }
 
 public:

@@ -30,7 +30,11 @@ namespace UnstructuredUpdateFunctorHelpers {
  * Functor to be used from with LibFlatArray from within
  * UnstructuredUpdateFunctor. Hides much of the boilerplate code.
  */
-template<typename CELL, typename GRID_TYPE>
+template<
+    typename CELL,
+    typename GRID_TYPE,
+    typename CONCURRENCY_SPEC,
+    typename MODEL_THREADING_SPEC>
 class UnstructuredGridSoAUpdateHelper
 {
 public:
@@ -45,11 +49,15 @@ public:
         const GRID_TYPE& gridOld,
         GRID_TYPE *gridNew,
         const Region<DIM>& region,
-        unsigned nanoStep) :
+        unsigned nanoStep,
+        const CONCURRENCY_SPEC& concurrencySpec,
+        const MODEL_THREADING_SPEC& modelThreadingSpec) :
         gridOld(gridOld),
         gridNew(gridNew),
         region(region),
-        nanoStep(nanoStep)
+        nanoStep(nanoStep),
+        concurrencySpec(concurrencySpec),
+        modelThreadingSpec(modelThreadingSpec)
     {}
 
     template<
@@ -59,16 +67,40 @@ public:
         LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& oldAccessor,
         LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& newAccessor) const
     {
-        // fixme: threading!
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            // call updateLineX with adjusted indices
-            typedef UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1, MATRICES, ValueType, C, SIGMA> HoodOld;
-            int intraChunkOffset = i->origin.x() % HoodOld::ARITY;
-            HoodOld hoodOld(oldAccessor, gridOld, i->origin.x(), intraChunkOffset);
-            newAccessor.index() = i->origin.x();
-            UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessor);
-            CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep);
-        }
+#define LGD_UPDATE_FUNCTOR_BODY                                         \
+        typedef UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1, MATRICES, ValueType, C, SIGMA> HoodOld; \
+        int intraChunkOffset = i->origin.x() % HoodOld::ARITY;          \
+        HoodOld hoodOld(                                                \
+            oldAccessor,                                                \
+            gridOld,                                                    \
+            i->origin.x(),                                              \
+            intraChunkOffset);                                          \
+        LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> newAccessorCopy( \
+            newAccessor.data(),                                         \
+            i->origin.x());                                             \
+        UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessorCopy); \
+        CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep); \
+        /**/
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_5
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_6
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_7
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_8
+#undef LGD_UPDATE_FUNCTOR_BODY
+
+        //     // fixme: threading!
+        // for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+        //     // call updateLineX with adjusted indices
+        //     typedef UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1, MATRICES, ValueType, C, SIGMA> HoodOld;
+        //     int intraChunkOffset = i->origin.x() % HoodOld::ARITY;
+        //     HoodOld hoodOld(oldAccessor, gridOld, i->origin.x(), intraChunkOffset);
+        //     newAccessor.index() = i->origin.x();
+        //     UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessor);
+        //     CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep);
+        // }
     }
 
 private:
@@ -76,6 +108,8 @@ private:
     GRID_TYPE *gridNew;
     const Region<DIM>& region;
     unsigned nanoStep;
+    const CONCURRENCY_SPEC& concurrencySpec;
+    const MODEL_THREADING_SPEC& modelThreadingSpec;
 };
 
 }
@@ -238,12 +272,13 @@ public:
     {
         gridOld.callback(
             gridNew,
-            // fixme: is missing concurrencySpec, modelThreadingSpec
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, GRID1>(
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, GRID1, CONCURRENCY_FUNCTOR, ANY_THREADED_UPDATE>(
                 gridOld,
                 gridNew,
                 region,
-                nanoStep));
+                nanoStep,
+                concurrencySpec,
+                modelThreadingSpec));
     }
 };
 
