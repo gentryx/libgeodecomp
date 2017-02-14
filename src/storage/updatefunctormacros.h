@@ -70,9 +70,9 @@
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_5                         \
     /**/
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_6                         \
-        }\
-        return;\
-        }
+        }                                                               \
+        return;                                                         \
+    }
 #else
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
