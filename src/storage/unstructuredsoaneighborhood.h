@@ -19,7 +19,11 @@ namespace LibGeoDecomp {
 namespace UnstructuredSoANeighborhoodHelpers
 {
 
-// fixme: doc
+/**
+ * This is a wrapper for UnstructuredSoANeighborhood to do scalar
+ * updates (required for loop peeling if a streak is not aligned on
+ * chunk boundaries).
+ */
 template<typename HOOD>
 class WrappedNeighborhood
 {
@@ -296,8 +300,12 @@ public:
     }
 
 private:
-    // fixme: get rid of grid reference, only reference weight vector
-    const GRID_TYPE& grid;       /**< old grid */
+    /**
+     * Reference to old grid. Storing just a reference to the weights
+     * vector isn't sufficient as a user may with to access multiple
+     * weight vectors through this neighborhood.
+     */
+    const GRID_TYPE& grid;
     /**
      * index of current chunk in weights container (stored in
      * SELL-C-Sigma format)

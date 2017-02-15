@@ -1,11 +1,6 @@
 #ifndef LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROS_H
 #define LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROS_H
 
-// fixme: get rid of this or rename to LIBGEODECOMP_CHUNK_THRESHOLD
-#if !defined(LGD_CHUNK_THRESHOLD)
-#define LGD_CHUNK_THRESHOLD 0
-#endif
-
 #ifdef LIBGEODECOMP_WITH_THREADS
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1                         \
     if (concurrencySpec.enableOpenMP() &&                               \
@@ -38,7 +33,6 @@
                     }                                                   \
                 }                                                       \
     /**/
-// fixme: get rid of operator%
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3                         \
             } else {                                                    \
                 typedef typename Region<DIM>::StreakIterator Iter;      \
@@ -83,7 +77,6 @@
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
-// fixme: replace with executor parameter
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_7                         \
     if (concurrencySpec.enableHPX() && !modelThreadingSpec.hasHPX()) {  \
         std::vector<hpx::future<void> > updateFutures;                  \
@@ -91,14 +84,14 @@
         typedef typename Region<DIM>::StreakIterator Iter;              \
         Iter begin = region.beginStreak();                              \
         Iter end = region.endStreak();                                  \
-        const int chunkThreshold = LGD_CHUNK_THRESHOLD;                 \
-        while(begin != end) {                                           \
+        const int chunkThreshold = 0;                                   \
+        while (begin != end) {                                          \
             Iter next = begin;                                          \
             int chunkLength = 0;                                        \
-            while(next != end) {                                        \
+            while (next != end) {                                       \
                 chunkLength += next->length();                          \
                 ++next;                                                 \
-                if(chunkLength >= chunkThreshold || next == end) {      \
+                if ((chunkLength >= chunkThreshold) || (next == end)) { \
                     updateFutures << hpx::async(                        \
                         [&](Iter i, Iter end) {                         \
                             for(; i != end; ++i) {                      \

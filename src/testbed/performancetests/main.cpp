@@ -2692,12 +2692,11 @@ private:
     std::string name;
 };
 
-// fixme: try ILP here, maybe switch to C=8?
 #ifdef LIBGEODECOMP_WITH_CPP14
 typedef double ValueType;
-static const std::size_t MATRICES = 1;
-static const int C = 4;         // AVX
-static const int SIGMA = 1;
+const std::size_t MATRICES = 1;
+const int C = 4;         // AVX
+const int SIGMA = 1;
 typedef short_vec<ValueType, C> ShortVec;
 
 class SPMVMCell
