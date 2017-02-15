@@ -2904,10 +2904,31 @@ public:
         // setup sparse matrix
         std::map<Coord<2>, ValueType> weights;
 
-        // setup matrix: ~1 % non zero entries
+        // setup matrix: immitate basic structure of MP_Geer matrix
+        // from Matrix Market:
+        // http://www.cise.ufl.edu/research/sparse/matrices/Janna/ML_Geer.html
         for (int row = 0; row < size; ++row) {
-            for (int col = 0; col < size / 100; ++col) {
-                weights[Coord<2>(row, col * 100)] = 5.0;
+            double factor = 1.0 * row / size;
+
+            for (int i = -3400; i < -3385; ++i) {
+                int column = row + i;
+                if ((column >= 0) && (column < size)) {
+                    weights[Coord<2>(column, row)] = 1000.0 + 1.0 * factor + column;
+                }
+            }
+
+            for (int i = -20; i < 20; ++i) {
+                int column = row + i;
+                if ((column >= 0) && (column < size)) {
+                    weights[Coord<2>(column, row)] = 1000.0 + 1.0 * factor + column;
+                }
+            }
+
+            for (int i = 3385; i < 3400; ++i) {
+                int column = row + i;
+                if ((column >= 0) && (column < size)) {
+                    weights[Coord<2>(column, row)] = 1000.0 + 1.0 * factor + column;
+                }
             }
         }
 
@@ -2969,20 +2990,6 @@ class SellMatrixInitializer : public CPUBenchmark
 
 class SparseMatrixVectorMultiplication : public CPUBenchmark
 {
-private:
-    template<typename CELL, typename GRID>
-    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
-                       GRID *gridNew, unsigned nanoStep)
-    {
-        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOld(gridOld, streak.origin.x());
-        CELL *hoodNew = &(*gridNew)[0];
-
-        // call update()
-        for (int i = hoodOld.index(); i < streak.endX; ++i, ++hoodOld) {
-            hoodNew[i].update(hoodOld, nanoStep);
-        }
-    }
-
 public:
     std::string family()
     {
@@ -3005,8 +3012,7 @@ public:
         Grid grid1(region);
 
         // 2. init grid old
-        double factor = 100000.0 / dim.x();
-        const int maxT = 100 * factor * factor;
+        const int maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMCell, Grid> init(dim, maxT);
         init.grid(&grid1);
         Grid grid2 = grid1;
@@ -3034,7 +3040,8 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2.0 * (size.x() / 100) * (size.x()) * maxT;
+        const double entries = 40 * dim.x() + 30 * (dim.x() - 2 * 3400);
+        const double numOps = 2.0 * entries * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3067,8 +3074,7 @@ public:
         Grid grid1(size);
 
         // 2. init grid old
-        double factor = 100000.0 / dim.x();
-        const int maxT = 100 * factor * factor;
+        const int maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
         init.grid(&grid1);
         Grid grid2 = grid1;
@@ -3097,7 +3103,8 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x()) * maxT;
+        const double entries = 40 * dim.x() + 30 * (dim.x() - 2 * 3400);
+        const double numOps = 2.0 * entries * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3130,8 +3137,7 @@ public:
         Grid grid1(size);
 
         // 2. init grid old
-        double factor = 100000.0 / dim.x();
-        const int maxT = 100 * factor * factor;
+        const int maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMSoACellInf, Grid> init(dim, maxT);
         init.grid(&grid1);
         Grid grid2 = grid1;
@@ -3160,7 +3166,8 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x()) * maxT;
+        const double entries = 40 * dim.x() + 30 * (dim.x() - 2 * 3400);
+        const double numOps = 2.0 * entries * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3221,8 +3228,7 @@ public:
         Grid gridNew(size);
 
         // 2. init grid old
-        double factor = 100000.0 / dim.x();
-        const int maxT = 100 * factor * factor;
+        const int maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
         init.grid(&gridOld);
 
@@ -3265,7 +3271,8 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2.0 * (size.dimensions.x() / 100) * (size.dimensions.x()) * maxT;
+        const double entries = 40 * dim.x() + 30 * (dim.x() - 2 * 3400);
+        const double numOps = 2.0 * entries * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
