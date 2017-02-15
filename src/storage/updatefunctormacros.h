@@ -52,7 +52,7 @@
                     }                                                   \
                     streaks.push_back(s);                               \
                 }                                                       \
-                _Pragma("omp parallel for schedule(static)")            \
+                _Pragma("omp parallel for schedule(dynamic)")           \
                     for (std::size_t j = 0; j < streaks.size(); ++j) {  \
                         Streak<DIM> *i = &streaks[j];                   \
                         LGD_UPDATE_FUNCTOR_BODY;                        \
