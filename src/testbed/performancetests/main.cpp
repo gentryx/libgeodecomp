@@ -2709,7 +2709,7 @@ public:
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
         public APITraits::HasSellSigma<SIGMA>,
-        public APITraits::HasThreadedUpdate<4096>
+        public APITraits::HasThreadedUpdate<1024>
     {};
 
     inline explicit SPMVMCell(double v = 8.0) :
@@ -2738,7 +2738,8 @@ public:
         public APITraits::HasSellType<ValueType>,
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
+        public APITraits::HasSellSigma<SIGMA>,
+        public APITraits::HasThreadedUpdate<1024>
     {};
 
     inline explicit SPMVMCellStreak(double v = 8.0) :
@@ -2770,7 +2771,8 @@ public:
         public APITraits::HasSellType<ValueType>,
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
+        public APITraits::HasSellSigma<SIGMA>,
+        public APITraits::HasThreadedUpdate<1024>
     {
     public:
         // fixme: use dedicated 1d macro here
@@ -2834,7 +2836,8 @@ public:
         public APITraits::HasSellType<ValueType>,
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
+        public APITraits::HasSellSigma<SIGMA>,
+        public APITraits::HasThreadedUpdate<1024>
     {
     public:
         // fixme: use dedicated 1d macro here
