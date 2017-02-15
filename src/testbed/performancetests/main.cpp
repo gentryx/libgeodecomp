@@ -3266,6 +3266,9 @@ public:
                     }
                     _mm256_store_pd(resPtr + i*C, tmp);
                 }
+
+                using std::swap;
+                swap(rhsPtr, resPtr);
             }
         }
 
