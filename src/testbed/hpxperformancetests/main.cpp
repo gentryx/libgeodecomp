@@ -31,6 +31,7 @@ public:
         public APITraits::HasSellMatrices<1>,
         public APITraits::HasSellC<C>,
         public APITraits::HasSellSigma<SIGMA>,
+        public APITraits::HasThreadedUpdate<8>,
         public ADDITIONAL_API
     {};
 
@@ -108,8 +109,8 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     inline static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (; hoodOld.index() < indexEnd; ++hoodOld) {
-            UnstructuredBusyworkCellWithUpdateLineX& self = hoodNew[hoodOld.index()];
+        for (; hoodOld.index() < indexEnd; ++hoodNew, ++hoodOld) {
+            UnstructuredBusyworkCellWithUpdateLineX& self = *hoodNew;
             self = hoodOld[hoodOld.index()];
 
             for (int i = 0; i < ITERATIONS; ++i) {
@@ -800,8 +801,8 @@ int hpx_main(int argc, char **argv)
     eval.print_header();
 
     std::vector<Coord<3> > sizes;
-    sizes << Coord<3>( 10,  10, 10000)
-          << Coord<3>(100, 100,   100);
+    sizes << Coord<3>( 10,  10, 30000)
+          << Coord<3>(100, 100,   300);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
         eval(HPXBusyworkCellIron(), toVector(sizes[i]));
