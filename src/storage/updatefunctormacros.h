@@ -79,33 +79,59 @@
 #ifdef LIBGEODECOMP_WITH_HPX
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_7                         \
     if (concurrencySpec.enableHPX() && !modelThreadingSpec.hasHPX()) {  \
-        std::vector<hpx::future<void> > updateFutures;                  \
-        updateFutures.reserve(region.numPlanes());                      \
-        typedef typename Region<DIM>::StreakIterator Iter;              \
-        Iter begin = region.beginStreak();                              \
-        Iter end = region.endStreak();                                  \
-        const int chunkThreshold = 0;                                   \
-        while (begin != end) {                                          \
-            Iter next = begin;                                          \
-            int chunkLength = 0;                                        \
-            while (next != end) {                                       \
-                chunkLength += next->length();                          \
-                ++next;                                                 \
-                if ((chunkLength >= chunkThreshold) || (next == end)) { \
-                    updateFutures << hpx::async(                        \
-                        [&](Iter i, Iter end) {                         \
-                            for(; i != end; ++i) {                      \
-                                LGD_UPDATE_FUNCTOR_BODY;                \
-                            }                                           \
-                        }, begin, next);                                \
-                    break;                                              \
-                }                                                       \
-            }                                                           \
-            begin = next;                                               \
-        }                                                               \
-        hpx::wait_all(updateFutures);                                   \
+        if (!concurrencySpec.preferFineGrainedParallelism()) {          \
+            std::vector<hpx::future<void> > updateFutures;              \
+            updateFutures.reserve(region.numPlanes());                  \
+            typedef typename Region<DIM>::StreakIterator Iter;          \
+            Iter last = region.beginStreak();                           \
                                                                         \
-        return;                                                         \
+            for (std::size_t i = 0; i < region.numPlanes(); ++i) {      \
+                Iter next = region.planeStreakIterator(i + 1);          \
+                updateFutures << hpx::async(                            \
+                            [&](Iter i, Iter end) {                     \
+                                for(; i != end; ++i) {                  \
+                                    LGD_UPDATE_FUNCTOR_BODY;            \
+                                }                                       \
+                            }, last, next);                             \
+                last = next;                                            \
+            }                                                           \
+                                                                        \
+            hpx::wait_all(updateFutures);                               \
+            return;                                                     \
+        } else {                                                        \
+            std::vector<hpx::future<void> > updateFutures;              \
+            typedef typename Region<DIM>::StreakIterator Iter;          \
+                                                                        \
+            std::vector<Streak<DIM> > streaks;                          \
+            streaks.reserve(region.numStreaks());                       \
+                                                                        \
+            for (Iter i = region.beginStreak();                         \
+                 i != region.endStreak();                               \
+                 ++i) {                                                 \
+                Streak<DIM> s = *i;                                     \
+                auto granularity = modelThreadingSpec.granularity();    \
+                while (s.length() > granularity) {                      \
+                    Streak<DIM> tranche = s;                            \
+                    tranche.endX = s.origin.x() + granularity -         \
+                        (s.origin.x() % granularity);                   \
+                    streaks.push_back(tranche);                         \
+                    s.origin.x() = tranche.endX;                        \
+                }                                                       \
+                streaks.push_back(s);                                   \
+            }                                                           \
+                                                                        \
+            updateFutures.reserve(streaks.size());                      \
+                                                                        \
+            for (auto& streak: streaks) {                               \
+                updateFutures << hpx::async(                            \
+                    [&](Streak<DIM> *i) {                               \
+                        LGD_UPDATE_FUNCTOR_BODY;                        \
+                    }, &streak);                                        \
+            }                                                           \
+                                                                        \
+            hpx::wait_all(updateFutures);                               \
+            return;                                                     \
+        }                                                               \
     }                                                                   \
     /**/
 #else
