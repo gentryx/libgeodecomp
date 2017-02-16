@@ -2807,16 +2807,6 @@ public:
         }
     }
 
-    // fixme: get rid of this?
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first()].value * j.second();
-        }
-    }
-
     double value;
     double sum;
 };
@@ -2868,16 +2858,6 @@ public:
             }
             (&hoodNew->sum()) << tmp;
             hoodNew += C;
-        }
-    }
-
-    // fixme: get rid of this?
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first()].value * j.second();
         }
     }
 
