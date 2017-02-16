@@ -184,50 +184,33 @@ public:
     template<typename HOOD_OLD, typename HOOD_NEW>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
     {
-        // correct for Streaks not starting at chunk boundaries:
-        int startOffset = hoodNew.index() % HOOD_OLD::ARITY;
+        // This update function traverses the chunks in a scalar
+        // fashion. That's not advisable from a performance point of
+        // view, but simplifies testing for correctness:
+        for (; hoodNew.index() < indexEnd; ++hoodNew, hoodOld.incIntraChunkOffset()) {
+            // assemble weight map:
+            std::map<int, double> weights;
+            for (typename HOOD_OLD::ScalarIterator i = hoodOld.beginScalar(); i != hoodOld.endScalar(); ++i) {
+                const int column = *i.first();
+                const double weight = *i.second();
 
-        // fixme: use loop peeler here
-        // Important: index is actually the index in the chunkVector, not necessarily a cell id.
-        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
-            // correct for Streaks not ending on chunk boundaries:
-            int chunkSize = std::min(HOOD_OLD::ARITY, indexEnd - hoodOld.index() * HOOD_OLD::ARITY);
-            // assemble weight maps:
-            std::vector<std::map<int, double> > weights(chunkSize);
-            for (typename HOOD_OLD::Iterator i = hoodOld.begin(); i != hoodOld.end(); ++i) {
-                const int *columnPointer = i.first();
-                const double *weightPointer = i.second();
-
-                for (int i = 0; i < chunkSize; ++i) {
-                    // ignore 0-padding
-                    if ((columnPointer[i] != 0) || (weightPointer[i] != 0.0)) {
-                        weights[i][columnPointer[i]] = weightPointer[i];
-                    }
+                // ignore 0-padding
+                if ((column != 0) || (weight != 0.0)) {
+                    weights[column] = weight;
                 }
             }
 
-            // we need to create actual cells so we can call
-            // member functions. users would not do this (because
-            // it's slow), but it's good for testing.
-            std::vector<UnstructuredTestCell> cells;
-            for (int i = startOffset; i < chunkSize; ++i) {
-                int index = hoodOld.index() * HOOD_OLD::ARITY + i;
-                cells << hoodOld[index];
+            UnstructuredTestCell cell;
+            hoodOld[hoodNew.index()] >> cell;
 
-                cells.back().verify(
-                    UnstructuredTestCellHelpers::IterAdapter(weights[i].begin()),
-                    UnstructuredTestCellHelpers::IterAdapter(weights[i].end()),
-                    hoodOld,
-                    nanoStep);
-            }
+            cell.verify(
+                UnstructuredTestCellHelpers::IterAdapter(weights.begin()),
+                UnstructuredTestCellHelpers::IterAdapter(weights.end()),
+                hoodOld,
+                nanoStep);
 
             // copy back to new grid:
-            for (int i = 0; i < (chunkSize - startOffset); ++i) {
-                hoodNew << cells[i];
-                ++hoodNew;
-            }
-
-            startOffset = 0;
+            hoodNew << cell;
         }
     }
 
