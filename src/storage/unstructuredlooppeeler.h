@@ -69,9 +69,8 @@ private:
  *
  * Contrary to the loop peeler for structured grids, this loop peeler
  * also needs to rebind hoodOld, the proxy object to access the old
- * grid, as iteration here works on chunks. See UnstructuredTestCell
- * and the SoA-enabled tests of UnstructuredUpdateFunctor for for how
- * to use this.
+ * grid, as iteration here works on chunks. See the SoA-enabled tests
+ * of UnstructuredUpdateFunctor for for how to use this.
  */
 template<typename SHORT_VEC_TYPE, typename COUNTER_TYPE1, typename COUNTER_TYPE2, typename HOOD_OLD, typename LAMBDA>
 static
