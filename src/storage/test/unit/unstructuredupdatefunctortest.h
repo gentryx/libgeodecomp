@@ -94,14 +94,14 @@ public:
         public APITraits::HasSellType<double>,
         public APITraits::HasSellMatrices<1>,
         public APITraits::HasSellC<4>,
-        public APITraits::HasSellSigma<SIGMA>
-    {
-    public:
-        LIBFLATARRAY_CUSTOM_SIZES((16)(32)(64)(128)(256)(512), (1), (1))
-    };
+        public APITraits::HasSellSigma<SIGMA>,
+        public LibFlatArray::api_traits::has_default_1d_sizes
+    {};
 
-    inline explicit SimpleUnstructuredSoATestCell(double v = 0) :
-        value(v), sum(0)
+    inline
+    explicit SimpleUnstructuredSoATestCell(double v = 0) :
+        value(v),
+        sum(0)
     {}
 
     // fixme: duplicate these tests and rerun them as OpenMP tests,
@@ -113,7 +113,11 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        unstructuredLoopPeeler<ShortVec>(&hoodNew.index(), indexEnd, hoodOld, [&hoodNew](auto REAL, auto *counter, const auto& end, auto& hoodOld) {
+        unstructuredLoopPeeler<ShortVec>(
+            &hoodNew.index(),
+            indexEnd,
+            hoodOld,
+            [&hoodNew](auto REAL, auto *counter, const auto& end, auto& hoodOld) {
                 typedef decltype(REAL) ShortVec;
                 for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY) {
                     ShortVec tmp;
@@ -405,7 +409,6 @@ public:
         // 3 13 23
         // ...
         std::map<Coord<2>, double> matrix;
-        // fixme: use non-uniform weights in all tests, make factor differ
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
                 matrix[Coord<2>(row, col)] = row + col * 10;
@@ -474,7 +477,7 @@ public:
         std::map<Coord<2>, double> matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = row + col * 10;
+                matrix[Coord<2>(row, col)] = row + col * 100;
             }
         }
         gridOld.setWeights(0, matrix);
@@ -501,7 +504,7 @@ public:
             if (region.count(coord)) {
                 double sum = 0;
                 for (int i = 0; i < coord.x(); ++i) {
-                    double weight = coord.x() + i * 10;
+                    double weight = coord.x() + i * 100;
                     sum += weight * (3000 + i);
                 }
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
