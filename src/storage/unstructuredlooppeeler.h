@@ -59,6 +59,20 @@ private:
 
 }
 
+/**
+ * This function does the housekeeping required for vectorized update
+ * routines for unstructured grid codes. It does so by peeling the
+ * initial and trailing loop iterations of a Streak, which are not
+ * aligned on chunk boundaries, and calls the user-supplied functor
+ * (or lambda) back to execute those in a scalar fashion. The main
+ * part of the Streak is executed vectorized.
+ *
+ * Contrary to the loop peeler for structured grids, this loop peeler
+ * also needs to rebind hoodOld, the proxy object to access the old
+ * grid, as iteration here works on chunks. See UnstructuredTestCell
+ * and the SoA-enabled tests of UnstructuredUpdateFunctor for for how
+ * to use this.
+ */
 template<typename SHORT_VEC_TYPE, typename COUNTER_TYPE1, typename COUNTER_TYPE2, typename HOOD_OLD, typename LAMBDA>
 static
 void unstructuredLoopPeeler(COUNTER_TYPE1 *counter, const COUNTER_TYPE2& end, HOOD_OLD& hoodOld, const LAMBDA& lambda)
