@@ -1262,9 +1262,10 @@ public:
 
     /**
      * Yields an iterator to the offset'th plane in the region (i.e. a
-     * XY-plane for 3D or a row for 2D). Runs in O(DIM). This is an
-     * efficient way to generate starting points for multi-threaded
-     * iteration through a Region.
+     * XY-plane for 3D or a row for 2D). Runs in O(DIM), which is for
+     * all intents and purposes O(1). This is an efficient way to
+     * generate starting points for multi-threaded iteration through a
+     * Region.
      */
     inline StreakIterator planeStreakIterator(std::size_t offset) const
     {
