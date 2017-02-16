@@ -17,9 +17,9 @@ using namespace LibGeoDecomp;
 
 // defining settings for SELL-C-q
 typedef double ValueType;
-static const std::size_t MATRICES = 1;
-static const int C = 4;
-static const int SIGMA = 1;
+const std::size_t MATRICES = 1;
+const int C = 4;
+const int SIGMA = 1;
 
 class Cell
 {
@@ -50,15 +50,6 @@ public:
             for (const auto& j: hoodOld.weights(0)) {
                 hoodNew[i].sum += hoodOld[j.first()].value * j.second();
             }
-        }
-    }
-
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first()].value * j.second();
         }
     }
 
@@ -156,7 +147,6 @@ public:
     }
 };
 
-static
 void runSimulation(int argc, char *argv[])
 {
     SimpleInitializer<Cell> *init;
@@ -175,15 +165,16 @@ void runSimulation(int argc, char *argv[])
     } else {
         init = new CellInitializerDiagonal(steps);
     }
+
     SerialSimulator<Cell> sim(init);
     sim.addWriter(new TracingWriter<Cell>(outputFrequency, init->maxSteps()));
     sim.addWriter(new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency));
+
     sim.run();
 }
 
 int main(int argc, char *argv[])
 {
     runSimulation(argc, argv);
-
     return EXIT_SUCCESS;
 }

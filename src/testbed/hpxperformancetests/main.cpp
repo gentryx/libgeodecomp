@@ -15,31 +15,6 @@
 
 using namespace LibGeoDecomp;
 
-class ChargedParticle
-{
-public:
-    template<typename HOOD>
-    void update(const HOOD& hood, int nanoStep)
-    {
-        // fixme
-    }
-
-    template <class ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & pos;
-        ar & vel;
-        ar & charge;
-    }
-
-private:
-    FloatCoord<3> pos;
-    FloatCoord<3> vel;
-    double charge;
-};
-
-LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(ChargedParticle)
-
 template<typename ADDITIONAL_API>
 class UnstructuredBusyworkCellBase
 {
@@ -109,17 +84,9 @@ class APIWithUpdateLineX :
 
 class APIWithSoAAndUpdateLineX :
     public APITraits::HasSoA,
-    public APITraits::HasUpdateLineX
-{
-public:
-    // uniform sizes lead to std::bad_alloc,
-    // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
-    // as dimension (DIM = 1)
-    LIBFLATARRAY_CUSTOM_SIZES(
-        (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768),
-        (1),
-        (1))
-};
+    public APITraits::HasUpdateLineX,
+    public LibFlatArray::api_traits::has_default_1d_sizes
+{};
 
 class UnstructuredBusyworkCell : public UnstructuredBusyworkCellBase<EmptyAPI>
 {
@@ -172,8 +139,7 @@ public:
     {
         typedef LibFlatArray::short_vec<double, C> ShortVec;
 
-        // fixme: indexStart handling...
-        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
+        for (; hoodNew.index() < indexEnd; hoodNew += C, ++hoodOld) {
             ShortVec x = &hoodOld->x();
             ShortVec y = &hoodOld->y();
             ShortVec cReal = &hoodOld->cReal();
@@ -189,11 +155,8 @@ public:
                 ShortVec weights;
                 ShortVec otherX;
                 ShortVec otherY;
-                // fixme: load in c-tor?
                 weights.load_aligned(j.second());
-                // fixme: is this gahter actually correct? shouldn't we use offset 0 for the gather? see also spmvmvectorized/main.cpp
                 otherX.gather(&hoodOld->x(), j.first());
-                // fixme: gather in c-tor?
                 otherY.gather(&hoodOld->y(), j.first());
                 cReal += otherX * weights;
                 cImag += otherY * weights;
@@ -203,7 +166,6 @@ public:
             &hoodNew->y() << y;
             &hoodNew->cReal() << cReal;
             &hoodNew->cImag() << cImag;
-            hoodNew += C;
         }
     }
 };
