@@ -104,12 +104,6 @@ public:
         sum(0)
     {}
 
-    // fixme: duplicate these tests and rerun them as OpenMP tests,
-    // with different OpenMP threading specs (true, true), (true,
-    // false), (false, true), (false, false).
-    // optionally add public APITraits::HasThreadedUpdate<16> to API for fine-grained updates
-
-
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {

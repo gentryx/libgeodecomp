@@ -39,8 +39,8 @@ src/parallelization/test/parallel_mpi_4/main.cpp
 src/parallelization/test/parallel_openmp_1/main.cpp
 src/parallelization/test/parallel_openmp_4/main.cpp
 src/parallelization/test/unit/main.cpp
-src/storage/test/parallel_hpx_1/main.cpp
 src/storage/test/parallel_mpi_2/main.cpp
+src/storage/test/parallel_openmp_4/main.cpp
 src/storage/test/unit/main.cpp
 
 src/**/test/**/*test.cpp
