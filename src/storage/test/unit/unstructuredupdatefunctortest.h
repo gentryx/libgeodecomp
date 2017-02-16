@@ -2,11 +2,12 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/storage/unstructuredupdatefunctor.h>
-#include <libgeodecomp/storage/unstructuredgrid.h>
-#include <libgeodecomp/storage/unstructuredsoagrid.h>
-#include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
+#include <libgeodecomp/storage/updatefunctor.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredlooppeeler.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
+#include <libgeodecomp/storage/unstructuredupdatefunctor.h>
 
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
@@ -102,30 +103,6 @@ public:
     inline explicit SimpleUnstructuredSoATestCell(double v = 0) :
         value(v), sum(0)
     {}
-
-    template<typename SHORT_VEC_TYPE, typename COUNTER_TYPE1, typename COUNTER_TYPE2, typename HOOD_OLD, typename LAMBDA>
-    static
-    void unstructuredLoopPeeler(COUNTER_TYPE1 *counter, const COUNTER_TYPE2& end, HOOD_OLD& hoodOld, const LAMBDA& lambda)
-    {
-        typedef SHORT_VEC_TYPE lfa_local_short_vec;
-        typedef typename LibFlatArray::detail::flat_array::
-            sibling_short_vec_switch<SHORT_VEC_TYPE, 1>::VALUE
-            lfa_local_scalar;
-
-        COUNTER_TYPE1 nextStop = *counter;
-        COUNTER_TYPE1 remainder = *counter & (SHORT_VEC_TYPE::ARITY - 1);
-        if (remainder != 0) {
-            nextStop += SHORT_VEC_TYPE::ARITY - remainder;
-        }
-        COUNTER_TYPE1 lastStop = end - (end & (SHORT_VEC_TYPE::ARITY - 1));
-
-        typedef UnstructuredSoANeighborhoodHelpers::WrappedNeighborhood<HOOD_OLD> WrappedHood;
-        WrappedHood wrappedHood(hoodOld);
-
-        lambda(lfa_local_scalar(),    counter, nextStop, wrappedHood);
-        lambda(lfa_local_short_vec(), counter, lastStop, hoodOld);
-        lambda(lfa_local_scalar(),    counter, end,      wrappedHood);
-    }
 
     // fixme: duplicate these tests and rerun them as OpenMP tests,
     // with different OpenMP threading specs (true, true), (true,

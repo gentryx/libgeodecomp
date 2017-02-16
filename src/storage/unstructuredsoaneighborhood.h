@@ -16,66 +16,6 @@
 
 namespace LibGeoDecomp {
 
-namespace UnstructuredSoANeighborhoodHelpers
-{
-
-/**
- * This is a wrapper for UnstructuredSoANeighborhood to do scalar
- * updates (required for loop peeling if a streak is not aligned on
- * chunk boundaries).
- */
-template<typename HOOD>
-class WrappedNeighborhood
-{
-public:
-    typedef typename HOOD::ScalarIterator Iterator;
-    typedef typename HOOD::SoAAccessor SoAAccessor;
-
-    inline
-    WrappedNeighborhood(HOOD& hood) :
-        hood(hood)
-    {}
-
-    inline
-    Iterator begin()
-    {
-        return hood.beginScalar();
-    }
-
-    inline
-    Iterator end()
-    {
-        return hood.endScalar();
-    }
-
-    inline
-    void operator++()
-    {
-        hood.intraChunkOffset = (hood.intraChunkOffset + 1) % HOOD::ARITY;
-        if (hood.intraChunkOffset == 0) {
-            ++hood;
-        }
-    }
-
-    inline
-    const SoAAccessor *operator->() const
-    {
-        return &hood.accessor;
-    }
-
-    inline
-    WrappedNeighborhood& weights(std::size_t matrixID = 0)
-    {
-        hood.weights(matrixID);
-        return *this;
-    }
-
-private:
-    HOOD& hood;
-};
-
-}
-
 /**
  * Neighborhood providing pointers for vectorization of UnstructuredSoAGrid.
  * weights(id) returns a pair of two pointers. One points to the array where
@@ -102,9 +42,6 @@ template<
 class UnstructuredSoANeighborhood
 {
 public:
-    template<typename HOOD>
-    friend class UnstructuredSoANeighborhoodHelpers::WrappedNeighborhood;
-
     static const int ARITY = C;
 
     using IteratorPair = std::pair<const int*, const VALUE_TYPE*>;
@@ -285,6 +222,20 @@ public:
     {
         const auto& matrix = grid.getWeights(currentMatrixID);
         return ScalarIterator(matrix, matrix.chunkOffsetVec()[currentChunk + 1], intraChunkOffset);
+    }
+
+    /**
+     * Advance hood by one cell within a chunk. Useful for scalar
+     * iteration (see ScalarIterator).
+     */
+    inline
+    void incIntraChunkOffset()
+    {
+        intraChunkOffset = (intraChunkOffset + 1) % ARITY;
+
+        if (intraChunkOffset == 0) {
+            ++(*this);
+        }
     }
 
     inline

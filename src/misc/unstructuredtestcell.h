@@ -4,6 +4,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/fixedarray.h>
+#include <libgeodecomp/storage/unstructuredlooppeeler.h>
 #include <libflatarray/macros.hpp>
 
 namespace LibGeoDecomp {
