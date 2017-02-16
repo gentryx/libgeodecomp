@@ -2790,7 +2790,7 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         // fixme: indexStart handling...
         for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
@@ -2855,7 +2855,7 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         REAL tmp, weights, values;
         // fixme: indexStart handling...

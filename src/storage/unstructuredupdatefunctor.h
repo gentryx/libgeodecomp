@@ -79,7 +79,7 @@ public:
             newAccessor.data(),                                         \
             i->origin.x());                                             \
         UnstructuredSoANeighborhoodNew<CELL, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2> hoodNew(&newAccessorCopy); \
-        CELL::updateLineX(hoodNew, i->origin.x(), i->endX, hoodOld, nanoStep); \
+        CELL::updateLineX(hoodNew, i->endX, hoodOld, nanoStep); \
         /**/
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2

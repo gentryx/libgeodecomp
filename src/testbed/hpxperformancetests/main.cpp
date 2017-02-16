@@ -168,7 +168,7 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    inline static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    inline static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         typedef LibFlatArray::short_vec<double, C> ShortVec;
 

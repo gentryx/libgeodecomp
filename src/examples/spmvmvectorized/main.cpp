@@ -42,6 +42,7 @@ public:
         public APITraits::HasSellSigma<SIGMA>
     {
     public:
+        // fixme: use dedicated 1D macro here
         // uniform sizes lead to std::bad_alloc,
         // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
         // as dimension (DIM = 1)
@@ -56,7 +57,7 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
             ShortVec tmp;

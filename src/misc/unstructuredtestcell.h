@@ -181,10 +181,10 @@ public:
     }
 
     template<typename HOOD_OLD, typename HOOD_NEW>
-    static void updateLineX(HOOD_NEW& hoodNew, int startX, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
     {
         // correct for Streaks not starting at chunk boundaries:
-        int startOffset = startX % HOOD_OLD::ARITY;
+        int startOffset = hoodNew.index() % HOOD_OLD::ARITY;
 
         // fixme: use loop peeler here
         // Important: index is actually the index in the chunkVector, not necessarily a cell id.

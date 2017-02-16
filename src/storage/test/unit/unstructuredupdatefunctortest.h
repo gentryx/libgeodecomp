@@ -133,9 +133,8 @@ public:
     // optionally add public APITraits::HasThreadedUpdate<16> to API for fine-grained updates
 
 
-    // fixme: get rid of indexStart
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexStart, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         unstructuredLoopPeeler<ShortVec>(&hoodNew.index(), indexEnd, hoodOld, [&hoodNew](auto REAL, auto *counter, const auto& end, auto& hoodOld) {
                 typedef decltype(REAL) ShortVec;
