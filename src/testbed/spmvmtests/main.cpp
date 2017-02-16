@@ -75,15 +75,9 @@ public:
         public APITraits::HasSellType<double>,
         public APITraits::HasSellMatrices<1>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
-    {
-    public:
-        LIBFLATARRAY_CUSTOM_SIZES(
-            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768)
-            (65536)(131072)(262144)(524288)(1048576)(2097152)(4194304),
-            (1),
-            (1))
-    };
+        public APITraits::HasSellSigma<SIGMA>,
+        public LibFlatArray::api_traits::has_default_1d_sizes
+    {};
 
     typedef short_vec<double, C> ShortVec;
 
@@ -121,29 +115,23 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        // fixme: LFA loop peeler
         ShortVec tmp, weights, values;
-        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
+        // no loop peeler required here because we know it's only
+        // going to be one Streak anyway and that will be aligned on
+        // chunk boundaries.
+        for (; hoodNew.index() < indexEnd; hoodNew += C, ++hoodOld) {
             tmp.load_aligned(&hoodNew->sum());
+
             for (const auto& j: hoodOld.weights(0)) {
                 weights.load_aligned(j.second());
                 values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
+
             tmp.store_aligned(&hoodNew->sum());
-            hoodNew += C;
         }
     }
 #endif
-
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first()].value * j.second();
-        }
-    }
 
     double value;
     double sum;
