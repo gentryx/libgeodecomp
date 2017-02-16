@@ -2771,19 +2771,9 @@ public:
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
         public APITraits::HasSellSigma<SIGMA>,
-        public APITraits::HasThreadedUpdate<1024>
-    {
-    public:
-        // fixme: use dedicated 1d macro here
-        // uniform sizes lead to std::bad_alloc,
-        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
-        // as dimension (DIM = 1)
-        LIBFLATARRAY_CUSTOM_SIZES(
-            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768)
-            (65536)(131072)(262144)(524288)(1048576),
-            (1),
-            (1))
-    };
+        public APITraits::HasThreadedUpdate<1024>,
+        public LibFlatArray::api_traits::has_default_1d_sizes
+    {};
 
     inline explicit SPMVMSoACell(double v = 8.0) :
         value(v), sum(0)
@@ -2792,19 +2782,27 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        // fixme: indexStart handling...
-        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
-            ShortVec tmp;
-            tmp.load_aligned(&hoodNew->sum());
-            for (const auto& j: hoodOld.weights(0)) {
-                ShortVec weights, values;
-                weights.load_aligned(j.second());
-                values.gather(&hoodOld->value(), j.first());
-                tmp += values * weights;
-            }
-            tmp.store_aligned(&hoodNew->sum());
-            hoodNew += HOOD_OLD::ARITY;
-        }
+        unstructuredLoopPeeler<ShortVec>(
+            &hoodNew.index(),
+            indexEnd,
+            hoodOld,
+            [&hoodNew](auto shortVec, auto *counter, auto end, auto& hoodOld) {
+                typedef decltype(shortVec) ShortVec;
+
+                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+                    ShortVec tmp;
+                    tmp.load_aligned(&hoodNew->sum());
+
+                    for (const auto& j: hoodOld.weights(0)) {
+                        ShortVec weights, values;
+                        weights.load_aligned(j.second());
+                        values.gather(&hoodOld->value(), j.first());
+                        tmp += values * weights;
+                    }
+
+                    tmp.store_aligned(&hoodNew->sum());
+                }
+            });
     }
 
     double value;
@@ -2826,19 +2824,9 @@ public:
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
         public APITraits::HasSellSigma<SIGMA>,
-        public APITraits::HasThreadedUpdate<1024>
-    {
-    public:
-        // fixme: use dedicated 1d macro here
-        // uniform sizes lead to std::bad_alloc,
-        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
-        // as dimension (DIM = 1)
-        LIBFLATARRAY_CUSTOM_SIZES(
-            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768)
-            (65536)(131072)(262144)(524288)(1048576),
-            (1),
-            (1))
-    };
+        public APITraits::HasThreadedUpdate<1024>,
+        public LibFlatArray::api_traits::has_default_1d_sizes
+    {};
 
     inline explicit SPMVMSoACellInf(double v = 8.0) :
         value(v), sum(0)
@@ -2847,18 +2835,27 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        REAL tmp, weights, values;
-        // fixme: indexStart handling...
-        for (; hoodOld.index() < ((indexEnd - 1) / HOOD_OLD::ARITY + 1); ++hoodOld) {
-            tmp = &hoodNew->sum();
-            for (const auto& j: hoodOld.weights(0)) {
-                weights = j.second();
-                values.gather(&hoodOld->value(), j.first());
-                tmp += values * weights;
-            }
-            (&hoodNew->sum()) << tmp;
-            hoodNew += C;
-        }
+        unstructuredLoopPeeler<ShortVec>(
+            &hoodNew.index(),
+            indexEnd,
+            hoodOld,
+            [&hoodNew](auto shortVec, auto *counter, auto end, auto& hoodOld) {
+                typedef decltype(shortVec) ShortVec;
+
+                ShortVec tmp, weights, values;
+
+                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+                    tmp = &hoodNew->sum();
+
+                    for (const auto& j: hoodOld.weights(0)) {
+                        weights = j.second();
+                        values.gather(&hoodOld->value(), j.first());
+                        tmp += values * weights;
+                    }
+
+                    (&hoodNew->sum()) << tmp;
+                }
+            });
     }
 
     double value;
