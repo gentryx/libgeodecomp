@@ -115,35 +115,6 @@ public:
         return matrices[matrixID];
     }
 
-    /**
-     * Returns a list of pairs representing the neighborhood of center element.
-     * The first element of the pair is the ELEMENT_TYPE
-     * and the secound the ADJACENCY_TYPE.
-     * The first Element of the list is the center element it self.
-     * If center element does not exist the EdggeElement is returned.
-     * In both cases ADJACENCY_TYPE = -1
-     */
-    inline NeighborList getNeighborhood(const Coord<DIM>& center) const
-    {
-        NeighborList neighborhood;
-
-        if (boundingBox().inBounds(center)) {
-            neighborhood.push_back(std::make_pair(*this[center], -1));
-            std::vector<std::pair<int, WEIGHT_TYPE> > neighbor =
-                matrices[0].getRow(center.x());
-
-            for (NeighborListIterator it = neighbor.begin();
-                 it != neighbor.end();
-                 ++it) {
-                neighborhood.push_back(std::make_pair((*this)[it->first], it->second));
-            }
-        } else {
-            neighborhood.push_back(std::make_pair(getEdgeElement(), -1));
-        }
-
-        return neighborhood;
-    }
-
     inline const Coord<DIM>& getDimensions() const
     {
         return dimension;

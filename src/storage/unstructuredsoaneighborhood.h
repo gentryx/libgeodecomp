@@ -8,7 +8,6 @@
 #include <libflatarray/soa_accessor.hpp>
 
 #include <libgeodecomp/geometry/coord.h>
-#include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 
 #include <iterator>

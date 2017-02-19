@@ -52,7 +52,6 @@ public:
     using SellContainer = SellCSigmaSparseMatrixContainer<VALUETYPE, C, SIGMA>;
     using Matrix = std::vector<std::pair<Coord<2>, VALUETYPE> >;
 
-    // fixme: do we really need two separate implementations?
     void operator()(SellContainer *container, const Matrix& matrix) const
     {
         std::vector<int> rowLengthCopy;
@@ -162,80 +161,6 @@ public:
     }
 };
 
-/**
- * See doc above.
- */
-template<typename VALUETYPE, int C>
-class InitFromMatrix<VALUETYPE, C, 1>
-{
-public:
-    using SellContainer = SellCSigmaSparseMatrixContainer<VALUETYPE, C, 1>;
-    using Matrix = std::vector<std::pair<Coord<2>, VALUETYPE> >;
-
-    void operator()(SellContainer *container, const Matrix& matrix) const
-    {
-        // calculate size for arrays
-        const int matrixRows = container->dimension;
-        const int numberOfChunks = (matrixRows - 1) / C + 1;
-        const int rowsPadded = numberOfChunks * C;
-        int numberOfValues = 0;
-
-        // save references to sell data structures
-        auto& chunkOffset = container->chunkOffset;
-        auto& chunkLength = container->chunkLength;
-        auto& rowLength   = container->rowLength;
-        auto& values      = container->values;
-        auto& column      = container->column;
-
-        // allocate memory
-        chunkOffset.resize(numberOfChunks + 1);
-        chunkLength.resize(numberOfChunks);
-        rowLength.resize(rowsPadded);
-
-        // get row lengths
-        std::fill(begin(rowLength), end(rowLength), 0);
-        for (const auto& pair: matrix) {
-            ++rowLength[pair.first.x()];
-        }
-
-        // save chunk lengths and offsets
-        chunkOffset[0] = 0;
-        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
-            chunkLength[nChunk] = *std::max_element(
-                rowLength.begin() + nChunk * C,
-                rowLength.begin() + (nChunk + 1) * C);
-
-            if (nChunk > 0) {
-                chunkOffset[nChunk] = chunkOffset[nChunk - 1] + chunkLength[nChunk - 1] * C;
-            }
-            numberOfValues += chunkLength[nChunk] * C;
-        }
-        chunkOffset[numberOfChunks] = chunkOffset[numberOfChunks - 1] +
-            chunkLength[numberOfChunks - 1] * C;
-
-        // save values
-        values.resize(numberOfValues);
-        column.resize(numberOfValues);
-        std::fill(begin(values), end(values), 0);
-        std::fill(begin(column), end(column), 0);
-        int currentRow = 0;
-        int index = 0;
-        for (const auto& pair: matrix) {
-            if (pair.first.x() != currentRow) {
-                currentRow = pair.first.x();
-                index = 0;
-            }
-            const int chunk = pair.first.x() / C;
-            const int row   = pair.first.x() % C;
-            const int start = chunkOffset[chunk];
-            const int idx   = start + index * C + row;
-            values[idx]     = pair.second;
-            column[idx]     = pair.first.y();
-            ++index;
-        }
-    }
-};
-
 }
 
 /**
@@ -268,47 +193,12 @@ public:
         static_assert(SIGMA >= 1, "SIGMA should be greater or equal to 1!");
     }
 
-    // fixme: kill this code
-    // lhs = A   x rhs
-    // tmp = val x b
-    void matVecMul(std::vector<VALUETYPE>& lhs, std::vector<VALUETYPE>& rhs)
-    {
-        if (lhs.size() != rhs.size() || lhs.size() != dimension) {
-            throw std::invalid_argument("lhs and rhs must be of size N");
-        }
-
-        // loop over chunks     TODO parallel omp
-        for (std::size_t chunk = 0; chunk < chunkLength.size(); ++chunk) {
-            int offs = chunkOffset[chunk];
-            VALUETYPE tmp[C];
-
-            // init tmp                     TODO vectorize
-            for (int row = 0; row<C; ++row) {
-                tmp[row] = lhs[chunk*C + row];
-            }
-
-            // loop over columns in chunk
-            for (int col = 0; col < chunkLength[chunk]; ++col) {
-
-                // loop over rows in chunks TODO vectorize
-                for (int row = 0; row < C; ++row) {
-                    VALUETYPE val = values[offs];
-                    int columnINDEX = column[offs++];
-                    // note: val might be zero due to padding
-                    VALUETYPE b = rhs[columnINDEX];
-                    tmp[row] += val * b;
-                }
-            }
-
-            // store tmp                     TODO vectorize
-            for (int row = 0; row < C; ++row) {
-                lhs[chunk*C + row] = tmp[row];
-            }
-        }
-
-    }
-
-    // fixme: is this mainly used for constructing the neighborhood in UnstructuredGrid::getNeighborhood. drop this code once we have an efficient neighborhood-object for UnstructuredGrid
+    /**
+     * Returns all neighbors of a given ID (i.e. all nodes to which a
+     * node (row) has edges leading to, or in other words: the indices
+     * of all non-zero entries in the matrix' row). Useful for
+     * debugging and IO, not efficient for use in kernels.
+     */
     std::vector<std::pair<int, VALUETYPE> > getRow(int const row) const
     {
         std::vector< std::pair<int, VALUETYPE> > vec;
