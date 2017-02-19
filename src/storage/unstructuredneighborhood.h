@@ -76,121 +76,16 @@ private:
 };
 
 /**
- * Empty dummy class.
+ * Base class for UnstructuredNeighborhoods. This class does not
+ * perform coordinate remapping from logical to physical IDs, hence ID
+ * reordering is strongly suggested (e.g. via
+ * ReorderingUnstructuredGrid). This class is also used for scalar
+ * updates in the vectorized case, which is why GRID is a template
+ * parameter (think UnstructuredSoAGrid).
  */
-template<typename CELL, typename GRID, std::size_t MATRICES = 1,
-         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1,
-         bool SORT = false>
+template<typename CELL, typename GRID, std::size_t MATRICES,
+         typename VALUE_TYPE, int C, int SIGMA>
 class UnstructuredNeighborhoodBase
-{};
-
-/**
- * Base class for UnstructuredNeighborhoods. There are two implementations:
- * One NeighborHood corrects the sorting given by the SELL matrix. This one
- * does, the one below does not.
- * Moreover this class is also used for scalar updates in vectorized case.
- * This is why the GRID is a template parameter.
- */
-template<typename CELL, typename GRID, std::size_t MATRICES,
-         typename VALUE_TYPE, int C, int SIGMA>
-class UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, true>
-{
-public:
-    using Grid = GRID;
-    using Iterator = UnstructuredNeighborhoodHelpers::Iterator<VALUE_TYPE, C, SIGMA>;
-
-    inline
-    UnstructuredNeighborhoodBase(const Grid& grid, long startX) :
-        grid(grid),
-        xOffset(startX),
-        currentChunk(0),
-        chunkOffset(0),
-        currentMatrixID(0)
-    {}
-
-    inline
-    UnstructuredNeighborhoodBase& operator++()
-    {
-        ++xOffset;
-        return *this;
-    }
-
-    inline
-    UnstructuredNeighborhoodBase operator++(int)
-    {
-        UnstructuredNeighborhoodBase tmp(*this);
-        operator++();
-        return tmp;
-    }
-
-    inline
-    void operator+=(long i)
-    {
-        xOffset += i;
-    }
-
-    inline
-    long index() const
-    {
-        return xOffset;
-    }
-
-    inline
-    long index()
-    {
-        return xOffset;
-    }
-
-    inline
-    UnstructuredNeighborhoodBase& weights()
-    {
-        // default neighborhood is for matrix 0
-        return weights(0);
-    }
-
-    inline
-    UnstructuredNeighborhoodBase& weights(const std::size_t matrixID)
-    {
-        currentMatrixID = matrixID;
-
-        return *this;
-    }
-
-    inline
-    Iterator begin()
-    {
-        const auto& matrix = grid.getWeights(currentMatrixID);
-        currentChunk = matrix.realRowToSortedVec()[xOffset].second / C;
-        chunkOffset  = matrix.realRowToSortedVec()[xOffset].second % C;
-        int index    = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
-        return Iterator(matrix, index);
-    }
-
-    inline
-    const Iterator end()
-    {
-        const auto& matrix = grid.getWeights(currentMatrixID);
-        int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
-        const int realRow = matrix.realRowToSortedVec()[xOffset].second;
-        index += C * matrix.rowLengthVec()[realRow];
-        return Iterator(matrix, index);
-    }
-
-protected:
-    const Grid& grid;           /**< old grid */
-    long xOffset;               /**< initial offset for updateLineX function */
-    int currentChunk;           /**< current chunk */
-    int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
-    int currentMatrixID;        /**< current id for matrices */
-};
-
-/**
- * Same as above, except SORT = false which is faster.
- * fixme: can we avoid sorting by re-arranging indices at insert/sort time?
- */
-template<typename CELL, typename GRID, std::size_t MATRICES,
-         typename VALUE_TYPE, int C, int SIGMA>
-class UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, false>
 {
 public:
     using Grid = GRID;
@@ -318,42 +213,17 @@ template<typename CELL, std::size_t MATRICES,
          typename VALUE_TYPE, int C, int SIGMA>
 class UnstructuredNeighborhood :
         public UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<
-    CELL, ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >, MATRICES, VALUE_TYPE, C, SIGMA, true>
+    CELL, ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >, MATRICES, VALUE_TYPE, C, SIGMA>
 {
 public:
     using Grid = ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >;
     using UnstructuredNeighborhoodHelpers::
-    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, true>::grid;
+    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>::grid;
 
     inline
     UnstructuredNeighborhood(const Grid& grid, long startX) :
         UnstructuredNeighborhoodHelpers::
-        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, true>(grid, startX)
-    {}
-
-    inline
-    const CELL& operator[](int index) const
-    {
-        return grid[index];
-    }
-};
-
-/**
- * Same as above (see doc).
- */
-template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C>
-class UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, 1> :
-        public UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<
-    CELL, ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1> >, MATRICES, VALUE_TYPE, C, 1, false>
-{
-public:
-    using Grid = ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1> >;
-    using UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, 1, false>::grid;
-
-    inline
-    UnstructuredNeighborhood(const Grid& grid, long startX) :
-        UnstructuredNeighborhoodHelpers::
-        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, 1, false>(grid, startX)
+        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>(grid, startX)
     {}
 
     inline

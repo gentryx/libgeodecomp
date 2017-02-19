@@ -21,14 +21,14 @@ template<
     int C = 64,
     int SIGMA = 1>
 class UnstructuredSoAScalarNeighborhood : public UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<
-    CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, false>
+    CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA>
 {
 public:
-    using UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, false>::grid;
+    using UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA>::grid;
 
     inline
     UnstructuredSoAScalarNeighborhood(const GRID& grid, long startX) :
-        UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, false>(grid, startX)
+        UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA>(grid, startX)
     {}
 
     CELL operator[](int index) const
