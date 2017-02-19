@@ -83,16 +83,21 @@ private:
  * updates in the vectorized case, which is why GRID is a template
  * parameter (think UnstructuredSoAGrid).
  */
-template<typename CELL, typename GRID, std::size_t MATRICES,
-         typename VALUE_TYPE, int C, int SIGMA>
-class UnstructuredNeighborhoodBase
+template<
+    typename CELL,
+    typename GRID,
+    std::size_t MATRICES,
+    typename VALUE_TYPE,
+    int C,
+    int SIGMA>
+class Base
 {
 public:
     using Grid = GRID;
     using Iterator = UnstructuredNeighborhoodHelpers::Iterator<VALUE_TYPE, C, SIGMA>;
 
     inline
-    UnstructuredNeighborhoodBase(const Grid& grid, long startX) :
+    Base(const Grid& grid, long startX) :
         grid(grid),
         xOffset(startX),
         currentChunk(startX / C),
@@ -101,16 +106,16 @@ public:
     {}
 
     inline
-    UnstructuredNeighborhoodBase& operator++()
+    Base& operator++()
     {
         updateIndices(1);
         return *this;
     }
 
     inline
-    UnstructuredNeighborhoodBase operator++(int)
+    Base operator++(int)
     {
-        UnstructuredNeighborhoodBase tmp(*this);
+        Base tmp(*this);
         operator++();
         return tmp;
     }
@@ -134,14 +139,14 @@ public:
     }
 
     inline
-    UnstructuredNeighborhoodBase& weights()
+    Base& weights()
     {
         // default neighborhood is for matrix 0
         return weights(0);
     }
 
     inline
-    UnstructuredNeighborhoodBase& weights(std::size_t matrixID)
+    Base& weights(std::size_t matrixID)
     {
         currentMatrixID = matrixID;
 
@@ -212,18 +217,16 @@ protected:
 template<typename CELL, std::size_t MATRICES,
          typename VALUE_TYPE, int C, int SIGMA>
 class UnstructuredNeighborhood :
-        public UnstructuredNeighborhoodHelpers::UnstructuredNeighborhoodBase<
+        public UnstructuredNeighborhoodHelpers::Base<
     CELL, ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >, MATRICES, VALUE_TYPE, C, SIGMA>
 {
 public:
     using Grid = ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >;
-    using UnstructuredNeighborhoodHelpers::
-    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>::grid;
+    using UnstructuredNeighborhoodHelpers::Base<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>::grid;
 
     inline
     UnstructuredNeighborhood(const Grid& grid, long startX) :
-        UnstructuredNeighborhoodHelpers::
-        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>(grid, startX)
+        UnstructuredNeighborhoodHelpers::Base<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>(grid, startX)
     {}
 
     inline

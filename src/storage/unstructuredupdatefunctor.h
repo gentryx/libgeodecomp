@@ -19,7 +19,6 @@
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhoodnew.h>
-#include <libgeodecomp/storage/unstructuredsoascalarneighborhood.h>
 #include <libgeodecomp/storage/updatefunctormacros.h>
 
 namespace LibGeoDecomp {
