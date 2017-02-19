@@ -210,14 +210,10 @@ public:
         return delegate.data();
     }
 
-    // fixme: 1. finish GridBase interface with internal ID translation (via logicalToPhysicalIDs)
-    // fixme: 2. ID translation is slow, but acceptable for IO. not acceptable for updates.
-    //           probably acceptable for ghost zone communication.
-
-    // fixme: 3. allow steppers, simulators to obtain a remapped
-    // region from a grid (e.g. remapRegion(), needs to be in
-    // gridBase) and add accessors that work with these remapped regions. can probably be inside specialized updatefunctor
-
+    /**
+     * Set edge weights. This function also triggers the remapping of
+     * the internal cell IDs.
+     */
     inline
     void setWeights(std::size_t matrixID, const std::map<Coord<2>, WeightType>& matrix)
     {
