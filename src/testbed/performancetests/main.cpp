@@ -2882,7 +2882,7 @@ public:
     virtual void grid(GridBase<CELL, 1> *grid)
     {
         // setup sparse matrix
-        std::map<Coord<2>, ValueType> weights;
+        typename GridBase<CELL, 1>::SparseMatrix weights;
 
         // setup matrix: immitate basic structure of MP_Geer matrix
         // from Matrix Market:
@@ -2893,21 +2893,21 @@ public:
             for (int i = -3400; i < -3385; ++i) {
                 int column = row + i;
                 if ((column >= 0) && (column < size)) {
-                    weights[Coord<2>(column, row)] = 1000.0 + 1.0 * factor + column;
+                    weights << std::make_pair(Coord<2>(column, row), 1000.0 + 1.0 * factor + column);
                 }
             }
 
             for (int i = -20; i < 20; ++i) {
                 int column = row + i;
                 if ((column >= 0) && (column < size)) {
-                    weights[Coord<2>(column, row)] = 1000.0 + 1.0 * factor + column;
+                    weights << std::make_pair(Coord<2>(column, row), 1000.0 + 1.0 * factor + column);
                 }
             }
 
             for (int i = 3385; i < 3400; ++i) {
                 int column = row + i;
                 if ((column >= 0) && (column < size)) {
-                    weights[Coord<2>(column, row)] = 1000.0 + 1.0 * factor + column;
+                    weights << std::make_pair(Coord<2>(column, row), 1000.0 + 1.0 * factor + column);
                 }
             }
         }
@@ -2938,12 +2938,12 @@ class SellMatrixInitializer : public CPUBenchmark
         const Coord<1> dim1d(dim.x());
         const int size = dim.x();
         UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> grid(dim1d);
-        std::map<Coord<2>, ValueType> weights;
+        GridBase<SPMVMCell, 1>::SparseMatrix weights;
 
         // setup matrix: ~1 % non zero entries
         for (int row = 0; row < size; ++row) {
             for (int col = 0; col < size / 100; ++col) {
-                weights[Coord<2>(row, col * 100)] = 5.0;
+                weights << std::make_pair(Coord<2>(row, col * 100), 5.0);
             }
         }
 

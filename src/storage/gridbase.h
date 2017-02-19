@@ -67,6 +67,7 @@ class GridBase : GridBaseHelpers::LoadSaveRegionCharInterface<DIMENSIONS>
 public:
     friend class ProxyGrid<CELL, DIMENSIONS, WEIGHT_TYPE>;
     typedef CELL CellType;
+    typedef std::vector<std::pair<Coord<2>, WEIGHT_TYPE> > SparseMatrix;
 
     using GridBaseHelpers::LoadSaveRegionCharInterface<DIMENSIONS>::saveRegion;
     using GridBaseHelpers::LoadSaveRegionCharInterface<DIMENSIONS>::loadRegion;
@@ -250,10 +251,8 @@ public:
     /**
      * Through this function the weights of the edges on unstructured
      * grids can be set. Unavailable on regular grids.
-     *
-     * fixme: type of matrix is terrible
      */
-    virtual void setWeights(std::size_t matrixID, const std::map<Coord<2>, WEIGHT_TYPE>& matrix)
+    virtual void setWeights(std::size_t matrixID, const SparseMatrix& matrix)
     {
         throw std::logic_error("edge weights cannot be set on this grid type");
     }

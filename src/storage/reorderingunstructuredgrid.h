@@ -152,11 +152,12 @@ public:
     friend class ::SparseMatrixVectorMultiplication;
 
     typedef typename DELEGATE_GRID::CellType CellType;
-    typedef typename DELEGATE_GRID::WeightType WeightType;
-    typedef typename SerializationBuffer<CellType>::BufferType BufferType;
-    typedef typename APITraits::SelectSoA<CellType>::Value SoAFlag;
-    typedef typename ReorderingUnstructuredGridHelpers::Selector<SoAFlag>::Value ReorderingRegionIterator;
+    typedef typename DELEGATE_GRID::SparseMatrix SparseMatrix;
     typedef typename DELEGATE_GRID::StorageType StorageType;
+    typedef typename DELEGATE_GRID::WeightType WeightType;
+    typedef typename APITraits::SelectSoA<CellType>::Value SoAFlag;
+    typedef typename SerializationBuffer<CellType>::BufferType BufferType;
+    typedef typename ReorderingUnstructuredGridHelpers::Selector<SoAFlag>::Value ReorderingRegionIterator;
 
     typedef std::pair<int, int> IntPair;
 
@@ -215,11 +216,11 @@ public:
      * the internal cell IDs.
      */
     inline
-    void setWeights(std::size_t matrixID, const std::map<Coord<2>, WeightType>& matrix)
+    void setWeights(std::size_t matrixID, const SparseMatrix& matrix)
     {
         std::map<int, int> rowLengths;
         Region<1> mask;
-        for (typename std::map<Coord<2>, WeightType>::const_iterator i = matrix.begin(); i != matrix.end(); ++i) {
+        for (typename SparseMatrix::const_iterator i = matrix.begin(); i != matrix.end(); ++i) {
             int id = i->first.x();
             if (!nodeSet.count(Coord<1>(id))) {
                 continue;
@@ -275,9 +276,9 @@ public:
         reorderDelegateGrid(std::move(newLogicalToPhysicalIDs), std::move(newPhysicalToLogicalIDs));
 
         using ReorderingUnstructuredGridHelpers::mapLogicalToPhysicalID;
-        std::map<Coord<2>, WeightType> newMatrix;
+        SparseMatrix newMatrix;
 
-        for (typename std::map<Coord<2>, WeightType>::const_iterator i = matrix.begin(); i != matrix.end(); ++i) {
+        for (typename SparseMatrix::const_iterator i = matrix.begin(); i != matrix.end(); ++i) {
             int id = i->first.x();
             if (nodeSet.count(Coord<1>(id)) == 0) {
                 continue;
@@ -300,7 +301,7 @@ public:
             }
             int id2 = iter->second;
 
-            newMatrix[Coord<2>(id1, id2)] = i->second;
+            newMatrix << std::make_pair(Coord<2>(id1, id2), i->second);
         }
 
         delegate.setWeights(matrixID, std::move(newMatrix));

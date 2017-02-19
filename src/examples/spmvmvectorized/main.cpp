@@ -95,11 +95,11 @@ public:
     virtual void grid(GridBase<Cell, 1> *grid)
     {
         // setup diagonal matrix, one neighbor per cell
-        std::map<Coord<2>, ValueType> weights;
+        Grid::SparseMatrix weights;
 
         for (int i = 0; i < 100; ++i) {
             grid->set(Coord<1>(i), Cell(static_cast<double>(i) + 0.1));
-            weights[Coord<2>(i, i)] = static_cast<ValueType>(i) + 0.1;
+            weights << std::make_pair(Coord<2>(i, i), static_cast<ValueType>(i) + 0.1);
         }
 
         grid->setWeights(0, weights);
@@ -126,7 +126,7 @@ public:
     virtual void grid(GridBase<Cell, 1> *grid)
     {
         // read rhs and matrix from file
-        std::map<Coord<2>, ValueType> weights;
+        GridBase<Cell, 1>::SparseMatrix weights;
         std::ifstream rhsIfs;
         std::ifstream matrixIfs;
 
@@ -160,7 +160,7 @@ public:
                     throw std::logic_error("Failed to read data from matrix");
                 }
                 if (tmp != 0.0) {
-                    weights[Coord<2>(row, col)] = tmp;
+                    weights << std::make_pair(Coord<2>(row, col), tmp);
                 }
             }
         }

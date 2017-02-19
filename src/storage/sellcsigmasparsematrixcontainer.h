@@ -50,7 +50,7 @@ class InitFromMatrix
 {
 public:
     using SellContainer = SellCSigmaSparseMatrixContainer<VALUETYPE, C, SIGMA>;
-    using Matrix = std::map<Coord<2>, VALUETYPE>;
+    using Matrix = std::vector<std::pair<Coord<2>, VALUETYPE> >;
 
     // fixme: do we really need two separate implementations?
     void operator()(SellContainer *container, const Matrix& matrix) const
@@ -170,7 +170,7 @@ class InitFromMatrix<VALUETYPE, C, 1>
 {
 public:
     using SellContainer = SellCSigmaSparseMatrixContainer<VALUETYPE, C, 1>;
-    using Matrix = std::map<Coord<2>, VALUETYPE>;
+    using Matrix = std::vector<std::pair<Coord<2>, VALUETYPE> >;
 
     void operator()(SellContainer *container, const Matrix& matrix) const
     {
@@ -248,6 +248,7 @@ template<typename VALUETYPE, int C = 1, int SIGMA = 1>
 class SellCSigmaSparseMatrixContainer
 {
 public:
+    typedef std::vector<std::pair<Coord<2>, VALUETYPE> > SparseMatrix;
     using AlignedValueVector = std::vector<VALUETYPE, LibFlatArray::aligned_allocator<VALUETYPE, 64> >;
     using AlignedIntVector   = std::vector<int, LibFlatArray::aligned_allocator<int, 64> >;
 
@@ -327,9 +328,13 @@ public:
      * _complete_ matrix. Matrix is represented as map, key is Coord<2> which contains
      * (row, column). value_type of map contains the actual value.
      */
-    void initFromMatrix(const std::map<Coord<2>, VALUETYPE>& matrix)
+    void initFromMatrix(const SparseMatrix& matrix)
     {
-        SellHelpers::InitFromMatrix<VALUETYPE, C, SIGMA>()(this, matrix);
+        SparseMatrix sortedMatrix = matrix;
+        std::sort(sortedMatrix.begin(), sortedMatrix.end(), [](const std::pair<Coord<2>, VALUETYPE>& a, const std::pair<Coord<2>, VALUETYPE>& b){
+                return a.first < b.first;
+            });
+        SellHelpers::InitFromMatrix<VALUETYPE, C, SIGMA>()(this, sortedMatrix);
     }
 
     inline bool operator==(const SellCSigmaSparseMatrixContainer& other) const

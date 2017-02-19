@@ -31,6 +31,7 @@ public:
     friend class ReorderingUnstructuredGridTest;
 
     typedef WEIGHT_TYPE WeightType;
+    typedef typename GridBase<ELEMENT_TYPE, 1, WEIGHT_TYPE>::SparseMatrix SparseMatrix;
     typedef std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> > NeighborList;
     typedef typename std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> >::iterator NeighborListIterator;
     typedef ELEMENT_TYPE StorageType;
@@ -94,7 +95,7 @@ public:
         return elements.data();
     }
 
-    void setWeights(std::size_t matrixID, const std::map<Coord<2>, WEIGHT_TYPE>& matrix)
+    void setWeights(std::size_t matrixID, const SparseMatrix& matrix)
     {
         assert(matrixID < MATRICES);
         matrices[matrixID].initFromMatrix(matrix);

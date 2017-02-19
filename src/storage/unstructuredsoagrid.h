@@ -114,8 +114,12 @@ private:
 /**
  * A unstructured grid for irregular structures using SoA memory layout.
  */
-template<typename ELEMENT_TYPE, std::size_t MATRICES = 1,
-         typename VALUE_TYPE = double, int MY_C = 64, int MY_SIGMA = 1>
+template<
+    typename ELEMENT_TYPE,
+    std::size_t MATRICES = 1,
+    typename WEIGHT_TYPE = double,
+    int MY_C = 64,
+    int MY_SIGMA = 1>
 class UnstructuredSoAGrid : public GridBase<ELEMENT_TYPE, 1>
 {
 public:
@@ -124,8 +128,8 @@ public:
     using GridBase<ELEMENT_TYPE, 1>::saveRegion;
     using GridBase<ELEMENT_TYPE, 1>::loadRegion;
 
-    // fixme: rename VALUE_TYPE to WEIGHT_TYPE
-    typedef VALUE_TYPE WeightType;
+    typedef typename GridBase<ELEMENT_TYPE, 1>::SparseMatrix SparseMatrix;
+    typedef WEIGHT_TYPE WeightType;
     typedef char StorageType;
     const static int DIM = 1;
     const static int SIGMA = MY_SIGMA;
@@ -150,7 +154,7 @@ public:
         // init matrices
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
-                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dimension.x());
+                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(dimension.x());
         }
 
         // the grid size should be padded to the total number of chunks
@@ -184,21 +188,21 @@ public:
     }
 
     inline
-    void setWeights(std::size_t matrixID, const std::map<Coord<2>, VALUE_TYPE>& matrix)
+    void setWeights(std::size_t matrixID, const SparseMatrix& matrix)
     {
         assert(matrixID < MATRICES);
         matrices[matrixID].initFromMatrix(matrix);
     }
 
     inline
-    const SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>& getWeights(std::size_t const matrixID) const
+    const SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>& getWeights(std::size_t const matrixID) const
     {
         assert(matrixID < MATRICES);
         return matrices[matrixID];
     }
 
     inline
-    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>& getWeights(std::size_t const matrixID)
+    SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>& getWeights(std::size_t const matrixID)
     {
         assert(matrixID < MATRICES);
         return matrices[matrixID];
@@ -288,7 +292,7 @@ public:
                     << (*this)[*i] << "\n"
                     << "neighbor: ";
 
-            std::vector<std::pair<int, VALUE_TYPE> > neighbor =
+            std::vector<std::pair<int, WEIGHT_TYPE> > neighbor =
                 matrices[0].getRow(index++);
             message << neighbor;
         }
@@ -446,7 +450,7 @@ private:
     LibFlatArray::soa_grid<ELEMENT_TYPE> elements;
     int origin;
     // TODO wrapper for different types of sell c sigma containers
-    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> matrices[MATRICES];
+    SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA> matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;
 
@@ -463,10 +467,10 @@ private:
     }
 };
 
-template<typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
+template<typename ELEMENT_TYPE, std::size_t MATRICES, typename WEIGHT_TYPE, int C, int SIGMA>
 inline
 std::ostream& operator<<(std::ostream& os,
-                         const UnstructuredSoAGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid)
+                         const UnstructuredSoAGrid<ELEMENT_TYPE, MATRICES, WEIGHT_TYPE, C, SIGMA>& grid)
 {
     os << grid.toString();
     return os;

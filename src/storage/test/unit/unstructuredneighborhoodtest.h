@@ -60,7 +60,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         Region<1> region;
         region << Streak<1>(Coord<1>(0), 4);
-        ReorderingUnstructuredGrid<UnstructuredGrid<MyCell, 1, double, 1, 1> > grid(region, MyCell(), MyCell());
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<MyCell, 1, double, 1, 1> > GridType;
+        GridType grid(region, MyCell(), MyCell());
 
         // init elements
         grid[0] = MyCell(0.5);
@@ -74,11 +75,11 @@ public:
         // 0 2 0 0
         // 0 0 3 0
         // 0 0 0 4
-        std::map<Coord<2>, double> weights;
-        weights[Coord<2>(0, 0)] = 1;
-        weights[Coord<2>(1, 1)] = 2;
-        weights[Coord<2>(2, 2)] = 3;
-        weights[Coord<2>(3, 3)] = 4;
+        GridType::SparseMatrix weights;
+        weights << std::make_pair(Coord<2>(0, 0), 1);
+        weights << std::make_pair(Coord<2>(1, 1), 2);
+        weights << std::make_pair(Coord<2>(2, 2), 3);
+        weights << std::make_pair(Coord<2>(3, 3), 4);
         grid.setWeights(0, weights);
 
         // init neighborhood
@@ -119,7 +120,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         Region<1> region;
         region << Streak<1>(Coord<1>(0), 8);
-        ReorderingUnstructuredGrid<UnstructuredGrid<MyCell, 1, double, 1, 1> > grid(region, MyCell(), MyCell());
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<MyCell, 1, double, 1, 1> > GridType;
+        GridType grid(region, MyCell(), MyCell());
 
         // init weights
         // matrix:
@@ -131,12 +133,12 @@ public:
         // 0 0 0 0 0 0 0 0
         // 0 0 0 0 0 0 0 0
         // 0 0 0 0 0 0 0 0
-        std::map<Coord<2>, double> weights;
-        weights[Coord<2>(1, 1)] = 2;
-        weights[Coord<2>(1, 3)] = 3;
-        weights[Coord<2>(1, 4)] = 7;
-        weights[Coord<2>(1, 5)] = 6;
-        weights[Coord<2>(1, 6)] = 4;
+        GridType::SparseMatrix weights;
+        weights << std::make_pair(Coord<2>(1, 1), 2.0);
+        weights << std::make_pair(Coord<2>(1, 3), 3.0);
+        weights << std::make_pair(Coord<2>(1, 4), 7.0);
+        weights << std::make_pair(Coord<2>(1, 5), 6.0);
+        weights << std::make_pair(Coord<2>(1, 6), 4.0);
         grid.setWeights(0, weights);
 
         // init neighborhood

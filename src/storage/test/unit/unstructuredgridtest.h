@@ -181,31 +181,31 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 128;
-        UnstructuredGrid<int, 2, double, 4, 1> *grid =
-            new UnstructuredGrid<int, 2, double, 4, 1>(Coord<1>(DIM));
-        std::map<Coord<2>,double> weights0;
-        std::map<Coord<2>,double> weights1;
-        std::map<Coord<2>,double> rawMatrix0;
-        std::map<Coord<2>,double> rawMatrix1;
+        typedef UnstructuredGrid<int, 2, double, 4, 1> GridType;
+        GridType *grid = new GridType(Coord<1>(DIM));
+        GridType::SparseMatrix weights0;
+        GridType::SparseMatrix weights1;
+        GridType::SparseMatrix rawMatrix0;
+        GridType::SparseMatrix rawMatrix1;
         SellCSigmaSparseMatrixContainer<double,4,1> matrix0 (DIM);
         SellCSigmaSparseMatrixContainer<double,4,1> matrix1 (DIM);
 
         for (int i = 0; i < DIM; ++i) {
             grid->set(Coord<1>(i), i);
 
-            weights0[  Coord<2>(i,abs(i*57)      % DIM)] =  i      / DIM;
-            weights0[  Coord<2>(i,abs(i*57 + 75) % DIM)] =  i * 57 / DIM;
-            weights0[  Coord<2>(i,abs(i*57 - 7 ) % DIM)] =  i *  7 / DIM;
-            rawMatrix0[Coord<2>(i,abs(i*57)      % DIM)] =  i      / DIM;
-            rawMatrix0[Coord<2>(i,abs(i*57 + 75) % DIM)] =  i * 57 / DIM;
-            rawMatrix0[Coord<2>(i,abs(i*57 - 7 ) % DIM)] =  i * 7  / DIM;
+            weights0   << std::make_pair(Coord<2>(i,abs(i*57)      % DIM),  i      / DIM);
+            weights0   << std::make_pair(Coord<2>(i,abs(i*57 + 75) % DIM),  i * 57 / DIM);
+            weights0   << std::make_pair(Coord<2>(i,abs(i*57 - 7 ) % DIM),  i *  7 / DIM);
+            rawMatrix0 << std::make_pair(Coord<2>(i,abs(i*57)      % DIM),  i      / DIM);
+            rawMatrix0 << std::make_pair(Coord<2>(i,abs(i*57 + 75) % DIM),  i * 57 / DIM);
+            rawMatrix0 << std::make_pair(Coord<2>(i,abs(i*57 - 7 ) % DIM),  i * 7  / DIM);
 
-            weights1[  Coord<2>(i,abs(i*57)      % DIM)] = -i      / DIM;
-            weights1[  Coord<2>(i,abs(i*57 + 75) % DIM)] = -i * 57 / DIM;
-            weights1[  Coord<2>(i,abs(i*57 - 7 ) % DIM)] = -i *  7 / DIM;
-            rawMatrix1[Coord<2>(i,abs(i*57)      % DIM)] = -i      / DIM;
-            rawMatrix1[Coord<2>(i,abs(i*57 + 75) % DIM)] = -i * 57 / DIM;
-            rawMatrix1[Coord<2>(i,abs(i*57 - 7 ) % DIM)] = -i *  7 / DIM;
+            weights1   << std::make_pair(Coord<2>(i,abs(i*57)      % DIM), -i      / DIM);
+            weights1   << std::make_pair(Coord<2>(i,abs(i*57 + 75) % DIM), -i * 57 / DIM);
+            weights1   << std::make_pair(Coord<2>(i,abs(i*57 - 7 ) % DIM), -i *  7 / DIM);
+            rawMatrix1 << std::make_pair(Coord<2>(i,abs(i*57)      % DIM), -i      / DIM);
+            rawMatrix1 << std::make_pair(Coord<2>(i,abs(i*57 + 75) % DIM), -i * 57 / DIM);
+            rawMatrix1 << std::make_pair(Coord<2>(i,abs(i*57 - 7 ) % DIM), -i *  7 / DIM);
         }
 
         matrix0.initFromMatrix(rawMatrix0);

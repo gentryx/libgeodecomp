@@ -440,7 +440,7 @@ public:
     void grid(GridBase<DataflowTestModel, 1> *grid)
     {
         Region<1> boundingRegion = grid->boundingRegion();
-        std::map<Coord<2>, double> weights;
+        GridBase<DataflowTestModel, 1>::SparseMatrix weights;
 
         for (auto&& i: boundingRegion) {
             std::vector<int> neighbors = genNeighborList(i.x());
@@ -448,7 +448,7 @@ public:
             grid->set(i, cell);
 
             for (auto&& j: neighbors) {
-                weights[Coord<2>(i.x(), j)] = i.x() * 1000 + j;
+                weights << std::make_pair(Coord<2>(i.x(), j), i.x() * 1000 + j);
             }
         }
 

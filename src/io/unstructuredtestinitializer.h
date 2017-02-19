@@ -32,7 +32,7 @@ public:
     {
         int cycle = NANO_STEPS * firstStep;
         Region<1> boundingRegion = ret->boundingRegion();
-        std::map<Coord<2>, double> weights;
+        typename GridBase<TEST_CELL, 1>::SparseMatrix weights;
 
         for (Region<1>::Iterator i = boundingRegion.begin(); i != boundingRegion.end(); ++i) {
             TEST_CELL cell(i->x(), cycle, true);
@@ -49,7 +49,7 @@ public:
                 double edgeWeight = actualNeighbor + 0.1;
 
                 weightsReorderBuffer[actualNeighbor] = edgeWeight;
-                weights[Coord<2>(i->x(), actualNeighbor)] = edgeWeight;
+                weights << std::make_pair(Coord<2>(i->x(), actualNeighbor), edgeWeight);
             }
 
             for (std::map<int, double>::iterator j = weightsReorderBuffer.begin(); j != weightsReorderBuffer.end(); ++j) {

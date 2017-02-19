@@ -36,12 +36,12 @@ public:
 };
 
 template<typename ADJACENCY, typename T>
-typename SharedPtr<ADJACENCY>::Type MakeAdjacency(const std::map<Coord<2>, T>& weights)
+typename SharedPtr<ADJACENCY>::Type MakeAdjacency(const std::vector<std::pair<Coord<2>, T> >& weights)
 {
-    typename SharedPtr<ADJACENCY>::Type result(new ADJACENCY);;
+    typename SharedPtr<ADJACENCY>::Type result(new ADJACENCY);
+    typedef std::vector<std::pair<Coord<2>, T> > SparseMatrix;
 
-    for (typename std::map<Coord<2>, T>::const_iterator it = weights.begin(); it != weights.end(); ++it) {
-
+    for (typename SparseMatrix::const_iterator it = weights.begin(); it != weights.end(); ++it) {
         // ptscotch doesn't like edges from nodes to themselves
         if (it->first.x() == it->first.y()) {
             continue;

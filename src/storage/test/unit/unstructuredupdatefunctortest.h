@@ -185,10 +185,10 @@ public:
         region << Streak<1>(Coord<1>(100), 150);
 
         // weights matrix looks like this: 1 0 1 0 1 0 ...
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < DIM; col += 2) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix << std::make_pair(Coord<2>(row, col), 1);
             }
         }
         gridOld.setWeights(0, matrix);
@@ -234,10 +234,10 @@ public:
         region << Streak<1>(Coord<1>(100), 150);
 
         // weights matrix looks like this: 1 0 1 0 1 0 ...
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < DIM; col += 2) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix << std::make_pair(Coord<2>(row, col), 1);
             }
         }
         gridOld.setWeights(0, matrix);
@@ -284,10 +284,10 @@ public:
         // 1 1 1
         // ...
         // -> force sorting
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix << std::make_pair(Coord<2>(row, col), 1);
             }
         }
         gridOld.setWeights(0, matrix);
@@ -342,10 +342,10 @@ public:
         // 1 1 1
         // ...
         // -> force sorting
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix << std::make_pair(Coord<2>(row, col), 1);
             }
         }
         gridOld.setWeights(0, matrix);
@@ -402,10 +402,10 @@ public:
         // 2 12
         // 3 13 23
         // ...
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = row + col * 10;
+                matrix << std::make_pair(Coord<2>(row, col), row + col * 10);
             }
         }
         gridOld.setWeights(0, matrix);
@@ -468,10 +468,10 @@ public:
         // 2 12
         // 3 13 23
         // ...
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = row + col * 100;
+                matrix << std::make_pair(Coord<2>(row, col), row + col * 100);
             }
         }
         gridOld.setWeights(0, matrix);

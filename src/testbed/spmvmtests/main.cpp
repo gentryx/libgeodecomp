@@ -184,7 +184,7 @@ private:
     std::vector<int>        column;
     std::vector<int>        rowLen;
 
-    void initFromMatrix(const std::map<Coord<2>, VALUE_TYPE>& matrix)
+    void initFromMatrix(const std::vector<std::pair<Coord<2>, VALUE_TYPE> >& matrix)
     {
         const int nonZero = matrix.size();
         if (!nonZero) {
@@ -236,7 +236,7 @@ public:
 
     void init(const std::string& fileName)
     {
-        std::map<Coord<2>, VALUE_TYPE> adjacency;
+        std::vector<std::pair<Coord<2>, VALUE_TYPE> > adjacency;
 
         // read matrix into adjacency (this may take some time ...)
         // using this C API provided by matrix market
@@ -266,7 +266,7 @@ public:
             if (fscanf(f, "%d %d %lg\n", &m, &n, &tmp) != 3) {
                 throw std::logic_error("Failed to parse mtx format");
             }
-            adjacency[Coord<2>(m - 1, n - 1)] = tmp;
+            adjacency << std::make_pair(Coord<2>(m - 1, n - 1), tmp);
         }
 
         fclose(f);
@@ -300,7 +300,7 @@ public:
     virtual void grid(GridBase<CELL, 1> *grid)
     {
         // setup sparse matrix
-        std::map<Coord<2>, double> weights;
+        std::vector<std::pair<Coord<2>, double> > weights;
 
         // read matrix into weights (this may take some time ...)
         // using this C API provided by matrix market
@@ -330,7 +330,7 @@ public:
             if (fscanf(f, "%d %d %lg\n", &m, &n, &tmp) != 3) {
                 throw std::logic_error("Failed to parse mtx format");
             }
-            weights[Coord<2>(m - 1, n - 1)] = tmp;
+            weights << std::make_pair(Coord<2>(m - 1, n - 1), tmp);
         }
 
         fclose(f);

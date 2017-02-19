@@ -155,7 +155,7 @@ public:
     void grid(GridBase<MODEL, 1> *grid)
     {
         CoordBox<1> box = grid->boundingBox();
-        std::map<Coord<2>, double> weights;
+        typename GridBase<MODEL, 1>::SparseMatrix weights;
 
         for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
             std::vector<int> neighbors = getNeighbors(i->x());
@@ -163,7 +163,7 @@ public:
             grid->set(*i, cell);
 
             for (auto&& j: neighbors) {
-                weights[Coord<2>(i->x(), j)] = 0.1;
+                weights << std::make_pair(Coord<2>(i->x(), j), 0.1);
             }
         }
 
