@@ -19,6 +19,11 @@ public:
         viewBox(viewBox)
     {}
 
+    virtual void resize(const CoordBox<DIM>& newBox)
+    {
+        viewBox = newBox;
+    }
+
     virtual void set(const Coord<DIM>& coord, const CELL& cell)
     {
         delegate->set(coord, cell);

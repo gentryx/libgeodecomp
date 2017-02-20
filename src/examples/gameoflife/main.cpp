@@ -108,15 +108,6 @@ public:
     }
 };
 
-class CellToColor {
-public:
-    Color operator()(const ConwayCell& cell)
-    {
-        int val = (int)cell.alive * 255;
-        return Color(val, val, val);
-    }
-};
-
 void runSimulation()
 {
     int outputFrequency = 1;

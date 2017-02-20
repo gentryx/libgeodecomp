@@ -1,10 +1,13 @@
 #ifndef LIBGEODECOMP_STORAGE_CUDAGRID_H
 #define LIBGEODECOMP_STORAGE_CUDAGRID_H
 
+#include <libflatarray/cuda_array.hpp>
+
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
-#include <libgeodecomp/storage/cudaarray.h>
 #include <libgeodecomp/storage/gridbase.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
+#include <libgeodecomp/misc/stringops.h>
 
 #include <cuda.h>
 
@@ -26,15 +29,61 @@ public:
     typedef TOPOLOGY Topology;
 
     static const int DIM = Topology::DIM;
+    using GridBase<CellType, DIM>::topoDimensions;
+    using GridBase<CellType, DIM>::saveRegion;
+    using GridBase<CellType, DIM>::loadRegion;
 
     explicit inline CUDAGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
+        const CellType& defaultCell = CellType(),
+        const CellType& edgeCell = CellType(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CellType, DIM>(topologicalDimensions),
         box(box),
-        topoDimensions(topologicalDimensions),
-        array(box.dimensions.prod()),
-        edgeCellStore(1, CELL_TYPE())
+        array(box.dimensions.prod(), defaultCell),
+        edgeCellStore(1, edgeCell),
+        hostEdgeCell(edgeCell)
     {}
+
+    explicit inline CUDAGrid(
+        const Region<DIM>& region,
+        const CellType& defaultCell = CellType(),
+        const CellType& edgeCell = CellType(),
+        const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CellType, DIM>(topologicalDimensions),
+        box(region.boundingBox()),
+        array(box.dimensions.prod(), defaultCell),
+        edgeCellStore(1, edgeCell),
+        hostEdgeCell(edgeCell)
+    {}
+
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    __host__ __device__
+    inline
+    CellType *data()
+    {
+        return array.data();
+    }
+
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    __host__ __device__
+    inline
+    const CellType *data() const
+    {
+        return array.data();
+    }
+
+    inline
+    void resize(const CoordBox<DIM>& newBox)
+    {
+        box = newBox;
+        array.resize(box.dimensions.prod());
+    }
 
     inline
     void set(const Coord<DIM>& coord, const CELL_TYPE& source)
@@ -43,6 +92,7 @@ public:
         CELL_TYPE *target = address(coord);
         if (target == edgeCellStore.data()) {
             hostEdgeCell = source;
+            edgeCellStore.load(&source);
         }
         cudaMemcpy(target, &source, length, cudaMemcpyHostToDevice);
     }
@@ -73,7 +123,7 @@ public:
     void setEdge(const CELL_TYPE& cell)
     {
         hostEdgeCell = cell;
-        cudaMemcpy(edgeCellStore.data(), &hostEdgeCell, sizeof(CELL_TYPE), cudaMemcpyHostToDevice);
+        edgeCellStore.load(&cell);
     }
 
     const CELL_TYPE& getEdge() const
@@ -86,12 +136,55 @@ public:
         return box;
     }
 
+    void saveRegion(std::vector<CELL_TYPE> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL_TYPE>::storageSize(region);
+        if (target->size() < expectedMinimumSize) {
+            throw std::logic_error(
+                "target buffer too small (is " + StringOps::itoa(target->size()) +
+                ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
+        }
+
+        CellType *cursor = target->data();
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+
+            std::size_t length = i->length() * sizeof(CellType);
+            cudaMemcpy(cursor, const_cast<CellType*>(address(i->origin + offset)), length, cudaMemcpyDeviceToHost);
+            cursor += i->length();
+        }
+    }
+
+    void loadRegion(const std::vector<CELL_TYPE>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    {
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL_TYPE>::storageSize(region);
+        if (source.size() < expectedMinimumSize) {
+            throw std::logic_error(
+                "source buffer too small (is " + StringOps::itoa(source.size()) +
+                ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
+        }
+
+        const CellType *cursor = source.data();
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+
+            std::size_t length = i->length() * sizeof(CellType);
+            cudaMemcpy(address(i->origin + offset), cursor, length, cudaMemcpyHostToDevice);
+            cursor += i->length();
+        }
+    }
+
     template<typename GRID_TYPE, typename REGION>
     void saveRegion(GRID_TYPE *target, const REGION& region) const
     {
         for (typename REGION::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
+
             std::size_t length = i->length() * sizeof(CellType);
             cudaMemcpy(&(*target)[i->origin], const_cast<CellType*>(address(i->origin)), length, cudaMemcpyDeviceToHost);
         }
@@ -112,18 +205,6 @@ public:
     const CoordBox<DIM>& boundingBox()
     {
         return box;
-    }
-
-    __host__ __device__
-    CellType *data()
-    {
-        return array.data();
-    }
-
-    __host__ __device__
-    const CellType *data() const
-    {
-        return array.data();
     }
 
     __host__ __device__
@@ -181,9 +262,8 @@ protected:
 
 private:
     CoordBox<DIM> box;
-    Coord<DIM> topoDimensions;
-    CUDAArray<CellType> array;
-    CUDAArray<CellType> edgeCellStore;
+    LibFlatArray::cuda_array<CellType> array;
+    LibFlatArray::cuda_array<CellType> edgeCellStore;
     CellType hostEdgeCell;
 
     std::size_t byteSize() const

@@ -50,19 +50,18 @@ public:
             grids[step].resize(CoordBox<DIM>(Coord<DIM>(), globalDimensions));
         }
 
-        CoordBox<DIM> box = grid.boundingBox();
-        GridType localGrid(box);
-        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
-            grid.get(*i, &localGrid[(*i).origin]);
+        std::vector<CELL_TYPE> buf;
+        for (typename Region<DIM>::StreakIterator i = validRegion.beginStreak(); i != validRegion.endStreak(); ++i) {
+            buf.resize(i->length());
+            grid.get(*i, buf.data());
+            grids[step].set(*i, buf.data());
         }
-
-        grids[step].paste(grid, validRegion);
         grids[step].setEdge(grid.getEdge());
 
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {
             for (int receiver = 0; receiver < mpiLayer.size(); ++receiver) {
                 if (sender != receiver) {
-                    sendRecvGrid(sender, receiver, localGrid, validRegion, step);
+                    sendRecvGrid(sender, receiver, grids[step], validRegion, step);
                 }
             }
         }

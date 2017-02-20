@@ -28,6 +28,8 @@ public:
     typedef Grid<CELL_TYPE, TOPOLOGY> Delegate;
     typedef CoordMap<CELL_TYPE, Delegate> CoordMapType;
 
+    using GridBase<CELL_TYPE, TOPOLOGY::DIM>::loadRegion;
+    using GridBase<CELL_TYPE, TOPOLOGY::DIM>::saveRegion;
     using GridBase<CELL_TYPE, TOPOLOGY::DIM>::topoDimensions;
 
     explicit DisplacedGrid(
@@ -41,20 +43,39 @@ public:
     {}
 
     explicit DisplacedGrid(
+        const Region<DIM>& region,
+        const CELL_TYPE& defaultCell = CELL_TYPE(),
+        const CELL_TYPE& edgeCell = CELL_TYPE(),
+        const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CELL_TYPE, TOPOLOGY::DIM>(topologicalDimensions),
+        delegate(region.boundingBox().dimensions, defaultCell, edgeCell),
+        origin(region.boundingBox().origin)
+    {}
+
+    explicit DisplacedGrid(
         const Delegate& grid,
         const Coord<DIM>& origin=Coord<DIM>()) :
         delegate(grid),
         origin(origin)
     {}
 
-    inline CELL_TYPE *baseAddress()
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    inline
+    CELL_TYPE *data()
     {
-        return delegate.baseAddress();
+        return delegate.data();
     }
 
-    inline const CELL_TYPE *baseAddress() const
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    inline
+    const CELL_TYPE *data() const
     {
-        return delegate.baseAddress();
+        return delegate.data();
     }
 
     inline const Coord<DIM>& getOrigin() const
@@ -131,18 +152,6 @@ public:
         return getEdgeCell();
     }
 
-    void fill(const CoordBox<DIM>& box, const CELL_TYPE& cell)
-    {
-        delegate.fill(CoordBox<DIM>(box.origin - origin, box.dimensions), cell);
-    }
-
-    inline void paste(const GridBase<CELL_TYPE, DIM>& grid, const Region<DIM>& region)
-    {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            grid.get(*i, &(*this)[i->origin]);
-        }
-    }
-
     inline const Coord<DIM>& getDimensions() const
     {
         return delegate.getDimensions();
@@ -151,6 +160,40 @@ public:
     virtual CoordBox<DIM> boundingBox() const
     {
         return CoordBox<DIM>(origin, delegate.getDimensions());
+    }
+
+    void saveRegion(std::vector<CELL_TYPE> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        CELL_TYPE *source = buffer->data();
+        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+            Coord<DIM> relativeCoord = i->origin - origin;
+            if (TOPOLOGICALLY_CORRECT) {
+                relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+            }
+
+            Streak<DIM> streak(relativeCoord, relativeCoord.x() + i->length());
+
+            delegate.get(streak, source);
+            source += i->length();
+        }
+    }
+
+    void loadRegion(const std::vector<CELL_TYPE>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    {
+        const CELL_TYPE *source = buffer.data();
+        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+            Coord<DIM> relativeCoord = i->origin - origin;
+            if (TOPOLOGICALLY_CORRECT) {
+                relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+            }
+
+            Streak<DIM> streak(relativeCoord, relativeCoord.x() + i->length());
+
+            delegate.set(streak, source);
+            source += i->length();
+        }
     }
 
     inline CoordMapType getNeighborhood(const Coord<DIM>& center) const

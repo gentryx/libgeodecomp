@@ -2,11 +2,12 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/storage/unstructuredupdatefunctor.h>
-#include <libgeodecomp/storage/unstructuredgrid.h>
-#include <libgeodecomp/storage/unstructuredsoagrid.h>
-#include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
+#include <libgeodecomp/storage/updatefunctor.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredlooppeeler.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
+#include <libgeodecomp/storage/unstructuredupdatefunctor.h>
 
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
@@ -47,11 +48,12 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
-            hoodNew[i].sum = 0.;
+        for (; hoodOld.index() < indexEnd; ++hoodOld) {
+            hoodNew->sum = 0.0;
             for (const auto& j: hoodOld.weights(0)) {
-                hoodNew[i].sum += hoodOld[j.first()].value * j.second();
+                hoodNew->sum += hoodOld[j.first()].value * j.second();
             }
+            ++hoodNew;
         }
     }
 
@@ -92,30 +94,41 @@ public:
         public APITraits::HasSellType<double>,
         public APITraits::HasSellMatrices<1>,
         public APITraits::HasSellC<4>,
-        public APITraits::HasSellSigma<SIGMA>
-    {
-    public:
-        LIBFLATARRAY_CUSTOM_SIZES((16)(32)(64)(128)(256)(512), (1), (1))
-    };
+        public APITraits::HasSellSigma<SIGMA>,
+        public LibFlatArray::api_traits::has_default_1d_sizes
+    {};
 
-    inline explicit SimpleUnstructuredSoATestCell(double v = 0) :
-        value(v), sum(0)
+    inline
+    explicit SimpleUnstructuredSoATestCell(double v = 0) :
+        value(v),
+        sum(0)
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (int i = hoodOld.index(); i < indexEnd / HOOD_OLD::ARITY; ++i, ++hoodOld) {
-            ShortVec tmp;
-            tmp.load_aligned(&hoodNew->sum() + i * 4);
-            for (const auto& j: hoodOld.weights(0)) {
-                ShortVec weights, values;
-                weights.load_aligned(j.second());
-                values.gather(&hoodOld->value(), j.first());
-                tmp += values * weights;
-            }
-            tmp.store_aligned(&hoodNew->sum() + i * 4);
-        }
+        unstructuredLoopPeeler<ShortVec>(
+            &hoodNew.index(),
+            indexEnd,
+            hoodOld,
+            [&hoodNew](auto REAL, auto *counter, const auto& end, auto& hoodOld) {
+                typedef decltype(REAL) ShortVec;
+                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY) {
+                    ShortVec tmp;
+                    tmp.load_aligned(&hoodNew->sum());
+
+                    for (const auto& j: hoodOld.weights()) {
+                        ShortVec weights, values;
+                        weights.load_aligned(j.second());
+                        values.gather(&hoodOld->value(), j.first());
+                        tmp += values * weights;
+
+                    }
+
+                    &hoodNew->sum() << tmp;
+                    ++hoodOld;
+                }
+            });
     }
 
     template<typename NEIGHBORHOOD>
@@ -141,8 +154,8 @@ public:
     double sum;
 };
 
-LIBFLATARRAY_REGISTER_SOA(SimpleUnstructuredSoATestCell<1  >, ((double)(sum))((double)(value)))
-LIBFLATARRAY_REGISTER_SOA(SimpleUnstructuredSoATestCell<150>, ((double)(sum))((double)(value)))
+LIBFLATARRAY_REGISTER_SOA(SimpleUnstructuredSoATestCell<1 >, ((double)(sum))((double)(value)))
+LIBFLATARRAY_REGISTER_SOA(SimpleUnstructuredSoATestCell<60>, ((double)(sum))((double)(value)))
 #endif
 
 namespace LibGeoDecomp {
@@ -155,13 +168,16 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         Coord<1> dim(DIM);
+        Region<1> boundingRegion;
+        boundingRegion << CoordBox<1>(Coord<1>(0), dim);
 
         typedef SimpleUnstructuredTestCell<1, EmptyUnstructuredTestCellAPI> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
-        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<TestCellType, 1, double, 4, 1> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
         Region<1> region;
         region << Streak<1>(Coord<1>(10),   30);
@@ -169,10 +185,10 @@ public:
         region << Streak<1>(Coord<1>(100), 150);
 
         // weights matrix looks like this: 1 0 1 0 1 0 ...
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < DIM; col += 2) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix << std::make_pair(Coord<2>(row, col), 1);
             }
         }
         gridOld.setWeights(0, matrix);
@@ -201,13 +217,16 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         Coord<1> dim(DIM);
+        Region<1> boundingRegion;
+        boundingRegion << CoordBox<1>(Coord<1>(0), dim);
 
         typedef SimpleUnstructuredTestCell<1> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
-        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredGrid<TestCellType, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<TestCellType, 1, double, 4, 1> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
         Region<1> region;
         region << Streak<1>(Coord<1>(10),   30);
@@ -215,10 +234,10 @@ public:
         region << Streak<1>(Coord<1>(100), 150);
 
         // weights matrix looks like this: 1 0 1 0 1 0 ...
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < DIM; col += 2) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix << std::make_pair(Coord<2>(row, col), 1);
             }
         }
         gridOld.setWeights(0, matrix);
@@ -247,18 +266,16 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         Coord<1> dim(DIM);
+        Region<1> boundingRegion;
+        boundingRegion << CoordBox<1>(Coord<1>(0), dim);
 
         typedef SimpleUnstructuredTestCell<128, EmptyUnstructuredTestCellAPI> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
-        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridNew(dim, defaultCell, edgeCell);
-
-        Region<1> region;
-        region << Streak<1>(Coord<1>(10),   30);
-        region << Streak<1>(Coord<1>(40),   60);
-        region << Streak<1>(Coord<1>(100), 150);
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<TestCellType, 1, double, 4, 128> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
         // weights matrix looks like this:
         // 0
@@ -267,13 +284,20 @@ public:
         // 1 1 1
         // ...
         // -> force sorting
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix << std::make_pair(Coord<2>(row, col), 1);
             }
         }
         gridOld.setWeights(0, matrix);
+        gridNew.setWeights(0, matrix);
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(40),   60);
+        region << Streak<1>(Coord<1>(100), 150);
+        region = gridOld.remapRegion(region);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -300,18 +324,16 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         Coord<1> dim(DIM);
+        Region<1> boundingRegion;
+        boundingRegion << CoordBox<1>(Coord<1>(0), dim);
 
         typedef SimpleUnstructuredTestCell<128> TestCellType;
         TestCellType defaultCell(200);
         TestCellType edgeCell(-1);
 
-        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredGrid<TestCellType, 1, double, 4, 128> gridNew(dim, defaultCell, edgeCell);
-
-        Region<1> region;
-        region << Streak<1>(Coord<1>(10),   30);
-        region << Streak<1>(Coord<1>(40),   60);
-        region << Streak<1>(Coord<1>(100), 150);
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<TestCellType, 1, double, 4, 128> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
         // weights matrix looks like this:
         // 0
@@ -320,13 +342,20 @@ public:
         // 1 1 1
         // ...
         // -> force sorting
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix << std::make_pair(Coord<2>(row, col), 1);
             }
         }
         gridOld.setWeights(0, matrix);
+        gridNew.setWeights(0, matrix);
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(40),   60);
+        region << Streak<1>(Coord<1>(100), 150);
+        region = gridOld.remapRegion(region);
 
         UnstructuredUpdateFunctor<TestCellType > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -338,7 +367,8 @@ public:
             if (((coord.x() >=  10) && (coord.x() <  30)) ||
                 ((coord.x() >=  40) && (coord.x() <  60)) ||
                 ((coord.x() >= 100) && (coord.x() < 150))) {
-                const double sum = coord.x() * 200.0;
+
+                const double sum = coord.x() * 200;
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
                 TS_ASSERT_EQUALS(0.0, gridNew.get(coord).sum);
@@ -352,34 +382,45 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         CoordBox<1> dim(Coord<1>(0), Coord<1>(DIM));
+        Region<1> boundingRegion;
+        boundingRegion << dim;
 
         SimpleUnstructuredSoATestCell<1> defaultCell(200);
         SimpleUnstructuredSoATestCell<1> edgeCell(-1);
 
-        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<1>, 1, double, 4, 1> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<1>, 1, double, 4, 1> gridNew(dim, defaultCell, edgeCell);
+        typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<1>, 1, double, 4, 1> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
-        Region<1> region;
-        // "normal" streak
-        region << Streak<1>(Coord<1>(10),   30);
-        // loop peeling in first chunk
-        region << Streak<1>(Coord<1>(37),   60);
-        // loop peeling in last chunk
-        region << Streak<1>(Coord<1>(100), 149);
+        for (int i = 0; i < DIM; ++i) {
+            gridOld.set(Coord<1>(i), SimpleUnstructuredSoATestCell<1>(2000 + i));
+        }
 
         // weights matrix looks like this:
         // 0
         // 1
-        // 1 1
-        // 1 1 1
+        // 2 12
+        // 3 13 23
         // ...
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix << std::make_pair(Coord<2>(row, col), row + col * 10);
             }
         }
         gridOld.setWeights(0, matrix);
+        gridNew.setWeights(0, matrix);
+
+        Region<1> region;
+        // loop peeling in first and last chunk
+        region << Streak<1>(Coord<1>(10),   30);
+        // loop peeling in first chunk
+        region << Streak<1>(Coord<1>(37),   60);
+        // "normal" streak
+        region << Streak<1>(Coord<1>(64),   80);
+        // loop peeling in last chunk
+        region << Streak<1>(Coord<1>(100), 149);
+        region = gridOld.remapRegion(region);
 
         UnstructuredUpdateFunctor<SimpleUnstructuredSoATestCell<1> > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
@@ -388,10 +429,12 @@ public:
         functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
-            if (((coord.x() >=  10) && (coord.x() <  30)) ||
-                ((coord.x() >=  37) && (coord.x() <  60)) ||
-                ((coord.x() >= 100) && (coord.x() < 149))) {
-                const double sum = coord.x() * 200.0;
+            if (region.count(coord)) {
+                double sum = 0;
+                for (int i = 0; i < coord.x(); ++i) {
+                    double weight = coord.x() + i * 10;
+                    sum += weight * (2000 + i);
+                }
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
                 TS_ASSERT_EQUALS(0.0, gridNew.get(coord).sum);
@@ -405,46 +448,59 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 150;
         CoordBox<1> dim(Coord<1>(0), Coord<1>(DIM));
+        Region<1> boundingRegion;
+        boundingRegion << dim;
 
-        SimpleUnstructuredSoATestCell<150> defaultCell(200);
-        SimpleUnstructuredSoATestCell<150> edgeCell(-1);
+        SimpleUnstructuredSoATestCell<60> defaultCell(200);
+        SimpleUnstructuredSoATestCell<60> edgeCell(-1);
 
-        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<150>, 1, double, 4, 150> gridOld(dim, defaultCell, edgeCell);
-        UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<150>, 1, double, 4, 150> gridNew(dim, defaultCell, edgeCell);
+        typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<SimpleUnstructuredSoATestCell<60>, 1, double, 4, 60> > GridType;
+        GridType gridOld(boundingRegion, defaultCell, edgeCell);
+        GridType gridNew(boundingRegion, defaultCell, edgeCell);
 
-        Region<1> region;
-        // "normal" streak
-        region << Streak<1>(Coord<1>(10),   30);
-        // loop peeling in first chunk
-        region << Streak<1>(Coord<1>(37),   60);
-        // loop peeling in last chunk
-        region << Streak<1>(Coord<1>(100), 149);
+        for (int i = 0; i < DIM; ++i) {
+            gridOld.set(Coord<1>(i), SimpleUnstructuredSoATestCell<60>(3000 + i));
+        }
 
         // weights matrix looks like this:
         // 0
         // 1
-        // 1 1
-        // 1 1 1
+        // 2 12
+        // 3 13 23
         // ...
-        std::map<Coord<2>, double> matrix;
+        GridType::SparseMatrix matrix;
         for (int row = 0; row < DIM; ++row) {
             for (int col = 0; col < row; ++col) {
-                matrix[Coord<2>(row, col)] = 1;
+                matrix << std::make_pair(Coord<2>(row, col), row + col * 100);
             }
         }
         gridOld.setWeights(0, matrix);
+        gridNew.setWeights(0, matrix);
 
-        UnstructuredUpdateFunctor<SimpleUnstructuredSoATestCell<150> > functor;
+        Region<1> region;
+        // use the same variation of Streaks as in the previous
+        // example, even though they will not correspond to the same
+        // special cases (with regard to starting/ending on chunk
+        // boundaries) as the Region get's remapped anyway.
+        region << Streak<1>(Coord<1>(10),   30);
+        region << Streak<1>(Coord<1>(37),   60);
+        region << Streak<1>(Coord<1>(64),   80);
+        region << Streak<1>(Coord<1>(100), 149);
+        Region<1> updateRegion = gridOld.remapRegion(region);
+
+        UnstructuredUpdateFunctor<SimpleUnstructuredSoATestCell<60> > functor;
         UpdateFunctorHelpers::ConcurrencyNoP concurrencySpec;
-        APITraits::SelectThreadedUpdate<SimpleUnstructuredSoATestCell<150> >::Value modelThreadingSpec;
+        APITraits::SelectThreadedUpdate<SimpleUnstructuredSoATestCell<60> >::Value modelThreadingSpec;
 
-        functor(region, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
+        functor(updateRegion, gridOld, &gridNew, 0, concurrencySpec, modelThreadingSpec);
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
-            if (((coord.x() >=  10) && (coord.x() <  30)) ||
-                ((coord.x() >=  37) && (coord.x() <  60)) ||
-                ((coord.x() >= 100) && (coord.x() < 149))) {
-                const double sum = (149 - coord.x()) * 200.0;
+            if (region.count(coord)) {
+                double sum = 0;
+                for (int i = 0; i < coord.x(); ++i) {
+                    double weight = coord.x() + i * 100;
+                    sum += weight * (3000 + i);
+                }
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
                 TS_ASSERT_EQUALS(0.0, gridNew.get(coord).sum);

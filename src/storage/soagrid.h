@@ -7,8 +7,10 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 
 namespace LibGeoDecomp {
 
@@ -31,7 +33,7 @@ public:
      * wraps this dimension. It'll be equal to the stencil's radius if
      * the dimensions is not being wrapped. Example:
      *
-     * gridDim = (6, 3, 1)
+     * gridDim = (10, 9, 1)
      * edgeRadii = (2, 3, 0)
      *
      * memory layout (numbers = x-coord, e = edgeCell
@@ -156,12 +158,14 @@ class SaveMember
 public:
     SaveMember(
         char *target,
+        MemoryLocation::Location sourceLocation,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
         const Region<DIM>& region,
         const Coord<DIM>& origin,
         const Coord<3>& edgeRadii) :
         target(target),
+        sourceLocation(sourceLocation),
         targetLocation(targetLocation),
         selector(selector),
         region(region),
@@ -179,7 +183,7 @@ public:
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakOut(
                 data,
-                MemoryLocation::HOST,
+                sourceLocation,
                 currentTarget,
                 targetLocation,
                 i->length(),
@@ -190,6 +194,7 @@ public:
 
 private:
     char *target;
+    MemoryLocation::Location sourceLocation;
     MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
     const Region<DIM>& region;
@@ -208,12 +213,14 @@ public:
     LoadMember(
         const char *source,
         MemoryLocation::Location sourceLocation,
+        MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
         const Region<DIM>& region,
         const Coord<DIM>& origin,
         const Coord<3>& edgeRadii) :
         source(source),
         sourceLocation(sourceLocation),
+        targetLocation(targetLocation),
         selector(selector),
         region(region),
         origin(origin),
@@ -233,7 +240,7 @@ public:
                 currentSource,
                 sourceLocation,
                 currentTarget,
-                MemoryLocation::HOST,
+                targetLocation,
                 i->length(),
                 DIM_X * DIM_Y * DIM_Z);
 
@@ -244,11 +251,78 @@ public:
 private:
     const char *source;
     MemoryLocation::Location sourceLocation;
+    MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
     const Region<DIM>& region;
     const Coord<DIM>& origin;
     const Coord<3>& edgeRadii;
     long memberOffset;
+};
+
+/**
+ * This class duplicates some functionality from RegionStreakIterator,
+ * but is still necessary as we always need 3D coordinates (because of
+ * LibFlatArray::soa_grid) while a Region may alternatively yield 1D
+ * or 2D coordinates.
+ */
+template<typename ITERATOR, int DIM>
+class OffsetStreakIterator
+{
+public:
+    inline OffsetStreakIterator(const ITERATOR& delegate, Coord<3> offset) :
+        delegate(delegate),
+        offset(offset)
+    {
+        reset();
+    }
+
+    inline bool operator==(const OffsetStreakIterator other)
+    {
+        return delegate == other.delegate;
+    }
+
+    inline bool operator!=(const OffsetStreakIterator other)
+    {
+        return delegate != other.delegate;
+    }
+
+    inline const OffsetStreakIterator& operator*() const
+    {
+        return *this;
+    }
+
+    inline const OffsetStreakIterator *operator->() const
+    {
+        return this;
+    }
+
+    inline OffsetStreakIterator& operator++()
+    {
+        ++delegate;
+        reset();
+
+        return *this;
+    }
+
+    inline int length() const
+    {
+        return delegate->length();
+    }
+
+    Coord<3> origin;
+
+private:
+    ITERATOR delegate;
+    Coord<3> offset;
+
+    inline void reset()
+    {
+        origin = offset;
+
+        for (int i = 0; i < DIM; ++i) {
+            origin[i] += delegate->origin[i];
+        }
+    }
 };
 
 }
@@ -267,15 +341,17 @@ public:
     friend class SoAGridTest;
     friend class SelectorTest;
 
+    using GridBase<CELL, TOPOLOGY::DIM>::topoDimensions;
+    using GridBase<CELL, TOPOLOGY::DIM>::saveRegion;
+    using GridBase<CELL, TOPOLOGY::DIM>::loadRegion;
     const static int DIM = TOPOLOGY::DIM;
+
     /**
      * Accumulated size of all members. Note that this may be lower
      * than sizeof(CELL) as the compiler may add padding within a
      * struct/class to ensure alignment.
      */
     static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<CELL>::VALUE;
-
-    using GridBase<CELL, TOPOLOGY::DIM>::topoDimensions;
 
     typedef CELL CellType;
     typedef TOPOLOGY Topology;
@@ -292,9 +368,43 @@ public:
         edgeCell(edgeCell),
         box(box)
     {
+        // don't set edges here, but...
+        resize(box, false);
+        // ...init edges AND interior here in one go
+        delegate.callback(
+            SoAGridHelpers::SetContent<CELL, true>(
+                actualDimensions, edgeRadii, edgeCell, defaultCell));
+    }
+
+    explicit SoAGrid(
+        const Region<DIM>& region,
+        const CELL& defaultCell = CELL(),
+        const CELL& edgeCell = CELL(),
+        const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
+        GridBase<CELL, TOPOLOGY::DIM>(topologicalDimensions),
+        edgeRadii(calcEdgeRadii()),
+        edgeCell(edgeCell),
+        box(region.boundingBox())
+    {
+        // don't set edges here, but...
+        resize(box, false);
+        // ...init edges AND interior here in one go
+        delegate.callback(
+            SoAGridHelpers::SetContent<CELL, true>(
+                actualDimensions, edgeRadii, edgeCell, defaultCell));
+    }
+
+    inline void resize(const CoordBox<DIM>& newBox)
+    {
+        resize(newBox, true);
+    }
+
+    inline void resize(const CoordBox<DIM>& newBox, bool setEdges)
+    {
+        box = newBox;
         actualDimensions = Coord<3>::diagonal(1);
         for (int i = 0; i < DIM; ++i) {
-            actualDimensions[i] = box.dimensions[i];
+            actualDimensions[i] = newBox.dimensions[i];
         }
         actualDimensions += edgeRadii * 2;
 
@@ -303,10 +413,11 @@ public:
             actualDimensions.y(),
             actualDimensions.z());
 
-        // init edges and interior
-        delegate.callback(
-            SoAGridHelpers::SetContent<CELL, true>(
-                actualDimensions, edgeRadii, edgeCell, defaultCell));
+        if (setEdges) {
+            delegate.callback(
+                SoAGridHelpers::SetContent<CELL, false>(
+                    actualDimensions, edgeRadii, edgeCell, edgeCell));
+        }
     }
 
     char *data()
@@ -403,22 +514,48 @@ public:
         delegate.callback(&newGrid->delegate, functor);
     }
 
-    void saveRegion(char *target, const Region<DIM>& region) const
+    void saveRegion(std::vector<char> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        Coord<DIM> offset = edgeRadii - box.origin;
-        typename Region<DIM>::StreakIterator start = region.beginStreak(offset);
-        typename Region<DIM>::StreakIterator end   = region.endStreak(offset);
+        SerializationBuffer<CELL>::resize(target, region);
+        Coord<3> actualOffset = edgeRadii;
+        for (int i = 0; i < DIM; ++i) {
+            actualOffset[i] += -box.origin[i] + offset[i];
+        }
 
-        delegate.save(start, end, target, region.size());
+        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
+        StreakIteratorType start(region.beginStreak(), actualOffset);
+        StreakIteratorType end(  region.endStreak(),   actualOffset);
+
+        delegate.save(start, end, target->data(), region.size());
     }
 
-    void loadRegion(const char *source, const Region<DIM>& region)
+    void loadRegion(const std::vector<char>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        Coord<DIM> offset = edgeRadii - box.origin;
-        typename Region<DIM>::StreakIterator start = region.beginStreak(offset);
-        typename Region<DIM>::StreakIterator end   = region.endStreak(offset);
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::storageSize(region);
+        if (source.size() < expectedMinimumSize) {
+            throw std::logic_error(
+                "source buffer too small (is " + StringOps::itoa(source.size()) +
+                ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
+        }
 
-        delegate.load(start, end, source, region.size());
+        Coord<3> actualOffset = edgeRadii;
+        for (int i = 0; i < DIM; ++i) {
+            actualOffset[i] += -box.origin[i] + offset[i];
+        }
+
+        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
+        StreakIteratorType start(region.beginStreak(), actualOffset);
+        StreakIteratorType end(  region.endStreak(),   actualOffset);
+
+        delegate.load(start, end, source.data(), region.size());
+    }
+
+    static Coord<3> calcEdgeRadii()
+    {
+        return Coord<3>(
+            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : Stencil::RADIUS,
+            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : Stencil::RADIUS,
+            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : Stencil::RADIUS);
     }
 
 protected:
@@ -430,7 +567,13 @@ protected:
     {
         delegate.callback(
             SoAGridHelpers::SaveMember<CELL, DIM>(
-                target, targetLocation, selector, region, box.origin, edgeRadii));
+                target,
+                MemoryLocation::HOST,
+                targetLocation,
+                selector,
+                region,
+                box.origin,
+                edgeRadii));
     }
 
     void loadMemberImplementation(
@@ -441,7 +584,13 @@ protected:
     {
         delegate.callback(
             SoAGridHelpers::LoadMember<CELL, DIM>(
-                source, sourceLocation, selector, region, box.origin, edgeRadii));
+                source,
+                sourceLocation,
+                MemoryLocation::HOST,
+                selector,
+                region,
+                box.origin,
+                edgeRadii));
     }
 
 private:
@@ -450,14 +599,6 @@ private:
     Coord<3> actualDimensions;
     CELL edgeCell;
     CoordBox<DIM> box;
-
-    static Coord<3> calcEdgeRadii()
-    {
-        return Coord<3>(
-            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : Stencil::RADIUS,
-            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : Stencil::RADIUS,
-            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : Stencil::RADIUS);
-    }
 
     CELL delegateGet(const Coord<1>& coord) const
     {
@@ -515,7 +656,7 @@ private:
 
     void delegateSet(const Coord<1>& coord, const CELL& cell)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y(),
             edgeRadii.z(),
@@ -524,7 +665,7 @@ private:
 
     void delegateSet(const Coord<2>& coord, const CELL& cell)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y() + coord.y(),
             edgeRadii.z(),
@@ -533,7 +674,7 @@ private:
 
     void delegateSet(const Coord<3>& coord, const CELL& cell)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y() + coord.y(),
             edgeRadii.z() + coord.z(),
@@ -542,7 +683,7 @@ private:
 
     void delegateSet(const Coord<1>& coord, const CELL *cells, int count)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y(),
             edgeRadii.z(),
@@ -552,7 +693,7 @@ private:
 
     void delegateSet(const Coord<2>& coord, const CELL *cells, int count)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y() + coord.y(),
             edgeRadii.z(),
@@ -562,7 +703,7 @@ private:
 
     void delegateSet(const Coord<3>& coord, const CELL *cells, int count)
     {
-        return delegate.set(
+        delegate.set(
             edgeRadii.x() + coord.x(),
             edgeRadii.y() + coord.y(),
             edgeRadii.z() + coord.z(),

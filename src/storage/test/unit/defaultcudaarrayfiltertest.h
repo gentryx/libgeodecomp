@@ -5,6 +5,7 @@
 
 #ifdef LIBGEODECOMP_WITH_CUDA
 #include <cuda.h>
+#include <libflatarray/cuda_array.hpp>
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
@@ -12,7 +13,6 @@
 #endif
 
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/storage/cudaarray.h>
 #include <libgeodecomp/storage/defaultcudaarrayfilter.h>
 
 using namespace LibGeoDecomp;
@@ -52,10 +52,10 @@ public:
     void testCudaAoSWithGridOnDeviceAndBuffersOnDevice()
     {
         // TEST 1: Copy Out (Device to Device)
-        CUDAArray<MyDumbestSoACell> deviceCellVec(222);
+        LibFlatArray::cuda_array<MyDumbestSoACell> deviceCellVec(222);
         std::vector<MyDumbestSoACell> hostCellVec(222);
 
-        CUDAArray<double> deviceBuffer(222 * 256);
+        LibFlatArray::cuda_array<double> deviceBuffer(222 * 256);
         std::vector<double> hostBuffer(222 * 256);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
@@ -112,7 +112,7 @@ public:
     void testCudaAoSWithGridOnDeviceAndBuffersOnHost()
     {
         // TEST 1: Copy Out (Device to Host)
-        CUDAArray<MyDumbestSoACell> deviceCellVec(333);
+        LibFlatArray::cuda_array<MyDumbestSoACell> deviceCellVec(333);
         std::vector<MyDumbestSoACell> hostCellVec(333);
 
         std::vector<double> hostBuffer(333 * 256);
@@ -172,7 +172,7 @@ public:
         // TEST 1: Copy Out (Host to Device)
         std::vector<MyDumbestSoACell> hostCellVec(444);
 
-        CUDAArray<double> deviceBuffer(444 * 256);
+        LibFlatArray::cuda_array<double> deviceBuffer(444 * 256);
         std::vector<double> hostBuffer(444 * 256);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
@@ -284,10 +284,10 @@ public:
 
         // TEST 1: Copy Out (Device to Device)
         std::vector<double> hostMemberVec(256 * 6666, -1);
-        CUDAArray<double> deviceMemberVec(&hostMemberVec[0], 256 * 6666);
+        LibFlatArray::cuda_array<double> deviceMemberVec(&hostMemberVec[0], 256 * 6666);
 
         std::vector<double> hostBuffer(256 * 6666, -2);
-        CUDAArray<double> deviceBuffer(&hostBuffer[0], 256 * 6666);
+        LibFlatArray::cuda_array<double> deviceBuffer(&hostBuffer[0], 256 * 6666);
 
         for (std::size_t i = 0; i < 6666; ++i) {
             for (std::size_t j = 0; j < 256; ++j) {
@@ -350,7 +350,7 @@ public:
 
         // TEST 1: Copy Out (Device to Host)
         std::vector<double> hostMemberVec(256 * 7777, -1);
-        CUDAArray<double> deviceMemberVec(&hostMemberVec[0], 256 * 7777);
+        LibFlatArray::cuda_array<double> deviceMemberVec(&hostMemberVec[0], 256 * 7777);
 
         std::vector<double> hostBuffer(256 * 7777, -2);
 
@@ -414,7 +414,7 @@ public:
         std::vector<double> hostMemberVec(256 * 8888, -1);
 
         std::vector<double> hostBuffer(256 * 8888, -2);
-        CUDAArray<double> deviceBuffer(&hostBuffer[0], 256 * 8888);
+        LibFlatArray::cuda_array<double> deviceBuffer(&hostBuffer[0], 256 * 8888);
 
         for (std::size_t i = 0; i < 8888; ++i) {
             for (std::size_t j = 0; j < 256; ++j) {

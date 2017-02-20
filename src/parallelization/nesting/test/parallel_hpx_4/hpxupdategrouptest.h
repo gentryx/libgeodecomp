@@ -10,7 +10,7 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/parallelization/nesting/vanillastepper.h>
+#include <libgeodecomp/parallelization/nesting/hpxstepper.h>
 #include <libgeodecomp/parallelization/nesting/hpxupdategroup.h>
 #include <libgeodecomp/storage/mockpatchaccepter.h>
 
@@ -368,7 +368,7 @@ class UpdateGroupTest : public CxxTest::TestSuite
 public:
 
     typedef RecursiveBisectionPartition<2> PartitionType;
-    typedef LibGeoDecomp::VanillaStepper<TestCell<2>, UpdateFunctorHelpers::ConcurrencyEnableHPX> StepperType;
+    typedef LibGeoDecomp::HPXStepper<TestCell<2>, UpdateFunctorHelpers::ConcurrencyEnableHPX> StepperType;
     typedef HPXUpdateGroup<TestCell<2> > UpdateGroupType;
     typedef StepperType::GridType GridType;
 

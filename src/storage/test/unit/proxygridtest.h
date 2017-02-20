@@ -17,8 +17,14 @@ public:
         DisplacedGrid<int> mainGrid(CoordBox<2>(Coord<2>(-1, -2), Coord<2>(22, 14)));
         ProxyGrid<int, 2> subGrid(&mainGrid, CoordBox<2>(Coord<2>(0, 0), Coord<2>(20, 10)));
 
+        Region<2> boundingRegionSub;
+        Region<2> boundingRegionMain;
+        boundingRegionSub  << CoordBox<2>(Coord<2>( 0,  0), Coord<2>(20, 10));
+        boundingRegionMain << CoordBox<2>(Coord<2>(-1, -2), Coord<2>(22, 14));
         TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>( 0,  0), Coord<2>(20, 10)), subGrid.boundingBox());
         TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(-1, -2), Coord<2>(22, 14)), mainGrid.boundingBox());
+        TS_ASSERT_EQUALS(boundingRegionSub,  subGrid.boundingRegion());
+        TS_ASSERT_EQUALS(boundingRegionMain, mainGrid.boundingRegion());
         subGrid.setEdge(47);
         TS_ASSERT_EQUALS(47, subGrid.getEdge());
         TS_ASSERT_EQUALS(47, mainGrid.getEdge());

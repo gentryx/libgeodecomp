@@ -6,6 +6,9 @@
 #include <QObject>
 #include <libgeodecomp/misc/fpscounter.h>
 
+/**
+ * A simple Qt object that grabs camera images via OpenCV
+ */
 class FrameGrabber : public QObject, FPSCounter
 {
     Q_OBJECT

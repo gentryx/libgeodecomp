@@ -98,7 +98,7 @@ public:
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
-        return notifyPatchAcceptersAsync(region, patchType, nanoStep).get();
+        notifyPatchAcceptersAsync(region, patchType, nanoStep).get();
     }
 
     inline hpx::future<void> notifyPatchProvidersAsync(

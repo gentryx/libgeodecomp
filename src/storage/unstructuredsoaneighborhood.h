@@ -8,7 +8,6 @@
 #include <libflatarray/soa_accessor.hpp>
 
 #include <libgeodecomp/geometry/coord.h>
-#include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 
 #include <iterator>
@@ -21,18 +20,32 @@ namespace LibGeoDecomp {
  * weights(id) returns a pair of two pointers. One points to the array where
  * the indices for gather are stored and the seconds points the matrix values.
  * Both pointers can be used to load LFA short_vec classes accordingly.
+ *
+ * DIM_X/Y/Z refer to the grid's storage dimensions, INDEX is a fixed
+ * offset for the soa_accessor, MATRICES is the number of adjacency
+ * matrices (equals 1 for most applications), VALUE_TYPE is the type
+ * of the edge weights, C refers to the chunk size and SIGMA is the
+ * sorting scope used by the SELL-C-Sigma container.
  */
 template<
-    typename CELL, long DIM_X, long DIM_Y, long DIM_Z, long INDEX,
-    std::size_t MATRICES = 1, typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
+    typename GRID_TYPE,
+    typename CELL,
+    long DIM_X,
+    long DIM_Y,
+    long DIM_Z,
+    long INDEX,
+    std::size_t MATRICES = 1,
+    typename VALUE_TYPE = double,
+    int C = 64,
+    int SIGMA = 1>
 class UnstructuredSoANeighborhood
 {
 public:
     static const int ARITY = C;
 
-    using Grid = UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
     using IteratorPair = std::pair<const int*, const VALUE_TYPE*>;
     using SoAAccessor = LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>;
+    using ConstSoAAccessor = LibFlatArray::const_soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>;
 
     /**
      * This iterator returns objects/values needed to update
@@ -58,7 +71,6 @@ public:
         inline
         bool operator==(const Iterator& other) const
         {
-            // offset is indicator here
             return offset == other.offset;
         }
 
@@ -86,15 +98,74 @@ public:
         }
 
     private:
-        const Matrix& matrix;   /**< matrix to use */
-        int offset;             /**< Where are we right now inside chunk?  */
+        const Matrix& matrix;   // Which matrix to use?
+        int offset;             // In which chunk are we right now?
+    };
+
+    /**
+     * These iterators are used to traverse parts of a chunk, which
+     * may be necessary during loop peeling at the begin or end of a
+     * Streak if the Streak isn't aligned on the chunk size C.
+     */
+    class ScalarIterator : public std::iterator<std::forward_iterator_tag, const IteratorPair>
+    {
+    public:
+        using Matrix = SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>;
+
+        inline
+        ScalarIterator(const Matrix& matrix, int offset, int scalarOffset) :
+            matrix(matrix),
+            offset(offset),
+            scalarOffset(scalarOffset)
+        {}
+
+        inline
+        void operator++()
+        {
+            offset += C;
+        }
+
+        inline
+        bool operator==(const ScalarIterator& other) const
+        {
+            return offset == other.offset;
+        }
+
+        inline
+        bool operator!=(const ScalarIterator& other) const
+        {
+            return !(*this == other);
+        }
+
+        inline const ScalarIterator& operator*() const
+        {
+            return *this;
+        }
+
+        inline
+        const int *first() const
+        {
+            return &matrix.columnVec()[offset] + scalarOffset;
+        }
+
+        inline
+        const VALUE_TYPE *second() const
+        {
+            return &matrix.valuesVec()[offset] + scalarOffset;
+        }
+
+    private:
+        const Matrix& matrix;   // Which matrix to use?
+        int offset;             // In which chunk are we right now?
+        int scalarOffset;       // Our offset within the chunk
     };
 
     inline
-    UnstructuredSoANeighborhood(const SoAAccessor& acc, const Grid& grid, long startX) :
+    UnstructuredSoANeighborhood(const SoAAccessor& acc, const GRID_TYPE& grid, long startX, int intraChunkOffset = 0) :
         grid(grid),
         currentChunk(startX / C),
         currentMatrixID(0),
+        intraChunkOffset(intraChunkOffset),
         accessor(acc)
     {}
 
@@ -118,14 +189,7 @@ public:
     }
 
     inline
-    UnstructuredSoANeighborhood& weights()
-    {
-        // default neighborhood is for matrix 0
-        return weights(0);
-    }
-
-    inline
-    UnstructuredSoANeighborhood& weights(std::size_t matrixID)
+    UnstructuredSoANeighborhood& weights(std::size_t matrixID = 0)
     {
         currentMatrixID = matrixID;
         return *this;
@@ -146,22 +210,84 @@ public:
     }
 
     inline
+    ScalarIterator beginScalar() const
+    {
+        const auto& matrix = grid.getWeights(currentMatrixID);
+        return ScalarIterator(matrix, matrix.chunkOffsetVec()[currentChunk], intraChunkOffset);
+    }
+
+    inline
+    const ScalarIterator endScalar() const
+    {
+        const auto& matrix = grid.getWeights(currentMatrixID);
+        return ScalarIterator(matrix, matrix.chunkOffsetVec()[currentChunk + 1], intraChunkOffset);
+    }
+
+    /**
+     * Advance hood by one cell within a chunk. Useful for scalar
+     * iteration (see ScalarIterator).
+     */
+    inline
+    void incIntraChunkOffset()
+    {
+        intraChunkOffset = (intraChunkOffset + 1) % ARITY;
+
+        if (intraChunkOffset == 0) {
+            ++(*this);
+        }
+    }
+
+    inline
     const SoAAccessor *operator->() const
     {
         return &accessor;
     }
 
-    CELL operator[](int index) const
+    inline
+    const ConstSoAAccessor operator[](int offset) const
     {
-        return grid[index];
+        return ConstSoAAccessor(accessor.data(), accessor.index() + offset);
     }
 
 private:
-    const Grid& grid;            /**< old grid */
-    int currentChunk;            /**< current chunk */
-    int currentMatrixID;         /**< current id for matrices */
-    const SoAAccessor& accessor; /**< accessor to old grid */
+    /**
+     * Reference to old grid. Storing just a reference to the weights
+     * vector isn't sufficient as a user may with to access multiple
+     * weight vectors through this neighborhood.
+     */
+    const GRID_TYPE& grid;
+    /**
+     * index of current chunk in weights container (stored in
+     * SELL-C-Sigma format)
+     */
+    int currentChunk;
+    /**
+     * logical ID of current adjacency matrix (virtually always 0)
+     */
+    int currentMatrixID;
+    /**
+     * offset within a chunk, useful for loop peeling if a Streak
+     * doesn't start and/or end on a chunkboundary:
+     */
+    int intraChunkOffset;
+    /**
+     * Struct-of-Arrays accessor to old grid:
+     */
+    const SoAAccessor& accessor;
 };
+
+template<
+    typename GRID_TYPE,
+    typename CELL,
+    long DIM_X,
+    long DIM_Y,
+    long DIM_Z,
+    long INDEX,
+    std::size_t MATRICES,
+    typename VALUE_TYPE,
+    int C,
+    int SIGMA>
+const int UnstructuredSoANeighborhood<GRID_TYPE, CELL, DIM_X, DIM_Y, DIM_Z, INDEX, MATRICES, VALUE_TYPE, C, SIGMA>::ARITY;
 
 }
 

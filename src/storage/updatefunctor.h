@@ -173,6 +173,10 @@ public:
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_5
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_6
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_7
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_8
 #undef LGD_UPDATE_FUNCTOR_BODY
     }
 
@@ -207,6 +211,10 @@ public:
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_5
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_6
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_7
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_8
 #undef LGD_UPDATE_FUNCTOR_BODY
     }
 
@@ -241,6 +249,10 @@ public:
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_5
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_6
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_7
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_8
 #undef LGD_UPDATE_FUNCTOR_BODY
     }
 
@@ -265,24 +277,7 @@ public:
         // SelectThreadedUpdate,
         ANY_THREADED_UPDATE modelThreadingSpec)
     {
-        // fixme
-        // for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-        //     Streak<DIM> sourceStreak(i->origin + sourceOffset,
-        //                              i->endX + sourceOffset.x());
         UnstructuredUpdateFunctor<CELL>()(region, gridOld, gridNew, nanoStep, concurrencySpec, modelThreadingSpec);
-        // }
-        // fixme
-// #define LGD_UPDATE_FUNCTOR_BODY
-//         Streak<DIM> sourceStreak(i->origin + sourceOffset,
-//                                  i->endX + sourceOffset.x());
-//         UnstructuredUpdateFunctor<CELL>()(
-//             sourceStreak, gridOld, gridNew, nanoStep);
-//         /**/
-//         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
-//         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
-//         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
-//         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
-// #undef LGD_UPDATE_FUNCTOR_BODY
     }
 #endif
 };

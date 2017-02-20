@@ -1,6 +1,7 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/unstructuredtestcell.h>
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <fstream>
@@ -180,31 +181,31 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 128;
-        UnstructuredGrid<int, 2, double, 4, 1> *grid =
-            new UnstructuredGrid<int, 2, double, 4, 1>(Coord<1>(DIM));
-        std::map<Coord<2>,double> weights0;
-        std::map<Coord<2>,double> weights1;
-        std::map<Coord<2>,double> rawMatrix0;
-        std::map<Coord<2>,double> rawMatrix1;
+        typedef UnstructuredGrid<int, 2, double, 4, 1> GridType;
+        GridType *grid = new GridType(Coord<1>(DIM));
+        GridType::SparseMatrix weights0;
+        GridType::SparseMatrix weights1;
+        GridType::SparseMatrix rawMatrix0;
+        GridType::SparseMatrix rawMatrix1;
         SellCSigmaSparseMatrixContainer<double,4,1> matrix0 (DIM);
         SellCSigmaSparseMatrixContainer<double,4,1> matrix1 (DIM);
 
         for (int i = 0; i < DIM; ++i) {
             grid->set(Coord<1>(i), i);
 
-            weights0[  Coord<2>(i,abs(i*57)      % DIM)] =  i      / DIM;
-            weights0[  Coord<2>(i,abs(i*57 + 75) % DIM)] =  i * 57 / DIM;
-            weights0[  Coord<2>(i,abs(i*57 - 7 ) % DIM)] =  i *  7 / DIM;
-            rawMatrix0[Coord<2>(i,abs(i*57)      % DIM)] =  i      / DIM;
-            rawMatrix0[Coord<2>(i,abs(i*57 + 75) % DIM)] =  i * 57 / DIM;
-            rawMatrix0[Coord<2>(i,abs(i*57 - 7 ) % DIM)] =  i * 7  / DIM;
+            weights0   << std::make_pair(Coord<2>(i,abs(i*57)      % DIM),  i      / DIM);
+            weights0   << std::make_pair(Coord<2>(i,abs(i*57 + 75) % DIM),  i * 57 / DIM);
+            weights0   << std::make_pair(Coord<2>(i,abs(i*57 - 7 ) % DIM),  i *  7 / DIM);
+            rawMatrix0 << std::make_pair(Coord<2>(i,abs(i*57)      % DIM),  i      / DIM);
+            rawMatrix0 << std::make_pair(Coord<2>(i,abs(i*57 + 75) % DIM),  i * 57 / DIM);
+            rawMatrix0 << std::make_pair(Coord<2>(i,abs(i*57 - 7 ) % DIM),  i * 7  / DIM);
 
-            weights1[  Coord<2>(i,abs(i*57)      % DIM)] = -i      / DIM;
-            weights1[  Coord<2>(i,abs(i*57 + 75) % DIM)] = -i * 57 / DIM;
-            weights1[  Coord<2>(i,abs(i*57 - 7 ) % DIM)] = -i *  7 / DIM;
-            rawMatrix1[Coord<2>(i,abs(i*57)      % DIM)] = -i      / DIM;
-            rawMatrix1[Coord<2>(i,abs(i*57 + 75) % DIM)] = -i * 57 / DIM;
-            rawMatrix1[Coord<2>(i,abs(i*57 - 7 ) % DIM)] = -i *  7 / DIM;
+            weights1   << std::make_pair(Coord<2>(i,abs(i*57)      % DIM), -i      / DIM);
+            weights1   << std::make_pair(Coord<2>(i,abs(i*57 + 75) % DIM), -i * 57 / DIM);
+            weights1   << std::make_pair(Coord<2>(i,abs(i*57 - 7 ) % DIM), -i *  7 / DIM);
+            rawMatrix1 << std::make_pair(Coord<2>(i,abs(i*57)      % DIM), -i      / DIM);
+            rawMatrix1 << std::make_pair(Coord<2>(i,abs(i*57 + 75) % DIM), -i * 57 / DIM);
+            rawMatrix1 << std::make_pair(Coord<2>(i,abs(i*57 - 7 ) % DIM), -i *  7 / DIM);
         }
 
         matrix0.initFromMatrix(rawMatrix0);
@@ -216,6 +217,181 @@ public:
         TS_ASSERT_EQUALS(matrix1, grid->getWeights(1));
 
         delete grid;
+#endif
+    }
+
+    void testLoadSaveRegion()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredGrid<UnstructuredTestCell<> > grid(Coord<1>(100));
+
+        for (int i = 0; i < 100; ++i) {
+            grid[Coord<1>(i)] = UnstructuredTestCell<>(i, 4711, true);
+        }
+
+        std::vector<UnstructuredTestCell<> > buffer(10);
+        Region<1> region;
+        region << Streak<1>(Coord<1>( 0),   3)
+               << Streak<1>(Coord<1>(10),  12)
+               << Streak<1>(Coord<1>(20),  21)
+               << Streak<1>(Coord<1>(96), 100);
+        TS_ASSERT_EQUALS(10, region.size());
+
+        grid.saveRegion(&buffer, region);
+
+        int index = 0;
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCell<> actual = buffer[index];
+            UnstructuredTestCell<> expected(i->x(), 4711, true);
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++index;
+        }
+
+        for (std::size_t i = 0; i < buffer.size(); ++i) {
+            buffer[i].id = 1000000 + i;
+            buffer[i].cycleCounter = 777;
+        }
+
+        UnstructuredGrid<UnstructuredTestCell<> > grid2(Coord<1>(100));
+        grid2.loadRegion(buffer, region);
+
+        index = 0;
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCell<> actual = grid2.get(*i);
+            UnstructuredTestCell<> expected(
+                1000000 + index,
+                777,
+                true);
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++index;
+        }
+#endif
+    }
+
+    void testLoadSaveRegionWithOffset()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredGrid<UnstructuredTestCell<> > grid(Coord<1>(100));
+
+        for (int i = 0; i < 100; ++i) {
+            grid[Coord<1>(i)] = UnstructuredTestCell<>(i, 4711, true);
+        }
+
+        std::vector<UnstructuredTestCell<> > buffer(10);
+        Region<1> region;
+        region << Streak<1>(Coord<1>( 0),   3)
+               << Streak<1>(Coord<1>(10),  12)
+               << Streak<1>(Coord<1>(20),  21)
+               << Streak<1>(Coord<1>(96), 100);
+        TS_ASSERT_EQUALS(10, region.size());
+
+        Region<1> regionOffset10;
+        regionOffset10 << Streak<1>(Coord<1>( 10),  13)
+                       << Streak<1>(Coord<1>( 20),  22)
+                       << Streak<1>(Coord<1>( 30),  31)
+                       << Streak<1>(Coord<1>(106), 110);
+        TS_ASSERT_EQUALS(10, regionOffset10.size());
+
+        Region<1> regionOffset20;
+        regionOffset20 << Streak<1>(Coord<1>( 20),  23)
+                       << Streak<1>(Coord<1>( 30),  32)
+                       << Streak<1>(Coord<1>( 40),  41)
+                       << Streak<1>(Coord<1>(116), 120);
+        TS_ASSERT_EQUALS(10, regionOffset20.size());
+
+        grid.saveRegion(&buffer, regionOffset10, Coord<1>(-10));
+
+        int index = 0;
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCell<> actual = buffer[index];
+            UnstructuredTestCell<> expected(i->x(), 4711, true);
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++index;
+        }
+
+        for (std::size_t i = 0; i < buffer.size(); ++i) {
+            buffer[i].id = 1010101 + i;
+            buffer[i].cycleCounter = 8252;
+        }
+
+        UnstructuredGrid<UnstructuredTestCell<> > grid2(Coord<1>(100));
+        grid2.loadRegion(buffer, regionOffset20, Coord<1>(-20));
+
+        index = 0;
+        for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
+            UnstructuredTestCell<> actual = grid2.get(*i);
+            UnstructuredTestCell<> expected(
+                1010101 + index,
+                8252,
+                true);
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++index;
+        }
+#endif
+    }
+
+    void testResize()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        Coord<1> origin(0);
+        Coord<1> dim(10);
+        CoordBox<1> box(origin, dim);
+
+        Region<1> boundingRegion;
+        boundingRegion << box;
+        UnstructuredGrid<UnstructuredTestCellSoA1> grid(box);
+        TS_ASSERT_EQUALS(box, grid.boundingBox());
+        TS_ASSERT_EQUALS(boundingRegion, grid.boundingRegion());
+
+        dim.x() = 100;
+        box = CoordBox<1>(origin, dim);
+
+        grid.resize(box);
+        TS_ASSERT_EQUALS(box, grid.boundingBox());
+
+        for (int i = 0; i < dim.x(); ++i) {
+            UnstructuredTestCellSoA1 cell(i, 888, true);
+            grid.set(Coord<1>(i), cell);
+        }
+
+        for (int i = origin.x(); i < (origin.x() + dim.x()); ++i) {
+            UnstructuredTestCellSoA1 expected(i, 888, true);
+            UnstructuredTestCellSoA1 actual = grid.get(Coord<1>(i));
+
+            TS_ASSERT_EQUALS(expected, actual);
+        }
+#endif
+    }
+
+    void testResizeFromZero()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredGrid<UnstructuredTestCellSoA1> grid;
+        grid.resize(CoordBox<1>(Coord<1>(0), Coord<1>(10)));
+#endif
+    }
+
+    void testOffset()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        Coord<1> origin(1000);
+        Coord<1> dim(50);
+        CoordBox<1> box(origin, dim);
+
+        UnstructuredGrid<UnstructuredTestCellSoA1> grid(box);
+        TS_ASSERT_EQUALS(box, grid.boundingBox());
+
+        for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
+            grid[*i].id = i->x();
+        }
+
+        for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
+            TS_ASSERT_EQUALS(grid[*i].id, i->x());
+        }
 #endif
     }
 };

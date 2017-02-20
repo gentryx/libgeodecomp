@@ -213,7 +213,7 @@ private:
     {
         LOG(INFO, "wavefrontCoord(" << wavefrontCoord << ")");
         buffer->setEdge(curGrid->getEdge());
-        buffer->fill(buffer->boundingBox(), curGrid->getEdgeCell());
+        // buffer->fill(buffer->boundingBox(), curGrid->getEdgeCell());
         fixBufferOrigin(buffer, wavefrontCoord);
 
         int index = 0;
@@ -312,9 +312,9 @@ private:
             Coord<DIM> fillDim = buffers[omp_get_thread_num()].getDimensions();
             fillDim[DIM - 1] = 1;
 
-            buffers[omp_get_thread_num()].fill(
-                CoordBox<DIM>(fillOrigin, fillDim),
-                buffers[omp_get_thread_num()].getEdgeCell());
+            // buffers[omp_get_thread_num()].fill(
+            //     CoordBox<DIM>(fillOrigin, fillDim),
+            //     buffers[omp_get_thread_num()].getEdgeCell());
         } else {
             Coord<DIM> sourceOffset;
             Coord<DIM> targetOffset;

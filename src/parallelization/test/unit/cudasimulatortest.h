@@ -232,6 +232,7 @@ public:
             Coord<3>(64, 2, 3));
 
         TestWriter<TestCellSoA3dTorus> *writer = new TestWriter<TestCellSoA3dTorus>(1, 0, numSteps);
+        // fixme
         // sim.addWriter(writer);
 
         sim.run();

@@ -34,7 +34,7 @@
 namespace LibGeoDecomp {
 
 template <typename CARGO, typename BUFFER=hpx::lcos::local::receive_buffer<CARGO> >
-class HPXReceiver : public hpx::components::managed_component_base<HPXReceiver<CARGO> >
+class HPX_COMPONENT_EXPORT HPXReceiver : public hpx::components::managed_component_base<HPXReceiver<CARGO> >
 {
 public:
     typedef CARGO Cargo;

@@ -43,10 +43,12 @@ public:
     using ParentType::chronometer;
 
     using ParentType::innerSet;
+    using ParentType::remappedInnerSet;
     using ParentType::saveKernel;
     using ParentType::restoreRim;
     using ParentType::globalNanoStep;
     using ParentType::rim;
+    using ParentType::remappedRim;
     using ParentType::resetValidGhostZoneWidth;
     using ParentType::initGridsCommon;
     using ParentType::getVolatileKernel;
@@ -93,7 +95,7 @@ private:
         using std::swap;
         TimeTotal t(&chronometer);
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
-        const Region<DIM>& region = innerSet(index);
+        const Region<DIM>& region = remappedInnerSet(index);
         {
             TimeComputeInner t(&chronometer);
 
@@ -114,7 +116,7 @@ private:
             }
         }
 
-       this->notifyPatchAccepters(innerSet(ghostZoneWidth()), ParentType::INNER_SET, globalNanoStep());
+        this->notifyPatchAccepters(innerSet(ghostZoneWidth()), ParentType::INNER_SET, globalNanoStep());
 
         if (validGhostZoneWidth == 0) {
             updateGhost();
@@ -182,7 +184,7 @@ private:
             {
                 TimeComputeGhost timer(&chronometer);
 
-                const Region<DIM>& region = rim(t + 1);
+                const Region<DIM>& region = remappedRim(t + 1);
                 UpdateFunctor<CELL_TYPE, CONCURRENCY_SPEC>()(
                     region,
                     Coord<DIM>(),

@@ -1,6 +1,9 @@
 #ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_SIMPARAMS_H
 #define LIBGEODECOMP_EXAMPLES_LATTICEGAS_SIMPARAMS_H
 
+/**
+ * Parameter set for the LGA simulation.
+ */
 class SimParams
 {
 public:

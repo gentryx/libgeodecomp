@@ -6,6 +6,7 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/storage/coordmap.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
@@ -14,74 +15,6 @@ namespace LibGeoDecomp {
 
 template<typename CELL_TYPE, typename GRID_TYPE>
 class CoordMap;
-
-namespace GridHelpers {
-
-/**
- * Helper for setting a cuboid domain within a grid
- */
-template<int DIM>
-class FillCoordBox;
-
-/**
- * see above
- */
-template<>
-class FillCoordBox<1>
-{
-public:
-    template<typename GRID, typename CELL>
-    void operator()(const Coord<1>& origin, const Coord<1>& dim, GRID *grid, const CELL& cell)
-    {
-        CELL *cursor = &(*grid)[origin];
-        std::fill(cursor, cursor + dim.x(), cell);
-    }
-};
-
-/**
- * see above
- */
-template<>
-class FillCoordBox<2>
-{
-public:
-    template<typename GRID, typename CELL>
-    void operator()(const Coord<2>& origin, const Coord<2>& dim, GRID *grid, const CELL& cell)
-    {
-        int maxY = origin.y() + dim.y();
-        Coord<2> c = origin;
-        for (; c.y() < maxY; ++c.y()) {
-            CELL *cursor = &(*grid)[c];
-            std::fill(cursor, cursor + dim.x(), cell);
-        }
-    }
-};
-
-/**
- * see above
- * fixme: replace this by coordbox streak iteration
- */
-template<>
-class FillCoordBox<3>
-{
-public:
-    template<typename GRID, typename CELL>
-    void operator()(const Coord<3>& origin, const Coord<3>& dim, GRID *grid, const CELL& cell)
-    {
-        int maxY = origin.y() + dim.y();
-        int maxZ = origin.z() + dim.z();
-        Coord<3> c = origin;
-
-        for (; c.z() < maxZ; ++c.z()) {
-            for (c.y() = origin.y(); c.y() < maxY; ++c.y()) {
-                CELL *cursor = &(*grid)[c];
-                std::fill(cursor, cursor + dim.x(), cell);
-            }
-        }
-    }
-};
-
-}
 
 /**
  * A multi-dimensional regular grid
@@ -95,9 +28,11 @@ public:
     friend class ParallelStripingSimulatorTest;
     const static int DIM = TOPOLOGY::DIM;
 
+    using GridBase<CELL_TYPE, TOPOLOGY::DIM>::loadRegion;
+    using GridBase<CELL_TYPE, TOPOLOGY::DIM>::saveRegion;
+
     // always align on cache line boundaries
     typedef typename std::vector<CELL_TYPE, LibFlatArray::aligned_allocator<CELL_TYPE, 64> > CellVector;
-
     typedef TOPOLOGY Topology;
     typedef CELL_TYPE Cell;
     typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > CoordMapType;
@@ -131,6 +66,15 @@ public:
         return *this;
     }
 
+    inline void resize(const CoordBox<DIM>& newBox)
+    {
+        if (newBox.origin != Coord<DIM>()) {
+            throw std::logic_error("Grid can't handle origin in resize(CoordBox)");
+        }
+
+        resize(newBox.dimensions);
+    }
+
     inline void resize(const Coord<DIM>& newDim)
     {
         dimensions = newDim;
@@ -156,14 +100,23 @@ public:
         return edgeCell;
     }
 
-    inline CELL_TYPE *baseAddress()
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    inline
+    CELL_TYPE *data()
     {
-        return &(*this)[Coord<DIM>()];
+        return cellVector.data();
     }
 
-    inline const CELL_TYPE *baseAddress() const
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    inline
+    const CELL_TYPE *data() const
     {
-        return &(*this)[Coord<DIM>()];
+        return cellVector.data();
     }
 
     inline CELL_TYPE& operator[](const Coord<DIM>& coord)
@@ -256,11 +209,6 @@ public:
         return getEdgeCell();
     }
 
-    void fill(const CoordBox<DIM>& box, const CELL_TYPE& cell)
-    {
-        GridHelpers::FillCoordBox<DIM>()(box.origin, box.dimensions, this, cell);
-    }
-
     inline const Coord<DIM>& getDimensions() const
     {
         return dimensions;
@@ -286,6 +234,28 @@ public:
     virtual CoordBox<DIM> boundingBox() const
     {
         return CoordBox<DIM>(Coord<DIM>(), dimensions);
+    }
+
+    void saveRegion(std::vector<CELL_TYPE> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        CELL_TYPE *target = buffer->data();
+
+        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+            get(*i, target);
+            target += i->length();
+        }
+    }
+
+    void loadRegion(const std::vector<CELL_TYPE>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    {
+        const CELL_TYPE *source = buffer.data();
+
+        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
+            set(*i, source);
+            source += i->length();
+        }
     }
 
 protected:

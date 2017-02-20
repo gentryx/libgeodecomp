@@ -3,6 +3,9 @@
 
 #include <libgeodecomp/examples/latticegas/cell.h>
 
+/**
+ * A wrapper that contains to cells
+ */
 class BigCell
 {
 public:

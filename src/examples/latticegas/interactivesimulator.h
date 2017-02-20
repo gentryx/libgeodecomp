@@ -10,6 +10,9 @@
 #include <libgeodecomp/examples/latticegas/simparams.h>
 #include <libgeodecomp/misc/fpscounter.h>
 
+/**
+ * A demo simulator that can do live steering and has a Qt interface.
+ */
 class InteractiveSimulator : public QObject, public QRunnable, protected FPSCounter
 {
     Q_OBJECT

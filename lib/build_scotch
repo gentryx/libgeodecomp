@@ -1,0 +1,45 @@
+#!/bin/bash
+set -e
+
+if [ "$#" -ne 3 ] ; then
+    echo "Usage: $0 C_COMPILER MPI_C_COMPILER TARGET_PATH" 1>&2
+    exit 1
+fi
+
+SOURCE_DIR=$(dirname $(realpath $0))
+C_COMPILER="$1"
+MPI_C_COMPILER="$2"
+TARGET_PATH="$3"
+ARCHIVE=scotch_6.0.4_esmumps.tar.gz
+
+ABSOLUTE_TARGET_PATH=$(realpath $TARGET_PATH)
+mkdir -p "$TARGET_PATH"
+cd "$TARGET_PATH"
+
+wget "http://distfiles.gentoo.org/distfiles/$ARCHIVE"
+tar -xf "$ARCHIVE"
+rm -f "$ARCHIVE"
+cd scotch_6.0.4/src
+
+patch -p2 <$SOURCE_DIR/scotch.patch
+
+cat Make.inc/Makefile.inc.i686_pc_linux2.shlib | grep -v CCS | grep -v CCP | grep -v CCD >Makefile.inc
+echo "CCS		= $C_COMPILER"     >>Makefile.inc
+echo "CCD		= $C_COMPILER"     >>Makefile.inc
+echo "CCP		= $MPI_C_COMPILER" >>Makefile.inc
+
+make scotch
+make ptscotch
+make prefix=$ABSOLUTE_TARGET_PATH install
+
+cd ../../
+rm -rf scotch_6.0.4
+
+cat <<EOF
+
+Success! PTSCOTCH has been built and installed. You can point
+LibGeoDecomp's build system to pick up PTSCOTCH by specifying:
+
+  cmake -DSCOTCH_DIR="$ABSOLUTE_TARGET_PATH"
+
+EOF

@@ -75,10 +75,10 @@ private:
 
     std::vector<CoordBox<DIM> > gatherBoundingBoxes(
         const CoordBox<DIM>& ownBoundingBox,
-        PartitionPtr partition) const
+        std::size_t size,
+        std::size_t tag) const
     {
-        std::size_t size = partition->getWeights().size();
-        std::string broadcastName = basename + "/boundingBoxes";
+        std::string broadcastName = basename + "/boundingBoxes" + StringOps::itoa(tag);
         std::vector<CoordBox<DIM> > boundingBoxes;
         return HPXReceiver<CoordBox<DIM> >::allGather(ownBoundingBox, rank, size, broadcastName);
     }

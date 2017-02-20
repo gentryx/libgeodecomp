@@ -91,7 +91,8 @@ protected:
 
     inline void incRemainder(
         const IndexVectorType::iterator& start,
-        const IndexVectorType::iterator& end, int inserts)
+        const IndexVectorType::iterator& end,
+        int inserts)
     {
         if (inserts == 0) {
             return;
@@ -500,6 +501,9 @@ class RegionInsertHelper;
 template<int DIM>
 class RegionRemoveHelper;
 
+/**
+ * Internal helper class
+ */
 template<class STENCIL, int INDEX>
 class AddCoord
 {
@@ -588,6 +592,13 @@ public:
         mySize(0),
         geometryCacheTainted(false)
     {}
+
+    explicit inline Region(const CoordBox<DIMENSIONS>& box) :
+        mySize(0),
+        geometryCacheTainted(false)
+    {
+        *this << box;
+    }
 
 #ifdef LIBGEODECOMP_WITH_CPP14
     inline Region(const Region<DIMENSIONS>& other) = default;
@@ -1251,9 +1262,10 @@ public:
 
     /**
      * Yields an iterator to the offset'th plane in the region (i.e. a
-     * XY-plane for 3D or a row for 2D). Runs in O(DIM). This is an
-     * efficient way to generate starting points for multi-threaded
-     * iteration through a Region.
+     * XY-plane for 3D or a row for 2D). Runs in O(DIM), which is for
+     * all intents and purposes O(1). This is an efficient way to
+     * generate starting points for multi-threaded iteration through a
+     * Region.
      */
     inline StreakIterator planeStreakIterator(std::size_t offset) const
     {

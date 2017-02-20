@@ -50,6 +50,7 @@ if(WITH_CUDA)
   else()
     set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_35")
   endif()
+
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${CUDA_INCLUDE_DIRS})
 endif()
 

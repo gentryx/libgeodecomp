@@ -5,10 +5,10 @@
 
 #ifdef LIBGEODECOMP_WITH_CUDA
 #include <cuda.h>
+#include <libflatarray/cuda_array.hpp>
 #endif
 
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/storage/cudaarray.h>
 #include <libgeodecomp/storage/defaultcudafilter.h>
 
 using namespace LibGeoDecomp;
@@ -23,7 +23,7 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Host to Device)
-        CUDAArray<TestCell<2> > deviceCellVec(40);
+        LibFlatArray::cuda_array<TestCell<2> > deviceCellVec(40);
         std::vector<TestCell<2> > hostCellVec(40);
 
         std::vector<double> hostBuffer(40, -1);
@@ -76,10 +76,10 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Device to Device)
-        CUDAArray<TestCell<2> > deviceCellVec(1903);
+        LibFlatArray::cuda_array<TestCell<2> > deviceCellVec(1903);
         std::vector<TestCell<2> > hostCellVec(1903);
 
-        CUDAArray<double> deviceBuffer(1903, -1);
+        LibFlatArray::cuda_array<double> deviceBuffer(1903, -1);
         std::vector<double> hostBuffer(1903, -1);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
@@ -184,7 +184,7 @@ public:
         // TEST 1: Copy Out (Host to Device)
         std::vector<TestCell<2> > hostCellVec(4711);
 
-        CUDAArray<double> deviceBuffer(4711, -1);
+        LibFlatArray::cuda_array<double> deviceBuffer(4711, -1);
         std::vector<double> hostBuffer(4711, -1);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
@@ -234,9 +234,9 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Device to Device)
-        CUDAArray<double> deviceMemberVec(66, -1);
+        LibFlatArray::cuda_array<double> deviceMemberVec(66, -1);
         std::vector<double> hostMemberVec(66, -2);
-        CUDAArray<double> deviceBuffer(66, -3);
+        LibFlatArray::cuda_array<double> deviceBuffer(66, -3);
         std::vector<double> hostBuffer(66, -4);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
@@ -285,7 +285,7 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Device to Host)
-        CUDAArray<double> deviceMemberVec(77, -1);
+        LibFlatArray::cuda_array<double> deviceMemberVec(77, -1);
         std::vector<double> hostMemberVec(77, -2);
         std::vector<double> hostBuffer(77, -4);
 
@@ -333,7 +333,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Host to Device)
         std::vector<double> hostMemberVec(99, -2);
-        CUDAArray<double> deviceBuffer(99, -3);
+        LibFlatArray::cuda_array<double> deviceBuffer(99, -3);
         std::vector<double> hostBuffer(99, -4);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {

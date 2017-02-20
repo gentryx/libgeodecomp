@@ -12,7 +12,8 @@ class SoATestCell
 {
 public:
     class API :
-        public APITraits::HasStencil<Stencils::Moore<3, 2> >
+        public APITraits::HasStencil<Stencils::Moore<3, 2> >,
+        public APITraits::HasSoA
     {};
 
     explicit SoATestCell(int v = 0) :
@@ -190,6 +191,34 @@ public:
         TS_ASSERT_EQUALS(grid.get(Coord<3>(2, 2, 3) + box.origin), SoATestCell(4));
     }
 
+    void testRegionConstructor()
+    {
+        CoordBox<3> box(Coord<3>(12, 11, 10), Coord<3>(60, 70, 80));
+        SoATestCell defaultCell(1);
+        SoATestCell edgeCell(2);
+
+        Region<3> region;
+        region << box;
+
+        SoAGrid<SoATestCell, Topologies::Cube<3>::Topology> grid(region, defaultCell, edgeCell);
+        grid.set(Coord<3>(1, 1, 1) + box.origin, SoATestCell(3));
+        grid.set(Coord<3>(2, 2, 3) + box.origin, SoATestCell(4));
+
+        TS_ASSERT_EQUALS(grid.actualDimensions, Coord<3>(64, 74, 84));
+        TS_ASSERT_EQUALS(grid.boundingBox(), box);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0)), edgeCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0) + box.origin), defaultCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(1, 1, 1) + box.origin), SoATestCell(3));
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(2, 2, 3) + box.origin), SoATestCell(4));
+
+        edgeCell = SoATestCell(-1);
+        grid.setEdge(edgeCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0)), edgeCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0) + box.origin), defaultCell);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(1, 1, 1) + box.origin), SoATestCell(3));
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(2, 2, 3) + box.origin), SoATestCell(4));
+    }
+
     void test2d()
     {
         CoordBox<2> box(Coord<2>(10, 15), Coord<2>(50, 40));
@@ -278,6 +307,66 @@ public:
         grid.callback(CheckCellValues(0 + oppositeSideOffset2, 51 + 4 + oppositeSideOffset2, 4));
     }
 
+    void testResize()
+    {
+        Coord<3> origin(20, 21, 22);
+        Coord<3> dim(30, 20, 10);
+        CoordBox<3> box(origin, dim);
+
+        TestCellSoA innerCell;
+        TestCellSoA edgeCell;
+        innerCell.isEdgeCell = false;
+        edgeCell.isEdgeCell = true;
+
+        SoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> grid(box, innerCell, edgeCell);
+
+        int maxX = dim.x() + 2;
+        int maxY = dim.y() + 2;
+        int maxZ = dim.z() + 2;
+
+        for (int z = 0; z < maxZ; ++z) {
+            for (int y = 0; y < maxY; ++y) {
+                for (int x = 0; x < maxX; ++x) {
+                    TestCellSoA expected = innerCell;
+
+                    if ((x < 1) || (x > (maxX - 2)) ||
+                        (y < 1) || (y > (maxY - 2)) ||
+                        (z < 1) || (z > (maxZ - 2))) {
+                        expected = edgeCell;
+                    }
+
+                    TestCellSoA actual = grid.delegate.get(x, y, z);
+
+                    TS_ASSERT_EQUALS(actual, expected);
+                }
+            }
+        }
+
+        origin = Coord<3>(30, 31, 32);
+        dim = Coord<3>(40, 50, 60);
+        box = CoordBox<3>(origin, dim);
+        grid.resize(box);
+        TS_ASSERT_EQUALS(box, grid.boundingBox());
+
+        maxX = dim.x() + 2;
+        maxY = dim.y() + 2;
+        maxZ = dim.z() + 2;
+
+        for (int z = 0; z < maxZ; ++z) {
+            for (int y = 0; y < maxY; ++y) {
+                for (int x = 0; x < maxX; ++x) {
+                    if ((x < 1) || (x > (maxX - 2)) ||
+                        (y < 1) || (y > (maxY - 2)) ||
+                        (z < 1) || (z > (maxZ - 2))) {
+                        TestCellSoA actual = grid.delegate.get(x, y, z);
+                        TS_ASSERT_EQUALS(actual, edgeCell);
+                    }
+
+                }
+            }
+        }
+    }
+
     void testDisplacementWithTopologicalCorrectness()
     {
         CoordBox<3> box(Coord<3>(20, 25, 32), Coord<3>(50, 40, 35));
@@ -329,7 +418,7 @@ public:
             }
         }
 
-        grid.saveRegion(&buffer[0], region);
+        grid.saveRegion(&buffer, region);
 
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -342,7 +431,7 @@ public:
             }
         }
 
-        grid.loadRegion(&buffer[0], region);
+        grid.loadRegion(buffer, region);
 
         counter = 444;
         for (int z = 0; z < dim.z(); ++z) {
@@ -389,7 +478,7 @@ public:
             }
         }
 
-        grid.saveRegion(&buffer[0], region);
+        grid.saveRegion(&buffer, region);
 
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -402,7 +491,7 @@ public:
             }
         }
 
-        grid.loadRegion(&buffer[0], region);
+        grid.loadRegion(buffer, region);
 
         counter = 444;
         for (int z = 0; z < dim.z(); ++z) {
@@ -450,7 +539,7 @@ public:
             }
         }
 
-        grid.saveRegion(&buffer[0], region);
+        grid.saveRegion(&buffer, region);
 
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -463,7 +552,7 @@ public:
             }
         }
 
-        grid.loadRegion(&buffer[0], region);
+        grid.loadRegion(buffer, region);
 
         counter = 444;
         for (int z = 0; z < dim.z(); ++z) {

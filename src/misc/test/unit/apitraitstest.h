@@ -31,7 +31,8 @@ public:
         public APITraits::HasStencil<Stencils::Moore<3, 1> >,
         public APITraits::HasNanoSteps<3>,
         public APITraits::HasStaticData<double>,
-        public APITraits::HasCustomRegularGrid
+        public APITraits::HasCustomRegularGrid,
+        public APITraits::HasThreadedUpdate<1234, APITraits::TrueType, APITraits::TrueType, APITraits::TrueType>
     {
     public:
         inline FloatCoord<3> getRegularGridSpacing()
@@ -185,7 +186,20 @@ public:
 
         TS_ASSERT_EQUALS(axisUnitsA, expectedUnitsA);
         TS_ASSERT_EQUALS(axisUnitsB, expectedUnitsB);
+    }
 
+    void testSelectThreadedUpdate()
+    {
+        TS_ASSERT_EQUALS(16384, APITraits::SelectThreadedUpdate<MySimpleDummyCell>::Value().granularity());
+        TS_ASSERT_EQUALS(1234,  APITraits::SelectThreadedUpdate<MyFancyDummyCell >::Value().granularity());
+
+        TS_ASSERT_EQUALS(false, APITraits::SelectThreadedUpdate<MySimpleDummyCell >::Value().hasOpenMP());
+        TS_ASSERT_EQUALS(false, APITraits::SelectThreadedUpdate<MySimpleDummyCell >::Value().hasHPX());
+        TS_ASSERT_EQUALS(false, APITraits::SelectThreadedUpdate<MySimpleDummyCell >::Value().hasCUDA());
+
+        TS_ASSERT_EQUALS(true,  APITraits::SelectThreadedUpdate<MyFancyDummyCell >::Value().hasOpenMP());
+        TS_ASSERT_EQUALS(true,  APITraits::SelectThreadedUpdate<MyFancyDummyCell >::Value().hasHPX());
+        TS_ASSERT_EQUALS(true,  APITraits::SelectThreadedUpdate<MyFancyDummyCell >::Value().hasCUDA());
     }
 
     void testTrueTypeFalseTypeOperators()
@@ -229,7 +243,6 @@ public:
         TS_ASSERT_EQUALS(FalseType(), TrueType()  && false);
         TS_ASSERT_EQUALS(FalseType(), FalseType() && true);
         TS_ASSERT_EQUALS(FalseType(), FalseType() && false);
-
     }
 };
 

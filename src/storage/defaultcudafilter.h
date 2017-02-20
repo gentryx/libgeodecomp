@@ -20,6 +20,8 @@ namespace DefaultCUDAFilterHelpers {
  * Seems to be a bug in CUDA:
  *
  * http://stackoverflow.com/questions/23199824/c-cuda-pointer-to-member
+ *
+ * Update: problem is slightly different, but persists in CUDA 8.0.44.
  */
 template<typename MEMBER, typename MEMBER_POINTER>
 class MemberPointerWrapper

@@ -9,8 +9,8 @@
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/misc/testcell.h>
 
-#define GRIDWIDTH 4
-#define GRIDHEIGHT 5
+#define GRID_WIDTH 4
+#define GRID_HEIGHT 5
 
 double edge = 0;
 
@@ -57,13 +57,11 @@ namespace LibGeoDecomp {
  */
 class GridTest : public CxxTest::TestSuite
 {
-    Grid<TestCell<2> > *testGrid;
-
 public:
 
     void setUp()
     {
-        testGrid = new Grid<TestCell<2> >(Coord<2>(GRIDWIDTH, GRIDHEIGHT));
+        testGrid = new Grid<TestCell<2> >(Coord<2>(GRID_WIDTH, GRID_HEIGHT));
 
         int num = 200;
         for (int y = 0; y < testGrid->getDimensions().y(); y++) {
@@ -85,6 +83,29 @@ public:
         Grid<TestCell<2> > g;
         TS_ASSERT_EQUALS(0, (int)g.getDimensions().x());
         TS_ASSERT_EQUALS(0, (int)g.getDimensions().y());
+    }
+
+    void testBoundingBox()
+    {
+        CoordBox<2> rect(Coord<2>(), Coord<2>(12, 13));
+        Grid<int> grid(rect.dimensions);
+        TS_ASSERT_EQUALS(rect, grid.boundingBox());
+        TS_ASSERT_EQUALS(12, grid.getDimensions().x());
+        TS_ASSERT_EQUALS(13, grid.getDimensions().y());
+    }
+
+    void testBoundingRegion()
+    {
+        Coord<3> origin;
+        Coord<3> dim(23, 24, 25);
+
+        CoordBox<3> rect(origin, dim);
+        Grid<double, Topologies::Cube<3>::Topology> grid(dim);
+
+        Region<3> expectedRegion;
+        expectedRegion << rect;
+
+        TS_ASSERT_EQUALS(expectedRegion, grid.boundingRegion());
     }
 
     void testCopyConstructorFromGridBase()
@@ -214,7 +235,7 @@ public:
 
     void testGetNeighborhoodInUpperRightCorner()
     {
-        CoordMap<TestCell<2> > hood = testGrid->getNeighborhood(Coord<2>(GRIDWIDTH-1, 0));
+        CoordMap<TestCell<2> > hood = testGrid->getNeighborhood(Coord<2>(GRID_WIDTH - 1, 0));
 
         TS_ASSERT_EQUALS(hood[Coord<2>( 0, -1)].testValue,
                          TestCell<2>::defaultValue());
@@ -290,52 +311,6 @@ public:
         TS_ASSERT_EQUALS(fooBar[Coord<2>(-1, -1)], 10);
     }
 
-    void testFill2D()
-    {
-        CoordBox<2> insert(Coord<2>(10, 20), Coord<2>(4, 7));
-        Coord<2> dim(40, 70);
-
-        Grid<int> g(dim, -1);
-        g.fill(insert, 2);
-
-
-        for (int y = 0; y < dim.y(); ++y) {
-            for (int x = 0; x < dim.x(); ++x) {
-                Coord<2> c = Coord<2>(x, y);
-                int expected = -1;
-                if (insert.inBounds(c)) {
-                    expected = 2;
-                }
-
-                TS_ASSERT_EQUALS(expected, g[c]);
-            }
-        }
-    }
-
-    void testFill3D()
-    {
-        CoordBox<3> insert(Coord<3>(10, 20, 15), Coord<3>(4, 7, 5));
-        Coord<3> dim(40, 70, 30);
-
-        Grid<int, Topologies::Cube<3>::Topology> g(dim, -1);
-        g.fill(insert, 2);
-
-
-        for (int z = 0; z < dim.z(); ++z) {
-            for (int y = 0; y < dim.y(); ++y) {
-                for (int x = 0; x < dim.x(); ++x) {
-                    Coord<3> c = Coord<3>(x, y, z);
-                    int expected = -1;
-                    if (insert.inBounds(c)) {
-                        expected = 2;
-                    }
-
-                    TS_ASSERT_EQUALS(expected, g[c]);
-                }
-            }
-        }
-    }
-
     void testDefaultTopology()
     {
         Grid<int> g(Coord<2>(3, 4), 10, 11);
@@ -378,21 +353,6 @@ public:
         TS_ASSERT_EQUALS(g[Coord<2>( 3,  0)],  0);
         TS_ASSERT_EQUALS(g[Coord<2>(-1,  0)],  2);
         TS_ASSERT_EQUALS(g[Coord<2>( 5,  5)], 12);
-    }
-
-    void testFill3d()
-    {
-        Coord<3> dim(3, 4, 5);
-        Grid<int, Topologies::Cube<3>::Topology> g(dim, 47, 11);
-        TS_ASSERT_EQUALS(g[Coord<3>(-1, 0, 0)],  11);
-
-        for (int z=0; z < dim.z(); ++z) {
-            for (int y=0; y < dim.y(); ++y) {
-                for (int x=0; x < dim.x(); ++x)  {
-                    TS_ASSERT_EQUALS(g[Coord<3>(x, y, z)], 47);
-                }
-            }
-        }
     }
 
     void testCompare()
@@ -470,6 +430,91 @@ public:
         }
     }
 
+    void testLoadSaveRegion()
+    {
+        std::vector<TestCell<2> > buffer(10);
+        Region<2> region;
+        region << Streak<2>(Coord<2>(0, 0), 4)
+               << Streak<2>(Coord<2>(1, 1), 3)
+               << Streak<2>(Coord<2>(0, 4), 4);
+
+        testGrid->saveRegion(&buffer, region);
+
+        Region<2>::Iterator iter = region.begin();
+        for (int i = 0; i < 10; ++i) {
+            TestCell<2> actual = testGrid->get(*iter);
+            TestCell<2> expected(*iter, testGrid->getDimensions());
+            expected.testValue = 200 + iter->y() * GRID_WIDTH + iter->x();
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++iter;
+        }
+
+        // manupulate test data:
+        for (int i = 0; i < 10; ++i) {
+            buffer[i].pos = Coord<2>(-i, -10);
+        }
+
+        int index = 0;
+        testGrid->loadRegion(buffer, region);
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            Coord<2> actual = testGrid->get(*i).pos;
+            Coord<2> expected = Coord<2>(index, -10);
+            TS_ASSERT_EQUALS(actual, expected);
+
+            --index;
+        }
+    }
+
+    void testLoadSaveRegionWithOffset()
+    {
+        std::vector<TestCell<2> > buffer(10);
+        Region<2> region;
+        region << Streak<2>(Coord<2>(0, 0), 4)
+               << Streak<2>(Coord<2>(1, 1), 3)
+               << Streak<2>(Coord<2>(0, 4), 4);
+        TS_ASSERT_EQUALS(region.size(), 10);
+
+        Region<2> regionWithOffset23;
+        regionWithOffset23 << Streak<2>(Coord<2>(2, 3), 6)
+                           << Streak<2>(Coord<2>(3, 4), 5)
+                           << Streak<2>(Coord<2>(2, 7), 6);
+        TS_ASSERT_EQUALS(regionWithOffset23.size(), 10);
+
+        Region<2> regionWithOffset59;
+        regionWithOffset59 << Streak<2>(Coord<2>(5,  9), 9)
+                           << Streak<2>(Coord<2>(6, 10), 8)
+                           << Streak<2>(Coord<2>(5, 13), 9);
+        TS_ASSERT_EQUALS(regionWithOffset59.size(), 10);
+
+        testGrid->saveRegion(&buffer, regionWithOffset23, Coord<2>(-2, -3));
+
+        Region<2>::Iterator iter = region.begin();
+        for (int i = 0; i < 10; ++i) {
+            TestCell<2> actual = testGrid->get(*iter);
+            TestCell<2> expected(*iter, testGrid->getDimensions());
+            expected.testValue = 200 + iter->y() * GRID_WIDTH + iter->x();
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++iter;
+        }
+
+        // manupulate test data:
+        for (int i = 0; i < 10; ++i) {
+            buffer[i].pos = Coord<2>(-i, -12);
+        }
+
+        int index = 0;
+        testGrid->loadRegion(buffer, regionWithOffset59, Coord<2>(-5, -9));
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            Coord<2> actual = testGrid->get(*i).pos;
+            Coord<2> expected = Coord<2>(index, -12);
+            TS_ASSERT_EQUALS(actual, expected);
+
+            --index;
+        }
+    }
+
     void testCreationOfZeroSizedGrid()
     {
         Grid<int, Topologies::Torus<1>::Topology> grid1;
@@ -481,6 +526,9 @@ public:
         Grid<int, Topologies::Torus<3>::Topology> grid3;
         TS_ASSERT_EQUALS(Coord<3>(), grid3.getDimensions());
     }
+
+private:
+    Grid<TestCell<2> > *testGrid;
 };
 
 }

@@ -1,14 +1,18 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/clonableinitializerwrapper.h>
+#include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/paralleltestwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/teststeerer.h>
+#include <libgeodecomp/io/testwriter.h>
+#include <libgeodecomp/io/unstructuredtestinitializer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
 #include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/misc/unstructuredtestcell.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
@@ -33,7 +37,7 @@ public:
 };
 
 
-class ParallelStripingSimulatorTest : public CxxTest::TestSuite
+class StripingSimulatorTest : public CxxTest::TestSuite
 {
 public:
     typedef GridBase<TestCell<2>, 2> GridBaseType;
@@ -68,38 +72,24 @@ public:
         layer.reset();
     }
 
-    void testGhostHeight()
-    {
-        if (rank == 0) {
-            TS_ASSERT_EQUALS(unsigned(0), testSim->ghostHeightUpper);
-        } else {
-            TS_ASSERT_EQUALS(unsigned(1), testSim->ghostHeightUpper);
-        }
-
-        if (rank == (size - 1)) {
-            TS_ASSERT_EQUALS(unsigned(0), testSim->ghostHeightLower);
-        } else {
-            TS_ASSERT_EQUALS(unsigned(1), testSim->ghostHeightLower);
-        }
-    }
-
     void testNeighbors()
     {
-        if (rank == 0) {
-            TS_ASSERT_EQUALS(-1, testSim->upperNeighbor());
-            TS_ASSERT_EQUALS( 1, testSim->lowerNeighbor());
+        if ((rank > 0) && (rank < 3)) {
+            TS_ASSERT_EQUALS(2, testSim->outerGhostRegions.size());
+            TS_ASSERT_EQUALS(2, testSim->innerGhostRegions.size());
+        } else {
+            TS_ASSERT_EQUALS(1, testSim->outerGhostRegions.size());
+            TS_ASSERT_EQUALS(1, testSim->innerGhostRegions.size());
         }
-        if (rank == 1) {
-            TS_ASSERT_EQUALS( 0, testSim->upperNeighbor());
-            TS_ASSERT_EQUALS( 2, testSim->lowerNeighbor());
+
+        if (rank > 0) {
+            TS_ASSERT(!testSim->outerGhostRegions[rank - 1].empty());
+            TS_ASSERT(!testSim->innerGhostRegions[rank - 1].empty());
         }
-        if (rank == 2) {
-            TS_ASSERT_EQUALS( 1, testSim->upperNeighbor());
-            TS_ASSERT_EQUALS( 3, testSim->lowerNeighbor());
-        }
-        if (rank == 3) {
-            TS_ASSERT_EQUALS( 2, testSim->upperNeighbor());
-            TS_ASSERT_EQUALS(-1, testSim->lowerNeighbor());
+
+        if (rank < 3) {
+            TS_ASSERT(!testSim->outerGhostRegions[rank + 1].empty());
+            TS_ASSERT(!testSim->innerGhostRegions[rank + 1].empty());
         }
     }
 
@@ -146,7 +136,7 @@ public:
             testSim->region,
             cycle);
 
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 40; ++i) {
             referenceSim->step();
             testSim->step();
             cycle += NANO_STEPS;
@@ -222,10 +212,8 @@ public:
         NoOpBalancer::WeightVec weights2 = toMonoPartitions(weights1);
 
         testSim->redistributeGrid(weights1, weights2);
-        testSim->waitForGhostRegions();
+        testSim->waitForGhostRegions(testSim->newStripe);
 
-        TS_ASSERT_EQUALS(testSim->ghostHeightLower, (unsigned)0);
-        TS_ASSERT_EQUALS(testSim->ghostHeightUpper, (unsigned)0);
         if (rank == 0) {
             TS_ASSERT_EQUALS(testSim->curStripe->getDimensions(),
                              init->gridDimensions());
@@ -243,17 +231,27 @@ public:
         NoOpBalancer::WeightVec weights2 = toWeirdoPartitions(weights1);
 
         testSim->redistributeGrid(weights1, weights2);
-        testSim->waitForGhostRegions();
+        testSim->waitForGhostRegions(testSim->curStripe);
 
-
-        unsigned s = weights2[rank    ] - testSim->ghostHeightUpper;
-        unsigned e = weights2[rank + 1] + testSim->ghostHeightLower;
-
+        unsigned ghostHeightUpper = (rank > 0) ? 1 : 0;
+        unsigned ghostHeightLower = (rank < 3) ? 1 : 0;
         int width = init->gridBox().dimensions.x();
+
+        if (weights2[rank] == weights2[rank + 1]) {
+            ghostHeightUpper = 0;
+            ghostHeightLower = 0;
+            width = 0;
+        }
+
+        unsigned s = weights2[rank    ] - ghostHeightUpper;
+        unsigned e = weights2[rank + 1] + ghostHeightLower;
+
         DisplacedGrid<TestCell<2> > expectedStripe(
             CoordBox<2>(Coord<2>(0, s), Coord<2>(width, e - s)));
         init->grid(&expectedStripe);
         Grid<TestCell<2> > actualStripe = *testSim->curStripe->vanillaGrid();
+
+        TS_ASSERT_EQUALS(actualStripe.boundingBox(), expectedStripe.vanillaGrid()->boundingBox());
         TS_ASSERT_EQUALS(actualStripe, *expectedStripe.vanillaGrid());
     }
 
@@ -261,7 +259,15 @@ public:
     {
         NoOpBalancer::WeightVec weights1 = testSim->partitions;
         testSim->redistributeGrid(weights1, weights2);
-        testSim->waitForGhostRegions();
+        testSim->waitForGhostRegions(testSim->newStripe);
+
+        TS_ASSERT_TEST_GRID_REGION(
+            GridBaseType,
+            *testSim->curStripe,
+            testSim->regionWithOuterGhosts,
+            540);
+        testSim->nanoStep(0);
+        testSim->waitForGhostRegions(testSim->curStripe);
 
         testSim->run();
         referenceSim->run();
@@ -295,30 +301,22 @@ public:
         NoOpBalancer::WeightVec weights2 = toWeirdoPartitions(weights1);
 
         testSim->redistributeGrid(weights1, weights2);
-
         TS_ASSERT_EQUALS(testSim->partitions, weights2);
+
         switch (rank) {
         case 0:
-            TS_ASSERT_EQUALS((int)testSim->ghostHeightUpper, 0);
-            TS_ASSERT_EQUALS((int)testSim->ghostHeightLower, 1);
             TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 4);
             TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 4);
             break;
         case 1:
-            TS_ASSERT_EQUALS((int)testSim->ghostHeightUpper, 0);
-            TS_ASSERT_EQUALS((int)testSim->ghostHeightLower, 0);
             TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 0);
             TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 0);
             break;
         case 2:
-            TS_ASSERT_EQUALS((int)testSim->ghostHeightUpper, 1);
-            TS_ASSERT_EQUALS((int)testSim->ghostHeightLower, 1);
             TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 9);
             TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 9);
             break;
         case 3:
-            TS_ASSERT_EQUALS((int)testSim->ghostHeightUpper, 1);
-            TS_ASSERT_EQUALS((int)testSim->ghostHeightLower, 0);
             TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 3);
             TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 3);
             break;
@@ -462,6 +460,127 @@ public:
             *testSim->curStripe,
             testSim->region,
             cycle);
+    }
+
+    void testSoA()
+    {
+        int startStep = 0;
+        int endStep = 21;
+
+        StripingSimulator<TestCellSoA> sim(
+            new TestInitializer<TestCellSoA>(),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellSoA> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellSoA>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellSoA>(writer));
+
+        sim.run();
+    }
+
+    void testUnstructured()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCell<> TestCellType;
+
+        int startStep = 7;
+        int endStep = 20;
+
+        StripingSimulator<TestCellType> sim(
+            new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA1()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA1 TestCellType;
+        int startStep = 7;
+        int endStep = 20;
+
+        StripingSimulator<TestCellType> sim(
+            new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA2()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA2 TestCellType;
+        int startStep = 7;
+        int endStep = 15;
+
+        StripingSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(632, endStep, startStep),
+        rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA3()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA3 TestCellType;
+        int startStep = 7;
+        int endStep = 19;
+
+        StripingSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(655, endStep, startStep),
+        rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA4()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA1 TestCellType;
+        int startStep = 5;
+        int endStep = 24;
+
+        StripingSimulator<TestCellType> sim(
+            new UnstructuredTestInitializer<TestCellType>(444, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellType> *writer = 0;
+        if (MPILayer().rank() == 0) {
+            writer = new TestWriter<TestCellType>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellType>(writer));
+        sim.run();
+#endif
     }
 
 private:

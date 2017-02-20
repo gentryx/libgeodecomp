@@ -115,6 +115,14 @@ public:
             ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1])));
     }
 
+#if !defined(__NVCC__) || (__CUDACC_VER_MAJOR__ >= 8)
+#ifdef __GNUG__
+#if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6) )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#endif
+#endif
+#endif
     __host__ __device__
     bool operator()(const Coord<3> coord, const Coord<3> dim)
     {
@@ -123,6 +131,13 @@ public:
             ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1]))) ||
             ((!WrapsAxis<2, TOPOLOGY>::VALUE) && ((coord[2] < 0) || (coord[2] >= dim[2])));
     }
+#if !defined(__NVCC__) || (__CUDACC_VER_MAJOR__ >= 8)
+#ifdef __GNUG__
+#if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6) )
+#pragma GCC diagnostic pop
+#endif
+#endif
+#endif
 };
 
 /**
@@ -269,6 +284,13 @@ public:
         {
         public:
             static const int DIM = 1;
+
+            template<int D>
+            class WrapsAxis
+            {
+            public:
+                static const bool VALUE = false;
+            };
 
             template<typename GRID>
             static inline const typename GRID::value_type& locate(

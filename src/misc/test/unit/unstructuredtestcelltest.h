@@ -2,6 +2,7 @@
 #include <libgeodecomp/io/unstructuredtestinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/misc/unstructuredtestcell.h>
+#include <libgeodecomp/storage/reorderingunstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
@@ -16,7 +17,7 @@ class UnstructuredTestCellTest : public CxxTest::TestSuite
 public:
 #ifdef LIBGEODECOMP_WITH_CPP14
     typedef UnstructuredTestCell<UnstructuredTestCellHelpers::EmptyAPI, TestCellHelpers::NoOutput> TestCellType;
-    typedef UnstructuredGrid<TestCellType> TestGridType;
+    typedef ReorderingUnstructuredGrid<UnstructuredGrid<TestCellType> > TestGridType;
 #endif
 
     void setUp()
@@ -25,8 +26,10 @@ public:
         startStep = 5;
         endStep = 60;
         UnstructuredTestInitializer<TestCellType> init(200, endStep, startStep);
-        grid1 = TestGridType(Coord<1>(200));
-        grid2 = TestGridType(Coord<1>(200));
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 200);
+        grid1 = TestGridType(region);
+        grid2 = TestGridType(region);
         init.grid(&grid1);
         init.grid(&grid2);
 #endif
@@ -38,7 +41,7 @@ public:
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
 
         for (int x = 0; x < 200; ++x, ++hood) {
-            grid2[Coord<1>(x)].update(hood, 0);
+            grid2.delegate[Coord<1>(x)].update(hood, 0);
         }
 
         int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
@@ -53,10 +56,11 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage weights
-        grid1[Coord<1>(40)].expectedNeighborWeights[41] = 4711;
+        TS_ASSERT_EQUALS(grid1.get(Coord<1>(40)).expectedNeighborWeights[0], 41.1);
+        grid1.delegate[Coord<1>(40)].expectedNeighborWeights[0] = 4711;
 
         for (int x = 0; x < 200; ++x, ++hood) {
-            grid2[Coord<1>(x)].update(hood, 0);
+            grid2.delegate[Coord<1>(x)].update(hood, 0);
         }
 
         for (int x = 0; x < 200; ++x, ++hood) {
@@ -65,7 +69,7 @@ public:
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.get(Coord<1>(x)).valid(), flag);
         }
 #endif
     }
@@ -75,20 +79,20 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage nano step
-        grid1[Coord<1>(40)].cycleCounter += 1;
+        grid1.delegate[Coord<1>(40)].cycleCounter += 1;
 
         for (int x = 0; x < 200; ++x, ++hood) {
-            grid2[Coord<1>(x)].update(hood, 0);
+            grid2.delegate[Coord<1>(x)].update(hood, 0);
         }
 
         for (int x = 0; x < 200; ++x, ++hood) {
             bool flag = true;
             // determining affected neighbors is slightly more complicated here:
-            if (((x >= 20) && (x <= 40)) || (x >= 120)) {
+            if ((x >= 30) && (x <= 40)) {
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.get(Coord<1>(x)).valid(), flag);
         }
 #endif
     }
@@ -98,20 +102,20 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage ID
-        grid1[Coord<1>(40)].id += 1;
+        grid1.delegate[Coord<1>(40)].id += 1;
 
         for (int x = 0; x < 200; ++x, ++hood) {
-            grid2[Coord<1>(x)].update(hood, 0);
+            grid2.delegate[Coord<1>(x)].update(hood, 0);
         }
 
         for (int x = 0; x < 200; ++x, ++hood) {
             bool flag = true;
             // determining affected neighbors is slightly more complicated here:
-            if (((x >= 20) && (x <= 40)) || (x >= 120)) {
+            if ((x >= 30) && (x <= 39)) {
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.get(Coord<1>(x)).valid(), flag);
         }
 #endif
     }
@@ -121,28 +125,56 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredNeighborhood<TestCellType, 1, double, 64, 1> hood(grid1, 0);
         // sabotage validity bit
-        grid1[Coord<1>(40)].isValid = false;
+        grid1.delegate[Coord<1>(40)].isValid = false;
 
         for (int x = 0; x < 200; ++x, ++hood) {
-            grid2[Coord<1>(x)].update(hood, 0);
+            grid2.delegate[Coord<1>(x)].update(hood, 0);
         }
 
         for (int x = 0; x < 200; ++x, ++hood) {
             bool flag = true;
             // determining affected neighbors is slightly more complicated here:
-            if (((x >= 20) && (x <= 40)) || (x >= 120)) {
+            if ((x >= 30) && (x <= 40)) {
                 flag = false;
             }
 
-            TS_ASSERT_EQUALS(grid2[Coord<1>(x)].valid(), flag);
+            TS_ASSERT_EQUALS(grid2.get(Coord<1>(x)).valid(), flag);
         }
 #endif
     }
 
-    void testSoA()
+    void testOperatorEquals()
+    {
+        UnstructuredTestCell<> cell1(12, 34, true, true);
+        UnstructuredTestCell<> cell2 = cell1;
+
+        TS_ASSERT_EQUALS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.id = 0;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.cycleCounter = 0;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.isValid = false;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.isEdgeCell = false;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+
+        cell2 = cell1;
+        cell2.expectedNeighborWeights << 1234;
+        TS_ASSERT_DIFFERS(cell1, cell2);
+    }
+
+    void testSoAVariant1()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        typedef UnstructuredTestCellSoA TestCellType;
+        typedef UnstructuredTestCellSoA1 TestCellType;
         typedef UnstructuredSoAGrid<TestCellType, 1, double, 32, 1> TestGridType;
 
         UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
@@ -168,7 +200,95 @@ public:
 #endif
     }
 
+    void testSoAVariant2()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA2 TestCellType;
+        typedef UnstructuredSoAGrid<TestCellType, 1, double, 8, 1> TestGridType;
 
+        UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
+        TestGridType grid1 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
+        TestGridType grid2 = TestGridType(CoordBox<1>(Coord<1>(), Coord<1>(340)));
+        init.grid(&grid1);
+        init.grid(&grid2);
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 340);
+        UnstructuredUpdateFunctor<TestCellType>()(
+            region,
+            grid1,
+            &grid2,
+            0,
+            UpdateFunctorHelpers::ConcurrencyNoP(),
+            APITraits::SelectThreadedUpdate<TestCellType>::Value());
+
+        int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
+        int expectedCycle2 = expectedCycle1 + 1;
+        TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
+        TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
+#endif
+    }
+
+    void testSoAVariant3()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA3 TestCellType;
+        typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<TestCellType, 1, double, 8, 64> > TestGridType;
+
+        // fixme: update only a subset of the grid's bounding region
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 340);
+
+        UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
+        TestGridType grid1 = TestGridType(region);
+        TestGridType grid2 = TestGridType(region);
+        init.grid(&grid1);
+        init.grid(&grid2);
+
+        UnstructuredUpdateFunctor<TestCellType>()(
+            region,
+            grid1,
+            &grid2,
+            0,
+            UpdateFunctorHelpers::ConcurrencyNoP(),
+            APITraits::SelectThreadedUpdate<TestCellType>::Value());
+
+        int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
+        int expectedCycle2 = expectedCycle1 + 1;
+        TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
+        TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
+#endif
+    }
+
+    void testSoAVariant4()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA4 TestCellType;
+        typedef ReorderingUnstructuredGrid<UnstructuredSoAGrid<TestCellType, 1, double, 16, 32> > TestGridType;
+
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0), 340);
+
+        UnstructuredTestInitializer<TestCellType> init(340, endStep, startStep);
+        TestGridType grid1 = TestGridType(region);
+        TestGridType grid2 = TestGridType(region);
+        init.grid(&grid1);
+        init.grid(&grid2);
+
+        UnstructuredUpdateFunctor<TestCellType>()(
+            region,
+            grid1,
+            &grid2,
+            0,
+            UpdateFunctorHelpers::ConcurrencyNoP(),
+            APITraits::SelectThreadedUpdate<TestCellType>::Value());
+
+        int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
+        int expectedCycle2 = expectedCycle1 + 1;
+        TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
+        TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
+#endif
+    }
 
 private:
 

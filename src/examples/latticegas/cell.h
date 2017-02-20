@@ -7,6 +7,9 @@
 #include <sstream>
 #include <libgeodecomp/examples/latticegas/simparams.h>
 
+/**
+ * Simulation model of the lattice gas automaton (LGA)
+ */
 class Cell
 {
 public:

@@ -53,6 +53,43 @@ public:
             throw std::runtime_error("CUDA error");
         }
     }
+
+    template<typename COORD_TYPE>
+    static void generateLaunchConfig(dim3 *cudaGridDim, dim3 *cudaBlockDim, const COORD_TYPE& dim)
+    {
+        int maxDimX = 512;
+        int dimY = 1;
+
+        if (dim.y() >= 4) {
+            maxDimX = 128;
+            dimY = 4;
+        }
+
+        int dimX = 32;
+        for (; dimX < maxDimX; dimX <<= 1) {
+            if (dimX >= dim.x()) {
+                break;
+            }
+        }
+
+        *cudaBlockDim = dim3(dimX, dimY, 1);
+
+        cudaGridDim->x = divideAndRoundUp(dim.x(), cudaBlockDim->x);
+        cudaGridDim->y = divideAndRoundUp(dim.y(), cudaBlockDim->y);
+        cudaGridDim->z = divideAndRoundUp(dim.z(), cudaBlockDim->z);
+    }
+
+private:
+    static int divideAndRoundUp(int i, int dividend)
+    {
+        int ret = i / dividend;
+        if (i % dividend) {
+            ret += 1;
+        }
+
+        return ret;
+    }
+
 };
 
 }

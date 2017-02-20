@@ -56,5 +56,6 @@
 #include <libgeodecomp/storage/simplearrayfilter.h>
 #include <libgeodecomp/storage/simplefilter.h>
 #include <libgeodecomp/storage/passthroughcontainer.h>
+#include <libgeodecomp/storage/unstructuredlooppeeler.h>
 
 #endif

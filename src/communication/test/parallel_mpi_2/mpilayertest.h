@@ -276,6 +276,24 @@ public:
             layer.cancelAll();
         }
     }
+
+    void testWait()
+    {
+        MPILayer layer;
+        TS_ASSERT_EQUALS(layer.wait(4711), 0);
+        TS_ASSERT(!layer.wait(4711));
+
+        int otherRank = 1 - layer.rank();
+
+        int sourceData = layer.rank();
+        int targetData = -1;
+
+        layer.send(&sourceData, otherRank, 1, 4711);
+        layer.recv(&targetData, otherRank, 1, 4711);
+
+        TS_ASSERT_EQUALS(layer.wait(4711), 2);
+        TS_ASSERT_EQUALS(targetData, otherRank);
+    }
 };
 
 }

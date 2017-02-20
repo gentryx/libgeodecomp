@@ -12,6 +12,9 @@
 #include <libgeodecomp/examples/latticegas/simparams.h>
 #include <libgeodecomp/misc/fpscounter.h>
 
+/**
+ * A simple Qt widget that will render the simulation state in situ.
+ */
 class FlowWidget : public QWidget, FPSCounter
 {
     Q_OBJECT

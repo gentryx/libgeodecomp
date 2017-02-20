@@ -364,7 +364,9 @@ public:
     {};
 
     /**
-     * Replaces the grid type from regular grid to an unstructured grid.
+     * Enforces that an unstructured grid is to be used for the
+     * simulation. Not to be confused with HasUnstructuredGrid, which
+     * is a trait for IO.
      */
     class HasUnstructuredTopology: public HasTopology<Topologies::Unstructured::Topology>
     {};
@@ -736,6 +738,11 @@ public:
             {
                 return FalseType();
             }
+
+            inline int granularity() const
+            {
+                return 16384;
+            }
         };
     };
 
@@ -743,10 +750,42 @@ public:
     class SelectThreadedUpdate<CELL, typename CELL::API::SupportsThreadedUpdate>
     {
     public:
-        typedef TrueType Value;
+        class Value
+        {
+        public:
+            typedef typename CELL::API::HasOpenMP HasOpenMP;
+            typedef typename CELL::API::HasHPX    HasHPX;
+            typedef typename CELL::API::HasCUDA   HasCUDA;
+
+            inline HasOpenMP hasOpenMP() const
+            {
+                return HasOpenMP();
+            }
+
+            inline HasHPX hasHPX() const
+            {
+                return HasHPX();
+            }
+
+            inline HasCUDA hasCUDA() const
+            {
+                return HasCUDA();
+            }
+
+            inline int granularity() const
+            {
+                return CELL::API::GRANULARITY_VALUE;
+            }
+        };
     };
 
     /**
+     * This trait gives models control over the threading strategy
+     * taken inside LibGeoDecomp. The GRANULARITY may be used to
+     * suggest LibGeoDecomp to give smaller heaps of work to each
+     * thread. This can improve scalability when the amount of Streaks
+     * is low compared to the number of cores.
+     *
      * Some models (e.g. n-body codes) are so compute intensive, that
      * it may be advisable to use multiple threads for updating a
      * single cell -- as opposed to using multiple threads for dijunct
@@ -756,10 +795,17 @@ public:
      * on OpenMP or HPX). On CUDA each cell will get its own thread
      * block.
      */
+    template<int GRANULARITY, typename HAS_OPENMP = FalseType, typename HAS_HPX = FalseType, typename HAS_CUDA = FalseType>
     class HasThreadedUpdate
     {
     public:
         typedef void SupportsThreadedUpdate;
+
+        typedef HAS_OPENMP HasOpenMP;
+        typedef HAS_HPX    HasHPX;
+        typedef HAS_CUDA   HasCUDA;
+
+        static const int GRANULARITY_VALUE = GRANULARITY;
     };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -1005,11 +1051,16 @@ public:
     };
 
     /**
-     * If a model is based on an unstructred grid, then we assume that
-     * it can be represented a set of polygonal zones. The shape of
-     * each zone will be represented by a sequence of coordinates. See
-     * the Voronoi example for instructions on how to use this
-     * feature.
+     * This trait can be used by Writers and other IO components to
+     * discover that a cell has an unstructured grid whose nodes are
+     * stored in its cells (e.g. a regular grid of cells, which act as
+     * containers for the unstructured grid). This has no influence on
+     * the grid type to be used by the simulator (see
+     * HasUnstructuredTopology).
+     *
+     * The shape of each zone (element) will be represented by a sequence of
+     * coordinates. See the Voronoi example for instructions on how to
+     * use this feature.
      */
     class HasUnstructuredGrid
     {

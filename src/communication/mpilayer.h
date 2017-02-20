@@ -38,7 +38,8 @@ public:
         // reserve [100, 199], assuming there won't be more than 100
         // links between any two nodes.
         PATCH_LINK = 100,
-        PARALLEL_MEMORY_WRITER = 200
+        PARALLEL_MEMORY_WRITER = 200,
+        COLLECTING_WRITER = 300
     };
 
     typedef std::map<int, std::vector<MPI_Request> > RequestsMap;
@@ -58,7 +59,10 @@ public:
     explicit MPILayer(const MPILayer& other)
     {
         if (other.requests.size() > 0) {
-            throw std::logic_error("Can't clone MPILayer with pending MPI requests, as their duplication (and the subsequent doubled MPI_Wait())  would most likely break MPI");
+            throw std::logic_error(
+                "Can't clone MPILayer with pending MPI requests,"
+                " as their duplication (and the subsequent doubled MPI_Wait())"
+                " would most likely break MPI");
         }
 
         *this = other;
@@ -150,16 +154,17 @@ public:
      * waits until those communication requests tagged with waitTag
      * are finished.
      */
-    void wait(int waitTag)
+    int wait(int waitTag)
     {
         std::vector<MPI_Request>& requestVec = requests[waitTag];
+        int ret = requestVec.size();
 
-        if(requestVec.size() > 0) {
+        if (requestVec.size() > 0) {
             MPI_Waitall(requestVec.size(), &requestVec[0], MPI_STATUSES_IGNORE);
-
         }
 
         requestVec.clear();
+        return ret;
     }
 
     void testAll()

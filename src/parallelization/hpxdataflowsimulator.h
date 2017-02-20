@@ -8,7 +8,10 @@
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/communication/hpxreceiver.h>
-#include <libgeodecomp/parallelization/hierarchicalsimulator.h>
+#include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/storage/reorderingunstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <mutex>
 #include <stdexcept>
 
@@ -16,12 +19,15 @@ namespace LibGeoDecomp {
 
 namespace HPXDataFlowSimulatorHelpers {
 
+/**
+ * A draft for the event type to be passed to all cells in the future
+ * -- instead of a plain integer representing the nano step.
+ */
 class UpdateEvent
 {
 public:
     inline
-    UpdateEvent(const std::vector<int>& neighbors, int nanoStep, int step) :
-        myNeighbors(neighbors),
+    UpdateEvent(int nanoStep, int step) :
         myNanoStep(nanoStep),
         myStep(step)
     {}
@@ -37,52 +43,56 @@ public:
     }
 
 private:
-    const std::vector<int>& myNeighbors;
     int myNanoStep;
     int myStep;
 };
 
+/**
+ * A lightweight implementation of the Neighborhood concept, tailored
+ * for HPX dataflow.
+ */
 template<typename MESSAGE>
 class Neighborhood
 {
 public:
-    // fixme: move semantics
     inline Neighborhood(
         int targetGlobalNanoStep,
-        std::vector<int> messageNeighborIDs,
-        std::vector<hpx::shared_future<MESSAGE> > messagesFromNeighbors,
-        const std::map<int, hpx::id_type>& remoteIDs) :
+        const std::vector<int> *messageNeighborIDs,
+        std::vector<hpx::shared_future<MESSAGE> > *messagesFromNeighbors,
+        const std::map<int, hpx::id_type> *remoteIDs) :
         targetGlobalNanoStep(targetGlobalNanoStep),
         messageNeighborIDs(messageNeighborIDs),
-        messagesFromNeighbors(hpx::util::unwrapped(messagesFromNeighbors)),
+        messagesFromNeighbors(messagesFromNeighbors),
         remoteIDs(remoteIDs)
-    {
-        sentNeighbors.reserve(messageNeighborIDs.size());
-    }
+    {}
 
     inline
     const std::vector<int>& neighbors() const
     {
-        return messageNeighborIDs;
+        return *messageNeighborIDs;
     }
 
     inline
     const MESSAGE& operator[](int index) const
     {
-        std::vector<int>::const_iterator i = std::find(messageNeighborIDs.begin(), messageNeighborIDs.end(), index);
-        if (i == messageNeighborIDs.end()) {
+        std::vector<int>::const_iterator i = std::find(messageNeighborIDs->begin(), messageNeighborIDs->end(), index);
+        if (i == messageNeighborIDs->end()) {
             throw std::logic_error("ID not found for incoming messages");
         }
 
-        return messagesFromNeighbors[i - messageNeighborIDs.begin()];
+        return (*messagesFromNeighbors)[i - messageNeighborIDs->begin()].get();
     }
 
-    // fixme: move semantics
+    /**
+     * Send a message to the cell known by the given ID. Odd: move
+     * semantics seem to make this code run slower according to our
+     * performance tests.
+     */
     inline
     void send(int remoteCellID, const MESSAGE& message)
     {
-        std::map<int, hpx::id_type>::const_iterator iter = remoteIDs.find(remoteCellID);
-        if (iter == remoteIDs.end()) {
+        std::map<int, hpx::id_type>::const_iterator iter = remoteIDs->find(remoteCellID);
+        if (iter == remoteIDs->end()) {
             throw std::logic_error("ID not found for outgoing messages");
         }
 
@@ -98,7 +108,7 @@ public:
     inline
     void sendEmptyMessagesToUnnotifiedNeighbors()
     {
-        for (int neighbor: messageNeighborIDs) {
+        for (int neighbor: *messageNeighborIDs) {
             if (std::find(sentNeighbors.begin(), sentNeighbors.end(), neighbor) == sentNeighbors.end()) {
                 send(neighbor, MESSAGE());
             }
@@ -107,9 +117,10 @@ public:
 
 private:
     int targetGlobalNanoStep;
-    std::vector<int> messageNeighborIDs;
-    std::vector<MESSAGE> messagesFromNeighbors;
-    std::map<int, hpx::id_type> remoteIDs;
+    const std::vector<int> *messageNeighborIDs;
+    std::vector<hpx::shared_future<MESSAGE> > *messagesFromNeighbors;
+    const std::map<int, hpx::id_type> *remoteIDs;
+    // fixme: make this optional!
     std::vector<int> sentNeighbors;
 };
 
@@ -120,17 +131,14 @@ class CellComponent
 public:
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
     typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
-    typedef DisplacedGrid<CELL, Topologies::Unstructured::Topology> GridType;
+    typedef ReorderingUnstructuredGrid<UnstructuredGrid<CELL> > GridType;
 
-
-    // fixme: move semantics
     explicit CellComponent(
         const std::string& basename = "",
         typename SharedPtr<GridType>::Type grid = 0,
         int id = -1,
         const std::vector<int> neighbors = std::vector<int>()) :
         basename(basename),
-        // fixme: move semantics
         neighbors(neighbors),
         grid(grid),
         id(id)
@@ -211,20 +219,18 @@ public:
         return lastTimeStepFuture;
     }
 
-    // fixme: use move semantics here
     void update(
-        std::vector<int> neighbors,
-        std::vector<hpx::shared_future<MESSAGE> > inputFutures,
+        const std::vector<int>& neighbors,
+        std::vector<hpx::shared_future<MESSAGE> >&& inputFutures,
         // Unused, just here to ensure correct ordering of updates per cell:
         const hpx::shared_future<void>& lastTimeStepReady,
         int nanoStep,
         int step)
     {
-        // fixme: lastTimeStepReady.get();
-
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;
-        Neighborhood<MESSAGE> hood(targetGlobalNanoStep, neighbors, inputFutures, remoteIDs);
-        UpdateEvent event(neighbors, nanoStep, step);
+        Neighborhood<MESSAGE> hood(targetGlobalNanoStep, &neighbors, &inputFutures, &remoteIDs);
+
+        UpdateEvent event(nanoStep, step);
 
         cell()->update(hood, event);
         hood.sendEmptyMessagesToUnnotifiedNeighbors();
@@ -251,7 +257,7 @@ private:
 
     CELL *cell()
     {
-        return grid->baseAddress();
+        return grid->data();
     }
 };
 
@@ -262,16 +268,15 @@ private:
  * operator. Primary use case (for now) is DGSWEM.
  */
 template<typename CELL, typename PARTITION = UnstructuredStripingPartition>
-class HPXDataflowSimulator : public HierarchicalSimulator<CELL>
+class HPXDataflowSimulator : public DistributedSimulator<CELL>
 {
 public:
     typedef typename APITraits::SelectMessageType<CELL>::Value MessageType;
-    typedef HierarchicalSimulator<CELL> ParentType;
+    typedef DistributedSimulator<CELL> ParentType;
     typedef typename DistributedSimulator<CELL>::Topology Topology;
     typedef PartitionManager<Topology> PartitionManagerType;
     using DistributedSimulator<CELL>::NANO_STEPS;
     using DistributedSimulator<CELL>::initializer;
-    using HierarchicalSimulator<CELL>::initialWeights;
 
     /**
      * basename will be added to IDs for use in AGAS lookup, so for
@@ -283,13 +288,8 @@ public:
     inline HPXDataflowSimulator(
         Initializer<CELL> *initializer,
         const std::string& basename,
-        int loadBalancingPeriod = 10000,
-        bool enableFineGrainedParallelism = true,
-        int chunkSize = 1000) :
-        ParentType(
-            initializer,
-            loadBalancingPeriod * NANO_STEPS,
-            enableFineGrainedParallelism),
+        int chunkSize = 5) :
+        ParentType(initializer),
         basename(basename),
         chunkSize(chunkSize)
     {}
@@ -309,6 +309,7 @@ public:
     {
         throw std::logic_error("HPXDataflowSimulator::balanceLoad() not implemented");
     }
+
     void run()
     {
         Region<1> localRegion;
@@ -317,7 +318,7 @@ public:
         std::size_t numLocalities = hpx::get_num_localities().get();
 
         std::vector<double> rankSpeeds(numLocalities, 1.0);
-        std::vector<std::size_t> weights = initialWeights(
+        std::vector<std::size_t> weights = LoadBalancer::initialWeights(
             box.dimensions.prod(),
             rankSpeeds);
 
@@ -344,7 +345,7 @@ public:
         SharedPtr<Adjacency>::Type adjacency = initializer->getAdjacency(localRegion);
 
 
-        // fixme: instantiate components in agas and only hold ids of those
+        // fixme: instantiate components in agas and only hold ids of those to ease migration
         typedef HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> ComponentType;
         typedef typename ComponentType::GridType GridType;
 
@@ -378,7 +379,6 @@ public:
         int maxTimeSteps = initializer->maxSteps();
 
         // HPX Sliding semaphore
-        int chunkSize = 1000;
         // allow larger look-ahead for dataflow generation to better
         // overlap calculation and computation:
         int lookAheadDistance = 2 * chunkSize;

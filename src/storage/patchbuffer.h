@@ -52,7 +52,7 @@ public:
         BufferType& buffer = storedRegions.back();
         buffer = SerializationBuffer<CellType>::create(region);
 
-        GridVecConv::gridToVector(grid, &buffer, region);
+        grid.saveRegion(&buffer, region);
         storedNanoSteps << (min)(requestedNanoSteps);
         erase_min(requestedNanoSteps);
     }
@@ -70,8 +70,7 @@ public:
             throw std::logic_error("no region available");
         }
 
-        GridVecConv::vectorToGrid(
-            storedRegions.front(), destinationGrid, region);
+        destinationGrid->loadRegion(storedRegions.front(), region);
 
         if (remove) {
             storedRegions.pop_front();

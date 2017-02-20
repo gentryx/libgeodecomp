@@ -3,9 +3,11 @@
 #include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/teststeerer.h>
+#include <libgeodecomp/io/testwriter.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/paralleltestwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/unstructuredtestinitializer.h>
 #include <libgeodecomp/loadbalancer/mockbalancer.h>
 #include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -96,6 +98,7 @@ public:
         memoryWriter = new MemoryWriterType(outputPeriod);
         sim->addWriter(mockWriter);
         sim->addWriter(memoryWriter);
+        rank = MPILayer().rank();
     }
 
     void tearDown()
@@ -115,7 +118,6 @@ public:
         TS_ASSERT_EQUALS((31 - 4)       * 27, sim->timeToNextEvent());
         TS_ASSERT_EQUALS((101 - 20 - 4) * 27, sim->timeToLastEvent());
 
-        std::size_t rank = MPILayer().rank();
         MockWriter<>::EventsStore expectedEvents;
         expectedEvents << MockWriter<>::Event(20, WRITER_INITIALIZED, rank, false)
                        << MockWriter<>::Event(20, WRITER_INITIALIZED, rank, true);
@@ -160,7 +162,7 @@ public:
             globalNanoStep);
         TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
 
-        if (MPILayer().rank() == 0) {
+        if (rank == 0) {
             std::string expectedEvents;
             for (int i = 0; i < 2; ++i) {
                 expectedEvents += "balance() [1415, 1415, 1415, 1416] [1, 1, 1, 1]\n";
@@ -179,7 +181,6 @@ public:
 
         MockSteererType::EventsStore expected;
         typedef MockSteererType::Event Event;
-        int rank = MPILayer().rank();
         expected << Event(20, STEERER_INITIALIZED, rank, false)
                  << Event(20, STEERER_INITIALIZED, rank, true);
         for (unsigned i = 25; i < maxSteps; i += 5) {
@@ -1253,14 +1254,15 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 
-        ghostZoneWidth = 3;
+        // fixme: disabled until #46 is fixed
+        // ghostZoneWidth = 3;
 
-        HiParSimulator<NonPoDTestCell, ZCurvePartition<2> > sim(
-            new NonPoDTestCell::Initializer(),
-            new MockBalancer(),
-            loadBalancingPeriod,
-            ghostZoneWidth);
-        sim.run();
+        // HiParSimulator<NonPoDTestCell, ZCurvePartition<2> > sim(
+        //     new NonPoDTestCell::Initializer(),
+        //     new MockBalancer(),
+        //     loadBalancingPeriod,
+        //     ghostZoneWidth);
+        // sim.run();
 
 #endif
     }
@@ -1269,6 +1271,178 @@ public:
     {
         sim->addWriter(new AccumulatingWriter());
         sim->run();
+    }
+
+    void testSoA()
+    {
+        int startStep = 0;
+        int endStep = 21;
+
+        HiParSimulator<TestCellSoA, ZCurvePartition<3> > sim(
+            new TestInitializer<TestCellSoA>(),
+            rank? 0 : new NoOpBalancer());
+
+        Writer<TestCellSoA> *writer = 0;
+        if (rank == 0) {
+            writer = new TestWriter<TestCellSoA>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellSoA>(writer));
+
+        sim.run();
+    }
+
+    void testUnstructured()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCell<> TestCellType;
+
+        int startStep = 7;
+        int endStep = 20;
+
+        HiParSimulator<TestCellType, UnstructuredStripingPartition> sim(
+            new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
+        expectedSteps << 7
+                      << 10
+                      << 13
+                      << 16
+                      << 19
+                      << 20;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+        sim.addWriter(new ParallelTestWriter<TestCellType>(3, expectedSteps, expectedEvents));
+
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA1()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA1 TestCellType;
+        int startStep = 7;
+        int endStep = 20;
+
+        HiParSimulator<TestCellType, UnstructuredStripingPartition> sim(
+            new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
+        expectedSteps << 7
+                      << 11
+                      << 15
+                      << 19
+                      << 20;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+        sim.addWriter(new ParallelTestWriter<TestCellType>(4, expectedSteps, expectedEvents));
+
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA2()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA2 TestCellType;
+        int startStep = 7;
+        int endStep = 15;
+
+        HiParSimulator<TestCellType, UnstructuredStripingPartition> sim(
+            new UnstructuredTestInitializer<TestCellType>(632, endStep, startStep),
+        rank? 0 : new NoOpBalancer());
+
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
+        expectedSteps << 7
+                      << 9
+                      << 11
+                      << 13
+                      << 15;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+        sim.addWriter(new ParallelTestWriter<TestCellType>(2, expectedSteps, expectedEvents));
+
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA3()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA3 TestCellType;
+        int startStep = 7;
+        int endStep = 19;
+
+        HiParSimulator<TestCellType, UnstructuredStripingPartition> sim(
+            new UnstructuredTestInitializer<TestCellType>(655, endStep, startStep),
+        rank? 0 : new NoOpBalancer());
+
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
+        expectedSteps << 7
+                      << 10
+                      << 13
+                      << 16
+                      << 19;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+        sim.addWriter(new ParallelTestWriter<TestCellType>(3, expectedSteps, expectedEvents));
+
+        sim.run();
+#endif
+    }
+
+    void testUnstructuredSoA4()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef UnstructuredTestCellSoA1 TestCellType;
+        int startStep = 5;
+        int endStep = 24;
+
+        HiParSimulator<TestCellType, UnstructuredStripingPartition> sim(
+            new UnstructuredTestInitializer<TestCellType>(444, endStep, startStep),
+            rank? 0 : new NoOpBalancer());
+
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
+        expectedSteps << 5
+                      << 8
+                      << 11
+                      << 14
+                      << 17
+                      << 20
+                      << 23
+                      << 24;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+        sim.addWriter(new ParallelTestWriter<TestCellType>(3, expectedSteps, expectedEvents));
+
+        sim.run();
+#endif
     }
 
 private:
@@ -1283,6 +1457,7 @@ private:
     SharedPtr<MockWriter<>::EventsStore>::Type events;
     MockWriter<> *mockWriter;
     MemoryWriterType *memoryWriter;
+    std::size_t rank;
 };
 
 }

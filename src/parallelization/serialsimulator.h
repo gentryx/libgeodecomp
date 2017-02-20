@@ -50,13 +50,12 @@ public:
     {
         stepNum = initializer->startStep();
         Coord<DIM> dim = initializer->gridBox().dimensions;
-        curGrid = new GridType(CoordBox<DIM>(Coord<DIM>(), dim));
-        newGrid = new GridType(CoordBox<DIM>(Coord<DIM>(), dim));
+        simArea << CoordBox<DIM>(Coord<DIM>(), dim);
+        curGrid = new GridType(simArea);
+        newGrid = new GridType(simArea);
         initializer->grid(curGrid);
         initializer->grid(newGrid);
-
-        CoordBox<DIM> box = curGrid->boundingBox();
-        simArea << box;
+        simArea = curGrid->remapRegion(simArea);
     }
 
     virtual ~SerialSimulator()
@@ -85,7 +84,12 @@ public:
         }
 
         ++stepNum;
-        handleOutput(WRITER_STEP_FINISHED);
+
+        WriterEvent event = WRITER_STEP_FINISHED;
+        if (stepNum == initializer->maxSteps()) {
+            event = WRITER_ALL_DONE;
+        }
+        handleOutput(event);
     }
 
     /**
@@ -110,7 +114,6 @@ public:
         }
 
         handleInput(STEERER_ALL_DONE, &feedback);
-        handleOutput(WRITER_ALL_DONE);
     }
 
     /**

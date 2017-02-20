@@ -490,7 +490,7 @@ public:
     const typename Simulator<CELL_TYPE>::GridType *getGrid()
     {
         if (!hasCurrentGridOnHost) {
-            cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
+            cudaMemcpy(grid.data(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
             hasCurrentGridOnHost = true;
         }
         return &ioGrid;
@@ -512,8 +512,8 @@ public:
             grid.set(*i, grid.getEdge());
         }
 
-        cudaMemcpy(devGridOld, grid.baseAddress(), byteSize, cudaMemcpyHostToDevice);
-        cudaMemcpy(devGridNew, grid.baseAddress(), byteSize, cudaMemcpyHostToDevice);
+        cudaMemcpy(devGridOld, grid.data(), byteSize, cudaMemcpyHostToDevice);
+        cudaMemcpy(devGridNew, grid.data(), byteSize, cudaMemcpyHostToDevice);
         stepNum = initializer->startStep();
         CUDAUtil::checkForError();
 
@@ -539,7 +539,6 @@ private:
     ProxyGrid<CELL_TYPE, DIM> ioGrid;
     CELL_TYPE *devGridOld;
     CELL_TYPE *devGridNew;
-    int baseAddress;
     int byteSize;
     Region<DIM> simArea;
     bool hasCurrentGridOnHost;

@@ -23,6 +23,7 @@
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredupdatefunctor.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/testbed/spmvmtests/mmio.h>
 
 #include <libflatarray/short_vec.hpp>
@@ -74,15 +75,9 @@ public:
         public APITraits::HasSellType<double>,
         public APITraits::HasSellMatrices<1>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
-    {
-    public:
-        LIBFLATARRAY_CUSTOM_SIZES(
-            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768)
-            (65536)(131072)(262144)(524288)(1048576)(2097152)(4194304),
-            (1),
-            (1))
-    };
+        public APITraits::HasSellSigma<SIGMA>,
+        public LibFlatArray::api_traits::has_default_1d_sizes
+    {};
 
     typedef short_vec<double, C> ShortVec;
 
@@ -121,26 +116,22 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         ShortVec tmp, weights, values;
-        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
-            tmp.load_aligned(&hoodNew->sum() + i * C);
+        // no loop peeler required here because we know it's only
+        // going to be one Streak anyway and that will be aligned on
+        // chunk boundaries.
+        for (; hoodNew.index() < indexEnd; hoodNew += C, ++hoodOld) {
+            tmp.load_aligned(&hoodNew->sum());
+
             for (const auto& j: hoodOld.weights(0)) {
                 weights.load_aligned(j.second());
                 values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
-            tmp.store_aligned(&hoodNew->sum() + i * C);
+
+            tmp.store_aligned(&hoodNew->sum());
         }
     }
 #endif
-
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first()].value * j.second();
-        }
-    }
 
     double value;
     double sum;
@@ -193,7 +184,7 @@ private:
     std::vector<int>        column;
     std::vector<int>        rowLen;
 
-    void initFromMatrix(const std::map<Coord<2>, VALUE_TYPE>& matrix)
+    void initFromMatrix(const std::vector<std::pair<Coord<2>, VALUE_TYPE> >& matrix)
     {
         const int nonZero = matrix.size();
         if (!nonZero) {
@@ -245,7 +236,7 @@ public:
 
     void init(const std::string& fileName)
     {
-        std::map<Coord<2>, VALUE_TYPE> adjacency;
+        std::vector<std::pair<Coord<2>, VALUE_TYPE> > adjacency;
 
         // read matrix into adjacency (this may take some time ...)
         // using this C API provided by matrix market
@@ -275,7 +266,7 @@ public:
             if (fscanf(f, "%d %d %lg\n", &m, &n, &tmp) != 3) {
                 throw std::logic_error("Failed to parse mtx format");
             }
-            adjacency[Coord<2>(m - 1, n - 1)] = tmp;
+            adjacency << std::make_pair(Coord<2>(m - 1, n - 1), tmp);
         }
 
         fclose(f);
@@ -309,7 +300,7 @@ public:
     virtual void grid(GridBase<CELL, 1> *grid)
     {
         // setup sparse matrix
-        std::map<Coord<2>, double> weights;
+        std::vector<std::pair<Coord<2>, double> > weights;
 
         // read matrix into weights (this may take some time ...)
         // using this C API provided by matrix market
@@ -339,7 +330,7 @@ public:
             if (fscanf(f, "%d %d %lg\n", &m, &n, &tmp) != 3) {
                 throw std::logic_error("Failed to parse mtx format");
             }
-            weights[Coord<2>(m - 1, n - 1)] = tmp;
+            weights << std::make_pair(Coord<2>(m - 1, n - 1), tmp);
         }
 
         fclose(f);
@@ -360,10 +351,12 @@ private:
     void updateFunctor(const Region<1>& region, const Grid& gridOld,
                        Grid *gridNew, unsigned nanoStep)
     {
+        typedef LibGeoDecomp::UpdateFunctorHelpers::ConcurrencyEnableOpenMP ConcurrencySpec;
+        typedef typename APITraits::SelectThreadedUpdate<CELL>::Value ModelThreadingSpec;
         gridOld.callback(
             gridNew,
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
-                gridOld, gridNew, region, nanoStep));
+            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL, Grid, ConcurrencySpec, ModelThreadingSpec>(
+                gridOld, gridNew, region, nanoStep, ConcurrencySpec(true, true), ModelThreadingSpec()));
     }
 
 public:

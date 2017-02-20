@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_STORAGE_SERIALIZATIONBUFFER_H
 
 #include <libflatarray/flat_array.hpp>
+#include <libgeodecomp/misc/apitraits.h>
 
 namespace LibGeoDecomp {
 
@@ -9,7 +10,8 @@ namespace SerializationBufferHelpers {
 
 /**
  * This is an n-way switch to allow other classes to select the
- * appropriate type to buffer regions of a grid; for use with GridVecConv.
+ * appropriate type to buffer regions of a grid; for use with
+ * GridBase::loadRegion() and saveRegion().
  */
 template<typename CELL, typename SUPPORTS_SOA = void, typename SUPPORTS_BOOST_SERIALIZATION = void>
 class Implementation
@@ -22,12 +24,24 @@ public:
     template<typename REGION>
     static BufferType create(const REGION& region)
     {
-        return BufferType(region.size());
+        return BufferType(storageSize(region));
+    }
+
+    template<typename REGION>
+    static std::size_t storageSize(const REGION& region)
+    {
+        return region.size();
+    }
+
+    template<typename REGION>
+    static void resize(BufferType *buffer, const REGION& region)
+    {
+        return buffer->resize(storageSize(region));
     }
 
     static ElementType *getData(BufferType& buffer)
     {
-        return &buffer.first();
+        return &buffer.front();
     }
 
 #ifdef LIBGEODECOMP_WITH_MPI
@@ -52,7 +66,19 @@ public:
     template<typename REGION>
     static BufferType create(const REGION& region)
     {
-        return BufferType(LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size());
+        return BufferType(storageSize(region));
+    }
+
+    template<typename REGION>
+    static std::size_t storageSize(const REGION& region)
+    {
+        return LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size();
+    }
+
+    template<typename REGION>
+    static void resize(BufferType *buffer, const REGION& region)
+    {
+        return buffer->resize(storageSize(region));
     }
 
     static ElementType *getData(BufferType& buffer)
@@ -71,32 +97,45 @@ public:
 /**
  * see above
  */
-template<typename CELL>
-class Implementation<CELL, void, typename CELL::API::SupportsBoostSerialization>
-{
-public:
-    typedef std::vector<char> BufferType;
-    typedef char ElementType;
-    typedef typename APITraits::FalseType FixedSize;
+// temporarily disabled until #46 ( https://github.com/gentryx/libgeodecomp/issues/46 ) is fixed.
 
-    template<typename REGION>
-    static BufferType create(const REGION& region)
-    {
-        return BufferType();
-    }
+// template<typename CELL>
+// class Implementation<CELL, void, typename CELL::API::SupportsBoostSerialization>
+// {
+// public:
+//     typedef std::vector<char> BufferType;
+//     typedef char ElementType;
+//     typedef typename APITraits::FalseType FixedSize;
 
-    static ElementType *getData(BufferType& buffer)
-    {
-        return &buffer.front();
-    }
+//     template<typename REGION>
+//     static BufferType create(const REGION& region)
+//     {
+//         return BufferType();
+//     }
 
-#ifdef LIBGEODECOMP_WITH_MPI
-    static inline MPI_Datatype cellMPIDataType()
-    {
-        return MPI_CHAR;
-    }
-#endif
-};
+//     template<typename REGION>
+//     static std::size_t storageSize(const REGION& region)
+//     {
+//         return region.size();
+//     }
+
+//     template<typename REGION>
+//     static void resize(BufferType *buffer, const REGION& region)
+//     {
+//         buffer->resize(storageSize(region));
+//     }
+//     static ElementType *getData(BufferType& buffer)
+//     {
+//         return &buffer.front();
+//     }
+
+// #ifdef LIBGEODECOMP_WITH_MPI
+//     static inline MPI_Datatype cellMPIDataType()
+//     {
+//         return MPI_CHAR;
+//     }
+// #endif
+// };
 
 }
 
@@ -122,6 +161,18 @@ public:
     static inline ElementType *getData(BufferType& buffer)
     {
         return Implementation::getData(buffer);
+    }
+
+    template<typename REGION>
+    static std::size_t storageSize(const REGION& region)
+    {
+        return Implementation::storageSize(region);
+    }
+
+    template<typename REGION>
+    static inline void resize(BufferType *buffer, const REGION& region)
+    {
+        Implementation::resize(buffer, region);
     }
 
 #ifdef LIBGEODECOMP_WITH_MPI

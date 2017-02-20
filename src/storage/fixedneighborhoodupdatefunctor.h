@@ -144,9 +144,12 @@ public:
     {
         Coord<DIM> normalizedOriginOld = streak.origin + *offsetOld;
         Coord<DIM> normalizedOriginNew = streak.origin + *offsetNew;
-        if (*topologicalDimensions != Coord<DIM>()) {
-            normalizedOriginOld = TOPOLOGY::normalize(streak.origin + *offsetOld, *topologicalDimensions);
-            normalizedOriginNew = TOPOLOGY::normalize(streak.origin + *offsetNew, *topologicalDimensions);
+        // don't normalize out of bounds accesses because SoA uses
+        // padding for constant boundary conditions:
+        if ((*topologicalDimensions != Coord<DIM>()) &&
+            !(TOPOLOGY::isOutOfBounds(normalizedOriginOld, *topologicalDimensions))) {
+            normalizedOriginOld = TOPOLOGY::normalize(normalizedOriginOld, *topologicalDimensions);
+            normalizedOriginNew = TOPOLOGY::normalize(normalizedOriginNew, *topologicalDimensions);
         }
 
         // this copy is required to expand our potentially 1D or 2D
@@ -309,6 +312,10 @@ public:
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
         LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_5
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_6
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_7
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_8
 #undef LGD_UPDATE_FUNCTOR_BODY
     }
 

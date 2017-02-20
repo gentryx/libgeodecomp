@@ -7,6 +7,7 @@
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/misc/sharedptr.h>
 
 namespace LibGeoDecomp {
@@ -22,7 +23,9 @@ class CollectingWriter : public Clonable<ParallelWriter<CELL_TYPE>, CollectingWr
 {
 public:
     typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
-    typedef DisplacedGrid<CELL_TYPE, Topology> StorageGridType;
+    typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
+    typedef typename GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value StorageGridType;
+    typedef typename SerializationBuffer<CELL_TYPE>::BufferType BufferType;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType SimulatorGridType;
 
     using ParallelWriter<CELL_TYPE>::period;
@@ -33,7 +36,7 @@ public:
         Writer<CELL_TYPE> *writer,
         int root = 0,
         MPI_Comm communicator = MPI_COMM_WORLD,
-        MPI_Datatype mpiDatatype = APITraits::SelectMPIDataType<CELL_TYPE>::value()) :
+        MPI_Datatype mpiDatatype = SerializationBuffer<CELL_TYPE>::cellMPIDataType()) :
         Clonable<ParallelWriter<CELL_TYPE>, CollectingWriter<CELL_TYPE> >("",  1),
         writer(writer),
         mpiLayer(communicator),
@@ -64,21 +67,18 @@ public:
         std::size_t rank,
         bool lastCall)
     {
+        SerializationBuffer<CELL_TYPE>::resize(&buffer, validRegion);
+        grid.saveRegion(&buffer, validRegion);
+
         if (mpiLayer.rank() == root) {
             if (globalGrid.boundingBox().dimensions != globalDimensions) {
-                globalGrid.resize(CoordBox<DIM>(Coord<DIM>(), globalDimensions));
+                Region<DIM> region;
+                region << CoordBox<DIM>(Coord<DIM>(), globalDimensions);
+                globalGrid = StorageGridType(region);
             }
 
-            globalGrid.paste(grid, validRegion);
+            globalGrid.loadRegion(buffer, validRegion);
             globalGrid.setEdge(grid.getEdge());
-        }
-
-        CoordBox<DIM> box = grid.boundingBox();
-        StorageGridType localGrid(box);
-
-        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
-            Streak<DIM> s(*i);
-            grid.get(s, &localGrid[s.origin]);
         }
 
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {
@@ -86,21 +86,25 @@ public:
                 if (mpiLayer.rank() == root) {
                     Region<DIM> recvRegion;
                     mpiLayer.recvRegion(&recvRegion, sender);
-                    mpiLayer.recvUnregisteredRegion(
-                        &globalGrid,
-                        recvRegion,
+                    SerializationBuffer<CELL_TYPE>::resize(&buffer, recvRegion);
+
+                    mpiLayer.recv(
+                        buffer.data(),
                         sender,
-                        MPILayer::PARALLEL_MEMORY_WRITER,
-                        datatype);
+                        buffer.size(),
+                        MPILayer::COLLECTING_WRITER,
+                        SerializationBuffer<CELL_TYPE>::cellMPIDataType());
+                    mpiLayer.waitAll();
+                    globalGrid.loadRegion(buffer, recvRegion);
                 }
                 if (mpiLayer.rank() == sender) {
                     mpiLayer.sendRegion(validRegion, root);
-                    mpiLayer.sendUnregisteredRegion(
-                        &localGrid,
-                        validRegion,
+                    mpiLayer.send(
+                        buffer.data(),
                         root,
-                        MPILayer::PARALLEL_MEMORY_WRITER,
-                        datatype);
+                        buffer.size(),
+                        MPILayer::COLLECTING_WRITER,
+                        SerializationBuffer<CELL_TYPE>::cellMPIDataType());
                 }
             }
         }
@@ -108,7 +112,7 @@ public:
         mpiLayer.waitAll();
 
         if (lastCall && (mpiLayer.rank() == root)) {
-            writer->stepFinished(*globalGrid.vanillaGrid(), step, event);
+            writer->stepFinished(globalGrid, step, event);
         }
     }
 
@@ -117,6 +121,7 @@ private:
     MPILayer mpiLayer;
     int root;
     StorageGridType globalGrid;
+    BufferType buffer;
     MPI_Datatype datatype;
 };
 

@@ -1,0 +1,12 @@
+diff -ur scotch_6.0.4_old/src/libscotch/Makefile scotch_6.0.4/src/libscotch/Makefile
+--- scotch_6.0.4_old/src/libscotch/Makefile	2016-12-17 04:48:07.675570422 -0600
++++ scotch_6.0.4/src/libscotch/Makefile	2016-12-17 04:49:00.670771037 -0600
+@@ -60,7 +60,7 @@
+ 					libscotcherrexit$(LIB)
+ 
+ ptscotch			:	scotch
+-					$(MAKE) CFLAGS="$(CFLAGS) -DSCOTCH_PTSCOTCH" CC="$(CCP)"	\
++					$(MAKE) CFLAGS="$(CFLAGS) -DSCOTCH_PTSCOTCH" CC="$(CCP)" CCD="$(CCP)"	\
+ 					ptscotch.h							\
+ 					ptscotchf.h							\
+ 					libptscotch$(LIB)						\

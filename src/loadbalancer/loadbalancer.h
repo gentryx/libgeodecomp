@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_LOADBALANCER_LOADBALANCER_H
 
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <vector>
 
 namespace LibGeoDecomp {
 
@@ -39,6 +40,17 @@ public:
      * \f]
      */
     virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads) = 0;
+
+    /**
+     * computes an initial weight distribution of the work items (i.e.
+     * number of cells in the simulation space). rankSpeeds gives an
+     * estimate of the relative performance of the different ranks
+     * (good when running on heterogeneous systems, e.g. clusters
+     * comprised of multiple genrations of nodes or x86 clusters with
+     * additional Xeon Phi accelerators).
+     */
+    static std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double> rankSpeeds);
+
 };
 
 }

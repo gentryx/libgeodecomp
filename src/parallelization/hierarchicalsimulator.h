@@ -6,6 +6,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This is the base class for all simulators that are using our nested
+ * parallelism architecture. The latter is built on UpdateGroups and
+ * Steppers.
+ */
 template<typename CELL>
 class HierarchicalSimulator : public DistributedSimulator<CELL>
 {
@@ -57,7 +62,11 @@ protected:
     inline void insertNextLoadBalancingEvent()
     {
         long nextLoadBalancing = currentNanoStep() + loadBalancingPeriod;
-        events[nextLoadBalancing] << LOAD_BALANCING;
+        long lastNanoStep = initializer->maxSteps() * NANO_STEPS;
+
+        if (nextLoadBalancing <= lastNanoStep) {
+            events[nextLoadBalancing] << LOAD_BALANCING;
+        }
     }
 
     virtual long currentNanoStep() const = 0;
@@ -78,33 +87,6 @@ protected:
     inline long timeToLastEvent() const
     {
         return  events.rbegin()->first - currentNanoStep();
-    }
-
-    /**
-     * computes an initial weight distribution of the work items (i.e.
-     * number of cells in the simulation space). rankSpeeds gives an
-     * estimate of the relative performance of the different ranks
-     * (good when running on heterogeneous systems, e.g. clusters
-     * comprised of multiple genrations of nodes or x86 clusters with
-     * additional Xeon Phi accelerators).
-     */
-    std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double> rankSpeeds) const
-    {
-        std::size_t size = rankSpeeds.size();
-        double totalSum = sum(rankSpeeds);
-        std::vector<std::size_t> ret(size);
-
-        std::size_t lastPos = 0;
-        double partialSum = 0.0;
-        for (std::size_t i = 0; i < size - 1; ++i) {
-            partialSum += rankSpeeds[i];
-            std::size_t nextPos = items * partialSum / totalSum;
-            ret[i] = nextPos - lastPos;
-            lastPos = nextPos;
-        }
-        ret[size - 1] = items - lastPos;
-
-        return ret;
     }
 };
 

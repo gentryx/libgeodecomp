@@ -22,6 +22,11 @@ public:
     {
         return AdjacencyPtr(new RegionBasedAdjacency());
     }
+
+    virtual SharedPtr<Adjacency>::Type getReverseAdjacency(const Region<DIM>& region) const
+    {
+        return makeShared<Adjacency>(new RegionBasedAdjacency());
+    }
 };
 
 }

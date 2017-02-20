@@ -19,6 +19,7 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/misc/unstructuredtestcell.h>
 
 namespace LibGeoDecomp {
 class HPXSerialization
@@ -156,6 +157,17 @@ public:
         archive & object.testValue;
     }
 
+    template<typename ARCHIVE, typename ADDITIONAL_API, typename OUTPUT>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::UnstructuredTestCell<ADDITIONAL_API, OUTPUT>& object, const unsigned /*version*/)
+    {
+        archive & object.cycleCounter;
+        archive & object.expectedNeighborWeights;
+        archive & object.id;
+        archive & object.isEdgeCell;
+        archive & object.isValid;
+    }
+
 };
 }
 
@@ -258,6 +270,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Streak<DIM>& object, const unsign
 
 template<class ARCHIVE, int DIM, typename STENCIL, typename TOPOLOGY, typename ADDITIONAL_API, typename OUTPUT>
 void serialize(ARCHIVE& archive, LibGeoDecomp::TestCell<DIM, STENCIL, TOPOLOGY, ADDITIONAL_API, OUTPUT>& object, const unsigned version)
+{
+    HPXSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename ADDITIONAL_API, typename OUTPUT>
+void serialize(ARCHIVE& archive, LibGeoDecomp::UnstructuredTestCell<ADDITIONAL_API, OUTPUT>& object, const unsigned version)
 {
     HPXSerialization::serialize(archive, object, version);
 }

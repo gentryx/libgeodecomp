@@ -39,17 +39,9 @@ public:
         public APITraits::HasSellType<ValueType>,
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
-    {
-    public:
-        // uniform sizes lead to std::bad_alloc,
-        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
-        // as dimension (DIM = 1)
-        LIBFLATARRAY_CUSTOM_SIZES(
-            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192),
-            (1),
-            (1))
-    };
+        public APITraits::HasSellSigma<SIGMA>,
+        public LibFlatArray::api_traits::has_default_1d_sizes
+    {};
 
     inline explicit Cell(double v = 0) :
         value(v), sum(0)
@@ -58,27 +50,19 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+        for (; hoodNew.index() < indexEnd; hoodNew += C, ++hoodOld) {
             ShortVec tmp;
-            tmp.load_aligned(&hoodNew->sum() + i * C);
+            tmp.load_aligned(&hoodNew->sum());
+
             for (const auto& j: hoodOld.weights(0)) {
                 ShortVec weights;
                 ShortVec values;
                 weights.load_aligned(j.second());
-                // fixme: is this gahter actually correct? shouldn't we use offset 0 for the gather? see also hpxperformancetests/main.cpp
                 values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
             }
-            tmp.store_aligned(&hoodNew->sum() + i * C);
-        }
-    }
 
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first()].value * j.second();
+            tmp.store_aligned(&hoodNew->sum());
         }
     }
 
@@ -111,11 +95,11 @@ public:
     virtual void grid(GridBase<Cell, 1> *grid)
     {
         // setup diagonal matrix, one neighbor per cell
-        std::map<Coord<2>, ValueType> weights;
+        Grid::SparseMatrix weights;
 
         for (int i = 0; i < 100; ++i) {
             grid->set(Coord<1>(i), Cell(static_cast<double>(i) + 0.1));
-            weights[Coord<2>(i, i)] = static_cast<ValueType>(i) + 0.1;
+            weights << std::make_pair(Coord<2>(i, i), static_cast<ValueType>(i) + 0.1);
         }
 
         grid->setWeights(0, weights);
@@ -142,7 +126,7 @@ public:
     virtual void grid(GridBase<Cell, 1> *grid)
     {
         // read rhs and matrix from file
-        std::map<Coord<2>, ValueType> weights;
+        GridBase<Cell, 1>::SparseMatrix weights;
         std::ifstream rhsIfs;
         std::ifstream matrixIfs;
 
@@ -176,7 +160,7 @@ public:
                     throw std::logic_error("Failed to read data from matrix");
                 }
                 if (tmp != 0.0) {
-                    weights[Coord<2>(row, col)] = tmp;
+                    weights << std::make_pair(Coord<2>(row, col), tmp);
                 }
             }
         }
@@ -212,9 +196,10 @@ void runSimulation(int argc, char *argv[])
     if (SIGMA == 1) {
         sim.addWriter(new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency));
     } else {
-        auto asciiWriter = new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency);
-        sim.addWriter(new SellSortingWriter<Cell, ASCIIWriter<Cell> >(
-                          asciiWriter, 0, "sum", &Cell::sum, outputFrequency));
+        // fixme
+        // auto asciiWriter = new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency);
+        // sim.addWriter(new SellSortingWriter<Cell, ASCIIWriter<Cell> >(
+        //                   asciiWriter, 0, "sum", &Cell::sum, outputFrequency));
     }
     sim.run();
 }

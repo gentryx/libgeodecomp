@@ -58,10 +58,12 @@ public:
             ghostZoneWidth);
 
         std::vector<CoordBox<3> > boundingBoxes;
+        std::vector<CoordBox<3> > expandedBoundingBoxes;
         for (int i = 0; i < 4; ++i) {
             boundingBoxes << partitionManager->getRegion(i, 0).boundingBox();
+            expandedBoundingBoxes << partitionManager->getRegion(i, ghostZoneWidth).boundingBox();
         }
-        partitionManager->resetGhostZones(boundingBoxes);
+        partitionManager->resetGhostZones(boundingBoxes, expandedBoundingBoxes);
 
         stepper.reset(new StepperType(partitionManager, init));
 

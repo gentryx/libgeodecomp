@@ -24,13 +24,21 @@ namespace LibGeoDecomp {
 /**
  * A grid type for irregular structures
  */
-template<typename ELEMENT_TYPE, std::size_t MATRICES = 1, typename WEIGHT_TYPE = double, int C = 64, int SIGMA = 1>
+template<typename ELEMENT_TYPE, std::size_t MATRICES = 1, typename WEIGHT_TYPE = double, int MY_C = 64, int MY_SIGMA = 1>
 class UnstructuredGrid : public GridBase<ELEMENT_TYPE, 1, WEIGHT_TYPE>
 {
 public:
+    friend class ReorderingUnstructuredGridTest;
+
+    typedef WEIGHT_TYPE WeightType;
+    typedef typename GridBase<ELEMENT_TYPE, 1, WEIGHT_TYPE>::SparseMatrix SparseMatrix;
     typedef std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> > NeighborList;
     typedef typename std::vector<std::pair<ELEMENT_TYPE, WEIGHT_TYPE> >::iterator NeighborListIterator;
+    typedef ELEMENT_TYPE StorageType;
+
     const static int DIM = 1;
+    const static int SIGMA = MY_SIGMA;
+    const static int C = MY_C;
 
     explicit UnstructuredGrid(
         const Coord<DIM>& dim = Coord<DIM>(),
@@ -38,6 +46,7 @@ public:
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
         elements(dim.x(), defaultElement),
+        origin(0),
         edgeElement(edgeElement),
         dimension(dim)
     {
@@ -53,10 +62,10 @@ public:
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
-        // fixme: dirty hack, we're allocating way too many cells. trim this down!
-        elements(box.origin.x() + box.dimensions.x(), defaultElement),
+        elements(box.dimensions.x(), defaultElement),
+        origin(box.origin.x()),
         edgeElement(edgeElement),
-        dimension(box.origin + box.dimensions)
+        dimension(box.dimensions)
     {
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
@@ -64,20 +73,26 @@ public:
         }
     }
 
-    UnstructuredGrid& operator=(const UnstructuredGrid& other)
+    /**
+     * Return a pointer to the underlying data storage. Use with care!
+     */
+    inline
+    ELEMENT_TYPE *data()
     {
-        elements = other.elements;
-        edgeElement = other.edgeElement;
-        dimension = other.dimension;
-
-        for (std::size_t i = 0; i < MATRICES; ++i) {
-            matrices[i] = other.matrices[i];
-        }
-
-        return *this;
+        return elements.data();
     }
 
-    void setWeights(std::size_t matrixID, const std::map<Coord<2>, WEIGHT_TYPE>& matrix)
+    /**
+     * Return a const pointer to the underlying data storage. Use with
+     * care!
+     */
+    inline
+    const ELEMENT_TYPE *data() const
+    {
+        return elements.data();
+    }
+
+    void setWeights(std::size_t matrixID, const SparseMatrix& matrix)
     {
         assert(matrixID < MATRICES);
         matrices[matrixID].initFromMatrix(matrix);
@@ -97,56 +112,31 @@ public:
         return matrices[matrixID];
     }
 
-    /**
-     * Returns a list of pairs representing the neighborhood of center element.
-     * The first element of the pair is the ELEMENT_TYPE
-     * and the secound the ADJACENCY_TYPE.
-     * The first Element of the list is the center element it self.
-     * If center element does not exist the EdggeElement is returned.
-     * In both cases ADJACENCY_TYPE = -1
-     */
-    inline NeighborList getNeighborhood(const Coord<DIM>& center) const
-    {
-        NeighborList neighborhood;
-
-        if (boundingBox().inBounds(center)) {
-            neighborhood.push_back(std::make_pair(*this[center], -1));
-            std::vector<std::pair<int, WEIGHT_TYPE> > neighbor =
-                matrices[0].getRow(center.x());
-
-            for (NeighborListIterator it = neighbor.begin();
-                 it != neighbor.end();
-                 ++it) {
-                neighborhood.push_back(std::make_pair((*this)[it->first], it->second));
-            }
-        } else {
-            neighborhood.push_back(std::make_pair(getEdgeElement(), -1));
-        }
-
-        return neighborhood;
-    }
-
     inline const Coord<DIM>& getDimensions() const
     {
         return dimension;
     }
 
-    inline const ELEMENT_TYPE& operator[](const int y) const
+    inline const ELEMENT_TYPE& operator[](const int i) const
     {
+        int y = i - origin;
+
         if (y < 0 || y >= dimension.x()) {
             return getEdgeElement();
-        } else {
-            return elements[y];
         }
+
+        return elements[y];
     }
 
-    inline ELEMENT_TYPE& operator[](const int y)
+    inline ELEMENT_TYPE& operator[](const int i)
     {
+        int y = i - origin;
+
         if (y < 0 || y >= dimension.x()) {
             return getEdgeElement();
-        } else {
-            return elements[y];
         }
+
+        return elements[y];
     }
 
     inline ELEMENT_TYPE& operator[](const Coord<DIM>& coord)
@@ -197,7 +187,10 @@ public:
             }
         }
 
-        // fixme: check weights
+        if (matrices != other.matrices) {
+            return false;
+        }
+
         return true;
     }
 
@@ -209,6 +202,16 @@ public:
     inline bool operator!=(const GridBase<ELEMENT_TYPE, DIM>& other) const
     {
         return !(*this == other);
+    }
+
+    inline void resize(const CoordBox<DIM>& newDim)
+    {
+        const ELEMENT_TYPE defaultElement = elements.size() ? elements[0] : edgeElement;
+
+        *this = UnstructuredGrid(
+            newDim.dimensions,
+            defaultElement,
+            edgeElement);
     }
 
     inline std::string toString() const
@@ -233,12 +236,12 @@ public:
         return message.str();
     }
 
-    virtual void set(const Coord<DIM>& coord, const ELEMENT_TYPE& element)
+    void set(const Coord<DIM>& coord, const ELEMENT_TYPE& element)
     {
         (*this)[coord] = element;
     }
 
-    virtual void set(const Streak<DIM>& streak, const ELEMENT_TYPE *element)
+    void set(const Streak<DIM>& streak, const ELEMENT_TYPE *element)
     {
         for (Coord<DIM> cursor = streak.origin; cursor.x() < streak.endX; ++cursor.x()) {
             (*this)[cursor] = *element;
@@ -246,12 +249,12 @@ public:
         }
     }
 
-    virtual ELEMENT_TYPE get(const Coord<DIM>& coord) const
+    ELEMENT_TYPE get(const Coord<DIM>& coord) const
     {
         return (*this)[coord];
     }
 
-    virtual void get(const Streak<DIM>& streak, ELEMENT_TYPE *element) const
+    void get(const Streak<DIM>& streak, ELEMENT_TYPE *element) const
     {
         Coord<DIM> cursor = streak.origin;
         for (; cursor.x() < streak.endX; ++cursor.x()) {
@@ -270,19 +273,87 @@ public:
         return edgeElement;
     }
 
-    virtual void setEdge(const ELEMENT_TYPE& element)
+    void setEdge(const ELEMENT_TYPE& element)
     {
         getEdgeElement() = element;
     }
 
-    virtual const ELEMENT_TYPE& getEdge() const
+    const ELEMENT_TYPE& getEdge() const
     {
         return getEdgeElement();
     }
 
-    virtual CoordBox<DIM> boundingBox() const
+    CoordBox<DIM> boundingBox() const
     {
-        return CoordBox<DIM>(Coord<DIM>(), dimension);
+        return CoordBox<DIM>(Coord<DIM>(origin), dimension);
+    }
+
+    inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>()) const
+    {
+        saveRegion(
+            buffer,
+            region.beginStreak(offset),
+            region.endStreak(offset),
+            region.size());
+    }
+
+    template<typename ITER1, typename ITER2>
+    inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const ITER1& start, const ITER2& end, int size) const
+    {
+        ELEMENT_TYPE *target = buffer->data();
+
+        for (ITER1 i = start; i != end; ++i) {
+            get(*i, target);
+            target += i->length();
+        }
+    }
+
+    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>())
+    {
+        loadRegion(
+            buffer,
+            region.beginStreak(offset),
+            region.endStreak(offset),
+            region.size());
+    }
+
+    template<typename ITER1, typename ITER2>
+    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const ITER1& start, const ITER2& end, int size)
+    {
+        const ELEMENT_TYPE *source = buffer.data();
+
+        for (ITER1 i = start; i != end; ++i) {
+            set(*i, source);
+            source += i->length();
+        }
+    }
+
+    template<typename ITER1, typename ITER2>
+    void saveMemberImplementation(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<ELEMENT_TYPE>& selector,
+        const ITER1& start,
+        const ITER2& end) const
+    {
+        for (ITER1 i = start; i != end; ++i) {
+            selector.copyMemberOut(&(*this)[i->origin], MemoryLocation::HOST, target, targetLocation, i->length());
+            target += selector.sizeOfExternal() * i->length();
+        }
+    }
+
+    template<typename ITER1, typename ITER2>
+    void loadMemberImplementation(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<ELEMENT_TYPE>& selector,
+        const ITER1& start,
+        const ITER2& end)
+    {
+        for (ITER1 i = start; i != end; ++i) {
+            selector.copyMemberIn(source, sourceLocation, &(*this)[i->origin], MemoryLocation::HOST, i->length());
+            source += selector.sizeOfExternal() * i->length();
+        }
     }
 
 protected:
@@ -292,10 +363,7 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region) const
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            selector.copyMemberOut(&(*this)[i->origin], MemoryLocation::HOST, target, targetLocation, i->length());
-            target += selector.sizeOfExternal() * i->length();
-        }
+        saveMemberImplementation(target, targetLocation, selector, region.beginStreak(), region.endStreak());
     }
 
     void loadMemberImplementation(
@@ -304,15 +372,12 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region)
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            selector.copyMemberIn(source, sourceLocation, &(*this)[i->origin], MemoryLocation::HOST, i->length());
-            source += selector.sizeOfExternal() * i->length();
-        }
+        loadMemberImplementation(source, sourceLocation, selector, region.beginStreak(), region.endStreak());
     }
 
 private:
     std::vector<ELEMENT_TYPE> elements;
-    // TODO wrapper for different types of sell c sigma containers
+    int origin;
     SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA> matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;

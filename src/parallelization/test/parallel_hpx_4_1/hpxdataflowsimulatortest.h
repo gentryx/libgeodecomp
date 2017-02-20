@@ -61,10 +61,9 @@ public:
         neighbors(neighbors)
     {}
 
-    // fixme: use move semantics here
     template<typename HOOD, typename EVENT>
     void update(
-        HOOD& hood,
+        HOOD&& hood,
         const EVENT& event)
     {
         int globalNanoStep = event.step() * NANO_STEPS + event.nanoStep();
@@ -110,10 +109,9 @@ public:
         neighbors(neighbors)
     {}
 
-    // fixme: use move semantics here
     template<typename HOOD, typename EVENT>
     void update(
-        HOOD& hood,
+        HOOD&& hood,
         const EVENT& event)
     {
         int globalNanoStep = event.step() * NANO_STEPS + event.nanoStep();
@@ -157,14 +155,22 @@ public:
     void grid(GridBase<MODEL, 1> *grid)
     {
         CoordBox<1> box = grid->boundingBox();
+        typename GridBase<MODEL, 1>::SparseMatrix weights;
 
         for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
-            MODEL cell(i->x(), getNeighbors(i->x()));
+            std::vector<int> neighbors = getNeighbors(i->x());
+            MODEL cell(i->x(), neighbors);
             grid->set(*i, cell);
+
+            for (auto&& j: neighbors) {
+                weights << std::make_pair(Coord<2>(i->x(), j), 0.1);
+            }
         }
+
+        grid->setWeights(0, weights);
     }
 
-    virtual Coord<1> gridDimensions() const
+    Coord<1> gridDimensions() const
     {
 	return Coord<1>(gridSize);
     }

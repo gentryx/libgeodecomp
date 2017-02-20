@@ -45,7 +45,6 @@ public:
     friend class HpxSimulatorTest;
     using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
     using HierarchicalSimulator<CELL_TYPE>::handleEvents;
-    using HierarchicalSimulator<CELL_TYPE>::initialWeights;
     using HierarchicalSimulator<CELL_TYPE>::enableFineGrainedParallelism;
     using HierarchicalSimulator<CELL_TYPE>::events;
     using HierarchicalSimulator<CELL_TYPE>::initEvents;
@@ -237,7 +236,7 @@ private:
         Region<DIM> globalRegion;
         globalRegion << box;
 
-        std::vector<std::size_t> weights = initialWeights(
+        std::vector<std::size_t> weights = LoadBalancer::initialWeights(
             box.dimensions.prod(),
             globalUpdateGroupSpeeds);
 

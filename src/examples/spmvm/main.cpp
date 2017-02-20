@@ -17,9 +17,9 @@ using namespace LibGeoDecomp;
 
 // defining settings for SELL-C-q
 typedef double ValueType;
-static const std::size_t MATRICES = 1;
-static const int C = 4;
-static const int SIGMA = 1;
+const std::size_t MATRICES = 1;
+const int C = 4;
+const int SIGMA = 1;
 
 class Cell
 {
@@ -39,22 +39,17 @@ public:
     {}
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    static void updateLineX(
+        HOOD_NEW& hoodNew,
+        int indexEnd,
+        HOOD_OLD& hoodOld,
+        unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
             hoodNew[i].sum = 0.;
             for (const auto& j: hoodOld.weights(0)) {
                 hoodNew[i].sum += hoodOld[j.first()].value * j.second();
             }
-        }
-    }
-
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first()].value * j.second();
         }
     }
 
@@ -75,11 +70,11 @@ public:
     virtual void grid(GridBase<Cell, 1> *grid)
     {
         // setup diagonal matrix, one neighbor per cell
-        std::map<Coord<2>, ValueType> weights;
+        GridBase<Cell, 1>::SparseMatrix weights;
 
         for (int i = 0; i < 100; ++i) {
             grid->set(Coord<1>(i), Cell(static_cast<double>(i) + 0.1));
-            weights[Coord<2>(i, i)] = static_cast<ValueType>(i) + 0.1;
+            weights << std::make_pair(Coord<2>(i, i),  static_cast<ValueType>(i) + 0.1);
         }
 
         grid->setWeights(0, weights);
@@ -105,8 +100,8 @@ public:
 
     virtual void grid(GridBase<Cell, 1> *grid)
     {
-        // read rhs and matrix from file
-        std::map<Coord<2>, ValueType> weights;
+        // read RHS and matrix from file
+        GridBase<Cell, 1>::SparseMatrix weights;
         std::ifstream rhsIfs;
         std::ifstream matrixIfs;
 
@@ -140,7 +135,7 @@ public:
                     throw std::logic_error("Failed to read data from matrix");
                 }
                 if (tmp != 0.0) {
-                    weights[Coord<2>(row, col)] = tmp;
+                    weights << std::make_pair(Coord<2>(row, col), tmp);
                 }
             }
         }
@@ -152,7 +147,6 @@ public:
     }
 };
 
-static
 void runSimulation(int argc, char *argv[])
 {
     SimpleInitializer<Cell> *init;
@@ -171,15 +165,16 @@ void runSimulation(int argc, char *argv[])
     } else {
         init = new CellInitializerDiagonal(steps);
     }
+
     SerialSimulator<Cell> sim(init);
     sim.addWriter(new TracingWriter<Cell>(outputFrequency, init->maxSteps()));
     sim.addWriter(new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency));
+
     sim.run();
 }
 
 int main(int argc, char *argv[])
 {
     runSimulation(argc, argv);
-
     return EXIT_SUCCESS;
 }

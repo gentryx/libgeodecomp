@@ -229,11 +229,17 @@ public:
                 ghostZoneWidth);
 
             std::vector<CoordBox<3> > boundingBoxes;
+            std::vector<CoordBox<3> > expandedBoundingBoxes;
+
             for (int i = 0; i < 2; ++i) {
                 boundingBoxes << myPartitionManager.getRegion(i, 0).boundingBox();
             }
 
-            myPartitionManager.resetGhostZones(boundingBoxes);
+            for (int i = 0; i < 2; ++i) {
+                expandedBoundingBoxes << myPartitionManager.getRegion(i, ghostZoneWidth).boundingBox();
+            }
+
+            myPartitionManager.resetGhostZones(boundingBoxes, expandedBoundingBoxes);
 
             for (int i = 0; i < 2; ++i) {
                 if (myPartitionManager.getRegion(i, 0).boundingBox() == CoordBox<3>()) {

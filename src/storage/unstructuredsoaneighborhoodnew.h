@@ -37,9 +37,22 @@ public:
     }
 
     inline
-    int index() const
+    UnstructuredSoANeighborhoodNew& operator+=(int i)
     {
-        return accessor->index;
+        *accessor += i;
+        return *this;
+    }
+
+    inline
+    long& index()
+    {
+        return accessor->index();
+    }
+
+    inline
+    const long& index() const
+    {
+        return accessor->index();
     }
 
     inline

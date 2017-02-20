@@ -50,7 +50,7 @@ class InitFromMatrix
 {
 public:
     using SellContainer = SellCSigmaSparseMatrixContainer<VALUETYPE, C, SIGMA>;
-    using Matrix = std::map<Coord<2>, VALUETYPE>;
+    using Matrix = std::vector<std::pair<Coord<2>, VALUETYPE> >;
 
     void operator()(SellContainer *container, const Matrix& matrix) const
     {
@@ -77,7 +77,7 @@ public:
         chunkLength.resize(numberOfChunks);
         rowLength.resize(rowsPadded);
         rowLengthCopy.resize(rowsPadded);
-        realRowToSorted.resize(rowsPadded);
+        realRowToSorted.reserve(rowsPadded);
         chunkRowToReal.resize(rowsPadded);
 
         // get row lengths
@@ -98,11 +98,16 @@ public:
                              [] (const SortItem& a, const SortItem& b) -> bool
                              { return a.rowLength > b.rowLength; });
             for (int i = 0; i < numberOfRows; ++i) {
-                chunkRowToReal[nSigma * SIGMA + i]   = lengths[i].rowIndex;
-                realRowToSorted[lengths[i].rowIndex] = nSigma * SIGMA + i;
-                rowLengthCopy[nSigma * SIGMA + i] = lengths[i].rowLength;
+                int newID = nSigma * SIGMA + i;
+                chunkRowToReal[newID] = lengths[i].rowIndex;
+                realRowToSorted.push_back(std::make_pair(lengths[i].rowIndex, newID));
+                rowLengthCopy[newID] = lengths[i].rowLength;
             }
         }
+
+        std::stable_sort(realRowToSorted.begin(), realRowToSorted.end(),
+                         [] (const std::pair<int, int>& a, const std::pair<int, int>& b) -> bool
+                         { return a.first < b.first; });
 
         // save chunk lengths and offsets
         chunkOffset[0] = 0;
@@ -117,7 +122,8 @@ public:
             }
             numberOfValues += chunkLength[nChunk] * C;
         }
-        chunkOffset[numberOfChunks] = chunkOffset[numberOfChunks - 1] +
+        chunkOffset[numberOfChunks] =
+            chunkOffset[numberOfChunks - 1] +
             chunkLength[numberOfChunks - 1] * C;
 
         // save values
@@ -128,85 +134,24 @@ public:
         std::fill(begin(column), end(column), 0);
         int currentRow = 0;
         int index = 0;
+
         for (const auto& pair: matrix) {
             if (pair.first.x() != currentRow) {
                 currentRow = pair.first.x();
                 index = 0;
             }
-            const int chunk = realRowToSorted[pair.first.x()] / C;
-            const int row   = realRowToSorted[pair.first.x()] % C;
-            const int start = chunkOffset[chunk];
-            const int idx   = start + index * C + row;
-            values[idx]     = pair.second;
-            column[idx]     = pair.first.y();
-            ++index;
-        }
-    }
-};
+            std::vector<std::pair<int, int> >::iterator iter = std::lower_bound(
+                realRowToSorted.begin(), realRowToSorted.end(), pair.first.x(),
+                [](const std::pair<int, int>& a, const int id) {
+                    return a.first < id;
+                });
 
-/**
- * See doc above.
- */
-template<typename VALUETYPE, int C>
-class InitFromMatrix<VALUETYPE, C, 1>
-{
-public:
-    using SellContainer = SellCSigmaSparseMatrixContainer<VALUETYPE, C, 1>;
-    using Matrix = std::map<Coord<2>, VALUETYPE>;
-
-    void operator()(SellContainer *container, const Matrix& matrix) const
-    {
-        // calculate size for arrays
-        const int matrixRows = container->dimension;
-        const int numberOfChunks = (matrixRows - 1) / C + 1;
-        const int rowsPadded = numberOfChunks * C;
-        int numberOfValues = 0;
-
-        // save references to sell data structures
-        auto& chunkOffset = container->chunkOffset;
-        auto& chunkLength = container->chunkLength;
-        auto& rowLength   = container->rowLength;
-        auto& values      = container->values;
-        auto& column      = container->column;
-
-        // allocate memory
-        chunkOffset.resize(numberOfChunks + 1);
-        chunkLength.resize(numberOfChunks);
-        rowLength.resize(rowsPadded);
-
-        // get row lengths
-        std::fill(begin(rowLength), end(rowLength), 0);
-        for (const auto& pair: matrix) {
-            ++rowLength[pair.first.x()];
-        }
-
-        // save chunk lengths and offsets
-        chunkOffset[0] = 0;
-        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
-            chunkLength[nChunk] = *std::max_element(rowLength.begin() + nChunk * C,
-                                                    rowLength.begin() + (nChunk + 1) * C);
-            if (nChunk > 0) {
-                chunkOffset[nChunk] = chunkOffset[nChunk - 1] + chunkLength[nChunk - 1] * C;
+            if (iter == realRowToSorted.end()) {
+                throw std::logic_error("ID not found");
             }
-            numberOfValues += chunkLength[nChunk] * C;
-        }
-        chunkOffset[numberOfChunks] = chunkOffset[numberOfChunks - 1] +
-            chunkLength[numberOfChunks - 1] * C;
 
-        // save values
-        values.resize(numberOfValues);
-        column.resize(numberOfValues);
-        std::fill(begin(values), end(values), 0);
-        std::fill(begin(column), end(column), 0);
-        int currentRow = 0;
-        int index = 0;
-        for (const auto& pair: matrix) {
-            if (pair.first.x() != currentRow) {
-                currentRow = pair.first.x();
-                index = 0;
-            }
-            const int chunk = pair.first.x() / C;
-            const int row   = pair.first.x() % C;
+            const int chunk = iter->second / C;
+            const int row   = iter->second % C;
             const int start = chunkOffset[chunk];
             const int idx   = start + index * C + row;
             values[idx]     = pair.second;
@@ -228,10 +173,12 @@ template<typename VALUETYPE, int C = 1, int SIGMA = 1>
 class SellCSigmaSparseMatrixContainer
 {
 public:
+    typedef std::vector<std::pair<Coord<2>, VALUETYPE> > SparseMatrix;
     using AlignedValueVector = std::vector<VALUETYPE, LibFlatArray::aligned_allocator<VALUETYPE, 64> >;
     using AlignedIntVector   = std::vector<int, LibFlatArray::aligned_allocator<int, 64> >;
 
     friend SellHelpers::InitFromMatrix<VALUETYPE, C, SIGMA>;
+    friend class ReorderingUnstructuredGridTest;
 
     explicit
     SellCSigmaSparseMatrixContainer(const int N = 0) :
@@ -246,57 +193,20 @@ public:
         static_assert(SIGMA >= 1, "SIGMA should be greater or equal to 1!");
     }
 
-    // fixme: kill this code
-    // lhs = A   x rhs
-    // tmp = val x b
-    void matVecMul(std::vector<VALUETYPE>& lhs, std::vector<VALUETYPE>& rhs)
-    {
-        if (lhs.size() != rhs.size() || lhs.size() != dimension) {
-            throw std::invalid_argument("lhs and rhs must be of size N");
-        }
-
-        // loop over chunks     TODO parallel omp
-        for (std::size_t chunk = 0; chunk < chunkLength.size(); ++chunk) {
-            int offs = chunkOffset[chunk];
-            VALUETYPE tmp[C];
-
-            // init tmp                     TODO vectorize
-            for (int row = 0; row<C; ++row) {
-                tmp[row] = lhs[chunk*C + row];
-            }
-
-            // loop over columns in chunk
-            for (int col = 0; col < chunkLength[chunk]; ++col) {
-
-                // loop over rows in chunks TODO vectorize
-                for (int row = 0; row < C; ++row) {
-                    VALUETYPE val = values[offs];
-                    int columnINDEX = column[offs++];
-                    // note: val might be zero due to padding
-                    VALUETYPE b = rhs[columnINDEX];
-                    tmp[row] += val * b;
-                }
-            }
-
-            // store tmp                     TODO vectorize
-            for (int row = 0; row < C; ++row) {
-                lhs[chunk*C + row] = tmp[row];
-            }
-        }
-
-    }
-
-    // fixme: is this mainly used for constructing the neighborhood in UnstructuredGrid::getNeighborhood. drop this code once we have an efficient neighborhood-object for UnstructuredGrid
+    /**
+     * Returns all neighbors of a given ID (i.e. all nodes to which a
+     * node (row) has edges leading to, or in other words: the indices
+     * of all non-zero entries in the matrix' row). Useful for
+     * debugging and IO, not efficient for use in kernels.
+     */
     std::vector<std::pair<int, VALUETYPE> > getRow(int const row) const
     {
         std::vector< std::pair<int, VALUETYPE> > vec;
-        int const chunk (row/C);
-        int const offset (row%C);
+        int const chunk(row/C);
+        int const offset(row%C);
         int index = chunkOffset[chunk] + offset;
 
-        for (int element = 0;
-             element < rowLength[row];
-             ++element, index += C) {
+        for (int element = 0; element < rowLength[row]; ++element, index += C) {
             vec.push_back(std::pair<int, VALUETYPE>(column[index], values[index]));
         }
 
@@ -308,9 +218,13 @@ public:
      * _complete_ matrix. Matrix is represented as map, key is Coord<2> which contains
      * (row, column). value_type of map contains the actual value.
      */
-    void initFromMatrix(const std::map<Coord<2>, VALUETYPE>& matrix)
+    void initFromMatrix(const SparseMatrix& matrix)
     {
-        SellHelpers::InitFromMatrix<VALUETYPE, C, SIGMA>()(this, matrix);
+        SparseMatrix sortedMatrix = matrix;
+        std::sort(sortedMatrix.begin(), sortedMatrix.end(), [](const std::pair<Coord<2>, VALUETYPE>& a, const std::pair<Coord<2>, VALUETYPE>& b){
+                return a.first < b.first;
+            });
+        SellHelpers::InitFromMatrix<VALUETYPE, C, SIGMA>()(this, sortedMatrix);
     }
 
     inline bool operator==(const SellCSigmaSparseMatrixContainer& other) const
@@ -368,7 +282,7 @@ public:
         return chunkOffset;
     }
 
-    inline const std::vector<int>& realRowToSortedVec() const
+    inline const std::vector<std::pair<int, int> >& realRowToSortedVec() const
     {
         return realRowToSorted;
     }
@@ -385,12 +299,12 @@ public:
 
 private:
     AlignedValueVector values;
-    AlignedIntVector   column;
-    std::vector<int>   rowLength;       // = Non Zero Entres in Row
-    std::vector<int>   chunkLength;     // = Max rowLength in Chunk
-    std::vector<int>   chunkOffset;     // COffset[i+1]=COffset[i]+CLength[i]*C
-    std::vector<int>   realRowToSorted; // mapping between rows and real rows, used for SIGMA
-    std::vector<int>   chunkRowToReal;  // and the other way around
+    AlignedIntVector column;
+    std::vector<int> rowLength;       // = Non Zero Entres in Row
+    std::vector<int> chunkLength;     // = Max rowLength in Chunk
+    std::vector<int> chunkOffset;     // COffset[i+1]=COffset[i]+CLength[i]*C
+    std::vector<std::pair<int, int> > realRowToSorted; // mapping between rows and real rows, used for SIGMA
+    std::vector<int> chunkRowToReal;  // and the other way around
     std::size_t dimension;              // = N
 };
 

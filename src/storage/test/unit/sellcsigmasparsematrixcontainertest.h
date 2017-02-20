@@ -1,6 +1,7 @@
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
 #include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -17,9 +18,9 @@ class SellCSigmaSparseMatrixContainerTest : public CxxTest::TestSuite
 {
 public:
 #ifdef LIBGEODECOMP_WITH_CPP14
-    using IMatrix = std::map<Coord<2>, int>;
-    using CMatrix = std::map<Coord<2>, char>;
-    using DMatrix = std::map<Coord<2>, double>;
+    using IMatrix = std::vector<std::pair<Coord<2>, int> >;
+    using CMatrix = std::vector<std::pair<Coord<2>, char> >;
+    using DMatrix = std::vector<std::pair<Coord<2>, double> >;
 #endif
 
     // test with a 8x8 diagonal Matrix, C = 1; Sigma = 1
@@ -40,14 +41,14 @@ public:
          */
 
         IMatrix matrix;
-        matrix[Coord<2>(0, 0)] = 1;
-        matrix[Coord<2>(1, 1)] = 2;
-        matrix[Coord<2>(2, 2)] = 3;
-        matrix[Coord<2>(3, 3)] = 4;
-        matrix[Coord<2>(4, 4)] = 5;
-        matrix[Coord<2>(5, 5)] = 6;
-        matrix[Coord<2>(6, 6)] = 7;
-        matrix[Coord<2>(7, 7)] = 8;
+        matrix << std::make_pair(Coord<2>(0, 0), 1);
+        matrix << std::make_pair(Coord<2>(1, 1), 2);
+        matrix << std::make_pair(Coord<2>(2, 2), 3);
+        matrix << std::make_pair(Coord<2>(3, 3), 4);
+        matrix << std::make_pair(Coord<2>(4, 4), 5);
+        matrix << std::make_pair(Coord<2>(5, 5), 6);
+        matrix << std::make_pair(Coord<2>(6, 6), 7);
+        matrix << std::make_pair(Coord<2>(7, 7), 8);
         smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
@@ -129,14 +130,14 @@ public:
          */
 
         IMatrix matrix;
-        matrix[Coord<2>(1, 1)] = 2;
-        matrix[Coord<2>(0, 0)] = 1;
-        matrix[Coord<2>(6, 6)] = 7;
-        matrix[Coord<2>(4, 4)] = 5;
-        matrix[Coord<2>(7, 7)] = 8;
-        matrix[Coord<2>(2, 2)] = 3;
-        matrix[Coord<2>(5, 5)] = 6;
-        matrix[Coord<2>(3, 3)] = 4;
+        matrix << std::make_pair(Coord<2>(1, 1), 2);
+        matrix << std::make_pair(Coord<2>(0, 0), 1);
+        matrix << std::make_pair(Coord<2>(6, 6), 7);
+        matrix << std::make_pair(Coord<2>(4, 4), 5);
+        matrix << std::make_pair(Coord<2>(7, 7), 8);
+        matrix << std::make_pair(Coord<2>(2, 2), 3);
+        matrix << std::make_pair(Coord<2>(5, 5), 6);
+        matrix << std::make_pair(Coord<2>(3, 3), 4);
         smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
@@ -199,7 +200,7 @@ public:
 #endif
     }
 
-    // test with a 8x8 diagonal Matrix, C = 2; Sigma = 1
+    // test with a 8x8 diagonal Matrix, , 2; Sigma = )1
     // randome addPoints
     void testGetRow_three()
     {
@@ -220,14 +221,14 @@ public:
          */
 
         IMatrix matrix;
-        matrix[Coord<2>(5, 5)] = 6;
-        matrix[Coord<2>(1, 1)] = 2;
-        matrix[Coord<2>(0, 0)] = 1;
-        matrix[Coord<2>(6, 6)] = 7;
-        matrix[Coord<2>(4, 4)] = 5;
-        matrix[Coord<2>(7, 7)] = 8;
-        matrix[Coord<2>(2, 2)] = 3;
-        matrix[Coord<2>(3, 3)] = 4;
+        matrix << std::make_pair(Coord<2>(5, 5), 6);
+        matrix << std::make_pair(Coord<2>(1, 1), 2);
+        matrix << std::make_pair(Coord<2>(0, 0), 1);
+        matrix << std::make_pair(Coord<2>(6, 6), 7);
+        matrix << std::make_pair(Coord<2>(4, 4), 5);
+        matrix << std::make_pair(Coord<2>(7, 7), 8);
+        matrix << std::make_pair(Coord<2>(2, 2), 3);
+        matrix << std::make_pair(Coord<2>(3, 3), 4);
         smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
@@ -310,14 +311,14 @@ public:
          */
 
         IMatrix matrix;
-        matrix[Coord<2>(0, 0)] = 1;
-        matrix[Coord<2>(1, 1)] = 2;
-        matrix[Coord<2>(2, 2)] = 3;
-        matrix[Coord<2>(3, 3)] = 4;
-        matrix[Coord<2>(4, 4)] = 5;
-        matrix[Coord<2>(5, 5)] = 6;
-        matrix[Coord<2>(6, 6)] = 7;
-        matrix[Coord<2>(7, 7)] = 8;
+        matrix << std::make_pair(Coord<2>(0, 0), 1);
+        matrix << std::make_pair(Coord<2>(1, 1), 2);
+        matrix << std::make_pair(Coord<2>(2, 2), 3);
+        matrix << std::make_pair(Coord<2>(3, 3), 4);
+        matrix << std::make_pair(Coord<2>(4, 4), 5);
+        matrix << std::make_pair(Coord<2>(5, 5), 6);
+        matrix << std::make_pair(Coord<2>(6, 6), 7);
+        matrix << std::make_pair(Coord<2>(7, 7), 8);
         smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
@@ -406,25 +407,25 @@ public:
          */
 
         CMatrix matrix;
-        matrix[Coord<2>(4, 0)] = 'G';
-        matrix[Coord<2>(8, 7)] = 'R';
-        matrix[Coord<2>(6, 3)] = 'K';
-        matrix[Coord<2>(7, 6)] = 'O';
-        matrix[Coord<2>(7, 4)] = 'N';
-        matrix[Coord<2>(7, 2)] = 'M';
-        matrix[Coord<2>(0, 4)] = 'A';
-        matrix[Coord<2>(3, 8)] = 'F';
-        matrix[Coord<2>(7, 0)] = 'L';
-        matrix[Coord<2>(3, 7)] = 'E';
-        matrix[Coord<2>(2, 4)] = 'B';
-        matrix[Coord<2>(5, 1)] = 'I';
-        matrix[Coord<2>(7, 8)] = 'P';
-        matrix[Coord<2>(3, 2)] = 'D';
-        matrix[Coord<2>(8, 5)] = 'Q';
-        matrix[Coord<2>(8, 3)] = 'S';
-        matrix[Coord<2>(5, 2)] = 'J';
-        matrix[Coord<2>(4, 5)] = 'H';
-        matrix[Coord<2>(2, 6)] = 'C';
+        matrix << std::make_pair(Coord<2>(4, 0), 'G');
+        matrix << std::make_pair(Coord<2>(8, 7), 'R');
+        matrix << std::make_pair(Coord<2>(6, 3), 'K');
+        matrix << std::make_pair(Coord<2>(7, 6), 'O');
+        matrix << std::make_pair(Coord<2>(7, 4), 'N');
+        matrix << std::make_pair(Coord<2>(7, 2), 'M');
+        matrix << std::make_pair(Coord<2>(0, 4), 'A');
+        matrix << std::make_pair(Coord<2>(3, 8), 'F');
+        matrix << std::make_pair(Coord<2>(7, 0), 'L');
+        matrix << std::make_pair(Coord<2>(3, 7), 'E');
+        matrix << std::make_pair(Coord<2>(2, 4), 'B');
+        matrix << std::make_pair(Coord<2>(5, 1), 'I');
+        matrix << std::make_pair(Coord<2>(7, 8), 'P');
+        matrix << std::make_pair(Coord<2>(3, 2), 'D');
+        matrix << std::make_pair(Coord<2>(8, 5), 'Q');
+        matrix << std::make_pair(Coord<2>(8, 3), 'S');
+        matrix << std::make_pair(Coord<2>(5, 2), 'J');
+        matrix << std::make_pair(Coord<2>(4, 5), 'H');
+        matrix << std::make_pair(Coord<2>(2, 6), 'C');
         smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, char> > row0;
@@ -539,12 +540,10 @@ public:
          */
 
         IMatrix matrix;
-        matrix[Coord<2>(0, 0)] = 1;
-        matrix[Coord<2>(0, 2)] = 4;
-        matrix[Coord<2>(1, 1)] = 2;
-        matrix[Coord<2>(2, 2)] = 3;
-        matrix[Coord<2>(1, 1)] = 5;
-        matrix[Coord<2>(2, 2)] = 6;
+        matrix << std::make_pair(Coord<2>(0, 0), 1);
+        matrix << std::make_pair(Coord<2>(0, 2), 4);
+        matrix << std::make_pair(Coord<2>(1, 1), 5);
+        matrix << std::make_pair(Coord<2>(2, 2), 6);
         smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
@@ -574,146 +573,6 @@ public:
 #endif
     }
 
-    void testMatVecMul_diag()
-    {
-#ifdef LIBGEODECOMP_WITH_CPP14
-        SellCSigmaSparseMatrixContainer<int, 4, 1> smc(8);
-
-        /* add a test 8x8 Matrix:
-         * 1       1 0 0 0 0 0 0 0      1
-         * 2       0 1 0 0 0 0 0 0      2
-         * 3       0 0 1 0 0 0 0 0      3
-         * 4       0 0 0 1 0 0 0 0      4
-         * 5   =   0 0 0 0 1 0 0 0  x   5
-         * 6       0 0 0 0 0 1 0 0      6
-         * 7       0 0 0 0 0 0 1 0      7
-         * 8       0 0 0 0 0 0 0 1      8
-         */
-
-        IMatrix matrix;
-        matrix[Coord<2>(0, 0)] = 1;
-        matrix[Coord<2>(1, 1)] = 1;
-        matrix[Coord<2>(2, 2)] = 1;
-        matrix[Coord<2>(3, 3)] = 1;
-        matrix[Coord<2>(4, 4)] = 1;
-        matrix[Coord<2>(5, 5)] = 1;
-        matrix[Coord<2>(6, 6)] = 1;
-        matrix[Coord<2>(7, 7)] = 1;
-        smc.initFromMatrix(matrix);
-
-        std::vector<int> lhs(8);
-        std::vector<int> rhs(8);
-        std::vector<int> expected(8);
-
-        for (int i=0; i<8; ++i) {
-            rhs[i]      = i+1;
-            expected[i] = i+1;
-        }
-
-        smc.matVecMul(lhs, rhs);
-
-        TS_ASSERT_EQUALS(
-                lhs,
-                expected
-                );
-#endif
-    }
-
-    void testMatVecMul_easy()
-    {
-#ifdef LIBGEODECOMP_WITH_CPP14
-        SellCSigmaSparseMatrixContainer<int, 2, 1> smc(4);
-
-        /* add a test 4x4 Matrix:
-         * 3       0 0 1 0       1
-         * 1       1 0 0 0       2
-         * 4   =   0 0 0 1   x   3
-         * 2       0 1 0 0       4
-         */
-
-        IMatrix matrix;
-        matrix[Coord<2>(0, 2)] = 1;
-        matrix[Coord<2>(1, 0)] = 1;
-        matrix[Coord<2>(2, 3)] = 1;
-        matrix[Coord<2>(3, 1)] = 1;
-        smc.initFromMatrix(matrix);
-
-        std::vector<int> lhs(4);
-        std::vector<int> rhs(4);
-        std::vector<int> expected(4);
-
-        for (int i=0; i<4; ++i) {
-            rhs[i] = i+1;
-        }
-
-        expected[0] = 3;
-        expected[1] = 1;
-        expected[2] = 4;
-        expected[3] = 2;
-
-        smc.matVecMul(lhs, rhs);
-
-        TS_ASSERT_EQUALS(
-                lhs,
-                expected
-                );
-#endif
-    }
-
-
-    void testMatVecMul_two()
-    {
-#ifdef LIBGEODECOMP_WITH_CPP14
-        SellCSigmaSparseMatrixContainer<int, 2, 1> smc(4);
-
-        /* add a test 4x4 Matrix:
-         * -4       0 1 2 -3       1
-         * 12       -4 3 2 1       2
-         * 12   =   2 -3 4 1   x   3
-         * 13       3 4 2 -1       4
-         */
-
-        IMatrix matrix;
-        matrix[Coord<2>(0, 0)] = 0;
-        matrix[Coord<2>(0, 1)] = 1;
-        matrix[Coord<2>(0, 2)] = 2;
-        matrix[Coord<2>(0, 3)] = -3;
-        matrix[Coord<2>(1, 0)] = -4;
-        matrix[Coord<2>(1, 1)] = 3;
-        matrix[Coord<2>(1, 2)] = 2;
-        matrix[Coord<2>(1, 3)] = 1;
-        matrix[Coord<2>(2, 0)] = 2;
-        matrix[Coord<2>(2, 1)] = -3;
-        matrix[Coord<2>(2, 2)] = 4;
-        matrix[Coord<2>(2, 3)] = 1;
-        matrix[Coord<2>(3, 0)] = 3;
-        matrix[Coord<2>(3, 1)] = 4;
-        matrix[Coord<2>(3, 2)] = 2;
-        matrix[Coord<2>(3, 3)] = -1;
-        smc.initFromMatrix(matrix);
-
-        std::vector<int> lhs(4);
-        std::vector<int> rhs(4);
-        std::vector<int> expected(4);
-
-        for (int i=0; i<4; ++i) {
-            rhs[i]      = i+1;
-        }
-
-        expected[0] = -4;
-        expected[1] = 12;
-        expected[2] = 12;
-        expected[3] = 13;
-
-        smc.matVecMul(lhs, rhs);
-
-        TS_ASSERT_EQUALS(
-                lhs,
-                expected
-                );
-#endif
-    }
-
     void testEqualOperator()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
@@ -724,13 +583,13 @@ public:
         DMatrix aMatrix;
         DMatrix bMatrix;
         for (int i=0; i<DIM; ++i) {
-            aMatrix[Coord<2>(i, abs(i*17+57)%DIM)] = (i*17+57)/DIM;
-            aMatrix[Coord<2>(i, abs(i*17-57)%DIM)] = (i*17-57)/DIM;
-            aMatrix[Coord<2>(i, abs(i*57+17)%DIM)] = (i*57+17)/DIM;
+            aMatrix << std::make_pair(Coord<2>(i, abs(i*17+57)%DIM), (i*17+57)/DIM);
+            aMatrix << std::make_pair(Coord<2>(i, abs(i*17-57)%DIM), (i*17-57)/DIM);
+            aMatrix << std::make_pair(Coord<2>(i, abs(i*57+17)%DIM), (i*57+17)/DIM);
 
-            bMatrix[Coord<2>(i, abs(i*17+57)%DIM)] = (i*17+57)/DIM;
-            bMatrix[Coord<2>(i, abs(i*17-57)%DIM)] = (i*17-57)/DIM;
-            bMatrix[Coord<2>(i, abs(i*57+17)%DIM)] = (i*57+17)/DIM;
+            bMatrix << std::make_pair(Coord<2>(i, abs(i*17+57)%DIM), (i*17+57)/DIM);
+            bMatrix << std::make_pair(Coord<2>(i, abs(i*17-57)%DIM), (i*17-57)/DIM);
+            bMatrix << std::make_pair(Coord<2>(i, abs(i*57+17)%DIM), (i*57+17)/DIM);
         }
         a.initFromMatrix(aMatrix);
         b.initFromMatrix(bMatrix);
@@ -744,18 +603,18 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         SellCSigmaSparseMatrixContainer<double, 2, 1> a(4);
-        std::map<Coord<2>, double> matrix;
+        DMatrix matrix;
         // 0 1 0 2
         // 0 0 0 1
         // 0 2 0 3
         // 1 1 0 0
-        matrix[Coord<2>(0, 1)] = 1;
-        matrix[Coord<2>(0, 3)] = 2;
-        matrix[Coord<2>(1, 3)] = 1;
-        matrix[Coord<2>(2, 1)] = 2;
-        matrix[Coord<2>(2, 3)] = 3;
-        matrix[Coord<2>(3, 0)] = 1;
-        matrix[Coord<2>(3, 1)] = 1;
+        matrix << std::make_pair(Coord<2>(0, 1), 1);
+        matrix << std::make_pair(Coord<2>(0, 3), 2);
+        matrix << std::make_pair(Coord<2>(1, 3), 1);
+        matrix << std::make_pair(Coord<2>(2, 1), 2);
+        matrix << std::make_pair(Coord<2>(2, 3), 3);
+        matrix << std::make_pair(Coord<2>(3, 0), 1);
+        matrix << std::make_pair(Coord<2>(3, 1), 1);
 
         a.initFromMatrix(matrix);
 
@@ -799,23 +658,23 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         SellCSigmaSparseMatrixContainer<double, 2, 1> a(5);
-        std::map<Coord<2>, double> matrix;
+        DMatrix matrix;
         // 0 1 0 0 0
         // 0 5 0 8 7
         // 1 4 0 3 2
         // 0 0 5 0 0
         // 0 0 0 2 3
-        matrix[Coord<2>(0, 1)] = 1;
-        matrix[Coord<2>(1, 1)] = 5;
-        matrix[Coord<2>(1, 3)] = 8;
-        matrix[Coord<2>(1, 4)] = 7;
-        matrix[Coord<2>(2, 0)] = 1;
-        matrix[Coord<2>(2, 1)] = 4;
-        matrix[Coord<2>(2, 3)] = 3;
-        matrix[Coord<2>(2, 4)] = 2;
-        matrix[Coord<2>(3, 2)] = 5;
-        matrix[Coord<2>(4, 3)] = 2;
-        matrix[Coord<2>(4, 4)] = 3;
+        matrix << std::make_pair(Coord<2>(0, 1), 1);
+        matrix << std::make_pair(Coord<2>(1, 1), 5);
+        matrix << std::make_pair(Coord<2>(1, 3), 8);
+        matrix << std::make_pair(Coord<2>(1, 4), 7);
+        matrix << std::make_pair(Coord<2>(2, 0), 1);
+        matrix << std::make_pair(Coord<2>(2, 1), 4);
+        matrix << std::make_pair(Coord<2>(2, 3), 3);
+        matrix << std::make_pair(Coord<2>(2, 4), 2);
+        matrix << std::make_pair(Coord<2>(3, 2), 5);
+        matrix << std::make_pair(Coord<2>(4, 3), 2);
+        matrix << std::make_pair(Coord<2>(4, 4), 3);
 
         a.initFromMatrix(matrix);
 
@@ -881,23 +740,23 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         SellCSigmaSparseMatrixContainer<double, 2, 4> a(5);
-        std::map<Coord<2>, double> matrix;
+        DMatrix matrix;
         // 0 1 0 0 0
         // 0 5 0 8 7
         // 1 4 0 3 2
         // 0 0 5 0 0
         // 0 0 0 2 3
-        matrix[Coord<2>(0, 1)] = 1;
-        matrix[Coord<2>(1, 1)] = 5;
-        matrix[Coord<2>(1, 3)] = 8;
-        matrix[Coord<2>(1, 4)] = 7;
-        matrix[Coord<2>(2, 0)] = 1;
-        matrix[Coord<2>(2, 1)] = 4;
-        matrix[Coord<2>(2, 3)] = 3;
-        matrix[Coord<2>(2, 4)] = 2;
-        matrix[Coord<2>(3, 2)] = 5;
-        matrix[Coord<2>(4, 3)] = 2;
-        matrix[Coord<2>(4, 4)] = 3;
+        matrix << std::make_pair(Coord<2>(0, 1), 1);
+        matrix << std::make_pair(Coord<2>(1, 1), 5);
+        matrix << std::make_pair(Coord<2>(1, 3), 8);
+        matrix << std::make_pair(Coord<2>(1, 4), 7);
+        matrix << std::make_pair(Coord<2>(2, 0), 1);
+        matrix << std::make_pair(Coord<2>(2, 1), 4);
+        matrix << std::make_pair(Coord<2>(2, 3), 3);
+        matrix << std::make_pair(Coord<2>(2, 4), 2);
+        matrix << std::make_pair(Coord<2>(3, 2), 5);
+        matrix << std::make_pair(Coord<2>(4, 3), 2);
+        matrix << std::make_pair(Coord<2>(4, 4), 3);
 
         a.initFromMatrix(matrix);
 
@@ -955,23 +814,23 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         SellCSigmaSparseMatrixContainer<double, 2, 8> a(5);
-        std::map<Coord<2>, double> matrix;
+        DMatrix matrix;
         // 0 1 0 0 0
         // 0 5 0 8 7
         // 1 4 0 3 2
         // 0 0 5 0 0
         // 0 0 0 2 3
-        matrix[Coord<2>(0, 1)] = 1;
-        matrix[Coord<2>(1, 1)] = 5;
-        matrix[Coord<2>(1, 3)] = 8;
-        matrix[Coord<2>(1, 4)] = 7;
-        matrix[Coord<2>(2, 0)] = 1;
-        matrix[Coord<2>(2, 1)] = 4;
-        matrix[Coord<2>(2, 3)] = 3;
-        matrix[Coord<2>(2, 4)] = 2;
-        matrix[Coord<2>(3, 2)] = 5;
-        matrix[Coord<2>(4, 3)] = 2;
-        matrix[Coord<2>(4, 4)] = 3;
+        matrix << std::make_pair(Coord<2>(0, 1), 1);
+        matrix << std::make_pair(Coord<2>(1, 1), 5);
+        matrix << std::make_pair(Coord<2>(1, 3), 8);
+        matrix << std::make_pair(Coord<2>(1, 4), 7);
+        matrix << std::make_pair(Coord<2>(2, 0), 1);
+        matrix << std::make_pair(Coord<2>(2, 1), 4);
+        matrix << std::make_pair(Coord<2>(2, 3), 3);
+        matrix << std::make_pair(Coord<2>(2, 4), 2);
+        matrix << std::make_pair(Coord<2>(3, 2), 5);
+        matrix << std::make_pair(Coord<2>(4, 3), 2);
+        matrix << std::make_pair(Coord<2>(4, 4), 3);
 
         a.initFromMatrix(matrix);
 

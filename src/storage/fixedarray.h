@@ -131,6 +131,11 @@ public:
         return true;
     }
 
+    bool operator!=(const FixedArray<T, SIZE>& other) const
+    {
+        return !(*this == other);
+    }
+
     void clear()
     {
         elements = 0;

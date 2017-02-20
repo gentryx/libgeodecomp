@@ -19,6 +19,7 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredlooppeeler.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
@@ -2694,9 +2695,9 @@ private:
 
 #ifdef LIBGEODECOMP_WITH_CPP14
 typedef double ValueType;
-static const std::size_t MATRICES = 1;
-static const int C = 4;         // AVX
-static const int SIGMA = 1;
+const std::size_t MATRICES = 1;
+const int C = 4;         // AVX
+const int SIGMA = 1;
 typedef short_vec<ValueType, C> ShortVec;
 
 class SPMVMCell
@@ -2707,7 +2708,8 @@ public:
         public APITraits::HasSellType<ValueType>,
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
+        public APITraits::HasSellSigma<SIGMA>,
+        public APITraits::HasThreadedUpdate<1024>
     {};
 
     inline explicit SPMVMCell(double v = 8.0) :
@@ -2736,7 +2738,8 @@ public:
         public APITraits::HasSellType<ValueType>,
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
+        public APITraits::HasSellSigma<SIGMA>,
+        public APITraits::HasThreadedUpdate<1024>
     {};
 
     inline explicit SPMVMCellStreak(double v = 8.0) :
@@ -2768,18 +2771,10 @@ public:
         public APITraits::HasSellType<ValueType>,
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
-    {
-    public:
-        // uniform sizes lead to std::bad_alloc,
-        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
-        // as dimension (DIM = 1)
-        LIBFLATARRAY_CUSTOM_SIZES(
-            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768)
-            (65536)(131072)(262144)(524288)(1048576),
-            (1),
-            (1))
-    };
+        public APITraits::HasSellSigma<SIGMA>,
+        public APITraits::HasThreadedUpdate<1024>,
+        public LibFlatArray::api_traits::has_default_1d_sizes
+    {};
 
     inline explicit SPMVMSoACell(double v = 8.0) :
         value(v), sum(0)
@@ -2788,26 +2783,27 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        for (int i = hoodOld.index(); i < indexEnd / C; ++i, ++hoodOld) {
-            ShortVec tmp;
-            tmp.load_aligned(&hoodNew->sum() + i * C);
-            for (const auto& j: hoodOld.weights(0)) {
-                ShortVec weights, values;
-                weights.load_aligned(j.second());
-                values.gather(&hoodOld->value(), j.first());
-                tmp += values * weights;
-            }
-            tmp.store_aligned(&hoodNew->sum() + i * C);
-        }
-    }
+        unstructuredLoopPeeler<ShortVec>(
+            &hoodNew.index(),
+            indexEnd,
+            hoodOld,
+            [&hoodNew](auto shortVec, auto *counter, auto end, auto& hoodOld) {
+                typedef decltype(shortVec) ShortVec;
 
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first()].value * j.second();
-        }
+                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+                    ShortVec tmp;
+                    tmp.load_aligned(&hoodNew->sum());
+
+                    for (const auto& j: hoodOld.weights(0)) {
+                        ShortVec weights, values;
+                        weights.load_aligned(j.second());
+                        values.gather(&hoodOld->value(), j.first());
+                        tmp += values * weights;
+                    }
+
+                    tmp.store_aligned(&hoodNew->sum());
+                }
+            });
     }
 
     double value;
@@ -2828,18 +2824,10 @@ public:
         public APITraits::HasSellType<ValueType>,
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
-        public APITraits::HasSellSigma<SIGMA>
-    {
-    public:
-        // uniform sizes lead to std::bad_alloc,
-        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
-        // as dimension (DIM = 1)
-        LIBFLATARRAY_CUSTOM_SIZES(
-            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768)
-            (65536)(131072)(262144)(524288)(1048576),
-            (1),
-            (1))
-    };
+        public APITraits::HasSellSigma<SIGMA>,
+        public APITraits::HasThreadedUpdate<1024>,
+        public LibFlatArray::api_traits::has_default_1d_sizes
+    {};
 
     inline explicit SPMVMSoACellInf(double v = 8.0) :
         value(v), sum(0)
@@ -2848,25 +2836,27 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        REAL tmp, weights, values;
-        for (int i = hoodOld.index(); i < (indexEnd / C); ++i, ++hoodOld) {
-            tmp = &hoodNew->sum() + i * C;
-            for (const auto& j: hoodOld.weights(0)) {
-                weights = j.second();
-                values.gather(&hoodOld->value(), j.first());
-                tmp += values * weights;
-            }
-            (&hoodNew->sum() + i * C) << tmp;
-        }
-    }
+        unstructuredLoopPeeler<ShortVec>(
+            &hoodNew.index(),
+            indexEnd,
+            hoodOld,
+            [&hoodNew](auto shortVec, auto *counter, auto end, auto& hoodOld) {
+                typedef decltype(shortVec) ShortVec;
 
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first()].value * j.second();
-        }
+                ShortVec tmp, weights, values;
+
+                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+                    tmp = &hoodNew->sum();
+
+                    for (const auto& j: hoodOld.weights(0)) {
+                        weights = j.second();
+                        values.gather(&hoodOld->value(), j.first());
+                        tmp += values * weights;
+                    }
+
+                    (&hoodNew->sum()) << tmp;
+                }
+            });
     }
 
     double value;
@@ -2892,12 +2882,33 @@ public:
     virtual void grid(GridBase<CELL, 1> *grid)
     {
         // setup sparse matrix
-        std::map<Coord<2>, ValueType> weights;
+        typename GridBase<CELL, 1>::SparseMatrix weights;
 
-        // setup matrix: ~1 % non zero entries
+        // setup matrix: immitate basic structure of MP_Geer matrix
+        // from Matrix Market:
+        // http://www.cise.ufl.edu/research/sparse/matrices/Janna/ML_Geer.html
         for (int row = 0; row < size; ++row) {
-            for (int col = 0; col < size / 100; ++col) {
-                weights[Coord<2>(row, col * 100)] = 5.0;
+            double factor = 1.0 * row / size;
+
+            for (int i = -3400; i < -3385; ++i) {
+                int column = row + i;
+                if ((column >= 0) && (column < size)) {
+                    weights << std::make_pair(Coord<2>(column, row), 1000.0 + 1.0 * factor + column);
+                }
+            }
+
+            for (int i = -20; i < 20; ++i) {
+                int column = row + i;
+                if ((column >= 0) && (column < size)) {
+                    weights << std::make_pair(Coord<2>(column, row), 1000.0 + 1.0 * factor + column);
+                }
+            }
+
+            for (int i = 3385; i < 3400; ++i) {
+                int column = row + i;
+                if ((column >= 0) && (column < size)) {
+                    weights << std::make_pair(Coord<2>(column, row), 1000.0 + 1.0 * factor + column);
+                }
             }
         }
 
@@ -2927,12 +2938,12 @@ class SellMatrixInitializer : public CPUBenchmark
         const Coord<1> dim1d(dim.x());
         const int size = dim.x();
         UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> grid(dim1d);
-        std::map<Coord<2>, ValueType> weights;
+        GridBase<SPMVMCell, 1>::SparseMatrix weights;
 
         // setup matrix: ~1 % non zero entries
         for (int row = 0; row < size; ++row) {
             for (int col = 0; col < size / 100; ++col) {
-                weights[Coord<2>(row, col * 100)] = 5.0;
+                weights << std::make_pair(Coord<2>(row, col * 100), 5.0);
             }
         }
 
@@ -2959,20 +2970,6 @@ class SellMatrixInitializer : public CPUBenchmark
 
 class SparseMatrixVectorMultiplication : public CPUBenchmark
 {
-private:
-    template<typename CELL, typename GRID>
-    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
-                       GRID *gridNew, unsigned nanoStep)
-    {
-        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA> hoodOld(gridOld, streak.origin.x());
-        UnstructuredNeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA> hoodNew(*gridNew);
-
-        // call update()
-        for (int i = hoodOld.index(); i < streak.endX; ++i, ++hoodOld) {
-            hoodNew[i].update(hoodOld, nanoStep);
-        }
-    }
-
 public:
     std::string family()
     {
@@ -2988,30 +2985,43 @@ public:
     {
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
-        typedef UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> Grid;
+        typedef ReorderingUnstructuredGrid<UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> > Grid;
         const Coord<1> size(dim.x());
-        Grid gridOld(size);
-        Grid gridNew(size);
+        Region<1> region;
+        region << CoordBox<1>(Coord<1>(), size);
+        Grid grid1(region);
 
         // 2. init grid old
-        const int maxT = 1;
+        const int maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMCell, Grid> init(dim, maxT);
-        init.grid(&gridOld);
+        init.grid(&grid1);
+        Grid grid2 = grid1;
 
         // 3. call updateFunctor()
         double seconds = 0;
         Streak<1> streak(Coord<1>(0), size.x());
+        UnstructuredUpdateFunctor<SPMVMCell> updateFunctor;
+        UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
+        APITraits::SelectThreadedUpdate<SPMVMCell>::Value threadedUpdateSpec;
         {
-            ScopedTimer t(&seconds);
-            updateFunctor<SPMVMCell, Grid>(streak, gridOld, &gridNew, 0);
+            ScopedTimer timer(&seconds);
+            Grid *gridOld = &grid1;
+            Grid *gridNew = &grid2;
+
+            for (int t = 0; t < maxT; ++t) {
+                using std::swap;
+                updateFunctor(region, *gridOld, gridNew, 0, concurrencySpec, threadedUpdateSpec);
+                swap(gridOld, gridNew);
+            }
         }
 
-        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+        if (grid1.get(Coord<1>(1)).sum == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double entries = 40 * dim.x() + 30 * (dim.x() - 2 * 3400);
+        const double numOps = 2.0 * entries * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3024,20 +3034,6 @@ public:
 
 class SparseMatrixVectorMultiplicationVectorized : public CPUBenchmark
 {
-private:
-    template<typename CELL, typename GRID>
-    void updateFunctor(
-        const Region<1>& region,
-        const GRID& gridOld,
-        GRID *gridNew,
-        unsigned nanoStep)
-    {
-        gridOld.callback(
-            gridNew,
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
-                gridOld, gridNew, region, nanoStep));
-    }
-
 public:
     std::string family()
     {
@@ -3055,29 +3051,40 @@ public:
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
         const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
-        Grid gridOld(size);
-        Grid gridNew(size);
+        Grid grid1(size);
 
         // 2. init grid old
-        const int maxT = 1;
+        const int maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
-        init.grid(&gridOld);
+        init.grid(&grid1);
+        Grid grid2 = grid1;
 
         // 3. call updateFunctor()
         double seconds = 0;
         Region<1> region;
         region << Streak<1>(Coord<1>(0), size.dimensions.x());
+        UnstructuredUpdateFunctor<SPMVMSoACell> updateFunctor;
+        UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
+        APITraits::SelectThreadedUpdate<SPMVMSoACell>::Value threadedUpdateSpec;
         {
-            ScopedTimer t(&seconds);
-            updateFunctor<SPMVMSoACell, Grid>(region, gridOld, &gridNew, 0);
+            ScopedTimer timer(&seconds);
+            Grid *gridOld = &grid1;
+            Grid *gridNew = &grid2;
+
+            for (int t = 0; t < maxT; ++t) {
+                using std::swap;
+                updateFunctor(region, *gridOld, gridNew, 0, concurrencySpec, threadedUpdateSpec);
+                swap(gridOld, gridNew);
+            }
         }
 
-        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+        if (grid1.get(Coord<1>(1)).sum == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.dimensions.x() / 100) * (size.dimensions.x());
+        const double entries = 40 * dim.x() + 30 * (dim.x() - 2 * 3400);
+        const double numOps = 2.0 * entries * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3090,20 +3097,6 @@ public:
 
 class SparseMatrixVectorMultiplicationVectorizedInf : public CPUBenchmark
 {
-private:
-    template<typename CELL, typename GRID>
-    void updateFunctor(const Region<1>& region, const GRID& gridOld,
-                       GRID *gridNew, unsigned nanoStep)
-    {
-        gridOld.callback(
-            gridNew,
-            UnstructuredUpdateFunctorHelpers::UnstructuredGridSoAUpdateHelper<CELL>(
-                gridOld,
-                gridNew,
-                region,
-                nanoStep));
-    }
-
 public:
     std::string family()
     {
@@ -3121,29 +3114,40 @@ public:
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACellInf, MATRICES, ValueType, C, SIGMA> Grid;
         const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
-        Grid gridOld(size);
-        Grid gridNew(size);
+        Grid grid1(size);
 
         // 2. init grid old
-        const int maxT = 1;
+        const int maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMSoACellInf, Grid> init(dim, maxT);
-        init.grid(&gridOld);
+        init.grid(&grid1);
+        Grid grid2 = grid1;
 
         // 3. call updateFunctor()
         double seconds = 0;
         Region<1> region;
         region << Streak<1>(Coord<1>(0), size.dimensions.x());
+        UnstructuredUpdateFunctor<SPMVMSoACellInf> updateFunctor;
+        UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
+        APITraits::SelectThreadedUpdate<SPMVMSoACellInf>::Value threadedUpdateSpec;
         {
-            ScopedTimer t(&seconds);
-            updateFunctor<SPMVMSoACellInf, Grid>(region, gridOld, &gridNew, 0);
+            ScopedTimer timer(&seconds);
+            Grid *gridOld = &grid1;
+            Grid *gridNew = &grid2;
+
+            for (int t = 0; t < maxT; ++t) {
+                using std::swap;
+                updateFunctor(region, *gridOld, gridNew, 0, concurrencySpec, threadedUpdateSpec);
+                swap(gridOld, gridNew);
+            }
         }
 
-        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+        if (grid1.get(Coord<1>(1)).sum == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.dimensions.x() / 100) * (size.dimensions.x());
+        const double entries = 40 * dim.x() + 30 * (dim.x() - 2 * 3400);
+        const double numOps = 2.0 * entries * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3204,7 +3208,7 @@ public:
         Grid gridNew(size);
 
         // 2. init grid old
-        const int maxT = 1;
+        const int maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
         init.grid(&gridOld);
 
@@ -3220,23 +3224,28 @@ public:
         const int rowsPadded = ((size.dimensions.x() - 1) / C + 1) * C;
         double seconds = 0;
         {
-            ScopedTimer t(&seconds);
-            for (int i = 0; i < rowsPadded / C; ++i) {
-                int offs = cs[i];
-                __m256d tmp = _mm256_load_pd(resPtr + i*C);
-                for (int j = 0; j < cl[i]; ++j) {
-                    __m256d rhs;
-                    __m256d val;
-                    rhs = _mm256_set_pd(
-                        *(rhsPtr + col[offs + 3]),
-                        *(rhsPtr + col[offs + 2]),
-                        *(rhsPtr + col[offs + 1]),
-                        *(rhsPtr + col[offs + 0]));
-                    val    = _mm256_load_pd(values + offs);
-                    tmp    = _mm256_add_pd(tmp, _mm256_mul_pd(val, rhs));
-                    offs += 4;
+            ScopedTimer timer(&seconds);
+            for (int t = 0; t < maxT; ++t) {
+                for (int i = 0; i < rowsPadded / C; ++i) {
+                    int offs = cs[i];
+                    __m256d tmp = _mm256_load_pd(resPtr + i*C);
+                    for (int j = 0; j < cl[i]; ++j) {
+                        __m256d rhs;
+                        __m256d val;
+                        rhs = _mm256_set_pd(
+                            *(rhsPtr + col[offs + 3]),
+                            *(rhsPtr + col[offs + 2]),
+                            *(rhsPtr + col[offs + 1]),
+                            *(rhsPtr + col[offs + 0]));
+                        val    = _mm256_load_pd(values + offs);
+                        tmp    = _mm256_add_pd(tmp, _mm256_mul_pd(val, rhs));
+                        offs += 4;
+                    }
+                    _mm256_store_pd(resPtr + i*C, tmp);
                 }
-                _mm256_store_pd(resPtr + i*C, tmp);
+
+                using std::swap;
+                swap(rhsPtr, resPtr);
             }
         }
 
@@ -3245,7 +3254,8 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        const double numOps = 2. * (size.dimensions.x() / 100) * (size.dimensions.x());
+        const double entries = 40 * dim.x() + 30 * (dim.x() - 2 * 3400);
+        const double numOps = 2.0 * entries * maxT;
         const double gflops = 1.0e-9 * numOps / seconds;
         return gflops;
     }
@@ -3257,6 +3267,105 @@ public:
 };
 #endif
 #endif
+
+class UpdateFunctorThreadingBase : public CPUBenchmark
+{
+public:
+    typedef UpdateFunctorHelpers::ConcurrencyEnableOpenMP MyConcurrencySpec;
+    typedef UpdateFunctor<JacobiCellFixedHood, MyConcurrencySpec> MyUpdateFunctor;
+
+    std::string family()
+    {
+        return "UpdateFunctorThreading";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        int size = rawDim[0];
+        // stencil radius:
+        int radius = 1;
+
+        int dimX = 10 - 1 - 2 * radius;
+        int endY = size - 2 - radius;
+        int steps = rawDim[1];
+
+        Coord<3> dim(10, size, 10);
+        typedef Grid<JacobiCellFixedHood, Topologies::Cube<3>::Topology> GridType;
+        GridType *gridOld = new GridType(dim, JacobiCellFixedHood(1.0));
+        GridType *gridNew = new GridType(dim, JacobiCellFixedHood(0.0));
+
+        Region<3> region;
+        for (int i = radius; i < endY; i += 2) {
+            region << CoordBox<3>(Coord<3>(radius, i, radius + 0), Coord<3>(dimX, 1, 1));
+        }
+        for (int i = radius; i < (endY / 2); i += 2) {
+            region << CoordBox<3>(Coord<3>(radius, i, radius + 1), Coord<3>(dimX, 1, 1));
+        }
+
+        using std::swap;
+
+        double seconds = 0;
+        {
+            ScopedTimer timer(&seconds);
+
+            for (int i = 0; i < steps; ++i) {
+                MyUpdateFunctor()(region, Coord<3>(), Coord<3>(), *gridOld, gridNew, 0, generateConcurrencySpec());
+
+                swap(gridOld, gridNew);
+            }
+
+        }
+
+        if (gridNew->get(Coord<3>(radius, radius, radius)).temp == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        const double numOps = region.size() * steps;
+        const double gflops = 1.0e-9 * numOps / seconds;
+        return gflops;
+    }
+
+    std::string unit()
+    {
+        return "GLUPS";
+    }
+
+private:
+    virtual MyConcurrencySpec generateConcurrencySpec() = 0;
+};
+
+class UpdateFunctorThreadingGold : public UpdateFunctorThreadingBase
+{
+public:
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+private:
+    MyConcurrencySpec generateConcurrencySpec()
+    {
+        return MyConcurrencySpec(true, true);
+    }
+};
+
+class UpdateFunctorThreadingSilver : public UpdateFunctorThreadingBase
+{
+public:
+
+    std::string species()
+    {
+        return "silver";
+    }
+
+private:
+    MyConcurrencySpec generateConcurrencySpec()
+    {
+        return MyConcurrencySpec(true, false);
+    }
+};
 
 #ifdef LIBGEODECOMP_WITH_CUDA
 void cudaTests(std::string name, std::string revision, int cudaDevice);
@@ -3431,7 +3540,6 @@ int main(int argc, char **argv)
     }
 
     sizes.clear();
-
     sizes << Coord<3>(22, 22, 22)
           << Coord<3>(64, 64, 64)
           << Coord<3>(68, 68, 68)
@@ -3453,6 +3561,10 @@ int main(int argc, char **argv)
     eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
     eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
     eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
+
+    dim = toVector(Coord<3>(10000, 2000, 0));
+    eval(UpdateFunctorThreadingSilver(), dim);
+    eval(UpdateFunctorThreadingGold(), dim);
 
 #ifdef LIBGEODECOMP_WITH_CUDA
     cudaTests(name, revision, cudaDevice);

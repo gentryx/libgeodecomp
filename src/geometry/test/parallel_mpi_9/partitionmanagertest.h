@@ -39,7 +39,9 @@ public:
             ghostZoneWidth);
         std::vector<CoordBox<2> > boundingBoxes(
             layer->allGather(manager.ownRegion().boundingBox()));
-        manager.resetGhostZones(boundingBoxes);
+        std::vector<CoordBox<2> > expandedBoundingBoxes(
+            layer->allGather(manager.ownExpandedRegion().boundingBox()));
+        manager.resetGhostZones(boundingBoxes, expandedBoundingBoxes);
     }
 
     void tearDown()
