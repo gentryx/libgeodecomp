@@ -63,8 +63,13 @@ class FindUnmatchedHeaderGuards < TestBase
   def test(filename, content)
     return 0 if is_commonly_excluded?(filename)
 
-    relative_path = Pathname.new(filename).relative_path_from(PATH)
-    macro = "LIBGEODECOMP_#{relative_path}".upcase.gsub(/[\/\.]/, "_")
+    relative_path = Pathname.new(filename).relative_path_from(PATH).to_s
+    if !(filename =~ /src\/libgeodecomp\//)
+      relative_path = "libgeodecomp/#{relative_path}"
+    end
+
+    macro = relative_path.upcase.gsub(/[\/\.]/, "_")
+
     expected_guard = <<EOF
 #ifndef #{macro}
 #define #{macro}
@@ -105,7 +110,10 @@ class FindBadIncludes < TestBase
     begin
       content.scan(/^#include.*".*"/) do
         ret += 1
-        log "#{filename}: found malformed include »#{$&}«"
+        match = $&
+        if filename =~ /src\/libgeodecomp/
+          log "#{filename}: found malformed include »#{match}«"
+        end
       end
     rescue ArgumentError => e
     end
