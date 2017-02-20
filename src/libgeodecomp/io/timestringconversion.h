@@ -18,10 +18,10 @@ public:
     static std::string renderISO(double time)
     {
         double intFraction;
-        int uSecondsSinceEpoch = std::modf(time, &intFraction) * 1.0e6;
-        time_t secondsSinceEpoch = intFraction;
+        int uSecondsSinceEpoch = int(std::modf(time, &intFraction) * 1.0e6);
+        time_t secondsSinceEpoch = time_t(intFraction);
         tm timeSpec;
-        gmtime_r(&secondsSinceEpoch, &timeSpec);
+        gmtime(&secondsSinceEpoch, &timeSpec);
         char buf[1024];
         strftime(buf, 1024, "%Y.%m.%d %H:%M:%S", &timeSpec);
 
@@ -37,7 +37,7 @@ public:
         double realSeconds;
         double subseconds = std::modf(duration, &realSeconds);
 
-        int totalSeconds = realSeconds;
+        int totalSeconds = int(realSeconds);
         int seconds = totalSeconds % 60;
         int minutes = totalSeconds / 60 % 60;
         int hours = totalSeconds / 3600;
@@ -48,7 +48,7 @@ public:
             << std::setw(2) << std::setfill('0') << seconds;
 
         if (subseconds > 0) {
-            int fraction = subseconds * 1.0e6;
+            int fraction = int(subseconds * 1.0e6);
             buf << "." << std::setw(6) << fraction;
         }
 
