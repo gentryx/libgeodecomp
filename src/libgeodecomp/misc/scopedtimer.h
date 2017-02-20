@@ -7,7 +7,7 @@
 #include <hpx/config.hpp>
 #include <hpx/util/high_resolution_timer.hpp>
 #else
-#include <sys/time.h>
+#include <libflatarray/testbed/benchmark.hpp>
 #endif
 
 namespace LibGeoDecomp {
@@ -36,10 +36,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_HPX
         return hpx::util::high_resolution_timer::now();
 #else
-        timeval t;
-        gettimeofday(&t, 0);
-
-        return t.tv_sec + t.tv_usec * 1.0e-6;
+        return LibFlatArray::benchmark::time();
 #endif
     }
 
