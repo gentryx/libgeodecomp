@@ -20,6 +20,23 @@ public:
     double temp;
 };
 
+/**
+ * Variant of MySimpleCell, but with a registered Struct of Arrays
+ * (SoA) memory layout.
+ */
+class MySimpleCellSoA : public MySimpleCell
+{
+public:
+    class API :
+        public MySimpleCell::API,
+        public APITraits::HasSoA
+    {};
+};
+
 }
+
+LIBFLATARRAY_REGISTER_SOA(
+    LibGeoDecomp::MySimpleCellSoA,
+    ((double)(temp)))
 
 #endif

@@ -24,8 +24,9 @@ template<typename CELL_TYPE>
 class CollectingWriterPerfTest : public CPUBenchmark
 {
 public:
-    explicit CollectingWriterPerfTest(const std::string& modelName) :
-        modelName(modelName)
+    explicit CollectingWriterPerfTest(const std::string& modelName, const std::string& speciesName) :
+        modelName(modelName),
+        speciesName(speciesName)
     {}
 
     std::string family()
@@ -34,7 +35,7 @@ public:
     }
     std::string species()
     {
-        return "gold";
+        return speciesName;
     }
 
     double performance(std::vector<int> rawDim)
@@ -73,7 +74,6 @@ public:
             }
         }
 
-        // fixme: add test for cell with SoA
         return gigaBytesPerSecond(dim, seconds);
     }
 
@@ -84,6 +84,7 @@ public:
 
 private:
     std::string modelName;
+    std::string speciesName;
 
     double gigaBytesPerSecond(const Coord<3>& dim, double seconds)
     {
@@ -101,8 +102,9 @@ template<typename CELL_TYPE>
 class PatchLinkPerfTest : public CPUBenchmark
 {
 public:
-    explicit PatchLinkPerfTest(const std::string& modelName) :
-        modelName(modelName)
+    explicit PatchLinkPerfTest(const std::string& modelName, const std::string& speciesName) :
+        modelName(modelName),
+        speciesName(speciesName)
     {}
 
     std::string family()
@@ -112,7 +114,7 @@ public:
 
     std::string species()
     {
-        return "gold";
+        return speciesName;
     }
 
     double performance(std::vector<int> rawDim)
@@ -139,7 +141,7 @@ public:
                 transmissionRegion,
                 1,
                 666,
-                APITraits::SelectMPIDataType<CELL_TYPE>::value());
+                SerializationBuffer<CELL_TYPE>::cellMPIDataType());
             provider.charge(1234, maxNanoStep, 1000);
 
             {
@@ -155,7 +157,7 @@ public:
                 transmissionRegion,
                 0,
                 666,
-                APITraits::SelectMPIDataType<CELL_TYPE>::value());
+                SerializationBuffer<CELL_TYPE>::cellMPIDataType());
             accepter.charge(1234, maxNanoStep, 1000);
 
             for (int i = 1234; i <= maxNanoStep; i += 1000) {
@@ -163,7 +165,6 @@ public:
             }
         }
 
-        // fixme: add test for cell with SoA
         return gigaBytesPerSecond(transmissionBox.dimensions, repeats, seconds);
     }
 
@@ -174,6 +175,7 @@ public:
 
 private:
     std::string modelName;
+    std::string speciesName;
 
     double gigaBytesPerSecond(const Coord<3>& dim, int repeats, double seconds)
     {
@@ -294,12 +296,25 @@ int main(int argc, char **argv)
         eval.print_header();
     }
 
-    eval(CollectingWriterPerfTest<MySimpleCell>("MySimpleCell"),                               toVector(Coord<3>::diagonal(256)), output);
-    eval(CollectingWriterPerfTest<TestCell<3> >("TestCell<3> "),                               toVector(Coord<3>::diagonal(64)),  output);
-    eval(PatchLinkPerfTest<MySimpleCell>("MySimpleCell"),                                      toVector(Coord<3>::diagonal(200)), output);
-    eval(PatchLinkPerfTest<TestCell<3> >("TestCell<3> "),                                      toVector(Coord<3>::diagonal(64)),  output);
-    eval(PartitionManagerBig3DPerfTest<RecursiveBisectionPartition<3> >("RecursiveBisection"), toVector(Coord<3>::diagonal(100)), output);
-    eval(PartitionManagerBig3DPerfTest<ZCurvePartition<3> >("ZCurve"),                         toVector(Coord<3>::diagonal(100)), output);
+    std::vector<int> diag64  = toVector(Coord<3>::diagonal(64));
+    std::vector<int> diag100 = toVector(Coord<3>::diagonal(100));
+    std::vector<int> diag200 = toVector(Coord<3>::diagonal(200));
+    std::vector<int> diag256 = toVector(Coord<3>::diagonal(256));
+
+    eval(CollectingWriterPerfTest<MySimpleCell>("MySimpleCell", "gold"),                       diag256, output);
+    eval(CollectingWriterPerfTest<MySimpleCellSoA>("MySimpleCell", "platinum"),                diag256, output);
+
+    eval(CollectingWriterPerfTest<TestCell<3> >("TestCell<3> ", "gold"),                       diag64,  output);
+    eval(CollectingWriterPerfTest<TestCellSoA>( "TestCell<3> ", "platinum"),                   diag64,  output);
+
+    eval(PatchLinkPerfTest<MySimpleCell>("MySimpleCell", "gold"),                              diag200, output);
+    eval(PatchLinkPerfTest<MySimpleCellSoA>("MySimpleCell", "platinum"),                       diag200, output);
+
+    eval(PatchLinkPerfTest<TestCell<3> >("TestCell<3> ", "gold"),                              diag64,  output);
+    eval(PatchLinkPerfTest<TestCellSoA>( "TestCell<3> ", "platinum"),                          diag64,  output);
+
+    eval(PartitionManagerBig3DPerfTest<RecursiveBisectionPartition<3> >("RecursiveBisection"), diag100, output);
+    eval(PartitionManagerBig3DPerfTest<ZCurvePartition<3> >("ZCurve"),                         diag100, output);
 
     MPI_Finalize();
     return 0;
