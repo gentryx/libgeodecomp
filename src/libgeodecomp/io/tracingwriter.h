@@ -91,7 +91,7 @@ private:
         case WRITER_ALL_DONE:
             delta = currentTime() - startTime;
             stream << "TracingWriter::allDone()\n"
-                   << "  total time: " << Time::renderDuration(delta) << "\n";
+                   << "  total time: " << TimeStringConversion::renderDuration(delta) << "\n";
             printTime();
             break;
         default:
@@ -118,9 +118,9 @@ private:
                << "  step: " << step << " of " << maxSteps << "\n"
                << "  elapsed: " << delta << "\n"
                << "  remaining: "
-               << Time::renderDuration(remaining) << "\n"
+               << TimeStringConversion::renderDuration(remaining) << "\n"
                << "  ETA:  "
-               << Time::renderDuration(eta) << "\n"
+               << TimeStringConversion::renderDuration(eta) << "\n"
                << "  speed: " << glups << " GLUPS\n"
                << "  effective memory bandwidth " << bandwidth << " GB/s\n";
         printTime();
@@ -128,7 +128,7 @@ private:
 
     void printTime() const
     {
-        stream << "  time: " << Time::renderDuration(currentTime()) << "\n";
+        stream << "  time: " << TimeStringConversion::renderDuration(currentTime()) << "\n";
         stream.flush();
     }
 

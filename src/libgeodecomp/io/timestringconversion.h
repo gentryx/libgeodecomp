@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_IO_TIME_H
-#define LIBGEODECOMP_IO_TIME_H
+#ifndef LIBGEODECOMP_IO_TIMESTRINGCONVERSION_H
+#define LIBGEODECOMP_IO_TIMESTRINGCONVERSION_H
 
 #include <cmath>
 #include <ctime>
@@ -12,7 +12,7 @@ namespace LibGeoDecomp {
  * This class helps with rendering time stamps. It replaces
  * our previous use of boost::posix_time.
  */
-class Time
+class TimeStringConversion
 {
 public:
     static std::string renderISO(double time)

@@ -37,7 +37,7 @@ public:
 #define LOG(LEVEL, MESSAGE)                                             \
     if ((LibGeoDecomp::Logger::LEVEL) <= LIBGEODECOMP_DEBUG_LEVEL) {    \
         std::cout << #LEVEL[0] << ", ["                                 \
-                  << Time::renderISO(ScopedTimer::time())               \
+                  << TimeStringConversion::renderISO(ScopedTimer::time()) \
                   << "] " << std::right                                 \
                   << std::setw(5) << #LEVEL                             \
                   << " -- " << MESSAGE << "\n";                         \
