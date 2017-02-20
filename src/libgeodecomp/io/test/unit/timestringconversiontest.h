@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/io/time.h>
+#include <libgeodecomp/io/timestringconversion.h>
 
 using namespace LibGeoDecomp;
 
