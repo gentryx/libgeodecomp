@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include <libgeodecomp/io/parallelwriter.h>
-#include <libgeodecomp/io/time.h>
+#include <libgeodecomp/io/timestringconversion.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/scopedtimer.h>

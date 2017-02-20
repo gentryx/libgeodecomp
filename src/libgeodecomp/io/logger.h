@@ -7,7 +7,7 @@
 #endif
 
 #include <iomanip>
-#include <libgeodecomp/io/time.h>
+#include <libgeodecomp/io/timestringconversion.h>
 #include <libgeodecomp/misc/scopedtimer.h>
 
 namespace LibGeoDecomp {
