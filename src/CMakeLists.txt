@@ -360,7 +360,7 @@ foreach(dir ${LIBDIRS})
   set(HEADERS "")
   set(RELATIVE_PATH ${dir}/)
   include(${dir}/auto.cmake)
-  install(FILES ${HEADERS} DESTINATION include/${PACKAGE_NAME}/${dir})
+  install(FILES ${HEADERS} DESTINATION include/${dir})
 endforeach(dir)
 
 # link against the libs we need
