@@ -18,6 +18,7 @@
 #include <mpi.h>
 #endif
 
+#include <algorithm>
 #include <cstdlib>
 #include <string>
 #include <sstream>
