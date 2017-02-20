@@ -75,29 +75,33 @@ private:
     int index;
 };
 
+}
+
 /**
- * Base class for UnstructuredNeighborhoods. This class does not
- * perform coordinate remapping from logical to physical IDs, hence ID
- * reordering is strongly suggested (e.g. via
- * ReorderingUnstructuredGrid). This class is also used for scalar
- * updates in the vectorized case, which is why GRID is a template
+ * Simple neighborhood for UnstructuredGrid. This is used as hoodOld
+ * in update() * or updateLineX(). This class does not * perform
+ * coordinate remapping from logical to physical IDs, hence ID *
+ * reordering is strongly suggested (e.g. via *
+ * ReorderingUnstructuredGrid). This class is also used for scalar *
+ * updates in the vectorized case, which is why GRID is a template *
  * parameter (think UnstructuredSoAGrid).
+ *
+ * Usage:
+ *  for (const auto& i: hoodOld.weights()) {
+ *    const CELL& cell  = hoodOld[i.first];
+ *    VALUE_TYPE weight = i.second;
+ *  }
  */
-template<
-    typename CELL,
-    typename GRID,
-    std::size_t MATRICES,
-    typename VALUE_TYPE,
-    int C,
-    int SIGMA>
-class Base
+template<typename CELL, std::size_t MATRICES,
+         typename VALUE_TYPE, int C, int SIGMA>
+class UnstructuredNeighborhood
 {
 public:
-    using Grid = GRID;
     using Iterator = UnstructuredNeighborhoodHelpers::Iterator<VALUE_TYPE, C, SIGMA>;
+    using Grid = ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >;
 
     inline
-    Base(const Grid& grid, long startX) :
+    UnstructuredNeighborhood(const Grid& grid, long startX) :
         grid(grid),
         xOffset(startX),
         currentChunk(startX / C),
@@ -106,16 +110,16 @@ public:
     {}
 
     inline
-    Base& operator++()
+    UnstructuredNeighborhood& operator++()
     {
         updateIndices(1);
         return *this;
     }
 
     inline
-    Base operator++(int)
+    UnstructuredNeighborhood operator++(int)
     {
-        Base tmp(*this);
+        UnstructuredNeighborhood tmp(*this);
         operator++();
         return tmp;
     }
@@ -139,14 +143,7 @@ public:
     }
 
     inline
-    Base& weights()
-    {
-        // default neighborhood is for matrix 0
-        return weights(0);
-    }
-
-    inline
-    Base& weights(std::size_t matrixID)
+    UnstructuredNeighborhood& weights(std::size_t matrixID = 0)
     {
         currentMatrixID = matrixID;
 
@@ -170,7 +167,19 @@ public:
         return Iterator(matrix, index);
     }
 
-protected:
+    inline
+    const CELL& operator[](int index) const
+    {
+        return grid[index];
+    }
+
+private:
+    const Grid& grid;           /**< old grid */
+    long xOffset;               /**< initial offset for updateLineX function */
+    int currentChunk;           /**< current chunk */
+    int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
+    int currentMatrixID;        /**< current id for matrices */
+
     /**
      * If xOffset is changed, the current chunk and chunkOffset
      * may change. This function updates the internal data structures
@@ -192,47 +201,6 @@ protected:
         }
 
         chunkOffset += difference;
-    }
-
-    const Grid& grid;           /**< old grid */
-    long xOffset;               /**< initial offset for updateLineX function */
-    int currentChunk;           /**< current chunk */
-    int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
-    int currentMatrixID;        /**< current id for matrices */
-};
-
-}
-
-/**
- * Simple neighborhood for UnstructuredGrid. This is used as hoodOld in update()
- * or updateLineX(). There are also two implementations: if SIGMA = 1 -> SORT = false,
- * else SIGMA > 1 -> SORT = true.
- *
- * Usage:
- *  for (const auto& i: hoodOld.weights()) {
- *    const CELL& cell  = hoodOld[i.first];
- *    VALUE_TYPE weight = i.second;
- *  }
- */
-template<typename CELL, std::size_t MATRICES,
-         typename VALUE_TYPE, int C, int SIGMA>
-class UnstructuredNeighborhood :
-        public UnstructuredNeighborhoodHelpers::Base<
-    CELL, ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >, MATRICES, VALUE_TYPE, C, SIGMA>
-{
-public:
-    using Grid = ReorderingUnstructuredGrid<UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> >;
-    using UnstructuredNeighborhoodHelpers::Base<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>::grid;
-
-    inline
-    UnstructuredNeighborhood(const Grid& grid, long startX) :
-        UnstructuredNeighborhoodHelpers::Base<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>(grid, startX)
-    {}
-
-    inline
-    const CELL& operator[](int index) const
-    {
-        return grid[index];
     }
 };
 
