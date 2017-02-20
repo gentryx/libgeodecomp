@@ -40,9 +40,6 @@ public:
     const static int SIGMA = MY_SIGMA;
     const static int C = MY_C;
 
-    // fixme: issue warnings in all c-tors if sigma != 1 (because we
-    // can then expect a missmatch between cells and their associated
-    // weights)
     explicit UnstructuredGrid(
         const Coord<DIM>& dim = Coord<DIM>(),
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
@@ -190,7 +187,10 @@ public:
             }
         }
 
-        // fixme: check weights
+        if (matrices != other.matrices) {
+            return false;
+        }
+
         return true;
     }
 
@@ -378,7 +378,6 @@ protected:
 private:
     std::vector<ELEMENT_TYPE> elements;
     int origin;
-    // TODO wrapper for different types of sell c sigma containers
     SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA> matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;

@@ -137,9 +137,6 @@ public:
 
     static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<ELEMENT_TYPE>::VALUE;
 
-    // fixme: issue warnings in all c-tors if sigma != 1 (because we
-    // can then expect a missmatch between cells and their associated
-    // weights)
     explicit
     UnstructuredSoAGrid(
         const CoordBox<DIM> box = CoordBox<DIM>(Coord<DIM>(), Coord<DIM>(1)),
