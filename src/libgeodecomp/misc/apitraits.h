@@ -1206,12 +1206,12 @@ inline bool operator&&(bool other, APITraits::TrueType)
     return other;
 }
 
-inline bool operator&&(APITraits::FalseType, bool other)
+inline bool operator&&(APITraits::FalseType, bool /* other */)
 {
     return false;
 }
 
-inline bool operator&&(bool other, APITraits::FalseType)
+inline bool operator&&(bool /* other */, APITraits::FalseType)
 {
     return false;
 }

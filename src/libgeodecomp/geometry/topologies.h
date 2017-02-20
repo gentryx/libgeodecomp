@@ -314,7 +314,7 @@ public:
 
             static Coord<1> normalize(
                 const Coord<1>& coord,
-                const Coord<1>& gridDim)
+                const Coord<1>& /* gridDim */)
             {
                 return coord;
             }
