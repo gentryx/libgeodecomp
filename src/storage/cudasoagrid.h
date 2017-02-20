@@ -5,7 +5,9 @@
 
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/cudautil.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 #include <libgeodecomp/storage/soagrid.h>
+#include <libgeodecomp/misc/stringops.h>
 
 namespace LibGeoDecomp {
 
@@ -299,7 +301,12 @@ public:
 
     void saveRegion(std::vector<char> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        // fixme: check size!
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::storageSize(region);
+        if (target->size() < expectedMinimumSize) {
+            throw std::logic_error(
+                "target buffer too small (is " + StringOps::itoa(target->size()) +
+                ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
+        }
 
         SerializationBuffer<CELL>::resize(target, region);
         Coord<3> actualOffset = edgeRadii;

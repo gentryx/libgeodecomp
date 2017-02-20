@@ -6,6 +6,8 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/storage/gridbase.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
+#include <libgeodecomp/misc/stringops.h>
 
 #include <cuda.h>
 
@@ -134,10 +136,16 @@ public:
         return box;
     }
 
-    void saveRegion(std::vector<CELL_TYPE> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    void saveRegion(std::vector<CELL_TYPE> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        // fixme: check size of buffer
-        CellType *cursor = buffer->data();
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL_TYPE>::storageSize(region);
+        if (target->size() < expectedMinimumSize) {
+            throw std::logic_error(
+                "target buffer too small (is " + StringOps::itoa(target->size()) +
+                ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
+        }
+
+        CellType *cursor = target->data();
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
@@ -149,10 +157,16 @@ public:
         }
     }
 
-    void loadRegion(const std::vector<CELL_TYPE>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    void loadRegion(const std::vector<CELL_TYPE>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        // fixme: check size of buffer
-        const CellType *cursor = buffer.data();
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL_TYPE>::storageSize(region);
+        if (source.size() < expectedMinimumSize) {
+            throw std::logic_error(
+                "source buffer too small (is " + StringOps::itoa(source.size()) +
+                ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
+        }
+
+        const CellType *cursor = source.data();
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
