@@ -2,7 +2,7 @@
 #include <hpx/hpx_init.hpp>
 #include <libgeodecomp.h>
 
-#include <libgeodecomp/examples/gameoflife_adcirc/hull.h>
+#include "hull.h"
 
 using namespace LibGeoDecomp;
 

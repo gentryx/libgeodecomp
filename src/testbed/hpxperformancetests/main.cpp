@@ -1,7 +1,6 @@
 #include <iostream>
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/geometry/floatcoord.h>
-#include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/parallelization/hpxdataflowsimulator.h>
@@ -12,6 +11,8 @@
 #include <libflatarray/testbed/evaluate.hpp>
 
 #include <hpx/hpx_init.hpp>
+
+#include "../performancetests/cpubenchmark.h"
 
 using namespace LibGeoDecomp;
 

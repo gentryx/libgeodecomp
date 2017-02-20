@@ -17,7 +17,6 @@
 #include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/parallelization/openmpsimulator.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredlooppeeler.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
@@ -39,6 +38,8 @@
 #include <iomanip>
 #include <iostream>
 #include <stdio.h>
+
+#include "cpubenchmark.h"
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;

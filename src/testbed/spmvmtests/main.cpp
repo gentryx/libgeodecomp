@@ -17,14 +17,12 @@
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/region.h>
-#include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredupdatefunctor.h>
 #include <libgeodecomp/storage/updatefunctor.h>
-#include <libgeodecomp/testbed/spmvmtests/mmio.h>
 
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
@@ -43,6 +41,9 @@
 #include <sstream>
 #include <vector>
 #include <map>
+
+#include "../performancetests/cpubenchmark.h"
+#include "mmio.h"
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;

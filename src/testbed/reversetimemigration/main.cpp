@@ -1,7 +1,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator.h>
-#include <libgeodecomp/testbed/reversetimemigration/config.h>
 #include <map>
 #include <mpi.h>
+
+#include "config.h"
 
 using namespace LibGeoDecomp;
 

@@ -1,10 +1,10 @@
 # LIBDIRS is used to find source files and headers
-set(LIBDIRS communication io io/remotesteerer geometry geometry/partitions loadbalancer misc parallelization parallelization/nesting storage)
+set(LIBDIRS libgeodecomp/communication libgeodecomp/io libgeodecomp/io/remotesteerer libgeodecomp/geometry libgeodecomp/geometry/partitions libgeodecomp/loadbalancer libgeodecomp/misc libgeodecomp/parallelization libgeodecomp/parallelization/nesting libgeodecomp/storage)
 # AUXDIRS lists auxiliary directories to be included in the main
 # build. They may for instance include additionally libraries to be
 # linked into the main lib.
 set(AUXDIRS)
-set(SUBDIRS communication examples io geometry loadbalancer misc parallelization storage testbed)
+set(SUBDIRS examples libgeodecomp/communication libgeodecomp/io libgeodecomp/geometry libgeodecomp/loadbalancer libgeodecomp/misc libgeodecomp/parallelization libgeodecomp/storage testbed)
 
 set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
 set(LGD_AGGREGATED_C_FLAGS   "${LGD_ADDITIONAL_C_COMPILE_FLAGS}"  )
@@ -482,12 +482,12 @@ if (WITH_TYPEMAPS)
   set_directory_properties(PROPERTIES CLEAN_NO_CUSTOM true)
 
   add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.cpp"
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/libgeodecomp/communication/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/libgeodecomp/communication/typemaps.cpp"
     COMMAND cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf
-    COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --namespace LibGeoDecomp --header-fix "^.+/src:libgeodecomp" --macro-guard-mpi LIBGEODECOMP_WITH_MPI --macro-guard-hpx LIBGEODECOMP_WITH_HPX --macro-guard-boost LIBGEODECOMP_WITH_BOOST_SERIALIZATION "${CMAKE_CURRENT_SOURCE_DIR}/../doc/xml" --include-prefix "libgeodecomp/" "${CMAKE_CURRENT_SOURCE_DIR}/communication"
+    COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --namespace LibGeoDecomp --header-fix "^.+/src:libgeodecomp" --macro-guard-mpi LIBGEODECOMP_WITH_MPI --macro-guard-hpx LIBGEODECOMP_WITH_HPX --macro-guard-boost LIBGEODECOMP_WITH_BOOST_SERIALIZATION "${CMAKE_CURRENT_SOURCE_DIR}/../doc/xml" --include-prefix "libgeodecomp/" "${CMAKE_CURRENT_SOURCE_DIR}/libgeodecomp/communication"
     DEPENDS "${CMAKE_BINARY_DIR}/cache")
 
-  list(REMOVE_ITEM ALL_HEADERS "communication/typemaps.h")
+  list(REMOVE_ITEM ALL_HEADERS "libgeodecomp/communication/typemaps.h")
   set(CANDIDATES)
   foreach(i ${ALL_HEADERS})
     set(CANDIDATES "${i}:${CANDIDATES}")
