@@ -112,7 +112,7 @@ public:
 
     inline explicit Coord(const FloatCoord<1>& other)
     {
-        c[0] = other[0];
+        c[0] = int(other[0]);
     }
 
 #ifdef __CUDACC__
@@ -149,9 +149,9 @@ public:
      * converts the coord to a linear index. This is good for addressing a linear array via Coords.
      */
     __host__ __device__
-    inline std::size_t toIndex(const Coord<1>& dim) const
+    inline std::size_t toIndex(const Coord<1>& /* dim */) const
     {
-        return x();
+        return std::size_t(x());
     }
 
     __host__ __device__
@@ -235,13 +235,13 @@ public:
     __host__ __device__
     inline Coord operator*(float scale) const
     {
-        return Coord(scale * x());
+        return Coord(int(scale * x()));
     }
 
     __host__ __device__
     inline Coord operator*(double scale) const
     {
-        return Coord(scale * x());
+        return Coord(int(scale * x()));
     }
 
     __host__ __device__
@@ -358,8 +358,8 @@ public:
 
     inline explicit Coord(const FloatCoord<2>& other)
     {
-        c[0] = other[0];
-        c[1] = other[1];
+        c[0] = int(other[0]);
+        c[1] = int(other[1]);
     }
 
 #ifdef __CUDACC__
@@ -498,13 +498,13 @@ public:
     __host__ __device__
     inline Coord operator*(float scale) const
     {
-        return Coord(scale * x(), scale * y());
+        return Coord(int(scale * x()), int(scale * y()));
     }
 
     __host__ __device__
     inline Coord operator*(double scale) const
     {
-        return Coord(scale * x(), scale * y());
+        return Coord(int(scale * x()), int(scale * y()));
     }
 
     __host__ __device__
@@ -617,9 +617,9 @@ public:
 
     inline explicit Coord(const FloatCoord<3>& other)
     {
-        c[0] = other[0];
-        c[1] = other[1];
-        c[2] = other[2];
+        c[0] = int(other[0]);
+        c[1] = int(other[1]);
+        c[2] = int(other[2]);
     }
 
 #ifdef __CUDACC__
@@ -784,14 +784,14 @@ public:
     __host__ __device__
     inline Coord operator*(float scale) const
     {
-        return Coord(scale * x(), scale * y(), scale * z());
+        return Coord(int(scale * x()), int(scale * y()), int(scale * z()));
     }
 
 
     __host__ __device__
     inline Coord operator*(double scale) const
     {
-        return Coord(scale * x(), scale * y(), scale * z());
+        return Coord(int(scale * x()), int(scale * y()), int(scale * z()));
     }
 
     __host__ __device__
