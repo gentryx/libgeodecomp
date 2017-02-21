@@ -60,7 +60,7 @@ public:
             }
         }
 
-        LOG(ERROR, "could not find id " << id << " in neighborhood");
+        LOG(FAULT, "could not find id " << id << " in neighborhood");
         throw std::logic_error("id not found");
     }
 

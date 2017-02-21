@@ -101,23 +101,23 @@ private:
                 &edgetabGra[0],
                 nullptr);
         if (error) {
-            LOG(ERROR, "SCOTCH_graphBuild error: " << error);
+            LOG(FAULT, "SCOTCH_graphBuild error: " << error);
         }
 
         error = SCOTCH_graphCheck(&graph);
         if (error) {
-            LOG(ERROR, "SCOTCH_graphCheck error: " << error);
+            LOG(FAULT, "SCOTCH_graphCheck error: " << error);
         }
 
         SCOTCH_Strat *straptr = SCOTCH_stratAlloc();
         error = SCOTCH_stratInit(straptr);
         if (error) {
-            LOG(ERROR, "SCOTCH_stratInit error: " << error);
+            LOG(FAULT, "SCOTCH_stratInit error: " << error);
         }
 
         error = SCOTCH_graphPart(&graph, weights.size(), straptr,& indices[0]);
         if (error) {
-            LOG(ERROR, "SCOTCH_graphMap error: " << error);
+            LOG(FAULT, "SCOTCH_graphMap error: " << error);
         }
 
         SCOTCH_graphExit(&graph);

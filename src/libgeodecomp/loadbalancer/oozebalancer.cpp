@@ -85,7 +85,7 @@ OozeBalancer::WeightVec OozeBalancer::balance(
 
     WeightVec ret = equalize(newLoads);
     if (sum(weights) != sum(ret)) {
-        LOG(ERROR, "OozeBalancer::balance() failed\n"
+        LOG(FAULT, "OozeBalancer::balance() failed\n"
             << "  weights.sum() = " << sum(weights) << "\n"
             << "  ret.sum() = " << sum(ret) << "\n"
             << "  expectedOptimal.sum() = " << sum(expectedOptimal) << "\n"

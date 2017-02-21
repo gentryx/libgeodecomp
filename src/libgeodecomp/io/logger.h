@@ -21,7 +21,7 @@ namespace LibGeoDecomp {
 class Logger {
 public:
     static const int FATAL = 0;
-    static const int ERROR = 1;
+    static const int FAULT = 1;
     static const int WARN  = 2;
     static const int INFO  = 3;
     static const int DBG   = 4;
