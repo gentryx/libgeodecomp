@@ -45,6 +45,7 @@
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/color.h>
+#include <libgeodecomp/misc/limits.h>
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
