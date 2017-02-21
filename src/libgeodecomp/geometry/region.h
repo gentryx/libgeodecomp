@@ -1007,8 +1007,8 @@ public:
 
         for (;;) {
             if (RegionHelpers::RegionIntersectHelper<DIM - 1>::intersects(cursor, *otherIter)) {
-                int intersectionOriginX = max(cursor.origin.x(), otherIter->origin.x());
-                int intersectionEndX = min(cursor.endX, otherIter->endX);
+                int intersectionOriginX = (max)(cursor.origin.x(), otherIter->origin.x());
+                int intersectionEndX = (min)(cursor.endX, otherIter->endX);
 
                 ret << Streak<DIM>(cursor.origin, intersectionOriginX);
                 cursor.origin.x() = intersectionEndX;
@@ -1071,8 +1071,8 @@ public:
 
             if (RegionHelpers::RegionIntersectHelper<DIM - 1>::intersects(*myIter, *otherIter)) {
                 Streak<DIM> intersection = *myIter;
-                intersection.origin.x() = max(myIter->origin.x(), otherIter->origin.x());
-                intersection.endX = min(myIter->endX, otherIter->endX);
+                intersection.origin.x() = (max)(myIter->origin.x(), otherIter->origin.x());
+                intersection.endX = (min)(myIter->endX, otherIter->endX);
                 ret << intersection;
             }
 
@@ -1582,8 +1582,8 @@ private:
         using std::min;
         int width = dimensions.x();
         Streak<DIM> buf = s;
-        buf.origin.x() = max(buf.origin.x(), 0);
-        buf.endX = min(width, buf.endX);
+        buf.origin.x() = (max)(buf.origin.x(), 0);
+        buf.endX = (min)(width, buf.endX);
         return buf;
     }
 
@@ -1599,7 +1599,7 @@ private:
         int currentX = streak.origin.x();
         if (currentX < 0) {
             Streak<DIM> section = streak;
-            section.endX = min(streak.endX, 0);
+            section.endX = (min)(streak.endX, 0);
             currentX = section.endX;
 
             // normalize left overhang
@@ -1611,7 +1611,7 @@ private:
         if (currentX < streak.endX) {
             Streak<DIM> section = streak;
             section.origin.x() = currentX;
-            section.endX = min(streak.endX, width);
+            section.endX = (min)(streak.endX, width);
             currentX = section.endX;
 
             normalizeStreak<TOPOLOGY>(section, target, dimensions);
@@ -1955,8 +1955,8 @@ private:
     {
         using std::min;
         using std::max;
-        return IntPair(min(a.first,  b.first),
-                       max(a.second, b.second));
+        return IntPair((min)(a.first,  b.first),
+                       (max)(a.second, b.second));
     }
 };
 

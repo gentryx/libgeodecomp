@@ -157,21 +157,21 @@ public:
             limits[i].length = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
         }
 
-        COORD min = simSpaceDim;
-        COORD max = -simSpaceDim;
+        COORD minCoord = simSpaceDim;
+        COORD maxCoord = -simSpaceDim;
         for (std::size_t i = 0; i < cutPoints.size(); ++i) {
             if (cutPoints[i] == farAway<2>()) {
                 continue;
             }
-            max = cutPoints[i].max(max);
-            min = cutPoints[i].min(min);
+            maxCoord = (cutPoints[i].max)(maxCoord);
+            minCoord = (cutPoints[i].min)(minCoord);
         }
-        COORD delta = max - min;
+        COORD delta = maxCoord - minCoord;
 
         Coord<DIM> minInt;
         Coord<DIM> deltaInt;
         for (int i = 0; i < DIM; ++i) {
-            minInt[i] = min[i];
+            minInt[i] = minCoord[i];
             deltaInt[i] = delta[i];
         }
         myBoundingBox = CoordBox<DIM>(minInt, deltaInt);
@@ -183,7 +183,7 @@ public:
         int hits = 0;
         for (std::size_t i = 0; i < SAMPLES; ++i) {
             COORD p = COORD(Random::genDouble(delta[0]),
-                            Random::genDouble(delta[1])) + min;
+                            Random::genDouble(delta[1])) + minCoord;
             if (includes(p)) {
                 ++hits;
             }

@@ -249,7 +249,7 @@ public:
         }
 
         for (RowLengthVec::iterator i = reorderedRowLengths.begin(); i != reorderedRowLengths.end(); ) {
-            RowLengthVec::iterator nextStop = std::min(i + SIGMA, reorderedRowLengths.end());
+            RowLengthVec::iterator nextStop = (std::min)(i + SIGMA, reorderedRowLengths.end());
 
             std::stable_sort(i, nextStop, [](const IntPair& a, const IntPair& b) {
                     return a.second > b.second;

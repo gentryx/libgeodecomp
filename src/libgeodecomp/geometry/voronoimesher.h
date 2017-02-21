@@ -90,7 +90,7 @@ public:
         for (typename CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
             Coord<2> containerCoord = *iter;
             ContainerCellType container = grid->get(containerCoord);
-            maxCells = std::max(maxCells, container.size());
+            maxCells = (std::max)(maxCells, container.size());
 
             for (typename ContainerCellType::Iterator i = container.begin(); i != container.end(); ++i) {
                 Cargo& cell = *i;
@@ -123,9 +123,9 @@ public:
                     cell.pushNeighbor(l->neighborID, l->length, l->dir);
                 }
 
-                maxShape     = std::max(maxShape,     cell.shape.size());
-                maxNeighbors = std::max(maxNeighbors, cell.numberOfNeighbors());
-                maxDiameter  = std::max(maxDiameter,  e.getDiameter());
+                maxShape     = (std::max)(maxShape,     cell.shape.size());
+                maxNeighbors = (std::max)(maxNeighbors, cell.numberOfNeighbors());
+                maxDiameter  = (std::max)(maxDiameter,  e.getDiameter());
             }
 
             grid->set(containerCoord, container);

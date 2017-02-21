@@ -42,7 +42,7 @@ public:
 
         const double evaporationTemperature = 100.0;
         const double evaporationSpeed = 1.0;
-        double evaporation = std::min(1.0, (1.0 - evaporationSpeed / evaporationTemperature) + evaporationSpeed / (0.0001 + temperature));
+        double evaporation = (std::min)(1.0, (1.0 - evaporationSpeed / evaporationTemperature) + evaporationSpeed / (0.0001 + temperature));
         humidity = hood[FixedCoord<>()].humidity * evaporation;
 
         double lostHumidity = hood[FixedCoord<>()].humidity - humidity;

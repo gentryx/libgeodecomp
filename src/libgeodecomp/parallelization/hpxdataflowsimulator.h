@@ -385,7 +385,7 @@ public:
         hpx::lcos::local::sliding_semaphore semaphore(lookAheadDistance);
 
         for (int startStep = 0; startStep < maxTimeSteps; startStep += chunkSize) {
-            int endStep = std::min(maxTimeSteps, startStep + chunkSize);
+            int endStep = (std::min)(maxTimeSteps, startStep + chunkSize);
             std::size_t index = 0;
             for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
                 nextTimeStepFutures << components[i->x()].setupDataflow(lastTimeStepFutures[index], startStep, endStep);

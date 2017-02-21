@@ -54,8 +54,7 @@ public:
         Coord<DIM> c;
         for (int i = 0; i < DIM; ++i) {
             // cut all overhanging coords
-            c[i] = std::min(discreteDim[i] - 1,
-                            (int)(pos[i] * scale));
+            c[i] = (std::min)(discreteDim[i] - 1, (int)(pos[i] * scale));
         }
         return c;
     }
@@ -216,8 +215,8 @@ public:
         CoordBox<DIM> box(Coord<DIM>(), discreteDim);
 
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            lowestFill  = std::min(cache[*i], lowestFill);
-            highestFill = std::max(cache[*i], highestFill);
+            lowestFill  = (std::min)(cache[*i], lowestFill);
+            highestFill = (std::max)(cache[*i], highestFill);
             sum += cache[*i];
 
             if (cache[*i] == 0) {
@@ -259,7 +258,7 @@ private:
         // boundary container cells on the right would not contain all
         // required neighbors.
         for (int i = 0; i < DIM; ++i) {
-            discreteDim[i] = std::max(1.0, std::floor(dimensions[i] * scale));
+            discreteDim[i] = (std::max)(1.0, std::floor(dimensions[i] * scale));
         }
 
         if (discreteDim.prod() > MAX_SIZE) {
@@ -296,8 +295,9 @@ private:
 
         for (int i = 0; i < DIM; ++i) {
             double delta = std::abs(a[i] - b[i]);
-            if (TOPOLOGY::wrapsAxis(i))
-                delta = std::min(delta, dimensions[i] - delta);
+            if (TOPOLOGY::wrapsAxis(i)) {
+                delta = (std::min)(delta, dimensions[i] - delta);
+            }
             dist2 += delta * delta;
         }
 
@@ -314,9 +314,9 @@ private:
         for (int i = 0; i < DIM; ++i) {
             int dist = std::abs(delta[i]);
             if (TOPOLOGY::wrapsAxis(i)) {
-                dist = std::min(dist, discreteDim[i] - dist);
+                dist = (std::min)(dist, discreteDim[i] - dist);
             }
-            maxDist = std::max(dist, maxDist);
+            maxDist = (std::max)(dist, maxDist);
         }
 
         return maxDist;
@@ -325,9 +325,11 @@ private:
     bool intervalTooLarge(const Coord<DIM>& a, const Coord<DIM>& b)
     {
         int maxDist = 0;
+
         for (int i = 0; i < DIM; ++i) {
-            maxDist = std::max(maxDist, std::abs(a[i] - b[i]));
+            maxDist = (std::max)(maxDist, std::abs(a[i] - b[i]));
         }
+
         return maxDist > 1;
 
     }

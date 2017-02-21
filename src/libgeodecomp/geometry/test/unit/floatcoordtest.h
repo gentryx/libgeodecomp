@@ -74,37 +74,37 @@ public:
     void testMax()
     {
         TS_ASSERT_EQUALS(FloatCoord<1>(2.0),
-                         FloatCoord<1>(2.0).max(FloatCoord<1>(0.0)));
+                         (FloatCoord<1>(2.0).max)(FloatCoord<1>(0.0)));
         TS_ASSERT_EQUALS(FloatCoord<1>(2.0),
-                         FloatCoord<1>(0.0).max(FloatCoord<1>(2.0)));
+                         (FloatCoord<1>(0.0).max)(FloatCoord<1>(2.0)));
 
         TS_ASSERT_EQUALS(FloatCoord<2>(2.0, 3.0),
-                         FloatCoord<2>(2.0, 0.0).max(FloatCoord<2>(0.0, 3.0)));
+                         (FloatCoord<2>(2.0, 0.0).max)(FloatCoord<2>(0.0, 3.0)));
         TS_ASSERT_EQUALS(FloatCoord<2>(2.0, 3.0),
-                         FloatCoord<2>(0.0, 3.0).max(FloatCoord<2>(2.0, 0.0)));
+                         (FloatCoord<2>(0.0, 3.0).max)(FloatCoord<2>(2.0, 0.0)));
 
         TS_ASSERT_EQUALS(FloatCoord<3>(2.0, 3.0, 4.0),
-                         FloatCoord<3>(0.0, 3.0, 0.0).max(FloatCoord<3>(2.0, 0.0, 4.0)));
+                         (FloatCoord<3>(0.0, 3.0, 0.0).max)(FloatCoord<3>(2.0, 0.0, 4.0)));
         TS_ASSERT_EQUALS(FloatCoord<3>(2.0, 3.0, 4.0),
-                         FloatCoord<3>(2.0, 0.0, 4.0).max(FloatCoord<3>(0.0, 3.0, 0.0)));
+                         (FloatCoord<3>(2.0, 0.0, 4.0).max)(FloatCoord<3>(0.0, 3.0, 0.0)));
     }
 
     void testMin()
     {
         TS_ASSERT_EQUALS(FloatCoord<1>(-2.0),
-                         FloatCoord<1>(-2.0).min(FloatCoord<1>( 0.0)));
+                         (FloatCoord<1>(-2.0).min)(FloatCoord<1>( 0.0)));
         TS_ASSERT_EQUALS(FloatCoord<1>(-2.0),
-                         FloatCoord<1>( 0.0).min(FloatCoord<1>(-2.0)));
+                         (FloatCoord<1>( 0.0).min)(FloatCoord<1>(-2.0)));
 
         TS_ASSERT_EQUALS(FloatCoord<2>(-2.0, -3.0),
-                         FloatCoord<2>(-2.0,  0.0).min(FloatCoord<2>( 0.0, -3.0)));
+                         (FloatCoord<2>(-2.0,  0.0).min)(FloatCoord<2>( 0.0, -3.0)));
         TS_ASSERT_EQUALS(FloatCoord<2>(-2.0, -3.0),
-                         FloatCoord<2>( 0.0, -3.0).min(FloatCoord<2>(-2.0,  0.0)));
+                         (FloatCoord<2>( 0.0, -3.0).min)(FloatCoord<2>(-2.0,  0.0)));
 
         TS_ASSERT_EQUALS(FloatCoord<3>(-2.0, -3.0, -4.0),
-                         FloatCoord<3>( 0.0, -3.0,  0.0).min(FloatCoord<3>(-2.0,  0.0, -4.0)));
+                         (FloatCoord<3>( 0.0, -3.0,  0.0).min)(FloatCoord<3>(-2.0,  0.0, -4.0)));
         TS_ASSERT_EQUALS(FloatCoord<3>(-2.0, -3.0, -4.0),
-                         FloatCoord<3>(-2.0,  0.0, -4.0).min(FloatCoord<3>( 0.0, -3.0,  0.0)));
+                         (FloatCoord<3>(-2.0,  0.0, -4.0).min)(FloatCoord<3>( 0.0, -3.0,  0.0)));
     }
 
     void testMaxElement()

@@ -26,7 +26,8 @@
     {                                                                   \
         double tsa_comp1_a = va;                                        \
         double tsa_comp1_b = vb;                                        \
-        double tsa_delta = std::max(fabs(tsa_comp1_a), fabs(tsa_comp1_b)) * accuracy; \
+        double tsa_delta = (std::max)(fabs(tsa_comp1_a),                \
+                                      fabs(tsa_comp1_b)) * accuracy;    \
         TSM_ASSERT_DELTA(msg, tsa_comp1_a, tsa_comp1_b, tsa_delta);     \
     }
 

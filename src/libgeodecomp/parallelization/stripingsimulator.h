@@ -360,7 +360,7 @@ private:
         unsigned start,
         unsigned end)
     {
-        int height = std::max((int)(end - start), 0);
+        int height = (std::max)((int)(end - start), 0);
         Coord<DIM> startCorner;
         Coord<DIM> dim = gridDimensions();
         startCorner[DIM - 1] = start;
@@ -549,8 +549,8 @@ private:
             unsigned sourceStartRow = oldPartitions[i];
             unsigned sourceEndRow   = oldPartitions[i + 1];
 
-            unsigned intersectionStart = std::max(newStartRow, sourceStartRow);
-            unsigned intersectionEnd   = std::min(newEndRow,   sourceEndRow);
+            unsigned intersectionStart = (std::max)(newStartRow, sourceStartRow);
+            unsigned intersectionEnd   = (std::min)(newEndRow,   sourceEndRow);
 
             if (intersectionEnd > intersectionStart) {
                 Region<DIM> intersection = fillRegion(intersectionStart, intersectionEnd);
@@ -577,8 +577,8 @@ private:
             unsigned targetStartRow = newPartitions[i];
             unsigned targetEndRow   = newPartitions[i + 1];
 
-            unsigned intersectionStart = std::max(oldStartRow, targetStartRow);
-            unsigned intersectionEnd   = std::min(oldEndRow,   targetEndRow);
+            unsigned intersectionStart = (std::max)(oldStartRow, targetStartRow);
+            unsigned intersectionEnd   = (std::min)(oldEndRow,   targetEndRow);
 
             if (intersectionEnd > intersectionStart) {
                 Region<DIM> intersection = fillRegion(intersectionStart, intersectionEnd);

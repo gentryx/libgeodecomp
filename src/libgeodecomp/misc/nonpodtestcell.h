@@ -109,11 +109,11 @@ private:
     {
         Coord<2> distance = Coord<2>(1, 1) * cycleCounter;
         CoordBox<2> seenBox(coord - distance, distance * 2 + Coord<2>(1, 1));
-        Coord<2> origin = Coord<2>(0, 0).max(seenBox.origin);
+        Coord<2> origin = (Coord<2>(0, 0).max)(seenBox.origin);
         Coord<2> oppositeCorner1 = seenBox.origin + seenBox.dimensions;
         Coord<2> oppositeCorner2 = simSpace.origin + simSpace.dimensions;
         seenBox.origin = origin;
-        seenBox.dimensions = oppositeCorner1.min(oppositeCorner2) - origin;
+        seenBox.dimensions = (oppositeCorner1.min)(oppositeCorner2) - origin;
 
         for (CoordBox<2>::Iterator i = seenBox.begin(); i != seenBox.end(); ++i) {
             if (seenNeighbors.count(*i) != 1) {

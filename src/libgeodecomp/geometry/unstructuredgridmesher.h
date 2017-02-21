@@ -89,11 +89,11 @@ private:
         for (std::size_t i = 0; i < points.size(); ++i) {
             for (typename CoordsArrayType::const_iterator j = neighbors[i].begin(); j != neighbors[i].end(); ++j) {
                 FloatCoord<DIM> delta = (points[i] - points[*j]).abs();
-                maxDelta = maxDelta.max(delta);
+                maxDelta = (maxDelta.max)(delta);
             }
 
-            minCoord = minCoord.min(points[i]);
-            maxCoord = maxCoord.max(points[i]);
+            minCoord = (minCoord.min)(points[i]);
+            maxCoord = (maxCoord.max)(points[i]);
         }
 
         gridDim = maxCoord - minCoord;

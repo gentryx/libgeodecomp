@@ -51,10 +51,10 @@ class Image : public Grid<Color>
         const Color& col)
     {
         Coord<2> lowerRight = upperLeft + Coord<2>(boxWidth, boxHeight);
-        int sx = std::max(upperLeft.x(), 0);
-        int sy = std::max(upperLeft.y(), 0);
-        int ex = std::min(lowerRight.x(), (int)getDimensions().x());
-        int ey = std::min(lowerRight.y(), (int)getDimensions().y());
+        int sx = (std::max)(upperLeft.x(), 0);
+        int sy = (std::max)(upperLeft.y(), 0);
+        int ex = (std::min)(lowerRight.x(), (int)getDimensions().x());
+        int ey = (std::min)(lowerRight.y(), (int)getDimensions().y());
 
         for (int y = sy; y < ey; y++) {
             for (int x = sx; x < ex; x++) {

@@ -243,7 +243,7 @@ private:
         Coord<DIM> bufferOrigin;
         // fixme: wrong on boundary with Torus topology
         for (int d = 0; d < (DIM - 1); ++d) {
-            bufferOrigin[d] = std::max(0, frameCoord[d] * wavefrontDim[d] - pipelineLength + 1);
+            bufferOrigin[d] = (std::max)(0, frameCoord[d] * wavefrontDim[d] - pipelineLength + 1);
         }
         bufferOrigin[DIM - 1] = 0;
         buffer->setOrigin(bufferOrigin);

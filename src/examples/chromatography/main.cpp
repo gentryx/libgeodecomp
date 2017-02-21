@@ -234,8 +234,8 @@ public:
             absorbtions[i] = area * freeLevel * substancePressures[i] * ABSORBTION_RATES[i];
         }
         for (std::size_t i = 0; i < SUBSTANCES; ++i) {
-            absorbtions[i] = std::min(absorbtions[i], quantities[i]);
-            absorbtions[i] = std::min(absorbtions[i], freeVolume);
+            absorbtions[i] = (std::min)(absorbtions[i], quantities[i]);
+            absorbtions[i] = (std::min)(absorbtions[i], freeVolume);
             freeVolume -= absorbtions[i];
             quantities[i] -= absorbtions[i];
             absorbedVolume += absorbtions[i];

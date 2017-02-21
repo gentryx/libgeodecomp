@@ -168,7 +168,7 @@ private:
     {
         long remainingNanoSteps = s;
         while (remainingNanoSteps > 0) {
-            long hop = std::min(remainingNanoSteps, timeToNextEvent());
+            long hop = (std::min)(remainingNanoSteps, timeToNextEvent());
             updateGroup->update(hop);
             handleEvents();
             remainingNanoSteps -= hop;

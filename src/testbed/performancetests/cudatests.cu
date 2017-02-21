@@ -519,7 +519,7 @@ double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
     for (; blockWidth <= dimX; blockWidth *= 2) {
     }
     blockWidth /= 2;
-    blockWidth = std::min(256, blockWidth);
+    blockWidth = (std::min)(256, blockWidth);
 
     dim3 dimBlock(blockWidth, 2, 1);
     dim3 dimGrid(dimX / dimBlock.x, dimY / dimBlock.y, 1);
