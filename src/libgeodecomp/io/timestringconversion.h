@@ -22,7 +22,7 @@ public:
         time_t secondsSinceEpoch = time_t(intFraction);
         tm timeSpec;
 #ifdef _WIN32
-        gmtime_s(&secondsSinceEpoch, &timeSpec);
+        gmtime_s(&timeSpec, &secondsSinceEpoch);
 #else
         gmtime_r(&secondsSinceEpoch, &timeSpec);
 #endif
