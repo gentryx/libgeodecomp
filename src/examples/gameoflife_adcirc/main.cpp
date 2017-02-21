@@ -600,11 +600,11 @@ private:
 
         maxDiameter = determineMaximumDiameter(&centers, myNeighborTables);
         minCoord = FloatCoord<2>(
-            std::numeric_limits<double>::max(),
-            std::numeric_limits<double>::max());
+            Limits<double>::getMax(),
+            Limits<double>::getMax());
         maxCoord = FloatCoord<2>(
-            std::numeric_limits<double>::min(),
-            std::numeric_limits<double>::min());
+            Limits<double>::getMin(),
+            Limits<double>::getMin());
 
         for (int i = 0; i < numberOfDomains; ++i) {
             FloatCoord<2> p(centers[i][0], centers[i][1]);

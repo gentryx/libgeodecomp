@@ -4,6 +4,7 @@
 #include <libgeodecomp/misc/simfabtestmodel.h>
 #include <libgeodecomp/misc/cacheblockingsimulationfactory.h>
 #include <libgeodecomp/misc/cudasimulationfactory.h>
+#include <libgeodecomp/misc/limits.h>
 #include <libgeodecomp/misc/serialsimulationfactory.h>
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/simulationfactory.h>
@@ -49,7 +50,7 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_CPP14
         unsigned maxSteps = initializerProxy->maxSteps();
-        double oldFitness = std::numeric_limits<double>::min();
+        double oldFitness = Limits<double>::getMin();
         double aktFitness = 0.0;
 
         for (unsigned i = 10; i < maxSteps; i *= 2) {

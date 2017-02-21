@@ -1,9 +1,8 @@
-// vim: noai:ts=4:sw=4:expandtab
 #ifndef LIBGEODECOMP_MISC_OPTIMIZER_H
 #define LIBGEODECOMP_MISC_OPTIMIZER_H
 
+#include <libgeodecomp/misc/limits.h>
 #include <libgeodecomp/misc/simulationparameters.h>
-#include <limits>
 
 namespace LibGeoDecomp {
 
@@ -27,7 +26,7 @@ public:
 
     explicit Optimizer(SimulationParameters params) :
         params(params),
-        fitness(std::numeric_limits<double>::min())
+        fitness(Limits<double>::getMin())
     {}
 
     virtual ~Optimizer()

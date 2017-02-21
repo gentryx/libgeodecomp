@@ -113,10 +113,10 @@ private:
      */
     Grid<double> createUnwarpedPlasmaField(const Coord<2>& dim, const double coarseness)
     {
-        Coord<2> enclosingSquare = Coord<2>::diagonal(std::max(dim.x(), dim.y()));
+        Coord<2> enclosingSquare = Coord<2>::diagonal((std::max)(dim.x(), dim.y()));
         double amplitude = 10.0;
-        double minValue = std::numeric_limits<double>::max();
-        double maxValue = std::numeric_limits<double>::min();
+        double minValue = Limits<double>::getMax();
+        double maxValue = Limits<double>::getMin();
 
         Grid<double> grid = createPlasmaField(enclosingSquare, amplitude, coarseness);
 

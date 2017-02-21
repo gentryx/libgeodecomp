@@ -7,6 +7,7 @@
 #ifdef LIBGEODECOMP_WITH_CUDA
 
 #include <libgeodecomp/parallelization/cudasimulator.h>
+#include <libgeodecomp/misc/limits.h>
 #include <libgeodecomp/misc/sharedptr.h>
 
 namespace LibGeoDecomp {
@@ -42,7 +43,7 @@ public:
             try {
                 sim->run();
             } catch(const std::runtime_error& error){
-                return std::numeric_limits<double>::min();
+                return Limits<double>::getMin();
             }
         }
 

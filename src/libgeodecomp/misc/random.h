@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_RANDOM_H
 #define LIBGEODECOMP_MISC_RANDOM_H
 
-#include <limits>
+#include <libgeodecomp/misc/limits.h>
 
 namespace LibGeoDecomp {
 
@@ -15,14 +15,14 @@ unsigned randomMT();
 class Random
 {
 public:
-    static inline unsigned genUnsigned(const unsigned max = std::numeric_limits<unsigned>::max())
+    static inline unsigned genUnsigned(const unsigned max = Limits<unsigned>::getMax())
     {
         return randomMT() % (unsigned)max;
     }
 
     static inline double genDouble(const double max = 1.0)
     {
-        return (double)genUnsigned() / double(std::numeric_limits<unsigned>::max()) * max;
+        return (double)genUnsigned() / double(Limits<unsigned>::getMax()) * max;
     }
 
     static inline void seed(const unsigned newSeed)

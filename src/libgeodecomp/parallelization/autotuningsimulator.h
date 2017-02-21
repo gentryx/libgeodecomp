@@ -8,6 +8,7 @@
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/cacheblockingsimulationfactory.h>
 #include <libgeodecomp/misc/cudasimulationfactory.h>
+#include <libgeodecomp/misc/limits.h>
 #include <libgeodecomp/misc/serialsimulationfactory.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/io/initializer.h>
@@ -32,7 +33,7 @@ public:
         const std::string& name,
         SimFactoryPtr simFactory,
         SimulationParameters param,
-        double fit = std::numeric_limits<double>::max()):
+        double fit = Limits<double>::getMax()):
         simulationType(name),
         simulationFactory(simFactory),
         parameters(param),
@@ -185,7 +186,7 @@ template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 std::string AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::getBestSim()
 {
     std::string bestSimulation;
-    double tmpFitness = std::numeric_limits<double>::min();
+    double tmpFitness = Limits<double>::getMin();
     typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
 
     for (IterType iter = simulations.begin(); iter != simulations.end(); iter++) {
@@ -220,7 +221,7 @@ unsigned AutoTuningSimulator<CELL_TYPE, OPTIMIZER_TYPE>::normalizeSteps(double g
     unsigned oldSteps = startStepNum;
     varStepInitializer->setMaxSteps(1);
     double variance = (*simulation->simulationFactory)(factory->parameters());
-    double fitness = std::numeric_limits<double>::max();
+    double fitness = Limits<double>::getMax();
 
     do {
         varStepInitializer->setMaxSteps(steps);

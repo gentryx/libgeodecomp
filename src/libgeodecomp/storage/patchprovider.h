@@ -6,9 +6,8 @@
 #include <mutex>
 #endif
 
-#include <limits>
-
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/misc/limits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/stringops.h>
 
@@ -28,7 +27,7 @@ public:
 
     static inline std::size_t infinity()
     {
-        return std::numeric_limits<std::size_t>::max();
+        return Limits<std::size_t>::max();
     }
 
     virtual ~PatchProvider() {};

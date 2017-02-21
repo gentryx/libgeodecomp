@@ -1,9 +1,8 @@
 #ifndef LIBGEODECOMP_STORAGE_PATCHACCEPTER_H
 #define LIBGEODECOMP_STORAGE_PATCHACCEPTER_H
 
-#include <limits>
-
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/misc/limits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/serializationbuffer.h>
 
@@ -26,7 +25,7 @@ public:
 
     static inline std::size_t infinity()
     {
-        return std::numeric_limits<std::size_t>::max();
+        return Limits<std::size_t>::max();
     }
 
     virtual ~PatchAccepter()
