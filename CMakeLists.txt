@@ -178,8 +178,14 @@ lgd_detect_distro()
 #                           Y
 #                     libgeodecomp_FLAGS          Exported via the CMake module
 #
-set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -Wall")
-set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wall")
+if (MSVC)
+  # -Wall on Microsoft Visual C++ generates too much noise
+  set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   /W4")
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} /W4")
+else()
+  set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -Wall")
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wall")
+endif()
 
 check_cxx_compiler_flag("-Wno-sign-conversion" SUPPORTS_WARN_NO_WSIGN)
 if(SUPPORTS_WARN_NO_WSIGN)
