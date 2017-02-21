@@ -3,8 +3,8 @@
 
 #include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/misc/limits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
-#include <limits>
 
 namespace LibGeoDecomp {
 
@@ -39,7 +39,7 @@ public:
 
     explicit RegionBasedAdjacency(std::size_t maxSize = (std::size_t(1) << 30)) :
         regions(1),
-        limits(1, std::numeric_limits<int>().(max)()),
+        limits(1, Limits<int>::getMax()),
         maxSize(maxSize)
     {}
 
@@ -130,7 +130,7 @@ private:
         regions.insert(regions.begin() + int(i), Region<2>());
         limits.insert(limits.begin() + int(i), newLimit);
 
-        Region<2>::StreakIterator middle = buf.streakIteratorOnOrAfter(Coord<2>(std::numeric_limits<int>().(max)(), newLimit));
+        Region<2>::StreakIterator middle = buf.streakIteratorOnOrAfter(Coord<2>(Limits<int>::getMax(), newLimit));
 
         for (Region<2>::StreakIterator iter = buf.beginStreak(); iter != middle; ++iter) {
             regions[i + 0] << *iter;
