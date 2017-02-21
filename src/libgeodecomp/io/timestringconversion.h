@@ -21,7 +21,11 @@ public:
         int uSecondsSinceEpoch = int(std::modf(time, &intFraction) * 1.0e6);
         time_t secondsSinceEpoch = time_t(intFraction);
         tm timeSpec;
-        gmtime(&secondsSinceEpoch, &timeSpec);
+#ifdef _WIN32
+        timeSpec = *gmtime(&secondsSinceEpoch);
+#else
+        gmtime_r(&secondsSinceEpoch, &timeSpec);
+#endif
         char buf[1024];
         strftime(buf, 1024, "%Y.%m.%d %H:%M:%S", &timeSpec);
 
