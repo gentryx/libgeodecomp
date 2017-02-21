@@ -128,7 +128,7 @@ public:
                 if (pressure > other.pressure)
                     fluxPressure = (pressure - other.pressure) *
                         borderLengths[i] * PRESSURE_DIFFUSION;
-                fluxesFlow[i]     = std::max(0.0, fluxFlow);
+                fluxesFlow[i]     = (std::max)(0.0, fluxFlow);
                 fluxesPressure[i] = fluxPressure;
                 totalFlux += fluxesPressure[i] + fluxesFlow[i];
             }
@@ -207,7 +207,7 @@ public:
         }
 
         for (std::size_t i = 0; i < SUBSTANCES; ++i)
-            quantities[i] = std::max(0.0, quantities[i]);
+            quantities[i] = (std::max)(0.0, quantities[i]);
 
         handleAbsorbtion();
         updatePressures();

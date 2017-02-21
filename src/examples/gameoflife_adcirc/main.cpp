@@ -609,8 +609,8 @@ private:
         for (int i = 0; i < numberOfDomains; ++i) {
             FloatCoord<2> p(centers[i][0], centers[i][1]);
 
-            minCoord = minCoord.min(p);
-            maxCoord = maxCoord.max(p);
+            minCoord = (minCoord.min)(p);
+            maxCoord = (maxCoord.max)(p);
         }
 
         quadrantOrigin = minCoord;
@@ -657,8 +657,8 @@ private:
             int numNeighbors = myNeighborTables[point].myNeighbors.size();
             for (int i = 0; i < numNeighbors; ++i) {
                 int neighborID = myNeighborTables[point].myNeighbors[i].neighborID;
-                double dist = getDistance(points[0][point],points[0][neighborID]);
-                maxDiameter = std::max(maxDiameter,dist);
+                double dist = getDistance(points[0][point], points[0][neighborID]);
+                maxDiameter = (std::max)(maxDiameter, dist);
             }
         }
 

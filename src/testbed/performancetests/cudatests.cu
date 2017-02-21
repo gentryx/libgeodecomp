@@ -569,7 +569,7 @@ public:
     double performance2(const Coord<3>& dim)
     {
 #define CASE(DIM, ADD)                                                  \
-        if (max(dim) <= DIM) {                                          \
+        if ((max)(dim) <= DIM) {                                        \
             return benchmarkCUDA<KERNEL, DIM + ADD, DIM, DIM>(          \
                 dim.x(), dim.y(), dim.z(), 20);                         \
         }
@@ -596,7 +596,7 @@ public:
         throw std::range_error("dim too large");
     }
 
-    int max(const Coord<3>& coord) const
+    int (max)(const Coord<3>& coord) const
     {
         return (std::max)(coord.x(), (std::max)(coord.y(), coord.z()));
     }

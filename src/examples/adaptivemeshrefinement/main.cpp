@@ -362,11 +362,11 @@ public:
         // }
 
         contagiousFlag =
-            std::max(contagiousFlag,
-                     std::max(HOOD(0, -1)->contagiousFlag,
-                              std::max(HOOD(-1, 0)->contagiousFlag,
-                                       std::max(HOOD(1, 0)->contagiousFlag,
-                                                HOOD(0, 1)->contagiousFlag))));
+            (std::max)(contagiousFlag,
+                       (std::max)(HOOD(0, -1)->contagiousFlag,
+                                  (std::max)(HOOD(-1, 0)->contagiousFlag,
+                                             (std::max)(HOOD(1, 0)->contagiousFlag,
+                                                        HOOD(0, 1)->contagiousFlag))));
 
         if (sublevel.size()) {
             for (std::size_t i = 0; i < sublevel[0].size(); ++i) {
@@ -376,10 +376,10 @@ public:
             if (depth < maxDepth) {
                 // check for refinement, fixme: extract into method
                 double delta = 0;
-                delta = std::max(delta, std::abs(value - HOOD(0, -1)->value));
-                delta = std::max(delta, std::abs(value - HOOD(0,  1)->value));
-                delta = std::max(delta, std::abs(value - HOOD(-1, 0)->value));
-                delta = std::max(delta, std::abs(value - HOOD( 1, 0)->value));
+                delta = (std::max)(delta, std::abs(value - HOOD(0, -1)->value));
+                delta = (std::max)(delta, std::abs(value - HOOD(0,  1)->value));
+                delta = (std::max)(delta, std::abs(value - HOOD(-1, 0)->value));
+                delta = (std::max)(delta, std::abs(value - HOOD( 1, 0)->value));
 
                 if (delta > DELTA_MAX) {
                     sublevel.resize(1);
@@ -454,7 +454,7 @@ public:
 
     // {
     //     double delta = 0;
-    //     delta = std::max(std::abs(HOOD(0, 1) - HOOD( 0, -1)),
+    //     delta = (std::max)(std::abs(HOOD(0, 1) - HOOD( 0, -1)),
     //                      std::abs(HOOD(1, 0) - HOOD(-1,  0)));
 
 

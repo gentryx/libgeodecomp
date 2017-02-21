@@ -264,26 +264,26 @@ public:
 
     void testMax()
     {
-        TS_ASSERT_EQUALS(Coord<1>(1).max(Coord<1>(3)), Coord<1>(3));
-        TS_ASSERT_EQUALS(Coord<1>(1).max(Coord<1>(0)), Coord<1>(1));
+        TS_ASSERT_EQUALS((Coord<1>(1).max)(Coord<1>(3)), Coord<1>(3));
+        TS_ASSERT_EQUALS((Coord<1>(1).max)(Coord<1>(0)), Coord<1>(1));
 
-        TS_ASSERT_EQUALS(Coord<2>(3, 4).max(Coord<2>(5, 1)), Coord<2>(5, 4));
+        TS_ASSERT_EQUALS((Coord<2>(3, 4).max)(Coord<2>(5, 1)), Coord<2>(5, 4));
 
-        TS_ASSERT_EQUALS(Coord<3>(10, 1, 14).max(Coord<3>( 9, 12,  9)), Coord<3>(10, 12, 14));
-        TS_ASSERT_EQUALS(Coord<3>(10, 12, 1).max(Coord<3>( 9,  1, 14)), Coord<3>(10, 12, 14));
-        TS_ASSERT_EQUALS(Coord<3>( 9, 11, 1).max(Coord<3>(10, 12, 14)), Coord<3>(10, 12, 14));
+        TS_ASSERT_EQUALS((Coord<3>(10, 1, 14).max)(Coord<3>( 9, 12,  9)), Coord<3>(10, 12, 14));
+        TS_ASSERT_EQUALS((Coord<3>(10, 12, 1).max)(Coord<3>( 9,  1, 14)), Coord<3>(10, 12, 14));
+        TS_ASSERT_EQUALS((Coord<3>( 9, 11, 1).max)(Coord<3>(10, 12, 14)), Coord<3>(10, 12, 14));
     }
 
     void testMin()
     {
-        TS_ASSERT_EQUALS(Coord<1>(7).min(Coord<1>(3)), Coord<1>(3));
-        TS_ASSERT_EQUALS(Coord<1>(1).min(Coord<1>(7)), Coord<1>(1));
+        TS_ASSERT_EQUALS((Coord<1>(7).min)(Coord<1>(3)), Coord<1>(3));
+        TS_ASSERT_EQUALS((Coord<1>(1).min)(Coord<1>(7)), Coord<1>(1));
 
-        TS_ASSERT_EQUALS(Coord<2>(3, 4).min(Coord<2>(5, 1)), Coord<2>(3, 1));
+        TS_ASSERT_EQUALS((Coord<2>(3, 4).min)(Coord<2>(5, 1)), Coord<2>(3, 1));
 
-        TS_ASSERT_EQUALS(Coord<3>(10, 1, 14).min(Coord<3>( 9, 12,  9)), Coord<3>(9, 1,  9));
-        TS_ASSERT_EQUALS(Coord<3>(10, 12, 1).min(Coord<3>( 9,  1, 14)), Coord<3>(9, 1,  1));
-        TS_ASSERT_EQUALS(Coord<3>( 9, 11, 1).min(Coord<3>(10, 12, 14)), Coord<3>(9, 11, 1));
+        TS_ASSERT_EQUALS((Coord<3>(10, 1, 14).min)(Coord<3>( 9, 12,  9)), Coord<3>(9, 1,  9));
+        TS_ASSERT_EQUALS((Coord<3>(10, 12, 1).min)(Coord<3>( 9,  1, 14)), Coord<3>(9, 1,  1));
+        TS_ASSERT_EQUALS((Coord<3>( 9, 11, 1).min)(Coord<3>(10, 12, 14)), Coord<3>(9, 11, 1));
     }
 
     void testMaxElement()

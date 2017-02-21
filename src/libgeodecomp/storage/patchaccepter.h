@@ -25,7 +25,7 @@ public:
 
     static inline std::size_t infinity()
     {
-        return Limits<std::size_t>::max();
+        return Limits<std::size_t>::getMax();
     }
 
     virtual ~PatchAccepter()

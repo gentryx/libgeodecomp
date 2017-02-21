@@ -139,7 +139,7 @@ private:
 
         *fluxFlow = (DIR::X * from.velocityX + DIR::Y * from.velocityY) *
             influence * from.quantity;
-        *fluxFlow = std::max(0.0, *fluxFlow);
+        *fluxFlow = (std::max)(0.0, *fluxFlow);
 
         *fluxPressure = 0;
         if (from.quantity > to.quantity) {
