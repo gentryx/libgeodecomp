@@ -19,8 +19,8 @@ class ScopedTimer
 {
 public:
     inline explicit ScopedTimer(double *totalElapsedTime) :
-        totalElapsedTime(totalElapsedTime),
-        startTime(time())
+        startTime(time()),
+        totalElapsedTime(totalElapsedTime)
     {}
 
     ~ScopedTimer()
@@ -53,8 +53,8 @@ public:
     }
 
 private:
-    double *totalElapsedTime;
     double startTime;
+    double *totalElapsedTime;
 };
 
 }
