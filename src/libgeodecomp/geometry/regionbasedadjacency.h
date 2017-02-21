@@ -39,7 +39,7 @@ public:
 
     explicit RegionBasedAdjacency(std::size_t maxSize = (std::size_t(1) << 30)) :
         regions(1),
-        limits(1, std::numeric_limits<int>().max()),
+        limits(1, std::numeric_limits<int>().(max)()),
         maxSize(maxSize)
     {}
 
@@ -127,10 +127,10 @@ private:
         Region<2> buf;
         swap(buf, regions[i]);
 
-        regions.insert(regions.begin() + i, Region<2>());
-        limits.insert(limits.begin() + i, newLimit);
+        regions.insert(regions.begin() + int(i), Region<2>());
+        limits.insert(limits.begin() + int(i), newLimit);
 
-        Region<2>::StreakIterator middle = buf.streakIteratorOnOrAfter(Coord<2>(std::numeric_limits<int>().max(), newLimit));
+        Region<2>::StreakIterator middle = buf.streakIteratorOnOrAfter(Coord<2>(std::numeric_limits<int>().(max)(), newLimit));
 
         for (Region<2>::StreakIterator iter = buf.beginStreak(); iter != middle; ++iter) {
             regions[i + 0] << *iter;
