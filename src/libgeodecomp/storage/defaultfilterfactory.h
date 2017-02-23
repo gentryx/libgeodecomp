@@ -9,9 +9,6 @@
 
 namespace LibGeoDecomp {
 
-/**
- *
- */
 template<bool CUDA =
 #ifdef __CUDACC__
          true
@@ -42,6 +39,12 @@ public:
 };
 #endif
 
+/**
+ * Type switch that determines whether to instantiate CUDA-enabled
+ * filters or not. This is tricky because the same header may be
+ * compiled with nvcc as well as with g++/icpc etc. and should give
+ * the correct result every time.
+ */
 template<>
 class DefaultFilterFactory<false>
 {
