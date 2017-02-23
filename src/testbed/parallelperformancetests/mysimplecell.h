@@ -29,7 +29,8 @@ class MySimpleCellSoA : public MySimpleCell
 public:
     class API :
         public MySimpleCell::API,
-        public APITraits::HasSoA
+        public APITraits::HasSoA,
+        public LibFlatArray::api_traits::has_default_3d_sizes_uniform
     {};
 };
 
