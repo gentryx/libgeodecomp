@@ -92,7 +92,7 @@ public:
         ++iterators[0];
         if (iterators[0] == region->indicesEnd(0)) {
             for (int i = 1; i < DIM; ++i) {
-                iterators[i] = region->indicesEnd(i);
+                iterators[i] = region->indicesEnd(std::size_t(i));
             }
             return;
         } else {
@@ -105,12 +105,12 @@ public:
             // illegal reads) advance upper-level iterators if
             // they're already pointing to the second-to-last
             // field:
-            if ((iterators[i] + 1) == region->indicesEnd(i)) {
+            if ((iterators[i] + 1) == region->indicesEnd(std::size_t(i))) {
                 return;
             }
 
             IndexVectorType::const_iterator nextEnd =
-                region->indicesBegin(i - 1) + (iterators[i] + 1)->second;
+                region->indicesBegin(std::size_t(i - 1)) + (iterators[i] + 1)->second;
 
             if (iterators[i - 1] != nextEnd) {
                 return;

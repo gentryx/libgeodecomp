@@ -54,8 +54,8 @@ public:
     }
 
     virtual void stepFinished(
-        const ParallelWriterGridType& grid,
-        const Region<DIM>& validRegion,
+        const ParallelWriterGridType& /* grid */,
+        const Region<DIM>& /* validRegion */,
         const Coord<DIM>& globalDimensions,
         unsigned step,
         WriterEvent event,
