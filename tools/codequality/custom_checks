@@ -109,9 +109,9 @@ class FindBadIncludes < TestBase
 
     begin
       content.scan(/^#include.*".*"/) do
-        ret += 1
         match = $&
         if filename =~ /src\/libgeodecomp/
+          ret += 1
           log "#{filename}: found malformed include »#{match}«"
         end
       end
