@@ -150,7 +150,7 @@ namespace ChronometerHelpers {
 class EventToString
 {
 public:
-    std::string operator()(int id)
+    std::string operator()(std::size_t id)
     {
         switch(id) {
         case 0:
@@ -266,7 +266,7 @@ public:
 
     }
 
-    double interval(int i) const
+    double interval(std::size_t i) const
     {
         return totalTimes[i];
     }

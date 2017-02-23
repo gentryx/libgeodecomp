@@ -17,8 +17,8 @@ class Image : public Grid<Color>
     class IllegalCoordException {};
 
     inline Image(
-        const unsigned width,
-        const unsigned height,
+        const int width,
+        const int height,
         const Color col=Color()) :
         Grid<Color>(Coord<2>(width, height), col)
     {}
@@ -31,23 +31,29 @@ class Image : public Grid<Color>
 
     Image slice(
         const Coord<2>& upperLeft,
-        const unsigned width,
-        const unsigned height);
+        const int width,
+        const int height);
 
     Image slice(
-        const unsigned x,
-        const unsigned y,
-        const unsigned width,
-        const unsigned height);
+        const int x,
+        const int y,
+        const int width,
+        const int height);
 
-    void paste(const Coord<2>& upperLeft, const Image& img);
-
-    void paste(const int x, const int y, const Image& img);
-
-    inline void fillBox(
+    void paste(
         const Coord<2>& upperLeft,
-        const unsigned boxWidth,
-        const unsigned boxHeight,
+        const Image& img);
+
+    void paste(
+        const int x,
+        const int y,
+        const Image& img);
+
+    inline
+    void fillBox(
+        const Coord<2>& upperLeft,
+        const int boxWidth,
+        const int boxHeight,
         const Color& col)
     {
         Coord<2> lowerRight = upperLeft + Coord<2>(boxWidth, boxHeight);

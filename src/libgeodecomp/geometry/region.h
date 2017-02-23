@@ -7,6 +7,8 @@
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/selector.h>
+#include <cstddef>
+#include <vector>
 
 namespace LibGeoDecomp {
 
@@ -1301,7 +1303,7 @@ public:
 
     inline IndexVectorType::const_iterator indicesAt(std::size_t dim, std::size_t offset) const
     {
-        return indices[dim].begin() + offset;
+        return indices[dim].begin() + std::ptrdiff_t(offset);
     }
 
     inline IndexVectorType::const_iterator indicesBegin(std::size_t dim) const

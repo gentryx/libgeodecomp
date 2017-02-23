@@ -150,19 +150,21 @@ public:
 
 void runSimulation()
 {
-    int outputFrequency = 1;
+    int outputPeriod = 1;
     CircleCellInitializer *init = new CircleCellInitializer();
     SerialSimulator<CircleCell> sim(init);
+
     sim.addWriter(
         new PPMWriter<CircleCell>(
             &CircleCell::state,
             CellToColor(),
             "./circle",
-            outputFrequency,
+            outputPeriod,
             Coord<2>(8, 8)));
+
     sim.addWriter(
         new TracingWriter<CircleCell>(
-            1,
+            outputPeriod,
             init->maxSteps()));
 
     sim.run();

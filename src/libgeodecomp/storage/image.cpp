@@ -4,16 +4,19 @@
 
 namespace LibGeoDecomp {
 
+namespace ImageHelpers {
+
 void copy(
     const Coord<2>& upperLeftSource,
     const Image& source,
     const Coord<2>& upperLeftTarget,
     Image* target,
-    const unsigned width,
-    const unsigned height)
+    const int width,
+    const int height)
 {
     const Coord<2>& uls = upperLeftSource;
     const Coord<2>& ult = upperLeftTarget;
+
     CoordBox<2> sourceRect(
         Coord<2>(0, 0),
         Coord<2>(source.getDimensions().x(), source.getDimensions().y()));
@@ -21,8 +24,8 @@ void copy(
         Coord<2>(0, 0),
         Coord<2>(target->getDimensions().x(), target->getDimensions().y()));
 
-    for (unsigned y = 0; y < height; y++) {
-        for (unsigned x = 0; x < width; x++) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
             Coord<2> cTarget = ult + Coord<2>(x, y);
             Coord<2> cSource = uls + Coord<2>(x, y);
 
@@ -41,22 +44,30 @@ void copy(
     }
 }
 
+}
+
 Image Image::slice(
     const Coord<2>& upperLeft,
-    const unsigned width,
-    const unsigned height)
+    const int width,
+    const int height)
 {
     Image ret(width, height);
-    copy(upperLeft, *this, Coord<2>(0,0), &ret, width, height);
+    ImageHelpers::copy(
+        upperLeft,
+        *this,
+        Coord<2>(0,0),
+        &ret,
+        width,
+        height);
     return ret;
 }
 
 
 Image Image::slice(
-    const unsigned x,
-    const unsigned y,
-    const unsigned width,
-    const unsigned height)
+    const int x,
+    const int y,
+    const int width,
+    const int height)
 {
     return slice(Coord<2>(x, y), width, height);
 }
@@ -66,8 +77,13 @@ void Image::paste(
     const Coord<2>& upperLeft,
     const Image& img)
 {
-    copy(Coord<2>(0,0), img, upperLeft, this,
-         img.getDimensions().x(), img.getDimensions().y());
+    ImageHelpers::copy(
+        Coord<2>(0,0),
+        img,
+        upperLeft,
+        this,
+        img.getDimensions().x(),
+        img.getDimensions().y());
 }
 
 
@@ -75,5 +91,6 @@ void Image::paste(const int x, const int y, const Image& img)
 {
     paste(Coord<2>(x, y), img);
 }
+
 
 }

@@ -103,7 +103,7 @@ public:
      * is assumed to be a neighbor of n_1, iff there is a directed
      * edge (n_1, n_2) in the adjacency list of the unstructured grid.
      */
-    AdjacencyPtr getAdjacency(const Region<DIM>& region) const
+    AdjacencyPtr getAdjacency(const Region<DIM>& /* region */) const
     {
         checkTopologyIfAdjacencyIsNeeded(Topology());
         return AdjacencyPtr();
@@ -135,7 +135,7 @@ private:
      * is the opposite of the direction in the original unstructured
      * grid. See UnstructuredTestInitializer for an example.
      */
-    SharedPtr<Adjacency>::Type getReverseAdjacency(const Region<DIM>& region) const
+    SharedPtr<Adjacency>::Type getReverseAdjacency(const Region<DIM>& /* region */) const
     {
         return makeShared<Adjacency>(new RegionBasedAdjacency());
     }

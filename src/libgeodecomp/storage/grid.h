@@ -42,7 +42,7 @@ public:
         const CELL_TYPE& defaultCell = CELL_TYPE(),
         const CELL_TYPE& edgeCell = CELL_TYPE()) :
         dimensions(dim),
-        cellVector(dim.prod(), defaultCell),
+        cellVector(std::size_t(dim.prod()), defaultCell),
         edgeCell(edgeCell)
     {}
 
@@ -78,7 +78,7 @@ public:
     inline void resize(const Coord<DIM>& newDim)
     {
         dimensions = newDim;
-        cellVector.resize(newDim.prod());
+        cellVector.resize(std::size_t(newDim.prod()));
     }
 
     /**

@@ -29,7 +29,10 @@ public:
      * This will typically be implemented by grids with Struct of
      * Arrays (SoA) layout.
      */
-    virtual void saveRegion(std::vector<char> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    virtual void saveRegion(
+        std::vector<char> */* buffer */,
+        const Region<DIM>& /* region */,
+        const Coord<DIM>& /* offset */ = Coord<DIM>()) const
     {
         throw std::logic_error("saveRegion not implemented for char buffers, not an SoA grid?");
     }
@@ -38,7 +41,10 @@ public:
      * This will typically be implemented by grids with Struct of
      * Arrays (SoA) layout.
      */
-    virtual void loadRegion(const std::vector<char>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    virtual void loadRegion(
+        const std::vector<char>& /* buffer */,
+        const Region<DIM>& /* region */,
+        const Coord<DIM>& /* offset */ = Coord<DIM>())
     {
         throw std::logic_error("loadRegion not implemented for char buffers, not an SoA grid?");
     }
@@ -148,7 +154,10 @@ public:
      * (AoS) grids. SoA grids implement the variant that uses char
      * buffers.
      */
-    virtual void saveRegion(std::vector<CELL> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    virtual void saveRegion(
+        std::vector<CELL> * /* buffer */,
+        const Region<DIM>& /* region */,
+        const Coord<DIM>& /* offset */ = Coord<DIM>()) const
     {
         throw std::logic_error("loadRegion not implemented for buffers of type CELL, not an AoS grid?");
     }
@@ -162,7 +171,10 @@ public:
      * (AoS) grids. SoA grids implement the variant that uses char
      * buffers.
      */
-    virtual void loadRegion(const std::vector<CELL>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    virtual void loadRegion(
+        const std::vector<CELL>& /* buffer */,
+        const Region<DIM>& /* region */,
+        const Coord<DIM>& /* offset */ = Coord<DIM>())
     {
         throw std::logic_error("loadRegion not implemented for buffers of type CELL, not an AoS grid?");
     }
@@ -252,7 +264,7 @@ public:
      * Through this function the weights of the edges on unstructured
      * grids can be set. Unavailable on regular grids.
      */
-    virtual void setWeights(std::size_t matrixID, const SparseMatrix& matrix)
+    virtual void setWeights(std::size_t /* matrixID */, const SparseMatrix& /* matrix*/)
     {
         throw std::logic_error("edge weights cannot be set on this grid type");
     }
