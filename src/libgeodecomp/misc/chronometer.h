@@ -18,6 +18,11 @@ namespace ChronometerHelpers {
 template<int ID>
 class EventUtil;
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * This class is being subclassed from by generated event classes (see
  * below).
@@ -41,14 +46,17 @@ public:
 
 protected:
     double *totalTimes;
+    double t;
 
     double elapsed() const
     {
         return ScopedTimer::time() - t;
     }
-
-    double t;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 /**
  * See above.
