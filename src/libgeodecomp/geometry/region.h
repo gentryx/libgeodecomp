@@ -519,6 +519,11 @@ public:
 
 }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * Region stores a set of coordinates. It performs a run-length
  * coding. Instead of storing complete Streak objects, these objects
@@ -1699,6 +1704,10 @@ private:
         }
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace RegionHelpers {
 

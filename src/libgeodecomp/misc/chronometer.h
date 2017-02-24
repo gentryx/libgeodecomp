@@ -231,12 +231,12 @@ public:
         reset();
     }
 
-    inline double operator[](int intervalID) const
+    inline double operator[](std::size_t intervalID) const
     {
         return totalTimes[intervalID];
     }
 
-    inline double& operator[](int intervalID)
+    inline double& operator[](std::size_t intervalID)
     {
         return totalTimes[intervalID];
     }

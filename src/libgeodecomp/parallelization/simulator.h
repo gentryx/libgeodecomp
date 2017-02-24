@@ -11,6 +11,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * A Simulator controls the workflow of the simulation. It also needs
  * to interface with the Initializer (for setting up the initial
@@ -99,6 +104,10 @@ protected:
     SteererVector steerers;
     Coord<DIM> gridDim;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

@@ -2,6 +2,11 @@
 
 using namespace LibGeoDecomp;
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 class CircleCell
 {
 public:
@@ -98,6 +103,10 @@ private:
     }
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 class CircleCellInitializer : public SimpleInitializer<CircleCell>
 {
 public:
@@ -150,7 +159,7 @@ public:
 
 void runSimulation()
 {
-    int outputPeriod = 1;
+    std::size_t outputPeriod = 1;
     CircleCellInitializer *init = new CircleCellInitializer();
     SerialSimulator<CircleCell> sim(init);
 

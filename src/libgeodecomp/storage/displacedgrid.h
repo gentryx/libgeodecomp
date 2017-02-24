@@ -7,6 +7,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * A grid whose origin has been shiftet by a certain offset. If
  * TOPOLOGICALLY_CORRECT is set to true, the coordinates will be
@@ -266,6 +271,10 @@ private:
     Delegate delegate;
     Coord<DIM> origin;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

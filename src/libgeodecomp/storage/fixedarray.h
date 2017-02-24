@@ -7,6 +7,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * This is an alternative array with a fixed maximum size. Good for
  * use within objects which should not contain pointers (and are thus
@@ -183,6 +188,10 @@ private:
     T store[SIZE];
     std::size_t elements;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 template<typename CharT, typename Traits, typename T, int N>
 std::basic_ostream<CharT, Traits>&

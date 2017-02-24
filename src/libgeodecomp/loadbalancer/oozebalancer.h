@@ -9,6 +9,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * The OozeBalancer is based on the (false) assumption that each node
  * is equally fast, that each item (see LoadBalancer) costs about the
@@ -76,6 +81,10 @@ private:
     WeightVec equalize(const LoadVec& loads);
     LoadVec linearCombo(const WeightVec& oldLoads, const LoadVec& newLoads);
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

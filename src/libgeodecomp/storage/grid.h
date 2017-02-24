@@ -16,6 +16,11 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, typename GRID_TYPE>
 class CoordMap;
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * A multi-dimensional regular grid
  */
@@ -298,6 +303,10 @@ private:
     CellVector cellVector;
     CELL_TYPE edgeCell;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 template<typename _CharT, typename _Traits, typename _CellT, typename _TopologyT>
 std::basic_ostream<_CharT, _Traits>&

@@ -12,6 +12,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * Records the time between creation and destruction.
  */
@@ -56,6 +61,10 @@ private:
     double startTime;
     double *totalElapsedTime;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

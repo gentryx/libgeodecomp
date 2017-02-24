@@ -30,7 +30,7 @@ public:
      * Arrays (SoA) layout.
      */
     virtual void saveRegion(
-        std::vector<char> */* buffer */,
+        std::vector<char>* /* buffer */,
         const Region<DIM>& /* region */,
         const Coord<DIM>& /* offset */ = Coord<DIM>()) const
     {
