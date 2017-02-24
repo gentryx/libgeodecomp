@@ -238,7 +238,7 @@ public:
     {}
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    inline StreakIteratorInitSingleOffset operator=(const StreakIteratorInitSingleOffset& other) = default;
+    inline StreakIteratorInitSingleOffset(const StreakIteratorInitSingleOffset& other) = default;
 #endif
 
     template<int STREAK_DIM, typename REGION>
@@ -301,7 +301,7 @@ public:
     {}
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    inline StreakIteratorInitSingleOffset operator=(const StreakIteratorInitSingleOffset& other) = default;
+    inline StreakIteratorInitOffsets(const StreakIteratorInitOffsets& other) = default;
 #endif
 
     template<int STREAK_DIM, typename REGION>
