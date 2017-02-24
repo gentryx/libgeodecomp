@@ -27,7 +27,7 @@ public:
         // This form however isn't compatible with g++ 4.6, hence the
         // macro conditional. Finally, defining NOMINMAX is not an
         // option as user code may depend on min()/max() being macros.
-#ifdef _WIN32
+#ifdef _MSC_BUILD
         return (std::numeric_limits<VALUE>::max)();
 #else
         return std::numeric_limits<VALUE>::max();
@@ -37,7 +37,7 @@ public:
     static inline VALUE getMin()
     {
         // see above.
-#ifdef _WIN32
+#ifdef _MSC_BUILD
         return (std::numeric_limits<VALUE>::min)();
 #else
         return std::numeric_limits<VALUE>::min();

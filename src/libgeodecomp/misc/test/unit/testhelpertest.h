@@ -11,7 +11,7 @@ class TestHelperTest : public CxxTest::TestSuite
 public:
     void setUp()
     {
-#ifdef WIN32
+#ifdef _WIN32
         testFile = std::string(getenv("WINDIR")) + "\\win.ini";
 #else
         testFile = "/etc/hosts";

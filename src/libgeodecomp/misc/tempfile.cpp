@@ -17,7 +17,7 @@ std::string TempFile::serial(const std::string& prefix)
 {
     for (;;) {
         std::stringstream buf;
-#ifdef __WIN32__
+#ifdef _WIN32
         std::string name = getenv("TMP");
         buf << '\\';
 #else
