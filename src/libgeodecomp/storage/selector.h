@@ -129,7 +129,7 @@ public:
         MemoryLocation::Location sourceLocation,
         CELL *target,
         MemoryLocation::Location targetLocation,
-        int num) const
+        std::size_t num) const
     {
         if (sourceLocation != MemoryLocation::HOST) {
             throw std::logic_error("PrimitiveSelector is for test purposes only,"
@@ -150,7 +150,7 @@ public:
         MemoryLocation::Location sourceLocation,
         char *target,
         MemoryLocation::Location targetLocation,
-        int num) const
+        std::size_t num) const
     {
         if (sourceLocation != MemoryLocation::HOST) {
             throw std::logic_error("PrimitiveSelector is for test purposes only,"
@@ -408,7 +408,7 @@ public:
         MemoryLocation::Location sourceLocation,
         CELL *target,
         MemoryLocation::Location targetLocation,
-        int num) const
+        std::size_t num) const
     {
         filter->copyMemberIn(source, sourceLocation, target, targetLocation, num, memberPointer);
     }
@@ -422,7 +422,7 @@ public:
         MemoryLocation::Location sourceLocation,
         char *target,
         MemoryLocation::Location targetLocation,
-        int num) const
+        std::size_t num) const
     {
         filter->copyMemberOut(source, sourceLocation, target, targetLocation, num, memberPointer);
     }

@@ -237,6 +237,10 @@ public:
         offsetIndex(offsetIndex)
     {}
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline StreakIteratorInitSingleOffset operator=(const StreakIteratorInitSingleOffset& other) = default;
+#endif
+
     template<int STREAK_DIM, typename REGION>
     inline std::size_t operator()(
         Streak<STREAK_DIM> *streak,
@@ -295,6 +299,10 @@ public:
     explicit StreakIteratorInitOffsets(const Coord<COORD_DIM> offsets) :
         offsets(offsets)
     {}
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline StreakIteratorInitSingleOffset operator=(const StreakIteratorInitSingleOffset& other) = default;
+#endif
 
     template<int STREAK_DIM, typename REGION>
     inline void operator()(
@@ -1827,11 +1835,11 @@ public:
     inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
     {
         IndexVectorType& indices = region->indices[DIM];
-        (*this)(region, s, 0, indices.size());
+        (*this)(region, s, 0, std::ptrdiff_t(indices.size()));
     }
 
     template<int MY_DIM>
-    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, std::ptrdiff_t start, std::ptrdiff_t end)
     {
         int c = s.origin[DIM];
         IndexVectorType& indices = region->indices[DIM];

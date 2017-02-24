@@ -152,7 +152,7 @@ private:
     std::size_t index(int y) const
     {
         using std::lower_bound;
-        return lower_bound(limits.begin(), limits.end(), y) - limits.begin();
+        return std::size_t(lower_bound(limits.begin(), limits.end(), y) - limits.begin());
     }
 };
 
