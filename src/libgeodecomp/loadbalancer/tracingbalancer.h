@@ -7,6 +7,13 @@
 
 namespace LibGeoDecomp {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// an assignment operator missing -- which is clearly there:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 )
+#endif
+
 /**
  * This class relies on another LoadBalancer to do the job, but is
  * able to pass debug output.
@@ -21,6 +28,11 @@ public:
         stream(stream)
     {}
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline TracingBalancer(const TracingBalancer& other) = default;
+    inline TracingBalancer(TracingBalancer&& other) = default;
+#endif
+
     virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads)
     {
         stream << "TracingBalancer::balance()\n"
@@ -33,6 +45,10 @@ private:
     SharedPtr<LoadBalancer>::Type balancer;
     std::ostream& stream;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

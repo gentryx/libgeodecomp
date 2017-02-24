@@ -246,6 +246,7 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_CPP14
     inline StreakIteratorInitSingleOffset(const StreakIteratorInitSingleOffset& other) = default;
+    inline StreakIteratorInitSingleOffset(StreakIteratorInitSingleOffset&& other) = default;
 #endif
 
     template<int STREAK_DIM, typename REGION>
@@ -297,6 +298,13 @@ private:
     const std::size_t offsetIndex;
 };
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// an assignment operator missing -- which is clearly there:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 )
+#endif
+
 /**
  * internal helper class
  */
@@ -313,6 +321,7 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_CPP14
     inline StreakIteratorInitOffsets(const StreakIteratorInitOffsets& other) = default;
+    inline StreakIteratorInitOffsets(StreakIteratorInitOffsets&& other) = default;
 #endif
 
     template<int STREAK_DIM, typename REGION>
@@ -332,6 +341,10 @@ public:
 private:
     const Coord<COORD_DIM> offsets;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 /**
  * internal helper class

@@ -48,6 +48,11 @@ public:
         maxSteps(maxSteps)
     {}
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline TracingWriter(const TracingWriter& other) = default;
+    inline TracingWriter(TracingWriter&& other) = default;
+#endif
+
     virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
         stepFinished(step, grid.dimensions(), event);

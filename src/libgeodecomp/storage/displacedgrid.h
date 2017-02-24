@@ -244,7 +244,7 @@ protected:
                 MemoryLocation::HOST,
                 target,
                 targetLocation,
-                i->length());
+                std::size_t(i->length()));
             target += selector.sizeOfExternal() * i->length();
         }
     }
@@ -261,7 +261,7 @@ protected:
                 sourceLocation,
                 &(*this)[i->origin],
                 MemoryLocation::HOST,
-                i->length());
+                std::size_t(i->length()));
             source += selector.sizeOfExternal() * i->length();
         }
     }
