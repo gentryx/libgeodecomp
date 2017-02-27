@@ -34,7 +34,7 @@ private:
 class BuggyCellInitializer : public SimpleInitializer<BuggyCell>
 {
 public:
-    explicit BuggyCellInitializer(std::string infile, int steps=10000) :
+    explicit BuggyCellInitializer(std::string infile, unsigned steps=10000) :
         SimpleInitializer<BuggyCell>(readDim(infile), steps),
         filename(infile)
     {}
@@ -69,15 +69,14 @@ public:
 private:
     std::string filename;
 
-    Coord<2> readDim(std::string filename)
+    Coord<2> readDim(std::string infile)
     {
         std::string buf;
         int width;
         int height;
-        std::ifstream input(filename.c_str());
+        std::ifstream input(infile.c_str());
         if (!input.good()) {
-            std::cerr << "failed to open input file\n";
-            exit(1);
+            throw std::runtime_error( "failed to open input file");
         }
         input >> buf >> width >> height;
         return Coord<2>(width, height);
@@ -89,16 +88,16 @@ class BuggyCellToColor
 public:
     Color operator[](char val) const
     {
-        char r = ((val >> 5) & 7) * 255 / 7;
-        char g = ((val >> 2) & 7) * 255 / 7;
-        char b = ((val >> 0) & 3) * 255 / 3;
+        unsigned char r = ((val >> 5) & 7) * 255 / 7;
+        unsigned char g = ((val >> 2) & 7) * 255 / 7;
+        unsigned char b = ((val >> 0) & 3) * 255 / 3;
         return Color(r, g, b);
     }
 };
 
 void runSimulation()
 {
-    int outputFrequency = 1;
+    unsigned outputFrequency = 1;
     BuggyCellInitializer *init = new BuggyCellInitializer("pic9_evil_smiley.ppm");
     SerialSimulator<BuggyCell> sim(init);
 
@@ -118,7 +117,7 @@ void runSimulation()
     sim.run();
 }
 
-int main(int argc, char **argv)
+int main(int /* argc */, char** /* argv */)
 {
     runSimulation();
     return 0;
