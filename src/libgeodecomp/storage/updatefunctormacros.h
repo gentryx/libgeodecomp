@@ -1,6 +1,10 @@
 #ifndef LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROS_H
 #define LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROS_H
 
+#include <libgeodecomp/storage/updatefunctormacrosmsvc.h>
+
+#ifndef _MSC_BUILD
+
 #ifdef LIBGEODECOMP_WITH_THREADS
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1                         \
     if (concurrencySpec.enableOpenMP() &&                               \
@@ -74,6 +78,8 @@
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_5
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_6
+#endif
+
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
