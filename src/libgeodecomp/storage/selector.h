@@ -53,7 +53,7 @@ public:
      * Dummy return value, won't ever be used as the model doesn't
      * support SoA anyway.
      */
-    int operator()(MEMBER CELL:: *memberPointer, APITraits::FalseType)
+    int operator()(MEMBER CELL::* /* memberPointer */, APITraits::FalseType)
     {
         return -1;
     }
@@ -62,7 +62,7 @@ public:
      * Same as above, but for array members.
      */
     template<int ARITY>
-    int operator()(MEMBER (CELL:: *memberPointer)[ARITY], APITraits::FalseType)
+    int operator()(MEMBER (CELL::* /* memberPointer */)[ARITY], APITraits::FalseType)
     {
         return -1;
     }

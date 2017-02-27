@@ -17,6 +17,11 @@ public:
         public APITraits::HasPredefinedMPIDataType<double>
     {};
 
+    inline
+    MySimpleCell() :
+        temp(0)
+    {}
+
     double temp;
 };
 

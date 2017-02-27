@@ -60,8 +60,8 @@ public:
     {
         int sx = viewport.origin.x() / cellDim.x();
         int sy = viewport.origin.y() / cellDim.y();
-        int ex = ceil((double(viewport.origin.x()) + viewport.dimensions.x()) / cellDim.x());
-        int ey = ceil((double(viewport.origin.y()) + viewport.dimensions.y()) / cellDim.y());
+        int ex = int(ceil((double(viewport.origin.x()) + viewport.dimensions.x()) / cellDim.x()));
+        int ey = int(ceil((double(viewport.origin.y()) + viewport.dimensions.y()) / cellDim.y()));
         ex = (std::min)(ex, grid.dimensions().x());
         ey = (std::min)(ey, grid.dimensions().y());
 

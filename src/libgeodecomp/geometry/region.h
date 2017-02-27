@@ -342,10 +342,6 @@ private:
     const Coord<COORD_DIM> offsets;
 };
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 /**
  * internal helper class
  */
@@ -359,6 +355,11 @@ public:
     explicit StreakIteratorInitOffsets(const Coord<COORD_DIM> offsets) :
         offsets(offsets)
     {}
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline StreakIteratorInitOffsets(const StreakIteratorInitOffsets<0, COORD_DIM>& other) = default;
+    inline StreakIteratorInitOffsets(StreakIteratorInitOffsets<0, COORD_DIM>&& other) = default;
+#endif
 
     template<int STREAK_DIM, typename REGION>
     inline void operator()(
@@ -378,6 +379,10 @@ public:
 private:
     const Coord<COORD_DIM> offsets;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 /**
  * internal helper class
@@ -463,11 +468,11 @@ public:
 
     template<int STREAK_DIM, typename REGION>
     inline void operator()(
-        Streak<STREAK_DIM> *streak,
+        Streak<STREAK_DIM>* /* streak */,
         IndexVectorType::const_iterator *iterators,
         const REGION& region,
-        const Coord<STREAK_DIM>& offset,
-        int additionalLength) const
+        const Coord<STREAK_DIM>& /* offset */,
+        int /* additionalLength */) const
     {
         iterators[0] = region.indicesEnd(0);
     }
@@ -1884,7 +1889,7 @@ public:
             // short-cut: no need to insert if index already present
             if (entry->first == c) {
                 nextLevelStart = entry->second;
-                nextLevelEnd = region->indices[DIM - 1].size();
+                nextLevelEnd = int(region->indices[DIM - 1].size());
                 if (i != indices.end()) {
                     nextLevelEnd = i->second;
                 }
@@ -1902,7 +1907,7 @@ public:
         if (i != indices.end()) {
             nextLevelStart = i->second;
         } else {
-            nextLevelStart = region->indices[DIM - 1].size();
+            nextLevelStart = int(region->indices[DIM - 1].size());
         }
 
         nextLevelEnd = nextLevelStart;

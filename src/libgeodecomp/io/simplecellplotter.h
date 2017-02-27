@@ -16,6 +16,12 @@ class PPMWriterTest;
 
 namespace SimpleCellPlotterHelpers {
 
+// do not warn about padding...
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * Converts a cell to color, based on a user-supplied palette and
  * user-selected data field of the cell. Useful of a Writer should
@@ -32,13 +38,15 @@ public:
     {}
 
     void copyStreakInImpl(
-        const Color *source,
+        const Color* /* source */,
         MemoryLocation::Location sourceLocation,
         MEMBER *target,
         MemoryLocation::Location targetLocation,
-        const std::size_t num,
-        const std::size_t stride)
+        const std::size_t /* num */,
+        const std::size_t /* stride */)
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         throw std::logic_error(
             "undefined behavior: can only convert members to colors, not the other way around");
     }
@@ -49,21 +57,24 @@ public:
         Color *target,
         MemoryLocation::Location targetLocation,
         const std::size_t num,
-        const std::size_t stride)
+        const std::size_t /* stride */)
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         for (std::size_t i = 0; i < num; ++i) {
             target[i] = palette[source[i]];
         }
     }
 
     void copyMemberInImpl(
-        const Color *source,
+        const Color* /* source */,
         MemoryLocation::Location sourceLocation,
-        CELL *target,
+        CELL* /* target */,
         MemoryLocation::Location targetLocation,
-        std::size_t num,
-        MEMBER CELL:: *memberPointer)
+        std::size_t /* num */,
+        MEMBER CELL::* /* memberPointer */)
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
 
         throw std::logic_error("undefined behavior: can only convert cells to colors, not the other way around");
     }
@@ -76,6 +87,8 @@ public:
         std::size_t num,
         MEMBER CELL:: *memberPointer)
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         for (std::size_t i = 0; i < num; ++i) {
             target[i] = palette[source[i].*memberPointer];
         }
@@ -83,7 +96,26 @@ public:
 
 private:
     PALETTE palette;
+
+    void checkMemoryLocations(
+        MemoryLocation::Location sourceLocation,
+        MemoryLocation::Location targetLocation)
+    {
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) ||
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+            throw std::logic_error("DefaultFilter can't access CUDA device memory");
+        }
+
+        if ((sourceLocation != MemoryLocation::HOST) ||
+            (targetLocation != MemoryLocation::HOST)) {
+            throw std::invalid_argument("unknown combination of source and target memory locations");
+        }
+    }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
