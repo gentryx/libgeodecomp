@@ -24,9 +24,7 @@
     LIBFLATARRAY_IF_SHORTER(MEMBER, 3, A, B)
 
 #define LIBFLATARRAY_ARRAY_ARITY(MEMBER)                                \
-    LIBFLATARRAY_ELEM(                                                  \
-        LIBFLATARRAY_SIZE(LIBFLATARRAY_DEQUEUE(MEMBER)),                \
-        MEMBER)
+    LIBFLATARRAY_ELEM(2, MEMBER (1) )
 
 #define LIBFLATARRAY_DEFINE_FIELD_OFFSET(r, CELL_TYPE, MEMBER)          \
     namespace detail {                                                  \
@@ -323,7 +321,7 @@
     }
 
 #define LIBFLATARRAY_CASE_DIM_MAX_3D(SIZE_INDEX, UNUSED, SIZE)          \
-    if (max <= SIZE) {                                                  \
+    if (maxDim <= SIZE) {                                               \
         LibFlatArray::soa_accessor<CELL, SIZE, SIZE, SIZE, 0>  accessor( \
             data, 0);                                                   \
         functor(accessor);                                              \
@@ -331,7 +329,7 @@
     }
 
 #define LIBFLATARRAY_CASE_DIM_MAX_2D(SIZE_INDEX, UNUSED, SIZE)          \
-    if (max <= SIZE) {                                                  \
+    if (maxDim <= SIZE) {                                               \
         LibFlatArray::soa_accessor<CELL, SIZE, SIZE, 1, 0>  accessor(   \
             data, 0);                                                   \
         functor(accessor);                                              \
@@ -339,7 +337,7 @@
     }
 
 #define LIBFLATARRAY_CASE_DIM_MAX_1D(SIZE_INDEX, UNUSED, SIZE)          \
-    if (max <= SIZE) {                                                  \
+    if (maxDim <= SIZE) {                                               \
         LibFlatArray::soa_accessor<CELL, SIZE, 1, 1, 0>  accessor(      \
             data, 0);                                                   \
         functor(accessor);                                              \

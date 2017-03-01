@@ -10,6 +10,7 @@
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/soa_grid.hpp>
 #include <libflatarray/macros.hpp>
+#include <libflatarray/preprocessor.hpp>
 
 #include "test.hpp"
 
@@ -121,6 +122,7 @@ LIBFLATARRAY_REGISTER_SOA(CellDefault3DSizes,        ((double)(memberA))((double
 LIBFLATARRAY_REGISTER_SOA(CellCustomSizes,           ((double)(memberA))((double)(memberB))((double)(memberC)))
 LIBFLATARRAY_REGISTER_SOA(CellCustomSizesUniform,    ((double)(memberA))((double)(memberB))((double)(memberC)))
 
+
 class TestFunctor
 {
 public:
@@ -129,7 +131,7 @@ public:
     {}
 
     template<typename CELL, long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& accessor)
+    void operator()(soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& /* accessor */)
     {
         report->push_back(DIM_X);
         report->push_back(DIM_Y);
@@ -721,7 +723,7 @@ ADD_TEST(TestSelectSizesCustomUniform)
     expected.clear();
 }
 
-int main(int argc, char **argv)
+int main(int /* argc*/, char** /* argv */)
 {
     return 0;
 }
