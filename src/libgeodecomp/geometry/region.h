@@ -151,6 +151,13 @@ public:
     }
 };
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// an assignment operator missing -- which is clearly there:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 )
+#endif
+
 /**
  * internal helper class
  */
@@ -165,6 +172,11 @@ public:
         offset(offset)
     {}
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline StreakIteratorInitPlaneOffset(const StreakIteratorInitPlaneOffset& other) = default;
+    inline StreakIteratorInitPlaneOffset(StreakIteratorInitPlaneOffset&& other) = default;
+#endif
+
     template<int STREAK_DIM, typename REGION>
     inline void operator()(
         Streak<STREAK_DIM> *streak,
@@ -173,9 +185,10 @@ public:
         const Coord<STREAK_DIM>& unusedOffsets,
         int unusedAdditionalLength) const
     {
-        iterators[DIM] = region.indicesBegin(DIM) + offset;
+        iterators[DIM] = region.indicesBegin(DIM) + std::ptrdiff_t(offset);
         for (int d = DIM - 1; d >= 0; --d) {
-            iterators[d] = region.indicesBegin(d) + iterators[d + 1]->second;
+            std::size_t index = std::size_t(d);
+            iterators[index] = region.indicesBegin(index) + iterators[index + 1]->second;
         }
 
         ConstructStreakFromIterators<DIM>()(streak, iterators, unusedOffsets, unusedAdditionalLength);
@@ -198,6 +211,11 @@ public:
     explicit StreakIteratorInitSingleOffset(const std::size_t offsetIndex) :
         offsetIndex(offsetIndex)
     {}
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline StreakIteratorInitSingleOffset(const StreakIteratorInitSingleOffset& other) = default;
+    inline StreakIteratorInitSingleOffset(StreakIteratorInitSingleOffset&& other) = default;
+#endif
 
     template<int STREAK_DIM, typename REGION>
     inline std::size_t operator()(
@@ -222,13 +240,6 @@ public:
 private:
     const std::size_t offsetIndex;
 };
-
-// Hardwire this warning to off as MSVC would otherwise complain about
-// an assignment operator missing -- which is clearly there:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4626 )
-#endif
 
 /**
  * internal helper class

@@ -173,7 +173,7 @@ public:
             const std::size_t stride)
         {
             for (std::size_t i = 0; i < num; ++i) {
-                target[i] = Color(source[i], 47, 11);
+                target[i] = Color(source[i], 47.0, 11.0);
             }
         }
 
@@ -199,7 +199,7 @@ public:
             double MyDummyCell:: *memberPointer)
         {
             for (std::size_t i = 0; i < num; ++i) {
-                target[i] = Color(source[i].*memberPointer, 47, 11);
+                target[i] = Color(source[i].*memberPointer, 47.0, 11.0);
             }
         }
     };

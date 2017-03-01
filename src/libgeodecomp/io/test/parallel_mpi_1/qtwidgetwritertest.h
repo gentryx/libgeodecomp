@@ -65,7 +65,7 @@ class MyQtCellColorConverter
 public:
     Color operator()(const MyQtTestCell& cell)
     {
-        return Color(255, cell.temp * 255, 0);
+        return Color(255.0, cell.temp * 255, 0.0);
     }
 };
 

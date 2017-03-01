@@ -2,7 +2,9 @@
 #define LIBGEODECOMP_STORAGE_UPDATEFUNCTORMACROSMSVC_H
 
 // MSVC doesn't have a _Pragma(), but requires __pragma(), hence here
-// is basically a copy of updatefunctormacros.h:
+// is basically a copy of updatefunctormacros.h. Oh, but of course we
+// have to shun all std::size_t loop counters as MSVC wouldn't accept
+// it as loop counter for OpenMP.
 #ifdef _MSC_BUILD
 
 #ifdef LIBGEODECOMP_WITH_THREADS
@@ -10,12 +12,12 @@
     if (concurrencySpec.enableOpenMP() &&                               \
         !modelThreadingSpec.hasOpenMP()) {                              \
         if (concurrencySpec.preferStaticScheduling()) {                 \
-            __pragma("omp parallel for schedule(static)")                \
-            for (std::size_t c = 0; c < region.numPlanes(); ++c) {      \
+            __pragma(omp parallel for schedule(static))                 \
+            for (int c = 0; c < int(region.numPlanes()); ++c) {         \
                 typename Region<DIM>::StreakIterator e =                \
-                    region.planeStreakIterator(c + 1);                  \
+                    region.planeStreakIterator(std::size_t(c + 1));     \
                 typedef typename Region<DIM>::StreakIterator Iter;      \
-                for (Iter i = region.planeStreakIterator(c + 0);        \
+                for (Iter i = region.planeStreakIterator(std::size_t(c + 0)); \
                      i != e;                                            \
                      ++i) {                                             \
                     LGD_UPDATE_FUNCTOR_BODY;                            \
@@ -25,12 +27,12 @@
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2                         \
         } else {                                                        \
             if (!concurrencySpec.preferFineGrainedParallelism()) {      \
-                __pragma("omp parallel for schedule(dynamic)")           \
-                for (std::size_t c = 0; c < region.numPlanes(); ++c) {  \
+                __pragma(omp parallel for schedule(dynamic))            \
+                for (int c = 0; c < int(region.numPlanes()); ++c) {     \
                     typename Region<DIM>::StreakIterator e =            \
-                        region.planeStreakIterator(c + 1);              \
+                        region.planeStreakIterator(std::size_t(c + 1)); \
                     typedef typename Region<DIM>::StreakIterator Iter;  \
-                    for (Iter i = region.planeStreakIterator(c + 0);    \
+                    for (Iter i = region.planeStreakIterator(std::size_t(c + 0)); \
                          i != e;                                        \
                          ++i) {                                         \
                         LGD_UPDATE_FUNCTOR_BODY;                        \
@@ -56,11 +58,11 @@
                     }                                                   \
                     streaks.push_back(s);                               \
                 }                                                       \
-                __pragma("omp parallel for schedule(dynamic)")           \
-                    for (std::size_t j = 0; j < streaks.size(); ++j) {  \
-                        Streak<DIM> *i = &streaks[j];                   \
-                        LGD_UPDATE_FUNCTOR_BODY;                        \
-                    }                                                   \
+                __pragma(omp parallel for schedule(dynamic))            \
+                for (int j = 0; j < int(streaks.size()); ++j) {         \
+                    Streak<DIM> *i = &streaks[std::size_t(j)];          \
+                    LGD_UPDATE_FUNCTOR_BODY;                            \
+                }                                                       \
             }                                                           \
     /**/
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4                         \
