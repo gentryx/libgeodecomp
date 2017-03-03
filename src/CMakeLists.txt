@@ -174,11 +174,7 @@ if(WITH_VISIT)
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${VisIt_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 endif()
 
-if(WIN32)
-  set(LOCAL_LIBGEODECOMP_LINK_LIB local_libgeodecomp_lib)
-else(WIN32)
-  set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
-endif(WIN32)
+set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 
 include_directories(SYSTEM ${INSTALL_INCLUDE_DIRECTORIES})
 include_directories(${BUILD_INCLUDE_DIRECTORIES})
@@ -247,10 +243,6 @@ foreach(dir ${AUXDIRS})
 endforeach(dir)
 
 #============= 5. ADD THE MAIN LIBRARY ===============================
-if(WIN32)
-  add_library(local_libgeodecomp_lib STATIC IMPORTED)
-  set_property(TARGET local_libgeodecomp_lib PROPERTY IMPORTED_LOCATION ${LIBGEODECOMP_BINARY_DIR}/libgeodecomp/geodecomp.lib)
-endif(WIN32)
 
 # link all sources
 set(SOURCES "")
