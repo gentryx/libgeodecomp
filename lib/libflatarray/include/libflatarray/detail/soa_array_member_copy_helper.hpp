@@ -1,5 +1,5 @@
 /**
- * Copyright 2015-2016 Andreas Schäfer
+ * Copyright 2015-2017 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -8,7 +8,18 @@
 #ifndef FLAT_ARRAY_DETAIL_SOA_ARRAY_MEMBER_COPY_HELPER_HPP
 #define FLAT_ARRAY_DETAIL_SOA_ARRAY_MEMBER_COPY_HELPER_HPP
 
+// disable certain warnings from system headers when compiling with
+// Microsoft Visual Studio:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <algorithm>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibFlatArray {
 
@@ -39,7 +50,18 @@ public:
                 copy_array_in<INDEX - 1, DUMMY>()(source, data, count, offset, stride);
 
                 for (std::size_t i = 0; i < count; ++i) {
+// Overflow is fine on 32-bit systems as these won't instantiate such
+// large arrays anyway:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4307 )
+#endif
+
                     data[SIZE * (INDEX - 1) + i] = source[stride * (INDEX - 1) + offset + i];
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
                 }
             }
         };
@@ -52,11 +74,11 @@ public:
             __device__
             inline
             void operator()(
-                const MEMBER *source,
-                MEMBER *data,
-                const std::size_t count,
-                const std::size_t offset,
-                const std::size_t stride)
+                const MEMBER* /* source */,
+                MEMBER* /* data */,
+                const std::size_t /* count */,
+                const std::size_t /* offset */,
+                const std::size_t /* stride */)
             {}
         };
 
@@ -77,7 +99,18 @@ public:
                 copy_array_out<INDEX - 1, DUMMY>()(target, data, count, offset, stride);
 
                 for (std::size_t i = 0; i < count; ++i) {
+// Overflow is fine on 32-bit systems as these won't instantiate such
+// large arrays anyway:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4307 )
+#endif
+
                     target[stride * (INDEX - 1) + offset + i] = data[SIZE * (INDEX - 1) + i];
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
                 }
             }
         };
@@ -90,11 +123,11 @@ public:
             __device__
             inline
             void operator()(
-                MEMBER *target,
-                const MEMBER *data,
-                const std::size_t count,
-                const std::size_t offset,
-                const std::size_t stride)
+                MEMBER* /* target */,
+                const MEMBER* /* data */,
+                const std::size_t /* count */,
+                const std::size_t /* offset */,
+                const std::size_t /* stride */)
             {}
         };
     };
@@ -170,7 +203,18 @@ public:
                         void operator()(const CELL& cell, MEMBER *data)
                         {
                             copy_in<INDEX - 1>()(cell, data);
+// Overflow is fine on 32-bit systems as these won't instantiate such
+// large arrays anyway:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4307 )
+#endif
+
                             data[SIZE * (INDEX - 1)] = (cell.*MEMBER_POINTER)[INDEX - 1];
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
                         }
                     };
 
@@ -181,7 +225,7 @@ public:
                         __host__
                         __device__
                         inline
-                        void operator()(const CELL& cell, MEMBER *data)
+                        void operator()(const CELL& /* cell */, MEMBER* /* data */)
                         {}
                     };
 
@@ -206,7 +250,7 @@ public:
                         __host__
                         __device__
                         inline
-                        void operator()(CELL& cell, const MEMBER *data)
+                        void operator()(CELL& /* cell */, const MEMBER* /* data */)
                         {}
                     };
                 };

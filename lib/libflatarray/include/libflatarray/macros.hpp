@@ -45,6 +45,9 @@
     template<typename CELL_TYPE, long R>                                \
     friend class LibFlatArray::detail::flat_array::offset;
 
+
+
+#ifdef _MSC_BUILD
 /**
  * This macros registers a type with LibFlatArray so that it can be
  * used with soa_grid, soa_array and friends. It will instantiate all
@@ -52,7 +55,27 @@
  * adds utilities so that user code can also discover properties of
  * the SoA layout.
  */
-#define LIBFLATARRAY_REGISTER_SOA(CELL_TYPE, CELL_MEMBERS)              \
+#  define LIBFLATARRAY_REGISTER_SOA(CELL_TYPE, CELL_MEMBERS)    \
+    __pragma( warning( push ) )                                 \
+    __pragma( warning( disable : 4307 4514 ) )                  \
+    LIBFLATARRAY_REGISTER_SOA_MAIN(CELL_TYPE, CELL_MEMBERS)     \
+    __pragma( warning( pop ) )                                  \
+
+#else
+
+/**
+ * This macros registers a type with LibFlatArray so that it can be
+ * used with soa_grid, soa_array and friends. It will instantiate all
+ * templates required for the "Struct of Arrays" (SoA) storage and
+ * adds utilities so that user code can also discover properties of
+ * the SoA layout.
+ */
+#  define LIBFLATARRAY_REGISTER_SOA(CELL_TYPE, CELL_MEMBERS)    \
+    LIBFLATARRAY_REGISTER_SOA_MAIN(CELL_TYPE, CELL_MEMBERS)     \
+
+#endif
+
+#define LIBFLATARRAY_REGISTER_SOA_MAIN(CELL_TYPE, CELL_MEMBERS)         \
     namespace LibFlatArray {                                            \
                                                                         \
     LIBFLATARRAY_FOR_EACH(                                              \
@@ -97,6 +120,17 @@
         long gen_index(const long x, const long y, const long z)        \
         {                                                               \
             return z * DIM_X * DIM_Y + y * DIM_X + x;                   \
+        }                                                               \
+                                                                        \
+        inline                                                          \
+        __host__ __device__                                             \
+        static                                                          \
+        long gen_index(const std::size_t x, const std::size_t y, const std::size_t z) \
+        {                                                               \
+            return                                                      \
+                static_cast<long>(z) * DIM_X * DIM_Y +                  \
+                static_cast<long>(y) * DIM_X +                          \
+                static_cast<long>(x);                                   \
         }                                                               \
                                                                         \
         inline                                                          \
@@ -350,6 +384,17 @@
             return z * DIM_X * DIM_Y + y * DIM_X + x;                   \
         }                                                               \
                                                                         \
+        inline                                                          \
+        __host__ __device__                                             \
+        static                                                          \
+        long gen_index(const std::size_t x, const std::size_t y, const std::size_t z) \
+        {                                                               \
+            return                                                      \
+                static_cast<long>(z) * DIM_X * DIM_Y +                  \
+                static_cast<long>(y) * DIM_X +                          \
+                static_cast<long>(x);                                   \
+        }                                                               \
+                                                                        \
         __host__ __device__                                             \
         const_soa_accessor(const char *my_data, long my_index) :        \
             my_data(my_data),                                           \
@@ -483,6 +528,17 @@
         long gen_index(const long x, const long y, const long z)        \
         {                                                               \
             return z * DIM_X * DIM_Y + y * DIM_X + x;                   \
+        }                                                               \
+                                                                        \
+        inline                                                          \
+        __host__ __device__                                             \
+        static                                                          \
+        long gen_index(const std::size_t x, const std::size_t y, const std::size_t z) \
+        {                                                               \
+            return                                                      \
+                static_cast<long>(z) * DIM_X * DIM_Y +                  \
+                static_cast<long>(y) * DIM_X +                          \
+                static_cast<long>(x);                                   \
         }                                                               \
                                                                         \
         inline                                                          \
@@ -723,6 +779,17 @@
         long gen_index(const long x, const long y, const long z)        \
         {                                                               \
             return z * DIM_X * DIM_Y + y * DIM_X + x;                   \
+        }                                                               \
+                                                                        \
+        inline                                                          \
+        __host__ __device__                                             \
+        static                                                          \
+        long gen_index(const std::size_t x, const std::size_t y, const std::size_t z) \
+        {                                                               \
+            return                                                      \
+                static_cast<long>(z) * DIM_X * DIM_Y +                  \
+                static_cast<long>(y) * DIM_X +                          \
+                static_cast<long>(x);                                   \
         }                                                               \
                                                                         \
         inline                                                          \

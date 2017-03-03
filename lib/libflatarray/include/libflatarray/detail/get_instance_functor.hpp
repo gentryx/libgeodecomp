@@ -37,6 +37,19 @@ public:
         count(count)
     {}
 
+    get_instance_functor(
+        CELL *target,
+        std::size_t x,
+        std::size_t y,
+        std::size_t z,
+        std::size_t count) :
+        target(target),
+        x(x),
+        y(y),
+        z(z),
+        count(count)
+    {}
+
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& accessor) const
     {
@@ -44,7 +57,7 @@ public:
         accessor.index() = accessor_type::gen_index(x, y, z);
         CELL *cursor = target;
 
-        for (long i = 0; i < count; ++i) {
+        for (std::size_t i = 0; i < count; ++i) {
             accessor >> *cursor;
             ++cursor;
             ++accessor.index();
@@ -53,10 +66,10 @@ public:
 
 private:
     CELL *target;
-    long x;
-    long y;
-    long z;
-    long count;
+    std::size_t x;
+    std::size_t y;
+    std::size_t z;
+    std::size_t count;
 };
 
 #ifdef LIBFLATARRAY_WITH_CUDA
@@ -97,8 +110,20 @@ public:
         y(y),
         z(z),
         count(count)
-    {
-    }
+    {}
+
+    get_instance_functor(
+        CELL *target,
+        std::size_t x,
+        std::size_t y,
+        std::size_t z,
+        std::size_t count) :
+        target(target),
+        x(x),
+        y(y),
+        z(z),
+        count(count)
+    {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& accessor) const

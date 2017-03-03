@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2016 Andreas Schäfer
+ * Copyright 2014-2017 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -11,9 +11,27 @@
 #include <libflatarray/aggregated_member_size.hpp>
 #include <libflatarray/detail/macros.hpp>
 #include <libflatarray/soa_accessor.hpp>
+
+// disable certain warnings from system headers when compiling with
+// Microsoft Visual Studio:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <stdexcept>
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 namespace LibFlatArray {
+
+// padding is fine:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
 
 /**
  * soa_array is a container with "Struct of Arrays"-style memory
@@ -119,9 +137,23 @@ public:
 
     inline
     __host__ __device__
+    soa_accessor<value_type, SIZE, 1, 1, 0> at(const std::size_t index)
+    {
+        return (*this)[static_cast<std::ptrdiff_t>(index)];
+    }
+
+    inline
+    __host__ __device__
     const_soa_accessor<value_type, SIZE, 1, 1, 0> at(const int index) const
     {
         return (*this)[index];
+    }
+
+    inline
+    __host__ __device__
+    const_soa_accessor<value_type, SIZE, 1, 1, 0> at(const std::size_t index) const
+    {
+        return (*this)[static_cast<std::ptrdiff_t>(index)];
     }
 
     inline
@@ -133,7 +165,7 @@ public:
             throw std::out_of_range("capacity exceeded");
         }
 #endif
-        (*this)[elements] = cell;
+        (*this)[static_cast<std::ptrdiff_t>(elements)] = cell;
         ++elements;
 
         return *this;
@@ -158,7 +190,7 @@ public:
             throw std::out_of_range("insufficient capacity for assignment (other soa_array too large)");
         }
 
-        at(offset).load(accessor.data(), num, accessor.index(), OTHER_SIZE);
+        at(offset).load(accessor.data(), num, std::size_t(accessor.index()), std::size_t(OTHER_SIZE));
         elements = new_elements;
     }
 
@@ -260,6 +292,11 @@ private:
         elements = other.size();
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 
 template<typename value_type, int size>
 void swap(soa_array<value_type, size>& a, soa_array<value_type, size>& b)

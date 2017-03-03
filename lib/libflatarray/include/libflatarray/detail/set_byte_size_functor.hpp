@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Andreas Schäfer
+ * Copyright 2014-2017 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -36,9 +36,22 @@ public:
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(const soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& accessor) const
+    void operator()(const soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& /* accessor */) const
     {
+        // Overflow is fine here (it's actually to be expected for
+        // 32-bit builds) as such large grids can't be instantiated at
+        // runtime anyway;
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4307 )
+#endif
+
         *byte_size = aggregated_member_size<CELL>::VALUE * DIM_X * DIM_Y * DIM_Z;
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
         *extent_x = DIM_X;
         *extent_y = DIM_Y;
         *extent_z = DIM_Z;

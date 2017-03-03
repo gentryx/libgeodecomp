@@ -1,23 +1,42 @@
 /**
- * Copyright 2014 Andreas Schäfer
+ * Copyright 2014-2017 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#include <iostream>
-#include <list>
 #include <libflatarray/flat_array.hpp>
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
 #include <libflatarray/testbed/evaluate.hpp>
 
+// globally disable some warnings with MSVC, that are issued not for a
+// specific header, but rather for the interaction of system headers
+// and LibFlatArray source. Also disable overly eager sign conversion
+// and overflow warnings:
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4244 4305 4307 4365 4456 4514 4710 )
+#endif
+
+// disable certain warnings from system headers when compiling with
+// Microsoft Visual Studio:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <iostream>
+#include <list>
 #ifdef __SSE__
 #include <xmmintrin.h>
 #endif
 
 #ifdef __AVX__
 #include <immintrin.h>
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 #define WEIGHT_S 0.11
@@ -343,6 +362,12 @@ public:
                          accessor1.index() < indexEnd;
                          accessor1 += 1, accessor2 += 1) {
 
+// Don't warn about comma in array subscript because we're using it to
+// bind template parameters -- which is fine.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4709 )
+#endif
                         accessor2.temp() =
                             accessor1[coord< 0,  0, -1>()].temp() * WEIGHT_S +
                             accessor1[coord< 0, -1,  0>()].temp() * WEIGHT_T +
@@ -351,6 +376,10 @@ public:
                             accessor1[coord< 1,  0,  0>()].temp() * WEIGHT_E +
                             accessor1[coord< 0,  1,  0>()].temp() * WEIGHT_B +
                             accessor1[coord< 0,  0,  1>()].temp() * WEIGHT_N;
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
                     }
                 }
             }
@@ -372,16 +401,22 @@ public:
         long dim_x = dim[0];
         long dim_y = dim[1];
         long dim_z = dim[2];
-        int maxT = 200000000 / dim_x / dim_y / dim_z;
+        int maxT = static_cast<int>(200000000 / dim_x / dim_y / dim_z);
         using std::max;
         maxT = max(16, maxT);
 
-        soa_grid<JacobiCell> gridOld(dim_x, dim_y, dim_z);
-        soa_grid<JacobiCell> gridNew(dim_x, dim_y, dim_z);
+        soa_grid<JacobiCell> gridOld(
+            static_cast<std::size_t>(dim_x),
+            static_cast<std::size_t>(dim_y),
+            static_cast<std::size_t>(dim_z));
+        soa_grid<JacobiCell> gridNew(
+            static_cast<std::size_t>(dim_x),
+            static_cast<std::size_t>(dim_y),
+            static_cast<std::size_t>(dim_z));
 
-        for (long z = 0; z < dim_z; ++z) {
-            for (long y = 0; y < dim_y; ++y) {
-                for (long x = 0; x < dim_x; ++x) {
+        for (std::size_t z = 0; z < std::size_t(dim_z); ++z) {
+            for (std::size_t y = 0; y < std::size_t(dim_y); ++y) {
+                for (std::size_t x = 0; x < std::size_t(dim_x); ++x) {
                     gridOld.set(x, y, z, JacobiCell(x + y + z));
                     gridNew.set(x, y, z, JacobiCell(x + y + z));
                 }
@@ -390,7 +425,11 @@ public:
 
         double tStart = time();
 
-        UpdateFunctor functor(dim_x, dim_y, dim_z);
+        UpdateFunctor functor(
+            static_cast<long>(dim_x),
+            static_cast<long>(dim_y),
+            static_cast<long>(dim_z));
+
         for (int t = 0; t < maxT; ++t) {
             gridOld.callback(&gridNew, functor);
             using std::swap;
@@ -460,6 +499,12 @@ public:
                     accessor1.index() = indexStart;
                     accessor2.index() = indexStart;
 
+// Don't warn about comma in array subscript because we're using it to
+// bind template parameters -- which is fine.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4709 )
+#endif
                     accessor2.temp() =
                         accessor1[coord< 0,  0, -1>()].temp() * WEIGHT_S +
                         accessor1[coord< 0, -1,  0>()].temp() * WEIGHT_T +
@@ -468,6 +513,10 @@ public:
                         accessor1[coord< 1,  0,  0>()].temp() * WEIGHT_E +
                         accessor1[coord< 0,  1,  0>()].temp() * WEIGHT_B +
                         accessor1[coord< 0,  0,  1>()].temp() * WEIGHT_N;
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 
                     accessor1.index() += 1;
                     accessor2.index() += 1;
@@ -669,8 +718,8 @@ public:
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) firstprivate(accessorOld, accessorNew)
 #endif
-            for (std::size_t z = 1; z < (dim_z - 1); ++z) {
-                for (std::size_t y = 1; y < (dim_y - 1); ++y) {
+            for (int z = 1; z < (dim_z - 1); ++z) {
+                for (long y = 1; y < (dim_y - 1); ++y) {
                     std::size_t x = 1;
                     std::size_t end_x = dim_x - 1;
 
@@ -680,8 +729,8 @@ public:
                         x,
                         end_x,
                         update_line,
-                        y,
-                        z,
+                        static_cast<std::size_t>(y),
+                        static_cast<std::size_t>(z),
                         accessor_old,
                         accessor_new);
                 }
@@ -708,6 +757,12 @@ public:
             SHORT_VEC factorB = WEIGHT_B;
             SHORT_VEC factorN = WEIGHT_N;
 
+// Don't warn about comma in array subscript because we're using it to
+// bind template parameters -- which is fine.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4709 )
+#endif
             for (; x < end_x; x += SHORT_VEC::ARITY) {
                 using LibFlatArray::coord;
                 buf =  SHORT_VEC(&accessor_old[coord< 0,  0, -1>()].temp()) * factorS;
@@ -723,12 +778,15 @@ public:
                 accessor_old += SHORT_VEC::ARITY;
             }
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
         }
 
     private:
-        std::size_t dim_x;
-        std::size_t dim_y;
-        std::size_t dim_z;
+        long dim_x;
+        long dim_y;
+        long dim_z;
     };
 
     std::string species()
@@ -759,7 +817,11 @@ public:
 
         double tStart = time();
 
-        UpdateFunctor functor(dim_x, dim_y, dim_z);
+        UpdateFunctor functor(
+            static_cast<long>(dim_x),
+            static_cast<long>(dim_y),
+            static_cast<long>(dim_z));
+
         for (int t = 0; t < maxT; ++t) {
             gridOld.callback(&gridNew, functor);
             using std::swap;
@@ -2285,7 +2347,7 @@ public:
     }
 
     template<typename Float, typename ACCESSOR>
-    void update(long& unused_counter, long end, ACCESSOR& i)
+    void update(long& /* unused_counter */, long end, ACCESSOR& i)
     {
         Float sum = 0.0f;
 
@@ -2304,8 +2366,8 @@ public:
         }
         float foo[Float::ARITY];
         foo << sum;
-        for (std::size_t i = 0; i < Float::ARITY; ++i) {
-            *counter += foo[i];
+        for (std::size_t j = 0; j < Float::ARITY; ++j) {
+            *counter += int(foo[j]);
         }
     }
 
