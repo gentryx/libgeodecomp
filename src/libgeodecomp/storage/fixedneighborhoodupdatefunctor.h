@@ -161,8 +161,14 @@ public:
             originNew[i] = normalizedOriginNew[i];
         }
 
-        long indexOld = hoodOld.gen_index(originOld.x(), originOld.y(), originOld.z());
-        long indexNew = hoodNew.gen_index(originNew.x(), originNew.y(), originNew.z());
+        long indexOld = hoodOld.gen_index(
+            static_cast<long>(originOld.x()),
+            static_cast<long>(originOld.y()),
+            static_cast<long>(originOld.z()));
+        long indexNew = hoodNew.gen_index(
+            static_cast<long>(originNew.x()),
+            static_cast<long>(originNew.y()),
+            static_cast<long>(originNew.z()));
 
         hoodOld.index() = indexOld;
         hoodNew.index() = indexNew;

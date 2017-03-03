@@ -9,13 +9,25 @@
 #ifndef FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_DOUBLE_1_HPP
 #define FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_DOUBLE_1_HPP
 
+// disable certain warnings from system headers when compiling with
+// Microsoft Visual Studio:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <cmath>
-#include <libflatarray/config.h>
-#include <libflatarray/short_vec_base.hpp>
 
 #ifdef LIBFLATARRAY_WITH_CPP14
 #include <initializer_list>
 #endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
+#include <libflatarray/config.h>
+#include <libflatarray/short_vec_base.hpp>
 
 namespace LibFlatArray {
 
@@ -26,6 +38,13 @@ class short_vec;
 // disabling this warning as implicit type conversion is exactly our goal here:
 #pragma warning push
 #pragma warning (disable: 2304)
+#endif
+
+// Don't warn about these functions being stripped from an executable
+// as they're not being used, that's actually expected behavior.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
 #endif
 
 template<>
@@ -243,5 +262,9 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 }
 
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #endif

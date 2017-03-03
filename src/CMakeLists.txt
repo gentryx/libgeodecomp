@@ -276,7 +276,7 @@ if(CMAKE_VERSION VERSION_GREATER 2.8.11)
 endif()
 
 # link 3rd party libraries to main lib and add them to pkg-config file down below
-set(LIBGEODECOMP_LINK_LIBRARIES ${ALL_BOOST_LIBS})
+set(LIBGEODECOMP_LINK_LIBRARIES ${ALL_BOOST_LIBS} ${libflatarray_LIBS})
 
 if(WITH_HPX)
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")

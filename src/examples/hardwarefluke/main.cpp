@@ -20,11 +20,11 @@ public:
     {}
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighbors, unsigned nanoStep)
+    void update(const COORD_MAP& neighbors, unsigned /* nanoStep */)
     {
         int buf = (neighbors[Coord<2>(0, -1)].val + neighbors[Coord<2>(-1, 0)].val +
-                    neighbors[Coord<2>(1,  0)].val + neighbors[Coord<2>( 0, 1)].val);
-        val = (buf >> 2) + 1;
+                   neighbors[Coord<2>(1,  0)].val + neighbors[Coord<2>( 0, 1)].val);
+        val = char((buf >> 2) + 1);
     }
 
 private:
@@ -34,7 +34,7 @@ private:
 class BuggyCellInitializer : public SimpleInitializer<BuggyCell>
 {
 public:
-    explicit BuggyCellInitializer(std::string infile, unsigned steps=10000) :
+    explicit BuggyCellInitializer(std::string infile, unsigned steps = 10000) :
         SimpleInitializer<BuggyCell>(readDim(infile), steps),
         filename(infile)
     {}
@@ -88,9 +88,9 @@ class BuggyCellToColor
 public:
     Color operator[](char val) const
     {
-        unsigned char r = ((val >> 5) & 7) * 255 / 7;
-        unsigned char g = ((val >> 2) & 7) * 255 / 7;
-        unsigned char b = ((val >> 0) & 3) * 255 / 3;
+        int r = ((val >> 5) & 7) * 255 / 7;
+        int g = ((val >> 2) & 7) * 255 / 7;
+        int b = ((val >> 0) & 3) * 255 / 3;
         return Color(r, g, b);
     }
 };

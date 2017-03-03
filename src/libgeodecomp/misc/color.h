@@ -28,21 +28,40 @@ class Color
 
     unsigned rgb;
 
-    inline Color() { *this = Color(0, 0, 0); }
+    inline Color() :
+        rgb(255 << 24)
+    {}
 
     inline Color(
-        const unsigned char& r,
-        const unsigned char& g,
-        const unsigned char& b)
-    {
-        rgb = 255;
-        rgb <<= 8;
-        rgb += r;
-        rgb <<= 8;
-        rgb += g;
-        rgb <<= 8;
-        rgb += b;
-    }
+        const unsigned char r,
+        const unsigned char g,
+        const unsigned char b) :
+        rgb((255 << 24) + (r << 16) + (g << 8) + b)
+    {}
+
+    inline Color(
+        const char r,
+        const char g,
+        const char b) :
+        rgb((255 << 24) +
+            (static_cast<unsigned char>(r) << 16) +
+            (static_cast<unsigned char>(g) << 8) +
+            static_cast<unsigned char>(b))
+    {}
+
+    inline Color(
+        const int r,
+        const int g,
+        const int b) :
+        rgb((255 << 24) + (r << 16) + (g << 8) + b)
+    {}
+
+    inline Color(
+        const double r,
+        const double g,
+        const double b) :
+        rgb((255 << 24) + (int(r) << 16) + (int(g) << 8) + int(b))
+    {}
 
     unsigned char red() const
     {

@@ -14,7 +14,7 @@ class TestCellPalette
 public:
     Color operator[](const double value) const
     {
-        return Color(value, 47, 11);
+        return Color(value, 47.0, 11.0);
     }
 };
 

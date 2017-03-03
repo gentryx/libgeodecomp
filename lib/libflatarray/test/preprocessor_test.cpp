@@ -1,13 +1,32 @@
 /**
- * Copyright 2016 Andreas Schäfer
+ * Copyright 2016-2017 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#include <iostream>
 #include <libflatarray/preprocessor.hpp>
+
+// globally disable some warnings with MSVC, that are issued not for a
+// specific header, but rather for the interaction of system headers
+// and LibFlatArray source:
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
+
+// Don't warn about these functions being stripped from an executable
+// as they're not being used, that's actually expected behavior.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <iostream>
 #include <vector>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #include "test.hpp"
 
@@ -19,6 +38,13 @@
 #define LIST_E LIBFLATARRAY_DEQUEUE(LIST_C)
 
 #define LAMBDA(INDEX, STANDARD_ARG, ITERATOR) vec[ITERATOR] = (INDEX + STANDARD_ARG + ITERATOR);
+
+// Don't warn about the conditional expressions being constant, that's
+// intentional here:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4127 4353 )
+#endif
 
 ADD_TEST(TestElem)
 {
@@ -52,13 +78,13 @@ ADD_TEST(TestForEach)
 
 ADD_TEST(TestDequeue)
 {
-    BOOST_TEST(LIBFLATARRAY_SIZE(LIST_D) == 4);
-    BOOST_TEST(LIBFLATARRAY_ELEM(0, LIST_D) == 20);
-    BOOST_TEST(LIBFLATARRAY_ELEM(1, LIST_D) == 30);
-    BOOST_TEST(LIBFLATARRAY_ELEM(2, LIST_D) == 40);
-    BOOST_TEST(LIBFLATARRAY_ELEM(3, LIST_D) == 50);
+    BOOST_TEST_EQ(LIBFLATARRAY_SIZE(LIST_D),     4);
+    BOOST_TEST_EQ(LIBFLATARRAY_ELEM(0, LIST_D), 20);
+    BOOST_TEST_EQ(LIBFLATARRAY_ELEM(1, LIST_D), 30);
+    BOOST_TEST_EQ(LIBFLATARRAY_ELEM(2, LIST_D), 40);
+    BOOST_TEST_EQ(LIBFLATARRAY_ELEM(3, LIST_D), 50);
 
-    BOOST_TEST(LIBFLATARRAY_SIZE(LIST_E) == 0);
+    BOOST_TEST_EQ(LIBFLATARRAY_SIZE(LIST_E),     0);
 }
 
 ADD_TEST(TestIfShorter)
@@ -110,7 +136,11 @@ ADD_TEST(TestIfShorter)
     BOOST_TEST(c4);
 }
 
-int main(int argc, char **argv)
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
+int main(int /* argc */, char** /* argv */)
 {
     return 0;
 }

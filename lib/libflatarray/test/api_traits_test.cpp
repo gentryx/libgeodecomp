@@ -1,15 +1,35 @@
 /**
- * Copyright 2014-2016 Andreas Schäfer
+ * Copyright 2014-2017 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
+// globally disable some warnings with MSVC, that are issued not for a
+// specific header, but rather for the interaction of system headers
+// and LibFlatArray source:
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
+
+// disable certain warnings from system headers when compiling with
+// Microsoft Visual Studio:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <iostream>
 #include <vector>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/soa_grid.hpp>
 #include <libflatarray/macros.hpp>
+#include <libflatarray/preprocessor.hpp>
 
 #include "test.hpp"
 
@@ -129,7 +149,7 @@ public:
     {}
 
     template<typename CELL, long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& accessor)
+    void operator()(soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& /* accessor */)
     {
         report->push_back(DIM_X);
         report->push_back(DIM_Y);
@@ -721,7 +741,7 @@ ADD_TEST(TestSelectSizesCustomUniform)
     expected.clear();
 }
 
-int main(int argc, char **argv)
+int main(int /* argc*/, char** /* argv */)
 {
     return 0;
 }

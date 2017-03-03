@@ -42,9 +42,9 @@ public:
 
         for (ITERATOR i = start; i != end; ++i) {
             accessor.index() = soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>::gen_index(
-                i->origin[0],
-                i->origin[1],
-                i->origin[2]);
+                static_cast<long>(i->origin[0]),
+                static_cast<long>(i->origin[1]),
+                static_cast<long>(i->origin[2]));
             accessor.load(source, i->length(), offset, count);
 
             offset += i->length();

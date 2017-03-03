@@ -44,12 +44,13 @@
             sibling_short_vec_switch<SHORT_VEC_TYPE, 1>::VALUE          \
             lfa_local_scalar;                                           \
                                                                         \
-        COUNTER_TYPE remainder = (X) % (lfa_local_short_vec::ARITY);    \
+        COUNTER_TYPE remainder = (X) %                                  \
+            COUNTER_TYPE(lfa_local_short_vec::ARITY);                   \
         COUNTER_TYPE next_stop = remainder ?                            \
-            (X) + (lfa_local_short_vec::ARITY) - remainder :            \
+            (X) + COUNTER_TYPE(lfa_local_short_vec::ARITY) - remainder : \
             (X);                                                        \
         COUNTER_TYPE last_stop = (END_X) -                              \
-            (END_X) % (lfa_local_short_vec::ARITY);                     \
+            (END_X) % COUNTER_TYPE(lfa_local_short_vec::ARITY);         \
                                                                         \
         FUNCTION<lfa_local_scalar   >(X, next_stop, __VA_ARGS__);       \
         FUNCTION<lfa_local_short_vec>(X, last_stop, __VA_ARGS__);       \
@@ -68,11 +69,11 @@ void loop_peeler(COUNTER_TYPE1 *counter, const COUNTER_TYPE2& end, const LAMBDA&
         sibling_short_vec_switch<SHORT_VEC_TYPE, 1>::VALUE
         lfa_local_scalar;
 
-    COUNTER_TYPE2 remainder = (*counter) % (lfa_local_short_vec::ARITY);
+    COUNTER_TYPE2 remainder = (*counter) % COUNTER_TYPE2(lfa_local_short_vec::ARITY);
     COUNTER_TYPE2 next_stop = remainder ?
-        (*counter) + (lfa_local_short_vec::ARITY) - remainder :
+        (*counter) + COUNTER_TYPE2(lfa_local_short_vec::ARITY) - remainder :
         (*counter);
-    COUNTER_TYPE2 last_stop = end - end % (lfa_local_short_vec::ARITY);
+    COUNTER_TYPE2 last_stop = end - end % COUNTER_TYPE2(lfa_local_short_vec::ARITY);
 
     lambda(lfa_local_scalar(),    counter, next_stop);
     lambda(lfa_local_short_vec(), counter, last_stop);

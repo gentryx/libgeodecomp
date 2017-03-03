@@ -36,18 +36,18 @@ public:
         }
 
         if (val < mark1) {
-            return Color(0, (val - mark0) * mult, 255);
+            return Color(0.0, (val - mark0) * mult, 255.0);
         }
 
         if (val < mark2) {
-            return Color(0, 255, (mark2 - val) * mult);
+            return Color(0.0, 255.0, (mark2 - val) * mult);
         }
 
         if (val < mark3) {
-            return Color((val - mark2) * mult, 255, 0);
+            return Color((val - mark2) * mult, 255.0, 0.0);
         }
 
-        return Color(255, (mark4 - val) * mult, 0);
+        return Color(255.0, (mark4 - val) * mult, 0.0);
     }
 
 private:

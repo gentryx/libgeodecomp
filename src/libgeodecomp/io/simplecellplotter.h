@@ -40,7 +40,7 @@ public:
     void copyStreakInImpl(
         const Color* /* source */,
         MemoryLocation::Location sourceLocation,
-        MEMBER *target,
+        MEMBER* /* target */,
         MemoryLocation::Location targetLocation,
         const std::size_t /* num */,
         const std::size_t /* stride */)

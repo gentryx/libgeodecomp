@@ -9,11 +9,26 @@
 #define FLAT_ARRAY_TESTBED_EVALUATE_HPP
 
 #include <libflatarray/testbed/benchmark.hpp>
+
+// disable certain warnings from system headers when compiling with
+// Microsoft Visual Studio:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#pragma warning( disable : 4668 )
+#pragma warning( disable : 4820 )
+#endif
+
 #include <ctime>
 #include <iomanip>
 #ifdef _WIN32
+#include <windows.h>
 #else
 #include <unistd.h>
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 namespace LibFlatArray {
@@ -38,11 +53,44 @@ public:
             return;
         }
 
+#ifdef _WIN32
+        // this charade is based on https://msdn.microsoft.com/en-us/library/windows/desktop/ms724928(v=vs.85).aspx
+        FILETIME fileTime;
+        GetSystemTimeAsFileTime(&fileTime);
+
+        ULARGE_INTEGER systemTime;
+        systemTime.LowPart = fileTime.dwLowDateTime;
+        systemTime.HighPart = fileTime.dwHighDateTime;
+
+        SYSTEMTIME epoch;
+        epoch.wYear = 1970;
+        epoch.wMonth = 1;
+        epoch.wDayOfWeek = 4;
+        epoch.wDay = 1;
+        epoch.wHour = 0;
+        epoch.wMinute = 0;
+        epoch.wSecond = 1;
+        epoch.wMilliseconds = 0;
+        FILETIME epochFileTime;
+        SystemTimeToFileTime(&epoch, &epochFileTime);
+
+        ULARGE_INTEGER epochULargeInteger;
+        epochULargeInteger.LowPart = epochFileTime.dwLowDateTime;
+        epochULargeInteger.HighPart = epochFileTime.dwHighDateTime;
+
+        time_t secondsSinceEpoch = static_cast<time_t>(systemTime.QuadPart - epochULargeInteger.QuadPart);
+#else
         timeval t;
         gettimeofday(&t, 0);
         time_t secondsSinceEpoch = t.tv_sec;
+#endif
+
         tm timeSpec;
+#ifdef _WIN32
+        gmtime_s(&timeSpec, &secondsSinceEpoch);
+#else
         gmtime_r(&secondsSinceEpoch, &timeSpec);
+#endif
         char buf[1024];
         strftime(buf, 1024, "%Y-%b-%d %H:%M:%S", &timeSpec);
 
@@ -50,7 +98,7 @@ public:
         std::string device = benchmark.device();
 
         int hostname_length = 2048;
-        std::string hostname(hostname_length, ' ');
+        std::string hostname(static_cast<std::size_t>(hostname_length), ' ');
         gethostname(&hostname[0], hostname_length);
         // cuts string at first 0 byte, required as gethostname returns 0-terminated strings
         hostname = std::string(hostname.c_str());

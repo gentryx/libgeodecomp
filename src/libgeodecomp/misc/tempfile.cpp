@@ -4,11 +4,28 @@
 #include <libgeodecomp/communication/mpilayer.h>
 #endif
 
-#include <fstream>
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/tempfile.h>
+
+// Don't warn about these functions being stripped from an executable
+// as they're not being used, that's actually expected behavior.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <fstream>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -29,7 +46,12 @@ std::string TempFile::serial(const std::string& prefix)
         std::string filename = prefix + StringOps::itoa(r);
         buf << filename;
         name += buf.str();
-        if (access(name.c_str(), F_OK) == -1) {
+#ifdef _WIN32
+        int access_result = _access(name.c_str(), 0);
+#else
+        int access_result = access(name.c_str(), F_OK);
+#endif
+        if (access_result != 0) {
             return name;
         }
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2016 Andreas Schäfer
+ * Copyright 2014-2017 Andreas Schäfer
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -8,7 +8,18 @@
 #ifndef FLAT_ARRAY_SHORT_VEC_HPP
 #define FLAT_ARRAY_SHORT_VEC_HPP
 
+// disable certain warnings from system headers when compiling with
+// Microsoft Visual Studio:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <cstdlib>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibFlatArray {
 
@@ -38,6 +49,13 @@ inline short_vec<CARGO, ARITY> operator/(CARGO a, const short_vec<CARGO, ARITY>&
 {
     return short_vec<CARGO, ARITY>(a) / b;
 }
+
+// Don't warn about these functions being stripped from an executable
+// as they're not being used, that's actually expected behavior.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
 
 template<typename CARGO, std::size_t ARITY >
 inline bool any(const short_vec<CARGO, ARITY>& vec)
@@ -81,6 +99,10 @@ inline bool get(unsigned char mask, const int i)
     return (mask >> i) & 1;
 }
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 template<typename SHORT_VEC1, typename SHORT_VEC2>
 inline
 SHORT_VEC1 blend(const SHORT_VEC1& v1, const SHORT_VEC2& v2, const typename SHORT_VEC1::mask_type& mask)
@@ -103,8 +125,8 @@ inline std::size_t count_mask(const typename short_vec<T, ARITY>::mask_type& mas
     v.blend(mask, short_vec<T, ARITY>(T(1)));
     std::size_t sum = 0;
 
-    for (std::size_t i = 0; i < ARITY; ++i) {
-        sum += get(v, i);
+    for (int i = 0; i < static_cast<int>(ARITY); ++i) {
+        sum += static_cast<std::size_t>(get(v, i));
     }
 
     return sum;
@@ -301,7 +323,18 @@ public:
 
 #endif
 
+// disable certain warnings from system headers when compiling with
+// Microsoft Visual Studio:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <sstream>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #include <libflatarray/detail/short_vec_avx512_double_8.hpp>
 #include <libflatarray/detail/short_vec_avx512_double_16.hpp>

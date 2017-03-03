@@ -27,9 +27,9 @@ void set_kernel(
     long edgeRadiiZ,
     bool initInterior)
 {
-    int x = blockDim.x * blockIdx.x + threadIdx.x;
-    int y = blockDim.y * blockIdx.y + threadIdx.y;
-    int z = blockDim.z * blockIdx.z + threadIdx.z;
+    long x = blockDim.x * blockIdx.x + threadIdx.x;
+    long y = blockDim.y * blockIdx.y + threadIdx.y;
+    long z = blockDim.z * blockIdx.z + threadIdx.z;
 
     if ((x >= dimX) ||
         (y >= dimY) ||

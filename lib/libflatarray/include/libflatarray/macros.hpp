@@ -45,6 +45,9 @@
     template<typename CELL_TYPE, long R>                                \
     friend class LibFlatArray::detail::flat_array::offset;
 
+
+
+#ifdef _MSC_BUILD
 /**
  * This macros registers a type with LibFlatArray so that it can be
  * used with soa_grid, soa_array and friends. It will instantiate all
@@ -52,7 +55,27 @@
  * adds utilities so that user code can also discover properties of
  * the SoA layout.
  */
-#define LIBFLATARRAY_REGISTER_SOA(CELL_TYPE, CELL_MEMBERS)              \
+#  define LIBFLATARRAY_REGISTER_SOA(CELL_TYPE, CELL_MEMBERS)    \
+    __pragma( warning( push ) )                                 \
+    __pragma( warning( disable : 4307 4514 ) )                  \
+    LIBFLATARRAY_REGISTER_SOA_MAIN(CELL_TYPE, CELL_MEMBERS)     \
+    __pragma( warning( pop ) )                                  \
+
+#else
+
+/**
+ * This macros registers a type with LibFlatArray so that it can be
+ * used with soa_grid, soa_array and friends. It will instantiate all
+ * templates required for the "Struct of Arrays" (SoA) storage and
+ * adds utilities so that user code can also discover properties of
+ * the SoA layout.
+ */
+#  define LIBFLATARRAY_REGISTER_SOA(CELL_TYPE, CELL_MEMBERS)    \
+    LIBFLATARRAY_REGISTER_SOA_MAIN(CELL_TYPE, CELL_MEMBERS)     \
+
+#endif
+
+#define LIBFLATARRAY_REGISTER_SOA_MAIN(CELL_TYPE, CELL_MEMBERS)         \
     namespace LibFlatArray {                                            \
                                                                         \
     LIBFLATARRAY_FOR_EACH(                                              \
@@ -97,6 +120,17 @@
         long gen_index(const long x, const long y, const long z)        \
         {                                                               \
             return z * DIM_X * DIM_Y + y * DIM_X + x;                   \
+        }                                                               \
+                                                                        \
+        inline                                                          \
+        __host__ __device__                                             \
+        static                                                          \
+        long gen_index(const std::size_t x, const std::size_t y, const std::size_t z) \
+        {                                                               \
+            return                                                      \
+                static_cast<long>(z) * DIM_X * DIM_Y +                  \
+                static_cast<long>(y) * DIM_X +                          \
+                static_cast<long>(x);                                   \
         }                                                               \
                                                                         \
         inline                                                          \
@@ -350,6 +384,17 @@
             return z * DIM_X * DIM_Y + y * DIM_X + x;                   \
         }                                                               \
                                                                         \
+        inline                                                          \
+        __host__ __device__                                             \
+        static                                                          \
+        long gen_index(const std::size_t x, const std::size_t y, const std::size_t z) \
+        {                                                               \
+            return                                                      \
+                static_cast<long>(z) * DIM_X * DIM_Y +                  \
+                static_cast<long>(y) * DIM_X +                          \
+                static_cast<long>(x);                                   \
+        }                                                               \
+                                                                        \
         __host__ __device__                                             \
         const_soa_accessor(const char *my_data, long my_index) :        \
             my_data(my_data),                                           \
@@ -483,6 +528,17 @@
         long gen_index(const long x, const long y, const long z)        \
         {                                                               \
             return z * DIM_X * DIM_Y + y * DIM_X + x;                   \
+        }                                                               \
+                                                                        \
+        inline                                                          \
+        __host__ __device__                                             \
+        static                                                          \
+        long gen_index(const std::size_t x, const std::size_t y, const std::size_t z) \
+        {                                                               \
+            return                                                      \
+                static_cast<long>(z) * DIM_X * DIM_Y +                  \
+                static_cast<long>(y) * DIM_X +                          \
+                static_cast<long>(x);                                   \
         }                                                               \
                                                                         \
         inline                                                          \
@@ -723,6 +779,17 @@
         long gen_index(const long x, const long y, const long z)        \
         {                                                               \
             return z * DIM_X * DIM_Y + y * DIM_X + x;                   \
+        }                                                               \
+                                                                        \
+        inline                                                          \
+        __host__ __device__                                             \
+        static                                                          \
+        long gen_index(const std::size_t x, const std::size_t y, const std::size_t z) \
+        {                                                               \
+            return                                                      \
+                static_cast<long>(z) * DIM_X * DIM_Y +                  \
+                static_cast<long>(y) * DIM_X +                          \
+                static_cast<long>(x);                                   \
         }                                                               \
                                                                         \
         inline                                                          \
@@ -987,7 +1054,7 @@
         if (dim_z != 1) {                                               \
             throw std::out_of_range("expected 1D grid, but z != 1");    \
         }                                                               \
-        std::size_t max = dim_x;                                        \
+        std::size_t maxDim = dim_x;                                     \
                                                                         \
         LIBFLATARRAY_FOR_EACH(                                          \
             LIBFLATARRAY_CASE_DIM_MAX_1D,                               \
@@ -1011,7 +1078,8 @@
         if (dim_z != 1) {                                               \
             throw std::out_of_range("expected 1D grid, but z != 1");    \
         }                                                               \
-        std::size_t max = std::max(dim_x, dim_z);                       \
+        using std::max;                                                 \
+        std::size_t maxDim = max(dim_x, dim_z);                         \
                                                                         \
         LIBFLATARRAY_FOR_EACH(                                          \
             LIBFLATARRAY_CASE_DIM_MAX_1D,                               \
@@ -1035,7 +1103,8 @@
         if (dim_z != 1) {                                               \
             throw std::out_of_range("expected 2D grid, but z != 1");    \
         }                                                               \
-        std::size_t max = std::max(dim_x, dim_y);                       \
+        using std::max;                                                 \
+        std::size_t maxDim = max(dim_x, dim_y);                         \
                                                                         \
         LIBFLATARRAY_FOR_EACH(                                          \
             LIBFLATARRAY_CASE_DIM_MAX_2D,                               \
@@ -1056,7 +1125,8 @@
         if (dim_z != 1) {                                               \
             throw std::out_of_range("expected 2D grid, but z != 1");    \
         }                                                               \
-        std::size_t max = std::max(dim_x, dim_y);                       \
+        using std::max;                                                 \
+        std::size_t maxDim = max(dim_x, dim_y);                         \
                                                                         \
         LIBFLATARRAY_FOR_EACH(                                          \
             LIBFLATARRAY_CASE_DIM_MAX_2D,                               \
@@ -1077,7 +1147,8 @@
         const std::size_t dim_y = 1,                                    \
         const std::size_t dim_z = 1)                                    \
     {                                                                   \
-        std::size_t max = std::max(dim_x, std::max(dim_y, dim_z));      \
+        using std::max;                                                 \
+        std::size_t maxDim = max(dim_x, max(dim_y, dim_z));             \
                                                                         \
         LIBFLATARRAY_FOR_EACH(                                          \
             LIBFLATARRAY_CASE_DIM_MAX_3D,                               \
@@ -1095,7 +1166,8 @@
         const std::size_t dim_y = 1,                                    \
         const std::size_t dim_z = 1)                                    \
     {                                                                   \
-        std::size_t max = std::max(dim_x, std::max(dim_y, dim_z));      \
+        using std::max;                                                 \
+        std::size_t maxDim = max(dim_x, max(dim_y, dim_z));             \
                                                                         \
         LIBFLATARRAY_FOR_EACH(                                          \
             LIBFLATARRAY_CASE_DIM_MAX_3D,                               \
