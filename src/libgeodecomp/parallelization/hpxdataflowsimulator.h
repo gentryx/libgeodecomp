@@ -87,9 +87,30 @@ public:
      * Send a message to the cell known by the given ID. Odd: move
      * semantics seem to make this code run slower according to our
      * performance tests.
+     * The send function is overloaded: the message can either be
+     * an rvalue (MESSAGE&& message) or a const reference
+     * (const MESSAGE& message).  In the first case, hpx will
+     * not make a copy of the message.
      */
     inline
-    void send(int remoteCellID, const MESSAGE& message)
+    void send(int remoteCellID,  MESSAGE&& message)
+    {
+        std::map<int, hpx::id_type>::const_iterator iter = remoteIDs->find(remoteCellID);
+        if (iter == remoteIDs->end()) {
+            throw std::logic_error("ID not found for outgoing messages");
+        }
+
+        sentNeighbors << remoteCellID;
+
+        hpx::apply(
+            typename HPXReceiver<MESSAGE>::receiveAction(),
+            iter->second,
+            targetGlobalNanoStep,
+            std::move(message));
+    }
+
+    inline
+    void send(int remoteCellID,  const MESSAGE& message)
     {
         std::map<int, hpx::id_type>::const_iterator iter = remoteIDs->find(remoteCellID);
         if (iter == remoteIDs->end()) {
