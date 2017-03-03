@@ -21,7 +21,9 @@
 #pragma warning( pop )
 #endif
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
 #endif
 
@@ -44,7 +46,12 @@ std::string TempFile::serial(const std::string& prefix)
         std::string filename = prefix + StringOps::itoa(r);
         buf << filename;
         name += buf.str();
-        if (access(name.c_str(), F_OK) == -1) {
+#ifdef _WIN32
+        int access_result = _access(name.c_str(), 0);
+#else
+        int access_result = access(name.c_str(), F_OK);
+#endif
+        if (access_result != 0) {
             return name;
         }
     }
