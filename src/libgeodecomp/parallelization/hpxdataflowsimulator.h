@@ -89,7 +89,7 @@ public:
      * performance tests.
      */
     inline
-    void send(int remoteCellID, const MESSAGE& message)
+    void send(int remoteCellID,  MESSAGE&& message)
     {
         std::map<int, hpx::id_type>::const_iterator iter = remoteIDs->find(remoteCellID);
         if (iter == remoteIDs->end()) {
@@ -102,7 +102,7 @@ public:
             typename HPXReceiver<MESSAGE>::receiveAction(),
             iter->second,
             targetGlobalNanoStep,
-            message);
+            std::move(message));
     }
 
     inline
