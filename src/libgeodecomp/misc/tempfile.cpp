@@ -4,11 +4,26 @@
 #include <libgeodecomp/communication/mpilayer.h>
 #endif
 
-#include <fstream>
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/tempfile.h>
+
+// Don't warn about these functions being stripped from an executable
+// as they're not being used, that's actually expected behavior.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <fstream>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 namespace LibGeoDecomp {
 
