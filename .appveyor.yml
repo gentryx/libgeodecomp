@@ -1,0 +1,22 @@
+version: 1.0.{build}
+
+shallow_clone: true
+
+matrix:
+  fast_finish: true
+
+environment:
+  matrix:
+    - GENERATOR: "Visual Studio 14"
+      CONFIG: Debug
+
+    - GENERATOR: "Visual Studio 14"
+      CONFIG: Release
+
+os: Visual Studio 2015
+
+build_script:
+  - cmake "-G%GENERATOR%" -H. -B_builds
+  - cmake --build _builds --config "%CONFIG%"
+  - cmake --build _builds --config "%CONFIG%" --target tests
+
