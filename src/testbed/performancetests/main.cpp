@@ -1793,395 +1793,10 @@ public:
 #undef SQR
 };
 
-#ifdef __ICC
-// disabling this warning as implicit type conversion is exactly our goal here:
-#pragma warning push
-#pragma warning (disable: 2304)
-#endif
-
-class ShortVec1xSSE
-{
-public:
-    static const int ARITY = 2;
-
-    inline ShortVec1xSSE() :
-        val(_mm_set1_pd(0))
-    {}
-
-    inline ShortVec1xSSE(const double *addr) :
-        val(_mm_loadu_pd(addr))
-    {}
-
-    inline ShortVec1xSSE(const double val) :
-        val(_mm_set1_pd(val))
-    {}
-
-    inline ShortVec1xSSE(__m128d val) :
-        val(val)
-    {}
-
-    inline ShortVec1xSSE operator+(const ShortVec1xSSE a) const
-    {
-        return ShortVec1xSSE(_mm_add_pd(val, a.val));
-    }
-
-    inline ShortVec1xSSE operator-(const ShortVec1xSSE a) const
-    {
-        return ShortVec1xSSE(_mm_sub_pd(val, a.val));
-    }
-
-    inline ShortVec1xSSE operator*(const ShortVec1xSSE a) const
-    {
-        return ShortVec1xSSE(_mm_mul_pd(val, a.val));
-    }
-
-    inline void store(double *a) const
-    {
-        _mm_store_pd(a + 0, val);
-    }
-
-    __m128d val;
-};
-
-class ShortVec2xSSE
-{
-public:
-    static const int ARITY = 4;
-
-    inline ShortVec2xSSE() :
-        val1(_mm_set1_pd(0)),
-        val2(_mm_set1_pd(0))
-    {}
-
-    inline ShortVec2xSSE(const double *addr) :
-        val1(_mm_loadu_pd(addr + 0)),
-        val2(_mm_loadu_pd(addr + 2))
-    {}
-
-    inline ShortVec2xSSE(const double val) :
-        val1(_mm_set1_pd(val)),
-        val2(_mm_set1_pd(val))
-    {}
-
-    inline ShortVec2xSSE(__m128d val1, __m128d val2) :
-        val1(val1),
-        val2(val2)
-    {}
-
-    inline ShortVec2xSSE operator+(const ShortVec2xSSE a) const
-    {
-        return ShortVec2xSSE(
-            _mm_add_pd(val1, a.val1),
-            _mm_add_pd(val2, a.val2));
-    }
-
-    inline ShortVec2xSSE operator-(const ShortVec2xSSE a) const
-    {
-        return ShortVec2xSSE(
-            _mm_sub_pd(val1, a.val1),
-            _mm_sub_pd(val2, a.val2));
-
-    }
-
-    inline ShortVec2xSSE operator*(const ShortVec2xSSE a) const
-    {
-        return ShortVec2xSSE(
-            _mm_mul_pd(val1, a.val1),
-            _mm_mul_pd(val2, a.val2));
-    }
-
-    inline void store(double *a) const
-    {
-        _mm_store_pd(a + 0, val1);
-        _mm_store_pd(a + 2, val2);
-    }
-
-    __m128d val1;
-    __m128d val2;
-};
-
-class ShortVec4xSSE
-{
-public:
-    static const int ARITY = 8;
-
-    inline ShortVec4xSSE() :
-        val1(_mm_set1_pd(0)),
-        val2(_mm_set1_pd(0)),
-        val3(_mm_set1_pd(0)),
-        val4(_mm_set1_pd(0))
-    {}
-
-    inline ShortVec4xSSE(const double *addr) :
-        val1(_mm_loadu_pd(addr + 0)),
-        val2(_mm_loadu_pd(addr + 2)),
-        val3(_mm_loadu_pd(addr + 4)),
-        val4(_mm_loadu_pd(addr + 6))
-    {}
-
-    inline ShortVec4xSSE(const double val) :
-        val1(_mm_set1_pd(val)),
-        val2(_mm_set1_pd(val)),
-        val3(_mm_set1_pd(val)),
-        val4(_mm_set1_pd(val))
-    {}
-
-    inline ShortVec4xSSE(__m128d val1, __m128d val2, __m128d val3, __m128d val4) :
-        val1(val1),
-        val2(val2),
-        val3(val3),
-        val4(val4)
-    {}
-
-    inline ShortVec4xSSE operator+(const ShortVec4xSSE a) const
-    {
-        return ShortVec4xSSE(
-            _mm_add_pd(val1, a.val1),
-            _mm_add_pd(val2, a.val2),
-            _mm_add_pd(val3, a.val3),
-            _mm_add_pd(val4, a.val4));
-    }
-
-    inline ShortVec4xSSE operator-(const ShortVec4xSSE a) const
-    {
-        return ShortVec4xSSE(
-            _mm_sub_pd(val1, a.val1),
-            _mm_sub_pd(val2, a.val2),
-            _mm_sub_pd(val3, a.val3),
-            _mm_sub_pd(val4, a.val4));
-
-    }
-
-    inline ShortVec4xSSE operator*(const ShortVec4xSSE a) const
-    {
-        return ShortVec4xSSE(
-            _mm_mul_pd(val1, a.val1),
-            _mm_mul_pd(val2, a.val2),
-            _mm_mul_pd(val3, a.val3),
-            _mm_mul_pd(val4, a.val4));
-    }
-
-    inline void store(double *a) const
-    {
-        _mm_storeu_pd(a + 0, val1);
-        _mm_storeu_pd(a + 2, val2);
-        _mm_storeu_pd(a + 4, val3);
-        _mm_storeu_pd(a + 6, val4);
-    }
-
-private:
-    __m128d val1;
-    __m128d val2;
-    __m128d val3;
-    __m128d val4;
-};
-
-#ifdef __AVX__
-
-class ShortVec1xAVX
-{
-public:
-    static const int ARITY = 4;
-
-    inline ShortVec1xAVX() :
-        val1(_mm256_set_pd(0, 0, 0, 0))
-    {}
-
-    inline ShortVec1xAVX(const double *addr) :
-        val1(_mm256_loadu_pd(addr +  0))
-    {}
-
-    inline ShortVec1xAVX(const double val) :
-        val1(_mm256_set_pd(val, val, val, val))
-    {}
-
-    inline ShortVec1xAVX(__m256d val1) :
-        val1(val1)
-    {}
-
-    inline ShortVec1xAVX operator+(const ShortVec1xAVX a) const
-    {
-        return ShortVec1xAVX(
-            _mm256_add_pd(val1, a.val1));
-    }
-
-    inline ShortVec1xAVX operator-(const ShortVec1xAVX a) const
-    {
-        return ShortVec1xAVX(
-            _mm256_sub_pd(val1, a.val1));
-
-    }
-
-    inline ShortVec1xAVX operator*(const ShortVec1xAVX a) const
-    {
-        return ShortVec1xAVX(
-            _mm256_mul_pd(val1, a.val1));
-    }
-
-    inline void store(double *a) const
-    {
-        _mm256_storeu_pd(a +  0, val1);
-    }
-
-private:
-    __m256d val1;
-};
-
-class ShortVec2xAVX
-{
-public:
-    static const int ARITY = 8;
-
-    inline ShortVec2xAVX() :
-        val1(_mm256_set_pd(0, 0, 0, 0)),
-        val2(_mm256_set_pd(0, 0, 0, 0))
-    {}
-
-    inline ShortVec2xAVX(const double *addr) :
-        val1(_mm256_loadu_pd(addr +  0)),
-        val2(_mm256_loadu_pd(addr +  4))
-    {}
-
-    inline ShortVec2xAVX(const double val) :
-        val1(_mm256_set_pd(val, val, val, val)),
-        val2(_mm256_set_pd(val, val, val, val))
-    {}
-
-    inline ShortVec2xAVX(__m256d val1, __m256d val2) :
-        val1(val1),
-        val2(val2)
-    {}
-
-    inline ShortVec2xAVX operator+(const ShortVec2xAVX a) const
-    {
-        return ShortVec2xAVX(
-            _mm256_add_pd(val1, a.val1),
-            _mm256_add_pd(val2, a.val2));
-    }
-
-    inline ShortVec2xAVX operator-(const ShortVec2xAVX a) const
-    {
-        return ShortVec2xAVX(
-            _mm256_sub_pd(val1, a.val1),
-            _mm256_sub_pd(val2, a.val2));
-
-    }
-
-    inline ShortVec2xAVX operator*(const ShortVec2xAVX a) const
-    {
-        return ShortVec2xAVX(
-            _mm256_mul_pd(val1, a.val1),
-            _mm256_mul_pd(val2, a.val2));
-    }
-
-    inline void store(double *a) const
-    {
-        _mm256_storeu_pd(a +  0, val1);
-        _mm256_storeu_pd(a +  4, val2);
-    }
-
-private:
-    __m256d val1;
-    __m256d val2;
-};
-
-class ShortVec4xAVX
-{
-public:
-    static const int ARITY = 16;
-
-    inline ShortVec4xAVX() :
-        val1(_mm256_set_pd(0, 0, 0, 0)),
-        val2(_mm256_set_pd(0, 0, 0, 0)),
-        val3(_mm256_set_pd(0, 0, 0, 0)),
-        val4(_mm256_set_pd(0, 0, 0, 0))
-    {}
-
-    inline ShortVec4xAVX(const double *addr) :
-        val1(_mm256_loadu_pd(addr +  0)),
-        val2(_mm256_loadu_pd(addr +  4)),
-        val3(_mm256_loadu_pd(addr +  8)),
-        val4(_mm256_loadu_pd(addr + 12))
-    {}
-
-    inline ShortVec4xAVX(const double val) :
-        val1(_mm256_set_pd(val, val, val, val)),
-        val2(_mm256_set_pd(val, val, val, val)),
-        val3(_mm256_set_pd(val, val, val, val)),
-        val4(_mm256_set_pd(val, val, val, val))
-    {}
-
-    inline ShortVec4xAVX(__m256d val1, __m256d val2, __m256d val3, __m256d val4) :
-        val1(val1),
-        val2(val2),
-        val3(val3),
-        val4(val4)
-    {}
-
-    inline ShortVec4xAVX operator+(const ShortVec4xAVX a) const
-    {
-        return ShortVec4xAVX(
-            _mm256_add_pd(val1, a.val1),
-            _mm256_add_pd(val2, a.val2),
-            _mm256_add_pd(val3, a.val3),
-            _mm256_add_pd(val4, a.val4));
-    }
-
-    inline ShortVec4xAVX operator-(const ShortVec4xAVX a) const
-    {
-        return ShortVec4xAVX(
-            _mm256_sub_pd(val1, a.val1),
-            _mm256_sub_pd(val2, a.val2),
-            _mm256_sub_pd(val3, a.val3),
-            _mm256_sub_pd(val4, a.val4));
-
-    }
-
-    inline ShortVec4xAVX operator*(const ShortVec4xAVX a) const
-    {
-        return ShortVec4xAVX(
-            _mm256_mul_pd(val1, a.val1),
-            _mm256_mul_pd(val2, a.val2),
-            _mm256_mul_pd(val3, a.val3),
-            _mm256_mul_pd(val4, a.val4));
-    }
-
-    inline void store(double *a) const
-    {
-        _mm256_storeu_pd(a +  0, val1);
-        _mm256_storeu_pd(a +  4, val2);
-        _mm256_storeu_pd(a +  8, val3);
-        _mm256_storeu_pd(a + 12, val4);
-    }
-
-private:
-    __m256d val1;
-    __m256d val2;
-    __m256d val3;
-    __m256d val4;
-};
-
-#endif
-
-#ifdef __ICC
-#pragma warning pop
-#endif
-
-template<typename VEC>
-void store(double *a, VEC v)
-{
-    v.store(a);
-}
-
 class LBMSoACell
 {
 public:
-    // typedef ShortVec1xSSE Double;
-    // typedef ShortVec2xSSE Double;
-    typedef ShortVec4xSSE Double;
-    // typedef ShortVec1xAVX Double;
-    // typedef ShortVec2xAVX Double;
-    // typedef ShortVec4xAVX Double;
+    typedef LibFlatArray::short_vec<double, 16> Double;
 
     class API : public APITraits::HasFixedCoordsOnlyUpdate,
                 public APITraits::HasSoA,
@@ -2221,8 +1836,7 @@ public:
         velocityY(0),
         velocityZ(0),
         state(s)
-    {
-    }
+    {}
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineX(
@@ -2232,39 +1846,6 @@ public:
         updateLineXFluid(hoodOld, indexEnd, hoodNew);
     }
 
-
-
-//     template<typename COORD_MAP>
-//     void update(const COORD_MAP& neighborhood, unsigned nanoStep)
-//     {
-//         *this = neighborhood[FixedCoord<0, 0>()];
-
-//         switch (state) {
-//         case LIQUID:
-//             updateFluid(neighborhood);
-//             break;
-//         case WEST_NOSLIP:
-//             updateWestNoSlip(neighborhood);
-//             break;
-//         case EAST_NOSLIP:
-//             updateEastNoSlip(neighborhood);
-//             break;
-//         case TOP :
-//             updateTop(neighborhood);
-//             break;
-//         case BOTTOM:
-//             updateBottom(neighborhood);
-//             break;
-//         case NORTH_ACC:
-//             updateNorthAcc(neighborhood);
-//             break;
-//         case SOUTH_NOSLIP:
-//             updateSouthNoSlip(neighborhood);
-//             break;
-//         }
-//     }
-
-// private:
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineXFluid(
         ACCESSOR1& hoodOld, int indexEnd,
@@ -2313,36 +1894,36 @@ public:
                 - GET_COMP(x,y+1,z-1,TS) - GET_COMP(x,y+1,z+1,BS);
             velZ  = velZ+GET_COMP(x,y-1,z-1,TN) + GET_COMP(x-1,y,z-1,TE) - GET_COMP(x,y,z+1,B) - GET_COMP(x,y-1,z+1,BN) - GET_COMP(x,y+1,z+1,BS) - GET_COMP(x+1,y,z+1,BW) - GET_COMP(x-1,y,z+1,BE);
 
-            store(&hoodNew.density(), rho);
-            store(&hoodNew.velocityX(), velX);
-            store(&hoodNew.velocityY(), velY);
-            store(&hoodNew.velocityZ(), velZ);
+            &hoodNew.density() << rho;
+            &hoodNew.velocityX() << velX;
+            &hoodNew.velocityY() << velY;
+            &hoodNew.velocityZ() << velZ;
 
             const Double dir_indep_trm = one_third*rho - one_half *( velX*velX + velY*velY + velZ*velZ );
 
-            store(&hoodNew.C(), omega_trm * GET_COMP(x,y,z,C) + omega_w0*( dir_indep_trm ));
+            &hoodNew.C() << (omega_trm * GET_COMP(x,y,z,C) + omega_w0 * dir_indep_trm );
 
-            store(&hoodNew.NW(), omega_trm * GET_COMP(x+1,y-1,z,NW) + omega_w2*( dir_indep_trm - ( velX-velY ) + one_point_five * SQR( velX-velY ) ));
-            store(&hoodNew.SE(), omega_trm * GET_COMP(x-1,y+1,z,SE) + omega_w2*( dir_indep_trm + ( velX-velY ) + one_point_five * SQR( velX-velY ) ));
-            store(&hoodNew.NE(), omega_trm * GET_COMP(x-1,y-1,z,NE) + omega_w2*( dir_indep_trm + ( velX+velY ) + one_point_five * SQR( velX+velY ) ));
-            store(&hoodNew.SW(), omega_trm * GET_COMP(x+1,y+1,z,SW) + omega_w2*( dir_indep_trm - ( velX+velY ) + one_point_five * SQR( velX+velY ) ));
+            &hoodNew.NW() << (omega_trm * GET_COMP(x+1,y-1,z,NW) + omega_w2*( dir_indep_trm - ( velX - velY ) + one_point_five * SQR( velX-velY ) ));
+            &hoodNew.SE() << (omega_trm * GET_COMP(x-1,y+1,z,SE) + omega_w2*( dir_indep_trm + ( velX - velY ) + one_point_five * SQR( velX-velY ) ));
+            &hoodNew.NE() << (omega_trm * GET_COMP(x-1,y-1,z,NE) + omega_w2*( dir_indep_trm + ( velX + velY ) + one_point_five * SQR( velX+velY ) ));
+            &hoodNew.SW() << (omega_trm * GET_COMP(x+1,y+1,z,SW) + omega_w2*( dir_indep_trm - ( velX + velY ) + one_point_five * SQR( velX+velY ) ));
 
-            store(&hoodNew.TW(), omega_trm * GET_COMP(x+1,y,z-1,TW) + omega_w2*( dir_indep_trm - ( velX-velZ ) + one_point_five * SQR( velX-velZ ) ));
-            store(&hoodNew.BE(), omega_trm * GET_COMP(x-1,y,z+1,BE) + omega_w2*( dir_indep_trm + ( velX-velZ ) + one_point_five * SQR( velX-velZ ) ));
-            store(&hoodNew.TE(), omega_trm * GET_COMP(x-1,y,z-1,TE) + omega_w2*( dir_indep_trm + ( velX+velZ ) + one_point_five * SQR( velX+velZ ) ));
-            store(&hoodNew.BW(), omega_trm * GET_COMP(x+1,y,z+1,BW) + omega_w2*( dir_indep_trm - ( velX+velZ ) + one_point_five * SQR( velX+velZ ) ));
+            &hoodNew.TW() << (omega_trm * GET_COMP(x+1,y,z-1,TW) + omega_w2*( dir_indep_trm - ( velX - velZ ) + one_point_five * SQR( velX-velZ ) ));
+            &hoodNew.BE() << (omega_trm * GET_COMP(x-1,y,z+1,BE) + omega_w2*( dir_indep_trm + ( velX - velZ ) + one_point_five * SQR( velX-velZ ) ));
+            &hoodNew.TE() << (omega_trm * GET_COMP(x-1,y,z-1,TE) + omega_w2*( dir_indep_trm + ( velX + velZ ) + one_point_five * SQR( velX+velZ ) ));
+            &hoodNew.BW() << (omega_trm * GET_COMP(x+1,y,z+1,BW) + omega_w2*( dir_indep_trm - ( velX + velZ ) + one_point_five * SQR( velX+velZ ) ));
 
-            store(&hoodNew.TS(), omega_trm * GET_COMP(x,y+1,z-1,TS) + omega_w2*( dir_indep_trm - ( velY-velZ ) + one_point_five * SQR( velY-velZ ) ));
-            store(&hoodNew.BN(), omega_trm * GET_COMP(x,y-1,z+1,BN) + omega_w2*( dir_indep_trm + ( velY-velZ ) + one_point_five * SQR( velY-velZ ) ));
-            store(&hoodNew.TN(), omega_trm * GET_COMP(x,y-1,z-1,TN) + omega_w2*( dir_indep_trm + ( velY+velZ ) + one_point_five * SQR( velY+velZ ) ));
-            store(&hoodNew.BS(), omega_trm * GET_COMP(x,y+1,z+1,BS) + omega_w2*( dir_indep_trm - ( velY+velZ ) + one_point_five * SQR( velY+velZ ) ));
+            &hoodNew.TS() << (omega_trm * GET_COMP(x,y+1,z-1,TS) + omega_w2*( dir_indep_trm - ( velY - velZ ) + one_point_five * SQR( velY-velZ ) ));
+            &hoodNew.BN() << (omega_trm * GET_COMP(x,y-1,z+1,BN) + omega_w2*( dir_indep_trm + ( velY - velZ ) + one_point_five * SQR( velY-velZ ) ));
+            &hoodNew.TN() << (omega_trm * GET_COMP(x,y-1,z-1,TN) + omega_w2*( dir_indep_trm + ( velY + velZ ) + one_point_five * SQR( velY+velZ ) ));
+            &hoodNew.BS() << (omega_trm * GET_COMP(x,y+1,z+1,BS) + omega_w2*( dir_indep_trm - ( velY + velZ ) + one_point_five * SQR( velY+velZ ) ));
 
-            store(&hoodNew.N(), omega_trm * GET_COMP(x,y-1,z,N) + omega_w1*( dir_indep_trm + velY + one_point_five * SQR(velY)));
-            store(&hoodNew.S(), omega_trm * GET_COMP(x,y+1,z,S) + omega_w1*( dir_indep_trm - velY + one_point_five * SQR(velY)));
-            store(&hoodNew.E(), omega_trm * GET_COMP(x-1,y,z,E) + omega_w1*( dir_indep_trm + velX + one_point_five * SQR(velX)));
-            store(&hoodNew.W(), omega_trm * GET_COMP(x+1,y,z,W) + omega_w1*( dir_indep_trm - velX + one_point_five * SQR(velX)));
-            store(&hoodNew.T(), omega_trm * GET_COMP(x,y,z-1,T) + omega_w1*( dir_indep_trm + velZ + one_point_five * SQR(velZ)));
-            store(&hoodNew.B(), omega_trm * GET_COMP(x,y,z+1,B) + omega_w1*( dir_indep_trm - velZ + one_point_five * SQR(velZ)));
+            &hoodNew.N() << (omega_trm * GET_COMP(x,y-1,z,N) + omega_w1*( dir_indep_trm + velY + one_point_five * SQR(velY)));
+            &hoodNew.S() << (omega_trm * GET_COMP(x,y+1,z,S) + omega_w1*( dir_indep_trm - velY + one_point_five * SQR(velY)));
+            &hoodNew.E() << (omega_trm * GET_COMP(x-1,y,z,E) + omega_w1*( dir_indep_trm + velX + one_point_five * SQR(velX)));
+            &hoodNew.W() << (omega_trm * GET_COMP(x+1,y,z,W) + omega_w1*( dir_indep_trm - velX + one_point_five * SQR(velX)));
+            &hoodNew.T() << (omega_trm * GET_COMP(x,y,z-1,T) + omega_w1*( dir_indep_trm + velZ + one_point_five * SQR(velZ)));
+            &hoodNew.B() << (omega_trm * GET_COMP(x,y,z+1,B) + omega_w1*( dir_indep_trm - velZ + one_point_five * SQR(velZ)));
         }
     }
 
