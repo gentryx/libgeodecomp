@@ -16,6 +16,13 @@ if (CMAKE_VERSION VERSION_GREATER 2.7)
   cmake_policy(SET CMP0012 NEW)
 endif()
 
+# this is a workaround for CMake complaining about the interface
+# include path of geodecomp.lib including the current build
+# directory.
+if(WIN32)
+  cmake_policy(SET CMP0041 OLD)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
