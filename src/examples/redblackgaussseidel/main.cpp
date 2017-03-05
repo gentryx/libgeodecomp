@@ -8,10 +8,10 @@
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
 #include <iostream>
-#include <cmath>
 
 using namespace LibGeoDecomp;
 
@@ -71,7 +71,7 @@ inline double initCellValue(Coord<2> c, Coord<2> gridDimensions){
         double xPos = ((double)c.x()) / gridDimensions.x();
         double yPos = ((double)c.y()) / gridDimensions.y();
 
-        return sin(M_PI*xPos)*sinh(M_PI*yPos);
+        return sin(LIBGEODECOMP_PI * xPos) * sinh(LIBGEODECOMP_PI * yPos);
 }
 
 

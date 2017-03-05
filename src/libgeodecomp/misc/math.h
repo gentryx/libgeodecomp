@@ -8,4 +8,6 @@
 #endif
 #include <cmath>
 
+#define LIBGEODECOMP_PI 3.14159265359
+
 #endif

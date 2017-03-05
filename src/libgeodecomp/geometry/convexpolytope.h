@@ -350,7 +350,7 @@ private:
             double angle = asin(dY);
 
             if (delta[0] < 0) {
-                angle = M_PI - angle;
+                angle = LIBGEODECOMP_PI - angle;
             }
 
             return angle;
@@ -391,16 +391,16 @@ private:
         }
 
         if (case1) {
-            return 1.0 * M_PI;
+            return 1.0 * LIBGEODECOMP_PI;
         }
         if (case2) {
-            return 0.0 * M_PI;
+            return 0.0 * LIBGEODECOMP_PI;
         }
         if (case3) {
-            return 1.5 * M_PI;
+            return 1.5 * LIBGEODECOMP_PI;
         }
         if (case4) {
-            return 0.5 * M_PI;
+            return 0.5 * LIBGEODECOMP_PI;
         }
 
         throw std::logic_error("oops, boundary case in boundary generation should be logically impossible!");
