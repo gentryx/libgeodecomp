@@ -202,7 +202,7 @@ endif()
 if(WIN32)
   set(DEFAULT_LINKAGE STATIC)
 else()
-  set(DEFAULT_LINKAGE DYNAMIC)
+  set(DEFAULT_LINKAGE SHARED)
 endif()
 
 check_cxx_compiler_flag("-Wno-sign-conversion" SUPPORTS_WARN_NO_WSIGN)
