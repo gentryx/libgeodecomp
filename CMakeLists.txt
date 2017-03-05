@@ -194,6 +194,12 @@ else()
   set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wall")
 endif()
 
+if(WIN32)
+  set(DEFAULT_LINKAGE STATIC)
+else()
+  set(DEFAULT_LINKAGE DYNAMIC)
+endif()
+
 check_cxx_compiler_flag("-Wno-sign-conversion" SUPPORTS_WARN_NO_WSIGN)
 if(SUPPORTS_WARN_NO_WSIGN)
   set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wno-sign-conversion")
@@ -254,7 +260,7 @@ lgd_add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" 
 # setting DEBUG_LEVEL to " 0" is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
 lgd_add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" " 0" true)
 
-lgd_add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." "SHARED" false)
+lgd_add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." ${DEFAULT_LINKAGE} false)
 
 lgd_add_config_option(LIB_DIR "Library subdirectory (e.g. lib, lib32, lib64), useful for multilib builds" "lib" false)
 
