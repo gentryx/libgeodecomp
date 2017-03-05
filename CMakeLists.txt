@@ -189,6 +189,11 @@ if (MSVC)
   # -Wall on Microsoft Visual C++ generates too much noise
   set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   /W4")
   set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} /W4")
+  # We're using lots of template instantiations, which in some
+  # executables prevents MSVC from linking our objects (error C1128).
+  # Adding /bigobj fixes this, at the cost of breaking MSVC 2005
+  # compatiblity -- worth it.
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} /bigobj")
 else()
   set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -Wall")
   set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wall")
