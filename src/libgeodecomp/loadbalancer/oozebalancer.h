@@ -1,8 +1,8 @@
 #ifndef LIBGEODECOMP_LOADBALANCER_OOZEBALANCER_H
 #define LIBGEODECOMP_LOADBALANCER_OOZEBALANCER_H
 
-#include <cmath>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/misc/math.h>
 
 #define GOLDEN_RATIO  1.6180339887498948482
 #define EULERS_NUMBER 2.71828182845904523536

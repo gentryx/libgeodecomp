@@ -1,8 +1,9 @@
 #ifndef LIBGEODECOMP_GEOMETRY_FLOATCOORD_H
 #define LIBGEODECOMP_GEOMETRY_FLOATCOORD_H
 
+#include <libgeodecomp/misc/math.h>
+
 #include <algorithm>
-#include <cmath>
 #include <sstream>
 
 namespace LibGeoDecomp {

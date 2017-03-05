@@ -1,6 +1,6 @@
-#include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/io/logger.h>
-#include <cmath>
+#include <libgeodecomp/misc/math.h>
+#include <libgeodecomp/misc/patternoptimizer.h>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>

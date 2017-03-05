@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_GEOMETRY_UNSTRUCTUREDGRIDMESHER_H
 #define LIBGEODECOMP_GEOMETRY_UNSTRUCTUREDGRIDMESHER_H
 
-#include <cmath>
+#include <libgeodecomp/misc/math.h>
 
 namespace LibGeoDecomp {
 

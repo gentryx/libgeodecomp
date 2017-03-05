@@ -1,8 +1,8 @@
 #ifndef LIBGEODECOMP_MISC_TEST_UNIT_OPTIMIZERTESTFUNCTIONS_H
 #define LIBGEODECOMP_MISC_TEST_UNIT_OPTIMIZERTESTFUNCTIONS_H
 
+#include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/misc/optimizer.h>
-#include <cmath>
 
 using namespace LibGeoDecomp;
 

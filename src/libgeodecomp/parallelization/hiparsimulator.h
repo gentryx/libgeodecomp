@@ -10,12 +10,12 @@
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/geometry/partitions/distributedptscotchunstructuredpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/hierarchicalsimulator.h>
 #include <libgeodecomp/parallelization/nesting/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/nesting/steereradapter.h>
 #include <libgeodecomp/parallelization/nesting/mpiupdategroup.h>
-#include <cmath>
 #include <stdexcept>
 
 namespace LibGeoDecomp {

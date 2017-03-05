@@ -3,16 +3,11 @@
 
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/image.h>
 
 #include <algorithm>
-#ifdef __CODEGEARC__
-#include <math.h>
-#else
-#include <cmath>
-#endif
-
 #include <vector>
 
 namespace LibGeoDecomp {

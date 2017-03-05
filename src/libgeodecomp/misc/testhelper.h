@@ -3,15 +3,10 @@
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/grid.h>
-
-#ifdef __CODEGEARC__
-#include <math.h>
-#else
-#include <cmath>
-#endif
 
 #include <fstream>
 #include <sstream>

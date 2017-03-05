@@ -1,7 +1,8 @@
 #ifndef LIBGEODECOMP_IO_TIMESTRINGCONVERSION_H
 #define LIBGEODECOMP_IO_TIMESTRINGCONVERSION_H
 
-#include <cmath>
+#include <libgeodecomp/misc/math.h>
+
 #include <ctime>
 #include <iomanip>
 #include <sstream>

@@ -4,6 +4,7 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/plane.h>
+#include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
