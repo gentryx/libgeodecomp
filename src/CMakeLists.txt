@@ -176,7 +176,7 @@ endif()
 
 if(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB local_libgeodecomp_link_lib)
-  add_library(local_libgeodecomp_lib IMPORTED)
+  add_library(local_libgeodecomp_lib ${LIB_LINKAGE_TYPE} IMPORTED)
   set_property(TARGET local_libgeodecomp_lib PROPERTY IMPORTED_LOCATION ${LIBGEODECOMP_BINARY_DIR}/src/${CMAKE_BUILD_TYPE}/geodecomp.dll)
 else()
   set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
