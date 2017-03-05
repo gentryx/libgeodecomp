@@ -81,16 +81,23 @@ if(allowed_test AND selected_test)
         list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
       endif()
 
-      # make sure that each test source will include mpi.h first for
-      # Intel MPI compliance (which is touchy if stdio.h has been
-      # included beforehand).
-      add_custom_command(
-        OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-        COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
-	COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-	COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-	COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
-        DEPENDS "${header}" )
+      if(WIN32)
+        add_custom_command(
+          OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+          COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
+          DEPENDS "${header}" )
+      else()
+        # make sure that each test source will include mpi.h first for
+        # Intel MPI compliance (which is touchy if stdio.h has been
+        # included beforehand).
+        add_custom_command(
+          OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+          COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
+	  COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+	  COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+	  COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
+          DEPENDS "${header}" )
+      endif()
     endif()
   endforeach(header)
 
