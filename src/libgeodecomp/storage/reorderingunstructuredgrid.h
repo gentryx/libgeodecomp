@@ -140,8 +140,6 @@ template<typename DELEGATE_GRID>
 class ReorderingUnstructuredGrid : public GridBase<typename DELEGATE_GRID::CellType, 1, typename DELEGATE_GRID::WeightType>
 {
 public:
-    template<typename CELL, typename GRID>
-    friend class SparseMatrixInitializer;
     template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
     friend class UnstructuredNeighborhood;
     template<typename CELL>
