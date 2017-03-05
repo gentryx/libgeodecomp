@@ -81,6 +81,7 @@ if(allowed_test AND selected_test)
         list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
       endif()
 
+      message(STATUS "andixxx test generation: ${header}")
       if(WIN32)
         add_custom_command(
           OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
