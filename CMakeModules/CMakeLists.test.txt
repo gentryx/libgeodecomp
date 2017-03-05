@@ -85,7 +85,7 @@ if(allowed_test AND selected_test)
       if(WIN32)
         message(STATUS "  andiyyy test generates: ${CMAKE_CURRENT_SOURCE_DIR}/${source}")
         add_custom_command(
-          OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+          OUTPUT "${source}"
           PRE_BUILD
           COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
           DEPENDS "${header}" )
@@ -94,7 +94,7 @@ if(allowed_test AND selected_test)
         # Intel MPI compliance (which is touchy if stdio.h has been
         # included beforehand).
         add_custom_command(
-          OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+          OUTPUT "${source}"
           COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
 	  COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	  COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
@@ -187,6 +187,7 @@ int main(int argc, char **argv)
   if(HAS_CUDA_TESTS AND WITH_CUDA)
     cuda_add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
   else()
+    message(STATUS "andizzz exe: ${TARGET_UNIT_TEST_EXE}, sources: ${SOURCES}")
     add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
   endif()
 
