@@ -85,6 +85,7 @@ if(allowed_test AND selected_test)
       if(WIN32)
         add_custom_command(
           OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+          PRE_BUILD
           COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
           DEPENDS "${header}" )
       else()
