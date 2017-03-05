@@ -83,9 +83,9 @@ if(allowed_test AND selected_test)
 
       message(STATUS "andixxx test generation: ${header} -> ${source}")
       if(WIN32)
-        message(STATUS "  andiyyy test generates: ${source}")
+        message(STATUS "  andiyyy test generates: ${CMAKE_CURRENT_SOURCE_DIR}/${source}")
         add_custom_command(
-          OUTPUT "${source}"
+          OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
           PRE_BUILD
           COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
           DEPENDS "${header}" )
