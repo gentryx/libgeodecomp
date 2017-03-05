@@ -12,6 +12,8 @@ IF "%PYTHON%" == "" GOTO DEFAULT_PYTHON
 :PYTHON_OVERRIDE
 echo "ANDI5"
 "%PYTHON%" %0 %*
+echo "andi5 after"
+dir "C:/projects/libgeodecomp/src/libgeodecomp/geometry/partitions/test/unit/"
 GOTO END
 :DEFAULT_PYTHON
 echo "ANDI6"
