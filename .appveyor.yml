@@ -9,11 +9,11 @@ environment:
   matrix:
     - GENERATOR: "Visual Studio 14"
       CONFIG: Debug
-      PYTHON: C:\\Python35\python.exe
+      PYTHON: C:\Python35\python.exe
 
     - GENERATOR: "Visual Studio 14"
       CONFIG: Release
-      PYTHON: C:\\Python35\python.exe
+      PYTHON: C:\Python35\python.exe
 
 os: Visual Studio 2015
 
