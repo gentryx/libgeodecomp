@@ -67,7 +67,7 @@ if(allowed_test AND selected_test)
         set(HAS_CUDA_TESTS true)
         set(TEST_SUFFIX "test.cu")
       else()
-            set(TEST_SUFFIX "test.cpp")
+        set(TEST_SUFFIX "test.cpp")
       endif()
 
       string(REPLACE "test.h" "${TEST_SUFFIX}" source "${header}")
@@ -81,7 +81,7 @@ if(allowed_test AND selected_test)
         list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
       endif()
 
-      message(STATUS "andixxx test generation: ${header}")
+      message(STATUS "andixxx test generation: ${header} -> ${source}")
       if(WIN32)
         add_custom_command(
           OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
