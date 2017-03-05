@@ -83,6 +83,7 @@ if(allowed_test AND selected_test)
 
       message(STATUS "andixxx test generation: ${header} -> ${source}")
       if(WIN32)
+        message(STATUS "  andiyyy test generates: ${CMAKE_CURRENT_SOURCE_DIR}/${source}")
         add_custom_command(
           OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
           PRE_BUILD
