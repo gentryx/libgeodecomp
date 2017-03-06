@@ -8,6 +8,7 @@ string(REPLACE "/" _ BUFFER1 ${RELATIVE_PATH})
 string(REPLACE ":" _ BUFFER2 ${BUFFER1})
 set(TARGET_UNIT_TEST_EXE test_${BUFFER2})
 set(TARGET_RUN_UNIT_TEST run_${BUFFER2})
+set(TARGET_GENERATE_UNIT_TEST_SRC src_${BUFFER2})
 
 get_filename_component(DIRNAME ${PWD} NAME)
 string(REGEX MATCH "^parallel_hpx"    is_hpx_test    ${DIRNAME})
@@ -86,7 +87,6 @@ if(allowed_test AND selected_test)
         message(STATUS "  andiyyy test generates: ${CMAKE_CURRENT_SOURCE_DIR}/${source}")
         add_custom_command(
           OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-          PRE_BUILD
           COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
           DEPENDS "${header}" )
       else()
@@ -94,25 +94,24 @@ if(allowed_test AND selected_test)
         # Intel MPI compliance (which is touchy if stdio.h has been
         # included beforehand).
         add_custom_command(
-          TARGET "${TARGET_UNIT_TEST_EXE}"
-          PRE_BUILD
+          OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
           COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
 	  COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	  COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	  COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
           DEPENDS "${header}" )
       endif()
+
     endif()
   endforeach(header)
 
   # ...and main()
   list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
   list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp")
+
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp"
     COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp" --root --main run_tests --error-printer )
-
-  # set(main_function "int run_tests(int argc, char** argv); int main(int argc, char** argv) { return run_tests(argc, argv); }")
 
   if(is_hpx_test)
     set(main_function "
@@ -182,8 +181,11 @@ int main(int argc, char **argv)
 ")
   endif()
 
-
   file(WRITE "main.cpp" "${main_function}")
+
+  add_custom_target(
+    ${TARGET_GENERATE_UNIT_TEST_SRC} echo generated phony target ${TARGET_GENERATE_UNIT_TEST_SRC}
+    SOURCES ${SOURCES})
 
   if(HAS_CUDA_TESTS AND WITH_CUDA)
     cuda_add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
@@ -195,6 +197,7 @@ int main(int argc, char **argv)
   set_target_properties(${TARGET_UNIT_TEST_EXE} PROPERTIES OUTPUT_NAME test)
   target_link_libraries(${TARGET_UNIT_TEST_EXE} ${LOCAL_LIBGEODECOMP_LINK_LIB})
 
+  add_dependencies(code_generation ${TARGET_GENERATE_UNIT_TEST_SRC})
   add_dependencies(tests ${TARGET_UNIT_TEST_EXE})
   add_dependencies(check ${TARGET_RUN_UNIT_TEST})
   add_dependencies(${TARGET_RUN_UNIT_TEST} ${TARGET_UNIT_TEST_EXE})
