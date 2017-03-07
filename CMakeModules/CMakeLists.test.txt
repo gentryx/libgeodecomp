@@ -50,6 +50,8 @@ if(LIMIT_TESTS)
   string(REGEX MATCH ${LIMIT_TESTS} selected_test ${RELATIVE_PATH})
 endif()
 
+# set(TEST_SOURCES)
+
 if(allowed_test AND selected_test)
   set(SOURCES)
   unset(HAS_CUDA_TESTS)
@@ -96,26 +98,34 @@ if(allowed_test AND selected_test)
         add_custom_command(
           OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
           COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
-	  COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-	  COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-	  COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
+          COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+          COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+          COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
           DEPENDS "${header}" )
 
-        string(REPLACE "/" _ BUFFER1 "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
-        string(REPLACE ":" _ BUFFER2 ${BUFFER1})
-        set(GENERATOR "generator_${BUFFER2}")
-        add_custom_target(
-          ${GENERATOR} echo generated test source ${source}
-          DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
-        add_dependencies(code_generation ${GENERATOR})
       endif()
 
+      string(REPLACE "/" _ BUFFER1 "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
+      string(REPLACE ":" _ BUFFER2 ${BUFFER1})
+      set(GENERATOR "generator_${BUFFER2}")
+      add_custom_target(
+        ${GENERATOR} echo generated test source ${source}
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
+      add_dependencies(code_generation ${GENERATOR})
+
+      # list(APPEND TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
     endif()
   endforeach(header)
 
   # ...and main()
   list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
   list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp")
+
+
+  # add_custom_command(
+  #       OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp"
+  #       COMMAND "${CXX_TEST_DIR}/test_generator" ${TEST_SOURCES}
+  #   )
 
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp"
@@ -193,7 +203,7 @@ int main(int argc, char **argv)
 
   # add_custom_target(
   #   ${TARGET_GENERATE_UNIT_TEST_SRC} echo generated phony target ${TARGET_GENERATE_UNIT_TEST_SRC}
-  #   DEPENDS ${SOURCES})
+  #   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp")
 
   if(HAS_CUDA_TESTS AND WITH_CUDA)
     cuda_add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
