@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 
   add_custom_target(
     ${TARGET_GENERATE_UNIT_TEST_SRC} echo generated phony target ${TARGET_GENERATE_UNIT_TEST_SRC}
-    SOURCES ${SOURCES})
+    DEPENDS ${SOURCES})
 
   if(HAS_CUDA_TESTS AND WITH_CUDA)
     cuda_add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
