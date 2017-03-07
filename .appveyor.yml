@@ -19,7 +19,7 @@ os: Visual Studio 2015
 
 build_script:
   - cmake "-G%GENERATOR%" -H. -B_builds
-  - cmake --build _builds --config "%CONFIG%" --target codegeneration
+  - cmake --build _builds --config "%CONFIG%" --target code_generation
 
 #  - cmake --build _builds --config "%CONFIG%" --target tests
 #  - cmake --build _builds --config "%CONFIG%"
