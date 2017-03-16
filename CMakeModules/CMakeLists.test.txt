@@ -125,7 +125,7 @@ if(allowed_test AND selected_test)
     add_custom_command(
       OUTPUT "${source}"
       COMMAND echo andiäää "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp"
-      COMMAND "${CXX_TEST_GENERATOR}" "${CXX_TEST_DIR}/bin/cxxtestgen" ${TEST_SOURCES}
+      COMMAND "${CXX_TEST_GENERATOR}" "${CXX_TEST_DIR}/bin/cxxtestgen" "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" ${TEST_SOURCES}
       )
   endforeach()
 
