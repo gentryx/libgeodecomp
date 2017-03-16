@@ -182,7 +182,7 @@ int main(int argc, char **argv)
 
   if(is_openmp_test)
     set(main_function "
-int run_tests(int argc, char **argv);
+int run_tests(int argc, char *argv[]);
 
 int main(int argc, char **argv)
 {
@@ -192,7 +192,7 @@ int main(int argc, char **argv)
   endif()
   if(is_unit_test)
     set(main_function "
-int run_tests(int argc, char **argv);
+int run_tests(int argc, char *argv[]);
 
 int main(int argc, char **argv)
 {
