@@ -138,7 +138,7 @@ if(allowed_test AND selected_test)
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 
-int run_tests(int argc, char **argv);
+int run_tests(int argc, char *argv[]);
 
 int hpx_main(int argc, char **argv)
 {
@@ -166,7 +166,7 @@ int main(int argc, char **argv)
 #include <mpi.h>
 #include <libgeodecomp/communication/typemaps.h>
 
-int run_tests(int argc, char **argv);
+int run_tests(int argc, char *argv[]);
 
 int main(int argc, char **argv)
 {
