@@ -21,7 +21,6 @@ arg_index += 1
 
 for source in sys.argv[arg_index:-1]:
     header = source.replace(".cpp", ".h").replace(".cu", ".h")
-    print(python + " -> " + cxxtestgen + " -> " + "-o" + " -> " + source + " -> " + "--part" + " -> " + header)
     call([python, cxxtestgen, "-o", source, "--part", header])
 
 run_tests_source = sys.argv[-1]
