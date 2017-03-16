@@ -11,7 +11,10 @@
 #include <fstream>
 #include <sstream>
 #include <cxxtest/TestSuite.h>
+
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 /**
  * This macro differs from TS_ASSERT_DELTA in that the error margin is relative
