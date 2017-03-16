@@ -166,6 +166,19 @@ int SimpleCell::counter = 0;
 
 class MultiCellWithParticles;
 
+template<typename Type>
+class ArgumentTypeTest
+{};
+
+template<typename ReturnType, typename Argument>
+class ArgumentTypeTest<ReturnType(Argument)>
+{
+public:
+    typedef Argument Value;
+};
+
+typedef ArgumentTypeTest<int(char)> FooBarType;
+
 DECLARE_MULTI_CONTAINER_CELL(
     MultiCellBase,
     MultiCellWithParticles,
