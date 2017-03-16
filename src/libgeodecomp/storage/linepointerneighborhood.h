@@ -248,6 +248,11 @@ public:
     };
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * gives cells access to their neighboring cells in a given stencil
  * shape. It is meant as a low-overhead replacement for CoordMap. The
@@ -317,6 +322,10 @@ private:
     const CELL **lines;
     long *offset;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
