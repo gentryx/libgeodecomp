@@ -4,7 +4,7 @@ rem know what a shebang is.
 
 IF "%PYTHON%" == "" GOTO DEFAULT_PYTHON
 :PYTHON_OVERRIDE
-"%PYTHON%" --python "%PYTHON%" %0 %*
+"%PYTHON%" %0 --python "%PYTHON%" %*
 GOTO END
 :DEFAULT_PYTHON
 python %0 %*
