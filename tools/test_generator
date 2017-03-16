@@ -1,0 +1,21 @@
+#!/usr/bin/python
+import sys
+from subprocess import call
+
+# The purpose of this script is to bundle the generation of the
+# scaffolding code for unit tests into one command invocation as CMake
+# on Windows struggles with more than one such task per directory
+# (i.e. it will only execute one command created via
+# add_custom_command(), causing all other test sources in that
+# directory not to be created).
+
+cxxtestgen = sys.argv[1]
+
+print(str(sys.argv[2:]))
+
+for source in sys.argv[2:-1]:
+    header = source.replace(".cpp", ".h").replace(".cu", ".h")
+    call([cxxtestgen, "-o", source, "--part", header])
+
+run_tests_source = sys.argv[-1]
+call([cxxtestgen, "-o", run_tests_source, "--root", "--main", "run_tests", "--error-printer"])

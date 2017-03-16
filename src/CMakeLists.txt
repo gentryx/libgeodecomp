@@ -7,6 +7,7 @@ set(AUXDIRS)
 set(SUBDIRS examples libgeodecomp/communication libgeodecomp/io libgeodecomp/geometry libgeodecomp/loadbalancer libgeodecomp/misc libgeodecomp/parallelization libgeodecomp/storage testbed)
 
 set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
+set(CXX_TEST_GENERATOR "${CMAKE_CURRENT_SOURCE_DIR}/../tools/test_generator")
 set(LGD_AGGREGATED_C_FLAGS   "${LGD_ADDITIONAL_C_COMPILE_FLAGS}"  )
 set(LGD_AGGREGATED_CXX_FLAGS "${LGD_ADDITIONAL_CXX_COMPILE_FLAGS}")
 
