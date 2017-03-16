@@ -6,8 +6,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <unistd.h>
-
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
