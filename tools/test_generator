@@ -9,13 +9,19 @@ from subprocess import call
 # add_custom_command(), causing all other test sources in that
 # directory not to be created).
 
-cxxtestgen = sys.argv[1]
+arg_index = 1
+python = "python"
 
-print(str(sys.argv[2:]))
+if sys.argv[1] == "--python":
+    python = sys.argv[2]
+    arg_index = 3
 
-for source in sys.argv[2:-1]:
+cxxtestgen = sys.argv[arg_index]
+arg_index += 1
+
+for source in sys.argv[arg_index:-1]:
     header = source.replace(".cpp", ".h").replace(".cu", ".h")
-    call([cxxtestgen, "-o", source, "--part", header])
+    call([python, cxxtestgen, "-o", source, "--part", header])
 
 run_tests_source = sys.argv[-1]
 call([cxxtestgen, "-o", run_tests_source, "--root", "--main", "run_tests", "--error-printer"])

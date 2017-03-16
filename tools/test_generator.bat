@@ -4,10 +4,10 @@ rem know what a shebang is.
 
 IF "%PYTHON%" == "" GOTO DEFAULT_PYTHON
 :PYTHON_OVERRIDE
-"%PYTHON%" %0 %*
+"%PYTHON%" "%PYTHON%" %0 %*
 GOTO END
 :DEFAULT_PYTHON
-python %0 %*
+python python %0 %*
 GOTO END
 :END
 
