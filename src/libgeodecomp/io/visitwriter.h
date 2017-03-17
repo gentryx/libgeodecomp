@@ -1,7 +1,9 @@
 #ifndef LIBGEODECOMP_IO_VISITWRITER_H
 #define LIBGEODECOMP_IO_VISITWRITER_H
 
-#include <unistd.h>
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_VISIT
+
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
@@ -11,13 +13,11 @@
 #include <libgeodecomp/parallelization/simulator.h>
 #include <libgeodecomp/storage/selector.h>
 
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_VISIT
-
 #include <cerrno>
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <unistd.h>
 #include <VisItControlInterface_V2.h>
 #include <VisItDataInterface_V2.h>
 
