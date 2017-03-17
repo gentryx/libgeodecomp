@@ -6,6 +6,7 @@
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testcell.h>
 
 #include <sstream>
