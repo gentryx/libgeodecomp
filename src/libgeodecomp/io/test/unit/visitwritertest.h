@@ -1,7 +1,11 @@
+#include <cxxtest/TestSuite.h>
+
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/visitwriter.h>
 
+#ifdef LIBGEODECOMP_WITH_VISIT
 using namespace LibGeoDecomp;
+#endif
 
 namespace LibGeoDecomp {
 
