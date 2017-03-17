@@ -1,11 +1,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/config.h>
+// purely here to avoid having to define namespace LibGeoDecomp here
+#include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/io/visitwriter.h>
 
-#ifdef LIBGEODECOMP_WITH_VISIT
 using namespace LibGeoDecomp;
-#endif
 
 namespace LibGeoDecomp {
 
