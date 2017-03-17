@@ -48,19 +48,24 @@
         }                                                               \
     }
 
+#ifdef _WIN32
+#  define LIBGEODECOMP_F_OK 0
+#else
+#  define LIBGEODECOMP_F_OK F_OK
+#endif
 
 #define TS_ASSERT_FILE(filename)                                        \
     {                                                                   \
         std::string path(filename);                                     \
         TSM_ASSERT("File " + path + " should exist, but doesn't",       \
-                   (access(path.c_str(), F_OK) != -1));                 \
+                   (access(path.c_str(), LIBGEODECOMP_F_OK) != -1));    \
     }
 
 #define TS_ASSERT_NO_FILE(filename)                                     \
     {                                                                   \
         std::string path(filename);                                     \
         TSM_ASSERT("File " + path + " should not exist, but does",      \
-                   (access(path.c_str(), F_OK) == -1));                 \
+                   (access(path.c_str(), LIBGEODECOMP_F_OK) == -1));    \
     }
 
 #define TS_ASSERT_FILE_CONTENTS_EQUAL(_filename1, _filename2)           \
