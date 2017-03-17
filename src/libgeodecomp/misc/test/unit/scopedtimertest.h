@@ -1,7 +1,12 @@
 #include <libgeodecomp/misc/scopedtimer.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
-#include <unistd.h>
 #include <cxxtest/TestSuite.h>
+
+#ifdef _WIN32
+#include <chrono>
+#else
+#include <unistd.h>
+#endif
 
 using namespace LibGeoDecomp;
 
@@ -24,7 +29,16 @@ public:
         double  tNew;
 
         for (int i = 0; i < 4; i++) {
-            usleep(250000);
+            int microseconds = 250000;
+#ifdef _WIN32
+            // usleep is obsolete on Windows and we're relying on
+            // C++11 for MSVC support anyways...
+            std::this_thread::sleep_for(std::chrono::microseconds(microseconds));
+#else
+            // ...but using usleep() on Unix allows us to retain C++98
+            // compatibility.
+            usleep(microseconds);
+#endif
             tNew = ScopedTimer::time();
             TS_ASSERT(tNew > tOld);
             tOld = tNew;
