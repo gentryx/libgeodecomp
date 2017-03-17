@@ -191,7 +191,7 @@ public:
     }
 
 private:
-    SharedPtr<MockWriter::EventsStore>::Type events;
+    SharedPtr<EventsStore>::Type events;
 
     void stepFinished(unsigned step, WriterEvent event, std::size_t rank, bool lastCall)
 
