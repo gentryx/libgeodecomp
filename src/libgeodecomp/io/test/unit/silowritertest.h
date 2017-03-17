@@ -179,11 +179,14 @@ public:
 
 typedef ArgumentTypeTest<int(char)> FooBarType;
 
+typedef ContainerCell<DummyParticle, 30> DummyParticleContainer;
+typedef ContainerCell<SimpleCell,    50> SimpleCellContainer;
+
 DECLARE_MULTI_CONTAINER_CELL(
     MultiCellBase,
     MultiCellWithParticles,
-    (((ContainerCell<DummyParticle, 30>))(particles))
-    (((ContainerCell<SimpleCell,    50>))(cells)) )
+    ((DummyParticleContainer)(particles))
+    ((SimpleCellContainer)(cells)) )
 
 class MultiCellWithParticles : public MultiCellBase
 {
