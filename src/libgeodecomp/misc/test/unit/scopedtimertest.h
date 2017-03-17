@@ -3,7 +3,7 @@
 #include <cxxtest/TestSuite.h>
 
 #ifdef _WIN32
-#include <chrono>
+#include <thread>
 #else
 #include <unistd.h>
 #endif
