@@ -84,35 +84,6 @@ if(allowed_test AND selected_test)
         list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
       endif()
 
-      message(STATUS "andixxx test generation: ${header} -> ${source}")
-      # if(WIN32)
-      #   message(STATUS "  andiyyy test generates: ${CMAKE_CURRENT_SOURCE_DIR}/${source}")
-      #   add_custom_command(
-      #     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-      #     COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
-      #     DEPENDS "${header}" )
-      # else()
-      #   # make sure that each test source will include mpi.h first for
-      #   # Intel MPI compliance (which is touchy if stdio.h has been
-      #   # included beforehand).
-      #   add_custom_command(
-      #     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-      #     COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
-      #     COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-      #     COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-      #     COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
-      #     DEPENDS "${header}" )
-
-      # endif()
-
-      # string(REPLACE "/" _ BUFFER1 "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
-      # string(REPLACE ":" _ BUFFER2 ${BUFFER1})
-      # set(GENERATOR "generator_${BUFFER2}")
-      # add_custom_target(
-      #   ${GENERATOR} echo generated test source ${source}
-      #   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
-      # add_dependencies(code_generation ${GENERATOR})
-
       list(APPEND TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
     endif()
   endforeach(header)
@@ -124,14 +95,9 @@ if(allowed_test AND selected_test)
   foreach(source ${SOURCES})
     add_custom_command(
       OUTPUT "${source}"
-      COMMAND echo andiäää "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp"
       COMMAND "${CXX_TEST_GENERATOR}" "${CXX_TEST_DIR}/bin/cxxtestgen" "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" ${TEST_SOURCES}
       )
   endforeach()
-
-  # add_custom_command(
-  #   OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp"
-  #   COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp" --root --main run_tests --error-printer )
 
   if(is_hpx_test)
     set(main_function "
@@ -190,6 +156,7 @@ int main(int argc, char **argv)
 }
 ")
   endif()
+
   if(is_unit_test)
     set(main_function "
 int run_tests(int argc, char *argv[]);
@@ -210,7 +177,6 @@ int main(int argc, char **argv)
   if(HAS_CUDA_TESTS AND WITH_CUDA)
     cuda_add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
   else()
-    message(STATUS "andizzz exe: ${TARGET_UNIT_TEST_EXE}, sources: ${SOURCES}")
     add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
   endif()
 
