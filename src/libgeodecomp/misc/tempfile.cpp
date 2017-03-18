@@ -33,6 +33,7 @@ namespace LibGeoDecomp {
 std::string TempFile::serial(const std::string& prefix)
 {
     for (;;) {
+        // fixme: refactor for readability
         std::stringstream buf;
 #ifdef _WIN32
         std::string name = getenv("TMP");
@@ -46,12 +47,8 @@ std::string TempFile::serial(const std::string& prefix)
         std::string filename = prefix + StringOps::itoa(r);
         buf << filename;
         name += buf.str();
-#ifdef _WIN32
-        int access_result = _access(name.c_str(), 0);
-#else
-        int access_result = access(name.c_str(), F_OK);
-#endif
-        if (access_result != 0) {
+
+        if (!(exists(name))) {
             return name;
         }
     }
@@ -79,5 +76,16 @@ std::string TempFile::parallel(const std::string& prefix)
 }
 
 #endif
+
+bool TempFile::exists(const std::string& filename)
+{
+#ifdef _WIN32
+    int accessResult = _access(filename.c_str(), 0);
+#else
+    int accessResult = access(filename.c_str(), F_OK);
+#endif
+
+    return (accessResult == 0);
+}
 
 }

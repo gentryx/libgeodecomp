@@ -6,6 +6,7 @@
 #include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/storage/grid.h>
 
 #include <fstream>
@@ -48,24 +49,18 @@
         }                                                               \
     }
 
-#ifdef _WIN32
-#  define LIBGEODECOMP_F_OK 0
-#else
-#  define LIBGEODECOMP_F_OK F_OK
-#endif
-
 #define TS_ASSERT_FILE(filename)                                        \
     {                                                                   \
         std::string path(filename);                                     \
         TSM_ASSERT("File " + path + " should exist, but doesn't",       \
-                   (access(path.c_str(), LIBGEODECOMP_F_OK) != -1));    \
+                   (TempFile::exists(path))); \
     }
 
 #define TS_ASSERT_NO_FILE(filename)                                     \
     {                                                                   \
         std::string path(filename);                                     \
         TSM_ASSERT("File " + path + " should not exist, but does",      \
-                   (access(path.c_str(), LIBGEODECOMP_F_OK) == -1));    \
+                   (!TempFile::exists(path)));                          \
     }
 
 #define TS_ASSERT_FILE_CONTENTS_EQUAL(_filename1, _filename2)           \

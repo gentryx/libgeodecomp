@@ -13,6 +13,7 @@ class TempFile
 public:
     static std::string serial(const std::string& prefix);
     static std::string parallel(const std::string& prefix);
+    static bool exists(const std::string& filename);
 };
 
 }
