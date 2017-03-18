@@ -33,20 +33,20 @@ namespace LibGeoDecomp {
 std::string TempFile::serial(const std::string& prefix)
 {
     for (;;) {
-        // fixme: refactor for readability
         std::stringstream buf;
 #ifdef _WIN32
-        std::string name = getenv("TMP");
-        buf << '\\';
+        buf << getenv("TMP")
+            << '\\';
 #else
         const char* tempDir = getenv("TMPDIR");
-        std::string name = tempDir? tempDir : "/tmp";
-        buf << '/';
+        buf << (tempDir? tempDir : "/tmp")
+            << '/';
 #endif
         unsigned r = Random::genUnsigned();
-        std::string filename = prefix + StringOps::itoa(r);
-        buf << filename;
-        name += buf.str();
+        buf << prefix
+            << StringOps::itoa(r);
+
+        std::string name = buf.str();
 
         if (!(exists(name))) {
             return name;
