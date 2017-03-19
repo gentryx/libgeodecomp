@@ -418,10 +418,6 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
     return os;
 }
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 }
 
 // LIBFLATARRAY_REGISTER_SOA() should disable warning 4307 already,
@@ -441,6 +437,7 @@ LIBFLATARRAY_REGISTER_SOA(
     ((bool)(isValid)))
 
 #ifdef _MSC_BUILD
+#pragma warning( pop )
 #pragma warning( pop )
 #endif
 

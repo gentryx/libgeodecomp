@@ -1,11 +1,3 @@
-/**
- * Copyright 2016-2017 Andreas Schäfer
- * Copyright 2016 Konstantin Kronfeldner
- *
- * Distributed under the Boost Software License, Version 1.0. (See accompanying
- * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
- */
-
 #ifndef LIBGEODECOMP_GEOMETRY_REGIONBASEDADJACENCY_H
 #define LIBGEODECOMP_GEOMETRY_REGIONBASEDADJACENCY_H
 
@@ -15,6 +7,13 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
+
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
 
 template<int DIM>
 class Region;
@@ -155,6 +154,10 @@ private:
         return std::size_t(lower_bound(limits.begin(), limits.end(), y) - limits.begin());
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
