@@ -9,3 +9,7 @@
 #ifdef __CUDACC__
 #define CXXTEST_NO_COPY_CONST
 #endif
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

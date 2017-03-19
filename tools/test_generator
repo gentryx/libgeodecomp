@@ -29,17 +29,34 @@ arg_index += 1
 for source in sys.argv[arg_index:-1]:
     header = source.replace(".cpp", ".h").replace(".cu", ".h")
     temp = source + ".tmp"
+    #
     call([python, cxxtestgen, "-o", temp, "--part", header])
     temp_file = open(temp, "r")
     temp_str = temp_file.read()
-    # explicitly close here to avoid problems on Windows when deleting
-    # a possibly still open file.
-    temp_file.close()
     test_str = testguard_str + temp_str
+    #
     source_file = open(source, "w")
     source_file.write(test_str)
     source_file.close()
+    #
+    # explicitly close here to avoid problems on Windows when deleting
+    # a possibly still open file.
+    temp_file.close()
     os.remove(temp)
 
 run_tests_source = sys.argv[-1]
-call([python, cxxtestgen, "-o", run_tests_source, "--root", "--main", "run_tests", "--error-printer"])
+temp = run_tests_source + ".tmp"
+
+call([python, cxxtestgen, "-o", temp, "--root", "--main", "run_tests", "--error-printer"])
+temp_file = open(temp, "r")
+temp_str = temp_file.read()
+test_str = testguard_str + temp_str
+
+source_file = open(run_tests_source, "w")
+source_file.write(test_str)
+source_file.close()
+
+# explicitly close here to avoid problems on Windows when deleting
+# a possibly still open file.
+temp_file.close()
+os.remove(temp)
