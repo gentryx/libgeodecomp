@@ -1836,7 +1836,7 @@ public:
     inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s)
     {
         const IndexVectorType& indices = region.indices[0];
-        return (*this)(region, s, 0, indices.size());
+        return (*this)(region, s, 0, static_cast<int>(indices.size()));
     }
 
     template<int MY_DIM>
@@ -1962,7 +1962,7 @@ public:
     inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
     {
         IndexVectorType& indices = region->indices[0];
-        (*this)(region, s, 0, indices.size());
+        (*this)(region, s, 0, static_cast<int>(indices.size()));
     }
 
     template<int MY_DIM>

@@ -186,7 +186,7 @@ public:
             }
         }
 
-        CoordBox<1> delegateBox(Coord<1>(0), Coord<1>(nodeSet.size()));
+        CoordBox<1> delegateBox(Coord<1>(0), Coord<1>(static_cast<int>(nodeSet.size())));
         delegate = DELEGATE_GRID(delegateBox, defaultElement, edgeElement);
     }
 

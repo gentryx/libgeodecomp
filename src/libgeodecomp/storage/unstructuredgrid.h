@@ -62,7 +62,7 @@ public:
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
-        elements(box.dimensions.x(), defaultElement),
+        elements(static_cast<std::size_t>(box.dimensions.x()), defaultElement),
         origin(box.origin.x()),
         edgeElement(edgeElement),
         dimension(box.dimensions)
@@ -125,7 +125,7 @@ public:
             return getEdgeElement();
         }
 
-        return elements[y];
+        return elements[static_cast<unsigned>(y)];
     }
 
     inline ELEMENT_TYPE& operator[](const int i)

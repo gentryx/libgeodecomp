@@ -45,7 +45,7 @@ public:
  * This is a class and not a method, because there are two different implementations,
  * one for SIGMA = 1 and one for SIGMA > 1.
  */
-template<typename VALUETYPE, int C, int SIGMA>
+template<typename VALUETYPE, std::size_t C, std::size_t SIGMA>
 class InitFromMatrix
 {
 public:
@@ -57,10 +57,10 @@ public:
         std::vector<int> rowLengthCopy;
 
         // calculate size for arrays
-        const int matrixRows = container->dimension;
-        const int numberOfChunks = (matrixRows - 1) / C + 1;
-        const int numberOfSigmas = (matrixRows - 1) / SIGMA + 1;
-        const int rowsPadded = numberOfChunks * C;
+        const std::size_t matrixRows = container->dimension;
+        const std::size_t numberOfChunks = (matrixRows - 1) / C + 1;
+        const std::size_t numberOfSigmas = (matrixRows - 1) / SIGMA + 1;
+        const std::size_t rowsPadded = numberOfChunks * C;
         int numberOfValues = 0;
 
         // save references to sell data structures
@@ -74,7 +74,7 @@ public:
 
         // allocate memory
         chunkOffset.resize(numberOfChunks + 1);
-        chunkLength.resize(numberOfChunks);
+        chunkLength.resize(numberOfChunks + 0);
         rowLength.resize(rowsPadded);
         rowLengthCopy.resize(rowsPadded);
         realRowToSorted.reserve(rowsPadded);
@@ -83,22 +83,22 @@ public:
         // get row lengths
         std::fill(begin(rowLength), end(rowLength), 0);
         for (const auto& pair: matrix) {
-            ++rowLength[pair.first.x()];
+            ++rowLength[static_cast<unsigned>(pair.first.x())];
         }
 
         // map sorting scope
-        for (int nSigma = 0; nSigma < numberOfSigmas; ++nSigma) {
-            const int numberOfRows = (std::min)(SIGMA, rowsPadded - nSigma * SIGMA);
+        for (std::size_t nSigma = 0; nSigma < numberOfSigmas; ++nSigma) {
+            const std::size_t numberOfRows = (std::min)(SIGMA, rowsPadded - nSigma * SIGMA);
             std::vector<SortItem> lengths(numberOfRows);
-            for (int i = 0; i < numberOfRows; ++i) {
-                const int row = nSigma * SIGMA + i;
-                lengths[i] = SortItem(rowLength[row], row);
+            for (std::size_t i = 0; i < numberOfRows; ++i) {
+                const std::size_t row = nSigma * SIGMA + i;
+                lengths[i] = SortItem(rowLength[static_cast<unsigned>(row)], row);
             }
             std::stable_sort(begin(lengths), end(lengths),
                              [] (const SortItem& a, const SortItem& b) -> bool
                              { return a.rowLength > b.rowLength; });
-            for (int i = 0; i < numberOfRows; ++i) {
-                int newID = nSigma * SIGMA + i;
+            for (unsigned i = 0; i < numberOfRows; ++i) {
+                unsigned newID = nSigma * SIGMA + i;
                 chunkRowToReal[newID] = lengths[i].rowIndex;
                 realRowToSorted.push_back(std::make_pair(lengths[i].rowIndex, newID));
                 rowLengthCopy[newID] = lengths[i].rowLength;
@@ -111,7 +111,7 @@ public:
 
         // save chunk lengths and offsets
         chunkOffset[0] = 0;
-        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
+        for (std::size_t nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
             std::vector<int> lengths(C);
             for (auto i = 0u; i < lengths.size(); ++i) {
                 lengths[i] = rowLength[chunkRowToReal[nChunk * C + i]];
