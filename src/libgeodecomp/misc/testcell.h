@@ -413,6 +413,13 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
 
 }
 
+// LIBFLATARRAY_REGISTER_SOA() should disable warning 4307 already,
+// but logs from AppVeyor indicate that this is not working.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4307 )
+#endif
+
 LIBFLATARRAY_REGISTER_SOA(
     LibGeoDecomp::TestCellSoA,
     ((double)(testValue))
@@ -421,5 +428,9 @@ LIBFLATARRAY_REGISTER_SOA(
     ((unsigned)(cycleCounter))
     ((bool)(isEdgeCell))
     ((bool)(isValid)))
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #endif
