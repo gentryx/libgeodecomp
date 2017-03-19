@@ -9,6 +9,13 @@
 
 namespace LibGeoDecomp {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 namespace ChronometerHelpers {
 
 /**
@@ -337,6 +344,10 @@ public:
 private:
     FixedArray<double, Chronometer::NUM_INTERVALS> totalTimes;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

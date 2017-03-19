@@ -8,6 +8,13 @@
 
 namespace LibGeoDecomp {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 /**
  * A real valued coordinate class. Can also be seen as a short,
  * fixed-size vector.
@@ -803,6 +810,10 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
     __os << coord.toString();
     return __os;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

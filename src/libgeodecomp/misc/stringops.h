@@ -19,6 +19,13 @@ std::string operator+(const std::string& a, const std::string& b)
 
 namespace LibGeoDecomp {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 /**
  * Common string operations which are mysterically missing in C++'s
  * standard library.
@@ -97,6 +104,10 @@ public:
         return buf.str();
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

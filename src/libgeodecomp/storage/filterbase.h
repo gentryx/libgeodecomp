@@ -11,6 +11,13 @@
 
 namespace LibGeoDecomp {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 namespace FilterBaseHelpers {
 
 /**
@@ -189,6 +196,10 @@ public:
 
     virtual bool checkExternalTypeID(const std::type_info& otherID) const = 0;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

@@ -68,6 +68,13 @@ namespace LibGeoDecomp {
 #pragma warning (disable: 2304)
 #endif
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 /**
  * represents an integer coordinate.
  */
@@ -880,6 +887,10 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
 
 #ifdef __ICC
 #pragma warning pop
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 }
