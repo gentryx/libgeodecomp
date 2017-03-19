@@ -86,84 +86,83 @@ public:
     void testPassThrough1()
     {
         ArrayCell cell;
-        // fixme: 
-    //     CollectionInterface::PassThrough<ArrayCell> interface;
+        CollectionInterface::PassThrough<ArrayCell> interfaceObject;
 
-    //     TS_ASSERT_EQUALS(cell.begin(),    interface.begin(cell));
-    //     TS_ASSERT_EQUALS(cell.end(),      interface.end(cell));
-    //     TS_ASSERT_EQUALS(std::size_t(10), interface.size(cell));
-    // }
+        TS_ASSERT_EQUALS(cell.begin(),    interfaceObject.begin(cell));
+        TS_ASSERT_EQUALS(cell.end(),      interfaceObject.end(cell));
+        TS_ASSERT_EQUALS(std::size_t(10), interfaceObject.size(cell));
+    }
 
-    // void testPassThrough2()
-    // {
-    //     typedef ContainerCell<SimpleCellA, 20, int> ContainerCellType;
+    void testPassThrough2()
+    {
+        typedef ContainerCell<SimpleCellA, 20, int> ContainerCellType;
 
-    //     ContainerCellType cell;
-    //     cell.insert( 1, SimpleCellA());
-    //     cell.insert( 2, SimpleCellA());
-    //     cell.insert( 3, SimpleCellA());
-    //     cell.insert( 5, SimpleCellA());
-    //     cell.insert( 7, SimpleCellA());
-    //     cell.insert(11, SimpleCellA());
+        ContainerCellType cell;
+        cell.insert( 1, SimpleCellA());
+        cell.insert( 2, SimpleCellA());
+        cell.insert( 3, SimpleCellA());
+        cell.insert( 5, SimpleCellA());
+        cell.insert( 7, SimpleCellA());
+        cell.insert(11, SimpleCellA());
 
-    //     CollectionInterface::PassThrough<ContainerCellType> interface;
+        CollectionInterface::PassThrough<ContainerCellType> interfaceObject;
 
-    //     // foo values are not 1 and 6, but 21 and 26, as the container
-    //     // cell will init its internal array with 20 cells upon creation.
-    //     TS_ASSERT_EQUALS(21,             interface.begin(cell)->foo);
-    //     TS_ASSERT_EQUALS(26,            (interface.end(cell) - 1)->foo);
-    //     TS_ASSERT_EQUALS(std::size_t(6), interface.size(cell));
-    // }
+        // foo values are not 1 and 6, but 21 and 26, as the container
+        // cell will init its internal array with 20 cells upon creation.
+        TS_ASSERT_EQUALS(21,             interfaceObject.begin(cell)->foo);
+        TS_ASSERT_EQUALS(26,            (interfaceObject.end(cell) - 1)->foo);
+        TS_ASSERT_EQUALS(std::size_t(6), interfaceObject.size(cell));
+    }
 
-    // void testDelegate1()
-    // {
-    //     MultiCell cell;
-    //     cell.cellA.insert(20, SimpleCellA());
-    //     cell.cellA.insert(30, SimpleCellA());
-    //     cell.cellA.insert(40, SimpleCellA());
-    //     cell.cellA.insert(50, SimpleCellA());
+    void testDelegate1()
+    {
+        MultiCell cell;
+        cell.cellA.insert(20, SimpleCellA());
+        cell.cellA.insert(30, SimpleCellA());
+        cell.cellA.insert(40, SimpleCellA());
+        cell.cellA.insert(50, SimpleCellA());
 
-    //     cell.cellB.insert(40, SimpleCellB());
-    //     cell.cellB.insert(50, SimpleCellB());
-    //     cell.cellB.insert(60, SimpleCellB());
+        cell.cellB.insert(40, SimpleCellB());
+        cell.cellB.insert(50, SimpleCellB());
+        cell.cellB.insert(60, SimpleCellB());
 
-    //     CollectionInterface::Delegate<MultiCell, ContainerCell<SimpleCellA, 30, int> > interfaceA(&MultiCell::cellA);
-    //     CollectionInterface::Delegate<MultiCell, ContainerCell<SimpleCellB, 50, int> > interfaceB(&MultiCell::cellB);
+        CollectionInterface::Delegate<MultiCell, ContainerCell<SimpleCellA, 30, int> > interfaceA(&MultiCell::cellA);
+        CollectionInterface::Delegate<MultiCell, ContainerCell<SimpleCellB, 50, int> > interfaceB(&MultiCell::cellB);
 
-    //     TS_ASSERT_EQUALS(57,             interfaceA.begin(cell)->foo);
-    //     TS_ASSERT_EQUALS(60,            (interfaceA.end(cell) - 1)->foo);
-    //     TS_ASSERT_EQUALS(std::size_t(4), interfaceA.size(cell));
+        TS_ASSERT_EQUALS(57,             interfaceA.begin(cell)->foo);
+        TS_ASSERT_EQUALS(60,            (interfaceA.end(cell) - 1)->foo);
+        TS_ASSERT_EQUALS(std::size_t(4), interfaceA.size(cell));
 
-    //     TS_ASSERT_EQUALS(51.5,           interfaceB.begin(cell)->bar);
-    //     TS_ASSERT_EQUALS(53.5,          (interfaceB.end(cell) - 1)->bar);
-    //     TS_ASSERT_EQUALS(std::size_t(3), interfaceB.size(cell));
-    // }
+        TS_ASSERT_EQUALS(51.5,           interfaceB.begin(cell)->bar);
+        TS_ASSERT_EQUALS(53.5,          (interfaceB.end(cell) - 1)->bar);
+        TS_ASSERT_EQUALS(std::size_t(3), interfaceB.size(cell));
+    }
 
-    // void testDelegate2()
-    // {
-    //     MultiCellChild cell;
-    //     cell.cellA.insert(20, SimpleCellA());
-    //     cell.cellA.insert(30, SimpleCellA());
-    //     cell.cellA.insert(40, SimpleCellA());
-    //     cell.cellA.insert(50, SimpleCellA());
-    //     cell.cellA.insert(55, SimpleCellA());
+    void testDelegate2()
+    {
+        MultiCellChild cell;
+        cell.cellA.insert(20, SimpleCellA());
+        cell.cellA.insert(30, SimpleCellA());
+        cell.cellA.insert(40, SimpleCellA());
+        cell.cellA.insert(50, SimpleCellA());
+        cell.cellA.insert(55, SimpleCellA());
 
-    //     cell.cellB.insert(40, SimpleCellB());
-    //     cell.cellB.insert(50, SimpleCellB());
-    //     cell.cellB.insert(65, SimpleCellB());
-    //     cell.cellB.insert(65, SimpleCellB());
-    //     cell.cellB.insert(65, SimpleCellB());
+        cell.cellB.insert(40, SimpleCellB());
+        cell.cellB.insert(50, SimpleCellB());
+        cell.cellB.insert(65, SimpleCellB());
+        cell.cellB.insert(65, SimpleCellB());
+        cell.cellB.insert(65, SimpleCellB());
 
-    //     CollectionInterface::Delegate<MultiCellChild, ContainerCell<SimpleCellA, 30, int> > interfaceA(&MultiCellChild::cellA);
-    //     CollectionInterface::Delegate<MultiCellChild, ContainerCell<SimpleCellB, 50, int> > interfaceB(&MultiCellChild::cellB);
+        CollectionInterface::Delegate<MultiCellChild, ContainerCell<SimpleCellA, 30, int> > interfaceA(&MultiCellChild::cellA);
+        CollectionInterface::Delegate<MultiCellChild, ContainerCell<SimpleCellB, 50, int> > interfaceB(&MultiCellChild::cellB);
 
-    //     TS_ASSERT_EQUALS(91,             interfaceA.begin(cell)->foo);
-    //     TS_ASSERT_EQUALS(95,            (interfaceA.end(cell) - 1)->foo);
-    //     TS_ASSERT_EQUALS(std::size_t(5), interfaceA.size(cell));
+        TS_ASSERT_EQUALS(91,             interfaceA.begin(cell)->foo);
+        TS_ASSERT_EQUALS(95,            (interfaceA.end(cell) - 1)->foo);
+        TS_ASSERT_EQUALS(std::size_t(5), interfaceA.size(cell));
 
-    //     TS_ASSERT_EQUALS(104.5,          interfaceB.begin(cell)->bar);
-    //     TS_ASSERT_EQUALS(108.5,         (interfaceB.end(cell) - 1)->bar);
-    //     TS_ASSERT_EQUALS(std::size_t(3), interfaceB.size(cell));
+        TS_ASSERT_EQUALS(104.5,          interfaceB.begin(cell)->bar);
+        TS_ASSERT_EQUALS(108.5,         (interfaceB.end(cell) - 1)->bar);
+        TS_ASSERT_EQUALS(std::size_t(3), interfaceB.size(cell));
     }
 };
 
