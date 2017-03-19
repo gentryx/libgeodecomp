@@ -9,11 +9,14 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+typedef ContainerCell<std::string, 5> StringContainer;
+typedef ContainerCell<double,      7> DoubleContainer;
+
 DECLARE_MULTI_CONTAINER_CELL(
     DummyContainer,
     DummyContainer,
-    (((ContainerCell<std::string, 5>))(labels))
-    (((ContainerCell<double,      7>))(prices)) )
+    ((StringContainer)(labels))
+    ((DoubleContainer)(prices)) )
 
 class APIProvider
 {
@@ -109,11 +112,14 @@ void SpawningParticleRed::update(HOOD& hood, const int nanoStep)
     }
 }
 
+typedef BoxCell<FixedArray<SpawningParticleRed,   16> > SpawningParticleRedContainer;
+typedef BoxCell<FixedArray<SpawningParticleBlue, 221> > SpawningParticleBlueContainer;
+
 DECLARE_MULTI_CONTAINER_CELL(
     CellWithSpawningParticles,
     APIProvider,
-    (((BoxCell<FixedArray<SpawningParticleRed,   16> >))(red))
-    (((BoxCell<FixedArray<SpawningParticleBlue, 221> >))(blue)) )
+    ((SpawningParticleRedContainer)(red))
+    ((SpawningParticleBlueContainer)(blue)) )
 
 
 typedef std::vector<std::pair<std::string, std::string> > LogType;
@@ -227,19 +233,22 @@ private:
     FloatCoord<2> pos;
 };
 
+typedef ContainerCell<SimpleNode,    30> SimpleNodeContainer;
+typedef ContainerCell<SimpleElement, 10> SimpleElementContainer;
+typedef BoxCell<FixedArray<SimpleParticle, 20> > SimpleParticleContainer;
 
 DECLARE_MULTI_CONTAINER_CELL(
     SimpleContainer,
     SimpleContainer,
-    (((ContainerCell<SimpleNode,    30>))(nodes))
-    (((ContainerCell<SimpleElement, 10>))(elements)) )
+    ((SimpleNodeContainer)(nodes))
+    ((SimpleElementContainer)(elements)) )
 
 DECLARE_MULTI_CONTAINER_CELL(
     AnotherSimpleContainer,
     AnotherSimpleContainer,
-    (((ContainerCell<SimpleNode,    30>))(nodes))
-    (((BoxCell<FixedArray<SimpleParticle, 20> >))(particles))
-    (((ContainerCell<SimpleElement, 10>))(elements)) )
+    ((SimpleNodeContainer)(nodes))
+    ((SimpleParticleContainer)(particles))
+    ((SimpleElementContainer)(elements)) )
 
 
 class MultiContainerCellTest : public CxxTest::TestSuite
