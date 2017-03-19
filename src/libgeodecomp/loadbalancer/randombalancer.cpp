@@ -1,5 +1,16 @@
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <libgeodecomp/loadbalancer/randombalancer.h>
 #include <libgeodecomp/misc/random.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

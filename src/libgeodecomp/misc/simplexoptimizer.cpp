@@ -1,9 +1,20 @@
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/simplexoptimizer.h>
 #include <libgeodecomp/misc/limits.h>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp{
 
