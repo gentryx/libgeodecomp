@@ -57,6 +57,13 @@ class Adapter
 
 }
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// an assignment operator missing -- which is clearly there:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 )
+#endif
+
 /**
  * This class is meant to be used with BoxCell and alike to interface
  * MD and n-body codes with our standard neighborhood types. It allows
@@ -98,6 +105,11 @@ public:
         cell(&hood[coord]),
         iterator(iterator)
     {}
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline NeighborhoodIterator(const NeighborhoodIterator& other) = default;
+    inline NeighborhoodIterator(NeighborhoodIterator&& other) = default;
+#endif
 
     static inline NeighborhoodIterator begin(
         WRITE_CONTAINER *writeContainer,
@@ -184,6 +196,10 @@ private:
     CellIterator iterator;
 
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
