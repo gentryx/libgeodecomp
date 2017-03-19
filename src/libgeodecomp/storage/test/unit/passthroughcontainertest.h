@@ -65,11 +65,14 @@ private:
     }
 };
 
+typedef BoxCell<FixedArray<Heater, 10> > HeaterContainer;
+typedef PassThroughContainer<GridCell> GridCellContainer;
+
 DECLARE_MULTI_CONTAINER_CELL(
     TestContainer,
     TestContainer,
-    (((BoxCell<FixedArray<Heater, 10> >))(heaters))
-    (((PassThroughContainer<GridCell>))(cells)) )
+    ((HeaterContainer)(heaters))
+    ((GridCellContainer)(cells)) )
 
 class PassThroughContainerTest : public CxxTest::TestSuite
 {
