@@ -77,6 +77,8 @@ public:
 #define DECLARE_MULTI_CONTAINER_CELL_UPDATE(INDEX, CELL, MEMBER)        \
     LIBFLATARRAY_ELEM(1, MEMBER).updateCargo(multiHood, nanoStep);
 
+#ifdef _MSC_BUILD
+
 /**
  * This cell is a wrapper around ContainerCell and BoxCell to allow
  * user code to compose containers with different element types.
@@ -99,6 +101,30 @@ public:
     __pragma( warning( disable : 4626 ) )                               \
     DECLARE_MULTI_CONTAINER_CELL_MAIN(NAME, API_PROVIDER, MEMBERS)      \
     __pragma( warning( pop ) )                                          \
+
+#else
+
+/**
+ * This cell is a wrapper around ContainerCell and BoxCell to allow
+ * user code to compose containers with different element types.
+ *
+ * Example: we could have freely moving particles stored in a BoxCell
+ * and static elements stored in a ContainerCell, with elements and
+ * particles interacting with each other. This Macro will generate the
+ * necessary glue to stitch both components of the model together.
+ *
+ * See the unit tests for examples of how to use this class.
+ *
+ * The macro expects MEMBERS to be a sequence of member specifications
+ * (adhering to the format expected by the Boost Preprocessor
+ * library), where each spec is again a sequence of member type and
+ * name.
+ *
+ */
+#define DECLARE_MULTI_CONTAINER_CELL(NAME, API_PROVIDER, MEMBERS)       \
+    DECLARE_MULTI_CONTAINER_CELL_MAIN(NAME, API_PROVIDER, MEMBERS)      \
+
+#endif
 
 #define DECLARE_MULTI_CONTAINER_CELL_MAIN(NAME, API_PROVIDER, MEMBERS)  \
     class NAME                                                          \
