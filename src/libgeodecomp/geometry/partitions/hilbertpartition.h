@@ -11,6 +11,13 @@
 
 namespace LibGeoDecomp {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 /**
  * An implementation of Hilbert's space-filling curve (SFC). It's
  * limited to 2D and we suggest the use of the ZCurvePartition anyway
@@ -377,6 +384,10 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
     __os << square.toString();
     return __os;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

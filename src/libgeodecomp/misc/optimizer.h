@@ -1,11 +1,3 @@
-/**
- * Copyright 2014-2017 Andreas Schäfer
- * Copyright 2014 Mathias Schöll
- *
- * Distributed under the Boost Software License, Version 1.0. (See accompanying
- * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
- */
-
 #ifndef LIBGEODECOMP_MISC_OPTIMIZER_H
 #define LIBGEODECOMP_MISC_OPTIMIZER_H
 
@@ -13,6 +5,13 @@
 #include <libgeodecomp/misc/simulationparameters.h>
 
 namespace LibGeoDecomp {
+
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
 
 /**
  * An Optimizer's purpose is to drive generic parameters so that the
@@ -52,8 +51,10 @@ protected:
     double fitness;
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 }
-
-
 
 #endif
