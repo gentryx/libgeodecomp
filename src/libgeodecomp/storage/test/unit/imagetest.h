@@ -29,14 +29,14 @@ public:
 
         int smallWidth = 30;
         int smallHeight = 40;
-        Image small(30, 40);
+        Image smallImage(30, 40);
         for (int y = 0; y < smallHeight; y++) {
             for (int x = 0; x < smallWidth; x++) {
-                small[Coord<2>(x, y)] = Color(x+10, y+20, 47);
+                smallImage[Coord<2>(x, y)] = Color(x+10, y+20, 47);
             }
         }
 
-        TS_ASSERT_EQUALS(small, big.slice(Coord<2>(10, 20), 30, 40));
+        TS_ASSERT_EQUALS(smallImage, big.slice(Coord<2>(10, 20), 30, 40));
     }
 
     void testPaste()
