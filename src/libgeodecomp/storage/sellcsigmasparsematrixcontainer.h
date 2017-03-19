@@ -184,9 +184,9 @@ public:
     SellCSigmaSparseMatrixContainer(const int N = 0) :
         values(),
         column(),
-        rowLength(N, 0),
-        chunkLength((N-1)/C + 1, 0),
-        chunkOffset((N-1)/C + 2, 0),
+        rowLength(static_cast<std::size_t>(N), 0),
+        chunkLength((static_cast<std::size_t>(N) - 1) / C + 1, 0),
+        chunkOffset((static_cast<std::size_t>(N) - 1) / C + 2, 0),
         dimension(N)
     {
         static_assert(C >= 1, "C should be greater or equal to 1!");
@@ -202,12 +202,14 @@ public:
     std::vector<std::pair<int, VALUETYPE> > getRow(int const row) const
     {
         std::vector< std::pair<int, VALUETYPE> > vec;
-        int const chunk(row/C);
-        int const offset(row%C);
-        int index = chunkOffset[chunk] + offset;
+        const int chunk(row / C);
+        const int offset(row % C);
+        int index = chunkOffset[static_cast<unsigned>(chunk)] + offset;
 
         for (int element = 0; element < rowLength[row]; ++element, index += C) {
-            vec.push_back(std::pair<int, VALUETYPE>(column[index], values[index]));
+            vec.push_back(std::pair<int, VALUETYPE>(
+                              column[static_cast<unsigned>(index)],
+                              values[static_cast<unsigned>(index)]));
         }
 
         return vec;
