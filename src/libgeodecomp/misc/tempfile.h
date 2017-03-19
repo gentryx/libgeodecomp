@@ -6,7 +6,7 @@
 namespace LibGeoDecomp {
 
 /**
- * Simple wrapper to generate (somewhat) safe filenames for temporary files
+ * Simple wrapper to handle temporary files (somewhat) safely.
  */
 class TempFile
 {
@@ -14,6 +14,7 @@ public:
     static std::string serial(const std::string& prefix);
     static std::string parallel(const std::string& prefix);
     static bool exists(const std::string& filename);
+    static void unlink(const std::string& filename);
 };
 
 }

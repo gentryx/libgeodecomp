@@ -88,4 +88,13 @@ bool TempFile::exists(const std::string& filename)
     return (accessResult == 0);
 }
 
+void TempFile::unlink(const std::string& filename)
+{
+#ifdef _WIN32
+    _unlink(filename.c_str());
+#else
+    ::unlink(filename.c_str());
+#endif
+}
+
 }

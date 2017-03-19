@@ -2,6 +2,7 @@
 #include <libgeodecomp/io/serialbovwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/stringops.h>
+#include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 
 #include <cxxtest/TestSuite.h>
@@ -24,7 +25,7 @@ public:
     void tearDown()
     {
         for (std::size_t i = 0; i < files.size(); ++i) {
-            unlink(files[i].c_str());
+            TempFile::unlink(files[i]);
         }
     }
 

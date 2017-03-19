@@ -2,6 +2,7 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/regionbasedadjacency.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 
 #include <cxxtest/TestSuite.h>
@@ -60,7 +61,7 @@ public:
     void tearDown()
     {
         for (std::size_t i = 0; i < files.size(); ++i) {
-            unlink(files[i].c_str());
+            TempFile::unlink(files[i]);
         }
     }
 
