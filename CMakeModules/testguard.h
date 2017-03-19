@@ -3,7 +3,7 @@
 // MSVC issues this warning for standard library headers, too, which
 // is not really helpful.
 #ifdef _MSC_BUILD
-#pragma warning( disable : 4514 4710 )
+#pragma warning( disable : 4514 4625 4626 4710 5026 5027 )
 #endif
 
 // include MPI header first to skirt troubles with Intel MPI and standard C library
