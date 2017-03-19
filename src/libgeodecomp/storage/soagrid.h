@@ -186,7 +186,7 @@ public:
                 sourceLocation,
                 currentTarget,
                 targetLocation,
-                i->length(),
+                static_cast<std::size_t>(i->length()),
                 DIM_X * DIM_Y * DIM_Z);
             currentTarget += selector.sizeOfExternal() * i->length();
         }
