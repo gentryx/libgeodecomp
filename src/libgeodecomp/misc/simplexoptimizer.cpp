@@ -418,3 +418,7 @@ std::string SimplexOptimizer::simplexToString() const
 }
 
 } // namespace LibGeoDecomp
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

@@ -94,3 +94,7 @@ void Image::paste(const int x, const int y, const Image& img)
 
 
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

@@ -98,3 +98,7 @@ void TempFile::unlink(const std::string& filename)
 }
 
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

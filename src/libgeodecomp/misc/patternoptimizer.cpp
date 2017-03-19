@@ -168,3 +168,7 @@ std::string PatternOptimizer::patternToString(std::vector<SimulationParameters> 
 }
 
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

@@ -23,3 +23,7 @@ std::vector<std::size_t> LoadBalancer::initialWeights(std::size_t items, const s
 
 }
 
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

@@ -14,3 +14,7 @@ const Color Color::MAGENTA(255,   0, 255);
 const Color Color::YELLOW( 255, 255,   0);
 
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

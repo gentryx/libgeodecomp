@@ -18,3 +18,7 @@ std::map<std::pair<Coord<2>, unsigned>, unsigned> HIndexingPartition::triangleLe
 bool HIndexingPartition::cachesInitialized = HIndexingPartition::fillCaches();
 
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
