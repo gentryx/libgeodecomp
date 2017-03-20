@@ -356,7 +356,12 @@ public:
         const ITER2& end) const
     {
         for (ITER1 i = start; i != end; ++i) {
-            selector.copyMemberOut(&(*this)[i->origin], MemoryLocation::HOST, target, targetLocation, i->length());
+            selector.copyMemberOut(
+                &(*this)[i->origin],
+                MemoryLocation::HOST,
+                target,
+                targetLocation,
+                i->length());
             target += selector.sizeOfExternal() * i->length();
         }
     }
@@ -370,7 +375,12 @@ public:
         const ITER2& end)
     {
         for (ITER1 i = start; i != end; ++i) {
-            selector.copyMemberIn(source, sourceLocation, &(*this)[i->origin], MemoryLocation::HOST, i->length());
+            selector.copyMemberIn(
+                source,
+                sourceLocation,
+                &(*this)[i->origin],
+                MemoryLocation::HOST,
+                i->length());
             source += selector.sizeOfExternal() * i->length();
         }
     }
