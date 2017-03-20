@@ -8,6 +8,7 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
@@ -18,6 +19,7 @@
 #include <map>
 #include <utility>
 #include <cassert>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 
@@ -298,8 +300,16 @@ public:
     }
 
     template<typename ITER1, typename ITER2>
-    inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const ITER1& start, const ITER2& end, int size) const
+    inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const ITER1& start, const ITER2& end, std::size_t size) const
     {
+        if (size > buffer->size()) {
+            throw std::invalid_argument(
+                "insufficient buffer size for UnstructuredGrid::saveRegion (have: " +
+                StringOps::itoa(buffer->size()) +
+                ", need at least: " +
+                StringOps::itoa(size) +
+                ")");
+        }
         ELEMENT_TYPE *target = buffer->data();
 
         for (ITER1 i = start; i != end; ++i) {
@@ -318,8 +328,17 @@ public:
     }
 
     template<typename ITER1, typename ITER2>
-    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const ITER1& start, const ITER2& end, int size)
+    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const ITER1& start, const ITER2& end, std::size_t size)
     {
+        if (size > buffer.size()) {
+            throw std::invalid_argument(
+                "insufficient buffer size for UnstructuredGrid::saveRegion (have: " +
+                StringOps::itoa(buffer.size()) +
+                ", need at least: " +
+                StringOps::itoa(size) +
+                ")");
+        }
+
         const ELEMENT_TYPE *source = buffer.data();
 
         for (ITER1 i = start; i != end; ++i) {
