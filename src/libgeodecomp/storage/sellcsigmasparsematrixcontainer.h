@@ -185,8 +185,8 @@ public:
         values(),
         column(),
         rowLength(static_cast<std::size_t>(N), 0),
-        chunkLength((static_cast<std::size_t>(N) - 1) / C + 1, 0),
-        chunkOffset((static_cast<std::size_t>(N) - 1) / C + 2, 0),
+        chunkLength(static_cast<std::size_t>((N - 1) / C + 1), 0),
+        chunkOffset(static_cast<std::size_t>((N - 1) / C + 2), 0),
         dimension(N)
     {
         static_assert(C >= 1, "C should be greater or equal to 1!");
