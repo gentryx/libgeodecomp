@@ -378,7 +378,7 @@ public:
     }
 
     template<typename ITER1, typename ITER2>
-    inline void saveRegion(std::vector<char> *target, const ITER1& start, const ITER2& end, int size) const
+    inline void saveRegion(std::vector<char> *target, const ITER1& start, const ITER2& end, std::size_t size) const
     {
         elements.save(start, end, target->data(), size);
     }
@@ -393,7 +393,7 @@ public:
     }
 
     template<typename ITER1, typename ITER2>
-    inline void loadRegion(const std::vector<char>& source, const ITER1& start, const ITER2& end, int size)
+    inline void loadRegion(const std::vector<char>& source, const ITER1& start, const ITER2& end, std::size_t size)
     {
         elements.load(start, end, source.data(), size);
     }

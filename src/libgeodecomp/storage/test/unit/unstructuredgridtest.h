@@ -239,7 +239,7 @@ public:
 
         grid.saveRegion(&buffer, region);
 
-        int index = 0;
+        std::size_t index = 0;
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             UnstructuredTestCell<> actual = buffer[index];
             UnstructuredTestCell<> expected(i->x(), 4711, true);
