@@ -56,13 +56,21 @@ public:
         TS_ASSERT_EQUALS(grid.boundingRegion(), region);
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
-            TestCell cell(i->x(), i->x() * 1000 + 666, i->x() % 31, i->x() % 5);
+            TestCell cell(
+                i->x(),
+                static_cast<unsigned>(i->x() * 1000 + 666),
+                i->x() % 31,
+                i->x() % 5);
             grid.set(*i, cell);
         }
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             TestCell actual = grid.get(*i);
-            TestCell expected(i->x(), i->x() * 1000 + 666, i->x() % 31, i->x() % 5);
+            TestCell expected(
+                i->x(),
+                static_cast<unsigned>(i->x() * 1000 + 666),
+                i->x() % 31,
+                i->x() % 5);
 
             TS_ASSERT_EQUALS(actual, expected);
         }
@@ -84,13 +92,21 @@ public:
         GridType grid(region);
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
-            TestCell cell(i->x(), i->x() * 1000 + 666, i->x() % 13, i->x() % 7);
+            TestCell cell(
+                i->x(),
+                static_cast<unsigned>(i->x() * 1000 + 666),
+                i->x() % 13,
+                i->x() % 7);
             grid.set(*i, cell);
         }
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             TestCell actual = grid.get(*i);
-            TestCell expected(i->x(), i->x() * 1000 + 666, i->x() % 13, i->x() % 7);
+            TestCell expected(
+                i->x(),
+                static_cast<std::size_t>(i->x() * 1000 + 666),
+                i->x() % 13,
+                i->x() % 7);
 
             TS_ASSERT_EQUALS(actual, expected);
         }
@@ -114,18 +130,26 @@ public:
         for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             std::vector<TestCell> cells;
             for (int x = i->origin.x(); x != i->endX; ++x) {
-                cells << TestCell(x, x * 1000 + 666, x % 39, x % 11);
+                cells << TestCell(
+                    x,
+                    static_cast<unsigned>(x * 1000 + 666),
+                    x % 39,
+                    x % 11);
             }
             grid.set(*i, &cells[0]);
         }
 
         for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            std::vector<TestCell> actual(i->length());
+            std::vector<TestCell> actual(static_cast<std::size_t>(i->length()));
             grid.get(*i, &actual[0]);
 
             std::vector<TestCell> expected;
             for (int x = i->origin.x(); x != i->endX; ++x) {
-                expected << TestCell(x, x * 1000 + 666, x % 39, x % 11);
+                expected << TestCell(
+                    x,
+                    static_cast<unsigned>(x * 1000 + 666),
+                    x % 39,
+                    x % 11);
             }
 
             TS_ASSERT_EQUALS(actual, expected);
@@ -161,7 +185,11 @@ public:
 
             std::vector<TestCell> expected;
             for (int x = i->origin.x(); x != i->endX; ++x) {
-                expected << TestCell(x, x * 1000 + 555, x % 39, x % 11);
+                expected << TestCell(
+                    x,
+                    static_cast<unsigned>(x * 1000 + 555),
+                    x % 39,
+                    x % 11);
             }
 
             TS_ASSERT_EQUALS(actual, expected);

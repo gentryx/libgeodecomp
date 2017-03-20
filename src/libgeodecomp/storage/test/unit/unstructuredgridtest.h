@@ -249,7 +249,7 @@ public:
         }
 
         for (std::size_t i = 0; i < buffer.size(); ++i) {
-            buffer[i].id = 1000000 + i;
+            buffer[i].id = static_cast<int>(1000000 + i);
             buffer[i].cycleCounter = 777;
         }
 
@@ -260,7 +260,7 @@ public:
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             UnstructuredTestCell<> actual = grid2.get(*i);
             UnstructuredTestCell<> expected(
-                1000000 + index,
+                static_cast<int>(1000000 + index),
                 777,
                 true);
 
@@ -303,7 +303,7 @@ public:
 
         grid.saveRegion(&buffer, regionOffset10, Coord<1>(-10));
 
-        int index = 0;
+        std::size_t index = 0;
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             UnstructuredTestCell<> actual = buffer[index];
             UnstructuredTestCell<> expected(i->x(), 4711, true);
@@ -313,7 +313,7 @@ public:
         }
 
         for (std::size_t i = 0; i < buffer.size(); ++i) {
-            buffer[i].id = 1010101 + i;
+            buffer[i].id = static_cast<std::size_t>(1010101 + i);
             buffer[i].cycleCounter = 8252;
         }
 
@@ -324,7 +324,7 @@ public:
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             UnstructuredTestCell<> actual = grid2.get(*i);
             UnstructuredTestCell<> expected(
-                1010101 + index,
+                static_cast<std::size_t>(1010101 + index),
                 8252,
                 true);
 

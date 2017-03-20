@@ -180,7 +180,11 @@ public:
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             accessor.index() = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
-            const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
+
+            const char *data = accessor.access_member(
+                static_cast<long>(selector.sizeOfMember()),
+                selector.offset());
+
             selector.copyStreakOut(
                 data,
                 sourceLocation,
@@ -235,13 +239,16 @@ public:
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             accessor.index() = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
 
-            char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
+            char *currentTarget = accessor.access_member(
+                static_cast<long>(selector.sizeOfMember()),
+                selector.offset());
+
             selector.copyStreakIn(
                 currentSource,
                 sourceLocation,
                 currentTarget,
                 targetLocation,
-                i->length(),
+                static_cast<std::size_t>(i->length()),
                 DIM_X * DIM_Y * DIM_Z);
 
             currentSource += selector.sizeOfExternal() * i->length();
@@ -409,9 +416,9 @@ public:
         actualDimensions += edgeRadii * 2;
 
         delegate.resize(
-            actualDimensions.x(),
-            actualDimensions.y(),
-            actualDimensions.z());
+            static_cast<std::size_t>(actualDimensions.x()),
+            static_cast<std::size_t>(actualDimensions.y()),
+            static_cast<std::size_t>(actualDimensions.z()));
 
         if (setEdges) {
             delegate.callback(
@@ -603,100 +610,100 @@ private:
     CELL delegateGet(const Coord<1>& coord) const
     {
         return delegate.get(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y(),
-            edgeRadii.z());
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y()),
+            static_cast<std::size_t>(edgeRadii.z()));
     }
 
     CELL delegateGet(const Coord<2>& coord) const
     {
         return delegate.get(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y() + coord.y(),
-            edgeRadii.z());
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y() + coord.y()),
+            static_cast<std::size_t>(edgeRadii.z()));
     }
 
     CELL delegateGet(const Coord<3>& coord) const
     {
         return delegate.get(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y() + coord.y(),
-            edgeRadii.z() + coord.z());
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y() + coord.y()),
+            static_cast<std::size_t>(edgeRadii.z() + coord.z()));
     }
 
     void delegateGet(const Coord<1>& coord, CELL *cells, int count) const
     {
         delegate.get(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y(),
-            edgeRadii.z(),
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y()),
+            static_cast<std::size_t>(edgeRadii.z()),
             cells,
-            count);
+            static_cast<std::size_t>(count));
     }
 
     void delegateGet(const Coord<2>& coord, CELL *cells, int count) const
     {
         delegate.get(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y() + coord.y(),
-            edgeRadii.z(),
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y() + coord.y()),
+            static_cast<std::size_t>(edgeRadii.z()),
             cells,
-            count);
+            static_cast<std::size_t>(count));
     }
 
     void delegateGet(const Coord<3>& coord, CELL *cells, int count) const
     {
         delegate.get(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y() + coord.y(),
-            edgeRadii.z() + coord.z(),
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y() + coord.y()),
+            static_cast<std::size_t>(edgeRadii.z() + coord.z()),
             cells,
-            count);
+            static_cast<std::size_t>(count));
     }
 
     void delegateSet(const Coord<1>& coord, const CELL& cell)
     {
         delegate.set(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y(),
-            edgeRadii.z(),
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y()),
+            static_cast<std::size_t>(edgeRadii.z()),
             cell);
     }
 
     void delegateSet(const Coord<2>& coord, const CELL& cell)
     {
         delegate.set(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y() + coord.y(),
-            edgeRadii.z(),
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y() + coord.y()),
+            static_cast<std::size_t>(edgeRadii.z()),
             cell);
     }
 
     void delegateSet(const Coord<3>& coord, const CELL& cell)
     {
         delegate.set(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y() + coord.y(),
-            edgeRadii.z() + coord.z(),
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y() + coord.y()),
+            static_cast<std::size_t>(edgeRadii.z() + coord.z()),
             cell);
     }
 
     void delegateSet(const Coord<1>& coord, const CELL *cells, int count)
     {
         delegate.set(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y(),
-            edgeRadii.z(),
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y()),
+            static_cast<std::size_t>(edgeRadii.z()),
             cells,
-            count);
+            static_cast<std::size_t>(count));
     }
 
     void delegateSet(const Coord<2>& coord, const CELL *cells, int count)
     {
         delegate.set(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y() + coord.y(),
-            edgeRadii.z(),
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y() + coord.y()),
+            static_cast<std::size_t>(edgeRadii.z()),
             cells,
             count);
     }
@@ -704,11 +711,11 @@ private:
     void delegateSet(const Coord<3>& coord, const CELL *cells, int count)
     {
         delegate.set(
-            edgeRadii.x() + coord.x(),
-            edgeRadii.y() + coord.y(),
-            edgeRadii.z() + coord.z(),
+            static_cast<std::size_t>(edgeRadii.x() + coord.x()),
+            static_cast<std::size_t>(edgeRadii.y() + coord.y()),
+            static_cast<std::size_t>(edgeRadii.z() + coord.z()),
             cells,
-            count);
+            static_cast<std::size_t>(count));
     }
 };
 
