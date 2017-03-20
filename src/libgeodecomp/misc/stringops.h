@@ -34,7 +34,8 @@ class StringOps
 {
 public:
 
-    static std::string itoa(int i)
+    template<typename INT>
+    static std::string itoa(INT i)
     {
         std::stringstream buf;
         buf << i;
