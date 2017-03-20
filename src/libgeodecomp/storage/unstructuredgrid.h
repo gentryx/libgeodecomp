@@ -361,7 +361,7 @@ public:
                 MemoryLocation::HOST,
                 target,
                 targetLocation,
-                i->length());
+                static_cast<std::size_t>(i->length()));
             target += selector.sizeOfExternal() * i->length();
         }
     }
@@ -380,7 +380,7 @@ public:
                 sourceLocation,
                 &(*this)[i->origin],
                 MemoryLocation::HOST,
-                i->length());
+                static_cast<std::size_t>(i->length()));
             source += selector.sizeOfExternal() * i->length();
         }
     }

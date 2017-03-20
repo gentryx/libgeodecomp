@@ -95,8 +95,13 @@ public:
         for (auto i = start; i != end; ++i) {
             accessor.index() = i->origin.x();
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
-            selector.copyStreakIn(currentSource, sourceLocation, currentTarget,
-                                  MemoryLocation::HOST, i->length(), DIM_X);
+            selector.copyStreakIn(
+                currentSource,
+                sourceLocation,
+                currentTarget,
+                MemoryLocation::HOST,
+                i->length(),
+                DIM_X);
             currentSource += selector.sizeOfExternal() * i->length();
         }
     }
@@ -143,7 +148,10 @@ public:
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
-        elements(box.dimensions.x(), 1, 1),
+        elements(
+            static_cast<std::size_t>(box.dimensions.x()),
+            static_cast<std::size_t>(1),
+            static_cast<std::size_t>(1)),
         origin(box.origin.x()),
         edgeElement(edgeElement),
         dimension(box.dimensions)
@@ -156,7 +164,7 @@ public:
 
         // the grid size should be padded to the total number of chunks
         // -> no border cases for vectorization
-        const std::size_t rowsPadded = ((dimension.x() - 1) / C + 1) * C;
+        const std::size_t rowsPadded = static_cast<std::size_t>(((dimension.x() - 1) / C + 1) * C);
         elements.resize(rowsPadded, 1, 1);
 
         // init soa_grid
