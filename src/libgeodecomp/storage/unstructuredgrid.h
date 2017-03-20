@@ -47,7 +47,7 @@ public:
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
-        elements(dim.x(), defaultElement),
+        elements(static_cast<unsigned>(dim.x()), defaultElement),
         origin(0),
         edgeElement(edgeElement),
         dimension(dim)
@@ -138,7 +138,7 @@ public:
             return getEdgeElement();
         }
 
-        return elements[y];
+        return elements[static_cast<unsigned>(y)];
     }
 
     inline ELEMENT_TYPE& operator[](const Coord<DIM>& coord)

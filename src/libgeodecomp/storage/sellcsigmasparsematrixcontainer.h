@@ -33,11 +33,12 @@ public:
     SortItem() :
         rowLength(0), rowIndex(0)
     {}
-    SortItem(int length, int index) :
-        rowLength(length), rowIndex(index)
+    SortItem(std::size_t length, std::size_t index) :
+        rowLength(length),
+        rowIndex(index)
     {}
-    int rowLength;
-    int rowIndex;
+    std::size_t rowLength;
+    std::size_t rowIndex;
 };
 
 /**
@@ -92,16 +93,18 @@ public:
             std::vector<SortItem> lengths(numberOfRows);
             for (std::size_t i = 0; i < numberOfRows; ++i) {
                 const std::size_t row = nSigma * SIGMA + i;
-                lengths[i] = SortItem(rowLength[static_cast<unsigned>(row)], row);
+                lengths[i] = SortItem(static_cast<std::size_t>(rowLength[row]), row);
             }
             std::stable_sort(begin(lengths), end(lengths),
                              [] (const SortItem& a, const SortItem& b) -> bool
                              { return a.rowLength > b.rowLength; });
+
             for (unsigned i = 0; i < numberOfRows; ++i) {
                 unsigned newID = nSigma * SIGMA + i;
-                chunkRowToReal[newID] = lengths[i].rowIndex;
-                realRowToSorted.push_back(std::make_pair(lengths[i].rowIndex, newID));
-                rowLengthCopy[newID] = lengths[i].rowLength;
+                int newIndex = static_cast<int>(lengths[i].rowIndex);
+                chunkRowToReal[newID] = newIndex;
+                realRowToSorted.push_back(std::make_pair(newIndex, newID));
+                rowLengthCopy[newID] = static_cast<int>(lengths[i].rowLength);
             }
         }
 
@@ -140,6 +143,7 @@ public:
                 currentRow = pair.first.x();
                 index = 0;
             }
+
             std::vector<std::pair<int, int> >::iterator iter = std::lower_bound(
                 realRowToSorted.begin(), realRowToSorted.end(), pair.first.x(),
                 [](const std::pair<int, int>& a, const int id) {
