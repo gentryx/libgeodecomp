@@ -53,8 +53,13 @@ public:
         for (auto i = start; i != end; ++i) {
             accessor.index() = i->origin.x();
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
-            selector.copyStreakOut(data, MemoryLocation::HOST, currentTarget,
-                                   targetLocation, i->length(), DIM_X);
+            selector.copyStreakOut(
+                data,
+                MemoryLocation::HOST,
+                currentTarget,
+                targetLocation,
+                static_cast<std::size_t>(i->length()),
+                DIM_X);
             currentTarget += selector.sizeOfExternal() * i->length();
         }
     }
@@ -100,7 +105,7 @@ public:
                 sourceLocation,
                 currentTarget,
                 MemoryLocation::HOST,
-                i->length(),
+                static_cast<std::size_t>(i->length()),
                 DIM_X);
             currentSource += selector.sizeOfExternal() * i->length();
         }
