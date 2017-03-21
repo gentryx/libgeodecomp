@@ -53,21 +53,21 @@ public:
         }
 
         auto weights = grid.getWeights(0);
-        for (int i = 0; i < 100; ++i) {
+        for (std::size_t i = 0; i < 100; ++i) {
             auto sparseRow = weights.getRow(i);
 
             TS_ASSERT_EQUALS(sparseRow.size(), i % 20 + 1);
-            int start = i + 1;
-            int end = start + i % 20 + 1;
+            std::size_t start = i + 1;
+            std::size_t end = start + i % 20 + 1;
             std::vector<std::pair<int, double> > expectedPairs;
-            for (int j = start; j != end; ++j) {
-                int neighbor = j % 100;
+            for (std::size_t j = start; j != end; ++j) {
+                int neighbor = static_cast<int>(j % 100);
                 expectedPairs << std::make_pair(neighbor, neighbor + 0.1);
             }
             std::sort(expectedPairs.begin(), expectedPairs.end(), pairCompareFirst);
 
-            for (int j = start; j != end; ++j) {
-                int index = j - start;
+            for (std::size_t j = start; j != end; ++j) {
+                std::size_t index = j - start;
                 TS_ASSERT_EQUALS(sparseRow[index], expectedPairs[index]);
             }
         }

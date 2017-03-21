@@ -37,7 +37,9 @@ public:
 #endif
     {
         Region<1> region;
-        region << Streak<1>(Coord<1>(startOffsets[node + 0]), startOffsets[node + 1]);
+        region << Streak<1>(
+            Coord<1>(static_cast<int>(startOffsets[node + 0])),
+            static_cast<int>(startOffsets[node + 1]));
         return region;
     }
 };
