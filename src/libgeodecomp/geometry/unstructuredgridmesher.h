@@ -88,7 +88,7 @@ private:
 
         for (std::size_t i = 0; i < points.size(); ++i) {
             for (typename CoordsArrayType::const_iterator j = neighbors[i].begin(); j != neighbors[i].end(); ++j) {
-                FloatCoord<DIM> delta = (points[i] - points[*j]).abs();
+                FloatCoord<DIM> delta = (points[i] - points[static_cast<std::size_t>(*j)]).abs();
                 maxDelta = (maxDelta.max)(delta);
             }
 
