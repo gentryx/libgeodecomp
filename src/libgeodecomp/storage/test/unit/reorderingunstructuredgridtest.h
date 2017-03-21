@@ -104,7 +104,7 @@ public:
             TestCell actual = grid.get(*i);
             TestCell expected(
                 i->x(),
-                static_cast<std::size_t>(i->x() * 1000 + 666),
+                static_cast<unsigned>(i->x() * 1000 + 666),
                 i->x() % 13,
                 i->x() % 7);
 
