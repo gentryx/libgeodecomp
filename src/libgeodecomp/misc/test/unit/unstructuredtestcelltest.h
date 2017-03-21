@@ -193,8 +193,8 @@ public:
             UpdateFunctorHelpers::ConcurrencyNoP(),
             APITraits::SelectThreadedUpdate<TestCellType>::Value());
 
-        int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
-        int expectedCycle2 = expectedCycle1 + 1;
+        unsigned expectedCycle1 = startStep * TestCellType::NANO_STEPS;
+        unsigned expectedCycle2 = expectedCycle1 + 1;
         TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
         TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
 #endif
@@ -222,8 +222,8 @@ public:
             UpdateFunctorHelpers::ConcurrencyNoP(),
             APITraits::SelectThreadedUpdate<TestCellType>::Value());
 
-        int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
-        int expectedCycle2 = expectedCycle1 + 1;
+        unsigned expectedCycle1 = startStep * TestCellType::NANO_STEPS;
+        unsigned expectedCycle2 = expectedCycle1 + 1;
         TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
         TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
 #endif
@@ -253,8 +253,8 @@ public:
             UpdateFunctorHelpers::ConcurrencyNoP(),
             APITraits::SelectThreadedUpdate<TestCellType>::Value());
 
-        int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
-        int expectedCycle2 = expectedCycle1 + 1;
+        unsigned expectedCycle1 = startStep * TestCellType::NANO_STEPS;
+        unsigned expectedCycle2 = expectedCycle1 + 1;
         TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
         TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
 #endif
@@ -283,8 +283,8 @@ public:
             UpdateFunctorHelpers::ConcurrencyNoP(),
             APITraits::SelectThreadedUpdate<TestCellType>::Value());
 
-        int expectedCycle1 = startStep * TestCellType::NANO_STEPS;
-        int expectedCycle2 = expectedCycle1 + 1;
+        unsigned expectedCycle1 = startStep * TestCellType::NANO_STEPS;
+        unsigned expectedCycle2 = expectedCycle1 + 1;
         TS_ASSERT_TEST_GRID(TestGridType, grid1, expectedCycle1);
         TS_ASSERT_TEST_GRID(TestGridType, grid2, expectedCycle2);
 #endif

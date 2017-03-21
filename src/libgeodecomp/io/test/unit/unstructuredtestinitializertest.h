@@ -54,7 +54,7 @@ public:
 
         auto weights = grid.getWeights(0);
         for (std::size_t i = 0; i < 100; ++i) {
-            auto sparseRow = weights.getRow(i);
+            auto sparseRow = weights.getRow(static_cast<int>(i));
 
             TS_ASSERT_EQUALS(sparseRow.size(), i % 20 + 1);
             std::size_t start = i + 1;
