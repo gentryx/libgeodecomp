@@ -150,14 +150,6 @@ public:
     {}
 
     inline explicit
-    UnstructuredTestCell(int id, std::size_t cycleCounter, bool isValid, bool isEdgeCell) :
-        id(id),
-        cycleCounter(static_cast<unsigned>(cycleCounter)),
-        isValid(isValid),
-        isEdgeCell(isEdgeCell)
-    {}
-
-    inline explicit
     UnstructuredTestCell(int id = -1, unsigned cycleCounter = 0, bool isValid = false, bool isEdgeCell = false) :
         id(id),
         cycleCounter(cycleCounter),
