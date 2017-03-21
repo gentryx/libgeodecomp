@@ -164,7 +164,7 @@ public:
     {
         const auto& matrix = grid.getWeights(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
-        index += C * matrix.rowLengthVec()[xOffset];
+        index += C * matrix.rowLengthVec()[static_cast<std::size_t>(xOffset)];
         return Iterator(matrix, static_cast<unsigned>(index));
     }
 

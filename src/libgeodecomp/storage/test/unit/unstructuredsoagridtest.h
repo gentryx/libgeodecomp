@@ -22,8 +22,13 @@ public:
     {};
 
     explicit
-    MySoACell1(int const val = 0) :
+    MySoACell1(int val = 0) :
         val(val)
+    {}
+
+    explicit
+    MySoACell1(std::size_t val = 0) :
+        val(static_cast<int>(val))
     {}
 
     inline bool operator==(const MySoACell1& other) const
@@ -264,22 +269,22 @@ public:
 
         // copy default data back
         grid.saveMember(valVector.data(), MemoryLocation::HOST, valSelector, region);
-        for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+        for (std::size_t i = 0; i < region.size(); ++i) {
             TS_ASSERT_EQUALS(valVector[i], 5);
         }
 
         // modify a bit and test again
-        for (int i = 0; i < static_cast<int>(region.size()); ++i) {
-            grid.set(Coord<1>(i), MySoACell1(i));
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            grid.set(Coord<1>(static_cast<std::size_t>(i)), MySoACell1(i));
         }
         grid.saveMember(valVector.data(), MemoryLocation::HOST, valSelector, region);
-        for (int i = 0; i < static_cast<int>(region.size()); ++i) {
-            TS_ASSERT_EQUALS(valVector[i], i);
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            TS_ASSERT_EQUALS(valVector[i], static_cast<int>(i));
         }
 
         // test load member
-        for (int i = 0; i < static_cast<int>(region.size()); ++i) {
-            valVector[i] = -i;
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            valVector[i] = -static_cast<int>(i);
         }
         grid.loadMember(valVector.data(), MemoryLocation::HOST, valSelector, region);
         for (int i = 0; i < static_cast<int>(region.size()); ++i) {
@@ -305,7 +310,7 @@ public:
 
         // copy default data back
         grid.saveMember(valVector.data(), MemoryLocation::HOST, valSelector, region);
-        for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+        for (std::size_t i = 0; i < region.size(); ++i) {
             TS_ASSERT_EQUALS(valVector[i], 6);
         }
 
@@ -314,16 +319,16 @@ public:
             grid.set(Coord<1>(i), MySoACell2(i, i + 1, i + 2));
         }
         grid.saveMember(valVector.data(), MemoryLocation::HOST, valSelector, region);
-        for (int i = 0; i < static_cast<int>(region.size()); ++i) {
-            TS_ASSERT_EQUALS(valVector[i], i + 1);
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            TS_ASSERT_EQUALS(valVector[i], static_cast<int>(i + 1));
         }
 
         // test load member
         for (int i = 0; i < static_cast<int>(region.size()); ++i) {
             grid.set(Coord<1>(i), defaultCell);
         }
-        for (int i = 0; i < static_cast<int>(region.size()); ++i) {
-            valVector[i] = -i;
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            valVector[i] = -static_cast<int>(i);
         }
         grid.loadMember(valVector.data(), MemoryLocation::HOST, valSelector, region);
         for (int i = 0; i < static_cast<int>(region.size()); ++i) {

@@ -320,12 +320,17 @@ public:
             return;
         }
 
-        set(index, element);
+        set(static_cast<std::size_t>(index), element);
     }
 
     inline void set(const Streak<DIM>& streak, const ELEMENT_TYPE *cells)
     {
-        elements.set(streak.origin.x() - origin, 0, 0, cells, streak.length());
+        elements.set(
+            static_cast<std::size_t>(streak.origin.x() - origin),
+            0,
+            0,
+            cells,
+            static_cast<std::size_t>(streak.length()));
     }
 
     inline ELEMENT_TYPE get(const Coord<DIM>& coord) const
@@ -341,7 +346,12 @@ public:
 
     inline void get(const Streak<DIM>& streak, ELEMENT_TYPE *cells) const
     {
-        elements.get(streak.origin.x() - origin, 0, 0, cells, streak.length());
+        elements.get(
+            static_cast<std::size_t>(streak.origin.x() - origin),
+            0,
+            0,
+            cells,
+            static_cast<std::size_t>(streak.length()));
     }
 
     inline ELEMENT_TYPE& getEdgeElement()
@@ -467,11 +477,11 @@ private:
     inline
     ELEMENT_TYPE get(int x) const
     {
-        return elements.get(x, 0, 0);
+        return elements.get(static_cast<std::size_t>(x), 0, 0);
     }
 
     inline
-    void set(int x, const ELEMENT_TYPE& cell)
+    void set(std::size_t x, const ELEMENT_TYPE& cell)
     {
         elements.set(x, 0, 0, cell);
     }
