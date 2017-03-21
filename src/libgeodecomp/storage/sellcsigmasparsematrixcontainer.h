@@ -62,7 +62,7 @@ public:
         const std::size_t numberOfChunks = (matrixRows - 1) / C + 1;
         const std::size_t numberOfSigmas = (matrixRows - 1) / SIGMA + 1;
         const std::size_t rowsPadded = numberOfChunks * C;
-        int numberOfValues = 0;
+        std::size_t numberOfValues = 0;
 
         // save references to sell data structures
         auto& chunkOffset     = container->chunkOffset;
@@ -116,14 +116,15 @@ public:
         chunkOffset[0] = 0;
         for (std::size_t nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
             std::vector<int> lengths(C);
-            for (auto i = 0u; i < lengths.size(); ++i) {
-                lengths[i] = rowLength[chunkRowToReal[nChunk * C + i]];
+            for (std::size_t i = 0; i < lengths.size(); ++i) {
+                unsigned realRow = chunkRowToReal[nChunk * C + i];
+                lengths[i] = rowLength[static_cast<unsigned>(realRow)];
             }
             chunkLength[nChunk] = *std::max_element(begin(lengths), end(lengths));
             if (nChunk > 0) {
-                chunkOffset[nChunk] = chunkOffset[nChunk - 1] + chunkLength[nChunk - 1] * C;
+                chunkOffset[nChunk] = chunkOffset[nChunk - 1] + chunkLength[nChunk - 1] * static_cast<int>(C);
             }
-            numberOfValues += chunkLength[nChunk] * C;
+            numberOfValues += static_cast<std::size_t>(chunkLength[nChunk]) * C;
         }
         chunkOffset[numberOfChunks] =
             chunkOffset[numberOfChunks - 1] +
@@ -154,12 +155,13 @@ public:
                 throw std::logic_error("ID not found");
             }
 
-            const int chunk = iter->second / C;
-            const int row   = iter->second % C;
-            const int start = chunkOffset[chunk];
-            const int idx   = start + index * C + row;
-            values[idx]     = pair.second;
-            column[idx]     = pair.first.y();
+            const std::size_t sortedRow = static_cast<std::size_t>(iter->second);
+            const std::size_t chunk = sortedRow / C;
+            const std::size_t row   = sortedRow % C;
+            const std::size_t start = static_cast<std::size_t>(chunkOffset[chunk]);
+            const std::size_t idx   = start + index * C + row;
+            values[idx] = pair.second;
+            column[idx] = pair.first.y();
             ++index;
         }
     }
@@ -185,13 +187,11 @@ public:
     friend class ReorderingUnstructuredGridTest;
 
     explicit
-    SellCSigmaSparseMatrixContainer(const int N = 0) :
-        values(),
-        column(),
-        rowLength(static_cast<std::size_t>(N), 0),
-        chunkLength(static_cast<std::size_t>((N - 1) / C + 1), 0),
-        chunkOffset(static_cast<std::size_t>((N - 1) / C + 2), 0),
-        dimension(N)
+    SellCSigmaSparseMatrixContainer(const std::size_t n = 0) :
+        rowLength(n, 0),
+        chunkLength(divSize(n) + 1, 0),
+        chunkOffset(divSize(n) + 2, 0),
+        dimension(n)
     {
         static_assert(C >= 1, "C should be greater or equal to 1!");
         static_assert(SIGMA >= 1, "SIGMA should be greater or equal to 1!");
@@ -311,7 +311,13 @@ private:
     std::vector<int> chunkOffset;     // COffset[i+1]=COffset[i]+CLength[i]*C
     std::vector<std::pair<int, int> > realRowToSorted; // mapping between rows and real rows, used for SIGMA
     std::vector<int> chunkRowToReal;  // and the other way around
-    std::size_t dimension;              // = N
+    std::size_t dimension;            // = N
+
+    static
+    std::size_t divSize(std::size_t n)
+    {
+        return (n == 0) ? 0 : ((n - 1) / C);
+    }
 };
 
 }
