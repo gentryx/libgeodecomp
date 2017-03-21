@@ -385,7 +385,7 @@ public:
         }
 
         for (std::size_t i = 0; i < buf.size(); ++i) {
-            buf[i] = i;
+            buf[i] = static_cast<int>(i);
         }
 
         grid.loadMember(
@@ -438,7 +438,7 @@ public:
         }
 
         for (std::size_t i = 0; i < buf.size(); ++i) {
-            buf[i] = i;
+            buf[i] = static_cast<int>(i);
         }
 
         grid.loadMember(

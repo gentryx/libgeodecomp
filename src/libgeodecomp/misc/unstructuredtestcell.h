@@ -290,7 +290,8 @@ private:
             isValid = false;
         }
 
-        int expectedNanoStep = cycleCounter % APITraits::SelectNanoSteps<UnstructuredTestCell>::VALUE;
+        int expectedNanoStep = static_cast<int>(cycleCounter % APITraits::SelectNanoSteps<UnstructuredTestCell>::VALUE);
+
         if (expectedNanoStep != nanoStep) {
             OUTPUT() << "UnstructuredTestCell error: id " << id
                      << " saw bad nano step " << nanoStep

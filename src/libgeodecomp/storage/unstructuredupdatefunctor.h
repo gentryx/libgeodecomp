@@ -68,7 +68,8 @@ public:
     {
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
         typedef UnstructuredSoANeighborhood<GRID_TYPE, CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1, MATRICES, ValueType, C, SIGMA> HoodOld; \
-        int intraChunkOffset = i->origin.x() % HoodOld::ARITY;          \
+        int intraChunkOffset =                                          \
+            i->origin.x() % static_cast<int>(HoodOld::ARITY);           \
         HoodOld hoodOld(                                                \
             oldAccessor,                                                \
             gridOld,                                                    \

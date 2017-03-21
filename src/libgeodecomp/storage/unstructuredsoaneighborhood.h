@@ -116,7 +116,7 @@ public:
         inline
         ScalarIterator(const Matrix& matrix, int offset, int scalarOffset) :
             matrix(matrix),
-            offset(offset),
+            offset(static_cast<unsigned>(offset)),
             scalarOffset(scalarOffset)
         {}
 
@@ -157,7 +157,7 @@ public:
 
     private:
         const Matrix& matrix;   // Which matrix to use?
-        int offset;             // In which chunk are we right now?
+        unsigned offset;        // In which chunk are we right now?
         int scalarOffset;       // Our offset within the chunk
     };
 
