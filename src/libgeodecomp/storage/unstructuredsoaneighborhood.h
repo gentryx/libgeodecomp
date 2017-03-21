@@ -163,7 +163,7 @@ public:
     inline
     UnstructuredSoANeighborhood(const SoAAccessor& acc, const GRID_TYPE& grid, long startX, int intraChunkOffset = 0) :
         grid(grid),
-        currentChunk(startX / C),
+        currentChunk(static_cast<std::size_t>(startX / C)),
         currentMatrixID(0),
         intraChunkOffset(intraChunkOffset),
         accessor(acc)
@@ -177,13 +177,13 @@ public:
     }
 
     inline
-    int index() const
+    std::size_t index() const
     {
         return currentChunk;
     }
 
     inline
-    int index()
+    std::size_t index()
     {
         return currentChunk;
     }
@@ -260,7 +260,7 @@ private:
      * index of current chunk in weights container (stored in
      * SELL-C-Sigma format)
      */
-    int currentChunk;
+    std::size_t currentChunk;
     /**
      * logical ID of current adjacency matrix (virtually always 0)
      */
