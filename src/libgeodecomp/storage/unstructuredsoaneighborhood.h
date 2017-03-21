@@ -59,7 +59,8 @@ public:
 
         inline
         Iterator(const Matrix& matrix, int offset) :
-            matrix(matrix), offset(offset)
+            matrix(matrix),
+            offset(static_cast<std::size_t>(offset))
         {}
 
         inline
@@ -99,7 +100,7 @@ public:
 
     private:
         const Matrix& matrix;   // Which matrix to use?
-        int offset;             // In which chunk are we right now?
+        std::size_t offset;     // In which chunk are we right now?
     };
 
     /**
@@ -264,7 +265,7 @@ private:
     /**
      * logical ID of current adjacency matrix (virtually always 0)
      */
-    int currentMatrixID;
+    std::size_t currentMatrixID;
     /**
      * offset within a chunk, useful for loop peeling if a Streak
      * doesn't start and/or end on a chunkboundary:

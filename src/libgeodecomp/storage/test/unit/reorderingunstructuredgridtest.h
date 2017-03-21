@@ -180,7 +180,7 @@ public:
         }
 
         for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            std::vector<TestCell> actual(i->length());
+            std::vector<TestCell> actual(static_cast<std::size_t>(i->length()));
             grid.get(*i, &actual[0]);
 
             std::vector<TestCell> expected;
@@ -267,7 +267,7 @@ public:
 
         int counter = 0;
         for (Region<1>::Iterator i = region1.begin(); i != region1.end(); ++i) {
-            grid1.set(*i, TestCell(counter, 10000 + counter));
+            grid1.set(*i, TestCell(counter, 10000 + counter, false, false));
             ++counter;
         }
 
@@ -282,7 +282,7 @@ public:
             TestCell expected(-20);
 
             if (region3.count(*i)) {
-                expected = TestCell(counter, 10000 + counter);
+                expected = TestCell(counter, 10000 + counter, false, false);
                 ++counter;
                 if (counter == 39) {
                     counter = 95;
@@ -322,7 +322,7 @@ public:
 
         int counter = 0;
         for (Region<1>::Iterator i = region1.begin(); i != region1.end(); ++i) {
-            grid1.set(*i, TestCell(counter, 10000 + counter));
+            grid1.set(*i, TestCell(counter, 10000 + counter, false, false));
             ++counter;
         }
 
@@ -337,7 +337,7 @@ public:
             TestCell expected(-2);
 
             if (region3.count(*i)) {
-                expected = TestCell(counter, 10000 + counter);
+                expected = TestCell(counter, 10000 + counter, false, false);
                 ++counter;
                 if (counter == 3) {
                     counter = 36;
@@ -364,7 +364,7 @@ public:
         GridType grid(region);
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
-            grid.set(*i, TestCell(i->x(), 10 * i->x()));
+            grid.set(*i, TestCell(i->x(), 10 * i->x(), false, false));
         }
 
         Region<1> subset;
@@ -378,7 +378,7 @@ public:
             Selector<TestCell>(&TestCell::id, "id"),
             subset);
 
-        int counter = 0;
+        unsigned counter = 0;
         for (Region<1>::Iterator i = subset.begin(); i != subset.end(); ++i) {
             TS_ASSERT_EQUALS(i->x(), buf[counter]);
             ++counter;
@@ -417,7 +417,7 @@ public:
         GridType grid(region);
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
-            grid.set(*i, TestCell(i->x(), 10 * i->x()));
+            grid.set(*i, TestCell(i->x(), 10 * i->x(), false, false));
         }
 
         Region<1> subset;
@@ -431,7 +431,7 @@ public:
             Selector<TestCell>(&TestCell::id, "id"),
             subset);
 
-        int counter = 0;
+        unsigned counter = 0;
         for (Region<1>::Iterator i = subset.begin(); i != subset.end(); ++i) {
             TS_ASSERT_EQUALS(i->x(), buf[counter]);
             ++counter;
@@ -479,7 +479,7 @@ public:
             TestCell cell = grid.get(*i);
             TS_ASSERT_EQUALS(cell.id, i->x());
 
-            cell.cycleCounter = cell.id;
+            cell.cycleCounter = static_cast<unsigned>(cell.id);
             grid.set(*i, cell);
         }
 
@@ -494,11 +494,11 @@ public:
             int counter = 42195;
 
             for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-                buf.resize(i->length());
+                buf.resize(static_cast<std::size_t>(i->length()));
 
                 grid.get(*i, &buf[0]);
                 for (std::size_t j = 0; j < buf.size(); ++j) {
-                    int expectedID = i->origin.x() + j;
+                    int expectedID = i->origin.x() + static_cast<int>(j);
                     TS_ASSERT_EQUALS(expectedID, buf[j].id);
 
                     buf[j].id = counter;
@@ -511,7 +511,7 @@ public:
             counter = 42195;
 
             for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-                buf.resize(i->length());
+                buf.resize(static_cast<std::size_t>(i->length()));
 
                 grid.get(*i, &buf[0]);
                 for (std::size_t j = 0; j < buf.size(); ++j) {
@@ -524,7 +524,7 @@ public:
         // test load/save member
         {
             std::vector<unsigned> buf(region.size());
-            int counter = 0;
+            std::size_t counter = 0;
 
             grid.saveMember(&buf[0], MemoryLocation::HOST, Selector<TestCell>(&TestCell::cycleCounter, "cycleCounter"), region);
 
@@ -542,7 +542,7 @@ public:
 
             counter = 2000;
             for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
-                TS_ASSERT_EQUALS(grid.get(*i).id, counter);
+                TS_ASSERT_EQUALS(grid.get(*i).id, static_cast<int>(counter));
                 ++counter;
             }
         }
@@ -659,7 +659,7 @@ public:
             TestCell cell = grid.get(*i);
             TS_ASSERT_EQUALS(cell.id, i->x());
 
-            cell.cycleCounter = cell.id;
+            cell.cycleCounter = static_cast<unsigned>(cell.id);
             grid.set(*i, cell);
         }
 
@@ -674,11 +674,11 @@ public:
             int counter = 0;
 
             for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-                buf.resize(i->length());
+                buf.resize(static_cast<std::size_t>(i->length()));
 
                 grid.get(*i, &buf[0]);
                 for (std::size_t j = 0; j < buf.size(); ++j) {
-                    int expectedID = i->origin.x() + j;
+                    int expectedID = i->origin.x() + static_cast<int>(j);
                     TS_ASSERT_EQUALS(expectedID, buf[j].id);
 
                     buf[j].id = counter;
@@ -691,7 +691,7 @@ public:
             counter = 0;
 
             for (Region<1>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-                buf.resize(i->length());
+                buf.resize(static_cast<std::size_t>(i->length()));
 
                 grid.get(*i, &buf[0]);
                 for (std::size_t j = 0; j < buf.size(); ++j) {
@@ -704,7 +704,7 @@ public:
         // test load/save member
         {
             std::vector<unsigned> buf(region.size());
-            int counter = 0;
+            unsigned counter = 0;
 
             grid.saveMember(&buf[0], MemoryLocation::HOST, Selector<TestCell>(&TestCell::cycleCounter, "cycleCounter"), region);
 
@@ -722,7 +722,7 @@ public:
 
             counter = 1000;
             for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
-                TS_ASSERT_EQUALS(grid.get(*i).id, counter);
+                TS_ASSERT_EQUALS(grid.get(*i).id, static_cast<int>(counter));
                 ++counter;
             }
         }
