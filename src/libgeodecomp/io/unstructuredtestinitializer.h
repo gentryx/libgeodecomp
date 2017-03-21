@@ -21,7 +21,7 @@ public:
         int dim,
         unsigned maxSteps,
         unsigned startStep = 0,
-        unsigned maxNeighbors = 20) :
+        int maxNeighbors = 20) :
         dim(dim),
         lastStep(maxSteps),
         firstStep(startStep),
@@ -122,7 +122,7 @@ private:
     int dim;
     unsigned lastStep;
     unsigned firstStep;
-    unsigned maxNeighbors;
+    int maxNeighbors;
 };
 
 }
