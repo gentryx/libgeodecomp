@@ -98,7 +98,7 @@ public:
         stepper->addPatchAccepter(patchAccepter, patchType);
     }
 
-    inline void update(int nanoSteps)
+    inline void update(unsigned nanoSteps)
     {
         stepper->update(nanoSteps);
     }

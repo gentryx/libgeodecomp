@@ -39,7 +39,7 @@ public:
     }
 
     template<class HOOD>
-    inline void copyOver(const PassThroughContainer& oldSelf, const HOOD& hood, const int nanoStep)
+    inline void copyOver(const PassThroughContainer& oldSelf, const HOOD& hood, const unsigned nanoStep)
     {
         *this = oldSelf;
     }
@@ -47,7 +47,7 @@ public:
     template<class NEIGHBORHOOD_ADAPTER_ALL>
     inline void updateCargo(
         NEIGHBORHOOD_ADAPTER_ALL& allNeighbors,
-        int nanoStep)
+        unsigned nanoStep)
     {
         cell.update(allNeighbors, nanoStep);
     }

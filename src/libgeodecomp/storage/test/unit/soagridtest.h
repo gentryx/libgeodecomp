@@ -101,7 +101,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, const int nanoStep)
+    void update(const NEIGHBORHOOD& hood, const unsigned nanoStep)
     {}
 
     template<typename HOOD_OLD, typename HOOD_NEW>

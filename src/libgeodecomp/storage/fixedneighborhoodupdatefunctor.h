@@ -44,7 +44,7 @@ public:
         const Coord<DIM> *dimensionsOld,
         const Coord<DIM> *dimensionsNew,
         const Coord<DIM> *topologicalDimensions,
-        int nanoStep,
+        unsigned nanoStep,
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) const
     {
@@ -138,7 +138,7 @@ public:
         const Coord<DIM> *dimensionsOld,
         const Coord<DIM> *dimensionsNew,
         const Coord<DIM> *topologicalDimensions,
-        int nanoStep,
+        unsigned nanoStep,
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) const
     {
@@ -275,7 +275,7 @@ public:
         const Coord<DIM> *dimensionsOld,
         const Coord<DIM> *dimensionsNew,
         const Coord<DIM> *topologicalDimensions,
-        int nanoStep,
+        unsigned nanoStep,
         const CONCURRENCY_FUNCTOR *concurrencySpec,
         const ANY_THREADED_UPDATE *modelThreadingSpec) :
         myRegion(region),
@@ -332,7 +332,7 @@ private:
     const Coord<DIM> *dimensionsOld;
     const Coord<DIM> *dimensionsNew;
     const Coord<DIM> *topologicalDimensions;
-    int nanoStep;
+    unsigned nanoStep;
     const CONCURRENCY_FUNCTOR *myConcurrencySpec;
     const ANY_THREADED_UPDATE *myModelThreadingSpec;
 };

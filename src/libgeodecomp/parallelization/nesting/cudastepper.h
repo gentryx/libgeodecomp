@@ -226,7 +226,7 @@ void copyKernel(CELL_TYPE *gridDataOld, CELL_TYPE *gridDataNew, int *coords, int
 
 template<int DIM, typename CELL_TYPE>
 __global__
-void updateKernel(CELL_TYPE *gridDataOld, CELL_TYPE *edgeCell, CELL_TYPE *gridDataNew, int nanoStep, const int *coords, int regionSize, CoordBox<DIM> boundingBox)
+void updateKernel(CELL_TYPE *gridDataOld, CELL_TYPE *edgeCell, CELL_TYPE *gridDataNew, unsigned nanoStep, const int *coords, int regionSize, CoordBox<DIM> boundingBox)
 {
     // fixme:
     int regionIndex = blockIdx.x;

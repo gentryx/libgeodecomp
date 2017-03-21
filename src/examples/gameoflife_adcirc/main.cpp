@@ -118,7 +118,7 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep);
+    void update(const NEIGHBORHOOD& hood, unsigned nanoStep);
 
     std::vector<SubNode> getBoundaryNodes(const int domainID) const
     {
@@ -215,7 +215,7 @@ typedef LibGeoDecomp::CoordMap<ContainerCellType, GridType> BaseNeighborhood;
 typedef LibGeoDecomp::NeighborhoodAdapter<BaseNeighborhood, 2> Neighborhood;
 
 template<typename NEIGHBORHOOD>
-void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
+void DomainCell::update(const NEIGHBORHOOD& hood, unsigned nanoStep)
 {
     int domainID = id;
     int numNeighbors = myNeighborTable.myNeighbors.size();

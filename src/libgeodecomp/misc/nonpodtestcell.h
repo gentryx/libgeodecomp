@@ -69,7 +69,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& neighborhood, int nanoStep)
+    void update(const NEIGHBORHOOD& neighborhood, unsigned nanoStep)
     {
 #define HOOD(X, Y) neighborhood[FixedCoord<X, Y, 0>()]
 

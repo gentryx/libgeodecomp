@@ -27,12 +27,12 @@ class UpdateEvent
 {
 public:
     inline
-    UpdateEvent(int nanoStep, int step) :
+    UpdateEvent(unsigned nanoStep, int step) :
         myNanoStep(nanoStep),
         myStep(step)
     {}
 
-    inline int nanoStep() const
+    inline unsigned nanoStep() const
     {
         return myNanoStep;
     }
@@ -43,7 +43,7 @@ public:
     }
 
 private:
-    int myNanoStep;
+    unsigned myNanoStep;
     int myStep;
 };
 
@@ -245,7 +245,7 @@ public:
         std::vector<hpx::shared_future<MESSAGE> >&& inputFutures,
         // Unused, just here to ensure correct ordering of updates per cell:
         const hpx::shared_future<void>& lastTimeStepReady,
-        int nanoStep,
+        unsigned nanoStep,
         int step)
     {
         int targetGlobalNanoStep = step * NANO_STEPS + nanoStep + 1;

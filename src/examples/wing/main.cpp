@@ -112,7 +112,7 @@ public:
     {}
 
     template<class NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& neighbors, int nanoStep)
+    void update(const NEIGHBORHOOD& neighbors, unsigned nanoStep)
     {
         *this = neighbors[FixedCoord<0, 0>()];
 

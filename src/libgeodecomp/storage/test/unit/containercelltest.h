@@ -20,7 +20,7 @@ public:
     {}
 
     template<class NEIGHBORHOOD>
-    void update(NEIGHBORHOOD neighbors, int nanoStep)
+    void update(NEIGHBORHOOD neighbors, unsigned nanoStep)
     {
         for (std::vector<int>::iterator i = ids->begin();
              i != ids->end();

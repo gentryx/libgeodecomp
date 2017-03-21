@@ -81,7 +81,7 @@ private:
  */
 template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS, class CELL_TYPE>
 __global__
-void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength)
+void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, unsigned nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength)
 {
     // we need to distinguish logical coordinates and padded
     // coordinates: padded coords will be used to compute addresses
@@ -159,7 +159,7 @@ void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
  */
 template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS, class CELL_TYPE>
 __global__
-void kernel3D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength)
+void kernel3D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, unsigned nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength)
 {
     // we need to distinguish logical coordinates and padded
     // coordinates: padded coords will be used to compute addresses
@@ -252,7 +252,7 @@ class KernelWrapper<1, WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS>
 {
 public:
     template<class CELL_TYPE>
-    void operator()(dim3 cudaDimGrid, dim3 cudaDimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
+    void operator()(dim3 cudaDimGrid, dim3 cudaDimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, unsigned nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
     {
         kernel2D<WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS><<<cudaDimGrid, cudaDimBlock>>>(
             devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, axisWrapOffset, offsetY, offsetZ, wavefrontLength);
@@ -267,7 +267,7 @@ class KernelWrapper<2, WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS>
 {
 public:
     template<class CELL_TYPE>
-    void operator()(dim3 cudaDimGrid, dim3 cudaDimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
+    void operator()(dim3 cudaDimGrid, dim3 cudaDimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, unsigned nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
     {
         kernel2D<WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS><<<cudaDimGrid, cudaDimBlock>>>(
             devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, axisWrapOffset, offsetY, offsetZ, wavefrontLength);
@@ -282,7 +282,7 @@ class KernelWrapper<3, WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS>
 {
 public:
     template<class CELL_TYPE>
-    void operator()(dim3 cudaDimGrid, dim3 cudaDimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
+    void operator()(dim3 cudaDimGrid, dim3 cudaDimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, unsigned nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
     {
         kernel3D<WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS><<<cudaDimGrid, cudaDimBlock>>>(
             devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, axisWrapOffset, offsetY, offsetZ, wavefrontLength);

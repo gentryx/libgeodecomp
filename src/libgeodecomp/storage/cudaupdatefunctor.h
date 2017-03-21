@@ -16,7 +16,7 @@ class CUDAUpdateFunctor
 public:
     template<typename HOOD>
     __device__
-    void operator()(CELL_TYPE *gridNew, int& index, int offset, const HOOD& hood, const int nanoStep) const
+    void operator()(CELL_TYPE *gridNew, int& index, int offset, const HOOD& hood, const unsigned nanoStep) const
     {
         typedef typename APITraits::SelectSeparateCUDAUpdate<CELL_TYPE>::Value CUDATest;
         CUDATest fixme;
@@ -28,14 +28,14 @@ private:
 
     template<typename HOOD>
     __device__
-    void runUpdate(CELL_TYPE *gridNew, int& index, int offset, const HOOD& hood, int nanoStep, APITraits::FalseType) const
+    void runUpdate(CELL_TYPE *gridNew, int& index, int offset, const HOOD& hood, unsigned nanoStep, APITraits::FalseType) const
     {
         gridNew[index].update(hood, nanoStep);
     }
 
     template<typename HOOD>
     __device__
-    void runUpdate(CELL_TYPE *gridNew, int& index, int offset, const HOOD& hood, int nanoStep, APITraits::TrueType) const
+    void runUpdate(CELL_TYPE *gridNew, int& index, int offset, const HOOD& hood, unsigned nanoStep, APITraits::TrueType) const
     {
         gridNew[index].updateCUDA(hood, nanoStep);
     }

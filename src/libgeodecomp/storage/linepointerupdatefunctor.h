@@ -61,7 +61,7 @@ public:
         const CoordBox<DIM>& box,
         const CELL **pointers,
         CELL *newLine,
-        int nanoStep)
+        unsigned nanoStep)
     {
         typedef typename APITraits::SelectTopology<CELL>::Value Topology;
         const Coord<DIM>& c = streak.origin;
@@ -117,7 +117,7 @@ public:
         const CoordBox<DIM>& box,
         const CELL **pointers,
         CELL *newLine,
-        int nanoStep)
+        unsigned nanoStep)
     {
         typedef typename APITraits::SelectStencil<CELL>::Value Stencil;
         typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
@@ -156,7 +156,7 @@ private:
      * to update() calls for single cells.
      */
     template<typename NEIGHBORHOOD>
-    void updateWrapper(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APITraits::FalseType)
+    void updateWrapper(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, unsigned nanoStep, APITraits::FalseType)
     {
         for (; *x < endX; ++(*x)) {
             newLine[*x].update(hood, nanoStep);
@@ -169,7 +169,7 @@ private:
      * to updateLineX() for streaks of cells.
      */
     template<typename NEIGHBORHOOD>
-    void updateWrapper(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APITraits::TrueType)
+    void updateWrapper(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, unsigned nanoStep, APITraits::TrueType)
     {
         CELL::updateLineX(newLine, x, endX, hood, nanoStep);
     }

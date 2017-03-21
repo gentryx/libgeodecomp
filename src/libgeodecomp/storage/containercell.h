@@ -163,7 +163,7 @@ public:
      * updating.
      */
     template<class HOOD>
-    inline void update(const HOOD& neighbors, const int nanoStep)
+    inline void update(const HOOD& neighbors, const unsigned nanoStep)
     {
         typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
         typedef typename NeighborhoodAdapter<ContainerCell, HOOD, PassThroughType>::Value NeighborhoodAdapterType;
@@ -174,7 +174,7 @@ public:
     }
 
     template<class HOOD_SELF>
-    inline void copyOver(const ContainerCell& oldSelf, HOOD_SELF& ownNeighbors, const int nanoStep)
+    inline void copyOver(const ContainerCell& oldSelf, HOOD_SELF& ownNeighbors, const unsigned nanoStep)
     {
         *this = oldSelf;
     }
@@ -185,7 +185,7 @@ public:
      * updateCargo(), which doesn't copy over the old state:
      */
     template<class HOOD_ALL>
-    inline void updateCargo(HOOD_ALL& allNeighbors, const int nanoStep)
+    inline void updateCargo(HOOD_ALL& allNeighbors, const unsigned nanoStep)
     {
         for (std::size_t i = 0; i < numElements; ++i) {
             cells[i].update(allNeighbors, nanoStep);

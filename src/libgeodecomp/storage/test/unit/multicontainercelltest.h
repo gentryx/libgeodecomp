@@ -53,7 +53,7 @@ public:
     }
 
     template<typename HOOD>
-    inline void update(HOOD& hood, const int nanoStep);
+    inline void update(HOOD& hood, const unsigned nanoStep);
 
 private:
     FloatCoord<3> pos;
@@ -85,7 +85,7 @@ public:
     }
 
     template<typename HOOD>
-    inline void update(HOOD& hood, const int nanoStep)
+    inline void update(HOOD& hood, const unsigned nanoStep)
     {
         for (int i = 0; i < numRedParticlesToBeSpawned; ++i) {
             hood->red << SpawningParticleRed(pos, 0);
@@ -102,7 +102,7 @@ private:
 };
 
 template<typename HOOD>
-void SpawningParticleRed::update(HOOD& hood, const int nanoStep)
+void SpawningParticleRed::update(HOOD& hood, const unsigned nanoStep)
 {
     for (int i = 0; i < numRedParticlesToBeSpawned; ++i) {
         hood->red << SpawningParticleRed(pos, 0);
@@ -135,7 +135,7 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep);
+    void update(const NEIGHBORHOOD& hood, unsigned nanoStep);
 
     std::string cargo;
 };
@@ -148,7 +148,7 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    void update(const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
         for (int i = 0; i < 20; ++i) {
             try {
@@ -173,7 +173,7 @@ public:
 };
 
 template<typename NEIGHBORHOOD>
-void SimpleNode::update(const NEIGHBORHOOD& hood, int nanoStep)
+void SimpleNode::update(const NEIGHBORHOOD& hood, unsigned nanoStep)
 {
     for (int i = 0; i < 20; ++i) {
         try {
@@ -202,7 +202,7 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    void update(const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
         seenNeighbors = 0;
         seenElements = 0;

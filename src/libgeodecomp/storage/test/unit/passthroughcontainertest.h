@@ -25,7 +25,7 @@ public:
     }
 
     template<typename HOOD>
-    void update(const HOOD& hood, int nanoStep)
+    void update(const HOOD& hood, unsigned nanoStep)
     {
         // intentionally left blank
     }
@@ -44,7 +44,7 @@ public:
     {}
 
     template<typename HOOD>
-    void update(const HOOD& hood, int nanoStep)
+    void update(const HOOD& hood, unsigned nanoStep)
     {
         temperature = (hood.cells[Coord<2>( 0, -1)].temperature +
                        hood.cells[Coord<2>(-1,  0)].temperature +

@@ -111,7 +111,7 @@ public:
     }
 
     template<class HOOD>
-    inline void update(HOOD& hood, const int nanoStep)
+    inline void update(HOOD& hood, const unsigned nanoStep)
     {
         typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
         typedef typename NeighborhoodAdapter<BoxCell, HOOD, PassThroughType>::Value NeighborhoodAdapterType;
@@ -125,7 +125,7 @@ public:
     inline void copyOver(
         const BoxCell& oldSelf,
         NEIGHBORHOOD_ADAPTER_SELF& ownNeighbors,
-        int nanoStep)
+        unsigned nanoStep)
     {
         origin    = oldSelf.origin;
         dimension = oldSelf.dimension;
@@ -141,7 +141,7 @@ public:
     template<class NEIGHBORHOOD_ADAPTER_ALL>
     inline void updateCargo(
         NEIGHBORHOOD_ADAPTER_ALL& allNeighbors,
-        int nanoStep)
+        unsigned nanoStep)
     {
         // we need to fix end here so particles inserted by update()
         // won't be immediately updated, too:

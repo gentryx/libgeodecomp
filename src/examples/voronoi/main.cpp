@@ -38,7 +38,7 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    void update(const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
         temperature = 0;
 

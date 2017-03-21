@@ -41,7 +41,7 @@ public:
     {}
 
     template<typename HOOD>
-    void update(const HOOD& hood, const int nanoStep)
+    void update(const HOOD& hood, const unsigned nanoStep)
     {
         glow -= DELTA_T * 0.04;
         if (glow < 0) {
@@ -91,7 +91,7 @@ public:
     {}
 
     template<typename HOOD>
-    void update(const HOOD& hood, const int nanoStep)
+    void update(const HOOD& hood, const unsigned nanoStep)
     {
         addForces(hood.spheres.begin(),    hood.spheres.end());
         addForces(hood.boundaries.begin(), hood.boundaries.end());

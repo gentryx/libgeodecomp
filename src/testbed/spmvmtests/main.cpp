@@ -349,8 +349,11 @@ class SparseMatrixVectorMultiplicationMM : public CPUBenchmark
 private:
     typedef UnstructuredSoAGrid<CELL, 1, double, C, SIGMA> Grid;
 
-    void updateFunctor(const Region<1>& region, const Grid& gridOld,
-                       Grid *gridNew, unsigned nanoStep)
+    void updateFunctor(
+        const Region<1>& region,
+        const Grid& gridOld,
+        Grid *gridNew,
+        unsigned nanoStep)
     {
         typedef LibGeoDecomp::UpdateFunctorHelpers::ConcurrencyEnableOpenMP ConcurrencySpec;
         typedef typename APITraits::SelectThreadedUpdate<CELL>::Value ModelThreadingSpec;

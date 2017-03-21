@@ -30,7 +30,7 @@ public:
     {}
 
     template<typename HOOD>
-    inline void update(const HOOD& hood, const int nanoStep)
+    inline void update(const HOOD& hood, const unsigned nanoStep)
     {
         neighbors = 0;
 
@@ -91,7 +91,7 @@ public:
     }
 
     template<typename HOOD>
-    inline void update(HOOD& hood, const int nanoStep)
+    inline void update(HOOD& hood, const unsigned nanoStep)
     {
         for (int i = 0; i < numParticlesToBeSpawned; ++i) {
             hood << SpawningParticle(pos, 0);

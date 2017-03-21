@@ -92,7 +92,7 @@ public:
     }
 
     template<class CONTAINER>
-    void update(CONTAINER *container, int nanoStep)
+    void update(CONTAINER *container, unsigned nanoStep)
     {
         *this = container->cell(id);
 

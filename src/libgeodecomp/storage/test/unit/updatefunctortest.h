@@ -20,7 +20,7 @@ public:
     {};
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    void update(const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
         myLog << "BasicCell::update(nanoStep = " << nanoStep << ")\n";
     }
@@ -35,7 +35,7 @@ public:
     {};
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    void update(const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
         myLog << "LineUpdateCell::update(nanoStep = " << nanoStep << ")\n";
     }
@@ -43,7 +43,7 @@ public:
     // won't ever be called as all current update functors support
     // updateLineX only with fixed neighborhoods
     template<typename NEIGHBORHOOD>
-    static void updateLineX(LineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
+    static void updateLineX(LineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
         myLog << "LineUpdateCell::updateLineX(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
         *x = endX;
@@ -59,7 +59,7 @@ public:
     {};
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    void update(const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
         myLog << "FixedCell::update(nanoStep = " << nanoStep << ")\n";
     }
@@ -76,7 +76,7 @@ public:
     {};
 
     template<typename NEIGHBORHOOD>
-    static void updateLineX(FixedLineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
+    static void updateLineX(FixedLineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
         myLog << "FixedLineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
         *x = endX;
@@ -104,14 +104,14 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    void update(const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
     }
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineX(
         ACCESSOR1& hoodOld, int indexEnd,
-        ACCESSOR2& hoodNew, int nanoStep)
+        ACCESSOR2& hoodNew, unsigned nanoStep)
     {
         for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index()) {
             hoodNew.temp()  = hoodOld[FixedCoord<0, 0, 0>()].temp();
@@ -226,7 +226,7 @@ public:
         typedef SoAGrid<TestCellType, Topologies::Cube<3>::Topology> GridType;
 
         int timeSteps = 5;
-        int nanoSteps = TestCellType::NANO_STEPS;
+        unsigned nanoSteps = TestCellType::NANO_STEPS;
         Coord<3> dim(10, 15, 5);
         CoordBox<3> box(Coord<3>(), dim);
 
@@ -262,7 +262,7 @@ private:
     {
         Streak<2> streak(Coord<2>(2, 1), 10);
         Coord<2> dim(20, 10);
-        int nanoStep = 0;
+        unsigned nanoStep = 0;
 
         Grid<CELL> gridOld(dim);
         Grid<CELL> gridNew(dim);

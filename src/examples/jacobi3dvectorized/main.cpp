@@ -30,7 +30,7 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, const int nanoStep)
+    static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, const unsigned nanoStep)
     {
         typedef LibFlatArray::short_vec<double, 16> MyShortVec;
         LIBFLATARRAY_LOOP_PEELER(MyShortVec, long, (*x), endX, updateLineImplementation, target, hood, nanoStep);

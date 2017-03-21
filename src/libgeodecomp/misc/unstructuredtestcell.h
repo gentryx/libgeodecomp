@@ -183,14 +183,14 @@ public:
     }
 
     template<typename HOOD>
-    void update(const HOOD& hood, int nanoStep)
+    void update(const HOOD& hood, unsigned nanoStep)
     {
         *this = hood[hood.index()];
         verify(hood.begin(), hood.end(), hood, nanoStep);
     }
 
     template<typename HOOD_OLD, typename HOOD_NEW>
-    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, int nanoStep)
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned nanoStep)
     {
         // This update function traverses the chunks in a scalar
         // fashion. That's not advisable from a performance point of
@@ -265,7 +265,7 @@ private:
     }
 
     template<typename ITERATOR1, typename ITERATOR2, typename HOOD>
-    void verify(const ITERATOR1& begin, const ITERATOR2& end, const HOOD& hood, int nanoStep)
+    void verify(const ITERATOR1& begin, const ITERATOR2& end, const HOOD& hood, unsigned nanoStep)
     {
         FixedArray<int, 100> actualNeighborIDs;
         FixedArray<double, 100> actualNeighborWeights;
@@ -290,7 +290,7 @@ private:
             isValid = false;
         }
 
-        int expectedNanoStep = static_cast<int>(cycleCounter % APITraits::SelectNanoSteps<UnstructuredTestCell>::VALUE);
+        unsigned expectedNanoStep = cycleCounter % APITraits::SelectNanoSteps<UnstructuredTestCell>::VALUE;
 
         if (expectedNanoStep != nanoStep) {
             OUTPUT() << "UnstructuredTestCell error: id " << id

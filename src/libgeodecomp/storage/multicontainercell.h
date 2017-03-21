@@ -184,7 +184,7 @@ public:
                                                                         \
         template<class NEIGHBORHOOD>                                    \
         inline void update(const NEIGHBORHOOD& hood,                    \
-                           int nanoStep)                                \
+                           unsigned nanoStep)                                \
         {                                                               \
             MultiNeighborhoodAdapter<NEIGHBORHOOD> multiHood(           \
                 this,                                                   \
