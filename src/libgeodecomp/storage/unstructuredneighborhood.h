@@ -27,8 +27,9 @@ public:
     using Matrix = SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>;
 
     inline
-    Iterator(const Matrix& matrix, int startIndex) :
-        matrix(matrix), index(startIndex)
+    Iterator(const Matrix& matrix, unsigned startIndex) :
+        matrix(matrix),
+        index(startIndex)
     {}
 
     inline
@@ -72,7 +73,7 @@ public:
 
 private:
     const Matrix& matrix;
-    int index;
+    unsigned index;
 };
 
 }
@@ -104,7 +105,7 @@ public:
     UnstructuredNeighborhood(const Grid& grid, long startX) :
         grid(grid),
         xOffset(startX),
-        currentChunk(startX / C),
+        currentChunk(static_cast<unsigned>(startX / C)),
         chunkOffset(startX % C),
         currentMatrixID(0)
     {}
@@ -155,7 +156,7 @@ public:
     {
         const auto& matrix = grid.getWeights(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
-        return Iterator(matrix, index);
+        return Iterator(matrix, static_cast<unsigned>(index));
     }
 
     inline
@@ -164,7 +165,7 @@ public:
         const auto& matrix = grid.getWeights(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
         index += C * matrix.rowLengthVec()[xOffset];
-        return Iterator(matrix, index);
+        return Iterator(matrix, static_cast<unsigned>(index));
     }
 
     inline
@@ -174,11 +175,11 @@ public:
     }
 
 private:
-    const Grid& grid;           /**< old grid */
-    long xOffset;               /**< initial offset for updateLineX function */
-    int currentChunk;           /**< current chunk */
-    int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
-    int currentMatrixID;        /**< current id for matrices */
+    const Grid& grid;            /**< old grid */
+    long xOffset;                /**< initial offset for updateLineX function */
+    unsigned currentChunk;       /**< current chunk */
+    int chunkOffset;             /**< offset inside current chunk: 0 <= x < C */
+    std::size_t currentMatrixID; /**< current id for matrices */
 
     /**
      * If xOffset is changed, the current chunk and chunkOffset
