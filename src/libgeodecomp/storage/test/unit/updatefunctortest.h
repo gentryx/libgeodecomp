@@ -243,9 +243,9 @@ public:
 
 
         for (int t = 0; t < timeSteps; ++t) {
-            for (int s = 0; s < nanoSteps; ++s) {
+            for (unsigned s = 0; s < nanoSteps; ++s) {
                 UpdateFunctor<TestCellType>()(region, Coord<3>(), Coord<3>(), *gridOld, gridNew, s);
-                int cycle = (init.startStep() + t) * TestCellType::NANO_STEPS + s;
+                unsigned cycle = (init.startStep() + t) * TestCellType::NANO_STEPS + s;
 
                 TS_ASSERT_TEST_GRID2(GridType, *gridOld, cycle, );
                 cycle += 1;

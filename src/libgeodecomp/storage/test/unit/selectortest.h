@@ -113,10 +113,10 @@ public:
         selectorY.copyMemberOut(&vec[0], MemoryLocation::HOST, (char*)&targetY[0], MemoryLocation::HOST, 20);
         selectorZ.copyMemberOut(&vec[0], MemoryLocation::HOST, (char*)&targetZ[0], MemoryLocation::HOST, 20);
 
-        for (int i = 0; i < 20; ++i) {
-            TS_ASSERT_EQUALS(targetX[i], i);
+        for (std::size_t i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(targetX[i], static_cast<long long>(i));
             TS_ASSERT_EQUALS(targetY[i], 47.11 + i);
-            TS_ASSERT_EQUALS(targetZ[i], 'a' + i);
+            TS_ASSERT_EQUALS(targetZ[i], 'a' + static_cast<char>(i));
         }
     }
 
@@ -141,10 +141,10 @@ public:
         selectorY.copyMemberIn((char*)&sourceY[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
         selectorZ.copyMemberIn((char*)&sourceZ[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
 
-        for (int i = 0; i < 20; ++i) {
-            TS_ASSERT_EQUALS(vec[i].x, i * 2 + 13);
+        for (std::size_t i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(vec[i].x, static_cast<long long>(i) * 2 + 13);
             TS_ASSERT_EQUALS(vec[i].y, 1.0 + i / 100.0);
-            TS_ASSERT_EQUALS(vec[i].z, i + 69);
+            TS_ASSERT_EQUALS(vec[i].z, static_cast<char>(i) + 69);
         }
     }
 
@@ -251,7 +251,7 @@ public:
             MemoryLocation::HOST,
             13);
 
-        for (int i = 0; i < 13; ++i) {
+        for (std::size_t i = 0; i < 13; ++i) {
             // expecting 'A' + "offset from save()" + index
             double expected = 65 + 20 + i;
             TS_ASSERT_EQUALS(expected, target[i]);
@@ -264,9 +264,9 @@ public:
             MemoryLocation::HOST,
             10);
 
-        for (int i = 0; i < 13; ++i) {
+        for (std::size_t i = 0; i < 13; ++i) {
             // expecting 'A' + "offset from save()" + "offset from load()" + index
-            char expected = 65 + i;
+            char expected = 65 + static_cast<char>(i);
             if (i < 10) {
                 expected += 10 + 20;
             }
@@ -297,8 +297,8 @@ public:
             MemoryLocation::HOST,
             20);
 
-        for (int i = 0; i < 20; ++i) {
-            TS_ASSERT_EQUALS(Color(i, 47, 11), targetY[i]);
+        for (std::size_t i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(Color(static_cast<int>(i), 47, 11), targetY[i]);
         }
 
         // test copyMemberIn:
@@ -309,8 +309,8 @@ public:
             MemoryLocation::HOST,
             20);
 
-        for (int i = 0; i < 20; ++i) {
-            TS_ASSERT_EQUALS(vec[i].y, i * 2 + 10);
+        for (std::size_t i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(vec[i].y, static_cast<int>(i) * 2 + 10);
         }
     }
 
@@ -336,8 +336,8 @@ public:
             MemoryLocation::HOST,
             20);
 
-        for (int i = 0; i < 20; ++i) {
-            TS_ASSERT_EQUALS(i + 20 + 'a', targetZ[i]);
+        for (std::size_t i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(static_cast<char>(i) + 20 + 'a', targetZ[i]);
         }
 
         // test copyMemberIn:
@@ -348,10 +348,9 @@ public:
             MemoryLocation::HOST,
             20);
 
-        for (int i = 0; i < 20; ++i) {
-            char expected = i;
-            expected += 30 + 'a';
-            TS_ASSERT_EQUALS((int)vec[i].z, expected);
+        for (std::size_t i = 0; i < 20; ++i) {
+            char expected = static_cast<char>(i) + 30 + 'a';
+            TS_ASSERT_EQUALS(vec[i].z, expected);
         }
     }
 
@@ -378,8 +377,8 @@ public:
             20,
             0);
 
-        for (int i = 0; i < 20; ++i) {
-            TS_ASSERT_EQUALS(Color(i + 50, 47, 11), targetY[i]);
+        for (std::size_t i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(Color(static_cast<int>(i) + 50, 47, 11), targetY[i]);
         }
 
         // test copyStreakIn:
@@ -391,7 +390,7 @@ public:
             20,
             0);
 
-        for (int i = 0; i < 20; ++i) {
+        for (std::size_t i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(vec[i], (50 + i) * 2 + 10);
         }
     }
@@ -424,8 +423,8 @@ public:
             selectorY,
             region);
 
-        for (int i = 0; i < 20; ++i) {
-            TS_ASSERT_EQUALS(Color(i + 50, 47, 11), targetY[i]);
+        for (std::size_t i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(Color(static_cast<int>(i) + 50, 47, 11), targetY[i]);
         }
 
         // test copyStreakIn:
@@ -464,7 +463,7 @@ public:
         std::vector<double> targetZ(20);
         grid.saveMember(&targetZ[0], MemoryLocation::HOST, selectorZ, region);
 
-        for (int i = 0; i < 20; ++i) {
+        for (std::size_t i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(i + 'a' + 20, targetZ[i]);
         }
 
@@ -637,9 +636,10 @@ public:
             MemoryLocation::HOST, 40);
 
         for (int i = 0; i < 40; ++i) {
-            TS_ASSERT_EQUALS(i + 2000 + 20000, targetY[i * 3 + 0]);
-            TS_ASSERT_EQUALS(i + 3000 + 30000, targetY[i * 3 + 1]);
-            TS_ASSERT_EQUALS(i + 4000 + 40000, targetY[i * 3 + 2]);
+            std::size_t index = static_cast<std::size_t>(i) * 3;
+            TS_ASSERT_EQUALS(i + 2000 + 20000, targetY[index + 0]);
+            TS_ASSERT_EQUALS(i + 3000 + 30000, targetY[index + 1]);
+            TS_ASSERT_EQUALS(i + 4000 + 40000, targetY[index + 2]);
         }
 
         // test copyMemberIn:
@@ -651,9 +651,10 @@ public:
             40);
 
         for (int i = 0; i < 40; ++i) {
-            TS_ASSERT_EQUALS(vec[i].y[0], i + 2000 + 20000 + 100000);
-            TS_ASSERT_EQUALS(vec[i].y[1], i + 3000 + 30000 + 200000);
-            TS_ASSERT_EQUALS(vec[i].y[2], i + 4000 + 40000 + 300000);
+            std::size_t index = static_cast<std::size_t>(i);
+            TS_ASSERT_EQUALS(vec[index].y[0], i + 2000 + 20000 + 100000);
+            TS_ASSERT_EQUALS(vec[index].y[1], i + 3000 + 30000 + 200000);
+            TS_ASSERT_EQUALS(vec[index].y[2], i + 4000 + 40000 + 300000);
         }
     }
 
@@ -699,7 +700,7 @@ public:
             selectorY,
             region);
 
-        int counter = 0;
+        std::size_t counter = 0;
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
             TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 2000 + 20000, targetY[counter * 3 + 0]);
             TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 3000 + 30000, targetY[counter * 3 + 1]);

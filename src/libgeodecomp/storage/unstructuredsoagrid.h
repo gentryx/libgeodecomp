@@ -167,8 +167,8 @@ public:
     {
         // init matrices
         for (std::size_t i = 0; i < MATRICES; ++i) {
-            matrices[i] =
-                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(dimension.x());
+            std::size_t size = static_cast<std::size_t>(dimension.x());
+            matrices[i] = SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(size);
         }
 
         // the grid size should be padded to the total number of chunks

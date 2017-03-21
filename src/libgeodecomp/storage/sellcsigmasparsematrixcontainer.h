@@ -117,7 +117,7 @@ public:
         for (std::size_t nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
             std::vector<int> lengths(C);
             for (std::size_t i = 0; i < lengths.size(); ++i) {
-                unsigned realRow = chunkRowToReal[nChunk * C + i];
+                int realRow = chunkRowToReal[nChunk * C + i];
                 lengths[i] = rowLength[static_cast<unsigned>(realRow)];
             }
             chunkLength[nChunk] = *std::max_element(begin(lengths), end(lengths));
@@ -128,7 +128,7 @@ public:
         }
         chunkOffset[numberOfChunks] =
             chunkOffset[numberOfChunks - 1] +
-            chunkLength[numberOfChunks - 1] * C;
+            chunkLength[numberOfChunks - 1] * static_cast<int>(C);
 
         // save values
         rowLength = std::move(rowLengthCopy);

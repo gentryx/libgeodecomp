@@ -112,10 +112,19 @@ public:
     double temp[40];
 };
 
+// unsigned to int conversions are fine here:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4365 )
+#endif
 
 LIBFLATARRAY_REGISTER_SOA(
     CellWithArrayMember,
     ((double)(temp)(40)) )
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 class VoidInitializer : public SimpleInitializer<CellWithArrayMember>
 {
@@ -320,13 +329,13 @@ public:
 
         SoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> grid(box, innerCell, edgeCell);
 
-        int maxX = dim.x() + 2;
-        int maxY = dim.y() + 2;
-        int maxZ = dim.z() + 2;
+        std::size_t maxX = static_cast<std::size_t>(dim.x() + 2);
+        std::size_t maxY = static_cast<std::size_t>(dim.y() + 2);
+        std::size_t maxZ = static_cast<std::size_t>(dim.z() + 2);
 
-        for (int z = 0; z < maxZ; ++z) {
-            for (int y = 0; y < maxY; ++y) {
-                for (int x = 0; x < maxX; ++x) {
+        for (std::size_t z = 0; z < maxZ; ++z) {
+            for (std::size_t y = 0; y < maxY; ++y) {
+                for (std::size_t x = 0; x < maxX; ++x) {
                     TestCellSoA expected = innerCell;
 
                     if ((x < 1) || (x > (maxX - 2)) ||
@@ -352,9 +361,9 @@ public:
         maxY = dim.y() + 2;
         maxZ = dim.z() + 2;
 
-        for (int z = 0; z < maxZ; ++z) {
-            for (int y = 0; y < maxY; ++y) {
-                for (int x = 0; x < maxX; ++x) {
+        for (std::size_t z = 0; z < maxZ; ++z) {
+            for (std::size_t y = 0; y < maxY; ++y) {
+                for (std::size_t x = 0; x < maxX; ++x) {
                     if ((x < 1) || (x > (maxX - 2)) ||
                         (y < 1) || (y > (maxY - 2)) ||
                         (z < 1) || (z > (maxZ - 2))) {

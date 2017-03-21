@@ -24,7 +24,7 @@ public:
     virtual ~UpdateFunctorTestBase()
     {}
 
-    void testSimple(int steps)
+    void testSimple(unsigned steps)
     {
         using std::swap;
         Coord<DIM> dim;
@@ -41,10 +41,10 @@ public:
         region << gridOld.boundingBox();
 
 
-        for (int s = 0; s < steps; ++s) {
+        for (unsigned s = 0; s < steps; ++s) {
             callFunctor(region, gridOld, &gridNew, s);
 
-            int cycle = init.startStep() * NANO_STEPS + s;
+            unsigned cycle = init.startStep() * NANO_STEPS + s;
             TS_ASSERT_TEST_GRID2(GridType, gridOld, cycle, typename);
             cycle += 1;
             TS_ASSERT_TEST_GRID2(GridType, gridNew, cycle, typename);
@@ -53,7 +53,7 @@ public:
         }
     }
 
-    void testSplittedTraversal(int steps)
+    void testSplittedTraversal(unsigned steps)
     {
         using std::swap;
         Coord<DIM> dim;
@@ -69,7 +69,7 @@ public:
 
         CoordBox<DIM> lineStarts = gridOld.boundingBox();
 
-        for (int s = 0; s < steps; ++s) {
+        for (unsigned s = 0; s < steps; ++s) {
             for (typename CoordBox<DIM>::StreakIterator i = lineStarts.beginStreak();
                  i != lineStarts.endStreak();
                  ++i) {
@@ -90,7 +90,7 @@ public:
                 callFunctor(r1, gridOld, &gridNew, s);
             }
 
-            int cycle = init.startStep() * NANO_STEPS + s;
+            unsigned cycle = init.startStep() * NANO_STEPS + s;
             TS_ASSERT_TEST_GRID2(GridType, gridOld, cycle, typename);
             cycle += 1;
             TS_ASSERT_TEST_GRID2(GridType, gridNew, cycle, typename);

@@ -53,8 +53,8 @@ public:
         dimension(dim)
     {
         for (std::size_t i = 0; i < MATRICES; ++i) {
-            matrices[i] =
-                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C ,SIGMA>(dim.x());
+            std::size_t size = static_cast<std::size_t>(dim.x());
+            matrices[i] = SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(size);
         }
     }
 
@@ -70,8 +70,8 @@ public:
         dimension(box.dimensions)
     {
         for (std::size_t i = 0; i < MATRICES; ++i) {
-            matrices[i] =
-                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(box.origin.x() + dimension.x());
+            std::size_t size = static_cast<std::size_t>(box.origin.x() + dimension.x());
+            matrices[i] = SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(size);
         }
     }
 
