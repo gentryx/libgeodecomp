@@ -81,12 +81,13 @@ void unstructuredLoopPeeler(COUNTER_TYPE1 *counter, const COUNTER_TYPE2& end, HO
         sibling_short_vec_switch<SHORT_VEC_TYPE, 1>::VALUE
         lfa_local_scalar;
 
+    const COUNTER_TYPE1 arityMinusOne = static_cast<COUNTER_TYPE1>(SHORT_VEC_TYPE::ARITY - 1);
     COUNTER_TYPE1 nextStop = *counter;
-    COUNTER_TYPE1 remainder = *counter & (SHORT_VEC_TYPE::ARITY - 1);
+    COUNTER_TYPE1 remainder = *counter & arityMinusOne;
     if (remainder != 0) {
         nextStop += SHORT_VEC_TYPE::ARITY - remainder;
     }
-    COUNTER_TYPE1 lastStop = end - (end & (SHORT_VEC_TYPE::ARITY - 1));
+    COUNTER_TYPE1 lastStop = end - (end & arityMinusOne);
 
     typedef UnstructuredLoopPeelerHelpers::WrappedNeighborhood<HOOD_OLD> WrappedHood;
     WrappedHood wrappedHood(hoodOld);

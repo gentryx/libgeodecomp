@@ -30,7 +30,7 @@ public:
 
     virtual void grid(GridBase<TEST_CELL, 1> *ret)
     {
-        int cycle = NANO_STEPS * firstStep;
+        unsigned cycle = NANO_STEPS * firstStep;
         Region<1> boundingRegion = ret->boundingRegion();
         typename GridBase<TEST_CELL, 1>::SparseMatrix weights;
 

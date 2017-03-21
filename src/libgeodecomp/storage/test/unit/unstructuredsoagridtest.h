@@ -275,7 +275,7 @@ public:
 
         // modify a bit and test again
         for (std::size_t i = 0; i < region.size(); ++i) {
-            grid.set(Coord<1>(static_cast<std::size_t>(i)), MySoACell1(i));
+            grid.set(Coord<1>(static_cast<int>(i)), MySoACell1(i));
         }
         grid.saveMember(valVector.data(), MemoryLocation::HOST, valSelector, region);
         for (std::size_t i = 0; i < region.size(); ++i) {

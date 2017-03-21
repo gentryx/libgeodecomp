@@ -313,7 +313,7 @@ public:
         }
 
         for (std::size_t i = 0; i < buffer.size(); ++i) {
-            buffer[i].id = static_cast<std::size_t>(1010101 + i);
+            buffer[i].id = static_cast<int>(1010101 + i);
             buffer[i].cycleCounter = 8252;
         }
 
@@ -324,7 +324,7 @@ public:
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             UnstructuredTestCell<> actual = grid2.get(*i);
             UnstructuredTestCell<> expected(
-                static_cast<std::size_t>(1010101 + index),
+                static_cast<int>(1010101 + index),
                 8252,
                 true);
 

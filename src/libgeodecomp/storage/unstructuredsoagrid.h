@@ -52,7 +52,9 @@ public:
 
         for (auto i = start; i != end; ++i) {
             accessor.index() = i->origin.x();
-            const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
+            const char *data = accessor.access_member(
+                static_cast<long>(selector.sizeOfMember()),
+                static_cast<long>(selector.offset()));
             selector.copyStreakOut(
                 data,
                 MemoryLocation::HOST,
@@ -99,7 +101,9 @@ public:
 
         for (auto i = start; i != end; ++i) {
             accessor.index() = i->origin.x();
-            char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
+            char *currentTarget = accessor.access_member(
+                static_cast<long>(selector.sizeOfMember()),
+                static_cast<long>(selector.offset()));
             selector.copyStreakIn(
                 currentSource,
                 sourceLocation,
