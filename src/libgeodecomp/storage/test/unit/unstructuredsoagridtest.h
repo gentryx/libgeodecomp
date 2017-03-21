@@ -27,7 +27,7 @@ public:
     {}
 
     explicit
-    MySoACell1(std::size_t val = 0) :
+    MySoACell1(std::size_t val) :
         val(static_cast<int>(val))
     {}
 
