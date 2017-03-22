@@ -705,7 +705,7 @@ private:
             static_cast<std::size_t>(edgeRadii.y() + coord.y()),
             static_cast<std::size_t>(edgeRadii.z()),
             cells,
-            count);
+            static_cast<std::size_t>(count));
     }
 
     void delegateSet(const Coord<3>& coord, const CELL *cells, int count)
