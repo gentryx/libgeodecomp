@@ -21,7 +21,7 @@ public:
     using Writer<CELL>::NANO_STEPS;
 
     TestWriter(
-        int period,
+        unsigned period,
         int firstStep,
         int lastStep)  :
         Clonable<Writer<CELL>, TestWriter<CELL> >("", period)

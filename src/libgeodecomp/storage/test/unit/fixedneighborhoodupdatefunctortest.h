@@ -29,7 +29,7 @@ public:
 
     template<typename HOOD_OLD, typename HOOD_NEW>
     static void updateLineX(HOOD_OLD& hoodOld, long indexEnd,
-                            HOOD_NEW& hoodNew, long /* nanoStep */)
+                            HOOD_NEW& hoodNew, unsigned /* nanoStep */)
     {
         for (; hoodOld.index() < indexEnd; hoodOld += 1, hoodNew += 1) {
             double akku =
@@ -71,7 +71,7 @@ public:
 
     template<typename HOOD_OLD, typename HOOD_NEW>
     static void updateLineX(HOOD_OLD& hoodOld, long indexEnd,
-                            HOOD_NEW& hoodNew, long /* nanoStep */)
+                            HOOD_NEW& hoodNew, unsigned /* nanoStep */)
     {
         for (; hoodOld.index() < indexEnd; hoodOld += 1, hoodNew += 1) {
             double akku =

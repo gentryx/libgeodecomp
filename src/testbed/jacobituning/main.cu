@@ -37,7 +37,7 @@ public:
 
     // fixme: use locally defined var for x-offset?
     template<typename NEIGHBORHOOD>
-    static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, unsigned /* nanoStep */)
     {
         for (; *x < endX; ++(*x)) {
             target[*x].temp = (hood[FixedCoord< 0,  0, -1>()].temp +

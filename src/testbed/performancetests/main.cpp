@@ -1300,7 +1300,7 @@ public:
 
     template<typename HOOD_OLD, typename HOOD_NEW>
     static void updateLineX(HOOD_OLD& hoodOld, int indexEnd,
-                            HOOD_NEW& hoodNew, int /* nanoStep */)
+                            HOOD_NEW& hoodNew, unsigned /* nanoStep */)
     {
         if (hoodOld.index() % 2 == 1) {
             updateSingle(hoodOld, hoodNew);
