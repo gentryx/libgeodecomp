@@ -1780,11 +1780,11 @@ public:
     inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s)
     {
         const IndexVectorType& indices = region.indices[DIM];
-        return (*this)(region, s, 0, indices.size());
+        return (*this)(region, s, 0, static_cast<std::ptrdiff_t>(indices.size()));
     }
 
     template<int MY_DIM>
-    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, std::size_t start, std::size_t end)
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, std::ptrdiff_t start, std::ptrdiff_t end)
     {
         int c = s.origin[DIM];
         const IndexVectorType& indices = region.indices[DIM];
@@ -1795,8 +1795,8 @@ public:
             IntPair(c, 0),
             RegionCommonHelper::pairCompareFirst);
 
-        std::size_t nextLevelStart = 0;
-        std::size_t nextLevelEnd = 0;
+        std::ptrdiff_t nextLevelStart = 0;
+        std::ptrdiff_t nextLevelEnd = 0;
 
         if (i != (indices.begin() + start)) {
             IndexVectorType::const_iterator entry = i;
@@ -1804,10 +1804,10 @@ public:
 
             // recurse if found
             if (entry->first == c) {
-                nextLevelStart = static_cast<std::size_t>(entry->second);
-                nextLevelEnd = region.indices[DIM - 1].size();
+                nextLevelStart = entry->second;
+                nextLevelEnd = static_cast<std::ptrdiff_t>(region.indices[DIM - 1].size());
                 if (i != indices.end()) {
-                    nextLevelEnd = static_cast<std::size_t>(i->second);
+                    nextLevelEnd = i->second;
                 }
 
                 return RegionLookupHelper<DIM-1>()(
@@ -1836,11 +1836,11 @@ public:
     inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s)
     {
         const IndexVectorType& indices = region.indices[0];
-        return (*this)(region, s, 0, static_cast<int>(indices.size()));
+        return (*this)(region, s, 0, static_cast<std::ptrdiff_t>(indices.size()));
     }
 
     template<int MY_DIM>
-    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, std::size_t start, std::size_t end)
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, std::ptrdiff_t start, std::ptrdiff_t end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
         const IndexVectorType& indices = region.indices[0];
@@ -1897,8 +1897,8 @@ public:
             IntPair(c, 0),
             RegionCommonHelper::pairCompareFirst);
 
-        int nextLevelStart = 0;
-        int nextLevelEnd = 0;
+        std::ptrdiff_t nextLevelStart = 0;
+        std::ptrdiff_t nextLevelEnd = 0;
 
         if (i != (indices.begin() + start)) {
             IndexVectorType::iterator entry = i;
@@ -1907,7 +1907,7 @@ public:
             // short-cut: no need to insert if index already present
             if (entry->first == c) {
                 nextLevelStart = entry->second;
-                nextLevelEnd = int(region->indices[DIM - 1].size());
+                nextLevelEnd = static_cast<std::ptrdiff_t>(region->indices[DIM - 1].size());
                 if (i != indices.end()) {
                     nextLevelEnd = i->second;
                 }
@@ -1925,7 +1925,7 @@ public:
         if (i != indices.end()) {
             nextLevelStart = i->second;
         } else {
-            nextLevelStart = int(region->indices[DIM - 1].size());
+            nextLevelStart = static_cast<ptrdiff_t>(region->indices[DIM - 1].size());
         }
 
         nextLevelEnd = nextLevelStart;
@@ -1966,7 +1966,7 @@ public:
     }
 
     template<int MY_DIM>
-    inline int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
+    inline int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, std::ptrdiff_t start, std::ptrdiff_t end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
         IndexVectorType& indices = region->indices[0];
@@ -2048,7 +2048,7 @@ public:
      * inserted streaks (may be negative).
      */
     template<int MY_DIM>
-    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, std::ptrdiff_t start, std::ptrdiff_t end)
     {
         int c = s.origin[DIM];
         IndexVectorType& indices = region->indices[DIM];
@@ -2072,8 +2072,8 @@ public:
             return 0;
         }
 
-        int nextLevelStart = entry->second;
-        int nextLevelEnd = region->indices[DIM - 1].size();
+        std::ptrdiff_t nextLevelStart = entry->second;
+        std::ptrdiff_t nextLevelEnd = static_cast<std::ptrdiff_t>(region->indices[DIM - 1].size());
         if (i != indices.end()) {
             nextLevelEnd = i->second;
         }
@@ -2118,7 +2118,7 @@ public:
     }
 
     template<int MY_DIM>
-    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, std::ptrdiff_t start, std::ptrdiff_t end)
     {
         int c = s.origin[0];
         IndexVectorType& indices = region->indices[0];
