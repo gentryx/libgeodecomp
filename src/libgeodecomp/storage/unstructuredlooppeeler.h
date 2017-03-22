@@ -76,10 +76,10 @@ template<typename SHORT_VEC_TYPE, typename COUNTER_TYPE1, typename COUNTER_TYPE2
 static
 void unstructuredLoopPeeler(COUNTER_TYPE1 *counter, const COUNTER_TYPE2& end, HOOD_OLD& hoodOld, const LAMBDA& lambda)
 {
-    typedef SHORT_VEC_TYPE lfa_local_short_vec;
+    typedef SHORT_VEC_TYPE LgdLocalShortVec;
     typedef typename LibFlatArray::detail::flat_array::
         sibling_short_vec_switch<SHORT_VEC_TYPE, 1>::VALUE
-        lfa_local_scalar;
+        LgdLocalScalar;
 
     COUNTER_TYPE1 nextStop = *counter;
     COUNTER_TYPE1 remainder = *counter & (SHORT_VEC_TYPE::ARITY - 1);
@@ -91,11 +91,35 @@ void unstructuredLoopPeeler(COUNTER_TYPE1 *counter, const COUNTER_TYPE2& end, HO
     typedef UnstructuredLoopPeelerHelpers::WrappedNeighborhood<HOOD_OLD> WrappedHood;
     WrappedHood wrappedHood(hoodOld);
 
-    lambda(lfa_local_scalar(),    counter, nextStop, wrappedHood);
-    lambda(lfa_local_short_vec(), counter, lastStop, hoodOld);
-    lambda(lfa_local_scalar(),    counter, end,      wrappedHood);
+    lambda(LgdLocalScalar(),   counter, nextStop, wrappedHood);
+    lambda(LgdLocalShortVec(), counter, lastStop, hoodOld);
+    lambda(LgdLocalScalar(),   counter, end,      wrappedHood);
 }
 
+/**
+ * Quick and dirty stand-in until we can have CUDA builds with C++14 enabled.
+ */
+#define UNSTRUCTURED_LOOP_PEELER(SHORT_VEC_TYPE, COUNTER_TYPE, COUNTER, END, HOOD_OLD_TYPE, HOOD_OLD, LAMBDA, ...) \
+    {                                                                   \
+        typedef SHORT_VEC_TYPE LgdLocalShortVec;                        \
+        typedef typename LibFlatArray::detail::flat_array::             \
+            sibling_short_vec_switch<SHORT_VEC_TYPE, 1>::VALUE          \
+            LgdLocalScalar;                                             \
+                                                                        \
+        COUNTER_TYPE nextStop = *COUNTER;                               \
+        COUNTER_TYPE remainder = *COUNTER & (SHORT_VEC_TYPE::ARITY - 1); \
+        if (remainder != 0) {                                           \
+            nextStop += SHORT_VEC_TYPE::ARITY - remainder;              \
+        }                                                               \
+        COUNTER_TYPE lastStop = END - (END & (SHORT_VEC_TYPE::ARITY - 1)); \
+                                                                        \
+        typedef UnstructuredLoopPeelerHelpers::WrappedNeighborhood<HOOD_OLD_TYPE> WrappedHood; \
+        WrappedHood wrappedHood(HOOD_OLD);                              \
+                                                                        \
+        LAMBDA(LgdLocalScalar(),   COUNTER, nextStop, wrappedHood, __VA_ARGS__); \
+        LAMBDA(LgdLocalShortVec(), COUNTER, lastStop, HOOD_OLD,    __VA_ARGS__); \
+        LAMBDA(LgdLocalScalar(),   COUNTER, END,      wrappedHood, __VA_ARGS__); \
+    }
 
 }
 

@@ -2211,30 +2211,53 @@ public:
         value(v), sum(0)
     {}
 
+    template<typename SHORT_VEC_TYPE, typename COUNTER_TYPE1, typename COUNTER_TYPE2, typename HOOD_OLD, typename HOOD_NEW>
+    static void updateBody(SHORT_VEC_TYPE /* shortVec */, COUNTER_TYPE1 *counter, const COUNTER_TYPE2& end, HOOD_OLD& hoodOld, HOOD_NEW& hoodNew)
+    {
+        typedef SHORT_VEC_TYPE ShortVec;
+
+        for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+            ShortVec tmp;
+            tmp.load_aligned(&hoodNew->sum());
+
+            for (const auto& j: hoodOld.weights(0)) {
+                ShortVec weights, values;
+                weights.load_aligned(j.second());
+                values.gather(&hoodOld->value(), j.first());
+                tmp += values * weights;
+            }
+
+            tmp.store_aligned(&hoodNew->sum());
+        }
+    }
+
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        unstructuredLoopPeeler<ShortVec>(
-            &hoodNew.index(),
-            indexEnd,
-            hoodOld,
-            [&hoodNew](auto shortVec, auto *counter, auto end, auto& hoodOld) {
-                typedef decltype(shortVec) ShortVec;
+        UNSTRUCTURED_LOOP_PEELER(ShortVec, long, &hoodNew.index(), indexEnd, HOOD_OLD, hoodOld, updateBody, hoodNew);
 
-                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
-                    ShortVec tmp;
-                    tmp.load_aligned(&hoodNew->sum());
+        // fixme: use lambda again once CUDA supports C++14
+        // unstructuredLoopPeeler<ShortVec>(
+        //     &hoodNew.index(),
+        //     indexEnd,
+        //     hoodOld,
+        //     [&hoodNew](auto shortVec, auto *counter, auto end, auto& hoodOld) {
+        //         typedef decltype(shortVec) ShortVec;
 
-                    for (const auto& j: hoodOld.weights(0)) {
-                        ShortVec weights, values;
-                        weights.load_aligned(j.second());
-                        values.gather(&hoodOld->value(), j.first());
-                        tmp += values * weights;
-                    }
+        //         for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+        //             ShortVec tmp;
+        //             tmp.load_aligned(&hoodNew->sum());
 
-                    tmp.store_aligned(&hoodNew->sum());
-                }
-            });
+        //             for (const auto& j: hoodOld.weights(0)) {
+        //                 ShortVec weights, values;
+        //                 weights.load_aligned(j.second());
+        //                 values.gather(&hoodOld->value(), j.first());
+        //                 tmp += values * weights;
+        //             }
+
+        //             tmp.store_aligned(&hoodNew->sum());
+        //         }
+        //     });
     }
 
     double value;
@@ -2264,30 +2287,53 @@ public:
         value(v), sum(0)
     {}
 
+    template<typename SHORT_VEC_TYPE, typename COUNTER_TYPE1, typename COUNTER_TYPE2, typename HOOD_OLD, typename HOOD_NEW>
+    static void updateBody(SHORT_VEC_TYPE /* shortVec */, COUNTER_TYPE1 *counter, const COUNTER_TYPE2& end, HOOD_OLD& hoodOld, HOOD_NEW& hoodNew)
+    {
+        typedef SHORT_VEC_TYPE ShortVec;
+
+        ShortVec tmp, weights, values;
+
+        for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+            tmp = &hoodNew->sum();
+
+            for (const auto& j: hoodOld.weights(0)) {
+                weights = j.second();
+                values.gather(&hoodOld->value(), j.first());
+                tmp += values * weights;
+            }
+
+            (&hoodNew->sum()) << tmp;
+        }
+    }
+
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
-        unstructuredLoopPeeler<ShortVec>(
-            &hoodNew.index(),
-            indexEnd,
-            hoodOld,
-            [&hoodNew](auto shortVec, auto *counter, auto end, auto& hoodOld) {
-                typedef decltype(shortVec) ShortVec;
+        UNSTRUCTURED_LOOP_PEELER(ShortVec, long, &hoodNew.index(), indexEnd, HOOD_OLD, hoodOld, updateBody, hoodNew);
 
-                ShortVec tmp, weights, values;
+        // fixme: use lambda again once CUDA supports C++14
+        // unstructuredLoopPeeler<ShortVec>(
+        //     &hoodNew.index(),
+        //     indexEnd,
+        //     hoodOld,
+        //     [&hoodNew](auto shortVec, auto *counter, auto end, auto& hoodOld) {
+        //         typedef decltype(shortVec) ShortVec;
 
-                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
-                    tmp = &hoodNew->sum();
+        //         ShortVec tmp, weights, values;
 
-                    for (const auto& j: hoodOld.weights(0)) {
-                        weights = j.second();
-                        values.gather(&hoodOld->value(), j.first());
-                        tmp += values * weights;
-                    }
+        //         for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+        //             tmp = &hoodNew->sum();
 
-                    (&hoodNew->sum()) << tmp;
-                }
-            });
+        //             for (const auto& j: hoodOld.weights(0)) {
+        //                 weights = j.second();
+        //                 values.gather(&hoodOld->value(), j.first());
+        //                 tmp += values * weights;
+        //             }
+
+        //             (&hoodNew->sum()) << tmp;
+        //         }
+        //     });
     }
 
     double value;
