@@ -1784,7 +1784,7 @@ public:
     }
 
     template<int MY_DIM>
-    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, int start, int end)
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, std::size_t start, std::size_t end)
     {
         int c = s.origin[DIM];
         const IndexVectorType& indices = region.indices[DIM];
@@ -1795,8 +1795,8 @@ public:
             IntPair(c, 0),
             RegionCommonHelper::pairCompareFirst);
 
-        int nextLevelStart = 0;
-        int nextLevelEnd = 0;
+        std::size_t nextLevelStart = 0;
+        std::size_t nextLevelEnd = 0;
 
         if (i != (indices.begin() + start)) {
             IndexVectorType::const_iterator entry = i;
@@ -1804,10 +1804,10 @@ public:
 
             // recurse if found
             if (entry->first == c) {
-                nextLevelStart = entry->second;
+                nextLevelStart = static_cast<std::size_t>(entry->second);
                 nextLevelEnd = region.indices[DIM - 1].size();
                 if (i != indices.end()) {
-                    nextLevelEnd = i->second;
+                    nextLevelEnd = static_cast<std::size_t>(i->second);
                 }
 
                 return RegionLookupHelper<DIM-1>()(
@@ -1840,7 +1840,7 @@ public:
     }
 
     template<int MY_DIM>
-    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, int start, int end)
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, std::size_t start, std::size_t end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
         const IndexVectorType& indices = region.indices[0];
