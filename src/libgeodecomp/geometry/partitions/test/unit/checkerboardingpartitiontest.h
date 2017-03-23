@@ -15,7 +15,15 @@ public:
         Coord<3> origin(0, 0, 0);
         Coord<3> dimensions(20, 20, 20);
         std::vector<std::size_t> weights;
-        weights << 100 << 100 << 100 << 100 << 100 << 100 << 100 << 100;
+        std::size_t hundred = 100;
+        weights << hundred
+                << hundred
+                << hundred
+                << hundred
+                << hundred
+                << hundred
+                << hundred
+                << hundred;
         CheckerboardingPartition<3> p(origin, dimensions, 0, weights);
 
         Region<3> expected0;
@@ -27,7 +35,6 @@ public:
         Region<3> expected6;
         Region<3> expected7;
 
-
         expected0 << CoordBox<3>(Coord<3>( 0, 0, 0), Coord<3>(10,10,10));
         expected1 << CoordBox<3>(Coord<3>(10, 0, 0), Coord<3>(10,10,10));
         expected2 << CoordBox<3>(Coord<3>( 0,10, 0), Coord<3>(10,10,10));
@@ -36,7 +43,6 @@ public:
         expected5 << CoordBox<3>(Coord<3>(10, 0,10), Coord<3>(10,10,10));
         expected6 << CoordBox<3>(Coord<3>( 0,10,10), Coord<3>(10,10,10));
         expected7 << CoordBox<3>(Coord<3>(10,10,10), Coord<3>(10,10,10));
-
 
         TS_ASSERT_EQUALS(expected0, p.getRegion(0));
         TS_ASSERT_EQUALS(expected1, p.getRegion(1));
@@ -53,7 +59,11 @@ public:
         Coord<2> origin(0, 0);
         Coord<2> dimensions(20, 20);
         std::vector<std::size_t> weights;
-        weights << 100 << 100 << 100 << 100;
+        std::size_t hundred = 100;
+        weights << hundred
+                << hundred
+                << hundred
+                << hundred;
         CheckerboardingPartition<2> p(origin, dimensions, 0, weights);
 
         Region<2> expected0;
@@ -61,12 +71,10 @@ public:
         Region<2> expected2;
         Region<2> expected3;
 
-
         expected0 << CoordBox<2>(Coord<2>( 0, 0), Coord<2>(10,10));
         expected1 << CoordBox<2>(Coord<2>(10, 0), Coord<2>(10,10));
         expected2 << CoordBox<2>(Coord<2>( 0,10), Coord<2>(10,10));
         expected3 << CoordBox<2>(Coord<2>(10,10), Coord<2>(10,10));
-
 
         TS_ASSERT_EQUALS(expected0, p.getRegion(0));
         TS_ASSERT_EQUALS(expected1, p.getRegion(1));

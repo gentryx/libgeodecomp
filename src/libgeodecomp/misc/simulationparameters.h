@@ -372,7 +372,7 @@ public:
 
 private:
     std::vector<VALUE_TYPE> elements;
-    int index;
+    std::size_t index;
 };
 
 }
