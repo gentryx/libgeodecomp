@@ -203,17 +203,17 @@ public:
      * of all non-zero entries in the matrix' row). Useful for
      * debugging and IO, not efficient for use in kernels.
      */
-    std::vector<std::pair<int, VALUETYPE> > getRow(int const row) const
+    std::vector<std::pair<int, VALUETYPE> > getRow(std::size_t row) const
     {
         std::vector< std::pair<int, VALUETYPE> > vec;
-        const int chunk(row / C);
-        const int offset(row % C);
-        int index = chunkOffset[static_cast<unsigned>(chunk)] + offset;
+        const std::size_t chunk(row / C);
+        const std::size_t offset(row % C);
+        std::size_t index = chunkOffset[chunk] + offset;
 
         for (int element = 0; element < rowLength[row]; ++element, index += C) {
             vec.push_back(std::pair<int, VALUETYPE>(
-                              column[static_cast<unsigned>(index)],
-                              values[static_cast<unsigned>(index)]));
+                              column[index],
+                              values[index]));
         }
 
         return vec;
