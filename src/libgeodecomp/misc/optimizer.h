@@ -39,7 +39,7 @@ public:
     virtual ~Optimizer()
     {}
 
-    virtual SimulationParameters operator()(int maxSteps, Evaluator& eval) = 0;
+    virtual SimulationParameters operator()(unsigned maxSteps, Evaluator& eval) = 0;
 
     double getFitness() const
     {

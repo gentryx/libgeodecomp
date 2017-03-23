@@ -136,10 +136,10 @@ SimplexOptimizer::SimplexOptimizer(
     initSimplex(params);
 }
 
-SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
+SimulationParameters SimplexOptimizer::operator()(unsigned steps, Evaluator& eval)
 {
     evalSimplex(eval);
-    int i;
+    unsigned i;
     for (i = 0; i < steps; ++i) {
         std::vector<SimplexVertex> old(simplex);
         LOG(Logger::DBG, simplexToString())

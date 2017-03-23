@@ -133,13 +133,13 @@ std::size_t PatternOptimizer::getMaxPos(
     return retval;
 }
 
-SimulationParameters PatternOptimizer::operator()(int steps, Evaluator& eval)
+SimulationParameters PatternOptimizer::operator()(unsigned steps, Evaluator& eval)
 {
     SimulationParameters middle = Optimizer::params;
     std::vector<SimulationParameters> pattern = genPattern(middle);
     std::size_t maxPos = 0;
     fitness = eval(middle);
-    for (int k = 0; k < steps; ++k) {
+    for (unsigned k = 0; k < steps; ++k) {
         pattern = genPattern(middle);
         maxPos = getMaxPos(pattern, eval,maxPos);
         LOG(Logger::DBG, patternToString(pattern) << "maxPos: " << maxPos )

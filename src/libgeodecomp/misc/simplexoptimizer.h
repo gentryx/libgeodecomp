@@ -54,7 +54,7 @@ public:
         const double stepMultiplicator = 8.0,
         const std::vector<double>& stepsizes = std::vector<double>());
 
-    virtual SimulationParameters operator()(int steps, Evaluator& eval);
+    virtual SimulationParameters operator()(unsigned steps, Evaluator& eval);
 
 private:
     void evalSimplex(Evaluator& eval);

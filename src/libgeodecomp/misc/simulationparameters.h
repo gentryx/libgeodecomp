@@ -458,7 +458,7 @@ public:
     {
         std::stringstream buf;
         buf << "SimulationParameters(\n";
-        for (std::map<std::string, int>::const_iterator i = names.begin(); i != names.end(); ++i) {
+        for (std::map<std::string, std::size_t>::const_iterator i = names.begin(); i != names.end(); ++i) {
             buf << "  " << i->first << " => " << parameters[i->second]->toString() << "\n";
         }
         buf << ")\n";
@@ -472,7 +472,7 @@ public:
     }
 
 protected:
-    std::map<std::string, int> names;
+    std::map<std::string, std::size_t> names;
     std::vector<ParamPointerType> parameters;
 };
 

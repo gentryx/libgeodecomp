@@ -19,7 +19,7 @@ public:
         std::vector<double> stepwidth = std::vector<double>(),
         std::vector<double> minStepwidth = std::vector<double>());
 
-    virtual SimulationParameters operator()(int steps, Evaluator& eval);
+    virtual SimulationParameters operator()(unsigned steps, Evaluator& eval);
 
 private:
     std::vector<double> stepwidth;
