@@ -208,7 +208,7 @@ private:
 /**
  * internal helper class
  */
-template<int DIM>
+template<std::size_t DIM>
 class StreakIteratorInitSingleOffset
 {
 public:
@@ -273,7 +273,7 @@ public:
         IndexVectorType::const_iterator *iterators,
         const REGION& region) const
     {
-        iterators[0] = region.indicesBegin(0) + offsetIndex;
+        iterators[0] = region.indicesBegin(0) + static_cast<std::ptrdiff_t>(offsetIndex);
         return offsetIndex;
     }
 
@@ -752,9 +752,9 @@ public:
      * as all coordinates which are no further than "width" cells
      * (maximum norm) away.
      */
-    inline Region expand(unsigned width=1) const
+    inline Region expand(unsigned width = 1) const
     {
-        return expand(Coord<DIM>::diagonal(width));
+        return expand(Coord<DIM>::diagonal(static_cast<int>(width)));
     }
 
     /**
@@ -827,7 +827,7 @@ public:
         const Coord<DIM>& globalDimensions,
         TOPOLOGY /* unused */) const
     {
-        Coord<DIM> dia = Coord<DIM>::diagonal(width);
+        Coord<DIM> dia = Coord<DIM>::diagonal(static_cast<int>(width));
         Region buffer = expand(dia);
         Region ret;
 
@@ -2040,7 +2040,7 @@ public:
     inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
     {
         IndexVectorType& indices = region->indices[DIM];
-        (*this)(region, s, 0, indices.size());
+        (*this)(region, s, 0, static_cast<std::ptrdiff_t>(indices.size()));
     }
 
     /**
@@ -2114,7 +2114,7 @@ public:
     inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
     {
         IndexVectorType& indices = region->indices[0];
-        (*this)(region, s, 0, indices.size());
+        (*this)(region, s, 0, static_cast<ptrdiff_t>(indices.size()));
     }
 
     template<int MY_DIM>
@@ -2146,7 +2146,7 @@ public:
             if (intersect(curStreak, *cursor)) {
                 IndexVectorType newStreaks(substract(*cursor, curStreak));
                 cursor = indices.erase(cursor);
-                int delta = newStreaks.size() - 1;
+                std::ptrdiff_t delta = std::ptrdiff_t(newStreaks.size()) - 1;
                 end += delta;
                 inserts += delta;
 

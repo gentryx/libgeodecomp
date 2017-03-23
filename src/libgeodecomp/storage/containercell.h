@@ -64,8 +64,8 @@ public:
         Key *end = ids + numElements;
         Key *pos = std::upper_bound(ids, end, id);
 
-        int offset = pos - ids;
-        if (offset > 0 && ids[offset - 1] == id) {
+        std::size_t offset = static_cast<std::size_t>(pos - ids);
+        if ((offset > 0) && (ids[offset - 1] == id)) {
             cells[offset - 1] = cell;
             return;
         }
@@ -78,7 +78,7 @@ public:
             return;
         }
 
-        for (int i = numElements; i > offset; --i) {
+        for (std::size_t i = numElements; i > offset; --i) {
             cells[i] = cells[i - 1];
             ids[i] = ids[i - 1];
         }
@@ -92,7 +92,7 @@ public:
     {
         Cargo *pos = (*this)[id];
         if (pos) {
-            int offset = pos - cells;
+            std::size_t offset = static_cast<std::size_t>(pos - cells);
             for (std::size_t i = offset; i < numElements - 1; ++i) {
                 cells[i] = cells[i + 1];
                 ids[i] = ids[i + 1];
