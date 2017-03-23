@@ -464,8 +464,8 @@ public:
 
     void testSoA()
     {
-        int startStep = 0;
-        int endStep = 21;
+        unsigned startStep = 0;
+        unsigned endStep = 21;
 
         StripingSimulator<TestCellSoA> sim(
             new TestInitializer<TestCellSoA>(),
@@ -485,8 +485,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCell<> TestCellType;
 
-        int startStep = 7;
-        int endStep = 20;
+        unsigned startStep = 7;
+        unsigned endStep = 20;
 
         StripingSimulator<TestCellType> sim(
             new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
@@ -506,8 +506,8 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA1 TestCellType;
-        int startStep = 7;
-        int endStep = 20;
+        unsigned startStep = 7;
+        unsigned endStep = 20;
 
         StripingSimulator<TestCellType> sim(
             new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep),
@@ -527,8 +527,8 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA2 TestCellType;
-        int startStep = 7;
-        int endStep = 15;
+        unsigned startStep = 7;
+        unsigned endStep = 15;
 
         StripingSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(632, endStep, startStep),
         rank? 0 : new NoOpBalancer());
@@ -547,8 +547,8 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA3 TestCellType;
-        int startStep = 7;
-        int endStep = 19;
+        unsigned startStep = 7;
+        unsigned endStep = 19;
 
         StripingSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(655, endStep, startStep),
         rank? 0 : new NoOpBalancer());
@@ -567,8 +567,8 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA1 TestCellType;
-        int startStep = 5;
-        int endStep = 24;
+        unsigned startStep = 5;
+        unsigned endStep = 24;
 
         StripingSimulator<TestCellType> sim(
             new UnstructuredTestInitializer<TestCellType>(444, endStep, startStep),

@@ -69,7 +69,7 @@ public:
     void test1dCube()
     {
         Coord<1> dim(777);
-        int numSteps = 33;
+        unsigned numSteps = 33;
         CUDASimulator<TestCell1dCube> sim(new TestInitializer1dCube(dim, numSteps));
 
         TestWriter<TestCell1dCube> *writer = new TestWriter<TestCell1dCube>(1, 0, numSteps);
@@ -82,8 +82,8 @@ public:
     void test1dTorus()
     {
         Coord<1> dim(666);
-        int startStep = 40;
-        int endStep = 70;
+        unsigned startStep = 40;
+        unsigned endStep = 70;
         CUDASimulator<TestCell1dTorus> sim(new TestInitializer1dTorus(dim, endStep, startStep));
 
         TestWriter<TestCell1dTorus> *writer = new TestWriter<TestCell1dTorus>(3, startStep, endStep);
@@ -96,7 +96,7 @@ public:
     void test2dCube()
     {
         Coord<2> dim(121, 151);
-        int numSteps = 21;
+        unsigned numSteps = 21;
         CUDASimulator<TestCell2dCube> sim(new TestInitializer2dCube(dim, numSteps));
 
         TestWriter<TestCell2dCube> *writer = new TestWriter<TestCell2dCube>(8, 0, numSteps);
@@ -109,8 +109,8 @@ public:
     void test2dTorus()
     {
         Coord<2> dim(141, 131);
-        int startStep = 35;
-        int endStep = 60;
+        unsigned startStep = 35;
+        unsigned endStep = 60;
         CUDASimulator<TestCell2dTorus> sim(new TestInitializer2dTorus(dim, endStep, startStep));
 
         TestWriter<TestCell2dTorus> *writer = new TestWriter<TestCell2dTorus>(6, startStep, endStep);
@@ -123,7 +123,7 @@ public:
     void test3dCube()
     {
         Coord<3> dim(50, 20, 10);
-        int numSteps = 5;
+        unsigned numSteps = 5;
         CUDASimulator<TestCell3dCube> sim(new TestInitializer3dCube(dim, numSteps));
 
         TestWriter<TestCell3dCube> *writer = new TestWriter<TestCell3dCube>(1, 0, numSteps);
@@ -136,9 +136,9 @@ public:
     void test3DTorus()
     {
         Coord<3> dim(50, 20, 10);
-        int startStep = 28;
-        int endStep = 38;
-        int ioPeriod = 3;
+        unsigned startStep = 28;
+        unsigned endStep = 38;
+        unsigned ioPeriod = 3;
         CUDASimulator<TestCell3dTorus> sim(new TestInitializer3dTorus(dim, endStep, startStep));
 
         TestWriter<TestCell3dTorus> *writer = new TestWriter<TestCell3dTorus>(ioPeriod, startStep, endStep);
@@ -151,7 +151,7 @@ public:
     void testMultipleWavefronts2DCube()
     {
         Coord<2> dim(135, 127);
-        int numSteps = 21;
+        unsigned numSteps = 21;
         CUDASimulator<TestCell2dCube> sim(
             new TestInitializer2dCube(dim, numSteps),
             Coord<3>(128, 5, 1));
@@ -166,7 +166,7 @@ public:
     void testMultipleWavefronts2DTorus()
     {
         Coord<2> dim(251, 91);
-        int numSteps = 21;
+        unsigned numSteps = 21;
         CUDASimulator<TestCell2dTorus> sim(
             new TestInitializer2dTorus(dim, numSteps),
             Coord<3>(128, 5, 1));
@@ -181,7 +181,7 @@ public:
     void testMultipleWavefronts3DCube()
     {
         Coord<3> dim(52, 20, 14);
-        int numSteps = 6;
+        unsigned numSteps = 6;
         CUDASimulator<TestCell3dCube> sim(
             new TestInitializer3dCube(dim, numSteps),
             Coord<3>(128, 2, 3));
@@ -196,7 +196,7 @@ public:
     void testMultipleWavefronts3DTorus()
     {
         Coord<3> dim(54, 20, 13);
-        int numSteps = 7;
+        unsigned numSteps = 7;
         CUDASimulator<TestCell3dTorus> sim(
             new TestInitializer3dTorus(dim, numSteps),
             Coord<3>(64, 2, 3));
@@ -226,7 +226,7 @@ public:
     void testSoA3dCube()
     {
         Coord<3> dim(54, 20, 13);
-        int numSteps = 7;
+        unsigned numSteps = 7;
         CUDASimulator<TestCellSoA3dTorus> sim(
             new TestInitializerSoA3dTorus(dim, numSteps),
             Coord<3>(64, 2, 3));

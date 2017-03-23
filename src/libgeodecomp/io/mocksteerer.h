@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <libgeodecomp/io/steerer.h>
+#include <libgeodecomp/misc/limits.h>
 
 namespace LibGeoDecomp {
 
@@ -43,7 +44,7 @@ public:
             buf << "STEERER_NEXT_STEP";
             break;
         case STEERER_ALL_DONE:
-            if (step != -1) {
+            if (step != Limits<unsigned>::getMax()) {
                 buf << "STEERER_ALL_DONE";
             } else {
                 buf << "DELETED";
@@ -58,7 +59,7 @@ public:
         return buf.str();
     }
 
-    int step;
+    unsigned step;
     SteererEvent event;
     std::size_t rank;
     bool lastCall;
@@ -157,7 +158,11 @@ public:
 
     virtual ~MockSteerer()
     {
-        *events << Event(-1, STEERER_ALL_DONE, -1, true);
+        *events << Event(
+            Limits<unsigned>::getMax(),
+            STEERER_ALL_DONE,
+            Limits<unsigned>::getMax(),
+            true);
     }
 
     Steerer<CELL_TYPE> *clone() const

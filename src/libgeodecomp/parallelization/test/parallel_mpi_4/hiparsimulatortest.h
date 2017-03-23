@@ -188,9 +188,10 @@ public:
                      << Event(i, STEERER_NEXT_STEP, rank, true);
         }
 
-        expected << Event(101, STEERER_ALL_DONE,  rank, false)
-                 << Event(101, STEERER_ALL_DONE,  rank, true)
-                 << Event(-1,  STEERER_ALL_DONE, -1, true);
+        unsigned deletionCode = Limits<unsigned>::getMax();
+        expected << Event(101,           STEERER_ALL_DONE, rank,         false)
+                 << Event(101,           STEERER_ALL_DONE, rank,         true)
+                 << Event(deletionCode,  STEERER_ALL_DONE, deletionCode, true);
 
         TS_ASSERT_EQUALS(*events, expected);
     }
@@ -1275,8 +1276,8 @@ public:
 
     void testSoA()
     {
-        int startStep = 0;
-        int endStep = 21;
+        unsigned startStep = 0;
+        unsigned endStep = 21;
 
         HiParSimulator<TestCellSoA, ZCurvePartition<3> > sim(
             new TestInitializer<TestCellSoA>(),

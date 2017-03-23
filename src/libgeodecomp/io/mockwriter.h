@@ -6,6 +6,7 @@
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/misc/limits.h>
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testcell.h>
 
@@ -49,7 +50,7 @@ public:
             buf << "WRITER_STEP_FINISHED";
             break;
         case WRITER_ALL_DONE:
-            if (step != -1) {
+            if (step != Limits<unsigned>::getMax()) {
                 buf << "WRITER_ALL_DONE";
             } else {
                 buf << "DELETED";
@@ -64,7 +65,7 @@ public:
         return buf.str();
     }
 
-    int step;
+    unsigned step;
     WriterEvent event;
     std::size_t rank;
     bool lastCall;
@@ -167,7 +168,8 @@ public:
 
     ~MockWriter()
     {
-        *events << Event(-1, WRITER_ALL_DONE, -1, true);
+        *events << Event(
+            Limits<unsigned>::getMax(), WRITER_ALL_DONE, Limits<unsigned>::getMax(), true);
     }
 
     void stepFinished(

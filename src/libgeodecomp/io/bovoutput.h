@@ -24,7 +24,7 @@ public:
     static void writeHeader(
         const std::string& filenameBOV,
         const std::string& filenameData,
-        int step,
+        unsigned step,
         const CoordBox<DIM>& boundingBox,
         const Coord<3>& brickletDim,
         const Selector<CELL_TYPE>& selector)
@@ -75,7 +75,7 @@ public:
 
         std::vector<char> buffer;
         Coord<DIM> dimensions = grid.dimensions();
-        std::size_t length = dimensions.x();
+        std::size_t length = static_cast<std::size_t>(dimensions.x());
         std::size_t byteSize = length * selector.sizeOfExternal();
         buffer.resize(byteSize);
 

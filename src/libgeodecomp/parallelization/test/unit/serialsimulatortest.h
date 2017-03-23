@@ -177,8 +177,9 @@ public:
             }
         }
 
-        expectedEvents << MockSteererType::Event(21, STEERER_ALL_DONE,  0, true)
-                       << MockSteererType::Event(-1, STEERER_ALL_DONE, -1, true);
+        unsigned deletionCode = Limits<unsigned>::getMax();
+        expectedEvents << MockSteererType::Event(21,           STEERER_ALL_DONE,  0, true)
+                       << MockSteererType::Event(deletionCode, STEERER_ALL_DONE,  deletionCode, true);
 
         simulator->run();
         simulator.reset();
@@ -193,8 +194,8 @@ public:
         typedef TestInitializer<TestCell1dTorus> TestInitializer1dTorus;
 
         Coord<1> dim(666);
-        int startStep = 40;
-        int endStep = 70;
+        unsigned startStep = 40;
+        unsigned endStep = 70;
         SerialSimulator<TestCell1dTorus> sim(new TestInitializer1dTorus(dim, endStep, startStep));
 
         TestWriter<TestCell1dTorus> *writer = new TestWriter<TestCell1dTorus>(3, startStep, endStep);
@@ -240,8 +241,8 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCell<> TestCellType;
-        int startStep = 7;
-        int endStep = 20;
+        unsigned startStep = 7;
+        unsigned endStep = 20;
 
         SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep));
         sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
@@ -253,8 +254,8 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA1 TestCellType;
-        int startStep = 7;
-        int endStep = 20;
+        unsigned startStep = 7;
+        unsigned endStep = 20;
 
         SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(614, endStep, startStep));
         sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
@@ -266,8 +267,8 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA2 TestCellType;
-        int startStep = 7;
-        int endStep = 15;
+        unsigned startStep = 7;
+        unsigned endStep = 15;
 
         SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(632, endStep, startStep));
         sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
@@ -279,8 +280,8 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA3 TestCellType;
-        int startStep = 7;
-        int endStep = 19;
+        unsigned startStep = 7;
+        unsigned endStep = 19;
 
         SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(655, endStep, startStep));
         sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));
@@ -292,8 +293,8 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         typedef UnstructuredTestCellSoA1 TestCellType;
-        int startStep = 5;
-        int endStep = 24;
+        unsigned startStep = 5;
+        unsigned endStep = 24;
 
         SerialSimulator<TestCellType> sim(new UnstructuredTestInitializer<TestCellType>(444, endStep, startStep));
         sim.addWriter(new TestWriter<TestCellType>(3, startStep, endStep));

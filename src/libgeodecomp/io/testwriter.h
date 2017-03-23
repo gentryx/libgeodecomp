@@ -22,13 +22,13 @@ public:
 
     TestWriter(
         unsigned period,
-        int firstStep,
-        int lastStep)  :
+        unsigned firstStep,
+        unsigned lastStep)  :
         Clonable<Writer<CELL>, TestWriter<CELL> >("", period)
     {
         expectedSteps << firstStep;
         expectedEvents << WRITER_INITIALIZED;
-        for (int i = firstStep + period - firstStep % period; i < lastStep; i += period) {
+        for (unsigned i = firstStep + period - firstStep % period; i < lastStep; i += period) {
             expectedSteps << i;
             expectedEvents << WRITER_STEP_FINISHED;
         }
@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    std::vector<int> expectedSteps;
+    std::vector<unsigned> expectedSteps;
     std::vector<WriterEvent> expectedEvents;
 };
 
