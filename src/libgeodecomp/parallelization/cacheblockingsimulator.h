@@ -50,10 +50,10 @@ public:
 
         Coord<DIM> bufferDim;
 
-        for (unsigned i = 0; i < DIM - 1; ++i) {
+        for (int i = 0; i < DIM - 1; ++i) {
             bufferDim[i] = wavefrontDim[i] + 2 * static_cast<int>(pipelineLength) - 2;
         }
-        bufferDim[DIM - 1] = pipelineLength * 4 - 4;
+        bufferDim[DIM - 1] = static_cast<int>(pipelineLength) * 4 - 4;
 
         for (std::size_t i = 0; i < buffers.size(); ++i) {
             buffers[i] = BufferType(CoordBox<DIM>(Coord<DIM>(), bufferDim), curGrid->getEdgeCell(), curGrid->getEdgeCell());
@@ -177,7 +177,7 @@ private:
 
             Region<DIM> mask;
             mask << CoordBox<DIM>(maskOrigin, maskDim);
-            for (int i = 0; i < static_cast<int>(pipelineLength); ++i) {
+            for (unsigned i = 0; i < pipelineLength; ++i) {
                 ret[index][i] = regions[i] & mask;
             }
         }

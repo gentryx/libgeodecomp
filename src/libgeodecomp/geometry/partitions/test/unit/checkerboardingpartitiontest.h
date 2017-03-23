@@ -88,7 +88,7 @@ public:
         Coord<2> dimensions(32, 25);
         std::vector<std::size_t> weights;
         for (int i = 0; i < 20; ++i) {
-            weights << 1;
+            weights << std::size_t(1);
         }
 
         CheckerboardingPartition<2> p(origin, dimensions, 0, weights);
@@ -109,7 +109,7 @@ public:
         Coord<3> dimensions(29, 31, 37);
         std::vector<std::size_t> weights;
         for (int i = 0; i < 400; ++i) {
-            weights << 1;
+            weights << std::size_t(1);
         }
 
         CheckerboardingPartition<3> p(origin, dimensions, 0, weights);

@@ -46,7 +46,7 @@ protected:
         CacheBlockingSimulator<CELL> *sim =
             new CacheBlockingSimulator<CELL>(
                 initializer->clone(),
-                pipelineLength,
+                static_cast<unsigned>(pipelineLength),
                 wavefrontDim);
 
         addWriters(sim);
