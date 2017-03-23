@@ -28,7 +28,7 @@ public:
     typedef Grid<CELL, Topology> GridType;
     typedef DisplacedGrid<CELL, BufferTopology> BufferType;
     typedef std::vector<std::vector<Region<3> > > WavefrontFrames;
-    static const int DIM = Topology::DIM;
+    static const unsigned DIM = Topology::DIM;
 
     using MonolithicSimulator<CELL>::NANO_STEPS;
     using MonolithicSimulator<CELL>::chronometer;
@@ -38,7 +38,7 @@ public:
         int pipelineLength,
         const Coord<DIM - 1>& wavefrontDim) :
         MonolithicSimulator<CELL>(initializer),
-        buffers(omp_get_max_threads()),
+        buffers(static_cast<std::size_t>(omp_get_max_threads())),
         pipelineLength(pipelineLength),
         wavefrontDim(wavefrontDim)
     {
@@ -50,7 +50,7 @@ public:
 
         Coord<DIM> bufferDim;
 
-        for (int i = 0; i < DIM - 1; ++i) {
+        for (unsigned i = 0; i < DIM - 1; ++i) {
             bufferDim[i] = wavefrontDim[i] + 2 * pipelineLength - 2;
         }
         bufferDim[DIM - 1] = pipelineLength * 4 - 4;
@@ -116,7 +116,7 @@ private:
     GridType *curGrid;
     GridType *newGrid;
     std::vector<BufferType> buffers;
-    int pipelineLength;
+    unsigned pipelineLength;
     Coord<DIM - 1> wavefrontDim;
     Grid<WavefrontFrames> frames;
     unsigned nanoStep;
@@ -126,7 +126,7 @@ private:
         Coord<DIM> gridDim = initializer->gridBox().dimensions;
 
         Coord<DIM - 1> framesDim;
-        for (int i = 0; i < (DIM - 1); ++i) {
+        for (unsigned i = 0; i < (DIM - 1); ++i) {
             framesDim[i] = gridDim[i] / wavefrontDim[i];
             if ((gridDim[i] % wavefrontDim[i]) != 0) {
                 framesDim[i] += 1;
@@ -149,7 +149,7 @@ private:
     {
         Coord<DIM> gridDim = initializer->gridBox().dimensions;
         Coord<DIM> wavefrontRegionDim;
-        for (int i = 0; i < (DIM - 1); ++i) {
+        for (unsigned i = 0; i < (DIM - 1); ++i) {
             wavefrontRegionDim[i] = wavefrontDim[i];
         }
         wavefrontRegionDim[DIM - 1] = gridDim[DIM - 1] - offset[DIM - 1];
@@ -159,8 +159,9 @@ private:
         regions[pipelineLength - 1] = region.expandWithTopology(
             0, gridDim, Topologies::Cube<3>::Topology());
 
-        for (int i = pipelineLength - 2; i >= 0; --i) {
-            regions[i] = regions[i + 1].expandWithTopology(
+        for (int i = static_cast<int>(pipelineLength - 2); i >= 0; --i) {
+            unsigned index = static_cast<unsigned>(i);
+            regions[index] = regions[index + 1].expandWithTopology(
                 1, gridDim, Topologies::Cube<3>::Topology());
         }
 
@@ -176,7 +177,7 @@ private:
 
             Region<DIM> mask;
             mask << CoordBox<DIM>(maskOrigin, maskDim);
-            for (int i = 0; i < pipelineLength; ++i) {
+            for (unsigned i = 0; i < pipelineLength; ++i) {
                 ret[index][i] = regions[i] & mask;
             }
         }
@@ -199,12 +200,12 @@ private:
 #pragma omp parallel for
         for (int y = 0; y < frameBox.dimensions.y(); ++y) {
             for (int x = 0; x < frameBox.dimensions.x(); ++x) {
-                updateWavefront(&buffers[omp_get_thread_num()], Coord<2>(x, y));
+                updateWavefront(&buffers[static_cast<std::size_t>(omp_get_thread_num())], Coord<2>(x, y));
             }
         }
 
         swap(curGrid, newGrid);
-        int curNanoStep = nanoStep + pipelineLength;
+        unsigned curNanoStep = nanoStep + pipelineLength;
         stepNum += curNanoStep / NANO_STEPS;
         nanoStep = curNanoStep % NANO_STEPS;
     }
@@ -216,13 +217,14 @@ private:
         // buffer->fill(buffer->boundingBox(), curGrid->getEdgeCell());
         fixBufferOrigin(buffer, wavefrontCoord);
 
-        int index = 0;
+        unsigned index = 0;
         CoordBox<DIM> boundingBox = curGrid->boundingBox();
-        int maxIndex = boundingBox.origin[DIM - 1] + boundingBox.dimensions[DIM - 1];
+        unsigned maxIndex = static_cast<unsigned>(boundingBox.origin[DIM - 1] + boundingBox.dimensions[DIM - 1]);
 
         // fill pipeline
-        for (; index < 2 * pipelineLength - 2; ++index) {
-            int lastStage = (index >> 1) + 1;
+        unsigned maxLength = 2 * pipelineLength - 2;
+        for (; index < maxLength; ++index) {
+            unsigned lastStage = (index >> 1) + 1;
             pipelinedUpdate(buffer, wavefrontCoord, index, index, 0, lastStage);
         }
 
@@ -242,8 +244,8 @@ private:
     {
         Coord<DIM> bufferOrigin;
         // fixme: wrong on boundary with Torus topology
-        for (int d = 0; d < (DIM - 1); ++d) {
-            bufferOrigin[d] = (std::max)(0, frameCoord[d] * wavefrontDim[d] - pipelineLength + 1);
+        for (unsigned d = 0; d < (DIM - 1); ++d) {
+            bufferOrigin[d] = (std::max)(0, frameCoord[d] * wavefrontDim[d] - static_cast<int>(pipelineLength) + 1);
         }
         bufferOrigin[DIM - 1] = 0;
         buffer->setOrigin(bufferOrigin);
@@ -252,23 +254,23 @@ private:
     void pipelinedUpdate(
         BufferType *buffer,
         const Coord<DIM - 1>& frameCoord,
-        int globalIndex,
-        int localIndex,
-        int firstStage,
-        int lastStage)
+        unsigned globalIndex,
+        unsigned localIndex,
+        unsigned firstStage,
+        unsigned lastStage)
     {
         LOG(DBG, "  pipelinedUpdate(frameCoord = " << frameCoord << ", globalIndex = " << globalIndex << ", localIndex = " << localIndex << ", firstStage = " << firstStage << ", lastStage = " << lastStage << ")");
 
-        for (int i = firstStage; i < lastStage; ++i) {
+        for (unsigned i = firstStage; i < lastStage; ++i) {
             bool firstIteration = (i == 0);
             bool lastIteration =  (i == (pipelineLength - 1));
-            int currentGlobalIndex = globalIndex - 2 * i;
+            unsigned currentGlobalIndex = globalIndex - 2 * i;
             bool needsFlushing = (i == firstStage) &&
-                (currentGlobalIndex >= newGrid->getDimensions()[DIM - 1]);
-            int sourceIndex = firstIteration ? currentGlobalIndex : normalizeIndex(localIndex + 2 - 4 * i);
-            int targetIndex = lastIteration  ? currentGlobalIndex : normalizeIndex(localIndex + 0 - 4 * i);
+                (currentGlobalIndex >= static_cast<unsigned>(newGrid->getDimensions()[DIM - 1]));
+            unsigned sourceIndex = firstIteration ? currentGlobalIndex : normalizeIndex(localIndex + 2 - 4 * i);
+            unsigned targetIndex = lastIteration  ? currentGlobalIndex : normalizeIndex(localIndex + 0 - 4 * i);
 
-            const Region<DIM>& updateFrame = frames[frameCoord][globalIndex - 2 * i][i];
+            const Region<DIM>& updateFrame = frames[frameCoord][static_cast<int>(globalIndex) - 2 * i][i];
             unsigned curNanoStep = (nanoStep + i) % NANO_STEPS;
 
             if ( firstIteration &&  lastIteration) {
@@ -293,8 +295,8 @@ private:
     void frameUpdate(
         bool needsFlushing,
         const Region<DIM>& updateFrame,
-        int sourceIndex,
-        int targetIndex,
+        unsigned sourceIndex,
+        unsigned targetIndex,
         const GRID1& sourceGrid,
         GRID2 *targetGrid,
         unsigned curNanoStep)
@@ -307,8 +309,8 @@ private:
 
         if (needsFlushing) {
             // fixme: only works with cube topologies
-            Coord<DIM> fillOrigin = buffers[omp_get_thread_num()].getOrigin();
-            fillOrigin[DIM - 1] = targetIndex;
+            Coord<DIM> fillOrigin = buffers[static_cast<std::size_t>(omp_get_thread_num())].getOrigin();
+            fillOrigin[DIM - 1] = static_cast<int>(targetIndex);
             Coord<DIM> fillDim = buffers[omp_get_thread_num()].getDimensions();
             fillDim[DIM - 1] = 1;
 
@@ -318,8 +320,8 @@ private:
         } else {
             Coord<DIM> sourceOffset;
             Coord<DIM> targetOffset;
-            sourceOffset[DIM - 1] = sourceIndex;
-            targetOffset[DIM - 1] = targetIndex;
+            sourceOffset[DIM - 1] = static_cast<int>(sourceIndex);
+            targetOffset[DIM - 1] = static_cast<int>(targetIndex);
 
             UpdateFunctor<CELL>()(updateFrame, sourceOffset, targetOffset, sourceGrid, targetGrid, curNanoStep);
         }
@@ -327,9 +329,9 @@ private:
 
     // wraps the index (for 3D this will be the Z coordinate) around
     // the buffer's dimension
-    int normalizeIndex(int localIndex)
+    unsigned normalizeIndex(unsigned localIndex)
     {
-        int bufferSize = buffers[0].getDimensions()[DIM - 1];
+        unsigned bufferSize = static_cast<unsigned>(buffers[0].getDimensions()[DIM - 1]);
         return (localIndex + bufferSize) % bufferSize;
     }
 };
