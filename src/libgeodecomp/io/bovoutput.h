@@ -105,7 +105,7 @@ public:
         const ITER1& start,
         const ITER2& end,
         float value = 1.0,
-        int time = 0)
+        unsigned time = 0)
     {
         std::string filenameBOV = prefix + ".bov";
         std::string filenameData = prefix + ".data";

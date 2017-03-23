@@ -164,7 +164,7 @@ public:
         --elements;
     }
 
-    void reserve(int num)
+    void reserve(std::size_t num)
     {
         if (num > SIZE) {
             throw std::out_of_range("reserving too many elements");
@@ -173,7 +173,7 @@ public:
         // this is a NOP since we don't reallocate
     }
 
-    void resize(int num)
+    void resize(std::size_t num)
     {
         reserve(num);
         elements = num;

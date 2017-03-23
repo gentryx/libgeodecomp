@@ -53,7 +53,7 @@ public:
 
     explicit Grid(const GridBase<CELL_TYPE, DIM>& base) :
         dimensions(base.dimensions()),
-        cellVector(base.dimensions().prod()),
+        cellVector(static_cast<std::size_t>(base.dimensions().prod())),
         edgeCell(base.getEdge())
     {
         CoordBox<DIM> box = base.boundingBox();

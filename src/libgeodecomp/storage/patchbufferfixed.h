@@ -80,11 +80,11 @@ public:
 
 private:
     Region<DIM> region;
-    int indexRead;
-    int indexWrite;
+    std::size_t indexRead;
+    std::size_t indexWrite;
     std::vector<BufferType> buffer;
 
-    inline void inc(int *index)
+    inline void inc(std::size_t *index)
     {
         *index = (*index + 1) % SIZE;
     }

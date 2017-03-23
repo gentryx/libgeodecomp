@@ -186,7 +186,8 @@ public:
         for (std::size_t i = 0; i < graph.size(); ++i) {
             for (std::vector<int>::const_iterator n = graph[i].begin();
                  n != graph[i].end(); ++n) {
-                if (manhattanDistance(positions[i].first, positions[*n].first) > 1) {
+                std::size_t otherIndex = static_cast<std::size_t>(*n);
+                if (manhattanDistance(positions[i].first, positions[otherIndex].first) > 1) {
                     return false;
                 }
             }
