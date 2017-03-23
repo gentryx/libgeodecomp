@@ -28,14 +28,14 @@ public:
     typedef Grid<CELL, Topology> GridType;
     typedef DisplacedGrid<CELL, BufferTopology> BufferType;
     typedef std::vector<std::vector<Region<3> > > WavefrontFrames;
-    static const unsigned DIM = Topology::DIM;
+    static const int DIM = Topology::DIM;
 
     using MonolithicSimulator<CELL>::NANO_STEPS;
     using MonolithicSimulator<CELL>::chronometer;
 
     CacheBlockingSimulator(
         Initializer<CELL> *initializer,
-        int pipelineLength,
+        unsigned pipelineLength,
         const Coord<DIM - 1>& wavefrontDim) :
         MonolithicSimulator<CELL>(initializer),
         buffers(static_cast<std::size_t>(omp_get_max_threads())),
@@ -51,7 +51,7 @@ public:
         Coord<DIM> bufferDim;
 
         for (unsigned i = 0; i < DIM - 1; ++i) {
-            bufferDim[i] = wavefrontDim[i] + 2 * pipelineLength - 2;
+            bufferDim[i] = wavefrontDim[i] + 2 * static_cast<int>(pipelineLength) - 2;
         }
         bufferDim[DIM - 1] = pipelineLength * 4 - 4;
 
@@ -126,7 +126,7 @@ private:
         Coord<DIM> gridDim = initializer->gridBox().dimensions;
 
         Coord<DIM - 1> framesDim;
-        for (unsigned i = 0; i < (DIM - 1); ++i) {
+        for (int i = 0; i < (DIM - 1); ++i) {
             framesDim[i] = gridDim[i] / wavefrontDim[i];
             if ((gridDim[i] % wavefrontDim[i]) != 0) {
                 framesDim[i] += 1;
@@ -149,7 +149,7 @@ private:
     {
         Coord<DIM> gridDim = initializer->gridBox().dimensions;
         Coord<DIM> wavefrontRegionDim;
-        for (unsigned i = 0; i < (DIM - 1); ++i) {
+        for (int i = 0; i < (DIM - 1); ++i) {
             wavefrontRegionDim[i] = wavefrontDim[i];
         }
         wavefrontRegionDim[DIM - 1] = gridDim[DIM - 1] - offset[DIM - 1];
@@ -165,10 +165,10 @@ private:
                 1, gridDim, Topologies::Cube<3>::Topology());
         }
 
-        int wavefrontLength = gridDim[DIM - 1] + 1;
+        std::size_t wavefrontLength = static_cast<std::size_t>(gridDim[DIM - 1] + 1);
         WavefrontFrames ret(wavefrontLength, std::vector<Region<DIM> >(pipelineLength));
 
-        for (int index = 0; index < wavefrontLength; ++index) {
+        for (int index = 0; index < static_cast<int>(wavefrontLength); ++index) {
             Coord<DIM> maskOrigin;
             maskOrigin[DIM - 1] = index;
             Topology::normalize(maskOrigin, initializer->gridDimensions());
@@ -177,7 +177,7 @@ private:
 
             Region<DIM> mask;
             mask << CoordBox<DIM>(maskOrigin, maskDim);
-            for (unsigned i = 0; i < pipelineLength; ++i) {
+            for (int i = 0; i < static_cast<int>(pipelineLength); ++i) {
                 ret[index][i] = regions[i] & mask;
             }
         }
@@ -200,7 +200,7 @@ private:
 #pragma omp parallel for
         for (int y = 0; y < frameBox.dimensions.y(); ++y) {
             for (int x = 0; x < frameBox.dimensions.x(); ++x) {
-                updateWavefront(&buffers[static_cast<std::size_t>(omp_get_thread_num())], Coord<2>(x, y));
+                updateWavefront(&buffers[threadIndex()], Coord<2>(x, y));
             }
         }
 
@@ -235,7 +235,7 @@ private:
 
         // let pipeline drain
         for (; index < (maxIndex + 2 * pipelineLength - 2); ++index) {
-            int firstStage = (index - maxIndex + 1) >> 1 ;
+            unsigned firstStage = (index - maxIndex + 1) >> 1 ;
             pipelinedUpdate(buffer, wavefrontCoord, index, index, firstStage, pipelineLength);
         }
     }
@@ -244,7 +244,7 @@ private:
     {
         Coord<DIM> bufferOrigin;
         // fixme: wrong on boundary with Torus topology
-        for (unsigned d = 0; d < (DIM - 1); ++d) {
+        for (int d = 0; d < (DIM - 1); ++d) {
             bufferOrigin[d] = (std::max)(0, frameCoord[d] * wavefrontDim[d] - static_cast<int>(pipelineLength) + 1);
         }
         bufferOrigin[DIM - 1] = 0;
@@ -309,9 +309,9 @@ private:
 
         if (needsFlushing) {
             // fixme: only works with cube topologies
-            Coord<DIM> fillOrigin = buffers[static_cast<std::size_t>(omp_get_thread_num())].getOrigin();
+            Coord<DIM> fillOrigin = buffers[threadIndex()].getOrigin();
             fillOrigin[DIM - 1] = static_cast<int>(targetIndex);
-            Coord<DIM> fillDim = buffers[omp_get_thread_num()].getDimensions();
+            Coord<DIM> fillDim = buffers[threadIndex()].getDimensions();
             fillDim[DIM - 1] = 1;
 
             // buffers[omp_get_thread_num()].fill(
@@ -326,6 +326,12 @@ private:
             UpdateFunctor<CELL>()(updateFrame, sourceOffset, targetOffset, sourceGrid, targetGrid, curNanoStep);
         }
      }
+
+    inline
+    std::size_t threadIndex()
+    {
+        return static_cast<std::size_t>(omp_get_thread_num());
+    }
 
     // wraps the index (for 3D this will be the Z coordinate) around
     // the buffer's dimension
