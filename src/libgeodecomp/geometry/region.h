@@ -239,7 +239,7 @@ public:
             IntPair(0, newOffset),
             RegionHelpers::RegionCommonHelper::pairCompareSecond);
         iterators[DIM] = upperBound - 1;
-        newOffset =  iterators[DIM] - region.indicesBegin(DIM);
+        newOffset = static_cast<std::size_t>(iterators[DIM] - region.indicesBegin(DIM));
 
         return newOffset;
     }
