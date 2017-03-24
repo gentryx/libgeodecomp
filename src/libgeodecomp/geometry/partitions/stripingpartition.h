@@ -61,9 +61,9 @@ public:
             (*this)[startOffsets[node + 1]]);
     }
 
-    Iterator operator[](unsigned pos) const
+    Iterator operator[](std::size_t pos) const
     {
-        Coord<DIM> cursor = dimensions.indexToCoord(static_cast<int>(pos)) + origin;
+        Coord<DIM> cursor = dimensions.indexToCoord(pos) + origin;
         return Iterator(origin, cursor, dimensions);
     }
 

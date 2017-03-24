@@ -63,7 +63,7 @@ public:
     };
 
     inline SpaceFillingCurve(
-        const long& offset,
+        const std::size_t& offset,
         const std::vector<std::size_t>& weights) :
         Partition<DIM>(offset, weights)
     {}

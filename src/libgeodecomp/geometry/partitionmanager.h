@@ -95,7 +95,7 @@ public:
         CoordBox<DIM> ownBoundingBox = ownRegion().boundingBox();
         CoordBox<DIM> ownExpandedBoundingBox = ownExpandedRegion().boundingBox();
 
-        for (unsigned i = 0; i < boundingBoxes.size(); ++i) {
+        for (int i = 0; i < static_cast<std::ptrdiff_t>(boundingBoxes.size()); ++i) {
             if ((i != myRank) &&
                 (boundingBoxes[i].intersects(ownExpandedBoundingBox) ||
                  expandedBoundingBoxes[i].intersects(ownBoundingBox)) &&
@@ -227,7 +227,7 @@ public:
         return partition->getWeights();
     }
 
-    inline unsigned rank() const
+    inline int rank() const
     {
         return myRank;
     }
@@ -249,7 +249,7 @@ private:
     RegionVecMap innerGhostZoneFragments;
     std::vector<Region<DIM> > ownRims;
     std::vector<Region<DIM> > ownInnerSets;
-    unsigned myRank;
+    int myRank;
     unsigned ghostZoneWidth;
     std::vector<CoordBox<DIM> > boundingBoxes;
     std::vector<CoordBox<DIM> > expandedBoundingBoxes;
@@ -264,7 +264,7 @@ private:
         return adjacencyManufacturer->getReverseAdjacency(region);
     }
 
-    inline void fillRegion(unsigned node)
+    inline void fillRegion(int node)
     {
         std::vector<Region<DIM> >& regionExpansion = regions[node];
         regionExpansion.resize(getGhostZoneWidth() + 1);
@@ -302,12 +302,13 @@ private:
         ownInnerSets.resize(getGhostZoneWidth() + 1);
 
         ownRims.back() = ownRegion() - kernel;
-        for (int i = getGhostZoneWidth() - 1; i >= 0; --i) {
-            ownRims[i] = ownRims[i + 1].expandWithTopology(
+        for (std::ptrdiff_t i = static_cast<std::ptrdiff_t>(getGhostZoneWidth() - 1); i >= 0; --i) {
+            std::size_t index = static_cast<std::size_t>(i);
+            ownRims[index] = ownRims[index + 1].expandWithTopology(
                 1,
                 simulationArea.dimensions,
                 Topology(),
-                *adjacency(ownRims[i + 1]));
+                *adjacency(ownRims[index + 1]));
         }
 
         ownInnerSets[getGhostZoneWidth()] = kernel;
@@ -323,7 +324,7 @@ private:
         innerRim       = ownInnerSets.back() & rim(0);
     }
 
-    inline void intersect(unsigned node)
+    inline void intersect(int node)
     {
         std::vector<Region<DIM> >& outerGhosts = outerGhostZoneFragments[node];
         std::vector<Region<DIM> >& innerGhosts = innerGhostZoneFragments[node];

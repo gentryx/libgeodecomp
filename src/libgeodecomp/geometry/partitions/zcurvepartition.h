@@ -99,8 +99,8 @@ public:
         }
     private:
         std::list<Square> squareStack;
-        unsigned trivialSquareDirDim;
-        unsigned trivialSquareCounter;
+        int trivialSquareDirDim;
+        std::ptrdiff_t trivialSquareCounter;
         Coord<DIM> cachedSquareOrigin;
         Coord<DIM> *cachedSquareCoordsIterator;
         Coord<DIM> *cachedSquareCoordsEnd;
@@ -124,7 +124,7 @@ public:
             }
         }
 
-        inline void digDown(int offset)
+        inline void digDown(std::ptrdiff_t offset)
         {
             if (squareStack.empty()) {
                 throw std::logic_error("cannot descend from empty squares stack");
@@ -151,7 +151,7 @@ public:
         inline void digDownTrivial(
             const Coord<DIM>& origin,
             const Coord<DIM>& dimensions,
-            unsigned offset)
+            std::ptrdiff_t offset)
         {
             sublevelState = TRIVIAL;
             cursor = origin;
@@ -165,23 +165,22 @@ public:
 
             trivialSquareCounter = dimensions[trivialSquareDirDim] - offset;
             cursor[trivialSquareDirDim] += offset;
-
         }
 
         inline void digDownCached(
             const Coord<DIM>& origin,
             const Coord<DIM>& dimensions,
-            unsigned offset)
+            std::ptrdiff_t offset)
         {
             sublevelState = CACHED;
             CoordVector& coords = (*ZCurvePartition<DIM>::coordsCache)[dimensions];
             cachedSquareOrigin = origin;
-            cachedSquareCoordsIterator = &coords[offset];
+            cachedSquareCoordsIterator = &coords[static_cast<std::size_t>(offset)];
             cachedSquareCoordsEnd      = &coords[0] + coords.size();
             cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
         }
 
-        inline void digDownRecursion(unsigned offset, Square currentSquare)
+        inline void digDownRecursion(std::ptrdiff_t offset, Square currentSquare)
         {
             const Coord<DIM>& dimensions = currentSquare.dimensions;
             Coord<DIM> halfDimensions = dimensions / 2;
@@ -207,14 +206,14 @@ public:
                 quadrantDims[i] = quadrantDim;
             }
 
-            unsigned accuSizes[numQuadrants];
+            std::ptrdiff_t accuSizes[numQuadrants];
             accuSizes[0] = 0;
             for (int i = 1; i < numQuadrants; ++i) {
                 accuSizes[i] = accuSizes[i - 1] + quadrantDims[i - 1].prod();
             }
 
-            unsigned pos = offset + accuSizes[currentSquare.quadrant];
-            unsigned index = std::upper_bound(
+            std::ptrdiff_t pos = offset + accuSizes[currentSquare.quadrant];
+            std::ptrdiff_t index = std::upper_bound(
                 accuSizes,
                 accuSizes + numQuadrants,
                 pos) - accuSizes - 1;
