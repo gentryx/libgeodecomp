@@ -168,9 +168,9 @@ private:
         std::size_t wavefrontLength = static_cast<std::size_t>(gridDim[DIM - 1] + 1);
         WavefrontFrames ret(wavefrontLength, std::vector<Region<DIM> >(pipelineLength));
 
-        for (int index = 0; index < static_cast<int>(wavefrontLength); ++index) {
+        for (unsigned index = 0; index < wavefrontLength; ++index) {
             Coord<DIM> maskOrigin;
-            maskOrigin[DIM - 1] = index;
+            maskOrigin[DIM - 1] = static_cast<int>(index);
             Topology::normalize(maskOrigin, initializer->gridDimensions());
             Coord<DIM> maskDim = gridDim;
             maskDim[DIM - 1] = 1;

@@ -49,7 +49,7 @@ public:
             }
         }
 
-        std::set<int> deleteSet;
+        std::set<std::size_t> deleteSet;
         bool newLimitIsSuperfluous = true;
         for (std::size_t i = 0; i < limits.size(); ++i) {
             COORD delta1 = cutPoints[2 * i + 0] - eq.base;
@@ -258,7 +258,7 @@ private:
             for (std::size_t j = 0; j < equations.size(); ++j) {
                 if (i != j) {
                     COORD cut = cutPoint(equations[i], equations[j]);
-                    int offset = 2 * i;
+                    std::size_t offset = 2 * i;
                     COORD delta = cut - equations[i].base;
                     COORD turnedDir = turnLeft90(equations[i].dir);
                     double distance =

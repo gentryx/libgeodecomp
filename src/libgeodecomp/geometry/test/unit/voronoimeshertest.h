@@ -150,8 +150,8 @@ public:
 
         const ContainerCellType& cell = grid[loc];
         for (ContainerCellType::const_iterator i = cell.begin(); i != cell.end(); ++i) {
-            xCoords << i->center[0];
-            yCoords << i->center[1];
+            xCoords << static_cast<int>(i->center[0]);
+            yCoords << static_cast<int>(i->center[1]);
         }
 
         double minX = loc[0] * quadrantSize[0];

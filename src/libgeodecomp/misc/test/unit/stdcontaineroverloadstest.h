@@ -172,9 +172,9 @@ public:
     void deleteChecker(int excludeObj)
     {
         // create test object
-        int size = 7;
+        std::size_t size = 7;
         std::vector<int> original(size);
-        for (int i = 0; i < size - 2; i++) {
+        for (std::size_t i = 0; i < size - 2; i++) {
             original[i] = 1 << i;
         }
 
@@ -184,7 +184,7 @@ public:
 
         // create reference
         std::vector<int> cropped;
-        for (int i = 0; i < size - 2; i++) {
+        for (std::size_t i = 0; i < size - 2; i++) {
             int val = 1 << i;
             if (val != excludeObj) {
                 cropped.push_back(val);
@@ -357,10 +357,16 @@ public:
 
     void testSort()
     {
-        std::vector<unsigned> v;
-        std::vector<unsigned> w;
-        v << 0 << 3 << 1 << 2;
-        w << 0 << 1 << 2 << 3;
+        std::vector<int> v;
+        std::vector<int> w;
+        v << 0
+          << 3
+          << 1
+          << 2;
+        w << 0
+          << 1
+          << 2
+          << 3;
         sort(v);
         TS_ASSERT_EQUALS(v, w);
     }
@@ -368,7 +374,10 @@ public:
     void testMinMaxVector()
     {
         std::vector<int> a;
-        a << 0 << 3 << 1 << 2;
+        a << 0
+          << 3
+          << 1
+          << 2;
         TS_ASSERT_EQUALS((min)(a), 0);
         TS_ASSERT_EQUALS((max)(a), 3);
 
@@ -424,10 +433,24 @@ public:
         std::deque<int> c;
         std::deque<int> d;
 
-        a << 1 << 2 << 3 << 4;
-        b << 5 << 6 << 7 << 0;
+        a << 1
+          << 2
+          << 3
+          << 4;
 
-        c << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 0;
+        b << 5
+          << 6
+          << 7
+          << 0;
+
+        c << 1
+          << 2
+          << 3
+          << 4
+          << 5
+          << 6
+          << 7
+          << 0;
 
         d = a + b;
 
@@ -437,7 +460,13 @@ public:
     void testMinMax()
     {
         std::deque<int> a;
-        a << 4 << 1 << 5 << 2 << 7 << 9;
+
+        a << 4
+          << 1
+          << 5
+          << 2
+          << 7
+          << 9;
 
         TS_ASSERT_EQUALS((min)(a), 1);
         TS_ASSERT_EQUALS((max)(a), 9);
@@ -447,8 +476,22 @@ public:
     {
         std::deque<int> a;
         std::deque<int> b;
-        a << 4 << 1 << 5 << 2 << 7 << 9 << 0;
-        b << 0 << 1 << 2 << 4 << 5 << 7 << 9;
+
+        a << 4
+          << 1
+          << 5
+          << 2
+          << 7
+          << 9
+          << 0;
+
+        b << 0
+          << 1
+          << 2
+          << 4
+          << 5
+          << 7
+          << 9;
 
         sort(a);
         TS_ASSERT_EQUALS(a, b);
@@ -457,7 +500,12 @@ public:
     void testContains()
     {
         std::deque<int> a;
-        a << 0 << 1 << 4 << -1;
+
+        a << 0
+          << 1
+          << 4
+          << -1;
+
         TS_ASSERT_EQUALS(contains(a,  2), false);
         TS_ASSERT_EQUALS(contains(a,  3), false);
         TS_ASSERT_EQUALS(contains(a,  1), true);
@@ -468,7 +516,13 @@ public:
     void testSum()
     {
         std::deque<int> a;
-        a << 5 << 2 << 6 << 1 << 3 << 100;
+
+        a << 5
+          << 2
+          << 6
+          << 1
+          << 3
+          << 100;
 
         TS_ASSERT_EQUALS(sum(a), 117);
     }

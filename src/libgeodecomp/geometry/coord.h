@@ -270,9 +270,9 @@ public:
     }
 
     __host__ __device__
-    inline int prod() const
+    inline std::ptrdiff_t prod() const
     {
-        return x();
+        return static_cast<std::ptrdiff_t>(x());
     }
 
     __host__ __device__
@@ -534,9 +534,9 @@ public:
     }
 
     __host__ __device__
-    inline int prod() const
+    inline std::ptrdiff_t prod() const
     {
-        return x() * y();
+        return static_cast<std::ptrdiff_t>(x()) * y();
     }
 
     __host__ __device__
@@ -658,12 +658,13 @@ public:
      * converts a linear index to a coordinate in a cuboid of size given by the Coord
      */
     __host__ __device__
-    inline Coord<3> indexToCoord(int index) const
+    inline Coord<3> indexToCoord(std::size_t index) const
     {
-        int coordX = index % x();
-        int remainder = index / x();
+        int coordX = static_cast<std::ptrdiff_t>(index) % x();
+        std::ptrdiff_t remainder = static_cast<std::ptrdiff_t>(index) / x();
         int coordY = remainder % y();
         int coordZ = remainder / y();
+
         return Coord<3>(coordX, coordY, coordZ);
     }
 
@@ -824,9 +825,9 @@ public:
     }
 
     __host__ __device__
-    inline int prod() const
+    inline std::ptrdiff_t prod() const
     {
-        return x() * y() * z();
+        return static_cast<std::ptrdiff_t>(x()) * y() * z();
     }
 
     __host__ __device__

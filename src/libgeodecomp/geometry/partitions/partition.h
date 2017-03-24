@@ -31,7 +31,7 @@ public:
      * MPI process, identified by its rank.
      */
     inline Partition(
-        const long offset,
+        const std::size_t offset,
         const std::vector<std::size_t>& weights) :
         weights(weights)
     {

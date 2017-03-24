@@ -12,22 +12,22 @@ public:
     void testSearchNodeCuboid()
     {
         std::vector<std::size_t> weights;
-        weights << 25
-                << 25;
+        weights << std::size_t(25)
+                << std::size_t(25);
 
         checkCuboid(weights, 0, Coord<2>( 0, 0), Coord<2>(15, 20));
         checkCuboid(weights, 1, Coord<2>(15, 0), Coord<2>(15, 20));
 
-        weights << 50;
+        weights << std::size_t(50);
 
         checkCuboid(weights, 1, Coord<2>( 0, 10), Coord<2>(15, 10));
         checkCuboid(weights, 2, Coord<2>(15,  0), Coord<2>(15, 20));
 
-        weights << 200;
+        weights << std::size_t(200);
 
         checkCuboid(weights, 3, Coord<2>(10,  0), Coord<2>(20, 20));
 
-        weights << 100;
+        weights << std::size_t(100);
 
         checkCuboid(weights, 4, Coord<2>(23,  0), Coord<2>( 7, 20));
     }
@@ -35,11 +35,11 @@ public:
     void testGetRegion()
     {
         std::vector<std::size_t> weights;
-        weights << 200
-                << 100
-                <<  50
-                <<  25
-                <<  25;
+        weights << std::size_t(200)
+                << std::size_t(100)
+                << std::size_t(50)
+                << std::size_t(25)
+                << std::size_t(25);
 
         Coord<3> origin(100, 200, 300);
         Coord<3> dimensions(64, 32, 64);
@@ -79,10 +79,10 @@ public:
     void testDimWeights()
     {
         std::vector<std::size_t> weights;
-        weights << 16
-                << 16
-                << 16
-                << 16;
+        weights << std::size_t(16)
+                << std::size_t(16)
+                << std::size_t(16)
+                << std::size_t(16);
         Coord<2> dim(96, 32);
         Coord<2> dimWeights(1, 3);
 
@@ -95,8 +95,8 @@ public:
     void testDegradedDimensions()
     {
         std::vector<std::size_t> weights;
-        weights << 0
-                << 0;
+        weights << std::size_t(0)
+                << std::size_t(0);
 
         Coord<3> dim(128, 0, 0);
         TS_ASSERT_THROWS(

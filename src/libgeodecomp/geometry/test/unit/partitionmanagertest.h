@@ -14,13 +14,13 @@ public:
         dimensions = Coord<2>(20, 20);
         offset = 10 * 20 + 8;
         weights.clear();
-        weights << 15
-                << 12
-                <<  1
-                << 32
-                << 25
-                << 40
-                << 67;
+        weights << std::size_t(15)
+                << std::size_t(12)
+                << std::size_t(1)
+                << std::size_t(32)
+                << std::size_t(25)
+                << std::size_t(40)
+                << std::size_t(67);
         /**
          * the grid should look like this: (line no. at beginning of
          * the rows, n means that the corresponding cell belongs to
@@ -156,8 +156,10 @@ public:
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 31));
 
         std::vector<std::size_t> weights;
-        weights << 10000 << 15000 << 25000;
-        weights << box.dimensions.prod() - sum(weights);
+        weights << std::size_t(10000)
+                << std::size_t(15000)
+                << std::size_t(25000)
+                << box.dimensions.prod() - sum(weights);
         SharedPtr<Partition<3> >::Type partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
@@ -191,9 +193,9 @@ public:
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 55));
 
         std::vector<std::size_t> weights;
-        weights << 40000
-                << 15000
-                << 25000
+        weights << std::size_t(40000)
+                << std::size_t(15000)
+                << std::size_t(25000)
                 << (box.dimensions.prod() - sum(weights));
         SharedPtr<Partition<3> >::Type partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));

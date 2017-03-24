@@ -103,9 +103,9 @@ public:
     }
 
     __host__ __device__
-    inline unsigned size() const
+    inline std::size_t size() const
     {
-        return dimensions.prod();
+        return static_cast<std::size_t>(dimensions.prod());
     }
 
     class Iterator

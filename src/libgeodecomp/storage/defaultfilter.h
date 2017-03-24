@@ -19,7 +19,7 @@ public:
         MEMBER *target,
         MemoryLocation::Location targetLocation,
         const std::size_t num,
-        const std::size_t stride)
+        const std::size_t /* stride */)
     {
         checkMemoryLocations(sourceLocation, targetLocation);
 
@@ -33,7 +33,7 @@ public:
         EXTERNAL *target,
         MemoryLocation::Location targetLocation,
         const std::size_t num,
-        const std::size_t stride)
+        const std::size_t /* stride */)
     {
         checkMemoryLocations(sourceLocation, targetLocation);
 

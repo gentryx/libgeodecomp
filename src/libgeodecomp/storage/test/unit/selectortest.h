@@ -134,7 +134,7 @@ public:
         for (int i = 0; i < 20; ++i) {
             sourceX << i * 2 + 13;
             sourceY << 1.0 + i / 100.0;
-            sourceZ << i + 69;
+            sourceZ << static_cast<char>(i + 69);
         }
 
         selectorX.copyMemberIn((char*)&sourceX[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);

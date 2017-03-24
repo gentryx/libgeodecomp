@@ -13,17 +13,17 @@ public:
     {
         std::vector<std::size_t> weights;
         // empty:
-        weights << 0;
+        weights << std::size_t(0);
         Region<1> expected;
         TS_ASSERT_EQUALS(UnstructuredStripingPartition(Coord<1>(0), Coord<1>(0), 0, weights).getRegion(0), expected);
 
         // with non-zero origin:
-        weights[0] = 100;
+        weights[0] = std::size_t(100);
         expected << Streak<1>(Coord<1>(50), 150);
         TS_ASSERT_EQUALS(UnstructuredStripingPartition(Coord<1>(50), Coord<1>(100), 0, weights).getRegion(0), expected);
 
         // with origin and offset:
-        weights[0] = 200;
+        weights[0] = std::size_t(200);
         expected.clear();
         expected << Streak<1>(Coord<1>(100), 300);
         TS_ASSERT_EQUALS(UnstructuredStripingPartition(Coord<1>(50), Coord<1>(250), 50, weights).getRegion(0), expected);
@@ -32,9 +32,9 @@ public:
     void testMultipleDomains()
     {
         std::vector<std::size_t> weights;
-        weights <<  50
-                << 100
-                <<  50;
+        weights << std::size_t(50)
+                << std::size_t(100)
+                << std::size_t(50);
         Region<1> expected0;
         Region<1> expected1;
         Region<1> expected2;

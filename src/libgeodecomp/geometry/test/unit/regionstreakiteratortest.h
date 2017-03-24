@@ -65,7 +65,14 @@ public:
         TS_ASSERT_EQUALS(r.numStreaks(), expectedStreaks);
 
         std::vector<std::size_t> offsets;
-        offsets << 0 << 10 << 15 << 50 << 51 << 90 << 95 << 100;
+        offsets << std::size_t(0)
+                << std::size_t(10)
+                << std::size_t(15)
+                << std::size_t(50)
+                << std::size_t(51)
+                << std::size_t(90)
+                << std::size_t(95)
+                << std::size_t(100);
 
         std::vector<RegionStreakIterator<2, Region<2> > > iterators;
         for (std::vector<std::size_t>::iterator i = offsets.begin(); i != offsets.end(); ++i) {

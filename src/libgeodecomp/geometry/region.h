@@ -269,7 +269,7 @@ public:
 
     template<int STREAK_DIM, typename REGION>
     inline std::size_t operator()(
-        Streak<STREAK_DIM> *streak,
+        Streak<STREAK_DIM>* /* streak */,
         IndexVectorType::const_iterator *iterators,
         const REGION& region) const
     {
@@ -849,7 +849,7 @@ public:
         unsigned width,
         const Coord<DIM>& globalDimensions,
         TOPOLOGY topology,
-        const ADJACENCY& adjacency) const
+        const ADJACENCY& /* adjacency */) const
     {
         return expandWithTopology(width, globalDimensions, topology);
     }
@@ -1277,7 +1277,7 @@ public:
         const std::string& prefix,
         const std::string& variableName = "region",
         float value = 1,
-        int time = 0) const
+        unsigned time = 0) const
     {
         BOVOutput<float, DIM>::writeRegion(prefix, variableName, boundingBox(), begin(), end(), value, time);
     }
