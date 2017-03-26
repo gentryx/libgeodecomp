@@ -129,7 +129,7 @@ OozeBalancer::WeightVec OozeBalancer::equalize(const LoadVec& loads)
     for (unsigned i = 0; i < ret.size() - 1; i++) {
         double f = frac(loads[i]);
         double roundUpCost = 1 - f;
-        ret[i] = (long)loads[i];
+        ret[i] = static_cast<std::size_t>(loads[i]);
 
         if (roundUpCost < balance) {
             balance -= roundUpCost;
@@ -139,7 +139,8 @@ OozeBalancer::WeightVec OozeBalancer::equalize(const LoadVec& loads)
         }
     }
 
-    ret.back() = (long)loads.back();
+    ret.back() = static_cast<std::size_t>(loads.back());
+
     if (frac(loads.back())  > (0.5 - balance)) {
         ret.back()++;
     }

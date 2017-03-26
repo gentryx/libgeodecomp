@@ -28,16 +28,16 @@ RandomBalancer::WeightVec RandomBalancer::balance(
 
     // calc. scaling wheights
     double randSum = 0;
-    long loadsSum = 0;
+    std::size_t loadsSum = 0;
     for (unsigned i = 0; i < ret.size(); i++) {
         randSum += randomBase[i];
         loadsSum += weights[i];
     }
 
     // scaled fill & calc. remainder
-    long remainder = loadsSum;
+    std::size_t remainder = loadsSum;
     for (unsigned i = 0; i < ret.size(); i++) {
-        ret[i] = (long)(randomBase[i] * loadsSum / randSum);
+        ret[i] = static_cast<std::size_t>(randomBase[i] * loadsSum / randSum);
         remainder -= ret[i];
     }
 

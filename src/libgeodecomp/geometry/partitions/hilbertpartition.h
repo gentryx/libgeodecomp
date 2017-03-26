@@ -208,14 +208,14 @@ public:
             const Form& form = currentSquare.form;
             Coord<2> halfDimensions = dimensions / 2;
             Coord<2> restDimensions = dimensions - halfDimensions;
-            unsigned totalSize = dimensions.x() * dimensions.y();
-            unsigned leftHalfSize = halfDimensions.x() * dimensions.y();
+            unsigned totalSize = static_cast<unsigned>(dimensions.x() * dimensions.y());
+            unsigned leftHalfSize = static_cast<unsigned>(halfDimensions.x() * dimensions.y());
             unsigned rightHalfSize = totalSize - leftHalfSize;
-            unsigned upperLeftQuarterSize = halfDimensions.x() * halfDimensions.y();
-            unsigned lowerLeftQuarterSize = halfDimensions.x() * restDimensions.y();
+            unsigned upperLeftQuarterSize = static_cast<unsigned>(halfDimensions.x() * halfDimensions.y());
+            unsigned lowerLeftQuarterSize = static_cast<unsigned>(halfDimensions.x() * restDimensions.y());
 
-            unsigned upperRightQuarterSize = restDimensions.x() * halfDimensions.y();
-            unsigned lowerRightQuarterSize = restDimensions.x() * restDimensions.y();
+            unsigned upperRightQuarterSize = static_cast<unsigned>(restDimensions.x() * halfDimensions.y());
+            unsigned lowerRightQuarterSize = static_cast<unsigned>(restDimensions.x() * restDimensions.y());
             // accumulated quarter sizes, e.g. accuSizes[0] is the
             // sum of the first 0 quarters, ergo 0, accuSizes[3]
             // is the accumulated size of the first three quarters.
@@ -249,9 +249,9 @@ public:
             unsigned newQuarter;
             unsigned pos = offset + accuSizes[currentSquare.quadrant];
             if (pos < accuSizes[2]) {
-                newQuarter = (pos < accuSizes[1]) ? 0 : 1;
+                newQuarter = (pos < accuSizes[1]) ? 0u : 1u;
             } else {
-                newQuarter = (pos < accuSizes[3]) ? 2 : 3;
+                newQuarter = (pos < accuSizes[3]) ? 2u : 3u;
             }
             currentSquare.quadrant = newQuarter;
             squareStack.push_back(currentSquare);
@@ -313,7 +313,7 @@ public:
     inline explicit HilbertPartition(
         const Coord<2>& origin = Coord<2>(0, 0),
         const Coord<2>& dimensions = Coord<2>(0, 0),
-        const long& offset = 0,
+        const std::size_t offset = 0,
         const std::vector<std::size_t>& weights = std::vector<std::size_t>(2),
         const AdjacencyPtr& /* unused: adjacency */ = AdjacencyPtr()) :
         SpaceFillingCurve<2>(offset, weights),

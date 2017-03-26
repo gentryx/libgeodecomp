@@ -114,7 +114,7 @@ std::size_t PatternOptimizer::getMaxPos(
 
     // i = 1 middle doesn't need to be evaluate again
     for (std::size_t i = 1; i < pattern.size(); ++i) {
-        int halfI = (i - 1) / 2;
+        std::size_t halfI = (i - 1) / 2;
         // all pattern[i] with the same coordinates as middle, oldMiddle don't need to be evaluate
         if ((pattern[0][halfI].getValue() == pattern[i][halfI].getValue()) ||
             ((i % 2) == 0 && (i - 1) == oldMiddle) ||

@@ -265,7 +265,7 @@ public:
         {
             sublevelState = CACHED;
             cachedTriangleOrigin = triangle.origin;
-            Coord<3> c(triangle.dimensions.x(), triangle.dimensions.y(), triangle.type);
+            Coord<3> c(triangle.dimensions.x(), triangle.dimensions.y(), static_cast<int>(triangle.type));
             CoordVector& coords = (*triangleCoordsCache)[c];
             cachedTriangleCoordsIterator = &coords[counter];
             cachedTriangleCoordsEnd = &coords[0] + coords.size();
@@ -281,10 +281,10 @@ public:
             // if horizontal stripe
             if (triangle.dimensions.x() > 1) {
                 trivialTriangleDirection = Coord<2>(1, 0);
-                trivialTriangleLength = triangle.dimensions.x();
+                trivialTriangleLength = static_cast<unsigned>(triangle.dimensions.x());
             } else {
                 trivialTriangleDirection = Coord<2>(0, triangle.type == 0? -1 : 1);
-                trivialTriangleLength = triangle.dimensions.y();
+                trivialTriangleLength = static_cast<unsigned>(triangle.dimensions.y());
             }
         }
 
@@ -416,7 +416,7 @@ public:
         static inline void newOriginAndDimensions(
             Coord<2> *curOri,
             Coord<2> *curDim,
-            int curType,
+            unsigned curType,
             int curCounter)
         {
             int leftHalf =  curDim->x() / 2;
@@ -431,7 +431,7 @@ public:
         }
 
         static inline Coord<2> newOrigin(
-            int curType,
+            unsigned curType,
             int curCounter,
             int leftHalf,
             int rightHalf,
@@ -446,38 +446,39 @@ public:
             case 1:
             case 3:
                 switch (curType) {
-                case 0:
+                case 0u:
                     return Coord<2>(leftHalf,   -lowerHalf);
-                case 1:
+                case 1u:
                     return Coord<2>(-rightHalf, -lowerHalf);
-                case 2:
+                case 2u:
                     return Coord<2>(leftHalf,   upperHalf);
-                case 3:
+                case 3u:
                     return Coord<2>(-rightHalf, upperHalf);
                 }
             case 2:
                 switch (curType) {
-                case 0:
+                case 0u:
                     return Coord<2>(0, -y);
-                case 1:
+                case 1u:
                     return Coord<2>(-x, 0);
-                case 2:
+                case 2u:
                     return Coord<2>(x, 0);
-                case 3:
+                case 3u:
                     return Coord<2>(0, y);
                 }
             case 4: // end:
                 switch (curType) {
-                case 0:
+                case 0u:
                     return Coord<2>( x, -y);
-                case 1:
+                case 1u:
                     return Coord<2>(-x, -y);
-                case 2:
+                case 2u:
                     return Coord<2>( x,  y);
-                case 3:
+                case 3u:
                     return Coord<2>(-x,  y);
                 }
             }
+
             throw std::invalid_argument("bad curType or curCounter");
         }
 
