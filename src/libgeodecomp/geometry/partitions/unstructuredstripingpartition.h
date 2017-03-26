@@ -25,10 +25,10 @@ public:
     UnstructuredStripingPartition(
         const Coord<1> origin,
         const Coord<1> /* unused: dimensions */,
-        const long offset,
+        const std::size_t offset,
         const std::vector<std::size_t>& weights,
         const AdjacencyPtr& /* unused: adjacency */ = AdjacencyPtr()) :
-        Partition<1>(origin.x() + offset, weights)
+        Partition<1>(static_cast<std::size_t>(origin.x()) + offset, weights)
     {}
 
     Region<1> getRegion(const std::size_t node) const

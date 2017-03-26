@@ -73,11 +73,11 @@ public:
         inline Iterator(
             const Coord<DIM>& origin,
             const Coord<DIM>& dimensions,
-            unsigned pos = 0) :
+            std::size_t pos = 0) :
             SpaceFillingCurve<DIM>::Iterator(origin, false)
         {
             squareStack.push_back(Square(origin, dimensions, 0));
-            digDown(pos);
+            digDown(static_cast<std::ptrdiff_t>(pos));
         }
 
         inline explicit Iterator(const Coord<DIM>& origin) :
@@ -278,7 +278,7 @@ public:
     inline explicit ZCurvePartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
-        const long& offset = 0,
+        const std::size_t offset = 0,
         const std::vector<std::size_t>& weights = std::vector<std::size_t>(2),
         const AdjacencyPtr& /* unused: adjacency */ = AdjacencyPtr()) :
         SpaceFillingCurve<DIM>(offset, weights),
@@ -286,7 +286,7 @@ public:
         dimensions(dimensions)
     {}
 
-    inline Iterator operator[](unsigned i) const
+    inline Iterator operator[](std::size_t i) const
     {
         return Iterator(origin, dimensions, i);
     }

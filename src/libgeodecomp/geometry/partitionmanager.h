@@ -68,7 +68,7 @@ public:
         typename SharedPtr<AdjacencyManufacturer<DIM> >::Type newAdjacencyManufacturer,
         const CoordBox<DIM>& newSimulationArea,
         typename SharedPtr<Partition<DIM> >::Type newPartition,
-        unsigned newRank,
+        int newRank,
         unsigned newGhostZoneWidth)
     {
         adjacencyManufacturer = newAdjacencyManufacturer;
@@ -95,14 +95,14 @@ public:
         CoordBox<DIM> ownBoundingBox = ownRegion().boundingBox();
         CoordBox<DIM> ownExpandedBoundingBox = ownExpandedRegion().boundingBox();
 
-        for (int i = 0; i < static_cast<std::ptrdiff_t>(boundingBoxes.size()); ++i) {
-            if ((i != myRank) &&
+        for (std::size_t i = 0; i < boundingBoxes.size(); ++i) {
+            if ((static_cast<int>(i) != myRank) &&
                 (boundingBoxes[i].intersects(ownExpandedBoundingBox) ||
                  expandedBoundingBoxes[i].intersects(ownBoundingBox)) &&
-                (!(getRegion(myRank, ghostZoneWidth) &
-                   getRegion(i,      0)).empty() ||
-                 !(getRegion(i,      ghostZoneWidth) &
-                   getRegion(myRank, 0)).empty())) {
+                (!(getRegion(myRank,              ghostZoneWidth) &
+                   getRegion(static_cast<int>(i), 0)).empty() ||
+                 !(getRegion(static_cast<int>(i), ghostZoneWidth) &
+                   getRegion(myRank,              0)).empty())) {
                 intersect(i);
             }
         }
@@ -268,7 +268,7 @@ private:
     {
         std::vector<Region<DIM> >& regionExpansion = regions[node];
         regionExpansion.resize(getGhostZoneWidth() + 1);
-        regionExpansion[0] = partition->getRegion(node);
+        regionExpansion[0] = partition->getRegion(static_cast<std::size_t>(node));
         for (std::size_t i = 1; i <= getGhostZoneWidth(); ++i) {
             Region<DIM> expanded;
             const Region<DIM>& reg = regionExpansion[i - 1];
