@@ -68,7 +68,7 @@ public:
         using SpaceFillingCurve<DIM>::Iterator::origin;
         using SpaceFillingCurve<DIM>::Iterator::sublevelState;
 
-        static const int NUM_QUADRANTS = 1 << DIM;
+        static const std::size_t NUM_QUADRANTS = 1 << DIM;
 
         inline Iterator(
             const Coord<DIM>& origin,
@@ -186,10 +186,10 @@ public:
             Coord<DIM> halfDimensions = dimensions / 2;
             Coord<DIM> remainingDimensions = dimensions - halfDimensions;
 
-            const int numQuadrants = ZCurvePartition<DIM>::Iterator::NUM_QUADRANTS;
+            const std::size_t numQuadrants = ZCurvePartition<DIM>::Iterator::NUM_QUADRANTS;
             Coord<DIM> quadrantDims[numQuadrants];
 
-            for (int i = 0; i < numQuadrants; ++i) {
+            for (std::size_t i = 0; i < numQuadrants; ++i) {
                 // high bits denote that the quadrant is in the upper
                 // half in respect to that dimension, e.g. quadrant 2
                 // would be (for 2D) in the lower half for dimension 0
@@ -197,7 +197,7 @@ public:
                 std::bitset<DIM> quadrantShift(i);
                 Coord<DIM> quadrantDim;
 
-                for (int d = 0; d < DIM; ++d) {
+                for (std::size_t d = 0; d < DIM; ++d) {
                     quadrantDim[d] = quadrantShift[d]?
                         remainingDimensions[d] :
                         halfDimensions[d];
@@ -208,7 +208,7 @@ public:
 
             std::ptrdiff_t accuSizes[numQuadrants];
             accuSizes[0] = 0;
-            for (int i = 1; i < numQuadrants; ++i) {
+            for (std::size_t i = 1; i < numQuadrants; ++i) {
                 accuSizes[i] = accuSizes[i - 1] + quadrantDims[i - 1].prod();
             }
 
@@ -222,17 +222,17 @@ public:
                 throw std::logic_error("offset too large?");
             }
 
-            unsigned newOffset = pos - accuSizes[index];
+            std::ptrdiff_t newOffset = pos - accuSizes[index];
             Coord<DIM> newDimensions = quadrantDims[index];
             Coord<DIM> newOrigin;
 
-            std::bitset<DIM> quadrantShift(index);
+            std::bitset<DIM> quadrantShift(static_cast<std::size_t>(index));
             for (int d = 0; d < DIM; ++d) {
-                newOrigin[d] = quadrantShift[d]? halfDimensions[d] : 0;
+                newOrigin[d] = quadrantShift[d] ? halfDimensions[d] : 0;
             }
             newOrigin += currentSquare.origin;
 
-            currentSquare.quadrant = index;
+            currentSquare.quadrant = static_cast<std::size_t>(index);
             squareStack.push_back(currentSquare);
 
             Square newSquare(newOrigin, newDimensions, 0);

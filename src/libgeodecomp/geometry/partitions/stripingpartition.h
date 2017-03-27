@@ -63,7 +63,7 @@ public:
 
     Iterator operator[](std::size_t pos) const
     {
-        Coord<DIM> cursor = dimensions.indexToCoord(pos) + origin;
+        Coord<DIM> cursor = dimensions.indexToCoord(static_cast<std::ptrdiff_t>(pos)) + origin;
         return Iterator(origin, cursor, dimensions);
     }
 

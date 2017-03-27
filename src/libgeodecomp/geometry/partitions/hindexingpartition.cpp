@@ -13,11 +13,11 @@
 
 namespace LibGeoDecomp {
 
-int HIndexingPartition::triangleTransitions[4][4] = {
-    {0,1,2,0},
-    {1,3,0,1},
-    {2,0,3,2},
-    {3,2,1,3}
+unsigned HIndexingPartition::triangleTransitions[4][4] = {
+    {0u, 1u, 2u, 0u},
+    {1u, 3u, 0u, 1u},
+    {2u, 0u, 3u, 2u},
+    {3u, 2u, 1u, 3u}
 };
 
 Coord<2> HIndexingPartition::maxCachedDimensions;

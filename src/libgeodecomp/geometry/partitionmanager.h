@@ -324,7 +324,7 @@ private:
         innerRim       = ownInnerSets.back() & rim(0);
     }
 
-    inline void intersect(int node)
+    inline void intersect(std::size_t node)
     {
         std::vector<Region<DIM> >& outerGhosts = outerGhostZoneFragments[node];
         std::vector<Region<DIM> >& innerGhosts = innerGhostZoneFragments[node];

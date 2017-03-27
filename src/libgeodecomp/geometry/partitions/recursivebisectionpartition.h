@@ -43,7 +43,7 @@ public:
         CoordBox<DIM> cuboid = searchNodeCuboid(
             startOffsets.begin(),
             startOffsets.end() - 1,
-            startOffsets.begin() + i,
+            startOffsets.begin() + static_cast<std::ptrdiff_t>(i),
             CoordBox<DIM>(origin, dimensions));
 
         Region<DIM> r;

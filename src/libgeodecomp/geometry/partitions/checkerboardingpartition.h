@@ -21,7 +21,7 @@ public:
     inline explicit CheckerboardingPartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
-        const long& offset = 0,
+        const std::size_t offset = 0,
         const std::vector<std::size_t>& weights = std::vector<std::size_t>(2)) :
         Partition<DIM>(offset, weights),
         origin(origin),
@@ -32,10 +32,12 @@ public:
 
     Region<DIM> getRegion(const std::size_t node) const
     {
-        Coord<DIM> logicalCoord(node % nodeGridDim.x(),
-                               (node % (nodeGridDim.x() * nodeGridDim.y()))/ nodeGridDim.x());
+        Coord<DIM> logicalCoord(
+            static_cast<std::ptrdiff_t>(node) % nodeGridDim.x(),
+            (static_cast<std::ptrdiff_t>(node) % (nodeGridDim.x() * nodeGridDim.y()))/ nodeGridDim.x());
+
         if (DIM > 2){
-            logicalCoord[2] = node / (nodeGridDim.x() * nodeGridDim.y());
+            logicalCoord[2] = static_cast<std::ptrdiff_t>(node) / (nodeGridDim.x() * nodeGridDim.y());
         }
 
         Coord<DIM> realStart;

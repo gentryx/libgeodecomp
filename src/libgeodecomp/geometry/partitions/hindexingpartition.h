@@ -121,7 +121,7 @@ public:
     // e.g. type 2 consist of a type 2, then 0, then 3 and finally
     // another type 2, all of only half the dimensions of the
     // original one.
-    static int triangleTransitions[4][4];
+    static unsigned triangleTransitions[4][4];
     // (dimensions.x(), dimensions.y(), type) -> coord sequence
     typedef Grid<CoordVector, Topologies::Cube<3>::Topology> CacheType;
     static SharedPtr<CacheType>::Type triangleCoordsCache;
@@ -417,7 +417,7 @@ public:
             Coord<2> *curOri,
             Coord<2> *curDim,
             unsigned curType,
-            int curCounter)
+            unsigned curCounter)
         {
             int leftHalf =  curDim->x() / 2;
             int rightHalf = curDim->x() - leftHalf;
@@ -501,7 +501,7 @@ public:
                 if (type == 1 || type == 3) {
                     return 0;
                 } else {
-                    return dimensions.prod();
+                    return static_cast<std::size_t>(dimensions.prod());
                 }
             } else {
                 std::pair<Coord<2>, unsigned> key(dimensions, type);
@@ -532,7 +532,7 @@ public:
     inline explicit HIndexingPartition(
         const Coord<2>& origin=Coord<2>(0, 0),
         const Coord<2>& dimensions=Coord<2>(0, 0),
-        const long& offset=0,
+        const std::size_t offset=0,
         const std::vector<std::size_t>& weights=std::vector<std::size_t>(2)) :
         SpaceFillingCurve<2>(offset, weights),
         origin(origin),
@@ -585,7 +585,7 @@ private:
                         coords.push_back(*h);
                     }
 
-                    Coord<3> c(dimensions.x(), dimensions.y(), t);
+                    Coord<3> c(dimensions.x(), dimensions.y(), static_cast<int>(t));
                     (*triangleCoordsCache)[c] = coords;
                 }
             }
