@@ -176,11 +176,11 @@ char *numberToString(N n, char *s,
     N digitValue;
     for (; digit >= 1 && skipDigits; n -= digit * digitValue, digit /= base, -- skipDigits)
     {
-        digitValue = (long)(n / digit);
+        digitValue = (N)(n / digit);
     }
     for (; digit >= 1 && maxDigits; n -= digit * digitValue, digit /= base, -- maxDigits)
     {
-        *s++ = digitToChar((unsigned)(digitValue = (long)(n / digit)));
+        *s++ = digitToChar((unsigned)(digitValue = (N)(n / digit)));
     }
 
     *s = '\0';
