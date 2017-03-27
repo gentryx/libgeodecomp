@@ -197,8 +197,8 @@ public:
                 std::bitset<DIM> quadrantShift(i);
                 Coord<DIM> quadrantDim;
 
-                for (std::size_t d = 0; d < DIM; ++d) {
-                    quadrantDim[d] = quadrantShift[d]?
+                for (int d = 0; d < DIM; ++d) {
+                    quadrantDim[d] = quadrantShift[static_cast<std::size_t>(d)] ?
                         remainingDimensions[d] :
                         halfDimensions[d];
                 }
@@ -228,7 +228,7 @@ public:
 
             std::bitset<DIM> quadrantShift(static_cast<std::size_t>(index));
             for (int d = 0; d < DIM; ++d) {
-                newOrigin[d] = quadrantShift[d] ? halfDimensions[d] : 0;
+                newOrigin[d] = quadrantShift[static_cast<std::size_t>(d)] ? halfDimensions[d] : 0;
             }
             newOrigin += currentSquare.origin;
 

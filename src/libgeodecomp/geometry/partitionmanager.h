@@ -103,7 +103,7 @@ public:
                    getRegion(static_cast<int>(i), 0)).empty() ||
                  !(getRegion(static_cast<int>(i), ghostZoneWidth) &
                    getRegion(myRank,              0)).empty())) {
-                intersect(i);
+                intersect(static_cast<int>(i));
             }
         }
 
@@ -324,7 +324,7 @@ private:
         innerRim       = ownInnerSets.back() & rim(0);
     }
 
-    inline void intersect(std::size_t node)
+    inline void intersect(int node)
     {
         std::vector<Region<DIM> >& outerGhosts = outerGhostZoneFragments[node];
         std::vector<Region<DIM> >& innerGhosts = innerGhostZoneFragments[node];

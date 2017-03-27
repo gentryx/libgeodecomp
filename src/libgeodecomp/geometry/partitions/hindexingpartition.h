@@ -432,7 +432,7 @@ public:
 
         static inline Coord<2> newOrigin(
             unsigned curType,
-            int curCounter,
+            unsigned curCounter,
             int leftHalf,
             int rightHalf,
             int upperHalf,
