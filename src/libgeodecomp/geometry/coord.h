@@ -147,9 +147,9 @@ public:
      * converts a linear index to a coordinate in a cuboid of size given by the Coord.
      */
     __host__ __device__
-    inline Coord<1> indexToCoord(int index) const
+    inline Coord<1> indexToCoord(std::size_t index) const
     {
-        return Coord<1>(index);
+        return Coord<1>(static_cast<int>(index));
     }
 
     /**
@@ -396,9 +396,11 @@ public:
      * converts a linear index to a coordinate in a cuboid of size given by the Coord
      */
     __host__ __device__
-    inline Coord<2> indexToCoord(int index) const
+    inline Coord<2> indexToCoord(std::size_t index) const
     {
-        return Coord<2>(index % x(), index / x());
+        return Coord<2>(
+            static_cast<std::ptrdiff_t>(index) % x(),
+            static_cast<std::ptrdiff_t>(index) / x());
     }
 
     /**
