@@ -36,8 +36,8 @@ char digitToChar(unsigned digit)
 const char *byteToHex(unsigned char byte)
 {
     static char asHex[3];
-    asHex[0] = digitToChar(byte >> 4);
-    asHex[1] = digitToChar(byte & 0x0F);
+    asHex[0] = digitToChar(byte >> 4u);
+    asHex[1] = digitToChar(byte & 0x0Fu);
     asHex[2] = '\0';
     return asHex;
 }

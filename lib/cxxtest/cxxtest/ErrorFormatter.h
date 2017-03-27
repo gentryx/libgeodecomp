@@ -61,7 +61,7 @@ public:
     int run()
     {
         TestRunner::runAllTests(*this);
-        return tracker().failedTests();
+        return static_cast<int>(tracker().failedTests());
     }
 
     void enterWorld(const WorldDescription& desc)
@@ -268,7 +268,7 @@ private:
     {
         newLine();
         reportTest();
-        return (*_o) << file << _preLine << line << _postLine << ": ";
+        return (*_o) << file << _preLine << static_cast<unsigned>(line) << _postLine << ": ";
     }
 
     void newLine(void)
