@@ -39,7 +39,7 @@ void RealTestDescription::initialize(List &argList,
                                      const char *argTestName)
 {
     _suite = &argSuite;
-    _line = argLine;
+    _line = static_cast<int>(argLine);
     _testName = argTestName;
     attach(argList);
 }
@@ -139,7 +139,7 @@ void RealSuiteDescription::initialize(const char *argFile,
                                       List &argTests)
 {
     _file = argFile;
-    _line = argLine;
+    _line = static_cast<int>(argLine);
     _suiteName = argSuiteName;
     _tests = &argTests;
 
