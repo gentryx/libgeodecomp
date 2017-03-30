@@ -61,7 +61,7 @@ public:
 
     void testMultipleUpdate()
     {
-        for (int i = 0; i < 100; i++) {
+        for (unsigned i = 0; i < 100; i++) {
             update(i % NANO_STEPS);
             TS_ASSERT_TEST_GRID(Grid<TestCellType >, grid, i + 1);
         }

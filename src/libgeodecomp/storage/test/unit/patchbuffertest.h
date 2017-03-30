@@ -60,7 +60,7 @@ public:
         patchBuffer.pushRequest(2);
         TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), PatchAccepter<GridType>::infinity());
 
-        for (int i = 0; i < 4; ++i) {
+        for (std::size_t i = 0; i < 4; ++i) {
             patchBuffer.put(baseGrid, validRegion, dimensions.dimensions, i, 0);
         }
         compGrid = zeroGrid;
@@ -76,7 +76,7 @@ public:
         patchBuffer = PatchBufferType(region1);
         patchBuffer.pushRequest(2);
         patchBuffer.pushRequest(3);
-        for (int i = 0; i < 4; ++i) {
+        for (std::size_t i = 0; i < 4; ++i) {
             patchBuffer.put(baseGrid, validRegion, dimensions.dimensions, i, 0);
         }
         compGrid = zeroGrid;
@@ -97,7 +97,7 @@ public:
         // just another normal retrieval
         patchBuffer.region = region2;
         patchBuffer.pushRequest(1);
-        for (int i = 0; i < 4; ++i) {
+        for (std::size_t i = 0; i < 4; ++i) {
             patchBuffer.put(baseGrid, validRegion, dimensions.dimensions, i, 0);
         }
         compGrid = zeroGrid;

@@ -83,11 +83,16 @@ public:
             vec.size());
 
         for (std::size_t i = 0; i < vec.size(); ++i) {
-            TS_ASSERT_EQUALS(Coord<2>(i + 300, i + 400), extract[i]);
+            Coord<2> c(
+                static_cast<int>(i) + 300,
+                static_cast<int>(i) + 400);
+            TS_ASSERT_EQUALS(c, extract[i]);
         }
 
         for (std::size_t i = 0; i < vec.size(); ++i) {
-            extract[i] = Coord<2>(i + 500, i + 600);
+            extract[i] = Coord<2>(
+                static_cast<int>(i) + 500,
+                static_cast<int>(i) + 600);
         }
         selector.copyMemberIn(
             reinterpret_cast<char*>(&extract[0]),
@@ -97,7 +102,10 @@ public:
             vec.size());
 
         for (std::size_t i = 0; i < vec.size(); ++i) {
-            TS_ASSERT_EQUALS(Coord<2>(i + 500, i + 600), vec[i].dimensions.dimensions);
+            Coord<2> c(
+                static_cast<int>(i) + 500,
+                static_cast<int>(i) + 600);
+            TS_ASSERT_EQUALS(c, vec[i].dimensions.dimensions);
         }
 
         TS_ASSERT_EQUALS(sizeof(Coord<2>), filter->sizeOf());
@@ -121,7 +129,7 @@ public:
             filter3);
 
         std::vector<TestClassForMultiLevelNesting> vec(55);
-        for (int i = 0; i < 55; ++i) {
+        for (std::size_t i = 0; i < 55; ++i) {
             vec[i].member.member.member.a = i + 0.1;
         }
 
@@ -133,11 +141,11 @@ public:
             MemoryLocation::HOST,
             55);
 
-        for (int i = 0; i < 55; ++i) {
+        for (std::size_t i = 0; i < 55; ++i) {
             TS_ASSERT_EQUALS((i + 0.1), buf[i]);
         }
 
-        for (int i = 0; i < 55; ++i) {
+        for (std::size_t i = 0; i < 55; ++i) {
             buf[i] = i + 0.2;
         }
 

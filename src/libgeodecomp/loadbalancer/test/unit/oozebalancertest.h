@@ -167,12 +167,16 @@ public:
     OozeBalancer::LoadVec itemLoads1()
     {
         OozeBalancer::LoadVec itemLoads(1500);
-        for (int i = 0; i < 400; i++)
+        for (std::size_t i = 0; i < 400; i++) {
             itemLoads[i] = 0.1;
-        for (int i = 400; i < 1300; i++)
+        }
+        for (std::size_t i = 400; i < 1300; i++) {
             itemLoads[i] = 1.0;
-        for (int i = 1300; i < 1500; i++)
+        }
+        for (std::size_t i = 1300; i < 1500; i++) {
             itemLoads[i] = 0.3;
+        }
+
         return itemLoads;
     }
 
@@ -184,6 +188,7 @@ public:
         nodeSpeeds[2] = 25;
         nodeSpeeds[3] = 10;
         nodeSpeeds[4] = 55;
+
         return nodeSpeeds;
     }
 

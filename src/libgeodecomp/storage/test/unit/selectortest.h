@@ -55,8 +55,17 @@ public:
 
 }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4365 )
+#endif
+
 LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::MyDummyCell,      ((long long)(x))((double)(y))((char)(z)) )
 LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::MyOtherDummyCell, ((int)(x))((double)(y)(3)) )
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

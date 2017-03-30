@@ -270,9 +270,9 @@ public:
 
         // modify vectors and copy back to grid:
         for (std::size_t i = 0; i < region.size(); ++i) {
-            xVector[i] = 1000 + i;
+            xVector[i] = static_cast<int>(1000 + i);
             yVector[i] = 2000 + i;
-            zVector[i] = i;
+            zVector[i] = static_cast<int>(i);
         }
 
         grid.loadMember(&xVector[0], MemoryLocation::HOST, xSelector, region);
@@ -315,7 +315,7 @@ public:
         for (int i = 0; i < 70; ++i) {
             TestCell<2> actual = testGrid.get(*iter);
             TestCell<2> expected(*iter, testGrid.getDimensions());
-            int expectedIndex = 200 + (*iter - origin).toIndex(dim);
+            std::size_t expectedIndex = 200 + (*iter - origin).toIndex(dim);
             expected.testValue = expectedIndex;
 
             TS_ASSERT_EQUALS(actual, expected);
@@ -323,8 +323,8 @@ public:
         }
 
         // manupulate test data:
-        for (int i = 0; i < 70; ++i) {
-            buffer[i].pos = Coord<2>(-i, -10);
+        for (std::size_t i = 0; i < 70; ++i) {
+            buffer[i].pos = Coord<2>(-static_cast<int>(i), -10);
         }
 
         int index = 0;
@@ -379,7 +379,7 @@ public:
         for (int i = 0; i < 90; ++i) {
             TestCell<2> actual = testGrid.get(*iter);
             TestCell<2> expected(*iter, testGrid.getDimensions());
-            int expectedIndex = 200 + (*iter - origin).toIndex(dim);
+            std::size_t expectedIndex = 200 + (*iter - origin).toIndex(dim);
             expected.testValue = expectedIndex;
 
             TS_ASSERT_EQUALS(actual, expected);
@@ -387,8 +387,8 @@ public:
         }
 
         // manupulate test data:
-        for (int i = 0; i < 90; ++i) {
-            buffer[i].pos = Coord<2>(-i, -20);
+        for (std::size_t i = 0; i < 90; ++i) {
+            buffer[i].pos = Coord<2>(-static_cast<int>(i), -20);
         }
 
         int index = 0;

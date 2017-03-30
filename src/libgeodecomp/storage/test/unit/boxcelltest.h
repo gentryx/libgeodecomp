@@ -153,7 +153,7 @@ public:
         }
 
         for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
-            for (int j = 0; j < 4; ++j) {
+            for (std::size_t j = 0; j < 4; ++j) {
                 // a particle should be able to see a field of 5x3
                 // particles (including itself), unless it's situated at
                 // the border of the simulation space:
@@ -228,7 +228,7 @@ public:
         // on the left and upper cell boundaries have transitioned to
         // the corresponding neighbor cells:
         for (int y = 0; y < dim.y(); ++y) {
-            int fieldDimY = 2;
+            std::size_t fieldDimY = 2;
             if (y == 0) {
                 fieldDimY = 3;
             }
@@ -237,7 +237,7 @@ public:
             }
 
             for (int x = 0; x < dim.x(); ++x) {
-                int fieldDimX = 2;
+                std::size_t fieldDimX = 2;
                 if (x == 0) {
                     fieldDimX = 3;
                 }
@@ -345,7 +345,7 @@ public:
                         expectedCubeDim.z() -= 1;
                     }
 
-                    std::size_t expected = expectedCubeDim.prod();
+                    std::size_t expected = static_cast<std::size_t>(expectedCubeDim.prod());
 
                     TS_ASSERT_EQUALS(grid1[Coord<3>(x, y, z)].size(), expected);
                 }

@@ -47,14 +47,14 @@ public:
 
     void testBasicUsageAndBusyWait()
     {
-        int max = 1000;
+        std::size_t max = 1000;
         long microSeconds = 250;
         double seconds = microSeconds * 1e-6;
         std::vector<double> times(max, 0);
         double timeOdd = 0;
         double timeEven = 0;
 
-        for (int i = 0; i < max; ++i) {
+        for (std::size_t i = 0; i < max; ++i) {
             ScopedTimer timerA(&times[i]);
             ScopedTimer timerB(i % 2 ? &timeOdd : &timeEven);
 
@@ -65,7 +65,7 @@ public:
         sort(times);
 
         // drop largest 40 percent to ignore OS jitter
-        for (int i = 0; i < (0.6 * max); ++i) {
+        for (std::size_t i = 0; i < (0.6 * max); ++i) {
             // accept at most 10% deviation
             TS_ASSERT_LESS_THAN(seconds * 0.9, times[i]);
             TS_ASSERT_LESS_THAN(times[i], seconds * 1.1);

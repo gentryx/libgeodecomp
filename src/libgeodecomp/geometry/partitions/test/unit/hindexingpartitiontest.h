@@ -139,11 +139,11 @@ public:
     void testSquareBracketsOperatorSimple()
     {
         Coord<2> dimensions(3, 5);
-        for (int prolog = 0; prolog < (dimensions.x() * dimensions.y()); ++prolog) {
+        for (std::size_t prolog = 0; prolog < static_cast<std::size_t>(dimensions.prod()); ++prolog) {
             HIndexingPartition h(Coord<2>(10, 20), dimensions);
             HIndexingPartition::Iterator testIter = h[prolog];
             HIndexingPartition::Iterator normalIter = h.begin();
-            for (int i = 0; i < prolog; ++i) {
+            for (std::size_t i = 0; i < prolog; ++i) {
                 ++normalIter;
             }
 
@@ -161,12 +161,12 @@ public:
     {
         Coord<2> dimensions(123, 234);
         // don't check ALL possible skip values, but just some, with special emphasis on the lower ones
-        for (int prolog = 0; prolog <= (dimensions.x() * dimensions.y()); prolog = prolog * 3 + 1) {
+        for (std::size_t prolog = 0; prolog <= static_cast<std::size_t>(dimensions.prod()); prolog = prolog * 3 + 1) {
             HIndexingPartition h(Coord<2>(10, 20), dimensions);
             HIndexingPartition::Iterator testIter = h[prolog];
             HIndexingPartition::Iterator normalIter = h.begin();
 
-            for (int i = 0; i < prolog; ++i) {
+            for (std::size_t i = 0; i < prolog; ++i) {
                 ++normalIter;
             }
 

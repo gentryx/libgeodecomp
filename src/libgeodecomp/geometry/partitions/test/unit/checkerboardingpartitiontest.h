@@ -98,7 +98,8 @@ public:
                 Region<2> expected;
                 expected << CoordBox<2>(origin + Coord<2>(x * 8, y * 5), Coord<2>(8, 5));
 
-                TS_ASSERT_EQUALS(expected, p.getRegion(y * 4 + x));
+                std::size_t index = static_cast<std::size_t>(y * 4 + x);
+                TS_ASSERT_EQUALS(expected, p.getRegion(index));
             }
         }
     }
@@ -131,7 +132,10 @@ public:
                         origin + upperLeftFrontCorner,
                         lowerRightRearCorner - upperLeftFrontCorner);
 
-                    TS_ASSERT_EQUALS(expected, p.getRegion(z * 5 * 8 + y * 5 + x));
+                    std::size_t index = static_cast<std::size_t>(
+                        z * 5 * 8 +
+                        y * 5 + x);
+                    TS_ASSERT_EQUALS(expected, p.getRegion(index));
                 }
             }
         }

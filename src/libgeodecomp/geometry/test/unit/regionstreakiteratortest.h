@@ -90,7 +90,7 @@ public:
         // ensure x-offsets match original offsets
         for (std::size_t i = 1; i < offsets.size(); ++i) {
             Coord<2> deltaCoord = iterators[i] - iterators[i - 1];
-            int deltaOffset = offsets[i] - offsets[i - 1];
+            int deltaOffset = static_cast<int>(offsets[i] - offsets[i - 1]);
             if (offsets[i] > r.numStreaks()) {
                 deltaOffset = 0;
             }

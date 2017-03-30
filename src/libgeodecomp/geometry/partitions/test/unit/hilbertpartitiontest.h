@@ -37,7 +37,7 @@ public:
     void testFillRectangles()
     {
         CoordVector actual;
-        for (int i = 0; i < 16; ++i) {
+        for (std::size_t i = 0; i < 16; ++i) {
             actual <<
                 *HilbertPartition::Iterator(
                     Coord<2>(10, 20),
@@ -110,7 +110,7 @@ public:
         partition = HilbertPartition(offset, dimensions);
 
         CoordVector expected;
-        for (int i = 0; i < (dimensions.x()*dimensions.y()); ++i) {
+        for (std::size_t i = 0; i < (dimensions.x()*dimensions.y()); ++i) {
             expected << *partition[i];
         }
 

@@ -92,10 +92,10 @@ public:
     void testResetRegionsAndGhostRegionFragments()
     {
         unsigned curOffset = offset;
-        for (unsigned i = 0; i < 7; ++i) {
+        for (int i = 0; i < 7; ++i) {
             // 23 because you have to intersect node 6's region with
             // the outer ghost zone. this leaves a fragment of length 22.
-            unsigned length = (i != 6)? weights[i] : 23;
+            unsigned length = (i != 6)? weights[static_cast<std::size_t>(i)] : 23;
             // we're node 4 ourselves, so that non-existent halo can be skipped
             if (i != 4) {
                 checkRegion(
@@ -152,7 +152,7 @@ public:
 
     void test3DFirst()
     {
-        int ghostZoneWidth = 4;
+        unsigned ghostZoneWidth = 4;
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 31));
 
         std::vector<std::size_t> weights;
@@ -189,7 +189,7 @@ public:
 
     void test3DSecond()
     {
-        int ghostZoneWidth = 3;
+        unsigned ghostZoneWidth = 3;
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 55));
 
         std::vector<std::size_t> weights;
@@ -282,7 +282,7 @@ private:
     unsigned offset;
     SharedPtr<StripingPartition<2> >::Type partition;
     std::vector<std::size_t> weights;
-    unsigned rank;
+    int rank;
     unsigned ghostZoneWidth;
     std::vector<CoordBox<2> > boundingBoxes;
     std::vector<CoordBox<2> > expandedBoundingBoxes;
@@ -296,8 +296,8 @@ private:
         const SharedPtr<StripingPartition<2> >::Type& partition)
     {
         std::vector<CoordBox<2> > boundingBoxes(size);
-        long startOffset = offset;
-        long endOffset = offset;
+        std::size_t startOffset = offset;
+        std::size_t endOffset = offset;
 
         for (unsigned i = 0; i < size; ++i) {
             endOffset += weights[i];
@@ -324,8 +324,8 @@ private:
         const SharedPtr<StripingPartition<2> >::Type& partition)
     {
         std::vector<CoordBox<2> > boundingBoxes(size);
-        long startOffset = offset;
-        long endOffset = offset;
+        std::size_t startOffset = offset;
+        std::size_t endOffset = offset;
 
         for (unsigned i = 0; i < size; ++i) {
             endOffset += weights[i];

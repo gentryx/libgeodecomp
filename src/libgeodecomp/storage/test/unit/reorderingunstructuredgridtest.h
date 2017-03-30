@@ -611,7 +611,8 @@ public:
                     return a.first < b.first;
                 });
 
-            std::vector<std::pair<int, double> > actualRow = grid.delegate.matrices[0].getRow(i->x());
+            std::size_t rowIndex = static_cast<std::size_t>(i->x());
+            std::vector<std::pair<int, double> > actualRow = grid.delegate.matrices[0].getRow(rowIndex);
 
             TS_ASSERT_EQUALS(actualRow, expectedRow);
         }
@@ -791,7 +792,8 @@ public:
                     return a.first < b.first;
                 });
 
-            std::vector<std::pair<int, double> > actualRow = grid.delegate.matrices[0].getRow(i->x());
+            std::size_t rowIndex = static_cast<std::size_t>(i->x());
+            std::vector<std::pair<int, double> > actualRow = grid.delegate.matrices[0].getRow(rowIndex);
 
             TS_ASSERT_EQUALS(actualRow, expectedRow);
         }

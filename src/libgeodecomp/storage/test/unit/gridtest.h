@@ -150,7 +150,8 @@ public:
         TS_ASSERT(!other[Coord<2>(2, 4)].isValid);
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
-                other.cellVector[y * width + x] = testGrid->cellVector[y * width + x];
+                std::size_t index = static_cast<std::size_t>(y * width + x);
+                other.cellVector[index] = testGrid->cellVector[index];
             }
         }
 
@@ -414,9 +415,9 @@ public:
 
         // modify vectors and copy back to grid:
         for (std::size_t i = 0; i < region.size(); ++i) {
-            xVector[i] = 1000 + i;
+            xVector[i] = static_cast<int>(1000 + i);
             yVector[i] = 2000 + i;
-            zVector[i] = i;
+            zVector[i] = static_cast<char>(i);
         }
 
         grid.loadMember(&xVector[0], MemoryLocation::HOST, xSelector, region);
@@ -452,7 +453,7 @@ public:
 
         // manupulate test data:
         for (int i = 0; i < 10; ++i) {
-            buffer[i].pos = Coord<2>(-i, -10);
+            buffer[static_cast<std::size_t>(i)].pos = Coord<2>(-i, -10);
         }
 
         int index = 0;
@@ -501,7 +502,7 @@ public:
 
         // manupulate test data:
         for (int i = 0; i < 10; ++i) {
-            buffer[i].pos = Coord<2>(-i, -12);
+            buffer[static_cast<std::size_t>(i)].pos = Coord<2>(-i, -12);
         }
 
         int index = 0;

@@ -109,7 +109,7 @@ public:
         TS_ASSERT_THROWS(container.insert(3,  MockCell(3 , 0)), std::logic_error);
 
 
-        for (int i = 0; i < 5; ++i) {
+        for (std::size_t i = 0; i < 5; ++i) {
             TS_ASSERT_EQUALS(ids[i], container.ids[i]);
             TS_ASSERT_EQUALS(ids[i], container.cells[i].id);
         }
@@ -118,8 +118,9 @@ public:
         TS_ASSERT_EQUALS(container[ 3], (void*)0);
         TS_ASSERT_EQUALS(container[ 9], (void*)0);
 
-        for (int i = 0; i < 5; ++i)
+        for (std::size_t i = 0; i < 5; ++i) {
             TS_ASSERT_EQUALS(container.cells + i, container[ids[i]]);
+        }
     }
 
     void testInsertAtEnd()
@@ -162,7 +163,7 @@ public:
         container.insert(7, MockCell(7, &ids));
         container.remove(5);
 
-        for (int i = 0; i < 4; ++i) {
+        for (std::size_t i = 0; i < 4; ++i) {
             TS_ASSERT_EQUALS(ids[i], container.ids[i]);
             TS_ASSERT_EQUALS(ids[i], container.cells[i].id);
         }

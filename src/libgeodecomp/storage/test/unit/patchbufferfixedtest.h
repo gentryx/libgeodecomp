@@ -60,7 +60,7 @@ public:
         // check that an empty region causes no changes at all
         PatchBufferType patchBuffer(region0);
         patchBuffer.pushRequest(0);
-        for (int i = 0; i < 4; ++i) {
+        for (std::size_t i = 0; i < 4; ++i) {
             patchBuffer.put(baseGrid, validRegion, dimensions.dimensions, i, 0);
         }
         compGrid = zeroGrid;
@@ -70,7 +70,7 @@ public:
         // check that we can copy out regions multiple times
         patchBuffer = PatchBufferType(region1);
         patchBuffer.pushRequest(2);
-        for (int i = 0; i < 4; ++i) {
+        for (std::size_t i = 0; i < 4; ++i) {
             patchBuffer.put(baseGrid, validRegion, dimensions.dimensions, i, 0);
         }
 

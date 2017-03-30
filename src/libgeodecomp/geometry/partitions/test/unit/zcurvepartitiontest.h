@@ -25,7 +25,7 @@ public:
     void testFillRectangles()
     {
         CoordVector actual;
-        for (int i = 0; i < 16; ++i) {
+        for (std::size_t i = 0; i < 16; ++i) {
             actual << *ZCurvePartition<2>::Iterator(Coord<2>(10, 20), Coord<2>(4, 4), i);
         }
 
@@ -83,7 +83,7 @@ public:
         partition = ZCurvePartition<2>(offset, dimensions);
         CoordVector expected;
 
-        for (int i = 0; i < (dimensions.x() * dimensions.y()); ++i) {
+        for (std::size_t i = 0; i < static_cast<std::size_t>(dimensions.prod()); ++i) {
             expected << *partition[i];
         }
 
@@ -122,7 +122,7 @@ public:
         ZCurvePartition<3> partition(Coord<3>(1, 2, 3), Coord<3>(2, 2, 2));
 
         std::vector<Coord<3> > actual1;
-        for (int i = 0; i < 8; ++i) {
+        for (std::size_t i = 0; i < 8; ++i) {
             actual1 << *partition[i];
         }
 
@@ -161,7 +161,7 @@ public:
             expected << *i;
         }
 
-        for (int i = 0; i < dimensions.prod(); ++i) {
+        for (std::size_t i = 0; i < static_cast<std::size_t>(dimensions.prod()); ++i) {
             actual1 << *partition[i];
         }
 

@@ -843,7 +843,7 @@ public:
         TS_ASSERT_EQUALS(7, c1.indices[1][6].second);
 
         Region<2> c2 = c1.expand();
-        for (int i = 0; i < 9; ++i) {
+        for (std::size_t i = 0; i < 9; ++i) {
             TS_ASSERT_EQUALS(IntPair(0, 9), c2.indices[0][i]);
         }
     }
@@ -877,7 +877,7 @@ public:
         }
 
         for (int radius = 0; radius < 30; ++radius) {
-            Region<2> actual = c.expand(radius);
+            Region<2> actual = c.expand(static_cast<unsigned>(radius));
             Region<2> expected;
 
             for(int x = -radius; x < (10 + radius); ++x) {
@@ -1934,9 +1934,9 @@ public:
         Region<2> region;
         Region<2> accumulator;
         region << CoordBox<2>(Coord<2>(150, 140), Coord<2>(200, 100));
-        int stride = 10;
+        std::size_t stride = 10;
 
-        for (int i = 0; i < 100; i += stride) {
+        for (std::size_t i = 0; i < 100; i += stride) {
             for (Region<2>::StreakIterator iter = region.planeStreakIterator(i);
                  iter != region.planeStreakIterator(i + stride);
                  ++iter) {
@@ -2266,11 +2266,12 @@ private:
     CoordVector transform(const std::vector<std::string>& shape)
     {
         CoordVector ret;
-        for (int y = 0; y < (int)shape.size(); y++) {
+        for (std::size_t y = 0; y < shape.size(); y++) {
             std::string line = shape[y];
-            for (int x = 0; x < (int)line.size(); x++) {
-                if (line[x] != ' ')
+            for (std::size_t x = 0; x < line.size(); x++) {
+                if (line[x] != ' ') {
                     ret.push_back(Coord<2>(x, y));
+                }
             }
         }
         return ret;

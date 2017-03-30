@@ -357,9 +357,9 @@ public:
         grid.resize(box);
         TS_ASSERT_EQUALS(box, grid.boundingBox());
 
-        maxX = dim.x() + 2;
-        maxY = dim.y() + 2;
-        maxZ = dim.z() + 2;
+        maxX = static_cast<std::size_t>(dim.x() + 2);
+        maxY = static_cast<std::size_t>(dim.y() + 2);
+        maxZ = static_cast<std::size_t>(dim.z() + 2);
 
         for (std::size_t z = 0; z < maxZ; ++z) {
             for (std::size_t y = 0; y < maxY; ++y) {
@@ -711,7 +711,7 @@ public:
 
         // test loadMember, too:
         for (std::size_t i = 0; i < region.size(); ++i) {
-            posVector[i] = Coord<3>(i, i * 1000, 4711);
+            posVector[i] = Coord<3>(static_cast<int>(i), static_cast<int>(i * 1000), 4711);
         }
         grid.loadMember(
             &posVector[0],
