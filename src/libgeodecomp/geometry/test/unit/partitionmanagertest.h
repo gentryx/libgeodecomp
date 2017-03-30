@@ -99,7 +99,7 @@ public:
             // we're node 4 ourselves, so that non-existent halo can be skipped
             if (i != 4) {
                 checkRegion(
-                    partitionManager.getOuterGhostZoneFragments()[i].back(),
+                    partitionManager.getOuterGhostZoneFragments()[static_cast<int>(i)].back(),
                     curOffset,
                     curOffset + length,
                     partition);
