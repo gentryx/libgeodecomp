@@ -92,10 +92,10 @@ public:
     void testResetRegionsAndGhostRegionFragments()
     {
         unsigned curOffset = offset;
-        for (int i = 0; i < 7; ++i) {
+        for (std::size_t i = 0; i < 7; ++i) {
             // 23 because you have to intersect node 6's region with
             // the outer ghost zone. this leaves a fragment of length 22.
-            unsigned length = (i != 6)? weights[static_cast<std::size_t>(i)] : 23;
+            unsigned length = (i != 6)? weights[i] : 23;
             // we're node 4 ourselves, so that non-existent halo can be skipped
             if (i != 4) {
                 checkRegion(

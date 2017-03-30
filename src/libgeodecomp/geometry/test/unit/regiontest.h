@@ -2270,7 +2270,10 @@ private:
             std::string line = shape[y];
             for (std::size_t x = 0; x < line.size(); x++) {
                 if (line[x] != ' ') {
-                    ret.push_back(Coord<2>(x, y));
+                    ret.push_back(
+                        Coord<2>(
+                            static_cast<int>(x),
+                            static_cast<int>(y)));
                 }
             }
         }

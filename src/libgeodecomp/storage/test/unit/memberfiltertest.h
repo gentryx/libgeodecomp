@@ -156,7 +156,7 @@ public:
             MemoryLocation::HOST,
             55);
 
-        for (int i = 0; i < 55; ++i) {
+        for (std::size_t i = 0; i < 55; ++i) {
             TS_ASSERT_EQUALS((i + 0.2), vec[i].member.member.member.a);
         }
     }
@@ -197,11 +197,13 @@ public:
             32 * 32 * 32);
 
         for (int i = 0; i < 30; ++i) {
-            TS_ASSERT_EQUALS(Coord<3>(i + 4000, i + 5000, i + 6000), vec[i]);
+            TS_ASSERT_EQUALS(
+                Coord<3>(i + 4000, i + 5000, i + 6000),
+                vec[static_cast<std::size_t>(i)]);
         }
 
         for (int i = 0; i < 30; ++i) {
-            vec[i] = Coord<3>(i + 7777, i + 8888, i + 9999);
+            vec[static_cast<std::size_t>(i)] = Coord<3>(i + 7777, i + 8888, i + 9999);
         }
 
         selector.copyStreakIn(
