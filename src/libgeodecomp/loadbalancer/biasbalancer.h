@@ -6,6 +6,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * This class is for testing purposes. It's meant to create an
  * unbalanced load distribution first and then hand over to the
@@ -23,6 +28,10 @@ private:
 
     WeightVec loadOnOneNodeOnly(WeightVec weights) const;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

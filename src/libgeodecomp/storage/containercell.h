@@ -9,6 +9,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * This class is useful for writing irregularly shaped codes with
  * LibGeoDecomp (e.g. meshfree or unstructured grids). It acts as an
@@ -216,6 +221,10 @@ private:
         }
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 template<typename ARCHIVE, typename CARGO, std::size_t SIZE, typename KEY>
 void serialize(ARCHIVE& ar, ContainerCell<CARGO, SIZE, KEY> cargoCell, unsigned v)

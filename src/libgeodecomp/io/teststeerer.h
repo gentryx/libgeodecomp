@@ -6,6 +6,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * The TestSteerer demos how a Steerer can be implemented to modify
  * the grid during the course of the simulation. The idea is to
@@ -99,6 +104,10 @@ private:
     bool previousLastCall;
     Region<DIM> unaccountedRegion;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

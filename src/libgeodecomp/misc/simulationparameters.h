@@ -18,6 +18,7 @@ namespace LibGeoDecomp {
 #ifdef _MSC_BUILD
 #pragma warning( push )
 #pragma warning( disable : 4514 )
+#pragma warning( disable : 4820 )
 #endif
 
 namespace SimulationParametersHelpers {
@@ -220,11 +221,6 @@ protected:
     VALUE_TYPE current;
 };
 
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4820 )
-#endif
-
 /**
  * An interval is a parameter that can take on any value withing range
  * a certain minimum (included) and maximum (excluded) value:
@@ -310,10 +306,6 @@ private:
     double granularity;
     VALUE_TYPE index;
 };
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 /**
  * Such a parameter may take on any value contained in the vector.

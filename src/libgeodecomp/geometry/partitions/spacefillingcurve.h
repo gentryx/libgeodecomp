@@ -9,6 +9,11 @@ namespace LibGeoDecomp {
 
 enum SpaceFillingCurveSublevelState {TRIVIAL, CACHED};
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * This base class for space-filling curves (SFCs) in LibGeoDecomp
  * aggregates some common functionality to reduce code duplication.
@@ -68,6 +73,10 @@ public:
         Partition<DIM>(offset, weights)
     {}
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

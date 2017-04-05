@@ -3,6 +3,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * This utility class ecapsulates the mathematical concept of a plane.
  * Its normal vector is given by "dir". Its main purpose is to check
@@ -44,6 +49,10 @@ public:
     ID neighborID;
     double length;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 template<typename _CharT, typename _Traits, typename COORD, typename ID>
 std::basic_ostream<_CharT, _Traits>&
