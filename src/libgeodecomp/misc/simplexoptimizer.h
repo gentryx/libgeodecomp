@@ -8,6 +8,10 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
 
 /**
  * This is a Implementation of the siplex algorithm, dicribet in
@@ -76,6 +80,11 @@ private:
     std::vector<double> stepsizes;  // stepsizes = s_i in Algo
     SimplexVertex merge(const SimplexVertex& a, const SimplexVertex& b) const;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 // Caution: SimplexVertex have borders.
 const SimplexOptimizer::SimplexVertex operator+(
         const SimplexOptimizer::SimplexVertex& a, const SimplexOptimizer::SimplexVertex& b);

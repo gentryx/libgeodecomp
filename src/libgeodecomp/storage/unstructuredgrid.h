@@ -23,6 +23,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * A grid type for irregular structures
  */
@@ -411,6 +416,10 @@ private:
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 template<typename _CharT, typename _Traits, typename ELEMENT_TYPE, std::size_t MATRICES, typename WEIGHT_TYPE, int C, int SIGMA>
 std::basic_ostream<_CharT, _Traits>&

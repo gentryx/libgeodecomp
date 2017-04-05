@@ -112,6 +112,11 @@ private:
 
 }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * This class is the counterpart to TestCell for structured grids. We
  * use this class to verify that our Simulators correcly invoke
@@ -306,6 +311,10 @@ private:
         ++cycleCounter;
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 typedef FixedArray<int, 100> IDsVec;
 typedef FixedArray<double, 100> WeightsVec;

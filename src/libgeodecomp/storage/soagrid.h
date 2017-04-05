@@ -334,6 +334,11 @@ private:
 
 }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * Grid class which corresponds to DisplacedGrid, but utilizes an
  * "Struct of Arrays" (SoA) memory layout. This is beneficial for
@@ -718,6 +723,10 @@ private:
             static_cast<std::size_t>(count));
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

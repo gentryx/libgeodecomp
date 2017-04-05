@@ -16,6 +16,11 @@ namespace LibGeoDecomp {
 
 namespace MockWriterHelpers {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * internal helper class
  */
@@ -70,6 +75,10 @@ public:
     std::size_t rank;
     bool lastCall;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
 

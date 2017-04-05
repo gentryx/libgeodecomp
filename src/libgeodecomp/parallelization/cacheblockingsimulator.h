@@ -12,6 +12,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * CacheBlockingSimulator is an experimental simulator to explore the
  * infrastructure required to implement a pipelined wavefront update
@@ -341,6 +346,10 @@ private:
         return (localIndex + bufferSize) % bufferSize;
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

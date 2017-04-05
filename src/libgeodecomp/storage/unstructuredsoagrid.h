@@ -125,6 +125,11 @@ private:
 
 }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * A unstructured grid for irregular structures using SoA memory layout.
  */
@@ -490,6 +495,10 @@ private:
         elements.set(x, 0, 0, cell);
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 template<typename ELEMENT_TYPE, std::size_t MATRICES, typename WEIGHT_TYPE, int C, int SIGMA>
 inline

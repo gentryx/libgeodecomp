@@ -128,6 +128,11 @@ public:
 
 }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * Useful for verifying the various parallelizations in LibGeoDecomp
  */
@@ -379,6 +384,10 @@ public:
         return checkNeighbor(other, Coord<DIM>(coord));
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 typedef TestCell<
     3,

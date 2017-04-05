@@ -9,6 +9,11 @@ namespace LibGeoDecomp {
 
 namespace MockSteererHelpers {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * Internal helper class which records a single invocation of the
  * MockWriter's interface.
@@ -64,6 +69,10 @@ public:
     std::size_t rank;
     bool lastCall;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
 
