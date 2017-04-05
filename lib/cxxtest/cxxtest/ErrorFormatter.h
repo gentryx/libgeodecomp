@@ -26,6 +26,11 @@
 #include <cxxtest/ValueTraits.h>
 #include <cstdio>
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 namespace CxxTest
 {
 class OutputStream
@@ -342,6 +347,10 @@ private:
     const char *_warningString;
 };
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #endif // __cxxtest__ErrorFormatter_h__
 

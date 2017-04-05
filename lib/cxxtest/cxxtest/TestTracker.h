@@ -25,6 +25,11 @@ namespace CxxTest
 {
 class TestListener;
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 class TestTracker : public TestListener
 {
 public:
@@ -126,6 +131,10 @@ private:
     TestTracker();
     void setListener(TestListener *l);
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 inline TestTracker &tracker() { return TestTracker::tracker(); }
 }

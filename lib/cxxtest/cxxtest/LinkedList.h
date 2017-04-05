@@ -14,6 +14,11 @@
 
 #include <cxxtest/Flags.h>
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 namespace CxxTest
 {
 struct List;
@@ -68,6 +73,10 @@ private:
     Link &operator=(const Link &);
 };
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #endif // __cxxtest__LinkedList_h__
 
