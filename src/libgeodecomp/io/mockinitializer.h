@@ -28,22 +28,12 @@
 
 // ...fine above
 
-
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4820 )
-#endif
-#include <ctime>
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
-// #include <libgeodecomp/storage/defaultarrayfilter.h>
+#include <libgeodecomp/storage/defaultarrayfilter.h>
 // #include <libgeodecomp/config.h>
 // #include <libgeodecomp/io/logger.h>
 // #include <libgeodecomp/storage/filterbase.h>
 // #include <libgeodecomp/storage/memorylocation.h>
-// #include <typeinfo>
+#include <typeinfo>
 
 // fine below...
 
