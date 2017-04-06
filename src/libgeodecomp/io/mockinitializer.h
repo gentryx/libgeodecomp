@@ -9,7 +9,17 @@
 // #include <libgeodecomp/geometry/adjacencymanufacturer.h>
 #include <stdexcept>
 #include <libgeodecomp/geometry/adjacency.h>
-#include <libgeodecomp/geometry/region.h>
+
+// #include <libgeodecomp/geometry/region.h>
+/*#include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/geometry/regionstreakiterator.h>
+#include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/selector.h>*/
+#include <cstddef>
+// #include <vector>
+
 // #include <libgeodecomp/geometry/regionbasedadjacency.h>
 // #include <libgeodecomp/misc/sharedptr.h>
 
