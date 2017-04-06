@@ -3,7 +3,15 @@
 
 #include <libgeodecomp/misc/math.h>
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
 #include <ctime>
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #include <iomanip>
 #include <sstream>
 
