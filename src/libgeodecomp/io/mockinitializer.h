@@ -12,11 +12,13 @@
 
 // #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/coordbox.h>
-/*#include <libgeodecomp/geometry/regionstreakiterator.h>
+
+#include <libgeodecomp/geometry/regionstreakiterator.h>
 #include <libgeodecomp/geometry/streak.h>
-#include <libgeodecomp/geometry/topologies.h>
+/*#include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/selector.h>*/
+
 #include <cstddef>
 #include <vector>
 
