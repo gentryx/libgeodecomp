@@ -28,7 +28,7 @@
 
 // ...fine above
 
-#include <libgeodecomp/storage/defaultarrayfilter.h>
+// #include <libgeodecomp/storage/defaultarrayfilter.h>
 // #include <libgeodecomp/config.h>
 // #include <libgeodecomp/io/logger.h>
 // #include <libgeodecomp/storage/filterbase.h>
