@@ -28,14 +28,19 @@
 
 // ...fine above
 
-#include <libgeodecomp/storage/defaultarrayfilter.h>
-// #include <libgeodecomp/storage/defaultcudafilter.h>
-// #include <libgeodecomp/storage/defaultcudaarrayfilter.h>
-
-// #include <libgeodecomp/storage/defaultfilter.h>
-
+// #include <libgeodecomp/storage/defaultarrayfilter.h>
+#include <libgeodecomp/config.h>
+#include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/storage/filterbase.h>
+#include <libgeodecomp/storage/memorylocation.h>
+#include <typeinfo>
 
 // fine below...
+
+// #include <libgeodecomp/storage/defaultcudafilter.h>
+// #include <libgeodecomp/storage/defaultcudaarrayfilter.h>
+// #include <libgeodecomp/storage/defaultfilter.h>
+
 
 // #include <libgeodecomp/storage/filterbase.h>
 // #include <libgeodecomp/storage/memberfilter.h>
