@@ -28,6 +28,8 @@
 
 // ...fine above
 
+#include <ctime>
+
 // #include <libgeodecomp/storage/defaultarrayfilter.h>
 // #include <libgeodecomp/config.h>
 // #include <libgeodecomp/io/logger.h>
