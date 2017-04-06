@@ -26,17 +26,22 @@
 // #include <libgeodecomp/storage/defaultfilterfactory.h>
 #include <libgeodecomp/misc/sharedptr.h>
 
-// ...fine above
-
 // #include <libgeodecomp/storage/filter.h>
 #include <libgeodecomp/config.h>
+
+
+// ...fine above
+
 // #include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/io/timestringconversion.h>
+#include <libgeodecomp/misc/scopedtimer.h>
+
+// fine below...
 #include <libgeodecomp/storage/filterbase.h>
 #include <libgeodecomp/storage/memorylocation.h>
 #include <typeinfo>
 
 
-// fine below...
 // #include <libgeodecomp/storage/defaultarrayfilter.h>
 // #include <libgeodecomp/config.h>
 // #include <libgeodecomp/io/logger.h>
