@@ -33,10 +33,12 @@
 // ...fine above
 
 // #include <libgeodecomp/io/logger.h>
+#include <iomanip>
+
+// fine below...
 #include <libgeodecomp/io/timestringconversion.h>
 #include <libgeodecomp/misc/scopedtimer.h>
 
-// fine below...
 #include <libgeodecomp/storage/filterbase.h>
 #include <libgeodecomp/storage/memorylocation.h>
 #include <typeinfo>
