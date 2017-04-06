@@ -21,13 +21,14 @@
 // #include <libgeodecomp/storage/selector.h>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/misc/sharedptr.h>
-#include <libflatarray/member_ptr_to_offset.hpp>
-#include <libgeodecomp/storage/defaultfilterfactory.h>
-#include <libgeodecomp/storage/filterbase.h>
-#include <libgeodecomp/storage/memberfilter.h>
-#include <stdexcept>
-#include <typeinfo>
+
+// #include <libgeodecomp/misc/sharedptr.h>
+// #include <libflatarray/member_ptr_to_offset.hpp>
+// #include <libgeodecomp/storage/defaultfilterfactory.h>
+// #include <libgeodecomp/storage/filterbase.h>
+// #include <libgeodecomp/storage/memberfilter.h>
+// #include <stdexcept>
+// #include <typeinfo>
 
 
 // fine below...
