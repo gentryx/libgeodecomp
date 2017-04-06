@@ -31,7 +31,8 @@
 #include <libgeodecomp/storage/defaultarrayfilter.h>
 // #include <libgeodecomp/storage/defaultcudafilter.h>
 // #include <libgeodecomp/storage/defaultcudaarrayfilter.h>
-#include <libgeodecomp/storage/defaultfilter.h>
+
+// #include <libgeodecomp/storage/defaultfilter.h>
 
 
 // fine below...
