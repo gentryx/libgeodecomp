@@ -1,7 +1,9 @@
 #ifndef LIBGEODECOMP_IO_MOCKINITIALIZER_H
 #define LIBGEODECOMP_IO_MOCKINITIALIZER_H
 
-#include <libgeodecomp/io/testinitializer.h>
+// #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/initializer.h>
+// #include <libgeodecomp/misc/testcell.h>
 
 namespace LibGeoDecomp {
 
@@ -15,7 +17,7 @@ namespace LibGeoDecomp {
 /**
  * This Initializer will record basic events.
  */
-class MockInitializer : public TestInitializer<TestCell<2> >
+/*class MockInitializer : public TestInitializer<TestCell<2> >
 {
 public:
     explicit MockInitializer(const std::string& configString = "")
@@ -29,7 +31,7 @@ public:
     }
 
     static std::string events;
-};
+    };*/
 
 #ifdef _MSC_BUILD
 #pragma warning( pop )

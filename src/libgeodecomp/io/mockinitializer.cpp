@@ -13,7 +13,7 @@
 
 namespace LibGeoDecomp {
 
-std::string MockInitializer::events;
+// std::string MockInitializer::events;
 
 }
 
