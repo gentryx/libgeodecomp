@@ -21,11 +21,11 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/sharedptr.h>
+#include <libflatarray/member_ptr_to_offset.hpp>
 
 // ...fine above
 
-#include <libflatarray/member_ptr_to_offset.hpp>
-// #include <libgeodecomp/storage/defaultfilterfactory.h>
+#include <libgeodecomp/storage/defaultfilterfactory.h>
 
 
 // #include <libgeodecomp/storage/filterbase.h>
