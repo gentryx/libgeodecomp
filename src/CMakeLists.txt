@@ -473,7 +473,7 @@ if (WITH_TYPEMAPS)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/libgeodecomp/communication/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/libgeodecomp/communication/typemaps.cpp"
     COMMAND cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf
-    COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --namespace LibGeoDecomp --header-fix "^.+/src:libgeodecomp" --macro-guard-mpi LIBGEODECOMP_WITH_MPI --macro-guard-hpx LIBGEODECOMP_WITH_HPX --macro-guard-boost LIBGEODECOMP_WITH_BOOST_SERIALIZATION "${CMAKE_CURRENT_SOURCE_DIR}/../doc/xml" --include-prefix "libgeodecomp/" "${CMAKE_CURRENT_SOURCE_DIR}/libgeodecomp/communication"
+    COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --namespace LibGeoDecomp --header-fix "^.+/src:libgeodecomp" --macro-guard-mpi LIBGEODECOMP_WITH_MPI --macro-guard-hpx LIBGEODECOMP_WITH_HPX --macro-guard-boost LIBGEODECOMP_WITH_BOOST_SERIALIZATION "${CMAKE_CURRENT_SOURCE_DIR}/../doc/xml" --include-prefix "" "${CMAKE_CURRENT_SOURCE_DIR}/libgeodecomp/communication"
     DEPENDS "${CMAKE_BINARY_DIR}/cache")
 
   list(REMOVE_ITEM ALL_HEADERS "libgeodecomp/communication/typemaps.h")

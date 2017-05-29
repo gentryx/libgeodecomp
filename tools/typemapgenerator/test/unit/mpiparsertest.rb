@@ -13,7 +13,7 @@ class TestMPIParser < Test::Unit::TestCase
     expected = {
       "wheels" => {
         :type => "Wheel",
-        :cardinality => "Car::NumWheels"
+        :cardinality => "NumWheels"
       },
       "engine" => {
         :type => "Engine",
@@ -386,7 +386,7 @@ class TestMPIParser < Test::Unit::TestCase
       "wheels" => {
         :class => "Wheel",
         :type => expected_datatype_map["Wheel"],
-        :cardinality => "Car::NumWheels"
+        :cardinality => "NumWheels"
       }
     }
 

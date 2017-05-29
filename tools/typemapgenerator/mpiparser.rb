@@ -74,7 +74,7 @@ class MPIParser
       find_classes_to_be_serialized("BoostSerialization") +
       find_classes_to_be_serialized("HPXSerialization")
     @type_hierarchy_closure = @datatype_map.keys.to_set + classes_to_be_serialized
-    @all_classes = classes_to_be_serialized
+    @all_mpi_classes = find_classes_to_be_serialized("Typemaps")
   end
 
   def grep_typemap_candidates(path)
@@ -140,12 +140,16 @@ class MPIParser
       end
     end
 
-    res.headers = res.topological_class_sortation.map { |klass| find_header(klass, @include_prefix) }
+    @log.info "  forest resolution successful, mapping headers"
+    res.headers = res.topological_class_sortation.map do |klass|
+      find_header(klass, @include_prefix)
+    end
     res.datatype_map = @datatype_map
     return res
   end
 
   def shallow_resolution(classes)
+    @log.info "shallow_resolution()"
     classes = classes.sort
 
     res = OpenStruct.new
@@ -164,6 +168,7 @@ class MPIParser
       res.wants_polymorphic_serialization[klass] = wants_polymorphic_serialization?(klass)
     end
 
+    @log.info "  shallow resolution successful, mapping headers"
     res.headers = classes.map { |klass| find_header(klass, @include_prefix) }
     return res
   end
@@ -224,7 +229,7 @@ class MPIParser
     klass =~ /^(#@namespace::|)(.+)/
     class_name = $2
 
-    @all_classes.each do |c|
+    @all_mpi_classes.each do |c|
       @log.debug "used_template_parameters(#{klass}) -> #{c}"
       c_template_param_names = template_parameters(c).map do |param|
         param[:name]
@@ -387,8 +392,10 @@ class MPIParser
 
       end
     rescue Exception => e
+      @log.debug "  considering #{klass} as concrete, caught #{e}"
       return false
     end
+    @log.debug "  #{klass} is concrete"
     return false
   end
 
@@ -697,7 +704,6 @@ class MPIParser
   def sweep_all_members(klass, kind="variable")
     @log.debug "sweep_all_members(#{klass})"
     filename = class_to_filename(klass)
-    @log.debug "  filename = #{filename}"
 
     doc = get_xml(filename)
     xpath = "doxygen/compounddef/sectiondef/memberdef[@kind='#{kind}'][@static='no']"
@@ -710,7 +716,6 @@ class MPIParser
   def sweep_all_functions(klass)
     @log.debug "sweep_all_functions(#{klass})"
     filename = class_to_filename(klass)
-    @log.debug "  filename = #{filename}"
 
     doc = get_xml(filename)
     xpath = "doxygen/compounddef/listofallmembers/member"
@@ -725,6 +730,7 @@ class MPIParser
     begin
       return prefix + find_header_simple(klass)
     rescue Exception => e
+      @log.debug "failed to find header for #{klass}, caught #{e}, prefix: #{prefix.nil?}"
       if klass =~ /<.+>/
         prefix + find_header_simple(template_basename(klass))
       else
@@ -742,7 +748,6 @@ class MPIParser
 
     doc.elements.each(xpath) do |member|
       header = member.attributes["file"]
-      @log.debug "  header: #{header}"
       return header if header
     end
 
@@ -783,7 +788,11 @@ class MPIParser
   def class_to_filename(klass)
     klass =~ /([^\<]+)/
     stripped_class = $1
-    @filename_cache[klass] || @filename_cache[stripped_class]
+    res = @filename_cache[klass] || @filename_cache[stripped_class]
+    if res.nil?
+      throw "XML file name not found for class #{klass}"
+    end
+    return res
   end
 
   def parse_class_name(klass)

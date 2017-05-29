@@ -45,8 +45,8 @@ public:
 
     /**
      * Performs an internal lookup. Works for custom, registered types
-     * and for built-in types (char, int, size_t...). Compilation will
-     * fail for unknown types.
+     * and for built-in types (char, int, std::size_t...). Compilation
+     * will fail for unknown types.
      */
     template<typename T>
     static inline MPI_Datatype lookup()

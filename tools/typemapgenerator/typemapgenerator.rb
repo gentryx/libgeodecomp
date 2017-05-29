@@ -17,7 +17,7 @@ class TypemapGenerator
                         macro_guard_mpi=nil,
                         macro_guard_boost=nil,
                         macro_guard_hpx=nil,
-                        include_prefix=nil)
+                        include_prefix="")
       parser = MPIParser.new(xml_path, sloppy, namespace, include_prefix)
 
       mpi_generator = MPIGenerator.new(template_path, namespace, macro_guard_mpi)
@@ -28,7 +28,7 @@ class TypemapGenerator
       boost_classes = parser.find_classes_to_be_serialized("BoostSerialization").sort
       hpx_classes = parser.find_classes_to_be_serialized("HPXSerialization").sort
 
-      mpi_options   = parser.resolve_forest(mpi_classes)
+      mpi_options = parser.resolve_forest(mpi_classes)
       mpi_options.header_pattern = header_pattern
       mpi_options.header_replacement = header_replacement
 
