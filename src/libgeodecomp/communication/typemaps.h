@@ -14,7 +14,6 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/storage/fixedarray.h>
 #include <libgeodecomp/storage/fixedarray.h>
-#include <libgeodecomp/storage/fixedarray.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
@@ -40,7 +39,6 @@ extern MPI_Datatype MPI_LIBGEODECOMP_COORDBOX_3_;
 extern MPI_Datatype MPI_LIBGEODECOMP_COORDBOXMPIDATATYPEHELPER;
 extern MPI_Datatype MPI_LIBGEODECOMP_FIXEDARRAY_DOUBLE_100_;
 extern MPI_Datatype MPI_LIBGEODECOMP_FIXEDARRAY_DOUBLE_CHRONOMETER_NUM_INTERVALS_;
-extern MPI_Datatype MPI_LIBGEODECOMP_FIXEDARRAY_INT_100_;
 extern MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_1_;
 extern MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_2_;
 extern MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_3_;
@@ -121,7 +119,6 @@ private:
     static MPI_Datatype generateMapLibGeoDecomp_CoordBoxMPIDatatypeHelper();
     static MPI_Datatype generateMapLibGeoDecomp_FixedArray_double_100_();
     static MPI_Datatype generateMapLibGeoDecomp_FixedArray_double_Chronometer_NUM_INTERVALS_();
-    static MPI_Datatype generateMapLibGeoDecomp_FixedArray_int_100_();
     static MPI_Datatype generateMapLibGeoDecomp_FloatCoord_1_();
     static MPI_Datatype generateMapLibGeoDecomp_FloatCoord_2_();
     static MPI_Datatype generateMapLibGeoDecomp_FloatCoord_3_();
@@ -272,11 +269,6 @@ public:
     static inline MPI_Datatype lookup(LibGeoDecomp::FixedArray<double,Chronometer::NUM_INTERVALS >*)
     {
         return MPI_LIBGEODECOMP_FIXEDARRAY_DOUBLE_CHRONOMETER_NUM_INTERVALS_;
-    }
-
-    static inline MPI_Datatype lookup(LibGeoDecomp::FixedArray<int,100 >*)
-    {
-        return MPI_LIBGEODECOMP_FIXEDARRAY_INT_100_;
     }
 
     static inline MPI_Datatype lookup(LibGeoDecomp::FloatCoord<1 >*)

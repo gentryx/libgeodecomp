@@ -13,7 +13,6 @@ MPI_Datatype MPI_LIBGEODECOMP_COORDBOX_3_;
 MPI_Datatype MPI_LIBGEODECOMP_COORDBOXMPIDATATYPEHELPER;
 MPI_Datatype MPI_LIBGEODECOMP_FIXEDARRAY_DOUBLE_100_;
 MPI_Datatype MPI_LIBGEODECOMP_FIXEDARRAY_DOUBLE_CHRONOMETER_NUM_INTERVALS_;
-MPI_Datatype MPI_LIBGEODECOMP_FIXEDARRAY_INT_100_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_1_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_2_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_3_;
@@ -366,44 +365,6 @@ Typemaps::generateMapLibGeoDecomp_FixedArray_double_Chronometer_NUM_INTERVALS_()
     MemberSpec rawSpecs[] = {
         MemberSpec(getAddress(&obj->elements), lookup<std::size_t >(), 1),
         MemberSpec(getAddress(&obj->store), lookup<double >(), Chronometer::NUM_INTERVALS)
-    };
-    std::sort(rawSpecs, rawSpecs + count, addressLower);
-
-    // split addresses from member types
-    MPI_Aint displacements[count];
-    MPI_Datatype memberTypes[count];
-    for (int i = 0; i < count; i++) {
-        displacements[i] = rawSpecs[i].address;
-        memberTypes[i] = rawSpecs[i].type;
-        lengths[i] = rawSpecs[i].length;
-    }
-
-    // transform absolute addresses into offsets
-    for (int i = count-1; i > 0; i--) {
-        displacements[i] -= displacements[0];
-    }
-    displacements[0] = 0;
-
-    // create datatype
-    MPI_Datatype objType;
-    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
-    MPI_Type_commit(&objType);
-
-    return objType;
-}
-
-MPI_Datatype
-Typemaps::generateMapLibGeoDecomp_FixedArray_int_100_() {
-    char fakeObject[sizeof(LibGeoDecomp::FixedArray<int,100 >)];
-    LibGeoDecomp::FixedArray<int,100 > *obj = (LibGeoDecomp::FixedArray<int,100 >*)fakeObject;
-
-    const int count = 2;
-    int lengths[count];
-
-    // sort addresses in ascending order
-    MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->elements), lookup<std::size_t >(), 1),
-        MemberSpec(getAddress(&obj->store), lookup<int >(), 100)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -1039,7 +1000,6 @@ void Typemaps::initializeMaps()
     MPI_LIBGEODECOMP_COORDBOXMPIDATATYPEHELPER = generateMapLibGeoDecomp_CoordBoxMPIDatatypeHelper();
     MPI_LIBGEODECOMP_FIXEDARRAY_DOUBLE_100_ = generateMapLibGeoDecomp_FixedArray_double_100_();
     MPI_LIBGEODECOMP_FIXEDARRAY_DOUBLE_CHRONOMETER_NUM_INTERVALS_ = generateMapLibGeoDecomp_FixedArray_double_Chronometer_NUM_INTERVALS_();
-    MPI_LIBGEODECOMP_FIXEDARRAY_INT_100_ = generateMapLibGeoDecomp_FixedArray_int_100_();
     MPI_LIBGEODECOMP_FLOATCOORD_1_ = generateMapLibGeoDecomp_FloatCoord_1_();
     MPI_LIBGEODECOMP_FLOATCOORD_2_ = generateMapLibGeoDecomp_FloatCoord_2_();
     MPI_LIBGEODECOMP_FLOATCOORD_3_ = generateMapLibGeoDecomp_FloatCoord_3_();

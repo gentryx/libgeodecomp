@@ -127,9 +127,9 @@ public:
         archive & object.mult;
     }
 
-    template<typename ARCHIVE, int DIM>
+    template<typename ARCHIVE, int DIMENSIONS>
     inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsigned /*version*/)
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIMENSIONS>& object, const unsigned /*version*/)
     {
         archive & object.geometryCacheTainted;
         archive & object.indices;
@@ -256,8 +256,8 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::QuickPalette<VALUE>& object, cons
     HPXSerialization::serialize(archive, object, version);
 }
 
-template<class ARCHIVE, int DIM>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsigned version)
+template<class ARCHIVE, int DIMENSIONS>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIMENSIONS>& object, const unsigned version)
 {
     HPXSerialization::serialize(archive, object, version);
 }
