@@ -247,7 +247,7 @@ lgd_add_config_option(LGD_ADDITIONAL_CXX_COMPILE_FLAGS "Add these flags when com
 
 lgd_add_config_option(CMAKE_BUILD_TYPE "Sets the compile/link options, e.g. Debug, Release... Refer to the cmake documentation for more details." "Release" false)
 
-lgd_add_config_option(CAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
+lgd_add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
 lgd_add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" false)
 
