@@ -103,11 +103,6 @@ if options[:cache]
     typemaps_deps = File.read(cache_file).split("\n")
   end
 
-  # puts "headers:"
-  # pp headers
-  # puts "typemaps_deps:"
-  # pp typemaps_deps
-
   # at least create a empty file to indicate that there are no
   # classes to be serialized yet...
   unless File.exists?(cache_file)
@@ -167,7 +162,6 @@ if options[:profiling]
   RubyProf.start
 end
 
-output_path = Pathname.new(ARGV[1] || "./")
 boost_header, hpx_header, hpx_source, mpi_header, mpi_source =
   TypemapGenerator.generate_forest(xml_path, basedir,
                                    options[:sloppy],
