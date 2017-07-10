@@ -29,7 +29,7 @@ class Color
     unsigned rgb;
 
     inline Color() :
-        rgb(255 << 24)
+        rgb(255u << 24)
     {}
 
     inline Color(
