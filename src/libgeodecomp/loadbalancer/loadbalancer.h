@@ -4,6 +4,12 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <vector>
 
+#if defined(LIBGEODECOMP_WITH_HPX)
+#include<hpx/config.hpp>
+#elif !defined(HPX_COMPONENT_EXPORT)
+#define HPX_COMPONENT_EXPORT
+#endif
+
 namespace LibGeoDecomp {
 
 /**
