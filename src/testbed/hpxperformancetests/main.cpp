@@ -1,3 +1,5 @@
+#include <hpx/hpx_init.hpp>
+
 #include <iostream>
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/geometry/floatcoord.h>
@@ -9,8 +11,6 @@
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
 #include <libflatarray/testbed/evaluate.hpp>
-
-#include <hpx/hpx_init.hpp>
 
 #include "../performancetests/cpubenchmark.h"
 

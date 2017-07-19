@@ -153,7 +153,7 @@ public:
             receiver(HPXReceiver<BufferType>::make(linkName).get())
         {}
 
-        virtual void charge(const std::size_t next, const std::size_t last, const std::size_t newStride)
+        virtual void charge(std::size_t next, std::size_t last, std::size_t newStride)
         {
             Link::charge(next, last, newStride);
             recv(next);

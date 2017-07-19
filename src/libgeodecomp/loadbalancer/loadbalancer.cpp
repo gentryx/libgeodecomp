@@ -2,7 +2,7 @@
 
 namespace LibGeoDecomp {
 
-std::vector<std::size_t> LoadBalancer::initialWeights(std::size_t items, const std::vector<double> rankSpeeds)
+std::vector<std::size_t> LoadBalancer::initialWeights(std::size_t items, const std::vector<double>& rankSpeeds)
 {
     std::size_t size = rankSpeeds.size();
     double totalSum = sum(rankSpeeds);

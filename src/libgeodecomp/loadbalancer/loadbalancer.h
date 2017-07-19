@@ -4,6 +4,12 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <vector>
 
+#if defined(LIBGEODECOMP_WITH_HPX)
+#include<hpx/config.hpp>
+#elif !defined(HPX_COMPONENT_EXPORT)
+#define HPX_COMPONENT_EXPORT
+#endif
+
 namespace LibGeoDecomp {
 
 /**
@@ -11,7 +17,7 @@ namespace LibGeoDecomp {
  * load by assigning a fraction of the total work to each
  * MPI processes/HPX localities.
  */
-class LoadBalancer
+class HPX_COMPONENT_EXPORT LoadBalancer
 {
 public:
     typedef std::vector<std::size_t> WeightVec;
@@ -46,10 +52,10 @@ public:
      * number of cells in the simulation space). rankSpeeds gives an
      * estimate of the relative performance of the different ranks
      * (good when running on heterogeneous systems, e.g. clusters
-     * comprised of multiple genrations of nodes or x86 clusters with
+     * comprised of multiple generations of nodes or x86 clusters with
      * additional Xeon Phi accelerators).
      */
-    static std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double> rankSpeeds);
+    static std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double>& rankSpeeds);
 
 };
 

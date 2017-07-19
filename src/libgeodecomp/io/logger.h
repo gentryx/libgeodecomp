@@ -18,6 +18,7 @@ namespace LibGeoDecomp {
  * happens at compile time, thus no runtime overhead is incurred for
  * filtered messages.
  */
+
 class Logger {
 public:
     static const int FATAL = 0;

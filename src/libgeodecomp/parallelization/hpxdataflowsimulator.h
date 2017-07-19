@@ -4,6 +4,9 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 
+#include <hpx/include/async.hpp>
+#include <hpx/include/components.hpp>
+
 #include <functional>
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
@@ -148,6 +151,7 @@ private:
 // fixme: componentize
 template<typename CELL, typename MESSAGE>
 class CellComponent
+  : public hpx::components::component_base<CellComponent<CELL, MESSAGE> >
 {
 public:
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
@@ -155,11 +159,11 @@ public:
     typedef ReorderingUnstructuredGrid<UnstructuredGrid<CELL> > GridType;
 
     explicit CellComponent(
-        const std::string& basename = "",
-        typename SharedPtr<GridType>::Type grid = 0,
-        int id = -1,
-        const std::vector<int> neighbors = std::vector<int>()) :
-        basename(basename),
+            const std::string& basename = "",
+            typename SharedPtr<GridType>::Type grid = 0,
+            int id = -1,
+            const std::vector<int>& neighbors = std::vector<int>())
+      : basename(basename),
         neighbors(neighbors),
         grid(grid),
         id(id)
@@ -188,7 +192,7 @@ public:
                 });
         }
 
-        hpx::shared_future<void>(hpx::when_all(remoteIDFutures)).get(); // swallowing exceptions?
+        hpx::when_all(remoteIDFutures).get();
     }
 
     hpx::shared_future<void> setupDataflow(hpx::shared_future<void> lastTimeStepFuture, int startStep, int endStep)
@@ -206,28 +210,19 @@ public:
                 receiveMessagesFutures.reserve(neighbors.size());
 
                 for (auto&& neighbor: neighbors) {
-                    if ((globalNanoStep) > 0) {
+                    if (globalNanoStep > 0) {
                         receiveMessagesFutures << receivers[neighbor]->get(globalNanoStep);
                     } else {
-                        receiveMessagesFutures <<  hpx::make_ready_future(MessageType());
+                        receiveMessagesFutures << hpx::make_ready_future(MessageType());
                     }
                 }
 
-                auto Operation = std::bind(
-                    &HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>::update,
-                    *this,
-                    // explicit namespace to avoid clashes with boost::bind's placeholders:
-                    std::placeholders::_1,
-                    std::placeholders::_2,
-                    std::placeholders::_3,
-                    std::placeholders::_4,
-                    std::placeholders::_5);
-
                 hpx::shared_future<void> thisTimeStepFuture = hpx::dataflow(
                     hpx::launch::async,
-                    Operation,
+                    &HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType>::update,
+                    this,
                     neighbors,
-                    receiveMessagesFutures,
+                    std::move(receiveMessagesFutures),
                     lastTimeStepFuture,
                     nanoStep,
                     step);
@@ -239,6 +234,7 @@ public:
 
         return lastTimeStepFuture;
     }
+    HPX_DEFINE_COMPONENT_ACTION(CellComponent, setupDataflow);
 
     void update(
         const std::vector<int>& neighbors,
@@ -273,7 +269,6 @@ private:
             StringOps::itoa(sender) +
             "_to_" +
             StringOps::itoa(receiver);
-
     }
 
     CELL *cell()
@@ -283,6 +278,15 @@ private:
 };
 
 }
+
+#define REGISTER_CELLCOMPONENT(CELL, MESSAGE, name)                           \
+    typedef ::hpx::components::component<                                     \
+        LibGeoDecomp::HPXDataFlowSimulatorHelpers::CellComponent<CELL, MESSAGE> > \
+            BOOST_PP_CAT(__cellcomponent_, name);                             \
+    HPX_REGISTER_ACTION(BOOST_PP_CAT(__cellcomponent_, name)::setupDataflow_action, \
+        BOOST_PP_CAT(__cellcomponent_setupDataflow_action_, name));           \
+    HPX_REGISTER_COMPONENT(BOOST_PP_CAT(__cellcomponent_, name))              \
+/**/
 
 /**
  * Experimental Simulator based on (surprise surprise) HPX' dataflow
@@ -365,12 +369,11 @@ public:
         localRegion = partitionManager.ownRegion();
         SharedPtr<Adjacency>::Type adjacency = initializer->getAdjacency(localRegion);
 
-
-        // fixme: instantiate components in agas and only hold ids of those to ease migration
         typedef HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> ComponentType;
         typedef typename ComponentType::GridType GridType;
+        typedef hpx::components::client<ComponentType> CellClient;
 
-        std::map<int, ComponentType> components;
+        std::map<int, CellClient> components;
         std::vector<int> neighbors;
 
         for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
@@ -381,12 +384,11 @@ public:
 
             neighbors.clear();
             adjacency->getNeighbors(i->x(), &neighbors);
-            HPXDataFlowSimulatorHelpers::CellComponent<CELL, MessageType> component(
+            components[i->x()] = hpx::local_new<CellClient>(
                 basename,
                 grid,
                 i->x(),
                 neighbors);
-            components[i->x()] = component;
         }
 
         // HPX Reset counters:
@@ -409,7 +411,10 @@ public:
             int endStep = (std::min)(maxTimeSteps, startStep + chunkSize);
             std::size_t index = 0;
             for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
-                nextTimeStepFutures << components[i->x()].setupDataflow(lastTimeStepFutures[index], startStep, endStep);
+                nextTimeStepFutures <<
+                    hpx::async(typename ComponentType::setupDataflow_action(),
+                        components[i->x()], lastTimeStepFutures[index],
+                        startStep, endStep);
                 ++index;
             }
 
