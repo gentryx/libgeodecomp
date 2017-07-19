@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_COMMUNICATION_HPXRECEIVER_H
 
 #include <libgeodecomp/config.h>
+#include <hpx/config.hpp>
 #ifdef LIBGEODECOMP_WITH_CPP14
 #include <utility>
 #endif
@@ -34,7 +35,7 @@
 namespace LibGeoDecomp {
 
 template <typename CARGO, typename BUFFER=hpx::lcos::local::receive_buffer<CARGO> >
-class HPX_COMPONENT_EXPORT HPXReceiver : public hpx::components::managed_component_base<HPXReceiver<CARGO> >
+class HPX_ALWAYS_EXPORT HPXReceiver : public hpx::components::managed_component_base<HPXReceiver<CARGO> >
 {
 public:
     typedef CARGO Cargo;

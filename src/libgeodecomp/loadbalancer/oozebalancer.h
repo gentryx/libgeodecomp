@@ -25,7 +25,7 @@ namespace LibGeoDecomp {
  * OozeBalancer will return a weighted linear combination of the old
  * distribution (weights) and the new one is returned.
  */
-class OozeBalancer : public LoadBalancer
+class HPX_COMPONENT_EXPORT OozeBalancer : public LoadBalancer
 {
 public:
     friend class OozeBalancerTest1;

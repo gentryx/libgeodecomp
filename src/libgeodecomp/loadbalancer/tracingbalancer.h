@@ -18,7 +18,7 @@ namespace LibGeoDecomp {
  * This class relies on another LoadBalancer to do the job, but is
  * able to pass debug output.
  */
-class TracingBalancer : public LoadBalancer
+class HPX_COMPONENT_EXPORT TracingBalancer : public LoadBalancer
 {
 public:
     explicit TracingBalancer(

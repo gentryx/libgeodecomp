@@ -9,7 +9,7 @@ namespace LibGeoDecomp {
  * This class is for testing purposes and will not not modify the
  * given work loads.
  */
-class NoOpBalancer : public LoadBalancer
+class HPX_COMPONENT_EXPORT NoOpBalancer : public LoadBalancer
 {
 public:
     virtual WeightVec balance(const WeightVec& weights, const LoadVec& /* relativeLoads */)
