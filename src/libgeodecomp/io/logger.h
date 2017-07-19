@@ -18,9 +18,6 @@ namespace LibGeoDecomp {
  * happens at compile time, thus no runtime overhead is incurred for
  * filtered messages.
  */
-#ifdef ERROR
-#undef ERROR
-#endif
 
 class Logger {
 public:
