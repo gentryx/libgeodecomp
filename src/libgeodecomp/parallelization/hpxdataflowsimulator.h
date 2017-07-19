@@ -412,7 +412,7 @@ public:
             std::size_t index = 0;
             for (Region<1>::Iterator i = localRegion.begin(); i != localRegion.end(); ++i) {
                 nextTimeStepFutures <<
-                    hpx::async(ComponentType::setupDataflow_action(),
+                    hpx::async(typename ComponentType::setupDataflow_action(),
                         components[i->x()], lastTimeStepFutures[index],
                         startStep, endStep);
                 ++index;
