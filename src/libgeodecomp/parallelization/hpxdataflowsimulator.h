@@ -148,10 +148,8 @@ private:
     std::vector<int> sentNeighbors;
 };
 
-// fixme: componentize
 template<typename CELL, typename MESSAGE>
-class CellComponent
-  : public hpx::components::component_base<CellComponent<CELL, MESSAGE> >
+class CellComponent : public hpx::components::component_base<CellComponent<CELL, MESSAGE> >
 {
 public:
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
