@@ -183,8 +183,6 @@ LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(UnstructuredBusyworkCell)
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(UnstructuredBusyworkCellWithUpdateLineX)
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(UnstructuredBusyworkCellWithSoAAndUpdateLineX)
 
-
-
 /**
  * Connects cells in a structure that corresponds to a regular grid of
  * the given width.
@@ -426,6 +424,9 @@ private:
     std::size_t messageSize;
     std::vector<int> neighbors;
 };
+
+REGISTER_CELLCOMPONENT(DataflowTestModel, MessageType, fixme)
+
 
 class DataflowTestInitializer : public Initializer<DataflowTestModel>
 {

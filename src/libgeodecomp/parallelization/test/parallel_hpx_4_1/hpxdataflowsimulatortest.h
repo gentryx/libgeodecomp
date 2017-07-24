@@ -141,6 +141,14 @@ private:
     std::vector<int> neighbors;
 };
 
+}
+
+REGISTER_CELLCOMPONENT(DummyModel, DummyMessage, fixmeB)
+REGISTER_CELLCOMPONENT(AsymmetricDummyModel, DummyMessage, fixmeC)
+
+namespace LibGeoDecomp {
+
+
 template<typename MODEL>
 class DummyInitializer : public Initializer<MODEL>
 {
