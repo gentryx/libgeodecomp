@@ -25,7 +25,7 @@ public:
         const ITERATOR& start,
         const ITERATOR& end,
         char *target,
-        long count) :
+        std::size_t count) :
         start(start),
         end(end),
         target(target),
@@ -42,7 +42,11 @@ public:
                 static_cast<long>(i->origin[0]),
                 static_cast<long>(i->origin[1]),
                 static_cast<long>(i->origin[2]));
-            accessor.save(target, i->length(), offset, static_cast<std::size_t>(count));
+            accessor.save(
+                target,
+                static_cast<std::size_t>(i->length()),
+                offset,
+                count);
 
             offset += i->length();
         }
@@ -52,7 +56,7 @@ private:
     ITERATOR start;
     ITERATOR end;
     char *target;
-    long count;
+    std::size_t count;
 };
 
 #ifdef LIBFLATARRAY_WITH_CUDA

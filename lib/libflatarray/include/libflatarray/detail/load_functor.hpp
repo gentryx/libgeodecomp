@@ -45,7 +45,11 @@ public:
                 static_cast<long>(i->origin[0]),
                 static_cast<long>(i->origin[1]),
                 static_cast<long>(i->origin[2]));
-            accessor.load(source, i->length(), offset, count);
+            accessor.load(
+                source,
+                static_cast<std::size_t>(i->length()),
+                offset,
+                count);
 
             offset += i->length();
         }
