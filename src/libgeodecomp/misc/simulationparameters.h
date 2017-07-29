@@ -124,22 +124,22 @@ public:
         *this = std::string(other);
     }
 
-    virtual void operator=(const bool& other)
+    virtual void operator=(const bool /* other */)
     {
         throw std::logic_error("illegal assignment from bool");
     }
 
-    virtual void operator=(const int& other)
+    virtual void operator=(const int /* other */)
     {
         throw std::logic_error("illegal assignment from int");
     }
 
-    virtual void operator=(const double& other)
+    virtual void operator=(const double /* other */)
     {
         throw std::logic_error("illegal assignment from double");
     }
 
-    virtual bool operator==(const std::string& other) const
+    virtual bool operator==(const std::string& /* other */) const
     {
         return false;
     }
@@ -149,17 +149,17 @@ public:
         return *this == std::string(other);
     }
 
-    virtual bool operator==(const bool& other) const
+    virtual bool operator==(const bool /* other */) const
     {
         return false;
     }
 
-    virtual bool operator==(const int& other) const
+    virtual bool operator==(const int /* other */) const
     {
         return false;
     }
 
-    virtual bool operator==(const double& other) const
+    virtual bool operator==(const double& /* other */) const
     {
         return false;
     }
