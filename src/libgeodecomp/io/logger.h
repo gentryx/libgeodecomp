@@ -6,7 +6,14 @@
 #include <hpx/config.hpp>
 #endif
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
 #include <iomanip>
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 #include <libgeodecomp/io/timestringconversion.h>
 #include <libgeodecomp/misc/scopedtimer.h>
 
