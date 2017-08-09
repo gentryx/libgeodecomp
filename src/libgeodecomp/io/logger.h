@@ -56,13 +56,13 @@ public:
 #define LOG(LEVEL, MESSAGE)                                     \
     __pragma( warning( push ) )                                 \
     __pragma( warning( disable : 4127 ) )                       \
-    LOG_MAIL(LEVEL, MESSAGE)                                    \
+    LOG_MAIN(LEVEL, MESSAGE)                                    \
     __pragma( warning( pop ) )                                  \
 
 #else
 
 #define LOG(LEVEL, MESSAGE)                                     \
-    LOG_MAIL(LEVEL, MESSAGE)                                    \
+    LOG_MAIN(LEVEL, MESSAGE)                                    \
 
 #endif
 
