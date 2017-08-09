@@ -41,7 +41,7 @@ public:
 #endif
 
 #if LIBGEODECOMP_DEBUG_LEVEL >= 0
-#define LOG(LEVEL, MESSAGE)                                             \
+#define LOG_MAIN(LEVEL, MESSAGE)                                        \
     if ((LibGeoDecomp::Logger::LEVEL) <= LIBGEODECOMP_DEBUG_LEVEL) {    \
         std::cout << #LEVEL[0] << ", ["                                 \
                   << TimeStringConversion::renderISO(ScopedTimer::time()) \
@@ -49,6 +49,23 @@ public:
                   << std::setw(5) << #LEVEL                             \
                   << " -- " << MESSAGE << "\n";                         \
     }
+
+// on MSVC builds disable warning about static conditionals:
+#ifdef _MSC_BUILD
+
+#define LOG(LEVEL, MESSAGE)                                     \
+    __pragma( warning( push ) )                                 \
+    __pragma( warning( disable : 4127 ) )                       \
+    LOG_MAIL(LEVEL, MESSAGE)                                    \
+    __pragma( warning( pop ) )                                  \
+
+#else
+
+#define LOG(LEVEL, MESSAGE)                                     \
+    LOG_MAIL(LEVEL, MESSAGE)                                    \
+
+#endif
+
 #endif
 
 #endif
