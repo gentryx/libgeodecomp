@@ -114,7 +114,7 @@ public:
         throw std::logic_error("illegal cast to double");
     }
 
-    virtual void operator=(const std::string& other)
+    virtual void operator=(const std::string& /* other */)
     {
         throw std::logic_error("illegal assignment from string");
     }
