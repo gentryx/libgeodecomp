@@ -386,14 +386,15 @@ bool SimplexOptimizer::checkConvergence()
 
 }
 
-int SimplexOptimizer::comperator(double fitness)
+int SimplexOptimizer::comperator(double curFitness)
 {
     int retval = -1;
+
     for (std::size_t i = 0; i < simplex.size(); ++i) {
-        if (simplex[i].getFitness() == fitness && retval == -1) {
+        if ((simplex[i].getFitness() == curFitness) && (retval == -1)) {
             ++retval;
         }
-        if (simplex[i].getFitness()>fitness) {
+        if (simplex[i].getFitness() > curFitness) {
             ++retval;
         }
     }
@@ -406,10 +407,12 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::merge(
 {
     SimplexOptimizer::SimplexVertex result(a);
     result.resetFitness();
+
     for (std::size_t i = 0; i < result.size(); ++i) {
         double newValue = (a[i].getValue() + b[i].getValue()) * 0.5;
         result[i].setValue(newValue);
     }
+
     return result;
 }
 
@@ -417,6 +420,7 @@ std::string SimplexOptimizer::simplexToString() const
 {
     std::stringstream result;
     result << std::endl;
+
     for (std::size_t i = 0; i < simplex.size(); ++i) {
         result <<  "Vertex " << i << ": ";
         for (std::size_t j = 0;j < simplex[i].size(); ++j) {

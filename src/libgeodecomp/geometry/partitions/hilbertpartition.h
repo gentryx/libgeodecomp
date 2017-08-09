@@ -146,72 +146,72 @@ public:
             }
 
             Square currentSquare = pop(squareStack);
-            const Coord<2>& origin = currentSquare.origin;
-            const Coord<2>& dimensions = currentSquare.dimensions;
+            const Coord<2>& curOrigin = currentSquare.origin;
+            const Coord<2>& curDimensions = currentSquare.dimensions;
             const Form& form = currentSquare.form;
 
-            if ((int)offset >= dimensions.x() * dimensions.y()) {
+            if (int(offset) >= curDimensions.prod()) {
                 endReached = true;
-                cursor = origin;
+                cursor = curOrigin;
                 return;
             }
-            if (hasTrivialDimensions(dimensions)) {
-                digDownTrivial(origin, dimensions, offset);
-            } else if (isCached(dimensions)) {
-                digDownCached(origin, dimensions, offset, form);
+            if (hasTrivialDimensions(curDimensions)) {
+                digDownTrivial(curOrigin, curDimensions, offset);
+            } else if (isCached(curDimensions)) {
+                digDownCached(curOrigin, curDimensions, offset, form);
             } else {
                 digDownRecursion(offset, currentSquare);
             }
         }
 
         inline void digDownTrivial(
-            const Coord<2>& origin,
-            const Coord<2>& dimensions,
+            const Coord<2>& curOrigin,
+            const Coord<2>& curDimensions,
             unsigned offset)
         {
             sublevelState = TRIVIAL;
-            cursor = origin;
-            if (dimensions.x() > 1) {
-                trivialSquareCounter = dimensions.x() - offset;
+            cursor = curOrigin;
+            if (curDimensions.x() > 1) {
+                trivialSquareCounter = curDimensions.x() - offset;
                 trivialSquareHorizontal = true;
                 cursor.x() += offset;
             } else {
-                trivialSquareCounter = dimensions.y() - offset;
+                trivialSquareCounter = curDimensions.y() - offset;
                 trivialSquareHorizontal = false;
                 cursor.y() += offset;
             }
         }
 
         inline void digDownCached(
-            const Coord<2>& origin,
-            const Coord<2>& dimensions,
+            const Coord<2>& curOrigin,
+            const Coord<2>& curDimensions,
             unsigned offset,
             const Form& form)
         {
             sublevelState = CACHED;
-            Coord<3> c(dimensions.x(),
-                       dimensions.y(),
+            Coord<3> c(curDimensions.x(),
+                       curDimensions.y(),
                        form);
             std::vector<Coord<2> >& coords = (*squareCoordsCache)[c];
-            cachedSquareOrigin = origin;
-            cachedSquareCoordsIterator = &coords[offset];
+            cachedSquareOrigin = curOrigin;
+            cachedSquareCoordsIterator = &coords[curOffset];
             cachedSquareCoordsEnd      = &coords[0] + coords.size();
             cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
         }
 
         inline void digDownRecursion(
-            unsigned offset,
+            unsigned curOffset,
             Square currentSquare)
         {
-            const Coord<2>& origin = currentSquare.origin;
-            const Coord<2>& dimensions = currentSquare.dimensions;
+            const Coord<2>& curOrigin = currentSquare.origin;
+            const Coord<2>& curDimensions = currentSquare.dimensions;
             const Form& form = currentSquare.form;
-            Coord<2> halfDimensions = dimensions / 2;
-            Coord<2> restDimensions = dimensions - halfDimensions;
-            unsigned totalSize = static_cast<unsigned>(dimensions.x() * dimensions.y());
-            unsigned leftHalfSize = static_cast<unsigned>(halfDimensions.x() * dimensions.y());
+            Coord<2> halfDimensions = curDimensions / 2;
+            Coord<2> restDimensions = curDimensions - halfDimensions;
+            unsigned totalSize = static_cast<unsigned>(dimensions.prod());
+            unsigned leftHalfSize = static_cast<unsigned>(halfDimensions.x() * curDimensions.y());
             unsigned rightHalfSize = totalSize - leftHalfSize;
-            unsigned upperLeftQuarterSize = static_cast<unsigned>(halfDimensions.x() * halfDimensions.y());
+            unsigned upperLeftQuarterSize = static_cast<unsigned>(halfDimensions.prod());
             unsigned lowerLeftQuarterSize = static_cast<unsigned>(halfDimensions.x() * restDimensions.y());
 
             unsigned upperRightQuarterSize = static_cast<unsigned>(restDimensions.x() * halfDimensions.y());
@@ -247,7 +247,7 @@ public:
             };
 
             unsigned newQuarter;
-            unsigned pos = offset + accuSizes[currentSquare.quadrant];
+            unsigned pos = curOffset + accuSizes[currentSquare.quadrant];
             if (pos < accuSizes[2]) {
                 newQuarter = (pos < accuSizes[1]) ? 0u : 1u;
             } else {
@@ -262,24 +262,24 @@ public:
 
             switch (squareSectorTransitions[form][newQuarter]) {
             case 0:
-                newOrigin = origin;
+                newOrigin = curOrigin;
                 newDimensions = halfDimensions;
                 break;
             case 1:
-                newOrigin.x() = origin.x() + halfDimensions.x();
-                newOrigin.y() = origin.y();
-                newDimensions.x() = dimensions.x() - halfDimensions.x();
+                newOrigin.x() = curOrigin.x() + halfDimensions.x();
+                newOrigin.y() = curOrigin.y();
+                newDimensions.x() = curDimensions.x() - halfDimensions.x();
                 newDimensions.y() = halfDimensions.y();
                 break;
             case 2:
-                newOrigin.x() = origin.x();
-                newOrigin.y() = origin.y() + halfDimensions.y();
+                newOrigin.x() = curOrigin.x();
+                newOrigin.y() = curOrigin.y() + halfDimensions.y();
                 newDimensions.x() = halfDimensions.x();
-                newDimensions.y() = dimensions.y() - halfDimensions.y();
+                newDimensions.y() = curDimensions.y() - halfDimensions.y();
                 break;
             case 3:
-                newOrigin = origin + halfDimensions;
-                newDimensions = dimensions - halfDimensions;
+                newOrigin = curOrigin + halfDimensions;
+                newDimensions = curDimensions - halfDimensions;
                 break;
             };
 
@@ -303,10 +303,10 @@ public:
             cursor = origin;
         }
 
-        inline bool isCached(const Coord<2>& dimensions) const
+        inline bool isCached(const Coord<2>& curDimensions) const
         {
-            return (dimensions.x() < maxCachedDimensions.x() &&
-                    dimensions.y() < maxCachedDimensions.y());
+            return (curDimensions.x() < maxCachedDimensions.x() &&
+                    curDimensions.y() < maxCachedDimensions.y());
         }
     };
 
