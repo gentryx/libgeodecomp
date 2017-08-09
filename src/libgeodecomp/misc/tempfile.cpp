@@ -35,7 +35,15 @@ std::string TempFile::serial(const std::string& prefix)
     for (;;) {
         std::stringstream buf;
 #ifdef _WIN32
-        buf << getenv("TMP")
+#ifdef _MSC_BUILD
+
+        char *tempVar;
+        std::size_t length;
+        std::errno_t err = _dubenv_s(&tempVar, &length, "TMP");
+        if (err) {
+            throw std::runtime_error("could not retrieve value of environment variable TMP");
+        }
+        buf << pValue
             << '\\';
 #else
         const char* tempDir = getenv("TMPDIR");
