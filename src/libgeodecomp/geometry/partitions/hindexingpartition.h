@@ -8,6 +8,7 @@
 #include <libgeodecomp/storage/grid.h>
 
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
@@ -143,7 +144,7 @@ public:
             SpaceFillingCurve<2>::Iterator(_origin, false)
         {
             unsigned remainder = pos;
-            triangleStack.push_back(Triangle(1, dimensions, origin + dimensions, -1));
+            triangleStack.push_back(Triangle(1, dimensions, origin + dimensions, std::numeric_limits<unsigned>::max()));
             triangleStack.push_back(Triangle(2, dimensions, origin));
             for (;;) {
                 Triangle curTria = pop(triangleStack);
