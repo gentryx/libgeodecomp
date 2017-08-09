@@ -110,13 +110,12 @@ public:
         partition = HilbertPartition(offset, dimensions);
 
         CoordVector expected;
-        for (std::size_t i = 0; i < (dimensions.x()*dimensions.y()); ++i) {
+        for (std::size_t i = 0; i < std::size_t(dimensions.x() * dimensions.y()); ++i) {
             expected << *partition[i];
         }
 
         CoordVector actual;
-        for (HilbertPartition::Iterator i = partition.begin();
-             i != partition.end(); ++i) {
+        for (HilbertPartition::Iterator i = partition.begin(); i != partition.end(); ++i) {
             actual << *i;
         }
         TS_ASSERT_EQUALS(expected, actual);
