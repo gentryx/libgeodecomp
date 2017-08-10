@@ -2192,6 +2192,41 @@ public:
     double sum;
 };
 
+// This ought to go into a lambda but as long as CUDA isn't
+// C++14-compatible we can't have auto-typed parameters in lambdas
+// which would be required by the loop peeler.
+template<typename HOOD_NEW_TYPE>
+class SPMVMSoACellUpdateHelper
+{
+public:
+    SPMVMSoACellUpdateHelper(HOOD_NEW_TYPE& hoodNew) :
+        hoodNew(hoodNew)
+    {}
+
+    template<typename SHORT_VEC, typename COUNTER_TYPE, typename END_TYPE, typename HOOD_TYPE>
+    void operator()(SHORT_VEC shortVec, COUNTER_TYPE *counter, END_TYPE end, HOOD_TYPE& hoodOld) const
+    {
+        typedef SHORT_VEC ShortVec;
+
+        for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+            ShortVec tmp;
+            tmp.load_aligned(&hoodNew->sum());
+
+            for (const auto& j: hoodOld.weights(0)) {
+                ShortVec weights, values;
+                weights.load_aligned(j.second());
+                values.gather(&hoodOld->value(), j.first());
+                tmp += values * weights;
+            }
+
+            tmp.store_aligned(&hoodNew->sum());
+        }
+    }
+
+private:
+    HOOD_NEW_TYPE& hoodNew;
+};
+
 class SPMVMSoACell
 {
 public:
@@ -2214,27 +2249,13 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
+        SPMVMSoACellUpdateHelper<HOOD_NEW> updateHelper(hoodNew);
+
         unstructuredLoopPeeler<ShortVec>(
             &hoodNew.index(),
             indexEnd,
             hoodOld,
-            [&hoodNew](auto shortVec, auto *counter, auto end, auto& hoodOld) {
-                typedef decltype(shortVec) ShortVec;
-
-                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
-                    ShortVec tmp;
-                    tmp.load_aligned(&hoodNew->sum());
-
-                    for (const auto& j: hoodOld.weights(0)) {
-                        ShortVec weights, values;
-                        weights.load_aligned(j.second());
-                        values.gather(&hoodOld->value(), j.first());
-                        tmp += values * weights;
-                    }
-
-                    tmp.store_aligned(&hoodNew->sum());
-                }
-            });
+            updateHelper);
     }
 
     double value;
@@ -2242,6 +2263,41 @@ public:
 };
 
 LIBFLATARRAY_REGISTER_SOA(SPMVMSoACell, ((double)(sum))((double)(value)))
+
+// This ought to go into a lambda but as long as CUDA isn't
+// C++14-compatible we can't have auto-typed parameters in lambdas
+// which would be required by the loop peeler.
+template<typename HOOD_NEW_TYPE>
+class SPMVMSoACellInfUpdateHelper
+{
+public:
+    SPMVMSoACellInfUpdateHelper(HOOD_NEW_TYPE& hoodNew) :
+        hoodNew(hoodNew)
+    {}
+
+    template<typename SHORT_VEC, typename COUNTER_TYPE, typename END_TYPE, typename HOOD_TYPE>
+    void operator()(SHORT_VEC shortVec, COUNTER_TYPE *counter, END_TYPE end, HOOD_TYPE& hoodOld) const
+    {
+        typedef SHORT_VEC ShortVec;
+
+        ShortVec tmp, weights, values;
+
+        for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+            tmp = &hoodNew->sum();
+
+            for (const auto& j: hoodOld.weights(0)) {
+                weights = j.second();
+                values.gather(&hoodOld->value(), j.first());
+                tmp += values * weights;
+            }
+
+            (&hoodNew->sum()) << tmp;
+        }
+    }
+
+private:
+    HOOD_NEW_TYPE& hoodNew;
+};
 
 class SPMVMSoACellInf
 {
@@ -2267,27 +2323,13 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
+        SPMVMSoACellInfUpdateHelper<HOOD_NEW> updateHelper(hoodNew);
+
         unstructuredLoopPeeler<ShortVec>(
             &hoodNew.index(),
             indexEnd,
             hoodOld,
-            [&hoodNew](auto shortVec, auto *counter, auto end, auto& hoodOld) {
-                typedef decltype(shortVec) ShortVec;
-
-                ShortVec tmp, weights, values;
-
-                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
-                    tmp = &hoodNew->sum();
-
-                    for (const auto& j: hoodOld.weights(0)) {
-                        weights = j.second();
-                        values.gather(&hoodOld->value(), j.first());
-                        tmp += values * weights;
-                    }
-
-                    (&hoodNew->sum()) << tmp;
-                }
-            });
+            updateHelper);
     }
 
     double value;

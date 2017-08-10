@@ -80,6 +80,44 @@ public:
     double sum;
 };
 
+// This ought to go into a lambda but as long as CUDA isn't
+// C++14-compatible we can't have auto-typed parameters in lambdas
+// which would be required by the loop peeler.
+template<typename HOOD_NEW_TYPE>
+class SimpleUnstructuredSoATestCellUpdateHelper
+{
+public:
+    SimpleUnstructuredSoATestCellUpdateHelper(HOOD_NEW_TYPE& hoodNew) :
+        hoodNew(hoodNew)
+    {}
+
+    template<typename SHORT_VEC, typename COUNTER_TYPE, typename END_TYPE, typename HOOD_TYPE>
+    void operator()(SHORT_VEC shortVec, COUNTER_TYPE *counter, END_TYPE end, HOOD_TYPE& hoodOld) const
+    {
+        typedef SHORT_VEC ShortVec;
+
+        for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY) {
+            ShortVec tmp;
+            tmp.load_aligned(&hoodNew->sum());
+
+            for (const auto& j: hoodOld.weights()) {
+                ShortVec weights, values;
+                weights.load_aligned(j.second());
+                values.gather(&hoodOld->value(), j.first());
+                tmp += values * weights;
+
+            }
+
+            &hoodNew->sum() << tmp;
+            ++hoodOld;
+        }
+    }
+
+private:
+    HOOD_NEW_TYPE& hoodNew;
+};
+
+
 template<int SIGMA>
 class SimpleUnstructuredSoATestCell
 {
@@ -107,28 +145,13 @@ public:
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
+        SimpleUnstructuredSoATestCellUpdateHelper<HOOD_NEW> updateHelper(hoodNew);
+
         unstructuredLoopPeeler<ShortVec>(
             &hoodNew.index(),
             indexEnd,
             hoodOld,
-            [&hoodNew](auto REAL, auto *counter, const auto& end, auto& hoodOld) {
-                typedef decltype(REAL) ShortVec;
-                for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY) {
-                    ShortVec tmp;
-                    tmp.load_aligned(&hoodNew->sum());
-
-                    for (const auto& j: hoodOld.weights()) {
-                        ShortVec weights, values;
-                        weights.load_aligned(j.second());
-                        values.gather(&hoodOld->value(), j.first());
-                        tmp += values * weights;
-
-                    }
-
-                    &hoodNew->sum() << tmp;
-                    ++hoodOld;
-                }
-            });
+            updateHelper);
     }
 
     template<typename NEIGHBORHOOD>
