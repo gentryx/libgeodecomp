@@ -38,11 +38,11 @@ std::string TempFile::serial(const std::string& prefix)
 #ifdef _WIN32
         char *tempVar;
         std::size_t length;
-        errno_t err = _dubenv_s(&tempVar, &length, "TMP");
+        errno_t err = _dupenv_s(&tempVar, &length, "TMP");
         if (err) {
             throw std::runtime_error("could not retrieve value of environment variable TMP");
         }
-        buf << pValue
+        buf << tempVar
             << '\\';
 #else
         const char* tempDir = getenv("TMPDIR");
