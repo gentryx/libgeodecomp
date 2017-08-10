@@ -6,13 +6,13 @@
 #endif
 
 #include <libgeodecomp/geometry/partitions/hindexingpartition.h>
+#include <libgeodecomp/loadbalancer/biasbalancer.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
+
 
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
-
-// fixme: testing...
-#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
 
