@@ -23,7 +23,7 @@ std::vector<std::size_t> LoadBalancer::initialWeights(std::size_t items, const s
     double partialSum = 0.0;
     for (std::size_t i = 0; i < size - 1; ++i) {
         partialSum += rankSpeeds[i];
-        std::size_t nextPos = items * partialSum / totalSum;
+        std::size_t nextPos = std::size_t(items * partialSum / totalSum);
         ret[i] = nextPos - lastPos;
         lastPos = nextPos;
     }
