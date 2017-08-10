@@ -18,8 +18,19 @@
 #include <fstream>
 
 #ifdef _WIN32
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 #include <io.h>
 #include <stdlib.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #else
 #include <unistd.h>
 #endif
