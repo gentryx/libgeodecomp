@@ -11,6 +11,9 @@
 #pragma warning( pop )
 #endif
 
+// fixme: testing...
+#include <libgeodecomp/loadbalancer/biasbalancer.h>
+
 namespace LibGeoDecomp {
 
 unsigned HIndexingPartition::triangleTransitions[4][4] = {
