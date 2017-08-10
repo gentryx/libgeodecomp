@@ -67,7 +67,7 @@ private:
     void totalContraction();
     bool checkConvergence();
     std::pair<SimplexVertex, SimplexVertex> reflection();
-    void initSimplex(SimulationParameters param);
+    void initSimplex(SimulationParameters newParams);
     SimplexVertex expansion();
     SimplexVertex partialOutsideContraction();
     SimplexVertex partialInsideContraction();

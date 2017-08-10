@@ -246,9 +246,9 @@ void SimplexOptimizer::evalSimplex(Evaluator& eval)
     }
 }
 
-void SimplexOptimizer::initSimplex(SimulationParameters params)
+void SimplexOptimizer::initSimplex(SimulationParameters newParams)
 {
-    SimplexVertex tmp(params);
+    SimplexVertex tmp(newParams);
     simplex = std::vector<SimplexVertex>();
     simplex.push_back(tmp);
     for (std::size_t i = 0; i < tmp.size(); ++i) {
