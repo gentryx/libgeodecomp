@@ -159,7 +159,7 @@ public:
         return false;
     }
 
-    virtual bool operator==(const double& /* other */) const
+    virtual bool operator==(const double /* other */) const
     {
         return false;
     }
@@ -207,9 +207,19 @@ public:
         return current;
     }
 
+    virtual void operator=(const VALUE_TYPE other)
+    {
+        current = other;
+    }
+
     virtual void operator=(const VALUE_TYPE& other)
     {
         current = other;
+    }
+
+    virtual bool operator==(const VALUE_TYPE other) const
+    {
+        return current == other;
     }
 
     virtual bool operator==(const VALUE_TYPE& other) const
