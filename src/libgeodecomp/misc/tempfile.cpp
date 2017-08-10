@@ -17,15 +17,15 @@
 
 #include <fstream>
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 #ifdef _WIN32
 #include <io.h>
 #include <stdlib.h>
 #else
 #include <unistd.h>
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 namespace LibGeoDecomp {
