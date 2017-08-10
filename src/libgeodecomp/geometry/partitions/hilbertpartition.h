@@ -185,7 +185,7 @@ public:
         inline void digDownCached(
             const Coord<2>& curOrigin,
             const Coord<2>& curDimensions,
-            unsigned offset,
+            unsigned curOffset,
             const Form& form)
         {
             sublevelState = CACHED;
@@ -208,7 +208,7 @@ public:
             const Form& form = currentSquare.form;
             Coord<2> halfDimensions = curDimensions / 2;
             Coord<2> restDimensions = curDimensions - halfDimensions;
-            unsigned totalSize = static_cast<unsigned>(dimensions.prod());
+            unsigned totalSize = static_cast<unsigned>(curDimensions.prod());
             unsigned leftHalfSize = static_cast<unsigned>(halfDimensions.x() * curDimensions.y());
             unsigned rightHalfSize = totalSize - leftHalfSize;
             unsigned upperLeftQuarterSize = static_cast<unsigned>(halfDimensions.prod());
