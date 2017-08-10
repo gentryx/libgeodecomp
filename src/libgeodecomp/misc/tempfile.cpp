@@ -35,8 +35,6 @@ std::string TempFile::serial(const std::string& prefix)
     for (;;) {
         std::stringstream buf;
 #ifdef _WIN32
-#ifdef _MSC_BUILD
-
         char *tempVar;
         std::size_t length;
         std::errno_t err = _dubenv_s(&tempVar, &length, "TMP");
