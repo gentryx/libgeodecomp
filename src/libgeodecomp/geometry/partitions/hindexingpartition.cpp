@@ -12,7 +12,7 @@
 #endif
 
 // fixme: testing...
-#include <libgeodecomp/loadbalancer/biasbalancer.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
 
