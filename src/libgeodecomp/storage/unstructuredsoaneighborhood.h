@@ -170,6 +170,11 @@ public:
         accessor(acc)
     {}
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline UnstructuredSoANeighborhood(const UnstructuredSoANeighborhood& other) = default;
+    inline UnstructuredSoANeighborhood(UnstructuredSoANeighborhood&& other) = default;
+#endif
+
     inline
     UnstructuredSoANeighborhood& operator++()
     {
