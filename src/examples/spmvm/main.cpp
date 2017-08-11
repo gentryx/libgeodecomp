@@ -1,5 +1,4 @@
 #include <cstdlib>
-#include <cmath>
 #include <map>
 #include <fstream>
 #include <string>
@@ -10,6 +9,7 @@
 #include <libgeodecomp/io/asciiwriter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 

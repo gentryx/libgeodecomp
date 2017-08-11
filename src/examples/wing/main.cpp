@@ -1,4 +1,3 @@
-#include <cmath>
 /**
  * We need to include typemaps first to avoid problems with Intel
  * MPI's C++ bindings (which may collide with stdio.h's SEEK_SET,
@@ -11,6 +10,7 @@
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
+#include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 

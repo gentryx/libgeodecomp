@@ -1,4 +1,3 @@
-#include <cmath>
 #include <mpi.h>
 
 #include <libgeodecomp.h>
@@ -9,6 +8,7 @@
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libflatarray/short_vec.hpp>
 

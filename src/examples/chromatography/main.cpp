@@ -3,10 +3,10 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/misc/misc.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 
-#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <silo.h>
