@@ -7,11 +7,11 @@
 #endif
 
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <libgeodecomp/misc/sharedptr.h>
-
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
+
+#include <libgeodecomp/misc/sharedptr.h>
 
 
 namespace LibGeoDecomp {
