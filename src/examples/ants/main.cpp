@@ -15,6 +15,12 @@ Coord<2> NEIGHBORS[] = {Coord<2>(-1, -1),
                         Coord<2>( 0,  1),
                         Coord<2>( 1,  1)};
 
+// don't warn about padding here, we just don't care.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 class Cell
 {
 public:
@@ -141,6 +147,11 @@ private:
 
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
+
 const double Cell::PI = 3.14159265;
 
 class CellToColor
@@ -198,6 +209,13 @@ private:
     }
 };
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// an assignment operator missing -- which is clearly there:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 )
+#endif
+
 class AntTracer : public TracingWriter<Cell>
 {
 public:
@@ -241,6 +259,10 @@ public:
                   << "  numFood: " << numFood << "\n";
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 void runSimulation()
 {
