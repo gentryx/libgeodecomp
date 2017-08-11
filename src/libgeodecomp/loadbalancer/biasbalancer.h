@@ -1,8 +1,18 @@
 #ifndef LIBGEODECOMP_LOADBALANCER_BIASBALANCER_H
 #define LIBGEODECOMP_LOADBALANCER_BIASBALANCER_H
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable :  4548 )
+#endif
+
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/sharedptr.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 
 namespace LibGeoDecomp {
 
