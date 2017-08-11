@@ -1,17 +1,16 @@
 #ifndef LIBGEODECOMP_LOADBALANCER_LOADBALANCER_H
 #define LIBGEODECOMP_LOADBALANCER_LOADBALANCER_H
 
-#include <libgeodecomp/misc/stdcontaineroverloads.h>
-
 #ifdef _MSC_BUILD
 #pragma warning( push )
 #pragma warning( disable :  4548 )
 #endif
-#include <vector>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
 
+#include <vector>
 
 namespace LibGeoDecomp {
 
