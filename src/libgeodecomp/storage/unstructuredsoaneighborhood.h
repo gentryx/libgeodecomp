@@ -15,6 +15,13 @@
 
 namespace LibGeoDecomp {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// an assignment operator missing -- which is clearly there:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 5027 )
+#endif
+
 /**
  * Neighborhood providing pointers for vectorization of UnstructuredSoAGrid.
  * weights(id) returns a pair of two pointers. One points to the array where
@@ -281,6 +288,10 @@ private:
      */
     const SoAAccessor& accessor;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 template<
     typename GRID_TYPE,

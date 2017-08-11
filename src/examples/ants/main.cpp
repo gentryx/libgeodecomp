@@ -207,6 +207,12 @@ public:
         TracingWriter<Cell>(period, maxSteps)
     {}
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline AntTracer(const AntTracer& other) = default;
+    inline AntTracer(AntTracer&& other) = default;
+#endif
+
+
     void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
         TracingWriter<Cell>::stepFinished(grid, step, event);
@@ -239,7 +245,7 @@ public:
 void runSimulation()
 {
     srand(1234);
-    int outputFrequency = 1;
+    unsigned outputFrequency = 1;
     CellInitializer *init = new CellInitializer();
     SerialSimulator<Cell> sim(init);
     sim.addWriter(
@@ -257,7 +263,7 @@ void runSimulation()
     sim.run();
 }
 
-int main(int argc, char **argv)
+int main(int /* argc */, char** /* argv */)
 {
     runSimulation();
     return 0;
