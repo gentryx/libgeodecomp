@@ -44,10 +44,9 @@ const SimplexOptimizer::SimplexVertex operator+(
         }
         result.resetFitness();
         return result;
-    } else {
-        throw std::invalid_argument("different size of SimplexVertex in operator+ call");
     }
-    return b;
+
+    throw std::invalid_argument("different size of SimplexVertex in operator+ call");
 }
 
 const SimplexOptimizer::SimplexVertex operator+(
@@ -73,10 +72,9 @@ const SimplexOptimizer::SimplexVertex operator-(
         }
         result.resetFitness();
         return result;
-    } else {
-        throw std::invalid_argument("different size of SimplexVertex in operator- call");
     }
-    return b;
+
+    throw std::invalid_argument("different size of SimplexVertex in operator- call");
 }
 
 const SimplexOptimizer::SimplexVertex operator*(
@@ -90,10 +88,9 @@ const SimplexOptimizer::SimplexVertex operator*(
         }
         result.resetFitness();
         return result;
-    } else {
-        throw std::invalid_argument("different size of SimplexVertex in operator* call");
     }
-    return b;
+
+    throw std::invalid_argument("different size of SimplexVertex in operator* call");
 }
 
 const SimplexOptimizer::SimplexVertex operator*(
