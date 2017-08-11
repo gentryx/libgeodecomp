@@ -12,6 +12,11 @@
 #include <utility>
 #endif
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable :  4548 )
+#endif
+
 #include <algorithm>
 #include <deque>
 #include <iterator>
@@ -20,6 +25,10 @@
 #include <set>
 #include <sstream>
 #include <vector>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 
