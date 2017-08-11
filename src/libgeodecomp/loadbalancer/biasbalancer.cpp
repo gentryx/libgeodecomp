@@ -2,7 +2,7 @@
 // inline functions not being included in object files:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4548 )
 #endif
 
 #include <libgeodecomp/loadbalancer/biasbalancer.h>
