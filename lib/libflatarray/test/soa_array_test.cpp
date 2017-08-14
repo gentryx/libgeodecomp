@@ -1,5 +1,6 @@
 /**
  * Copyright 2013-2017 Andreas Schäfer
+ * Copyright 2017 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -19,7 +20,7 @@
 // as they're not being used, that's actually expected behavior.
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4996 )
 #endif
 
 #include <iostream>
