@@ -1,10 +1,10 @@
 // #include <libgeodecomp/parallelization/serialsimulator.h>
 // #include <libgeodecomp/io/ppmwriter.h>
-// #include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/simpleinitializer.h>
 // #include <libgeodecomp/io/simplecellplotter.h>
 // #include <libgeodecomp/io/tracingwriter.h>
 
-// using namespace LibGeoDecomp;
+using namespace LibGeoDecomp;
 
 // Coord<2> NEIGHBORS[] = {Coord<2>(-1, -1),
 //                         Coord<2>( 0, -1),
