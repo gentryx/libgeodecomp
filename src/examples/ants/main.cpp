@@ -6,14 +6,14 @@
 
 // using namespace LibGeoDecomp;
 
-Coord<2> NEIGHBORS[] = {Coord<2>(-1, -1),
-                        Coord<2>( 0, -1),
-                        Coord<2>( 1, -1),
-                        Coord<2>(-1,  0),
-                        Coord<2>( 1,  0),
-                        Coord<2>(-1,  1),
-                        Coord<2>( 0,  1),
-                        Coord<2>( 1,  1)};
+// Coord<2> NEIGHBORS[] = {Coord<2>(-1, -1),
+//                         Coord<2>( 0, -1),
+//                         Coord<2>( 1, -1),
+//                         Coord<2>(-1,  0),
+//                         Coord<2>( 1,  0),
+//                         Coord<2>(-1,  1),
+//                         Coord<2>( 0,  1),
+//                         Coord<2>( 1,  1)};
 
 // // don't warn about padding here, we just don't care.
 // #ifdef _MSC_BUILD
