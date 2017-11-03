@@ -20,7 +20,17 @@ string(REGEX MATCH "^unit"            is_unit_test   ${DIRNAME})
 set(allowed_test false)
 if (is_unit_test)
   set(allowed_test true)
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${UNITEXEC} ./test")
+  if ("${UNITEXEC}" STREQUAL "")
+  add_custom_target(${TARGET_RUN_UNIT_TEST} 
+  COMMAND echo "running tests in..." & cd
+  COMMAND echo "cd $<$<CONFIG:Debug>:Debug>"
+  COMMAND cd "$<$<CONFIG:Debug>:Debug>"
+  COMMAND start /B test.exe
+  #VERBATIM
+  )
+  else()
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." & echo %CD% &echo "Unit ${UNITEXEC}" & start "${UNITEXEC}" test.exe)
+  endif()
 endif()
 
 if (is_hpx_test AND WITH_HPX)
@@ -29,19 +39,19 @@ if (is_hpx_test AND WITH_HPX)
   string(REGEX REPLACE "_.+" "" NUM_LOCALITIES "${NUM_PROC}")
   string(REGEX REPLACE ".+_" "" NUM_THREADS    "${NUM_PROC}")
 
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_LOCALITIES} ./test --hpx:bind=balanced --hpx:threads=${NUM_THREADS} -Ihpx.parcel.tcp.enable=0 -Ihpx.parcel.mpi.enable=1")
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && %cd% && bash -c "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_LOCALITIES} ./test --hpx:bind=balanced --hpx:threads=${NUM_THREADS} -Ihpx.parcel.tcp.enable=0 -Ihpx.parcel.mpi.enable=1")
 endif()
 
 if (is_mpi_test AND WITH_MPI)
   set(allowed_test true)
   string(REPLACE "parallel_mpi_" "" NUM_PROC ${DIRNAME})
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} ./test ${MPIEXEC_POSTFLAGS}")
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && %cd% && bash -c "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} ./test ${MPIEXEC_POSTFLAGS}")
 endif()
 
 if (is_openmp_test AND WITH_THREADS)
   set(allowed_test true)
   string(REPLACE "parallel_openmp_" "" NUM_THREADS ${DIRNAME})
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "OMP_NUM_THREADS=${NUM_THREADS} ${UNITEXEC} ./test")
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && %cd% && bash -c "OMP_NUM_THREADS=${NUM_THREADS} ${UNITEXEC} ./test")
 endif()
 
 # check whether LIMIT_TESTS selected this path, too
