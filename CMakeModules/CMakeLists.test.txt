@@ -22,17 +22,14 @@ if (is_unit_test)
   set(allowed_test true)
   if ("${UNITEXEC}" STREQUAL "")
   add_custom_target(${TARGET_RUN_UNIT_TEST} 
+  COMMAND cd "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>"
   COMMAND echo "running tests in..." & cd
-  COMMAND echo "cd $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>"
-  COMMAND cd "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>"
   COMMAND start /B test.exe
-  #VERBATIM
   )
   else()
   add_custom_target(${TARGET_RUN_UNIT_TEST}
+  COMMAND cd "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>"
   COMMAND echo "running tests in..." & cd
-  COMMAND echo "cd $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>"
-  COMMAND cd "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>"
   COMMAND echo "Unit ${UNITEXEC}"
   COMMAND start /B "${UNITEXEC}" test.exe)
   endif()
@@ -44,19 +41,28 @@ if (is_hpx_test AND WITH_HPX)
   string(REGEX REPLACE "_.+" "" NUM_LOCALITIES "${NUM_PROC}")
   string(REGEX REPLACE ".+_" "" NUM_THREADS    "${NUM_PROC}")
 
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && %cd% && bash -c "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_LOCALITIES} ./test --hpx:bind=balanced --hpx:threads=${NUM_THREADS} -Ihpx.parcel.tcp.enable=0 -Ihpx.parcel.mpi.enable=1")
+  add_custom_target(${TARGET_RUN_UNIT_TEST}
+  COMMAND cd "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>"
+  COMMAND echo "running tests in..." & cd
+  COMMAND start /B "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_LOCALITIES} test.exe --hpx:bind=balanced --hpx:threads=${NUM_THREADS} -Ihpx.parcel.tcp.enable=0 -Ihpx.parcel.mpi.enable=1")
 endif()
 
 if (is_mpi_test AND WITH_MPI)
   set(allowed_test true)
   string(REPLACE "parallel_mpi_" "" NUM_PROC ${DIRNAME})
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && %cd% && bash -c "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} ./test ${MPIEXEC_POSTFLAGS}")
+  add_custom_target(${TARGET_RUN_UNIT_TEST}
+  COMMAND cd "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>"
+  COMMAND echo "running tests in..." & cd 
+  COMMAND start /B "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} test.exe ${MPIEXEC_POSTFLAGS}")
 endif()
 
 if (is_openmp_test AND WITH_THREADS)
   set(allowed_test true)
   string(REPLACE "parallel_openmp_" "" NUM_THREADS ${DIRNAME})
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && %cd% && bash -c "OMP_NUM_THREADS=${NUM_THREADS} ${UNITEXEC} ./test")
+  add_custom_target(${TARGET_RUN_UNIT_TEST}
+  COMMAND cd "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>"
+  COMMAND echo "running tests in..." & cd
+  COMMAND start /B "OMP_NUM_THREADS=${NUM_THREADS} ${UNITEXEC} test.exe")
 endif()
 
 # check whether LIMIT_TESTS selected this path, too
