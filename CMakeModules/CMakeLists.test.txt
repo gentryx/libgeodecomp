@@ -23,13 +23,18 @@ if (is_unit_test)
   if ("${UNITEXEC}" STREQUAL "")
   add_custom_target(${TARGET_RUN_UNIT_TEST} 
   COMMAND echo "running tests in..." & cd
-  COMMAND echo "cd $<$<CONFIG:Debug>:Debug>"
-  COMMAND cd "$<$<CONFIG:Debug>:Debug>"
+  COMMAND echo "cd $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>"
+  COMMAND cd "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>"
   COMMAND start /B test.exe
   #VERBATIM
   )
   else()
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." & echo %CD% &echo "Unit ${UNITEXEC}" & start "${UNITEXEC}" test.exe)
+  add_custom_target(${TARGET_RUN_UNIT_TEST}
+  COMMAND echo "running tests in..." & cd
+  COMMAND echo "cd $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>"
+  COMMAND cd "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>"
+  COMMAND echo "Unit ${UNITEXEC}"
+  COMMAND start /B "${UNITEXEC}" test.exe)
   endif()
 endif()
 
