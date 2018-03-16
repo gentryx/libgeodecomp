@@ -304,6 +304,21 @@ public:
         addSelectorForPointMesh(Selector<CARGO>(memberPointer, memberName, filter));
     }
 
+    /**
+     * Adds another variable of the cargo data (e.g. the particles) to
+     * this writer's output.
+     */
+    // fixme: needs test
+    // fixme: add corresponding overloads for other grid types
+    template<typename MEMBER, typename MEMBER_MEMBER, typename CARGO>
+    void addSelectorForPointMesh(
+        MEMBER CARGO:: *memberPointer,
+        MEMBER_MEMBER MEMBER:: *memberMemberPointer,
+        const std::string& memberName)
+    {
+        addSelectorForPointMesh(Selector<CARGO>(memberPointer, memberMemberPointer, memberName));
+    }
+
 
     template<typename MEMBER, typename CARGO>
     void addSelectorForPointMesh(
