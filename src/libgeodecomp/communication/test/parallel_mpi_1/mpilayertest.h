@@ -25,9 +25,9 @@ public:
         TestCell<2> foo;
         TestCell<2> demo = demoCell();
         TS_ASSERT_EQUALS((unsigned)0, layer.requests[0].size());
-        layer.send(&demo, 0);
+        layer.sendUntagged(&demo, 0);
         TS_ASSERT_EQUALS((unsigned)1, layer.requests[0].size());
-        layer.recv(&foo, 0);
+        layer.recvUntagged(&foo, 0);
         TS_ASSERT_EQUALS((unsigned)2, layer.requests[0].size());
         layer.waitAll();
         TS_ASSERT_EQUALS((unsigned)0, layer.requests[0].size());
@@ -37,9 +37,9 @@ public:
     {
         MPILayer layer;
         TestCell<2> sendCell = demoCell(2);
-        layer.send(&sendCell, 0);
+        layer.sendUntagged(&sendCell, 0);
         TestCell<2> receivedCell;
-        layer.recv(&receivedCell, 0);
+        layer.recvUntagged(&receivedCell, 0);
         layer.waitAll();
         TS_ASSERT_EQUALS(receivedCell, sendCell);
     }

@@ -74,7 +74,7 @@ public:
     }
 
     template<typename T>
-    inline void send(
+    inline void sendUntagged(
         const T *c,
         int dest,
         int num = 1,
@@ -97,7 +97,7 @@ public:
     }
 
     template<typename T>
-    inline void recv(
+    inline void recvUntagged(
         T *c,
         int src,
         int num = 1,

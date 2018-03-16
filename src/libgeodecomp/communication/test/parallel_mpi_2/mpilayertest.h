@@ -115,14 +115,14 @@ public:
         if (layer.rank() == 0) {
             TestCell<2> a(Coord<2>(1, 2), Coord<2>(3, 4), 5);
             Coord<2> b(6, 7);
-            layer.send(&a, 1);
-            layer.send(&b, 1);
+            layer.sendUntagged(&a, 1);
+            layer.sendUntagged(&b, 1);
             layer.waitAll();
         } else {
             TestCell<2> a;
             Coord<2> b(8,9);
-            layer.recv(&a, 0);
-            layer.recv(&b, 0);
+            layer.recvUntagged(&a, 0);
+            layer.recvUntagged(&b, 0);
             layer.waitAll();
 
             // For some weird reason TS_ASSERT_EQUALS with these two
@@ -139,9 +139,9 @@ public:
 
         if (layer.rank() == 0) {
             c = FloatCoord<3>(0.5 + layer.rank(), 2.0, 3.0);
-            layer.send(&c, 1);
+            layer.sendUntagged(&c, 1);
         } else {
-            layer.recv(&c, 0);
+            layer.recvUntagged(&c, 0);
         }
 
         layer.waitAll();
@@ -272,7 +272,7 @@ public:
         if (MPILayer().rank() == 0) {
             MPILayer layer;
             int i = 0;
-            layer.recv(&i, 1, 1);
+            layer.recvUntagged(&i, 1, 1);
             layer.cancelAll();
         }
     }
