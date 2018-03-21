@@ -5,6 +5,7 @@
 #include <vector>
 
 #if defined(LIBGEODECOMP_WITH_HPX)
+#include <libgeodecomp/misc/cudaboostworkaround.h>
 #include<hpx/config.hpp>
 #elif !defined(HPX_COMPONENT_EXPORT)
 #define HPX_COMPONENT_EXPORT

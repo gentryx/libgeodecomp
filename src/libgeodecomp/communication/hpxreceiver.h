@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_COMMUNICATION_HPXRECEIVER_H
 
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <hpx/config.hpp>
 #ifdef LIBGEODECOMP_WITH_CPP14
 #include <utility>

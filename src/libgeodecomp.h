@@ -9,6 +9,7 @@
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
+#include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <hpx/config.hpp>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 #endif

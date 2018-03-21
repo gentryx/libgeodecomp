@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
+#include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <hpx/config.hpp>
 #endif
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION

@@ -4,6 +4,7 @@
 // HPX' config needs to be included before Boost's config:
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
+#include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <hpx/config.hpp>
 #endif
 

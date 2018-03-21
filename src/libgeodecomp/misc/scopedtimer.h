@@ -4,6 +4,7 @@
 #include <libgeodecomp/config.h>
 
 #ifdef LIBGEODECOMP_WITH_HPX
+#include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <hpx/config.hpp>
 #include <hpx/util/high_resolution_timer.hpp>
 #else
