@@ -1,5 +1,6 @@
 /**
  * Copyright 2015-2017 Andreas Schäfer
+ * Copyright 2017 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,7 +13,7 @@
 // Microsoft Visual Studio:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4996 )
 #endif
 
 #include <algorithm>
@@ -209,9 +210,7 @@ public:
 #pragma warning( push )
 #pragma warning( disable : 4307 )
 #endif
-
                             data[SIZE * (INDEX - 1)] = (cell.*MEMBER_POINTER)[INDEX - 1];
-
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
@@ -238,8 +237,17 @@ public:
                         inline
                         void operator()(CELL& cell, const MEMBER *data)
                         {
+// Overflow is fine on 32-bit systems as these won't instantiate such
+// large arrays anyway:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4307 )
+#endif
                             copy_out<INDEX - 1>()(cell, data);
                             (cell.*MEMBER_POINTER)[INDEX - 1] = data[SIZE * (INDEX - 1)];
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
                         }
                     };
 

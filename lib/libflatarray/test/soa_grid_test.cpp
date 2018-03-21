@@ -1,5 +1,6 @@
 /**
  * Copyright 2013-2017 Andreas Schäfer
+ * Copyright 2017 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -33,6 +34,12 @@
 
 #include "test.hpp"
 
+// padding is fine:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 class HeatedGameOfLifeCell
 {
 public:
@@ -57,6 +64,10 @@ public:
     double temperature;
     bool alive;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 LIBFLATARRAY_REGISTER_SOA(
     HeatedGameOfLifeCell,
@@ -354,6 +365,12 @@ public:
 
 std::size_t DestructionCounterClass::count = 0;
 
+// padding is fine:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 class CellWithNonTrivialMembers
 {
 public:
@@ -363,6 +380,10 @@ public:
     MapType maps[4];
     DestructionCounterClass destructCounter;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 LIBFLATARRAY_REGISTER_SOA(
     CellWithNonTrivialMembers,
@@ -889,9 +910,9 @@ ADD_TEST(TestCopyArrayOut)
     BOOST_TEST(store1[ 0] == 47.11);
     BOOST_TEST(store1[ 1] == 1.234);
     BOOST_TEST(store1[ 2] == 666.1);
-    BOOST_TEST(store0[24] == true);
-    BOOST_TEST(store0[25] == false);
-    BOOST_TEST(store0[26] == true);
+    BOOST_TEST(static_cast<bool>(store0[24]) == true);
+    BOOST_TEST(static_cast<bool>(store0[25]) == false);
+    BOOST_TEST(static_cast<bool>(store0[26]) == true);
 
     grid.set(3, 2, 1, HeatedGameOfLifeCell(2.345, false));
     grid.set(4, 2, 1, HeatedGameOfLifeCell(987.6, true));
@@ -899,19 +920,37 @@ ADD_TEST(TestCopyArrayOut)
 
     BOOST_TEST(store1[ 0] == 2.345);
     BOOST_TEST(store1[ 1] == 987.6);
-    BOOST_TEST(store0[16] == false);
-    BOOST_TEST(store0[17] == true);
+    BOOST_TEST(static_cast<bool>(store0[16]) == false);
+    BOOST_TEST(static_cast<bool>(store0[17]) == true);
 }
 
 ADD_TEST(TestNumberOfMembers)
 {
+// Don't warn about const expressions not being flagged as such: we
+// don't have a suitable macro for such comparisons.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4127 )
+#endif
     BOOST_TEST(number_of_members<HeatedGameOfLifeCell>::VALUE == 2);
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 }
 
 ADD_TEST(TestAggregatedMemberSize)
 {
+// Don't warn about const expressions not being flagged as such: we
+// don't have a suitable macro for such comparisons.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4127 )
+#endif
     BOOST_TEST(sizeof(HeatedGameOfLifeCell) == 16);
     BOOST_TEST(aggregated_member_size<HeatedGameOfLifeCell>::VALUE == 9);
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 }
 
 ADD_TEST(TestAccessMember)
@@ -1289,7 +1328,7 @@ ADD_TEST(TestDefaultSizesFor1D2D3D)
 
 }
 
-int main(int argc, char **argv)
+int main(int /* argc */, char ** /* argv */)
 {
     return 0;
 }

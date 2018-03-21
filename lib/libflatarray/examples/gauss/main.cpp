@@ -1,5 +1,6 @@
 /**
  * Copyright 2016-2017 Andreas Schäfer
+ * Copyright 2017 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -8,7 +9,18 @@
 #ifdef _MSC_BUILD
 #  define _USE_MATH_DEFINES
 #endif
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <cmath>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
