@@ -55,7 +55,7 @@ public:
      * comprised of multiple generations of nodes or x86 clusters with
      * additional Xeon Phi accelerators).
      */
-    static std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double>& rankSpeeds);
+    static WeightVec initialWeights(std::size_t items, const LoadVec& rankSpeeds);
 
 };
 

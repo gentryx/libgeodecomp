@@ -1,12 +1,17 @@
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 
-std::vector<std::size_t> LoadBalancer::initialWeights(std::size_t items, const std::vector<double>& rankSpeeds)
+LoadBalancer::WeightVec LoadBalancer::initialWeights(std::size_t items, const LoadBalancer::LoadVec& rankSpeeds)
 {
     std::size_t size = rankSpeeds.size();
+    if (size == 0) {
+        throw std::invalid_argument("Can't gather weights for 0 nodes.");
+    }
+
     double totalSum = sum(rankSpeeds);
-    std::vector<std::size_t> ret(size);
+    LoadBalancer::WeightVec ret(size);
 
     std::size_t lastPos = 0;
     double partialSum = 0.0;
