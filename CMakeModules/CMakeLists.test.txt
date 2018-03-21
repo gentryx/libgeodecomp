@@ -34,7 +34,7 @@ endif()
 if (is_mpi_test AND WITH_MPI)
   set(allowed_test true)
   string(REPLACE "parallel_mpi_" "" NUM_PROC ${DIRNAME})
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} ./test ${MPIEXEC_POSTFLAGS}")
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${MPIEXEC} --oversubscribe ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} ./test ${MPIEXEC_POSTFLAGS}")
 endif()
 
 if (is_openmp_test AND WITH_THREADS)
