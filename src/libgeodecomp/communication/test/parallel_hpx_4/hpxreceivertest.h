@@ -7,7 +7,7 @@
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/misc/stringops.h>
 
-typedef std::vector<int> Cargo1;
+typedef std::vector<long> Cargo1;
 typedef hpx::serialization::serialize_buffer<char> Cargo2;
 
 typedef LibGeoDecomp::HPXReceiver<Cargo1> ReceiverType1;
@@ -47,13 +47,13 @@ public:
         hpx::id_type leftID  = ReceiverType1::find(leftName ).get();
         hpx::id_type rightID = ReceiverType1::find(rightName).get();
 
-        std::vector<int> sendVec;
+        std::vector<long> sendVec;
         sendVec << rank;
         hpx::apply(ReceiverType1::receiveAction(), leftID,  10, sendVec);
         hpx::apply(ReceiverType1::receiveAction(), rightID, 11, sendVec);
 
-        std::vector<int> fromLeft  = receiver->get(11).get();
-        std::vector<int> fromRight = receiver->get(10).get();
+        std::vector<long> fromLeft  = receiver->get(11).get();
+        std::vector<long> fromRight = receiver->get(10).get();
 
         TS_ASSERT_EQUALS(1, fromLeft.size());
         TS_ASSERT_EQUALS(1, fromRight.size());
@@ -120,7 +120,7 @@ public:
         std::string name = "testMultipleReceivers";
         std::shared_ptr<ReceiverType3> receiver = ReceiverType3::make(name, rank).get();
         std::vector<hpx::future<hpx::id_type> > futures = ReceiverType3::find_all(name, size);
-        std::vector<hpx::id_type> ids = hpx::util::unwrapped(futures);
+        std::vector<hpx::id_type> ids = hpx::util::unwrap(futures);
 
         hpx::lcos::broadcast_apply<ReceiverType3::receiveAction>(ids, rank, rank + 0.456);
 

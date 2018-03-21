@@ -2,6 +2,8 @@
 #ifdef LIBGEODECOMP_WITH_HPX
 
 #include <libgeodecomp/parallelization/hpxsimulator.h>
+#include <hpx/include/lcos.hpp>
+#include <hpx/lcos/broadcast.hpp>
 
 namespace LibGeoDecomp {
 namespace HpxSimulatorHelpers {
@@ -45,9 +47,12 @@ HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulatorHelpers::getUpdateGroupSpeeds, getUpd
 HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulatorHelpers::setNumberOfUpdateGroups, setNumberOfUpdateGroups_action);
 
 HPX_REGISTER_BROADCAST_ACTION_DECLARATION(getUpdateGroupSpeeds_action)
-HPX_REGISTER_BROADCAST_APPLY_ACTION_DECLARATION(setNumberOfUpdateGroups_action)
+HPX_REGISTER_BROADCAST_ACTION_DECLARATION(setNumberOfUpdateGroups_action)
 
 HPX_REGISTER_BROADCAST_ACTION(getUpdateGroupSpeeds_action)
+HPX_REGISTER_BROADCAST_ACTION(setNumberOfUpdateGroups_action)
+
+HPX_REGISTER_BROADCAST_APPLY_ACTION(getUpdateGroupSpeeds_action)
 HPX_REGISTER_BROADCAST_APPLY_ACTION(setNumberOfUpdateGroups_action)
 
 namespace LibGeoDecomp {
@@ -88,7 +93,7 @@ void gatherAndBroadcastLocalityIndices(
 
     if (hpx::get_locality_id() == 0) {
         std::vector<std::vector<double> > tempGlobalUpdateGroupSpeeds =
-            hpx::lcos::broadcast<getUpdateGroupSpeeds_action>(localities, basename).get();
+            hpx::util::unwrap(hpx::util::unwrap(hpx::lcos::broadcast<getUpdateGroupSpeeds_action>(localities, basename)));
 
         std::vector<std::size_t> indices;
         std::vector<double> flattenedUpdateGroupSpeeds;

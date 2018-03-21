@@ -253,7 +253,7 @@ private:
         for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
             updateGroupCreationFutures << hpx::async(&HpxSimulator::createUpdateGroup, this, i, partition);
         }
-        updateGroups = hpx::util::unwrapped(std::move(updateGroupCreationFutures));
+        updateGroups = hpx::util::unwrap(std::move(updateGroupCreationFutures));
 
         for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
             writerAdaptersGhost[i].clear();

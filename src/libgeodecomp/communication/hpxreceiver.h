@@ -12,25 +12,40 @@
 #include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
+#include <hpx/util/unwrapped.hpp>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/stringops.h>
 
-#define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CARGO)                      \
+#define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_IMPL(CARGO)                 \
     typedef LibGeoDecomp::HPXReceiver<CARGO>::receiveAction DummyReceiver_ ## CARGO ## _ReceiveAction; \
-    HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
     HPX_REGISTER_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction);     \
-    HPX_REGISTER_BROADCAST_APPLY_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
     HPX_REGISTER_BROADCAST_APPLY_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
+    HPX_REGISTER_BROADCAST_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
     typedef hpx::components::managed_component<LibGeoDecomp::HPXReceiver<CARGO> > receiver_type_ ## CARGO; \
     HPX_REGISTER_COMPONENT(receiver_type_ ## CARGO , DummyReceiver_ ## CARGO); \
                                                                         \
     typedef LibGeoDecomp::HPXReceiver<std::vector<CARGO> >::receiveAction DummyReceiver_vector_ ## CARGO ## _ReceiveAction; \
-    HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
     HPX_REGISTER_ACTION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction);     \
-    HPX_REGISTER_BROADCAST_APPLY_ACTION_DECLARATION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
     HPX_REGISTER_BROADCAST_APPLY_ACTION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
+    HPX_REGISTER_BROADCAST_ACTION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
     typedef hpx::components::managed_component<LibGeoDecomp::HPXReceiver<std::vector<CARGO>> > receiver_type_vector_ ## CARGO; \
     HPX_REGISTER_COMPONENT(receiver_type_vector_ ## CARGO , DummyReceiver_vector_ ## CARGO);
+
+#define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_DECL(CARGO)                 \
+    typedef LibGeoDecomp::HPXReceiver<CARGO>::receiveAction DummyReceiver_ ## CARGO ## _ReceiveAction; \
+    HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
+    HPX_REGISTER_BROADCAST_APPLY_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
+    HPX_REGISTER_BROADCAST_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
+                                                                        \
+    typedef LibGeoDecomp::HPXReceiver<std::vector<CARGO> >::receiveAction DummyReceiver_vector_ ## CARGO ## _ReceiveAction; \
+    HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction);     \
+    HPX_REGISTER_BROADCAST_APPLY_ACTION_DECLARATION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
+    HPX_REGISTER_BROADCAST_ACTION_DECLARATION(DummyReceiver_vector_ ## CARGO ## _ReceiveAction); \
+
+#define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CARGO)                      \
+    LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_DECL(CARGO)                     \
+    LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_IMPL(CARGO)                     \
+
 
 namespace LibGeoDecomp {
 
@@ -104,7 +119,7 @@ public:
             )
             {
                 hpx::lcos::broadcast_apply<typename HPXReceiver::receiveAction>(
-                    hpx::util::unwrapped(idsFuture), rank, data);
+                    hpx::util::unwrap(idsFuture), rank, data);
                 return receiverFuture.get();
             },
             HPXReceiver<CARGO>::make(name, rank),
@@ -128,5 +143,17 @@ private:
 };
 
 }
+
+typedef LibGeoDecomp::CoordBox<1> CoordBox1;
+typedef LibGeoDecomp::CoordBox<2> CoordBox2;
+typedef LibGeoDecomp::CoordBox<3> CoordBox3;
+
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_DECL(char)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_DECL(double)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_DECL(float)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_DECL(int)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_DECL(CoordBox1)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_DECL(CoordBox2)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE_DECL(CoordBox3)
 
 #endif
