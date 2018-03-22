@@ -124,6 +124,10 @@ if(NOT DEFINED HPX_FOUND)
   set(HPX_FOUND false)
 endif()
 
+if(NOT DEFINED MPI_FOUND)
+  set(MPI_FOUND false)
+endif()
+
 if(NOT DEFINED OpenCV_FOUND)
   set(OpenCV_FOUND false)
 endif()
@@ -240,6 +244,21 @@ execute_process(
 set(AMD64_LINUX false)
 if (MACHINE_ARCH MATCHES "x86_64")
   set(AMD64_LINUX true)
+endif()
+
+# test if mpirun/mpiexec supports the  --oversubscribe flag:
+if(MPI_FOUND)
+  execute_process(
+    COMMAND ${MPIEXEC} --oversubscribe ${MPIEXEC_NUMPROC_FLAG} 4 echo ok
+    RESULT_VARIABLE MPIEXEC_OVERSUBSCRIBE_RETURN_CODE
+    OUTPUT_QUIET
+    ERROR_QUIET)
+
+  if (MPIEXEC_OVERSUBSCRIBE_RETURN_CODE EQUAL 0)
+    set(MPIEXEC_OVERSUBSCRIBE_FLAG "--oversubscribe")
+  else()
+    set(MPIEXEC_OVERSUBSCRIBE_FLAG "")
+  endif()
 endif()
 
 #============= 3. CONFIGURABLE BUILD OPTIONS =========================

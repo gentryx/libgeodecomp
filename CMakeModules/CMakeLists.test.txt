@@ -28,13 +28,13 @@ if (is_hpx_test AND WITH_HPX)
   string(REGEX REPLACE "_.+" "" NUM_LOCALITIES "${NUM_PROC}")
   string(REGEX REPLACE ".+_" "" NUM_THREADS    "${NUM_PROC}")
 
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_LOCALITIES} ./test --hpx:bind=balanced --hpx:threads=${NUM_THREADS} -Ihpx.parcel.tcp.enable=0 -Ihpx.parcel.mpi.enable=1")
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${MPIEXEC} ${MPIEXEC_OVERSUBSCRIBE_FLAG} ${MPIEXEC_NUMPROC_FLAG} ${NUM_LOCALITIES} ./test --hpx:bind=balanced --hpx:threads=${NUM_THREADS} -Ihpx.parcel.tcp.enable=0 -Ihpx.parcel.mpi.enable=1")
 endif()
 
 if (is_mpi_test AND WITH_MPI)
   set(allowed_test true)
   string(REPLACE "parallel_mpi_" "" NUM_PROC ${DIRNAME})
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${MPIEXEC} --oversubscribe ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} ./test ${MPIEXEC_POSTFLAGS}")
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${MPIEXEC} ${MPIEXEC_OVERSUBSCRIBE_FLAG} ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} ./test ${MPIEXEC_POSTFLAGS}")
 endif()
 
 if (is_openmp_test AND WITH_THREADS)
