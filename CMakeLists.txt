@@ -231,6 +231,7 @@ if((NOT RELEASE) AND DOXYGEN_FOUND AND RUBY_FOUND)
   set(DEFAULT_TYPEMAP_GENERATION true)
 endif()
 
+# check if we can can enable some hard-coded AMD64, X86 intrinsics. See option below.
 execute_process(
   COMMAND uname -m
   OUTPUT_VARIABLE MACHINE_ARCH
@@ -278,7 +279,7 @@ lgd_add_config_option(WITH_FORTRAN "Build Fortran examples/utilities, too" false
 
 lgd_add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
 
-lgd_add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
+lgd_add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics. Only used for tests and examples." ${AMD64_LINUX} true)
 
 lgd_add_config_option(WITH_LAX_VISIT_TESTS "Remove some of the stricter assertions from VisIt related unit tests -- VisIt sometimes produces erroneous results when running on a remote machine (e.g. for autobuilds)" false true)
 
