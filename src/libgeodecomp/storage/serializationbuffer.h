@@ -24,11 +24,11 @@ public:
     template<typename REGION>
     static BufferType create(const REGION& region)
     {
-        return BufferType(storageSize(region));
+        return BufferType(minimumStorageSize(region));
     }
 
     template<typename REGION>
-    static std::size_t storageSize(const REGION& region)
+    static std::size_t minimumStorageSize(const REGION& region)
     {
         return region.size();
     }
@@ -36,7 +36,7 @@ public:
     template<typename REGION>
     static void resize(BufferType *buffer, const REGION& region)
     {
-        return buffer->resize(storageSize(region));
+        return buffer->resize(minimumStorageSize(region));
     }
 
     static ElementType *getData(BufferType& buffer)
@@ -66,11 +66,11 @@ public:
     template<typename REGION>
     static BufferType create(const REGION& region)
     {
-        return BufferType(storageSize(region));
+        return BufferType(minimumStorageSize(region));
     }
 
     template<typename REGION>
-    static std::size_t storageSize(const REGION& region)
+    static std::size_t minimumStorageSize(const REGION& region)
     {
         return LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size();
     }
@@ -78,7 +78,7 @@ public:
     template<typename REGION>
     static void resize(BufferType *buffer, const REGION& region)
     {
-        return buffer->resize(storageSize(region));
+        return buffer->resize(minimumStorageSize(region));
     }
 
     static ElementType *getData(BufferType& buffer)
@@ -114,7 +114,7 @@ public:
 //     }
 
 //     template<typename REGION>
-//     static std::size_t storageSize(const REGION& region)
+//     static std::size_t minimumStorageSize(const REGION& region)
 //     {
 //         return region.size();
 //     }
@@ -122,7 +122,7 @@ public:
 //     template<typename REGION>
 //     static void resize(BufferType *buffer, const REGION& region)
 //     {
-//         buffer->resize(storageSize(region));
+//         buffer->resize(minimumStorageSize(region));
 //     }
 //     static ElementType *getData(BufferType& buffer)
 //     {
@@ -163,10 +163,19 @@ public:
         return Implementation::getData(buffer);
     }
 
+    /**
+     * Returns the minimum number of bytes that are required to store
+     * the number of cells as outlined by the Region.
+     *
+     * For standard and SoA models this is generally identical with
+     * the amount of actually allocated memory. For dynamic
+     * serialization such as Boost Serialization the actual ammount is
+     * often larger.
+     */
     template<typename REGION>
-    static std::size_t storageSize(const REGION& region)
+    static std::size_t minimumStorageSize(const REGION& region)
     {
-        return Implementation::storageSize(region);
+        return Implementation::minimumStorageSize(region);
     }
 
     template<typename REGION>

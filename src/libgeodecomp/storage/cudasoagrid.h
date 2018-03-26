@@ -301,7 +301,7 @@ public:
 
     void saveRegion(std::vector<char> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::storageSize(region);
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::minimumStorageSize(region);
         if (target->size() < expectedMinimumSize) {
             throw std::logic_error(
                 "target buffer too small (is " + StringOps::itoa(target->size()) +
@@ -323,7 +323,7 @@ public:
 
     void loadRegion(const std::vector<char>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::storageSize(region);
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::minimumStorageSize(region);
         if (source.size() < expectedMinimumSize) {
             throw std::logic_error(
                 "source buffer too small (is " + StringOps::itoa(source.size()) +

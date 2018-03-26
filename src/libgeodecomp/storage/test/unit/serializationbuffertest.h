@@ -21,7 +21,7 @@ public:
 
         SerializationBufferType::BufferType buf = SerializationBufferType::create(region);
         TS_ASSERT_EQUALS(buf.size(), region.size());
-        TS_ASSERT_EQUALS(SerializationBufferType::storageSize(region), region.size());
+        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region), region.size());
 
         region << Streak<2>(Coord<2>(0, 0), 20);
         SerializationBufferType::resize(&buf, region);
@@ -43,7 +43,7 @@ public:
 
         SerializationBufferType::BufferType buf = SerializationBufferType::create(region);
         TS_ASSERT_EQUALS(buf.size(), region.size());
-        TS_ASSERT_EQUALS(SerializationBufferType::storageSize(region), region.size());
+        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region), region.size());
 
         region << Streak<3>(Coord<3>(0, 0, 0), 20);
         SerializationBufferType::resize(&buf, region);
@@ -66,13 +66,13 @@ public:
         SerializationBufferType::BufferType buf = SerializationBufferType::create(region);
         std::size_t expectedSize = LibFlatArray::aggregated_member_size<TestCellSoA>::VALUE * region.size();
         TS_ASSERT_EQUALS(buf.size(), expectedSize);
-        TS_ASSERT_EQUALS(SerializationBufferType::storageSize(region), expectedSize);
+        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region), expectedSize);
 
         region << Streak<3>(Coord<3>(0, 0, 0), 25);
         expectedSize = LibFlatArray::aggregated_member_size<TestCellSoA>::VALUE * region.size();
         SerializationBufferType::resize(&buf, region);
         TS_ASSERT_EQUALS(buf.size(), expectedSize);
-        TS_ASSERT_EQUALS(SerializationBufferType::storageSize(region), expectedSize);
+        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region), expectedSize);
 
         TS_ASSERT_EQUALS(SerializationBufferType::getData(buf), &buf[0]);
 
