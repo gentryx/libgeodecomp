@@ -140,8 +140,10 @@ public:
 }
 
 /**
- * This class provides a uniform interface to the different buffer
- * types to be used with GridVecConv.
+ * This class provides a uniform interface for the different ways that
+ * cell classes can be serialized. It is a bridge between the grid
+ * class which holds the data and other classes, e.g. a PatchLink for
+ * synchronization of ghost zones.
  */
 template<typename CELL>
 class SerializationBuffer
@@ -152,12 +154,21 @@ public:
     typedef typename Implementation::ElementType ElementType;
     typedef typename Implementation::FixedSize FixedSize;
 
+    /**
+     * Allocates a buffer that can hold an excerpt of a grid as
+     * described by the Region.
+     */
     template<typename REGION>
     static inline BufferType create(const REGION& region)
     {
         return Implementation::create(region);
     }
 
+    /**
+     * Returns a pointer to the serialized data. The data there is
+     * expected to be serializable via MPI (i.e. is either bytewise
+     * serializable or an MPI datatype exists).
+     */
     static inline ElementType *getData(BufferType& buffer)
     {
         return Implementation::getData(buffer);
@@ -165,7 +176,7 @@ public:
 
     /**
      * Returns the minimum number of bytes that are required to store
-     * the number of cells as outlined by the Region.
+     * the number of cells as outlined by region.
      *
      * For standard and SoA models this is generally identical with
      * the amount of actually allocated memory. For dynamic
@@ -178,6 +189,10 @@ public:
         return Implementation::minimumStorageSize(region);
     }
 
+    /**
+     * Adapts the buffer size so that it can hold a set of cells as
+     * described by region.
+     */
     template<typename REGION>
     static inline void resize(BufferType *buffer, const REGION& region)
     {
@@ -185,6 +200,9 @@ public:
     }
 
 #ifdef LIBGEODECOMP_WITH_MPI
+    /**
+     * Returns the MPI datatype which should be used to transmission.
+     */
     static inline  MPI_Datatype cellMPIDataType()
     {
         return Implementation::cellMPIDataType();
