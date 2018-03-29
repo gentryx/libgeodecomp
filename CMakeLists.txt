@@ -44,14 +44,6 @@ if(NOT HPX_FOUND)
       set(Boost_INCLUDE_DIRS "$ENV{BOOST_INCDIR}")
     endif()
   endif()
-
-  # The reason for this ugly multi-stage discovery is the following:
-  # since CMAKE 2.8.11 each call to find_package(Boost...) will reset
-  # Boost_LIBRARIES.
-  find_package(Boost QUIET COMPONENTS thread)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-  find_package(Boost QUIET COMPONENTS move)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 else()
   # If HPX was found, we use the Boost libraries found by HPX
   set(ALL_BOOST_LIBS ${HPX_LIBRARIES})
