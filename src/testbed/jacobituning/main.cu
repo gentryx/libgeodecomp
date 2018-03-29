@@ -1,4 +1,4 @@
-#include <libgeodecomp.h>
+#include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/parallelization/autotuningsimulator.h>
