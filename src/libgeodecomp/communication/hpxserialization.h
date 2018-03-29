@@ -3,7 +3,6 @@
 #ifndef LIBGEODECOMP_HPXSERIALIZATION_H
 #define LIBGEODECOMP_HPXSERIALIZATION_H
 
-#include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/geometry/coord.h>
