@@ -7,6 +7,7 @@
 #include <hpx/config.hpp>
 #endif
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+#include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <boost/serialization/vector.hpp>
 #endif
 #ifdef LIBGEODECOMP_WITH_CPP14

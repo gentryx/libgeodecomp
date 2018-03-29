@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_MISC_SHAREDPTR_H
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SHARED_PTR
-
+#include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <boost/shared_ptr.hpp>
 #else
 #include <memory>
