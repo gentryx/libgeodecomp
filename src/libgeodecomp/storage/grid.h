@@ -184,6 +184,14 @@ public:
     virtual void set(const Streak<DIM>& streak, const CELL_TYPE *cells)
     {
         Coord<DIM> cursor = streak.origin;
+
+
+        if (boundingBox().inBounds(streak)) {
+            CELL_TYPE *target = &(*this)[cursor];
+            std::copy(cells, cells + streak.length(), target);
+            return;
+        }
+
         for (; cursor.x() < streak.endX; ++cursor.x()) {
             (*this)[cursor] = *cells;
             ++cells;
@@ -198,6 +206,13 @@ public:
     virtual void get(const Streak<DIM>& streak, CELL_TYPE *cells) const
     {
         Coord<DIM> cursor = streak.origin;
+
+        if (boundingBox().inBounds(streak)) {
+            const CELL_TYPE *source = &(*this)[cursor];
+            std::copy(source, source + streak.length(), cells);
+            return;
+        }
+
         for (; cursor.x() < streak.endX; ++cursor.x()) {
             *cells = (*this)[cursor];
             ++cells;
