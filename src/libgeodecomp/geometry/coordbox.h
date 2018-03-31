@@ -77,14 +77,27 @@ public:
     }
 
     /**
-     * checks whether the box' volume includes/containes coord.
-     * Returns true if coord is within the limits of the CoordBox.
+     * checks whether the box' volume includes/contains coord.
+     * Returns true oif coord is within the limits of the CoordBox.
      */
     __host__ __device__
     inline bool inBounds(const Coord<DIM>& coord) const
     {
         Coord<DIM> relativeCoord = coord - origin;
         return !Topologies::Cube<DIM>::Topology::isOutOfBounds(relativeCoord, dimensions);
+    }
+
+    /**
+     * checks whether the box includes the whole Streak.
+     */
+    __host__ __device__
+    inline bool inBounds(const Streak<DIM>& streak) const
+    {
+        Coord<DIM> relativeOrigin = streak.origin - origin;
+        int endX = origin.x() + dimensions.x();
+        return
+            (!Topologies::Cube<DIM>::Topology::isOutOfBounds(relativeOrigin, dimensions)) &&
+            (streak.endX <= endX);
     }
 
     std::string toString() const

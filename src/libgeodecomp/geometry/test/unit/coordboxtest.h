@@ -33,7 +33,7 @@ public:
         TS_ASSERT_EQUALS(4, rect.dimensions.y());
     }
 
-    void testInBounds()
+    void testInBoundsCoord()
     {
         TS_ASSERT(rect.inBounds(Coord<2>(3, 4)));
         TS_ASSERT(rect.inBounds(Coord<2>(7, 4)));
@@ -56,8 +56,44 @@ public:
 
         TS_ASSERT(!rect.inBounds(Coord<3>(10,  3,  9)));
         TS_ASSERT(!rect.inBounds(Coord<3>(33,  4,  5)));
+        TS_ASSERT(!rect.inBounds(Coord<3>( 3,  3,  5)));
         TS_ASSERT(!rect.inBounds(Coord<3>( 3, 24,  5)));
+        TS_ASSERT(!rect.inBounds(Coord<3>( 3,  4,  4)));
         TS_ASSERT(!rect.inBounds(Coord<3>( 3,  4, 15)));
+    }
+
+    void testInBoundsStreak()
+    {
+        TS_ASSERT(rect.inBounds(Streak<2>(Coord<2>(3, 4), 8)));
+        TS_ASSERT(rect.inBounds(Streak<2>(Coord<2>(7, 4), 8)));
+        TS_ASSERT(rect.inBounds(Streak<2>(Coord<2>(3, 6), 8)));
+        TS_ASSERT(rect.inBounds(Streak<2>(Coord<2>(7, 6), 8)));
+        TS_ASSERT(rect.inBounds(Streak<2>(Coord<2>(4, 4), 8)));
+        TS_ASSERT(rect.inBounds(Streak<2>(Coord<2>(4, 4), 6)));
+        TS_ASSERT(rect.inBounds(Streak<2>(Coord<2>(4, 4), 4)));
+
+        TS_ASSERT(!rect.inBounds(Streak<2>(Coord<2>(0,   0), 1)));
+        TS_ASSERT(!rect.inBounds(Streak<2>(Coord<2>(100, 0), 101)));
+        TS_ASSERT(!rect.inBounds(Streak<2>(Coord<2>(0, 100), 1)));
+        TS_ASSERT(!rect.inBounds(Streak<2>(Coord<2>(5,   8), 6)));
+        TS_ASSERT(!rect.inBounds(Streak<2>(Coord<2>(7,   5), 9)));
+        TS_ASSERT(!rect.inBounds(Streak<2>(Coord<2>(8,   5), 9)));
+        TS_ASSERT(!rect.inBounds(Streak<2>(Coord<2>(2,   5), 4)));
+
+        CoordBox<3> rect(Coord<3>(3, 4, 5), Coord<3>(30, 20, 10));
+        TS_ASSERT(rect.inBounds(Streak<3>(Coord<3>( 3,  4,  5), 33)));
+        TS_ASSERT(rect.inBounds(Streak<3>(Coord<3>(10, 10, 10), 30)));
+        TS_ASSERT(rect.inBounds(Streak<3>(Coord<3>(32,  4,  5), 33)));
+        TS_ASSERT(rect.inBounds(Streak<3>(Coord<3>( 3, 23,  5), 20)));
+        TS_ASSERT(rect.inBounds(Streak<3>(Coord<3>( 3,  4, 14), 33)));
+
+        TS_ASSERT(!rect.inBounds(Streak<3>(Coord<3>(10,  3,  9), 30)));
+        TS_ASSERT(!rect.inBounds(Streak<3>(Coord<3>( 2,  4,  5), 20)));
+        TS_ASSERT(!rect.inBounds(Streak<3>(Coord<3>( 2,  4,  5), 34)));
+        TS_ASSERT(!rect.inBounds(Streak<3>(Coord<3>(32,  4,  5), 34)));
+        TS_ASSERT(!rect.inBounds(Streak<3>(Coord<3>(33,  4,  5), 34)));
+        TS_ASSERT(!rect.inBounds(Streak<3>(Coord<3>( 3, 24,  5), 10)));
+        TS_ASSERT(!rect.inBounds(Streak<3>(Coord<3>( 3,  4, 15), 10)));
     }
 
     void testSize()
