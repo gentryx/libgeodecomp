@@ -13,7 +13,7 @@ public:
     void setUp()
     {
         origin = Coord<2>(3,4);
-        width = 4;
+        width = 5;
         height = 3;
         rect = CoordBox<2>(origin, Coord<2>(width, height));
     }
@@ -36,9 +36,9 @@ public:
     void testInBounds()
     {
         TS_ASSERT(rect.inBounds(Coord<2>(3, 4)));
-        TS_ASSERT(rect.inBounds(Coord<2>(6, 4)));
+        TS_ASSERT(rect.inBounds(Coord<2>(7, 4)));
         TS_ASSERT(rect.inBounds(Coord<2>(3, 6)));
-        TS_ASSERT(rect.inBounds(Coord<2>(6, 6)));
+        TS_ASSERT(rect.inBounds(Coord<2>(7, 6)));
         TS_ASSERT(rect.inBounds(Coord<2>(4, 4)));
 
         TS_ASSERT(!rect.inBounds(Coord<2>(0, 0)));
