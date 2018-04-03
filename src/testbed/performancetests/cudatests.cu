@@ -14,6 +14,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "cell.h"
+
 using namespace LibGeoDecomp;
 
 class GPUBenchmark : public LibFlatArray::gpu_benchmark
@@ -26,35 +28,6 @@ public:
     }
 
     virtual double performance2(const Coord<3>& dim) = 0;
-};
-
-class SoACell
-{
-public:
-    class API :
-        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public APITraits::HasTorusTopology<3>,
-        public APITraits::HasSoA
-    {};
-
-    double c;
-    int a;
-    char b;
-};
-
-LIBFLATARRAY_REGISTER_SOA(SoACell, ((double)(c))((int)(a))((char)(b)))
-
-class Cell
-{
-public:
-    class API :
-        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public APITraits::HasTorusTopology<3>
-    {};
-
-    double c;
-    int a;
-    char b;
 };
 
 class CellLBM

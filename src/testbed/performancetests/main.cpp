@@ -39,6 +39,7 @@
 #include <iostream>
 #include <stdio.h>
 
+#include "cell.h"
 #include "cpubenchmark.h"
 
 using namespace LibGeoDecomp;
@@ -2828,6 +2829,76 @@ private:
     }
 };
 
+
+template<typename CELL_TYPE, typename GRID_TYPE>
+class GridLoadSaveRegion : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "GridLoadSaveRegion";
+    }
+
+    std::string unit()
+    {
+        return "GB/s";
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        CoordBox<3> bigBox(Coord<3>(), Coord<3>(dim[0], dim[0], dim[0]));
+        CoordBox<3> smallBox(Coord<3>(1, 1, 1), Coord<3>::diagonal(dim[0] - 2));
+
+        Region<3> region(bigBox);
+        region << CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(1, dim[0], dim[0]));
+        region << CoordBox<3>(Coord<3>(dim[0] - 1, 0, 0), Coord<3>(1, dim[0], dim[0]));
+        region << CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(dim[0], 1, dim[0]));
+        region << CoordBox<3>(Coord<3>(0, dim[0] - 1, 0), Coord<3>(dim[0], 1, dim[0]));
+        region << CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(dim[0], dim[0], 1));
+        region << CoordBox<3>(Coord<3>(0, 0, dim[0] - 1), Coord<3>(dim[0], dim[0], 1));
+
+        GRID_TYPE grid1(bigBox);
+        GRID_TYPE grid2(bigBox);
+
+        typename SerializationBuffer<CELL_TYPE>::BufferType buffer1 = SerializationBuffer<CELL_TYPE>::create(region);
+        typename SerializationBuffer<CELL_TYPE>::BufferType buffer2 = SerializationBuffer<CELL_TYPE>::create(region);
+
+        int repeats = dim[2];
+        double seconds = 0;
+
+        {
+            ScopedTimer t(&seconds);
+            for (int i = 0; i < repeats; ++i) {
+                grid1.saveRegion(&buffer1, region);
+                grid2.saveRegion(&buffer2, region);
+                grid1.loadRegion(buffer2, region);
+                grid2.loadRegion(buffer1, region);
+            }
+        }
+
+        double bytesTransferred = 4.0 * region.size() * sizeof(CELL_TYPE);
+        return 1e-9 * bytesTransferred / seconds;
+    }
+};
+
+class GridLoadSaveRegionAoS : public GridLoadSaveRegion<Cell, DisplacedGrid<Cell, Topologies::Torus<3>::Topology> >
+{
+public:
+    std::string species()
+    {
+        return "silver";
+    }
+};
+
+class GridLoadSaveRegionSoA : public GridLoadSaveRegion<SoACell, SoAGrid<SoACell, Topologies::Torus<3>::Topology> >
+{
+public:
+    std::string species()
+    {
+        return "gold";
+    }
+};
+
 class UpdateFunctorThreadingSilver : public UpdateFunctorThreadingBase
 {
 public:
@@ -3042,6 +3113,9 @@ int main(int argc, char **argv)
     dim = toVector(Coord<3>(10000, 2000, 0));
     eval(UpdateFunctorThreadingSilver(), dim);
     eval(UpdateFunctorThreadingGold(), dim);
+
+    eval(GridLoadSaveRegionAoS(), toVector(Coord<3>(256, 0, 32)));
+    eval(GridLoadSaveRegionSoA(), toVector(Coord<3>(256, 0, 32)));
 
 #ifdef LIBGEODECOMP_WITH_CUDA
     cudaTests(name, revision, cudaDevice);
