@@ -2,6 +2,8 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/cudautil.h>
+#include <libgeodecomp/storage/cudagrid.h>
+#include <libgeodecomp/storage/cudasoagrid.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>
 #include <libgeodecomp/storage/soagrid.h>
 
@@ -26,15 +28,34 @@ public:
     virtual double performance2(const Coord<3>& dim) = 0;
 };
 
-class Cell
+class SoACell
 {
 public:
+    class API :
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>,
+        public APITraits::HasSoA
+    {};
+
     double c;
     int a;
     char b;
 };
 
-LIBFLATARRAY_REGISTER_SOA(Cell, ((double)(c))((int)(a))((char)(b)))
+LIBFLATARRAY_REGISTER_SOA(SoACell, ((double)(c))((int)(a))((char)(b)))
+
+class Cell
+{
+public:
+    class API :
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
+    {};
+
+    double c;
+    int a;
+    char b;
+};
 
 class CellLBM
 {
@@ -258,8 +279,8 @@ __global__ void updateRTMSoA(long dimX, long dimY, long dimZ, double *gridOld, d
     long offset = DIM_X * DIM_Y;
     long end = DIM_X * DIM_Y * (dimZ - 2);
 
-    LibFlatArray::soa_accessor_light<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
-    LibFlatArray::soa_accessor_light<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, index);
+    LibFlatArray::soa_accessor_light<SoACell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
+    LibFlatArray::soa_accessor_light<SoACell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, index);
 
     double c0 = hoody(0, 0, -2).c();
     double c1 = hoody(0, 0, -1).c();
@@ -602,6 +623,75 @@ public:
     }
 };
 
+template<typename CELL_TYPE, typename GRID_TYPE>
+class CUDAGridLoadSaveRegion : public GPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "CUDAGridLoadSaveRegion";
+    }
+
+    std::string unit()
+    {
+        return "GB/s";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        CoordBox<3> bigBox(Coord<3>(), Coord<3>(dim.x(), dim.x(), dim.x()));
+        CoordBox<3> smallBox(Coord<3>(1, 1, 1), dim - Coord<3>(2, 2, 2));
+
+        Region<3> region(bigBox);
+        region << CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(1, dim.x(), dim.x()));
+        region << CoordBox<3>(Coord<3>(dim.x() - 1, 0, 0), Coord<3>(1, dim.x(), dim.x()));
+        region << CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(dim.x(), 1, dim.x()));
+        region << CoordBox<3>(Coord<3>(0, dim.x() - 1, 0), Coord<3>(dim.x(), 1, dim.x()));
+        region << CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(dim.x(), dim.x(), 1));
+        region << CoordBox<3>(Coord<3>(0, 0, dim.x() - 1), Coord<3>(dim.x(), dim.x(), 1));
+
+        GRID_TYPE grid1(bigBox);
+        GRID_TYPE grid2(bigBox);
+
+        typename SerializationBuffer<CELL_TYPE>::BufferType buffer1 = SerializationBuffer<CELL_TYPE>::create(region);
+        typename SerializationBuffer<CELL_TYPE>::BufferType buffer2 = SerializationBuffer<CELL_TYPE>::create(region);
+
+        int repeats = dim.z();
+        double seconds = 0;
+
+        {
+            ScopedTimer t(&seconds);
+            for (int i = 0; i < repeats; ++i) {
+                grid1.saveRegion(&buffer1, region);
+                grid2.saveRegion(&buffer2, region);
+                grid1.loadRegion(buffer2, region);
+                grid2.loadRegion(buffer1, region);
+            }
+        }
+
+        double bytesTransferred = 4.0 * region.size() * sizeof(CELL_TYPE);
+        return 1e-9 * bytesTransferred / seconds;
+    }
+};
+
+class CUDAGridLoadSaveRegionAoS : public CUDAGridLoadSaveRegion<Cell, CUDAGrid<Cell, Topologies::Torus<3>::Topology> >
+{
+public:
+    std::string species()
+    {
+        return "silver";
+    }
+};
+
+class CUDAGridLoadSaveRegionSoA : public CUDAGridLoadSaveRegion<SoACell, CUDASoAGrid<SoACell, Topologies::Torus<3>::Topology> >
+{
+public:
+    std::string species()
+    {
+        return "gold";
+    }
+};
+
 void cudaTests(std::string name, std::string revision, int cudaDevice)
 {
     cudaSetDevice(cudaDevice);
@@ -623,4 +713,6 @@ void cudaTests(std::string name, std::string revision, int cudaDevice)
         Coord<3> dim(d, d, 256 + 32 - 4);
         eval(BenchmarkCUDA<LBMSoA>(),     toVector(Coord<3>::diagonal(d)));
     }
+    eval(CUDAGridLoadSaveRegionAoS(), toVector(Coord<3>(256, 0, 32)));
+    eval(CUDAGridLoadSaveRegionSoA(), toVector(Coord<3>(256, 0, 32)));
 }
