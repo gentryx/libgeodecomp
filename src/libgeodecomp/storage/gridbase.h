@@ -159,7 +159,7 @@ public:
         const Region<DIM>& /* region */,
         const Coord<DIM>& /* offset */ = Coord<DIM>()) const
     {
-        throw std::logic_error("loadRegion not implemented for buffers of type CELL, not an AoS grid?");
+        throw std::logic_error("saveRegion not implemented for buffers of type CELL, not an AoS grid?");
     }
 
     /**
