@@ -205,6 +205,7 @@ public:
         }
     }
 
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     void saveRegion(
         std::vector<char> *buffer,
         const Region<DIM>& region,
@@ -213,6 +214,7 @@ public:
         typedef typename APITraits::SelectBoostSerialization<CELL_TYPE>::Value Trait;
         saveRegionImplementation(buffer, region, offset, Trait());
     }
+#endif
 
     void loadRegion(
         const std::vector<CELL_TYPE>& buffer,
@@ -234,6 +236,7 @@ public:
         }
     }
 
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     void loadRegion(
         const std::vector<char>& buffer,
         const Region<DIM>& region,
@@ -242,6 +245,7 @@ public:
         typedef typename APITraits::SelectBoostSerialization<CELL_TYPE>::Value Trait;
         loadRegionImplementation(buffer, region, offset, Trait());
     }
+#endif
 
     inline CoordMapType getNeighborhood(const Coord<DIM>& center) const
     {
@@ -274,6 +278,8 @@ public:
     }
 
 protected:
+
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     void saveRegionImplementation(
         std::vector<char> *buffer,
         const Region<DIM>& region,
@@ -338,6 +344,7 @@ protected:
             archive & (*this)[*i];
         }
     }
+#endif
 
     void saveMemberImplementation(
         char *target,
