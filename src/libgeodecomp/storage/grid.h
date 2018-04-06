@@ -11,6 +11,24 @@
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+#include <libgeodecomp/misc/cudaboostworkaround.h>
+#include <libgeodecomp/communication/boostserialization.h>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/array.hpp>
+#include <boost/iostreams/device/back_inserter.hpp>
+#endif
+
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <libgeodecomp/misc/cudaboostworkaround.h>
+#include <libgeodecomp/communication/hpxserialization.h>
+#include <hpx/util/portable_binary_oarchive.hpp>
+#include <hpx/util/portable_binary_iarchive.hpp>
+#endif
+
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE, typename GRID_TYPE>
@@ -256,7 +274,10 @@ public:
         return CoordBox<DIM>(Coord<DIM>(), dimensions);
     }
 
-    void saveRegion(std::vector<CELL_TYPE> *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    void saveRegion(
+        std::vector<CELL_TYPE> *buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset = Coord<DIM>()) const
     {
         CELL_TYPE *target = buffer->data();
 
@@ -267,7 +288,19 @@ public:
         }
     }
 
-    void loadRegion(const std::vector<CELL_TYPE>& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    void saveRegion(
+        std::vector<char> *buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        typedef typename APITraits::SelectBoostSerialization<CELL_TYPE>::Value Trait;
+        saveRegionImplementation(buffer, region, offset, Trait());
+    }
+
+    void loadRegion(
+        const std::vector<CELL_TYPE>& buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset = Coord<DIM>())
     {
         const CELL_TYPE *source = buffer.data();
 
@@ -278,7 +311,81 @@ public:
         }
     }
 
+    void loadRegion(
+        const std::vector<char>& buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset = Coord<DIM>())
+    {
+        typedef typename APITraits::SelectBoostSerialization<CELL_TYPE>::Value Trait;
+        loadRegionImplementation(buffer, region, offset, Trait());
+    }
+
 protected:
+    void saveRegionImplementation(
+        std::vector<char> *buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset,
+        const APITraits::FalseType&) const
+    {
+        // fixme: throw exception, should not be called
+    }
+
+    void saveRegionImplementation(
+        std::vector<char> *buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset,
+        const APITraits::TrueType&) const
+    {
+        // fixme:
+        // #ifdef LIBGEODECOMP_WITH_HPX
+        //          int archive_flags = boost::archive::no_header;
+        //          archive_flags |= hpx::util::disable_data_chunking;
+        //          hpx::util::binary_filter *f = 0;
+        //          hpx::util::portable_binary_oarchive archive(*vec, f, archive_flags);
+        // #else
+        typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
+        Device sink(*buffer);
+        boost::iostreams::stream<Device> stream(sink);
+        boost::archive::binary_oarchive archive(stream);
+        // #endif
+
+        for (typename Region<DIM>::Iterator i = region.begin(); i != region.end(); ++i) {
+            archive & (*this)[*i];
+        }
+    }
+
+    void loadRegionImplementation(
+        const std::vector<char>& buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset,
+        const APITraits::FalseType&)
+    {
+        // fixme: throw exception here, should not be called
+    }
+
+    void loadRegionImplementation(
+        const std::vector<char>& buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset,
+        const APITraits::TrueType&)
+    {
+        // fixme:
+        //        #ifdef LIBGEODECOMP_WITH_HPX
+        //         int archive_flags = boost::archive::no_header;
+        //         archive_flags |= hpx::util::disable_data_chunking;
+        //         hpx::util::portable_binary_iarchive archive(vec, vec.size(), archive_flags);
+        // #else
+        typedef boost::iostreams::basic_array_source<char> Device;
+        Device source(&buffer.front(), buffer.size());
+        boost::iostreams::stream<Device> stream(source);
+        boost::archive::binary_iarchive archive(stream);
+        // #endif
+
+        for (typename Region<DIM>::Iterator i = region.begin(); i != region.end(); ++i) {
+            archive & (*this)[*i];
+        }
+    }
+
     void saveMemberImplementation(
         char *target,
         MemoryLocation::Location targetLocation,
