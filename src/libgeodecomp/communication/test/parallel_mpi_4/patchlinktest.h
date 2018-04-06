@@ -17,9 +17,11 @@
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/storage/soagrid.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {}
 using namespace LibGeoDecomp;
@@ -306,10 +308,9 @@ public:
         accepter.wait();
     }
 
-    void testBoostSerialization()
+    void testBoostSerialization1()
     {
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
-        // fixme: run multiple steps, with NonPoDTestCell
         Coord<2> dim(30, 20);
         CoordBox<2> box(Coord<2>(), dim);
         Region<2> boxRegion;
@@ -380,6 +381,124 @@ public:
                     }
                 }
             }
+        }
+#endif
+    }
+
+    void testBoostSerialization2()
+    {
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+        typedef DisplacedGrid<NonPoDTestCell> GridType4;
+        NonPoDTestCell::Initializer initializer;
+
+        // set up geometry data for a block stripe decomposition:
+        CoordBox<2> globalGridBox = initializer.gridBox();
+        int dimX = globalGridBox.dimensions.x();
+        int startRow = globalGridBox.dimensions.y() * (mpiLayer->rank() + 0) / mpiLayer->size();
+        int endRow   = globalGridBox.dimensions.y() * (mpiLayer->rank() + 1) / mpiLayer->size();
+
+        int upperGhostHeight = (mpiLayer->rank() == 0) ? 0 : 1;
+        int lowerGhostHeight = (mpiLayer->rank() == 3) ? 0 : 1;
+
+        int paddedStartRow = startRow - upperGhostHeight;
+        int paddedEndRow = endRow + lowerGhostHeight;
+        int paddedHeight = paddedEndRow - paddedStartRow;
+        CoordBox<2> ownGridBox(
+            Coord<2>(0, startRow),
+            Coord<2>(dimX, endRow - startRow));
+        CoordBox<2> paddedGridBox(
+            Coord<2>(0, paddedStartRow),
+            Coord<2>(dimX, paddedHeight));
+
+        Region<2> upperRecvRegion;
+        Region<2> lowerRecvRegion;
+        Region<2> upperSendRegion;
+        Region<2> lowerSendRegion;
+
+        upperRecvRegion << CoordBox<2>(Coord<2>(0, startRow - upperGhostHeight), Coord<2>(dimX, upperGhostHeight));
+        lowerRecvRegion << CoordBox<2>(Coord<2>(0, endRow),                      Coord<2>(dimX, lowerGhostHeight));
+        upperSendRegion << CoordBox<2>(Coord<2>(0, startRow),                    Coord<2>(dimX, upperGhostHeight));
+        lowerSendRegion << CoordBox<2>(Coord<2>(0, endRow   - lowerGhostHeight), Coord<2>(dimX, lowerGhostHeight));
+
+        Region<2> totalRegion;
+        Region<2> updateRegion;
+        totalRegion << paddedGridBox;
+        updateRegion << ownGridBox;
+
+        // init grids:
+        GridType4 grid1(paddedGridBox);
+        GridType4 grid2(paddedGridBox);
+        initializer.grid(&grid1);
+        initializer.grid(&grid2);
+
+        // set up patch links
+        int maxNanoSteps = 10;
+        typedef PatchLink<GridType4>::Accepter PatchAccepterType;
+        typedef PatchLink<GridType4>::Provider PatchProviderType;
+
+        std::vector<SharedPtr<PatchAccepterType>::Type> accepters;
+        std::vector<SharedPtr<PatchProviderType>::Type> providers;
+        if (upperGhostHeight > 0) {
+            accepters << SharedPtr<PatchAccepterType>::Type(
+                new PatchAccepterType(
+                    upperSendRegion,
+                    mpiLayer->rank() - 1,
+                    666,
+                    MPI_CHAR));
+            providers << SharedPtr<PatchProviderType>::Type(
+                new PatchProviderType(
+                    upperRecvRegion,
+                    mpiLayer->rank() - 1,
+                    666,
+                    MPI_CHAR));
+            accepters.back()->charge(0, maxNanoSteps, 1);
+            providers.back()->charge(0, maxNanoSteps, 1);
+        }
+        if (lowerGhostHeight > 0) {
+            accepters << SharedPtr<PatchAccepterType>::Type(
+                new PatchAccepterType(
+                    lowerSendRegion,
+                    mpiLayer->rank() + 1,
+                    666,
+                    MPI_CHAR));
+            providers << SharedPtr<PatchProviderType>::Type(
+                new PatchProviderType(
+                    lowerRecvRegion,
+                    mpiLayer->rank() + 1,
+                    666,
+                    MPI_CHAR));
+            accepters.back()->charge(0, maxNanoSteps, 1);
+            providers.back()->charge(0, maxNanoSteps, 1);
+        }
+
+        for (int t = 0; t < maxNanoSteps; ++t) {
+            UpdateFunctor<NonPoDTestCell> updateFunctor;
+            updateFunctor(updateRegion, Coord<2>(), Coord<2>(), grid1, &grid2, t);
+
+            for (auto&& i: accepters) {
+                i->put(
+                    grid2,
+                    updateRegion,
+                    globalGridBox.dimensions,
+                    t,
+                    mpiLayer->rank());
+            }
+
+            for (auto&& i: providers) {
+                i->get(
+                    &grid2,
+                    totalRegion,
+                    globalGridBox.dimensions,
+                    t,
+                    mpiLayer->rank());
+            }
+
+            for (auto&& i: accepters) {
+                i->wait();
+            }
+
+            using std::swap;
+            swap(grid1, grid2);
         }
 #endif
     }
