@@ -475,8 +475,8 @@ public:
             UpdateFunctor<NonPoDTestCell> updateFunctor;
             updateFunctor(updateRegion, Coord<2>(), Coord<2>(), grid1, &grid2, t);
 
-            for (auto&& i: accepters) {
-                i->put(
+            for (std::vector<SharedPtr<PatchAccepterType>::Type>::iterator i = accepters.begin(); i != accepters.end(); ++i) {
+                (*i)->put(
                     grid2,
                     updateRegion,
                     globalGridBox.dimensions,
@@ -484,8 +484,8 @@ public:
                     mpiLayer->rank());
             }
 
-            for (auto&& i: providers) {
-                i->get(
+            for (std::vector<SharedPtr<PatchProviderType>::Type>::iterator i = providers.begin(); i != providers.end(); ++i) {
+                (*i)->get(
                     &grid2,
                     totalRegion,
                     globalGridBox.dimensions,
@@ -493,8 +493,8 @@ public:
                     mpiLayer->rank());
             }
 
-            for (auto&& i: accepters) {
-                i->wait();
+            for (std::vector<SharedPtr<PatchAccepterType>::Type>::iterator i = accepters.begin(); i != accepters.end(); ++i) {
+                (*i)->wait();
             }
 
             using std::swap;
