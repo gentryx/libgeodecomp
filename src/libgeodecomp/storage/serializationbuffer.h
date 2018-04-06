@@ -44,6 +44,11 @@ public:
         return &buffer.front();
     }
 
+    static inline ElementType *getInsertIterator(BufferType *buffer)
+    {
+        return buffer->data();
+    }
+
 #ifdef LIBGEODECOMP_WITH_MPI
     static inline MPI_Datatype cellMPIDataType()
     {
@@ -86,6 +91,11 @@ public:
         return &buffer.front();
     }
 
+    static inline ElementType *getInsertIterator(BufferType *buffer)
+    {
+        return buffer->data();
+    }
+
 #ifdef LIBGEODECOMP_WITH_MPI
     static inline MPI_Datatype cellMPIDataType()
     {
@@ -97,45 +107,52 @@ public:
 /**
  * see above
  */
-// temporarily disabled until #46 ( https://github.com/gentryx/libgeodecomp/issues/46 ) is fixed.
+template<typename CELL>
+class Implementation<CELL, void, typename CELL::API::SupportsBoostSerialization>
+{
+public:
+    typedef std::vector<char> BufferType;
+    typedef char ElementType;
+    typedef typename APITraits::FalseType FixedSize;
 
-// template<typename CELL>
-// class Implementation<CELL, void, typename CELL::API::SupportsBoostSerialization>
-// {
-// public:
-//     typedef std::vector<char> BufferType;
-//     typedef char ElementType;
-//     typedef typename APITraits::FalseType FixedSize;
+    template<typename REGION>
+    static BufferType create(const REGION& region)
+    {
+        return BufferType();
+    }
 
-//     template<typename REGION>
-//     static BufferType create(const REGION& region)
+    template<typename REGION>
+    static std::size_t minimumStorageSize(const REGION& region)
+    {
+        return region.size();
+    }
+
+    template<typename REGION>
+    static void resize(BufferType *buffer, const REGION& region)
+    {
+        buffer->resize(0);
+    }
+
+    static ElementType *getData(BufferType& buffer)
+    {
+        return &buffer.front();
+    }
+
+//     static inline InsertIteratorType getInsertIterator(BufferType *buffer)
 //     {
-//         return BufferType();
+// typedef boost::iostreams::back_insert_device<std::vector<char> > DeviceType;
+// DeviceType sink(*buffer);
+// boost::iostreams::stream<Device> stream(sink);
+// return boost::archive::binary_oarchive archive(stream);
 //     }
 
-//     template<typename REGION>
-//     static std::size_t minimumStorageSize(const REGION& region)
-//     {
-//         return region.size();
-//     }
-
-//     template<typename REGION>
-//     static void resize(BufferType *buffer, const REGION& region)
-//     {
-//         buffer->resize(minimumStorageSize(region));
-//     }
-//     static ElementType *getData(BufferType& buffer)
-//     {
-//         return &buffer.front();
-//     }
-
-// #ifdef LIBGEODECOMP_WITH_MPI
-//     static inline MPI_Datatype cellMPIDataType()
-//     {
-//         return MPI_CHAR;
-//     }
-// #endif
-// };
+#ifdef LIBGEODECOMP_WITH_MPI
+    static inline MPI_Datatype cellMPIDataType()
+    {
+        return MPI_CHAR;
+    }
+#endif
+};
 
 }
 
@@ -153,6 +170,7 @@ public:
     typedef typename Implementation::BufferType BufferType;
     typedef typename Implementation::ElementType ElementType;
     typedef typename Implementation::FixedSize FixedSize;
+    // typedef typename Implementation::InsertIteratorType InsertIteratorType;
 
     /**
      * Allocates a buffer that can hold an excerpt of a grid as
@@ -198,6 +216,11 @@ public:
     {
         Implementation::resize(buffer, region);
     }
+
+    // static inline InsertIteratorType getInsertIterator(BufferType *buffer)
+    // {
+    //     Implementation::getInsertIterator(buffer);
+    // }
 
 #ifdef LIBGEODECOMP_WITH_MPI
     /**
