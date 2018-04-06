@@ -25,8 +25,8 @@
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <libgeodecomp/communication/hpxserialization.h>
-#include <hpx/util/portable_binary_oarchive.hpp>
-#include <hpx/util/portable_binary_iarchive.hpp>
+#include <hpx/runtime/serialization/input_archive.hpp>
+#include <hpx/runtime/serialization/output_archive.hpp>
 #endif
 
 namespace LibGeoDecomp {
@@ -347,7 +347,7 @@ protected:
         //          int archive_flags = boost::archive::no_header;
         //          archive_flags |= hpx::util::disable_data_chunking;
         //          hpx::util::binary_filter *f = 0;
-        //          hpx::util::portable_binary_oarchive archive(*vec, f, archive_flags);
+        //          hpx::serialization::output_archive archive(*vec, f, archive_flags);
         // #else
         typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
         Device sink(*buffer);
@@ -379,7 +379,7 @@ protected:
         //        #ifdef LIBGEODECOMP_WITH_HPX
         //         int archive_flags = boost::archive::no_header;
         //         archive_flags |= hpx::util::disable_data_chunking;
-        //         hpx::util::portable_binary_iarchive archive(vec, vec.size(), archive_flags);
+        //         hpx::serialization::input_archive archive(vec, vec.size(), archive_flags);
         // #else
         typedef boost::iostreams::basic_array_source<char> Device;
         Device source(&buffer.front(), buffer.size());
