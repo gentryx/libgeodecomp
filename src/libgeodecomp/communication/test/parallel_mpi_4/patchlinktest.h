@@ -309,9 +309,7 @@ public:
     void testBoostSerialization()
     {
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
-        // fixme: temporarily disabled until #46 is fixed
-        return;
-
+        // fixme: run multiple steps, with NonPoDTestCell
         Coord<2> dim(30, 20);
         CoordBox<2> box(Coord<2>(), dim);
         Region<2> boxRegion;
@@ -320,14 +318,7 @@ public:
         GridType3 sendGrid(box);
         GridType3 recvGrid(box);
 
-        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
-            MyComplicatedCell cell;
-            cell.cargo << i->x();
-            cell.cargo << i->y();
-            cell.cargo << mpiLayer->rank();
-            sendGrid.set(*i, cell);
-        }
-
+        // Set up senders (i.e. PatchAccepters)
         std::vector<Region<2> > regions(mpiLayer->size());
         for (int i = 0; i < mpiLayer->size(); ++i) {
             regions[i] << Streak<2>(Coord<2>(0, i), dim.x());;
@@ -338,10 +329,9 @@ public:
             0,
             2701,
             MPI_CHAR);
-        accepter.charge(4, 4, 1);
-        accepter.put(sendGrid, boxRegion, dim, 4, mpiLayer->rank());
-        accepter.wait();
+        accepter.charge(4, 10, 1);
 
+        // Set up receivers (i.e. PatchProviders)
         std::vector<SharedPtr<PatchLink<GridType3>::Provider>::Type> providers;
         if (mpiLayer->rank() == 0) {
             for (int i = 0; i < mpiLayer->size(); ++i) {
@@ -353,29 +343,44 @@ public:
                             2701,
                             MPI_CHAR)));
 
-                providers.back()->charge(4, 4, 1);
+                providers.back()->charge(4, 10, 1);
             }
-
-            for (int i = 0; i < mpiLayer->size(); ++i) {
-                providers[i]->get(&recvGrid, boxRegion, dim, 4, i);
-            }
-
-            for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
-                MyComplicatedCell cell = recvGrid.get(*i);
-
-                if (i->y() < mpiLayer->size()) {
-                    TS_ASSERT_EQUALS(cell.cargo.size(), std::size_t(3));
-                    TS_ASSERT_EQUALS(cell.cargo[0], i->x());
-                    TS_ASSERT_EQUALS(cell.cargo[1], i->y());
-                    TS_ASSERT_EQUALS(cell.cargo[2], i->y());
-                } else {
-                    TS_ASSERT_EQUALS(cell.cargo.size(), std::size_t(0));
-                }
-            }
-
         }
 
-        accepter.wait();
+        for (int t = 4; t < 10; ++t) {
+            // prep and send data:
+            for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+                MyComplicatedCell cell;
+                cell.cargo << i->x();
+                cell.cargo << i->y();
+                cell.cargo << mpiLayer->rank();
+                cell.x = t;
+                sendGrid.set(*i, cell);
+            }
+            accepter.put(sendGrid, boxRegion, dim, t, mpiLayer->rank());
+            accepter.wait();
+
+            // receive and check data:
+            if (mpiLayer->rank() == 0) {
+                for (int i = 0; i < mpiLayer->size(); ++i) {
+                    providers[i]->get(&recvGrid, boxRegion, dim, t, i);
+                }
+
+                for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+                    MyComplicatedCell cell = recvGrid.get(*i);
+
+                    if (i->y() < mpiLayer->size()) {
+                        TS_ASSERT_EQUALS(cell.cargo.size(), std::size_t(3));
+                        TS_ASSERT_EQUALS(cell.cargo[0], i->x());
+                        TS_ASSERT_EQUALS(cell.cargo[1], i->y());
+                        TS_ASSERT_EQUALS(cell.cargo[2], i->y());
+                        TS_ASSERT_EQUALS(cell.x,        t);
+                    } else {
+                        TS_ASSERT_EQUALS(cell.cargo.size(), std::size_t(0));
+                    }
+                }
+            }
+        }
 #endif
     }
 
