@@ -246,15 +246,16 @@ public:
             }
         }
 
-        for (RowLengthVec::iterator i = reorderedRowLengths.begin(); i != reorderedRowLengths.end(); ) {
-            RowLengthVec::iterator nextStop = (std::min)(i + SIGMA, reorderedRowLengths.end());
+		for (RowLengthVec::iterator i = reorderedRowLengths.begin(); i != reorderedRowLengths.end(); ) {
+			std::size_t currentIndex = i - reorderedRowLengths.begin();
+			std::size_t nextIndex = (std::min)(currentIndex + SIGMA, reorderedRowLengths.size());
+			RowLengthVec::iterator nextStop = reorderedRowLengths.begin() + nextIndex;
+			std::stable_sort(i, nextStop, [](const IntPair& a, const IntPair& b) {
+				return a.second > b.second;
+			});
 
-            std::stable_sort(i, nextStop, [](const IntPair& a, const IntPair& b) {
-                    return a.second > b.second;
-                });
-
-            i = nextStop;
-        }
+			i = nextStop;
+		}
 
         std::vector<IntPair> newLogicalToPhysicalIDs;
         std::vector<int> newPhysicalToLogicalIDs;
