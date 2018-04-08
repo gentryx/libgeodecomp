@@ -73,6 +73,11 @@ private:
 };
 
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 class Sphere
 {
 public:
@@ -158,6 +163,10 @@ private:
     FloatCoord<3> vel;
     double col;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 typedef BoxCell<FixedArray<Sphere,   30> > SpheresContainer;
 typedef BoxCell<FixedArray<Boundary, 30> > BoundariesContainer;
