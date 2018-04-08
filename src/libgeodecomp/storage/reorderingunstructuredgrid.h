@@ -373,7 +373,7 @@ public:
         return nodeSet;
     }
 
-    virtual void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
+    virtual void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& /* offset */ = Coord<DIM>()) const
     {
         delegate.saveRegion(
             buffer,
@@ -382,7 +382,7 @@ public:
             region.size());
     }
 
-    virtual void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
+    virtual void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& /* offset */ = Coord<DIM>())
     {
         delegate.loadRegion(
             buffer,
