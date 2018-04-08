@@ -2192,6 +2192,11 @@ public:
     double sum;
 };
 
+ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 5027 )
+#endif
+
 // This ought to go into a lambda but as long as CUDA isn't
 // C++14-compatible we can't have auto-typed parameters in lambdas
 // which would be required by the loop peeler.
@@ -2226,6 +2231,10 @@ public:
 private:
     HOOD_NEW_TYPE& hoodNew;
 };
+
+ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 class SPMVMSoACell
 {
