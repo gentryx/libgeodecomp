@@ -1,6 +1,13 @@
 // #include <libgeodecomp/parallelization/serialsimulator.h>
 // #include <libgeodecomp/io/ppmwriter.h>
-#include <libgeodecomp/io/simpleinitializer.h>
+// #include <libgeodecomp/io/simpleinitializer.h>
+
+#include <libgeodecomp/geometry/adjacencymanufacturer.h>
+// #include <libgeodecomp/misc/apitraits.h>
+// #include <libgeodecomp/misc/random.h>
+// #include <libgeodecomp/storage/gridbase.h>
+// #include <libgeodecomp/geometry/regionbasedadjacency.h>
+
 // #include <libgeodecomp/io/simplecellplotter.h>
 // #include <libgeodecomp/io/tracingwriter.h>
 
