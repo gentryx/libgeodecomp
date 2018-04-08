@@ -4,7 +4,7 @@
 
 #include <libgeodecomp/geometry/adjacencymanufacturer.h>
 #include <libgeodecomp/misc/apitraits.h>
-// #include <libgeodecomp/misc/random.h>
+#include <libgeodecomp/misc/random.h>
 // #include <libgeodecomp/storage/gridbase.h>
 // #include <libgeodecomp/geometry/regionbasedadjacency.h>
 
