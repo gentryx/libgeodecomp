@@ -1,11 +1,20 @@
 #ifndef LIBGEODECOMP_MISC_SHAREDPTR_H
 #define LIBGEODECOMP_MISC_SHAREDPTR_H
 
-#ifdef LIBGEODECOMP_WITH_BOOST_SHARED_PTR
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
 
+#ifdef LIBGEODECOMP_WITH_BOOST_SHARED_PTR
 #include <boost/shared_ptr.hpp>
 #else
 #include <memory>
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 namespace LibGeoDecomp {

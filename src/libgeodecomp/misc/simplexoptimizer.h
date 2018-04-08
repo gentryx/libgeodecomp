@@ -1,10 +1,20 @@
-// vim: noai:ts=4:sw=4:expandtab
 #ifndef LIBGEODECOMP_MISC_SIMPLEXOPTIMIZER_H
 #define LIBGEODECOMP_MISC_SIMPLEXOPTIMIZER_H
 
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <utility>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

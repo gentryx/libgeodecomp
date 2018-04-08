@@ -1,11 +1,22 @@
 #ifndef LIBGEODECOMP_IO_TESTWRITER_H
 #define LIBGEODECOMP_IO_TESTWRITER_H
 
-#include <list>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <list>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

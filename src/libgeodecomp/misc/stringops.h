@@ -2,8 +2,19 @@
 #define LIBGEODECOMP_MISC_STRINGOPS_H
 
 #include <libgeodecomp/misc/stringvec.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <set>
 #include <sstream>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 // sad but true: CodeGear's C++ compiler has troubles with the +
 // operator for strings.

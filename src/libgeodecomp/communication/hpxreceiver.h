@@ -1,6 +1,15 @@
 #ifndef LIBGEODECOMP_COMMUNICATION_HPXRECEIVER_H
 #define LIBGEODECOMP_COMMUNICATION_HPXRECEIVER_H
 
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
+#include <libgeodecomp/misc/stringops.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_CPP14
 #include <utility>
@@ -11,8 +20,10 @@
 #include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
-#include <libgeodecomp/communication/hpxserializationwrapper.h>
-#include <libgeodecomp/misc/stringops.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CARGO)                      \
     typedef LibGeoDecomp::HPXReceiver<CARGO>::receiveAction DummyReceiver_ ## CARGO ## _ReceiveAction; \

@@ -6,12 +6,22 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/serialization/set.hpp>
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/runtime/serialization/set.hpp>
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 namespace LibGeoDecomp {

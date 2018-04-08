@@ -1,8 +1,18 @@
 #ifndef LIBGEODECOMP_IO_IOEXCEPTION_H
 #define LIBGEODECOMP_IO_IOEXCEPTION_H
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <cstring>
 #include <stdexcept>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

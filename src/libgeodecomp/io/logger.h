@@ -2,6 +2,15 @@
 #define LIBGEODECOMP_IO_LOGGER_H
 
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/io/timestringconversion.h>
+#include <libgeodecomp/misc/scopedtimer.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #endif
@@ -14,8 +23,10 @@
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
-#include <libgeodecomp/io/timestringconversion.h>
-#include <libgeodecomp/misc/scopedtimer.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

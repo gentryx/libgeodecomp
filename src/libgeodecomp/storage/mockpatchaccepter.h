@@ -1,7 +1,18 @@
 #ifndef LIBGEODECOMP_STORAGE_MOCKPATCHACCEPTER_H
 #define LIBGEODECOMP_STORAGE_MOCKPATCHACCEPTER_H
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <deque>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #include <libgeodecomp/storage/patchaccepter.h>
 
 namespace LibGeoDecomp {

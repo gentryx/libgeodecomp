@@ -3,8 +3,19 @@
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/sharedptr.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <map>
 #include <vector>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

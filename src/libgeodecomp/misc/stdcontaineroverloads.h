@@ -2,6 +2,13 @@
 #define LIBGEODECOMP_MISC_STDCONTAINEROVERLOADS_H
 
 #include <libgeodecomp/config.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #endif
@@ -25,6 +32,10 @@
 #include <set>
 #include <sstream>
 #include <vector>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #ifdef _MSC_BUILD
 #pragma warning( pop )

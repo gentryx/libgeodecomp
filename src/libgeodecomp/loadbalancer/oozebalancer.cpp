@@ -1,5 +1,7 @@
-// Hardwire this warning to off as MSVC would otherwise complain about
-// inline functions not being included in object files:
+#include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/loadbalancer/oozebalancer.h>
+
+// Kill warning 4514 in system headers
 #ifdef _MSC_BUILD
 #pragma warning( push )
 #pragma warning( disable : 4514 )
@@ -7,8 +9,6 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <libgeodecomp/io/logger.h>
-#include <libgeodecomp/loadbalancer/oozebalancer.h>
 
 #ifdef _MSC_BUILD
 #pragma warning( pop )

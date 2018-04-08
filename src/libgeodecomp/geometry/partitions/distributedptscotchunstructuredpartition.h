@@ -9,14 +9,23 @@
 #ifdef LIBGEODECOMP_WITH_SCOTCH
 #ifdef LIBGEODECOMP_WITH_MPI
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <mpi.h>
 #include <ptscotch.h>
 #include <chrono>
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #ifdef SCOTCH_PTHREAD
 #error can only use ptscotch if compiled without SCOTCH_PTHREAD
 #endif // SCOTCH_PTHREAD
-
 
 namespace LibGeoDecomp {
 

@@ -4,13 +4,24 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_MPI
 
-#include <mpi.h>
-#include <map>
-#include <vector>
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/storage/grid.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <mpi.h>
+#include <map>
+#include <vector>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

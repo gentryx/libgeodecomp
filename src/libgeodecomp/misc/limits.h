@@ -1,14 +1,17 @@
-/**
- * Copyright 2017 Andreas Schäfer
- *
- * Distributed under the Boost Software License, Version 1.0. (See accompanying
- * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
- */
-
 #ifndef LIBGEODECOMP_MISC_LIMITS_H
 #define LIBGEODECOMP_MISC_LIMITS_H
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <limits>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

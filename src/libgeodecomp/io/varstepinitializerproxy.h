@@ -2,10 +2,21 @@
 #ifndef LIBGEODECOMP_IO_VARSTEPINITIALIZERPROXY_H
 #define LIBGEODECOMP_IO_VARSTEPINITIALIZERPROXY_H
 
-#include <memory>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/clonableinitializer.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <memory>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #ifdef LIBGEODECOMP_WITH_CPP14
 

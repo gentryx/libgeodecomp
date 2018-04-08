@@ -1,15 +1,27 @@
 #ifndef LIBGEODECOMP_MISC_SIMULATIONPARAMETERS_H
 #define LIBGEODECOMP_MISC_SIMULATIONPARAMETERS_H
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 // HPX' config needs to be included before Boost's config:
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #endif
 
+#include <stdexcept>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
-#include <stdexcept>
+
 
 namespace LibGeoDecomp {
 

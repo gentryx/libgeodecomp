@@ -10,10 +10,20 @@
 #include <libgeodecomp/misc/quickpalette.h>
 #include <libgeodecomp/storage/image.h>
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <cerrno>
 #include <fstream>
 #include <iomanip>
 #include <string>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

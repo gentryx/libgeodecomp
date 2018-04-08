@@ -4,11 +4,22 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_THREADS
 
-#include <omp.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/updatefunctor.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <omp.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

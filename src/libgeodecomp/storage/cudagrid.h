@@ -9,7 +9,17 @@
 #include <libgeodecomp/storage/serializationbuffer.h>
 #include <libgeodecomp/misc/stringops.h>
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <cuda.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

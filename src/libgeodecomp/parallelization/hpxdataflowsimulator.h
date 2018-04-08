@@ -4,7 +4,6 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 
-#include <functional>
 #include <libgeodecomp/geometry/partitions/unstructuredstripingpartition.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/communication/hpxreceiver.h>
@@ -12,8 +11,20 @@
 #include <libgeodecomp/storage/reorderingunstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <functional>
 #include <mutex>
 #include <stdexcept>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

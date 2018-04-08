@@ -9,9 +9,19 @@
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/storage/grid.h>
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <fstream>
 #include <sstream>
 #include <cxxtest/TestSuite.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 /**
  * This macro differs from TS_ASSERT_DELTA in that the error margin is relative

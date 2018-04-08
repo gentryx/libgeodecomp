@@ -8,6 +8,17 @@
 #include <libgeodecomp/storage/defaultfilterfactory.h>
 #include <libgeodecomp/storage/filterbase.h>
 #include <libgeodecomp/storage/memberfilter.h>
+
+#ifdef LIBGEODECOMP_WITH_MPI
+#include <libgeodecomp/communication/typemaps.h>
+#endif
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <stdexcept>
 #include <typeinfo>
 
@@ -15,8 +26,8 @@
 #include <silo.h>
 #endif
 
-#ifdef LIBGEODECOMP_WITH_MPI
-#include <libgeodecomp/communication/typemaps.h>
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 namespace LibGeoDecomp {

@@ -1,8 +1,6 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_NESTING_STEPPER_H
 #define LIBGEODECOMP_PARALLELIZATION_NESTING_STEPPER_H
 
-#include <deque>
-
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/chronometer.h>
@@ -11,6 +9,18 @@
 #include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 #include <libgeodecomp/storage/patchprovider.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <deque>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

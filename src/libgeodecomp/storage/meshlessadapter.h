@@ -1,8 +1,19 @@
 #ifndef LIBGEODECOMP_STORAGE_MESHLESSADAPTER_H
 #define LIBGEODECOMP_STORAGE_MESHLESSADAPTER_H
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <list>
 #include <set>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>

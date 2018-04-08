@@ -1,7 +1,18 @@
 #ifndef LIBGEODECOMP_GEOMETRY_ADJACENCYMANUFACTURER_H
 #define LIBGEODECOMP_GEOMETRY_ADJACENCYMANUFACTURER_H
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <stdexcept>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/regionbasedadjacency.h>

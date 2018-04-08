@@ -8,6 +8,12 @@
 #include <libflatarray/aligned_allocator.hpp>
 #include <libgeodecomp/geometry/coord.h>
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <map>
 #include <vector>
 #include <utility>
@@ -16,6 +22,10 @@
 #include <algorithm>
 
 #include <iostream>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

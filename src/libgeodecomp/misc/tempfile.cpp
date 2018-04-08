@@ -4,8 +4,7 @@
 #include <libgeodecomp/communication/mpilayer.h>
 #endif
 
-// Don't warn about these functions being stripped from an executable
-// as they're not being used, that's actually expected behavior.
+// Kill warning 4514 in system headers
 #ifdef _MSC_BUILD
 #pragma warning( push )
 #pragma warning( disable : 4514 )

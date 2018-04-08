@@ -2,9 +2,20 @@
 #define LIBGEODECOMP_STORAGE_FIXEDNEIGHBORHOODUPDATEFUNCTOR_H
 
 #include <libgeodecomp/config.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/runtime/launch_policy.hpp>
 #include <hpx/parallel/algorithms/for_each.hpp>
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 #include <libgeodecomp/geometry/region.h>

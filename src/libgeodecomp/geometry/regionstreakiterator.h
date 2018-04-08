@@ -1,9 +1,20 @@
 #ifndef LIBGEODECOMP_GEOMETRY_REGIONSTREAKITERATOR_H
 #define LIBGEODECOMP_GEOMETRY_REGIONSTREAKITERATOR_H
 
-#include <algorithm>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <algorithm>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

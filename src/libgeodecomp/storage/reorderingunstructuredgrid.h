@@ -4,9 +4,20 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_CPP14
 
-#include <algorithm>
 #include <libgeodecomp/storage/serializationbuffer.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <algorithm>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 class SparseMatrixVectorMultiplication;
 

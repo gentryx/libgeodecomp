@@ -3,9 +3,6 @@
 
 #include <libgeodecomp/config.h>
 
-#include <iostream>
-#include <stdexcept>
-
 #ifdef LIBGEODECOMP_WITH_CUDA
 
 #ifdef __ICC
@@ -14,9 +11,22 @@
 #pragma warning (disable: 2304)
 #endif
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <iostream>
+#include <stdexcept>
+
 #ifdef __CUDACC__
 #include <cuda.h>
 #include <cuda_runtime.h>
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 #ifdef __ICC
@@ -33,7 +43,6 @@
 #define __device__
 #endif
 
-#ifdef LIBGEODECOMP_WITH_CUDA
 #ifdef __CUDACC__
 
 namespace LibGeoDecomp {
@@ -94,7 +103,6 @@ private:
 
 }
 
-#endif
 #endif
 
 #endif

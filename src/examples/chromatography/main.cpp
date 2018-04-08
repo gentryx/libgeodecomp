@@ -3,14 +3,23 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/io/tracingwriter.h>
-#include <libgeodecomp/misc/misc.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
 
 #include <iomanip>
 #include <iostream>
 #include <silo.h>
 #include <stdlib.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 using namespace LibGeoDecomp;
 

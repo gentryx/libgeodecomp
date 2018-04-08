@@ -11,6 +11,12 @@
 #include <libgeodecomp/misc/quickpalette.h>
 #include <libgeodecomp/misc/sharedptr.h>
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:
 #pragma warning push
@@ -37,6 +43,10 @@
 
 #ifdef __ICC
 #pragma warning pop
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 namespace LibGeoDecomp {

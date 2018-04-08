@@ -14,7 +14,18 @@
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/io/varstepinitializerproxy.h>
 #include <libgeodecomp/io/logger.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <cfloat>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

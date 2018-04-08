@@ -13,6 +13,12 @@
 #include <hpx/runtime/serialization/serialize.hpp>
 #endif
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 // For Intel MPI we need to source mpi.h before stdio.h:
 #ifdef LIBGEODECOMP_WITH_MPI
 #include <mpi.h>
@@ -58,6 +64,10 @@
 #pragma warning pop
 #endif
 
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 namespace LibGeoDecomp {

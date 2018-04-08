@@ -1,8 +1,18 @@
 #ifndef LIBGEODECOMP_IO_TRACINGWRITER_H
 #define LIBGEODECOMP_IO_TRACINGWRITER_H
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <iostream>
 #include <stdexcept>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/timestringconversion.h>

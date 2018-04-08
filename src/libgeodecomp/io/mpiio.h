@@ -3,12 +3,22 @@
 #ifndef LIBGEODECOMP_IO_MPIIO_H
 #define LIBGEODECOMP_IO_MPIIO_H
 
-#include <mpi.h>
-
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <mpi.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

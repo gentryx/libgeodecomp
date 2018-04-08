@@ -5,7 +5,17 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <sstream>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

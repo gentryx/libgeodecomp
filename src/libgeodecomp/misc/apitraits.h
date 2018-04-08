@@ -3,17 +3,27 @@
 
 #include <libgeodecomp/config.h>
 
-#ifdef LIBGEODECOMP_WITH_MPI
-#include <mpi.h>
-#endif
-
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#ifdef LIBGEODECOMP_WITH_MPI
+#include <mpi.h>
+#endif
+
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <sstream>
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 namespace LibGeoDecomp {

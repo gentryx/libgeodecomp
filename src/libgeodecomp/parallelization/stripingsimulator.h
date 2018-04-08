@@ -4,7 +4,6 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_MPI
 
-#include <algorithm>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/sharedptr.h>
@@ -13,6 +12,18 @@
 #include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/storage/serializationbuffer.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <algorithm>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 

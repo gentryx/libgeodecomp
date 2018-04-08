@@ -4,13 +4,6 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 
-#include <hpx/config.hpp>
-#include <hpx/runtime/serialization/set.hpp>
-#include <hpx/runtime/serialization/string.hpp>
-#include <hpx/runtime/serialization/vector.hpp>
-#include <hpx/include/lcos.hpp>
-#include <hpx/lcos/broadcast.hpp>
-
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
@@ -21,6 +14,23 @@
 #include <libgeodecomp/parallelization/nesting/steereradapter.h>
 #include <libgeodecomp/parallelization/nesting/stepper.h>
 #include <libgeodecomp/parallelization/nesting/hpxstepper.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <hpx/config.hpp>
+#include <hpx/runtime/serialization/set.hpp>
+#include <hpx/runtime/serialization/string.hpp>
+#include <hpx/runtime/serialization/vector.hpp>
+#include <hpx/include/lcos.hpp>
+#include <hpx/lcos/broadcast.hpp>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 namespace HpxSimulatorHelpers {
