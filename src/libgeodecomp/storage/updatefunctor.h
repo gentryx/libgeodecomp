@@ -282,6 +282,13 @@ public:
 #endif
 };
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 /**
  * The default CONCURRENCY_FUNCTOR for UpdateFunctor: won't request
  * threading and won't execute any sideband actions.
@@ -387,6 +394,10 @@ public:
 private:
     bool enableFineGrainedParallelism;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

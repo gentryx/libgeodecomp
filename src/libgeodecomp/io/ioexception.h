@@ -6,6 +6,13 @@
 
 namespace LibGeoDecomp {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 /**
  * exception class which is suitable for all I/O errors. More specific
  * error conditions can be represented as subclasses.
@@ -63,6 +70,10 @@ public:
         IOException("Could not read file " + file)
     {}
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

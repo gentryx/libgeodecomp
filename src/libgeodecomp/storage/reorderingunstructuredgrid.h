@@ -14,6 +14,13 @@ namespace LibGeoDecomp {
 
 namespace ReorderingUnstructuredGridHelpers {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 typedef std::pair<int, int> IntPair;
 
 inline
@@ -31,6 +38,10 @@ std::vector<IntPair>::const_iterator mapLogicalToPhysicalID(int logicalID, const
 
     return pos;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #ifdef _MSC_BUILD
 #pragma warning( push )

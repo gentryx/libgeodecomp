@@ -24,6 +24,13 @@ class SellCSigmaSparseMatrixContainer;
 
 namespace SellHelpers {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 /**
  * Helper struct used for sorting.
  */
@@ -33,13 +40,19 @@ public:
     SortItem() :
         rowLength(0), rowIndex(0)
     {}
+
     SortItem(std::size_t length, std::size_t index) :
         rowLength(length),
         rowIndex(index)
     {}
+
     std::size_t rowLength;
     std::size_t rowIndex;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 /**
  * Helper class to initialize the sell container from an adjacency matrix.

@@ -6,6 +6,13 @@
 
 namespace LibGeoDecomp {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 /**
  * Adapter class which exhibits an interface compatible with a (very
  * limited) Qt pen.
@@ -31,6 +38,10 @@ private:
     Image *image;
     Coord<2> position;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
