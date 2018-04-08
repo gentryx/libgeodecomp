@@ -161,7 +161,7 @@ public:
         const CoordBox<DIM> box = CoordBox<DIM>(Coord<DIM>(), Coord<DIM>(1)),
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
-        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
+        const Coord<DIM>& /* topologicalDimension */ = Coord<DIM>()) :
         elements(
             static_cast<std::size_t>(box.dimensions.x()),
             static_cast<std::size_t>(1),
