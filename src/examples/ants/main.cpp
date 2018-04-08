@@ -2,7 +2,15 @@
 // #include <libgeodecomp/io/ppmwriter.h>
 // #include <libgeodecomp/io/simpleinitializer.h>
 
-#include <libgeodecomp/geometry/adjacencymanufacturer.h>
+// #include <libgeodecomp/geometry/adjacencymanufacturer.h>
+
+// #include <stdexcept>
+// #include <libgeodecomp/geometry/adjacency.h>
+// #include <libgeodecomp/geometry/region.h>
+// #include <libgeodecomp/geometry/regionbasedadjacency.h>
+// #include <libgeodecomp/misc/sharedptr.h>
+
+
 // #include <libgeodecomp/misc/apitraits.h>
 // #include <libgeodecomp/misc/random.h>
 // #include <libgeodecomp/storage/gridbase.h>
