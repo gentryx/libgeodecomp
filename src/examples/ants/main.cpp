@@ -4,7 +4,19 @@
 
 // #include <libgeodecomp/geometry/adjacencymanufacturer.h>
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <stdexcept>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 // #include <libgeodecomp/geometry/adjacency.h>
 // #include <libgeodecomp/geometry/region.h>
 // #include <libgeodecomp/geometry/regionbasedadjacency.h>
