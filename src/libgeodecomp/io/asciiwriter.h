@@ -116,7 +116,7 @@ private:
         void copyStreakOutImpl(
             const MEMBER *source,
             MemoryLocation::Location sourceLocation,
-            EXTERNAL */*target*/,
+            EXTERNAL * /*target*/,
             MemoryLocation::Location targetLocation,
             const std::size_t num,
             const std::size_t stride)
@@ -142,7 +142,7 @@ private:
         void copyMemberOutImpl(
             const CELL *source,
             MemoryLocation::Location sourceLocation,
-            EXTERNAL */*target*/,
+            EXTERNAL * /*target*/,
             MemoryLocation::Location targetLocation,
             std::size_t num,
             MEMBER CELL:: *memberPointer)

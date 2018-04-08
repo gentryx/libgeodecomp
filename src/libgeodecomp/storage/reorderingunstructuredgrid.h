@@ -32,6 +32,11 @@ std::vector<IntPair>::const_iterator mapLogicalToPhysicalID(int logicalID, const
     return pos;
 }
 
+ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 5027 )
+#endif
+
 /**
  * Helper class which converts logical coordinates to physical ones
  * (i.e. those that are actually used to address memory).
@@ -93,6 +98,10 @@ private:
         }
     }
 };
+
+ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 /**
  * Type switch

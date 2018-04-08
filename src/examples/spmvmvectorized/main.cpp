@@ -120,7 +120,7 @@ public:
     CellInitializerMatrix(std::size_t size, unsigned steps,
                           const std::string& rhsFile,
                           const std::string& matrixFile) :
-        SimpleInitializer<Cell>(Coord<1>(size), steps),
+        SimpleInitializer<Cell>(Coord<1>(int(size)), steps),
         size(size), rhsFile(rhsFile), matrixFile(matrixFile)
     {}
 
@@ -137,7 +137,7 @@ public:
             throw std::logic_error("Failed to open files");
         }
 
-        unsigned i = 0;
+        int i = 0;
         double tmp;
         // read rhs vector
         while (rhsIfs >> tmp) {
@@ -156,12 +156,11 @@ public:
 
         for (unsigned row = 0; row < rows; ++row) {
             for (unsigned col = 0; col < cols; ++col) {
-                ValueType tmp;
                 if (!(matrixIfs >> tmp)) {
                     throw std::logic_error("Failed to read data from matrix");
                 }
                 if (tmp != 0.0) {
-                    weights << std::make_pair(Coord<2>(row, col), tmp);
+                    weights << std::make_pair(Coord<2>(int(row), int(col)), tmp);
                 }
             }
         }
@@ -178,7 +177,7 @@ void runSimulation(int argc, char *argv[])
 {
     SimpleInitializer<Cell> *init;
     unsigned steps = 1;
-    int outputFrequency = 1;
+    unsigned outputFrequency = 1;
 
     // init
     if (argc > 1) {
@@ -194,7 +193,14 @@ void runSimulation(int argc, char *argv[])
     }
     SerialSimulator<Cell> sim(init);
     sim.addWriter(new TracingWriter<Cell>(outputFrequency, init->maxSteps()));
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4127 )
+#endif
     if (SIGMA == 1) {
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
         sim.addWriter(new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency));
     } else {
         // fixme
