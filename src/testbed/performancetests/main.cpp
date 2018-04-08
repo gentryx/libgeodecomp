@@ -2232,10 +2232,6 @@ private:
     HOOD_NEW_TYPE& hoodNew;
 };
 
-ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 class SPMVMSoACell
 {
 public:
@@ -2346,6 +2342,10 @@ public:
 };
 
 LIBFLATARRAY_REGISTER_SOA(SPMVMSoACellInf, ((double)(sum))((double)(value)))
+
+ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 // setup a sparse matrix
 template<typename CELL, typename GRID>

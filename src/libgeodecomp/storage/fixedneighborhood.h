@@ -6,6 +6,11 @@
 
 namespace LibGeoDecomp {
 
+ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 5027 )
+#endif
+
 /**
  * Similar to LinePointerNeighborhood, this class serves as a proxy
  * for cells to acccess their neighbors during update. In contrast to
@@ -118,6 +123,10 @@ private:
     const long& offsetSouth;
     const long& offsetNorth;
 };
+
+ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

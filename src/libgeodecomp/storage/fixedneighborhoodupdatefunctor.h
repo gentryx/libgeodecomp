@@ -208,8 +208,8 @@ public:
                     boundarySouth,
                     boundaryNorth);
 
-            long indexEnd = hoodOld.index() + 1;
-            CELL::updateLineX(hoodLeft, indexEnd, hoodNew, nanoStep);
+            long indexEndLeft = hoodOld.index() + 1;
+            CELL::updateLineX(hoodLeft, indexEndLeft, hoodNew, nanoStep);
         }
 
         boundaryWest   = 0;
