@@ -25,6 +25,11 @@ namespace LibGeoDecomp {
 
 namespace UnstructuredUpdateFunctorHelpers {
 
+ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 )
+#endif
+
 /**
  * Functor to be used from with LibFlatArray from within
  * UnstructuredUpdateFunctor. Hides much of the boilerplate code.
@@ -100,6 +105,10 @@ private:
     const CONCURRENCY_SPEC& concurrencySpec;
     const MODEL_THREADING_SPEC& modelThreadingSpec;
 };
+
+ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
