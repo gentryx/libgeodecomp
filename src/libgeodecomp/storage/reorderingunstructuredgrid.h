@@ -32,7 +32,7 @@ std::vector<IntPair>::const_iterator mapLogicalToPhysicalID(int logicalID, const
     return pos;
 }
 
-ifdef _MSC_BUILD
+#ifdef _MSC_BUILD
 #pragma warning( push )
 #pragma warning( disable : 4626 5027 )
 #endif
@@ -99,7 +99,7 @@ private:
     }
 };
 
-ifdef _MSC_BUILD
+#ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
 

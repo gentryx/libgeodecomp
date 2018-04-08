@@ -6,7 +6,7 @@
 
 namespace LibGeoDecomp {
 
-ifdef _MSC_BUILD
+#ifdef _MSC_BUILD
 #pragma warning( push )
 #pragma warning( disable : 4626 5027 )
 #endif
@@ -124,7 +124,7 @@ private:
     const long& offsetNorth;
 };
 
-ifdef _MSC_BUILD
+#ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
 

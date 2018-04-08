@@ -2192,7 +2192,7 @@ public:
     double sum;
 };
 
-ifdef _MSC_BUILD
+#ifdef _MSC_BUILD
 #pragma warning( push )
 #pragma warning( disable : 4626 5027 )
 #endif
@@ -2343,7 +2343,7 @@ public:
 
 LIBFLATARRAY_REGISTER_SOA(SPMVMSoACellInf, ((double)(sum))((double)(value)))
 
-ifdef _MSC_BUILD
+#ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
 
