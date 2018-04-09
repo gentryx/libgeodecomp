@@ -184,3 +184,7 @@ int main(int, char *[])
     runSimulation();
     return 0;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

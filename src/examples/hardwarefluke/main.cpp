@@ -1,7 +1,17 @@
 #include <libgeodecomp.h>
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 #include <fstream>
 #include <iostream>
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
 
 using namespace LibGeoDecomp;
 
@@ -122,3 +132,7 @@ int main(int /* argc */, char** /* argv */)
     runSimulation();
     return 0;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

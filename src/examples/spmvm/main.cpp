@@ -1,9 +1,3 @@
-#include <cstdlib>
-#include <map>
-#include <fstream>
-#include <string>
-#include <stdexcept>
-
 #include <libgeodecomp.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/asciiwriter.h>
@@ -12,6 +6,22 @@
 #include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <cstdlib>
+#include <map>
+#include <fstream>
+#include <string>
+#include <stdexcept>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 using namespace LibGeoDecomp;
 
@@ -178,3 +188,7 @@ int main(int argc, char *argv[])
     runSimulation(argc, argv);
     return EXIT_SUCCESS;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

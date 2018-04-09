@@ -1,5 +1,3 @@
-#include <mpi.h>
-
 #include <libgeodecomp.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/bovwriter.h>
@@ -11,6 +9,18 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <mpi.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
 
 using namespace LibGeoDecomp;
 
@@ -119,3 +129,7 @@ int main(int argc, char *argv[])
     MPI_Finalize();
     return 0;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

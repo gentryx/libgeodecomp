@@ -1,10 +1,3 @@
-#include <cstdlib>
-
-#include <map>
-#include <fstream>
-#include <string>
-#include <stdexcept>
-
 #include <libgeodecomp.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/asciiwriter.h>
@@ -18,6 +11,22 @@
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
 #include <libflatarray/short_vec.hpp>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <cstdlib>
+#include <map>
+#include <fstream>
+#include <string>
+#include <stdexcept>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;
@@ -218,3 +227,7 @@ int main(int argc, char *argv[])
 
     return EXIT_SUCCESS;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

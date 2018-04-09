@@ -1,15 +1,27 @@
 // fixme: use delta from original image to detect obstacles (rather than a threshold)
-#include <iostream>
-
-#include <QtGui/QApplication>
-#include <QtCore/QTimer>
-#include <QThreadPool>
 #include <libgeodecomp/examples/latticegas/cell.h>
 #include <libgeodecomp/examples/latticegas/cameratester.h>
 #include <libgeodecomp/examples/latticegas/framegrabber.h>
 #include <libgeodecomp/examples/latticegas/flowwidget.h>
 #include <libgeodecomp/examples/latticegas/interactivesimulator.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
+#include <iostream>
+#include <QtGui/QApplication>
+#include <QtCore/QTimer>
+#include <QThreadPool>
+
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
 
 void testModel()
 {
@@ -191,3 +203,7 @@ int main(int argc, char **argv)
       return runQtApp(argc, argv);
     }
  }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
