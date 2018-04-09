@@ -307,15 +307,26 @@ public:
 
     inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>()) const
     {
-        saveRegion(
+        saveRegionImplementation(
             buffer,
             region.beginStreak(offset),
             region.endStreak(offset),
             region.size());
     }
 
+    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>())
+    {
+        loadRegionImplementation(
+            buffer,
+            region.beginStreak(offset),
+            region.endStreak(offset),
+            region.size());
+    }
+
+protected:
+
     template<typename ITER1, typename ITER2>
-    inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const ITER1& start, const ITER2& end, std::size_t size) const
+    inline void saveRegionImplementation(std::vector<ELEMENT_TYPE> *buffer, const ITER1& start, const ITER2& end, std::size_t size) const
     {
         if (size > buffer->size()) {
             throw std::invalid_argument(
@@ -333,17 +344,8 @@ public:
         }
     }
 
-    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>())
-    {
-        loadRegion(
-            buffer,
-            region.beginStreak(offset),
-            region.endStreak(offset),
-            region.size());
-    }
-
     template<typename ITER1, typename ITER2>
-    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const ITER1& start, const ITER2& end, std::size_t size)
+    inline void loadRegionImplementation(const std::vector<ELEMENT_TYPE>& buffer, const ITER1& start, const ITER2& end, std::size_t size)
     {
         if (size > buffer.size()) {
             throw std::invalid_argument(
@@ -400,7 +402,6 @@ public:
         }
     }
 
-protected:
     void saveMemberImplementation(
         char *target,
         MemoryLocation::Location targetLocation,

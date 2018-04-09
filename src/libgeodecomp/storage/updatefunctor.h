@@ -270,8 +270,8 @@ public:
     template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_API, typename ANY_GRID_TYPE, typename ANY_THREADED_UPDATE>
     void operator()(
         const Region<DIM>& region,
-        const Coord<DIM>& sourceOffset,
-        const Coord<DIM>& targetOffset,
+        const Coord<DIM>& /* sourceOffset */,
+        const Coord<DIM>& /* targetOffset */,
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,

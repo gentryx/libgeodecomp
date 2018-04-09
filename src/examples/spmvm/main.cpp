@@ -101,11 +101,15 @@ private:
 
 public:
     inline
-    CellInitializerMatrix(std::size_t size, unsigned steps,
-                          const std::string& rhsFile,
-                          const std::string& matrixFile) :
-        SimpleInitializer<Cell>(Coord<1>(size), steps),
-        size(size), rhsFile(rhsFile), matrixFile(matrixFile)
+    CellInitializerMatrix(
+        std::size_t size,
+        unsigned steps,
+        const std::string& rhsFile,
+        const std::string& matrixFile) :
+        SimpleInitializer<Cell>(Coord<1>(int(size)), steps),
+        size(size),
+        rhsFile(rhsFile),
+        matrixFile(matrixFile)
     {}
 
     virtual void grid(GridBase<Cell, 1> *grid)
@@ -121,7 +125,7 @@ public:
             throw std::logic_error("Failed to open files");
         }
 
-        unsigned i = 0;
+        int i = 0;
         double tmp;
         // read rhs vector
         while (rhsIfs >> tmp) {

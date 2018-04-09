@@ -35,6 +35,11 @@ public:
         Simulator<CELL_TYPE>(initializer)
     {}
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
     /**
      * register  writer which will observe the simulation. The
      * DistributedSimulator will assume that it now owns the
@@ -44,6 +49,10 @@ public:
     {
         writers << WriterPtr(writer);
     }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 protected:
     WriterVector writers;

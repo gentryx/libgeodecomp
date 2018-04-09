@@ -113,12 +113,12 @@ private:
         using OutputDelegate::outfile;
 
         void copyStreakInImpl(
-            const EXTERNAL *source,
-            MemoryLocation::Location sourceLocation,
-            MEMBER *target,
-            MemoryLocation::Location targetLocation,
-            const std::size_t num,
-            const std::size_t stride)
+            const EXTERNAL * /* source */,
+            MemoryLocation::Location /* sourceLocation */,
+            MEMBER * /* target */,
+            MemoryLocation::Location /* targetLocation */,
+            const std::size_t /* num */,
+            const std::size_t /* stride */)
         {
             throw std::logic_error("this filter is meant for output only");
         }
@@ -139,12 +139,12 @@ private:
         }
 
         void copyMemberInImpl(
-            const EXTERNAL *source,
-            MemoryLocation::Location sourceLocation,
-            CELL *target,
-            MemoryLocation::Location targetLocation,
-            std::size_t num,
-            MEMBER CELL:: *memberPointer)
+            const EXTERNAL * /* source */,
+            MemoryLocation::Location /* sourceLocation */,
+            CELL */* target */,
+            MemoryLocation::Location /* targetLocation */,
+            std::size_t /* num */,
+            MEMBER CELL:: * /* memberPointer */)
         {
             throw std::logic_error("this filter is meant for output only");
         }

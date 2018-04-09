@@ -22,7 +22,7 @@ public:
     {}
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, unsigned nanoStep)
+    void update(const COORD_MAP& neighborhood, unsigned /* nanoStep */)
     {
         temp = (neighborhood[Coord<2>( 0, -1)].temp +
                 neighborhood[Coord<2>(-1,  0)].temp +
@@ -60,7 +60,7 @@ public:
 void runSimulation()
 {
     SerialSimulator<Cell> sim(new CellInitializer());
-    int outputFrequency = 1;
+    unsigned outputFrequency = 1;
 
     sim.addWriter(
         new PPMWriter<Cell>(
@@ -76,7 +76,7 @@ void runSimulation()
     sim.run();
 }
 
-int main(int argc, char **argv)
+int main(int /* argc */, char ** /* argv */)
 {
     runSimulation();
     return 0;

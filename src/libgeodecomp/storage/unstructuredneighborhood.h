@@ -24,6 +24,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 5027 )
+#endif
+
 namespace UnstructuredNeighborhoodHelpers {
 
 /**
@@ -214,6 +219,10 @@ private:
         chunkOffset += difference;
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

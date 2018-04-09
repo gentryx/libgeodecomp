@@ -41,7 +41,7 @@ public:
     {}
 
     template<typename HOOD>
-    void update(const HOOD& hood, const unsigned nanoStep)
+    void update(const HOOD& hood, const unsigned /* nanoStep */ )
     {
         glow -= DELTA_T * 0.04;
         if (glow < 0) {
@@ -173,7 +173,7 @@ typedef BoxCell<FixedArray<Boundary, 30> > BoundariesContainer;
 
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4626 )
+#pragma warning( disable : 4626 5027 )
 #endif
 
 DECLARE_MULTI_CONTAINER_CELL(

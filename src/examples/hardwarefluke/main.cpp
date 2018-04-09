@@ -10,7 +10,7 @@
 #include <iostream>
 
 #ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
+#pragma warning( pop )
 #endif
 
 using namespace LibGeoDecomp;
