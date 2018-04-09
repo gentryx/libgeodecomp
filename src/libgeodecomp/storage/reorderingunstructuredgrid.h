@@ -397,7 +397,7 @@ public:
 
     virtual void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& /* offset */ = Coord<DIM>()) const
     {
-        delegate.saveRegion(
+        delegate.saveRegionWithIterators(
             buffer,
             ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
             ReorderingRegionIterator(region.end(), logicalToPhysicalIDs),
@@ -406,7 +406,7 @@ public:
 
     virtual void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& /* offset */ = Coord<DIM>())
     {
-        delegate.loadRegion(
+        delegate.loadRegionWithIterators(
             buffer,
             ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
             ReorderingRegionIterator(region.end(), logicalToPhysicalIDs),
@@ -517,7 +517,7 @@ private:
         const Selector<CellType>& selector,
         const Region<DIM>& region) const
     {
-        delegate.saveMemberImplementation(
+        delegate.saveMemberWithIterators(
             target,
             targetLocation,
             selector,
@@ -531,7 +531,7 @@ private:
         const Selector<CellType>& selector,
         const Region<DIM>& region)
     {
-        delegate.loadMemberImplementation(
+        delegate.loadMemberWithIterators(
             source,
             sourceLocation,
             selector,

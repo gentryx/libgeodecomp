@@ -307,7 +307,7 @@ public:
 
     inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>()) const
     {
-        saveRegionImplementation(
+        saveRegionWithIterators(
             buffer,
             region.beginStreak(offset),
             region.endStreak(offset),
@@ -316,17 +316,15 @@ public:
 
     inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>())
     {
-        loadRegionImplementation(
+        loadRegionWithIterators(
             buffer,
             region.beginStreak(offset),
             region.endStreak(offset),
             region.size());
     }
 
-protected:
-
     template<typename ITER1, typename ITER2>
-    inline void saveRegionImplementation(std::vector<ELEMENT_TYPE> *buffer, const ITER1& start, const ITER2& end, std::size_t size) const
+    inline void saveRegionWithIterators(std::vector<ELEMENT_TYPE> *buffer, const ITER1& start, const ITER2& end, std::size_t size) const
     {
         if (size > buffer->size()) {
             throw std::invalid_argument(
@@ -345,7 +343,7 @@ protected:
     }
 
     template<typename ITER1, typename ITER2>
-    inline void loadRegionImplementation(const std::vector<ELEMENT_TYPE>& buffer, const ITER1& start, const ITER2& end, std::size_t size)
+    inline void loadRegionWithIterators(const std::vector<ELEMENT_TYPE>& buffer, const ITER1& start, const ITER2& end, std::size_t size)
     {
         if (size > buffer.size()) {
             throw std::invalid_argument(
@@ -365,7 +363,7 @@ protected:
     }
 
     template<typename ITER1, typename ITER2>
-    void saveMemberImplementation(
+    void saveMemberWithIterators(
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<ELEMENT_TYPE>& selector,
@@ -384,7 +382,7 @@ protected:
     }
 
     template<typename ITER1, typename ITER2>
-    void loadMemberImplementation(
+    void loadMemberWithIterators(
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<ELEMENT_TYPE>& selector,
@@ -402,13 +400,15 @@ protected:
         }
     }
 
+protected:
+
     void saveMemberImplementation(
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region) const
     {
-        saveMemberImplementation(target, targetLocation, selector, region.beginStreak(), region.endStreak());
+        saveMemberWithIterators(target, targetLocation, selector, region.beginStreak(), region.endStreak());
     }
 
     void loadMemberImplementation(
@@ -417,7 +417,7 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region)
     {
-        loadMemberImplementation(source, sourceLocation, selector, region.beginStreak(), region.endStreak());
+        loadMemberWithIterators(source, sourceLocation, selector, region.beginStreak(), region.endStreak());
     }
 
 private:

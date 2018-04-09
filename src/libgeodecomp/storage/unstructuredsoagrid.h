@@ -416,11 +416,11 @@ public:
         StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
         StreakIteratorType end(  region.endStreak(),   Coord<3>(offset.x(), 0, 0));
 
-        saveRegion(target, start, end, region.size());
+        saveRegionWithIterators(target, start, end, region.size());
     }
 
     template<typename ITER1, typename ITER2>
-    inline void saveRegion(std::vector<char> *target, const ITER1& start, const ITER2& end, std::size_t size) const
+    inline void saveRegionWithIterators(std::vector<char> *target, const ITER1& start, const ITER2& end, std::size_t size) const
     {
         elements.save(start, end, target->data(), size);
     }
@@ -431,17 +431,17 @@ public:
         StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
         StreakIteratorType end(  region.endStreak(),   Coord<3>(offset.x(), 0, 0));
 
-        loadRegion(source, start, end, region.size());
+        loadRegionWithIterators(source, start, end, region.size());
     }
 
     template<typename ITER1, typename ITER2>
-    inline void loadRegion(const std::vector<char>& source, const ITER1& start, const ITER2& end, std::size_t size)
+    inline void loadRegionWithIterators(const std::vector<char>& source, const ITER1& start, const ITER2& end, std::size_t size)
     {
         elements.load(start, end, source.data(), size);
     }
 
     template<typename ITER1, typename ITER2>
-    void saveMemberImplementation(
+    void saveMemberWithIterators(
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<ELEMENT_TYPE>& selector,
@@ -454,7 +454,7 @@ public:
     }
 
     template<typename ITER1, typename ITER2>
-    void loadMemberImplementation(
+    void loadMemberWithIterators(
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<ELEMENT_TYPE>& selector,
@@ -473,7 +473,7 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region) const
     {
-        saveMemberImplementation(target, targetLocation, selector, region.beginStreak(), region.endStreak());
+        saveMemberWithIterators(target, targetLocation, selector, region.beginStreak(), region.endStreak());
     }
 
     void loadMemberImplementation(
@@ -482,7 +482,7 @@ protected:
         const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region)
     {
-        loadMemberImplementation(source, sourceLocation, selector, region.beginStreak(), region.endStreak());
+        loadMemberWithIterators(source, sourceLocation, selector, region.beginStreak(), region.endStreak());
     }
 
 private:
