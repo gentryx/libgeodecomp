@@ -156,12 +156,12 @@ public:
         ACCESSOR2& hoodNew,
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
-        const Coord<DIM> *dimensionsOld,
-        const Coord<DIM> *dimensionsNew,
+        const Coord<DIM> * /* dimensionsOld */,
+        const Coord<DIM> * /* dimensionsNew */,
         const Coord<DIM> *topologicalDimensions,
         unsigned nanoStep,
-        const CONCURRENCY_FUNCTOR *concurrencySpec,
-        const ANY_THREADED_UPDATE *modelThreadingSpec) const
+        const CONCURRENCY_FUNCTOR * /* concurrencySpec */,
+        const ANY_THREADED_UPDATE * /* modelThreadingSpec */) const
     {
         Coord<DIM> normalizedOriginOld = streak.origin + *offsetOld;
         Coord<DIM> normalizedOriginNew = streak.origin + *offsetNew;
@@ -212,10 +212,19 @@ public:
         if (TOPOLOGY::template WrapsAxis<0>::VALUE && (originOld.x() == 0)) {
             boundaryWest   = (*dimensionsNew)[0];
             boundaryEast   = 0;
+
+            // static conditional is OK:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4127 )
+#endif
             if (TOPOLOGY::template WrapsAxis<0>::VALUE &&
                 ((originOld.x() + 1) == (*dimensionsNew).x())) {
                 boundaryEast   = -(*dimensionsNew)[0];
             }
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
             FixedNeighborhood<
                 CELL,
@@ -248,9 +257,15 @@ public:
                 boundarySouth,
                 boundaryNorth);
 
+// static conditional is OK
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4127 )
+#endif
         // other special case: right boundary
         if (TOPOLOGY::template WrapsAxis<0>::VALUE &&
             ((originOld.x() + streak.length()) == (*dimensionsNew).x())) {
+
             long indexEndRight = indexEnd - 1;
             CELL::updateLineX(hood, indexEndRight, hoodNew, nanoStep);
 
@@ -274,6 +289,9 @@ public:
             CELL::updateLineX(hood, indexEnd, hoodNew, nanoStep);
         }
     }
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 };
 
 }

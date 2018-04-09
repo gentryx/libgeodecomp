@@ -5,6 +5,11 @@ namespace LibGeoDecomp {
 
 namespace UnstructuredLoopPeelerHelpers {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 )
+#endif
+
 /**
  * This is a wrapper for UnstructuredSoANeighborhood to do scalar
  * updates (required for loop peeling if a streak is not aligned on
@@ -56,6 +61,10 @@ public:
 private:
     HOOD& hood;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
