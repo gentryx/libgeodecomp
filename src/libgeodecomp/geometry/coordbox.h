@@ -227,7 +227,7 @@ public:
     };
 
 private:
-    Coord<1> endPos(const Coord<1>& origin, const Coord<1>& dimensions) const
+    static Coord<1> endPos(const Coord<1>& origin, const Coord<1>& dimensions)
     {
         Coord<1> pos = origin;
         if (dimensions.x() > 0) {
@@ -238,7 +238,7 @@ private:
     }
 
     template<int DIM2>
-    Coord<DIM2> endPos(const Coord<DIM2>& origin, const Coord<DIM2>& dimensions) const
+    static Coord<DIM2> endPos(const Coord<DIM2>& origin, const Coord<DIM2>& dimensions)
     {
         Coord<DIM2> pos = origin;
         pos[DIM2 - 1] += dimensions[DIM2 - 1];

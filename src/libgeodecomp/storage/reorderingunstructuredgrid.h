@@ -283,8 +283,8 @@ public:
         }
 
         for (RowLengthVec::iterator i = reorderedRowLengths.begin(); i != reorderedRowLengths.end(); ) {
-            std::size_t currentIndex = std::size_t(i - reorderedRowLengths.begin());
-            std::size_t nextIndex = (std::min)(currentIndex + SIGMA, reorderedRowLengths.size());
+            std::ptrdiff_t currentIndex = i - reorderedRowLengths.begin();
+            std::ptrdiff_t nextIndex = (std::min)(currentIndex + SIGMA, std::ptrdiff_t(reorderedRowLengths.size()));
             RowLengthVec::iterator nextStop = reorderedRowLengths.begin() + nextIndex;
             std::stable_sort(i, nextStop, [](const IntPair& a, const IntPair& b) {
                     return a.second > b.second;
