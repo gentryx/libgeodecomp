@@ -52,6 +52,7 @@ if(CUDA_FOUND)
   endif()
 endif()
 
+find_package(Silo)
 
 # pretty print build options
 function(lfa_print_options)
@@ -118,6 +119,7 @@ lfa_add_config_option(LIB_INSTALL_DIR "Directory where libraries will be install
 lfa_add_config_option(WITH_CPP14 "Enable C++ 14 features of LibFlatArray" ${SUPPORTS_CPP14} true)
 lfa_add_config_option(WITH_FORCED_CPP11 "Some C++11-compatible compilers support sufficient features of C++14 to allow LibFlatArray to enable C++14 mode. Use this setting in conjunction with WITH_CPP14" false true)
 lfa_add_config_option(WITH_INCREASED_PRECISION "Some architectures (*cough*ARM*cough*) yield poor accuracy when using fast estimates. This option enforces mitigates that flaw at the expense of a few extra cycles." false true)
+lfa_add_config_option(WITH_SILO "Enable code examples that require LLNL's Silo library." ${Silo_FOUND} true)
 
 if(WITH_CUDA AND NOT CUDA_FOUND)
   message(FATAL_ERROR "WITH_CUDA selected, but could not find the NVIDIA CUDA toolkit.")
@@ -127,7 +129,7 @@ if(NOT MSVC)
   if(WITH_CPP14)
     # At the moment, CUDA doesn't support C++14, so we limt ourselves to
     # C++11 and hope for the best.
-    IF(WITH_CUDA OR WITH_FORCED_CPP11)
+    IF(WITH_FORCED_CPP11)
       set(libflatarray_FLAGS "-std=c++11")
     else()
       set(libflatarray_FLAGS "-std=c++14")
