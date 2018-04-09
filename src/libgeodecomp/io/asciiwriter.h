@@ -141,7 +141,7 @@ private:
         void copyMemberInImpl(
             const EXTERNAL * /* source */,
             MemoryLocation::Location /* sourceLocation */,
-            CELL */* target */,
+            CELL * /* target */,
             MemoryLocation::Location /* targetLocation */,
             std::size_t /* num */,
             MEMBER CELL:: * /* memberPointer */)

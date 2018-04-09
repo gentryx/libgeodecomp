@@ -153,6 +153,11 @@ public:
 
 }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4266 )
+#endif
+
 /**
  * This grid will rearrange cells in its delegate grid to match the
  * order defined by a compaction (defined by a node set) and the
@@ -593,6 +598,10 @@ private:
         delegate.set(Coord<1>(pos->second), cell);
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

@@ -145,12 +145,12 @@ public:
 
         for (unsigned row = 0; row < rows; ++row) {
             for (unsigned col = 0; col < cols; ++col) {
-                ValueType tmp;
-                if (!(matrixIfs >> tmp)) {
+                ValueType tmp2;
+                if (!(matrixIfs >> tmp2)) {
                     throw std::logic_error("Failed to read data from matrix");
                 }
-                if (tmp != 0.0) {
-                    weights << std::make_pair(Coord<2>(row, col), tmp);
+                if (tmp2 != 0.0) {
+                    weights << std::make_pair(Coord<2>(int(row), int(col)), tmp2);
                 }
             }
         }
@@ -166,7 +166,7 @@ void runSimulation(int argc, char *argv[])
 {
     SimpleInitializer<Cell> *init;
     unsigned steps = 1;
-    int outputFrequency = 1;
+    unsigned outputFrequency = 1;
 
     // init
     if (argc > 1) {
