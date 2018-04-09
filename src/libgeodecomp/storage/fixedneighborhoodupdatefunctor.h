@@ -157,7 +157,7 @@ public:
         const Coord<DIM> *offsetOld,
         const Coord<DIM> *offsetNew,
         const Coord<DIM> * /* dimensionsOld */,
-        const Coord<DIM> * /* dimensionsNew */,
+        const Coord<DIM> *dimensionsNew,
         const Coord<DIM> *topologicalDimensions,
         unsigned nanoStep,
         const CONCURRENCY_FUNCTOR * /* concurrencySpec */,
