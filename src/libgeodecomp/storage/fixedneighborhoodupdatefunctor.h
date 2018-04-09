@@ -28,6 +28,12 @@ namespace LibGeoDecomp {
 
 namespace FixedNeighborhoodUpdateFunctorHelpers {
 
+// Prevent MSVC from complaining about failed inlining
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
+
 /**
  * Recursively bind template parameters for the different boundary conditions.
  */
@@ -122,6 +128,10 @@ public:
         }
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 /**
  * See above
