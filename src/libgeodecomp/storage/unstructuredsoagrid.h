@@ -35,6 +35,11 @@ namespace LibGeoDecomp {
 
 namespace UnstructuredSoAGridHelpers {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 5027 )
+#endif
+
 /**
  * Internal helper class to save a region of a cell member.
  */
@@ -132,6 +137,10 @@ private:
     const ITER1& start;
     const ITER2& end;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
