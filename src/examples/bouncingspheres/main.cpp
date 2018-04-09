@@ -96,7 +96,7 @@ public:
     {}
 
     template<typename HOOD>
-    void update(const HOOD& hood, const unsigned nanoStep)
+    void update(const HOOD& hood, const unsigned /* nanoStep */)
     {
         addForces(hood.spheres.begin(),    hood.spheres.end());
         addForces(hood.boundaries.begin(), hood.boundaries.end());
@@ -171,11 +171,20 @@ private:
 typedef BoxCell<FixedArray<Sphere,   30> > SpheresContainer;
 typedef BoxCell<FixedArray<Boundary, 30> > BoundariesContainer;
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 )
+#endif
+
 DECLARE_MULTI_CONTAINER_CELL(
     BaseContainer,
     Sphere,
     ((SpheresContainer)(spheres))
     ((BoundariesContainer)(boundaries)) )
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 class Container : public BaseContainer
 {
@@ -388,7 +397,7 @@ private:
 
 };
 
-int main(int argc, char **argv)
+int main(int /* argc */, char ** /* argv */)
 {
     SerialSimulator<Container> sim(
         new GasInitializer(

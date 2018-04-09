@@ -98,7 +98,7 @@ public:
  */
 #define DECLARE_MULTI_CONTAINER_CELL(NAME, API_PROVIDER, MEMBERS)       \
     __pragma( warning( push ) )                                         \
-    __pragma( warning( disable : 4626 ) )                               \
+    __pragma( warning( disable : 4626 5027 ) )                          \
     DECLARE_MULTI_CONTAINER_CELL_MAIN(NAME, API_PROVIDER, MEMBERS)      \
     __pragma( warning( pop ) )                                          \
 
