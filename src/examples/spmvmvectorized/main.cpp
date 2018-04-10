@@ -1,3 +1,5 @@
+#pragma warning( disable : 4514 )
+
 #include <libgeodecomp.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/asciiwriter.h>
@@ -79,11 +81,6 @@ public:
     inline bool operator==(const Cell& cell) const
     {
         return (cell.sum == sum) && (cell.value == value);
-    }
-
-    inline bool operator!=(const Cell& cell) const
-    {
-        return !(*this == cell);
     }
 
     double value;
