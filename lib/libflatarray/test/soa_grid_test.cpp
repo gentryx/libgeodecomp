@@ -381,16 +381,16 @@ public:
     DestructionCounterClass destructCounter;
 };
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 LIBFLATARRAY_REGISTER_SOA(
     CellWithNonTrivialMembers,
     ((int)(id))
     ((CellWithNonTrivialMembers::MapType)(map))
     ((CellWithNonTrivialMembers::MapType)(maps)(4))
     ((DestructionCounterClass)(destructCounter)))
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 class MultiplyVelocityArrayStyle
 {
@@ -1332,3 +1332,7 @@ int main(int /* argc */, char ** /* argv */)
 {
     return 0;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4714 )
+#endif

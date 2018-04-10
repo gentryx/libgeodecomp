@@ -1,6 +1,6 @@
 /**
  * Copyright 2014-2017 Andreas Schäfer
- * Copyright 2017 Google
+ * Copyright 2017-2018 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -13,7 +13,7 @@
 // Microsoft Visual Studio:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 4996 )
+#pragma warning( disable : 4514 4710 4996 )
 #endif
 
 #include <cmath>
@@ -23,6 +23,8 @@
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
+
+#include <libflatarray/detail/macros.hpp>
 
 #ifndef BOOST_TEST
 // Microsoft Visual Studio doesn't define __PRETTY_FUNCTION__:
@@ -57,6 +59,7 @@ public:
     class TEST_NAME                             \
     {                                           \
     public:                                     \
+        LIBFLATARRAY_INLINE                     \
         void operator()();                      \
                                                 \
     private:                                    \
@@ -65,6 +68,7 @@ public:
                                                 \
     Runner<TEST_NAME> TEST_NAME::runner;        \
                                                 \
+    LIBFLATARRAY_INLINE                         \
     void TEST_NAME::operator()()                \
 
 
@@ -93,7 +97,7 @@ public:
 // non-IEEE-compliannt results. Single-precision accuracy (i.e. ~20
 // bits for the mantissa or 6 digits) shall be suffice for functional
 // testing.
-#define TEST_REAL(A, B)                                                 \
+#define TEST_REAL(A, B)                         \
     TEST_REAL_ACCURACY(A, B, 0.000001)
 
 #endif

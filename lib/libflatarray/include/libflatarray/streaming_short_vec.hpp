@@ -1,5 +1,6 @@
 /**
  * Copyright 2016 Andreas Schäfer
+ * Copyright 2018 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -48,9 +49,12 @@ public:
     streaming_short_vec(const CARGO val = 0) : short_vec<CARGO, ARITY>(val)
     {}
 
-    template<typename INIT_TYPE>
     inline
-    streaming_short_vec(const INIT_TYPE& val) : short_vec<CARGO, ARITY>(val)
+    streaming_short_vec(const CARGO *data) : short_vec<CARGO, ARITY>(data)
+    {}
+
+    inline
+    streaming_short_vec(short_vec<CARGO, ARITY>&& val) : short_vec<CARGO, ARITY>(std::move(val))
     {}
 
 #ifdef LIBFLATARRAY_WITH_CPP14
@@ -81,8 +85,9 @@ public:
 #pragma warning pop
 #endif
 
+template<typename CARGO, int ARITY>
 inline
-void operator<<(double *data, const streaming_short_vec<double, 8>& vec)
+void operator<<(double *data, const streaming_short_vec<CARGO, ARITY>& vec)
 {
     vec.store_nt(data);
 }
