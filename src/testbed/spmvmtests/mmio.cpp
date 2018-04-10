@@ -6,12 +6,21 @@
 *
 */
 
+// Kill warning 4514 in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
 
 #include <stdexcept>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #include "mmio.h"
 
