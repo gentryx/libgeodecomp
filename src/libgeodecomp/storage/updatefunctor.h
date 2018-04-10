@@ -73,6 +73,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         inline SoARegionUpdateHelper(const SoARegionUpdateHelper& other) = default;
         inline SoARegionUpdateHelper(SoARegionUpdateHelper&& other) = default;
+        inline SoARegionUpdateHelper& operator=(const SoARegionUpdateHelper&) = default;
+        inline SoARegionUpdateHelper& operator=(SoARegionUpdateHelper&&) = default;
 #endif
 
         template<

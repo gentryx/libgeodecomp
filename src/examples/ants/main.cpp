@@ -232,6 +232,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
     inline AntTracer(const AntTracer& other) = default;
     inline AntTracer(AntTracer&& other) = default;
+    inline AntTracer& operator=(const AntTracer&) = default;
+    inline AntTracer& operator=(AntTracer&&) = default;
 #endif
 
     void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)

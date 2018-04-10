@@ -174,8 +174,10 @@ public:
     {}
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-        inline SaveMember(const SaveMember& other) = default;
-        inline SaveMember(SaveMember&& other) = default;
+    inline SaveMember(const SaveMember& other) = default;
+    inline SaveMember(SaveMember&& other) = default;
+    inline SaveMember& operator=(const SaveMember&) = default;
+    inline SaveMember& operator=(SaveMember&&) = default;
 #endif
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
@@ -237,8 +239,10 @@ public:
     {}
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-        inline LoadMember(const LoadMember& other) = default;
-        inline LoadMember(LoadMember&& other) = default;
+    inline LoadMember(const LoadMember& other) = default;
+    inline LoadMember(LoadMember&& other) = default;
+    inline LoadMember& operator=(const LoadMember&) = default;
+    inline LoadMember& operator=(LoadMember&&) = default;
 #endif
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
