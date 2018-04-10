@@ -173,6 +173,11 @@ public:
         edgeRadii(edgeRadii)
     {}
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+        inline SaveMember(const SaveMember& other) = default;
+        inline SaveMember(SaveMember&& other) = default;
+#endif
+
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
     {
@@ -230,6 +235,11 @@ public:
         origin(origin),
         edgeRadii(edgeRadii)
     {}
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+        inline LoadMember(const LoadMember& other) = default;
+        inline LoadMember(LoadMember&& other) = default;
+#endif
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const

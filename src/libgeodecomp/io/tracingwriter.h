@@ -22,11 +22,6 @@
 
 namespace LibGeoDecomp {
 
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4626 )
-#endif
-
 /**
  * The purpose of the TracingWriter is out output performance data
  * which allows the user to gauge execution time (current, remaining,
@@ -157,10 +152,6 @@ private:
         return ScopedTimer::time();
     }
 };
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 }
 

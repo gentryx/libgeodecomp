@@ -70,6 +70,11 @@ public:
             modelThreadingSpec(modelThreadingSpec)
         {}
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+        inline SoARegionUpdateHelper(const SoARegionUpdateHelper& other) = default;
+        inline SoARegionUpdateHelper(SoARegionUpdateHelper&& other) = default;
+#endif
+
         template<
             typename CELL1, long MY_DIM_X1, long MY_DIM_Y1, long MY_DIM_Z1, long INDEX1,
             typename CELL2, long MY_DIM_X2, long MY_DIM_Y2, long MY_DIM_Z2, long INDEX2>

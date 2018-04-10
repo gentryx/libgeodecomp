@@ -126,10 +126,10 @@ private:
         void copyStreakOutImpl(
             const MEMBER *source,
             MemoryLocation::Location sourceLocation,
-            EXTERNAL * /*target*/,
+            EXTERNAL * /* target */,
             MemoryLocation::Location targetLocation,
             const std::size_t num,
-            const std::size_t stride)
+            const std::size_t /* stride */)
         {
             checkMemoryLocations(sourceLocation, targetLocation);
 

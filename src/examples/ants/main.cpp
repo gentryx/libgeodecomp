@@ -220,13 +220,6 @@ private:
     }
 };
 
-// Hardwire this warning to off as MSVC would otherwise complain about
-// an assignment operator missing -- which is clearly there:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4626 )
-#endif
-
 class AntTracer : public TracingWriter<Cell>
 {
 public:
@@ -240,7 +233,6 @@ public:
     inline AntTracer(const AntTracer& other) = default;
     inline AntTracer(AntTracer&& other) = default;
 #endif
-
 
     void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
@@ -270,10 +262,6 @@ public:
                   << "  numFood: " << numFood << "\n";
     }
 };
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 void runSimulation()
 {
