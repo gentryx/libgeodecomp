@@ -7,7 +7,7 @@ namespace UnstructuredLoopPeelerHelpers {
 
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4626 )
+#pragma warning( disable : 4626 5027 )
 #endif
 
 /**

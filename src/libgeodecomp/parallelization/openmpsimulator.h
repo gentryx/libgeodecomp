@@ -12,6 +12,12 @@
 
 namespace LibGeoDecomp {
 
+// padding is fine:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 /**
  * OpenMPSimulator is based on SerialSimulator, but is capable of
  * threading via OpenMP.
@@ -106,6 +112,10 @@ protected:
         }
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
