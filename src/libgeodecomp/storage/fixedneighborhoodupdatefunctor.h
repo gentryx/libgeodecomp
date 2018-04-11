@@ -83,6 +83,14 @@ public:
             concurrencySpec,                                            \
             modelThreadingSpec                                          \
 
+        // Constant conditional expressions are fine here, the
+        // compiler will be smart enough to optimize this away.
+        // They're there so we don't have to write redundant code for
+        // every combination of flags:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4127 )
+#endif
         if ((CUR_DIM == 2) && (HIGH == true)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
                 (normalizedOriginOld[CUR_DIM] == ((*dimensionsOld)[CUR_DIM] - 1))) {
@@ -126,6 +134,10 @@ public:
                     LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             }
         }
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
     }
 };
 
@@ -208,23 +220,23 @@ public:
         boundarySouth  = BOUNDARY_SOUTH  ?  (*dimensionsNew)[2] : 0;
         boundaryNorth  = BOUNDARY_NORTH  ? -(*dimensionsNew)[2] : 0;
 
+        // Constant conditional expressions are fine here, the
+        // compiler will be smart enough to optimize this away.
+        // They're there so we don't have to write redundant code for
+        // every combination of flags:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4127 )
+#endif
         // special case: on left boundary
         if (TOPOLOGY::template WrapsAxis<0>::VALUE && (originOld.x() == 0)) {
             boundaryWest   = (*dimensionsNew)[0];
             boundaryEast   = 0;
 
-            // static conditional is OK:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4127 )
-#endif
             if (TOPOLOGY::template WrapsAxis<0>::VALUE &&
                 ((originOld.x() + 1) == (*dimensionsNew).x())) {
                 boundaryEast   = -(*dimensionsNew)[0];
             }
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
             FixedNeighborhood<
                 CELL,
@@ -257,11 +269,6 @@ public:
                 boundarySouth,
                 boundaryNorth);
 
-// static conditional is OK
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4127 )
-#endif
         // other special case: right boundary
         if (TOPOLOGY::template WrapsAxis<0>::VALUE &&
             ((originOld.x() + streak.length()) == (*dimensionsNew).x())) {

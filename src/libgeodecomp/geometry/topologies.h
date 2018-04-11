@@ -125,6 +125,13 @@ public:
             ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0])));
     }
 
+    // MSVC is wrong here: yes, we are using coord and dim in this
+    // function, it's just that the comparison may be statically
+    // short-wired because of WrapsAxis:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4100 )
+#endif
     __host__ __device__
     bool operator()(const Coord<2> coord, const Coord<2> dim)
     {
@@ -132,6 +139,10 @@ public:
             ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0]))) ||
             ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1])));
     }
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 
 #if !defined(__NVCC__) || (__CUDACC_VER_MAJOR__ >= 8)
 #ifdef __GNUG__

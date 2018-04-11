@@ -98,15 +98,15 @@ public:
         {}
 
         template<typename CARGO>
-        void operator()(const CARGO& cargo) const
+        void operator()(const CARGO& /* cargo */) const
         {}
 
         template<typename CARGO1, typename CARGO2>
-        void operator()(CARGO1 cargo1, CARGO2 cargo2) const
+        void operator()(const CARGO1& /* cargo1 */, const CARGO2& /* cargo2 */) const
         {}
 
         template<typename CARGO1, typename CARGO2, typename CARGO3>
-        void operator()(CARGO1 cargo1, CARGO2 cargo2, CARGO3 cargo3) const
+        void operator()(const CARGO1& /* cargo1 */, const CARGO2& /* cargo2 */, const CARGO3& /* cargo3 */) const
         {}
     };
 

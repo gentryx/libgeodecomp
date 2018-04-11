@@ -1102,7 +1102,7 @@ public:
         SimpleInitializer<CELL>(dimensions, steps)
     {}
 
-    virtual void grid(GridBase<CELL, Topology::DIM> *target)
+    virtual void grid(GridBase<CELL, Topology::DIM>* /* target */)
     {}
 };
 
@@ -2263,7 +2263,7 @@ public:
     {}
 
     template<typename SHORT_VEC, typename COUNTER_TYPE, typename END_TYPE, typename HOOD_TYPE>
-    void operator()(SHORT_VEC shortVec, COUNTER_TYPE *counter, END_TYPE end, HOOD_TYPE& hoodOld) const
+    void operator()(SHORT_VEC /* shortVec */, COUNTER_TYPE* /* counter */, END_TYPE end, HOOD_TYPE& hoodOld) const
     {
         typedef SHORT_VEC MyShortVec;
 
@@ -2335,7 +2335,7 @@ public:
     {}
 
     template<typename SHORT_VEC, typename COUNTER_TYPE, typename END_TYPE, typename HOOD_TYPE>
-    void operator()(SHORT_VEC shortVec, COUNTER_TYPE *counter, END_TYPE end, HOOD_TYPE& hoodOld) const
+    void operator()(SHORT_VEC /* shortVec */, COUNTER_TYPE* /* counter */, END_TYPE end, HOOD_TYPE& hoodOld) const
     {
         typedef SHORT_VEC MyShortVec;
 

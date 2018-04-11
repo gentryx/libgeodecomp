@@ -66,6 +66,14 @@ public:
         typedef typename APITraits::SelectTopology<CELL>::Value Topology;
         const Coord<DIM>& c = streak.origin;
 
+        // Constant conditional expressions are fine here, the
+        // compiler will be smart enough to optimize this away.
+        // They're there so we don't have to write redundant code for
+        // every combination of flags:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4127 )
+#endif
         if ((CUR_DIM == 2) && (HIGH == true)) {
             if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) &&
                 (c[CUR_DIM] == (box.origin[CUR_DIM] + box.dimensions[CUR_DIM] - 1))) {
@@ -101,6 +109,9 @@ public:
                 LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, false,        BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             }
         }
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
     }
 };
@@ -114,7 +125,7 @@ class LinePointerUpdateFunctor<CELL, DIM, true, 0, BOUNDARY_TOP, BOUNDARY_BOTTOM
 public:
     void operator()(
         const Streak<DIM>& streak,
-        const CoordBox<DIM>& box,
+        const CoordBox<DIM>& /* box */,
         const CELL **pointers,
         CELL *newLine,
         unsigned nanoStep)
