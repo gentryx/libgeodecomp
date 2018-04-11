@@ -564,8 +564,8 @@ private:
         Coord<2> chunkOffset = gridIndex.scale(chunkDim);
 
         for (int i = 0; i < elementsPerChunk; ++i) {
-            Coord<2> randomCoord = Coord<2>(Random::genUnsigned(chunkDim.x()),
-                                            Random::genUnsigned(chunkDim.y()));
+            Coord<2> randomCoord = Coord<2>(int(Random::genUnsigned(chunkDim.x())),
+                                            int(Random::genUnsigned(chunkDim.y())));
             randomCoord += chunkOffset;
 
             if (doesNotCollide(randomCoord, *grid, gridIndex, minDistance)) {
@@ -1123,7 +1123,7 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
+    void update(const NEIGHBORHOOD& hood, unsigned /* nanoStep */)
     {
         temp = (hood[Coord<3>( 0,  0, -1)].temp +
                 hood[Coord<3>( 0, -1,  0)].temp +
