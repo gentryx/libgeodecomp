@@ -2,10 +2,7 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
-// fixme: experiment 4996: unknown here
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4996 )
-#endif
+// fixme: experiment 4996: bad here
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/geometry/convexpolytope.h>

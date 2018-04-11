@@ -2,6 +2,10 @@
 #define LIBGEODECOMP_MISC_APITRAITS_H
 
 #include <libgeodecomp/config.h>
+// fixme: experiment 4996: unknown here
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4996 )
+#endif
 
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
