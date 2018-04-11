@@ -149,6 +149,11 @@ public:
     }
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 5027 )
+#endif
+
 /**
  * Extract a single member variable from a SoA grid
  */
@@ -238,13 +243,6 @@ public:
         edgeRadii(edgeRadii)
     {}
 
-#ifdef LIBGEODECOMP_WITH_CPP14
-    inline LoadMember(const LoadMember& other) = default;
-    inline LoadMember(LoadMember&& other) = default;
-    inline LoadMember& operator=(const LoadMember&) = default;
-    inline LoadMember& operator=(LoadMember&&) = default;
-#endif
-
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
     {
@@ -279,6 +277,10 @@ private:
     const Coord<3>& edgeRadii;
     long memberOffset;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 /**
  * This class duplicates some functionality from RegionStreakIterator,

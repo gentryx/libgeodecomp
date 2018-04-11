@@ -22,6 +22,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 5027 )
+#endif
+
 /**
  * The purpose of the TracingWriter is out output performance data
  * which allows the user to gauge execution time (current, remaining,
@@ -57,13 +62,6 @@ public:
         lastStep(0),
         maxSteps(maxSteps)
     {}
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-    inline TracingWriter(const TracingWriter& other) = default;
-    inline TracingWriter(TracingWriter&& other) = default;
-    inline TracingWriter& operator=(const TracingWriter&) = default;
-    inline TracingWriter& operator=(TracingWriter&&) = default;
-#endif
 
     virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
@@ -154,6 +152,10 @@ private:
         return ScopedTimer::time();
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

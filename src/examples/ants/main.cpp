@@ -220,6 +220,11 @@ private:
     }
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 5027 )
+#endif
+
 class AntTracer : public TracingWriter<Cell>
 {
 public:
@@ -228,13 +233,6 @@ public:
         const unsigned maxSteps ) :
         TracingWriter<Cell>(period, maxSteps)
     {}
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-    inline AntTracer(const AntTracer& other) = default;
-    inline AntTracer(AntTracer&& other) = default;
-    inline AntTracer& operator=(const AntTracer&) = default;
-    inline AntTracer& operator=(AntTracer&&) = default;
-#endif
 
     void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
@@ -285,6 +283,10 @@ void runSimulation()
 
     sim.run();
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 int main(int /* argc */, char** /* argv */)
 {

@@ -45,6 +45,11 @@ public:
 
     static const int DIM = Topology::DIM;
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 5027 )
+#endif
+
     template<typename CONCURRENCY_FUNCTOR, typename ANY_THREADED_UPDATE>
     class SoARegionUpdateHelper
     {
@@ -69,13 +74,6 @@ public:
             concurrencySpec(concurrencySpec),
             modelThreadingSpec(modelThreadingSpec)
         {}
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-        inline SoARegionUpdateHelper(const SoARegionUpdateHelper& other) = default;
-        inline SoARegionUpdateHelper(SoARegionUpdateHelper&& other) = default;
-        inline SoARegionUpdateHelper& operator=(const SoARegionUpdateHelper&) = default;
-        inline SoARegionUpdateHelper& operator=(SoARegionUpdateHelper&&) = default;
-#endif
 
         template<
             typename CELL1, long MY_DIM_X1, long MY_DIM_Y1, long MY_DIM_Z1, long INDEX1,
@@ -109,6 +107,10 @@ public:
         const CONCURRENCY_FUNCTOR *concurrencySpec;
         const ANY_THREADED_UPDATE *modelThreadingSpec;
     };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
     template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_TOPOLOGY, typename ANY_THREADED_UPDATE>
     void operator()(

@@ -1433,10 +1433,19 @@ public:
     double temp;
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 LIBFLATARRAY_REGISTER_SOA(
     JacobiCellStreakUpdate,
     ((double)(temp))
                           )
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 class Jacobi3DStreakUpdate : public CPUBenchmark
 {
@@ -1957,6 +1966,11 @@ public:
 
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 LIBFLATARRAY_REGISTER_SOA(
     LBMSoACell,
     ((double)(C))
@@ -1984,6 +1998,9 @@ LIBFLATARRAY_REGISTER_SOA(
     ((double)(velocityZ))
     ((LBMSoACell::State)(state))
                           )
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 class LBMClassic : public CPUBenchmark
 {
@@ -2173,9 +2190,16 @@ public:
         public APITraits::HasThreadedUpdate<1024>
     {};
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
     inline explicit SPMVMCellStreak(double v = 8.0) :
         value(v), sum(0)
     {}
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
