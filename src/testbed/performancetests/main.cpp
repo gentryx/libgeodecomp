@@ -2557,7 +2557,7 @@ public:
             Grid *gridOld = &grid1;
             Grid *gridNew = &grid2;
 
-            for (int t = 0; t < maxT; ++t) {
+            for (unsigned t = 0; t < maxT; ++t) {
                 using std::swap;
                 updateFunctor(region, *gridOld, gridNew, 0, concurrencySpec, threadedUpdateSpec);
                 swap(gridOld, gridNew);
@@ -2620,7 +2620,7 @@ public:
             Grid *gridOld = &grid1;
             Grid *gridNew = &grid2;
 
-            for (int t = 0; t < maxT; ++t) {
+            for (unsigned t = 0; t < maxT; ++t) {
                 using std::swap;
                 updateFunctor(region, *gridOld, gridNew, 0, concurrencySpec, threadedUpdateSpec);
                 swap(gridOld, gridNew);
@@ -2683,7 +2683,7 @@ public:
             Grid *gridOld = &grid1;
             Grid *gridNew = &grid2;
 
-            for (int t = 0; t < maxT; ++t) {
+            for (unsigned t = 0; t < maxT; ++t) {
                 using std::swap;
                 updateFunctor(region, *gridOld, gridNew, 0, concurrencySpec, threadedUpdateSpec);
                 swap(gridOld, gridNew);
