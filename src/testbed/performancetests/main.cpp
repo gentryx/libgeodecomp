@@ -1,8 +1,5 @@
-// fixme: experiment 4996: good here
-
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
-// fixme: experiment 4996: bad here
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/geometry/convexpolytope.h>
@@ -14,7 +11,6 @@
 #include <libgeodecomp/geometry/partitions/hilbertpartition.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
-// fixme: experiment 4996: bad here
 #include <libgeodecomp/misc/cpubenchmark.h>
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/linepointerassembly.h>
@@ -34,8 +30,6 @@
 #include <libflatarray/testbed/evaluate.hpp>
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
-
-// fixme: experiment 4996: bad here
 
 #include <emmintrin.h>
 #ifdef __AVX__
