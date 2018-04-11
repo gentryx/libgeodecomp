@@ -31,7 +31,7 @@ FILE *mm_fopen(const char *pathname, const char *mode)
     FILE *f;
     FILE *ret;
 
-    errno_t err = fopen_s(&ret, pathname, mpde);
+    errno_t err = fopen_s(&ret, pathname, mode);
     if (err != 0) {
         return NULL;
     }
@@ -498,7 +498,11 @@ char *mm_strdup(const char *s)
     }
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    return strcpy_s(s2, len+1, s);
+    errno_t err = strcpy_s(s2, len+1, s);
+    if (err != 0) {
+        throw std::runtime_error("strcpy_s() failed");
+    }
+    return s;
 #else
     return strcpy(s2, s);
 #endif
