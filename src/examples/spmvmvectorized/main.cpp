@@ -87,7 +87,17 @@ public:
     double sum;
 };
 
+// Don't overzealously warn about std::copy() usage:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4996 )
+#endif
+
 LIBFLATARRAY_REGISTER_SOA(Cell, ((double)(sum))((double)(value)))
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 class CellInitializerDiagonal : public SimpleInitializer<Cell>
 {

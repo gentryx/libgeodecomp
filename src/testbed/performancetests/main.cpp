@@ -2261,7 +2261,7 @@ public:
 
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4626 5027 )
+#pragma warning( disable : 4626 4996 5027 )
 #endif
 
 // This ought to go into a lambda but as long as CUDA isn't
