@@ -1432,9 +1432,12 @@ public:
     double temp;
 };
 
+// Removing inline functions are OK. Also, ignore constant overflows
+// here as they're caused by compiling for very large grids on a
+// 32-bit machine:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4307 4514 )
 #endif
 
 LIBFLATARRAY_REGISTER_SOA(
@@ -1854,15 +1857,25 @@ public:
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineX(
-        ACCESSOR1& hoodOld, int indexEnd,
-        ACCESSOR2& hoodNew, unsigned nanoStep)
+        ACCESSOR1& hoodOld,
+        int indexEnd,
+        ACCESSOR2& hoodNew,
+        unsigned /* nanoStep */)
     {
         updateLineXFluid(hoodOld, indexEnd, hoodNew);
     }
 
+    // ignore constant overflows here as they're caused by compiling
+    // for very large grids on a 32-bit machine:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4307 )
+#endif
+
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineXFluid(
-        ACCESSOR1& hoodOld, int indexEnd,
+        ACCESSOR1& hoodOld,
+        int indexEnd,
         ACCESSOR2& hoodNew)
     {
 #define GET_COMP(X, Y, Z, COMP) Double(&hoodOld[FixedCoord<X, Y, Z>()].COMP())
@@ -1940,6 +1953,11 @@ public:
             &hoodNew.B() << (omega_trm * GET_COMP(x,y,z+1,B) + omega_w1*( dir_indep_trm - velZ + one_point_five * SQR(velZ)));
         }
     }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
     double C;
     double N;
     double E;
@@ -1975,9 +1993,12 @@ public:
 #pragma warning( pop )
 #endif
 
+// Removing inline functions are OK. Also, ignore constant overflows
+// here as they're caused by compiling for very large grids on a
+// 32-bit machine:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4307 4514 )
 #endif
 
 LIBFLATARRAY_REGISTER_SOA(
