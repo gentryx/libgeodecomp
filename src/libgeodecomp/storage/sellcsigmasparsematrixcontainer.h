@@ -64,6 +64,12 @@ public:
 #pragma warning( pop )
 #endif
 
+// Not inlining is OK. BTW: It's not even being requested, MSVC...
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
+
 /**
  * Helper class to initialize the sell container from an adjacency matrix.
  * This is a class and not a method, because there are two different implementations,
@@ -189,6 +195,10 @@ public:
         }
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
