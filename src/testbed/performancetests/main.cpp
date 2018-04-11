@@ -1,3 +1,8 @@
+// fixme: experiment
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4996 )
+#endif
+
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/io/simpleinitializer.h>
