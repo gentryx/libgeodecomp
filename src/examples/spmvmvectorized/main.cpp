@@ -1,5 +1,3 @@
-#pragma warning( disable : 4514 )
-
 #include <libgeodecomp.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/asciiwriter.h>

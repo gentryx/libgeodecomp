@@ -28,7 +28,6 @@
 FILE *mm_fopen(const char *pathname, const char *mode)
 {
 #ifdef _MSC_BUILD
-    FILE *f;
     FILE *ret;
 
     errno_t err = fopen_s(&ret, pathname, mode);
@@ -143,8 +142,21 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
     if (fgets(line, MM_MAX_LINE_LENGTH, f) == NULL)
         return MM_PREMATURE_EOF;
 
-    if (SSCANF(line, "%s %s %s %s %s", banner, mtx, crd, data_type,
-        storage_scheme) != 5)
+#ifdef _MSC_BUILD
+    if (sscanf_s(line, "%s %s %s %s %s",
+                 banner,         MM_MAX_TOKEN_LENGTH,
+                 mtx,            MM_MAX_TOKEN_LENGTH,
+                 crd,            MM_MAX_TOKEN_LENGTH,
+                 data_type,      MM_MAX_TOKEN_LENGTH,
+                 storage_scheme, MM_MAX_TOKEN_LENGTH) != 5)
+#else
+    if (sscanf(line, "%s %s %s %s %s",
+                  banner,
+                  mtx,
+                  crd,
+                  data_type,
+                  storage_scheme) != 5)
+#endif
         return MM_PREMATURE_EOF;
 
     for (p=mtx; *p!='\0'; *p=char(tolower(*p)),p++);  /* convert to lower case */
@@ -236,7 +248,17 @@ int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz )
     }while (line[0] == '%');
 
     /* line[] is either blank or has M,N, nz */
-    if (SSCANF(line, "%d %d %d", M, N, nz) == 3)
+#ifdef _MSC_BUILD
+    if (sscanf_s(line, "%d %d %d",
+                 M,  MM_MAX_LINE_LENGTH,
+                 N,  MM_MAX_LINE_LENGTH,
+                 nz, MM_MAX_LINE_LENGTH) == 3)
+#else
+    if (sscanf(line, "%d %d %d",
+               M,
+               N,
+               nz) == 3)
+#endif
         return 0;
 
     else

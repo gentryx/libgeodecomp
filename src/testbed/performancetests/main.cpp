@@ -2774,7 +2774,7 @@ public:
         double seconds = 0;
         {
             ScopedTimer timer(&seconds);
-            for (int t = 0; t < maxT; ++t) {
+            for (unsigned t = 0; t < maxT; ++t) {
                 for (int i = 0; i < rowsPadded / C; ++i) {
                     int offs = cs[i];
                     __m256d tmp = _mm256_load_pd(resPtr + i*C);
