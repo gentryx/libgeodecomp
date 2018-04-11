@@ -502,7 +502,7 @@ char *mm_strdup(const char *s)
     if (err != 0) {
         throw std::runtime_error("strcpy_s() failed");
     }
-    return s;
+    return s2;
 #else
     return strcpy(s2, s);
 #endif
