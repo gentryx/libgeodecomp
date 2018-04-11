@@ -67,6 +67,13 @@ public:
         offsetNorth(offsetNorth)
     {}
 
+    // ignore constant overflows here as they're caused by compiling
+    // for very large grids on a 32-bit machine:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4307 )
+#endif
+
     template<int X, int Y, int Z>
     __host__ __device__
     const SOA_ACCESSOR_OUT<CELL, LIBFLATARRAY_PARAMS_FULL(X, Y, Z, DIM_X, DIM_Y, DIM_Z, INDEX)>
@@ -86,6 +93,10 @@ public:
 
         return ACCESSOR(tempAccessor.data(), tempIndex);
     }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
     void operator>>(CELL& cell) const
     {
