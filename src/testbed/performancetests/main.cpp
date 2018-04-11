@@ -1383,11 +1383,20 @@ public:
             same.c = _mm_mul_pd(same.c, oneSeventh);
             same.d = _mm_mul_pd(same.d, oneSeventh);
 
+            // MSVC is wrong: this is not a comma operator, but just template
+            // parameters:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4709 )
+#endif
             // store results
             _mm_store_pd(&hoodNew[LibFlatArray::coord<0, 0, 0>()].temp(), same.a);
             _mm_store_pd(&hoodNew[LibFlatArray::coord<2, 0, 0>()].temp(), same.b);
             _mm_store_pd(&hoodNew[LibFlatArray::coord<4, 0, 0>()].temp(), same.c);
             _mm_store_pd(&hoodNew[LibFlatArray::coord<6, 0, 0>()].temp(), same.d);
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
             // cycle members
             odds0 = odds4;

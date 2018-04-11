@@ -80,7 +80,16 @@ public:
     operator[](FixedCoord<X, Y, Z>) const
     {
         typedef SOA_ACCESSOR_OUT<CELL, LIBFLATARRAY_PARAMS_FULL(X, Y, Z, DIM_X, DIM_Y, DIM_Z, INDEX)> ACCESSOR;
+        // MSVC is wrong: this is not a comma operator, but just template
+        // parameters:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4709 )
+#endif
         ACCESSOR tempAccessor = accessor[LibFlatArray::coord<X, Y, Z>()];
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
         tempIndex =
             tempAccessor.index() +
             ACCESSOR::gen_index(
