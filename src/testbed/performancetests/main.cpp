@@ -362,7 +362,7 @@ public:
                 }
             }
 
-            Region<3> r2 = r1.expand(expansionWidth);
+            Region<3> r2 = r1.expand(unsigned(expansionWidth));
         }
 
         return seconds;
@@ -506,7 +506,11 @@ public:
         {
             ScopedTimer t(&seconds);
 
-            Region<1> q = r.expandWithTopology(expansionWidth, Coord<1>(), Topologies::Unstructured::Topology(), adjacency);
+            Region<1> q = r.expandWithTopology(
+                unsigned(expansionWidth),
+                Coord<1>(),
+                Topologies::Unstructured::Topology(),
+                adjacency);
 
             if (q.size() == 4711) {
                 std::cout << "pure debug statement to prevent the compiler from optimizing away the previous function";
@@ -826,8 +830,8 @@ public:
         int offsetZ = dimX * dimY;
         int maxT = 20;
 
-        double *gridOld = new double[dimX * dimY * dimZ];
-        double *gridNew = new double[dimX * dimY * dimZ];
+        double *gridOld = new double[unsigned(dimX * dimY * dimZ)];
+        double *gridNew = new double[unsigned(dimX * dimY * dimZ)];
 
         for (int z = 0; z < dimZ; ++z) {
             for (int y = 0; y < dimY; ++y) {
@@ -903,8 +907,8 @@ public:
         int offsetZ = dimX * dimY;
         int maxT = 20;
 
-        double *gridOld = new double[dimX * dimY * dimZ];
-        double *gridNew = new double[dimX * dimY * dimZ];
+        double *gridOld = new double[unsigned(dimX * dimY * dimZ)];
+        double *gridNew = new double[unsigned(dimX * dimY * dimZ)];
 
         for (int z = 0; z < dimZ; ++z) {
             for (int y = 0; y < dimY; ++y) {
