@@ -249,15 +249,9 @@ int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz )
 
     /* line[] is either blank or has M,N, nz */
 #ifdef _MSC_BUILD
-    if (sscanf_s(line, "%d %d %d",
-                 M,  MM_MAX_LINE_LENGTH,
-                 N,  MM_MAX_LINE_LENGTH,
-                 nz, MM_MAX_LINE_LENGTH) == 3)
+    if (sscanf_s(line, "%d %d %d", M, N, n) == 3)
 #else
-    if (sscanf(line, "%d %d %d",
-               M,
-               N,
-               nz) == 3)
+    if (sscanf(line, "%d %d %d", M, N, nz) == 3)
 #endif
         return 0;
 

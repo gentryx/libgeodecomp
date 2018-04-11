@@ -38,6 +38,12 @@ static const int C = 4;
 static const int SIGMA = 1;
 typedef short_vec<ValueType, C> ShortVec;
 
+// Removing inline functions is fine:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 )
+#endif
+
 class Cell
 {
 public:
@@ -84,6 +90,10 @@ public:
     double value;
     double sum;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 // Don't overzealously warn about std::copy() usage:
 #ifdef _MSC_BUILD
