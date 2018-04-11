@@ -1,7 +1,4 @@
-// fixme: experiment
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4996 )
-#endif
+// fixme: experiment 4996: good here
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
@@ -35,6 +32,11 @@
 #include <libflatarray/testbed/evaluate.hpp>
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
+
+// fixme: experiment 4996: unknown here
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4996 )
+#endif
 
 #include <emmintrin.h>
 #ifdef __AVX__
