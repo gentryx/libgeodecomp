@@ -141,30 +141,30 @@ public:
             }
             Square currentSquare = squareStack.back();
             squareStack.pop_back();
-            const Coord<DIM>& origin = currentSquare.origin;
-            const Coord<DIM>& dimensions = currentSquare.dimensions;
+            const Coord<DIM>& subOrigin = currentSquare.origin;
+            const Coord<DIM>& subDimensions = currentSquare.dimensions;
 
-            if (offset >= dimensions.prod()) {
+            if (offset >= subDimensions.prod()) {
                 endReached = true;
-                cursor = origin;
+                cursor = subOrigin;
                 return;
             }
-            if (hasTrivialDimensions(dimensions)) {
-                digDownTrivial(origin, dimensions, offset);
-            } else if (isCached(dimensions)) {
-                digDownCached(origin, dimensions, offset);
+            if (hasTrivialDimensions(subDimensions)) {
+                digDownTrivial(subOrigin, subDimensions, offset);
+            } else if (isCached(subDimensions)) {
+                digDownCached(subOrigin, subDimensions, offset);
             } else {
                 digDownRecursion(offset, currentSquare);
             }
         }
 
         inline void digDownTrivial(
-            const Coord<DIM>& origin,
+            const Coord<DIM>& subOrigin,
             const Coord<DIM>& dimensions,
             std::ptrdiff_t offset)
         {
             sublevelState = TRIVIAL;
-            cursor = origin;
+            cursor = subOrigin;
 
             trivialSquareDirDim = 0;
             for (int i = 1; i < DIM; ++i) {
@@ -178,13 +178,13 @@ public:
         }
 
         inline void digDownCached(
-            const Coord<DIM>& origin,
+            const Coord<DIM>& subOrigin,
             const Coord<DIM>& dimensions,
             std::ptrdiff_t offset)
         {
             sublevelState = CACHED;
             CoordVector& coords = (*ZCurvePartition<DIM>::coordsCache)[dimensions];
-            cachedSquareOrigin = origin;
+            cachedSquareOrigin = subOrigin;
             cachedSquareCoordsIterator = &coords[static_cast<std::size_t>(offset)];
             cachedSquareCoordsEnd      = &coords[0] + coords.size();
             cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
@@ -192,9 +192,9 @@ public:
 
         inline void digDownRecursion(std::ptrdiff_t offset, Square currentSquare)
         {
-            const Coord<DIM>& dimensions = currentSquare.dimensions;
-            Coord<DIM> halfDimensions = dimensions / 2;
-            Coord<DIM> remainingDimensions = dimensions - halfDimensions;
+            const Coord<DIM>& subDimensions = currentSquare.dimensions;
+            Coord<DIM> halfDimensions = subDimensions / 2;
+            Coord<DIM> remainingDimensions = subDimensions - halfDimensions;
 
             const std::size_t numQuadrants = ZCurvePartition<DIM>::Iterator::NUM_QUADRANTS;
             Coord<DIM> quadrantDims[numQuadrants];
