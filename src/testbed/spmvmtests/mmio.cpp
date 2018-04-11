@@ -296,7 +296,7 @@ int mm_write_mtx_array_size(FILE *f, int M, int N)
 /* use when I[], J[], and val[]J, and val[] are already allocated */
 /******************************************************************/
 
-int mm_read_mtx_crd_data(FILE *f, int M, int nz, int I[], int J[],
+int mm_read_mtx_crd_data(FILE *f, int nz, int I[], int J[],
         double val[], MM_typecode matcode)
 {
     int i;
@@ -401,7 +401,7 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
         if (*val == NULL) {
             throw std::runtime_error("malloc() failed");
         }
-        ret_code = mm_read_mtx_crd_data(f, *M, *nz, *I, *J, *val,
+        ret_code = mm_read_mtx_crd_data(f, *nz, *I, *J, *val,
                 *matcode);
         if (ret_code != 0) return ret_code;
     }
@@ -411,14 +411,14 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
         if (*val == NULL) {
             throw std::runtime_error("malloc() failed");
         }
-        ret_code = mm_read_mtx_crd_data(f, *M, *nz, *I, *J, *val,
+        ret_code = mm_read_mtx_crd_data(f, *nz, *I, *J, *val,
                 *matcode);
         if (ret_code != 0) return ret_code;
     }
 
     else if mm_is_pattern(*matcode)
     {
-        ret_code = mm_read_mtx_crd_data(f, *M, *nz, *I, *J, *val,
+        ret_code = mm_read_mtx_crd_data(f, *nz, *I, *J, *val,
                 *matcode);
         if (ret_code != 0) return ret_code;
     }
