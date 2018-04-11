@@ -844,7 +844,7 @@ public:
 
         double seconds = 0;
         {
-            ScopedTimer t(&seconds);
+            ScopedTimer timer(&seconds);
 
             for (int t = 0; t < maxT; ++t) {
                 for (int z = 1; z < (dimZ - 1); ++z) {
@@ -921,7 +921,7 @@ public:
 
         double seconds = 0;
         {
-            ScopedTimer t(&seconds);
+            ScopedTimer timer(&seconds);
 
             for (int t = 0; t < maxT; ++t) {
                 for (int z = 1; z < (dimZ - 1); ++z) {
@@ -1496,7 +1496,7 @@ public:
 
         double seconds = 0;
         {
-            ScopedTimer t(&seconds);
+            ScopedTimer timer(&seconds);
 
             for (int t = 0; t < maxT; ++t) {
                 typedef UpdateFunctorHelpers::Selector<
