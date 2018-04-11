@@ -13,10 +13,10 @@
 #include <hpx/runtime/serialization/serialize.hpp>
 #endif
 
-// Kill warning 4514 in system headers
+// Kill some warnings in system headers:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4996 )
 #endif
 
 // For Intel MPI we need to source mpi.h before stdio.h:

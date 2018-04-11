@@ -3,8 +3,18 @@
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 
-#include <map>
+// Kill some warnings in system headers:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4996 )
+#endif
+
 #include <algorithm>
+#include <map>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 using namespace LibGeoDecomp;
 

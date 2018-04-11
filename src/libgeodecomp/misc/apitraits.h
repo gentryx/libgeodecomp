@@ -2,19 +2,15 @@
 #define LIBGEODECOMP_MISC_APITRAITS_H
 
 #include <libgeodecomp/config.h>
-// fixme: experiment 4996: good here
 #include <libgeodecomp/geometry/floatcoord.h>
-// fixme: experiment 4996: bad here
-
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
-// fixme: experiment 4996: bad here
-// Kill warning 4514 in system headers
+// Kill some warnings in system headers:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4996 )
 #endif
 
 #ifdef LIBGEODECOMP_WITH_MPI

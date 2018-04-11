@@ -5,10 +5,20 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <iostream>
-#include <cstdlib>
+// Kill some warnings in system headers:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4996 )
+#endif
+
 #include <algorithm>
+#include <cstdlib>
+#include <iostream>
 #include <map>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 using namespace LibGeoDecomp;
 
