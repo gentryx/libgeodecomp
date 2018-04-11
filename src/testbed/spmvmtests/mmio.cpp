@@ -22,7 +22,24 @@
 #pragma warning( pop )
 #endif
 
+#include <libgeodecomp/config.h>
 #include "mmio.h"
+
+FILE *mm_fopen(const char *pathname, const char *mode)
+{
+#ifdef _MSC_BUILD
+    FILE *f;
+    FILE *ret;
+
+    errno_t err = fopen_s(&ret, pathname, mpde);
+    if (err != 0) {
+        return NULL;
+    }
+    return ret;
+#else
+    return fopen(pathame, mode);
+#endif
+}
 
 int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
                 double **val_, int **I_, int **J_)
@@ -34,7 +51,7 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     double *val;
     int *I, *J;
 
-    if ((f = FOPEN(fname, "r")) == NULL)
+    if ((f = mm_fopen(fname, "r")) == NULL)
             return -1;
 
 
@@ -355,7 +372,7 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
 
     if (strcmp(fname, "stdin") == 0) f=stdin;
     else
-    if ((f = FOPEN(fname, "r")) == NULL)
+    if ((f = mm_fopen(fname, "r")) == NULL)
         return MM_COULD_NOT_READ_FILE;
 
 
@@ -432,7 +449,7 @@ int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
     if (strcmp(fname, "stdout") == 0)
         f = stdout;
     else
-    if ((f = FOPEN(fname, "w")) == NULL)
+    if ((f = mm_fopen(fname, "w")) == NULL)
         return MM_COULD_NOT_WRITE_FILE;
 
     /* print banner followed by typecode */
@@ -479,7 +496,12 @@ char *mm_strdup(const char *s)
     if (!s2) {
         throw std::runtime_error("malloc() failed");
     }
-    return STRCPY(s2, s);
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    return strcpy_s(s2, len+1, s);
+#else
+    return strcpy(s2, s);
+#endif
 }
 
 char  *mm_typecode_to_str(MM_typecode matcode)

@@ -243,7 +243,7 @@ public:
         // using this C API provided by matrix market
         MM_typecode matcode;
         int M, N, nz;
-        FILE *f = FOPEN(fileName.c_str(), "r");
+        FILE *f = mm_fopen(fileName.c_str(), "r");
         if (!f) {
             LOG(FATAL, "CRSInitializer failed to open file " << fileName);
             throw std::logic_error("fopen() failed");
@@ -307,7 +307,7 @@ public:
         // using this C API provided by matrix market
         MM_typecode matcode;
         int M, N, nz;
-        FILE *f = FOPEN(fileName.c_str(), "r");
+        FILE *f = mm_fopen(fileName.c_str(), "r");
         if (!f) {
             LOG(FATAL, "SparseMatrixInitializerMM failed to open file " << fileName);
             throw std::logic_error("fopen() failed");

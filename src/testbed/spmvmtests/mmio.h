@@ -16,18 +16,16 @@
 typedef char MM_typecode[4];
 
 #ifdef _MSC_BUILD
-#  define FOPEN fopen_s
 #  define FSCANF fscanf_s
 #  define SPRINTF sprintf_s
 #  define SSCANF sscanf_s
-#  define STRCPY strcpy_s
 #else
-#  define FOPEN fopen
 #  define FSCANF fscanf
 #  define SPRINTF sprintf
 #  define SSCANF sscanf
-#  define STRCPY strcpy
 #endif
+
+FILE *mm_fopen(const char *pfadname, const char *modus);
 
 char *mm_typecode_to_str(MM_typecode matcode);
 
