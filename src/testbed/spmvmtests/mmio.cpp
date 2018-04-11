@@ -34,7 +34,7 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     double *val;
     int *I, *J;
 
-    if ((f = fopen(fname, "r")) == NULL)
+    if ((f = FOPEN(fname, "r")) == NULL)
             return -1;
 
 
@@ -88,7 +88,7 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
 
     for (i=0; i<nz; i++)
     {
-        int rc = fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
+        int rc = FSCANF(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
         if (rc != 3) {
             throw std::runtime_error("failed to parse input file");
         }
@@ -126,7 +126,7 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
     if (fgets(line, MM_MAX_LINE_LENGTH, f) == NULL)
         return MM_PREMATURE_EOF;
 
-    if (sscanf(line, "%s %s %s %s %s", banner, mtx, crd, data_type,
+    if (SSCANF(line, "%s %s %s %s %s", banner, mtx, crd, data_type,
         storage_scheme) != 5)
         return MM_PREMATURE_EOF;
 
@@ -219,13 +219,13 @@ int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz )
     }while (line[0] == '%');
 
     /* line[] is either blank or has M,N, nz */
-    if (sscanf(line, "%d %d %d", M, N, nz) == 3)
+    if (SSCANF(line, "%d %d %d", M, N, nz) == 3)
         return 0;
 
     else
     do
     {
-        num_items_read = fscanf(f, "%d %d %d", M, N, nz);
+        num_items_read = FSCANF(f, "%d %d %d", M, N, nz);
         if (num_items_read == EOF) return MM_PREMATURE_EOF;
     }
     while (num_items_read != 3);
@@ -249,13 +249,13 @@ int mm_read_mtx_array_size(FILE *f, int *M, int *N)
     }while (line[0] == '%');
 
     /* line[] is either blank or has M,N, nz */
-    if (sscanf(line, "%d %d", M, N) == 2)
+    if (SSCANF(line, "%d %d", M, N) == 2)
         return 0;
 
     else /* we have a blank line */
     do
     {
-        num_items_read = fscanf(f, "%d %d", M, N);
+        num_items_read = FSCANF(f, "%d %d", M, N);
         if (num_items_read == EOF) return MM_PREMATURE_EOF;
     }
     while (num_items_read != 2);
@@ -286,14 +286,14 @@ int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
     if mm_is_complex(matcode)
     {
         for (i=0; i<nz; i++)
-            if (fscanf(f, "%d %d %lg %lg", &I[i], &J[i], &val[2*i], &val[2*i+1])
+            if (FSCANF(f, "%d %d %lg %lg", &I[i], &J[i], &val[2*i], &val[2*i+1])
                 != 4) return MM_PREMATURE_EOF;
     }
     else if mm_is_real(matcode)
     {
         for (i=0; i<nz; i++)
         {
-            if (fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i])
+            if (FSCANF(f, "%d %d %lg\n", &I[i], &J[i], &val[i])
                 != 3) return MM_PREMATURE_EOF;
 
         }
@@ -302,7 +302,7 @@ int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
     else if mm_is_pattern(matcode)
     {
         for (i=0; i<nz; i++)
-            if (fscanf(f, "%d %d", &I[i], &J[i])
+            if (FSCANF(f, "%d %d", &I[i], &J[i])
                 != 2) return MM_PREMATURE_EOF;
     }
     else
@@ -317,19 +317,19 @@ int mm_read_mtx_crd_entry(FILE *f, int *I, int *J,
 {
     if mm_is_complex(matcode)
     {
-            if (fscanf(f, "%d %d %lg %lg", I, J, real, imag)
+            if (FSCANF(f, "%d %d %lg %lg", I, J, real, imag)
                 != 4) return MM_PREMATURE_EOF;
     }
     else if mm_is_real(matcode)
     {
-            if (fscanf(f, "%d %d %lg\n", I, J, real)
+            if (FSCANF(f, "%d %d %lg\n", I, J, real)
                 != 3) return MM_PREMATURE_EOF;
 
     }
 
     else if mm_is_pattern(matcode)
     {
-            if (fscanf(f, "%d %d", I, J) != 2) return MM_PREMATURE_EOF;
+            if (FSCANF(f, "%d %d", I, J) != 2) return MM_PREMATURE_EOF;
     }
     else
         return MM_UNSUPPORTED_TYPE;
@@ -355,7 +355,7 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
 
     if (strcmp(fname, "stdin") == 0) f=stdin;
     else
-    if ((f = fopen(fname, "r")) == NULL)
+    if ((f = FOPEN(fname, "r")) == NULL)
         return MM_COULD_NOT_READ_FILE;
 
 
@@ -432,7 +432,7 @@ int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
     if (strcmp(fname, "stdout") == 0)
         f = stdout;
     else
-    if ((f = fopen(fname, "w")) == NULL)
+    if ((f = FOPEN(fname, "w")) == NULL)
         return MM_COULD_NOT_WRITE_FILE;
 
     /* print banner followed by typecode */
@@ -474,12 +474,12 @@ int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
 */
 char *mm_strdup(const char *s)
 {
-    int len = strlen(s);
+    std::size_t len = strlen(s);
     char *s2 = (char *) malloc((len+1)*sizeof(char));
     if (!s2) {
         throw std::runtime_error("malloc() failed");
     }
-    return strcpy(s2, s);
+    return STRCPY(s2, s);
 }
 
 char  *mm_typecode_to_str(MM_typecode matcode)
@@ -539,7 +539,7 @@ char  *mm_typecode_to_str(MM_typecode matcode)
         throw std::runtime_error("error in mm_typecode_to_str()");
     }
 
-    sprintf(buffer,"%s %s %s %s", types[0], types[1], types[2], types[3]);
+    SPRINTF(buffer,"%s %s %s %s", types[0], types[1], types[2], types[3]);
     return mm_strdup(buffer);
 
 }

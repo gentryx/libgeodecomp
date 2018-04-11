@@ -15,6 +15,20 @@
 
 typedef char MM_typecode[4];
 
+#ifdef _MSC_BUILD
+#  define FOPEN fopen_s
+#  define FSCANF fscanf_s
+#  define SPRINTF sprintf_s
+#  define SSCANF sscanf_s
+#  define STRCPY strcpy_s
+#else
+#  define FOPEN fopen
+#  define FSCANF fscanf
+#  define SPRINTF sprintf
+#  define SSCANF sscanf
+#  define STRCPY strcpy
+#endif
+
 char *mm_typecode_to_str(MM_typecode matcode);
 
 int mm_read_banner(FILE *f, MM_typecode *matcode);

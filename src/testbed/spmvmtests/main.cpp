@@ -243,7 +243,7 @@ public:
         // using this C API provided by matrix market
         MM_typecode matcode;
         int M, N, nz;
-        FILE *f = fopen(fileName.c_str(), "r");
+        FILE *f = FOPEN(fileName.c_str(), "r");
         if (!f) {
             LOG(FATAL, "CRSInitializer failed to open file " << fileName);
             throw std::logic_error("fopen() failed");
@@ -264,7 +264,7 @@ public:
         for (int i = 0; i < nz; ++i) {
             int m, n;
             double tmp;
-            if (fscanf(f, "%d %d %lg\n", &m, &n, &tmp) != 3) {
+            if (FSCANF(f, "%d %d %lg\n", &m, &n, &tmp) != 3) {
                 throw std::logic_error("Failed to parse mtx format");
             }
             adjacency << std::make_pair(Coord<2>(m - 1, n - 1), tmp);
@@ -292,7 +292,7 @@ public:
     SparseMatrixInitializerMM(
         const std::string& file,
         const Coord<3>& dim,
-        int maxT) :
+        unsigned maxT) :
         SimpleInitializer<CELL>(Coord<1>(dim.x()), maxT),
         fileName(file),
         size(dim.x())
@@ -307,7 +307,7 @@ public:
         // using this C API provided by matrix market
         MM_typecode matcode;
         int M, N, nz;
-        FILE *f = fopen(fileName.c_str(), "r");
+        FILE *f = FOPEN(fileName.c_str(), "r");
         if (!f) {
             LOG(FATAL, "SparseMatrixInitializerMM failed to open file " << fileName);
             throw std::logic_error("fopen() failed");
