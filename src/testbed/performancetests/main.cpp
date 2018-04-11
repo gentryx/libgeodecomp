@@ -1153,7 +1153,7 @@ public:
     double performance(std::vector<int> rawDim)
     {
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
-        int maxT = 5;
+        unsigned maxT = 5;
         SerialSimulator<JacobiCellClassic> sim(
             new NoOpInitializer<JacobiCellClassic>(dim, maxT));
 
@@ -1195,7 +1195,7 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
+    void update(const NEIGHBORHOOD& hood, unsigned /* nanoStep */)
     {
         temp = (hood[FixedCoord< 0,  0, -1>()].temp +
                 hood[FixedCoord< 0, -1,  0>()].temp +
@@ -1225,7 +1225,7 @@ public:
     double performance(std::vector<int> rawDim)
     {
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
-        int maxT = 20;
+        unsigned maxT = 20;
 
         SerialSimulator<JacobiCellFixedHood> sim(
             new NoOpInitializer<JacobiCellFixedHood>(dim, maxT));
@@ -1543,7 +1543,7 @@ public:
     double performance(std::vector<int> rawDim)
     {
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
-        int maxT = 20;
+        unsigned maxT = 20;
         SerialSimulator<JacobiCellStreakUpdate> sim(
             new NoOpInitializer<JacobiCellStreakUpdate>(dim, maxT));
 
@@ -2061,7 +2061,7 @@ public:
     double performance(std::vector<int> rawDim)
     {
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
-        int maxT = 20;
+        unsigned maxT = 20;
         SerialSimulator<LBMCell> sim(
             new NoOpInitializer<LBMCell>(dim, maxT));
 
@@ -2105,7 +2105,7 @@ public:
     double performance(std::vector<int> rawDim)
     {
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
-        int maxT = 200;
+        unsigned maxT = 200;
         OpenMPSimulator<LBMSoACell> sim(
             new NoOpInitializer<LBMSoACell>(dim, maxT));
 
@@ -2423,7 +2423,7 @@ private:
 
 public:
     inline
-    SparseMatrixInitializer(const Coord<3>& dim, int maxT) :
+    SparseMatrixInitializer(const Coord<3>& dim, unsigned maxT) :
         SimpleInitializer<CELL>(Coord<1>(dim.x()), maxT),
         size(dim.x())
     {}
@@ -2541,7 +2541,7 @@ public:
         Grid grid1(region);
 
         // 2. init grid old
-        const int maxT = 3.0e8 / dim.x();
+        const unsigned maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMCell, Grid> init(dim, maxT);
         init.grid(&grid1);
         Grid grid2 = grid1;
@@ -2603,7 +2603,7 @@ public:
         Grid grid1(size);
 
         // 2. init grid old
-        const int maxT = 3.0e8 / dim.x();
+        const unsigned maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
         init.grid(&grid1);
         Grid grid2 = grid1;
@@ -2666,7 +2666,7 @@ public:
         Grid grid1(size);
 
         // 2. init grid old
-        const int maxT = 3.0e8 / dim.x();
+        const unsigned maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMSoACellInf, Grid> init(dim, maxT);
         init.grid(&grid1);
         Grid grid2 = grid1;
@@ -2757,7 +2757,7 @@ public:
         Grid gridNew(size);
 
         // 2. init grid old
-        const int maxT = 3.0e8 / dim.x();
+        const unsigned maxT = 3.0e8 / dim.x();
         SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
         init.grid(&gridOld);
 
