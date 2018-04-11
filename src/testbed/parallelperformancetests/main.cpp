@@ -9,12 +9,12 @@
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/misc/cpubenchmark.h>
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/parallelization/nesting/stepper.h>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
 #include <libflatarray/testbed/evaluate.hpp>
 
-#include "../performancetests/cpubenchmark.h"
 #include "mysimplecell.h"
 
 using namespace LibGeoDecomp;

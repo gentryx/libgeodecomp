@@ -11,6 +11,7 @@
 #include <libgeodecomp/geometry/partitions/hilbertpartition.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
+#include <libgeodecomp/misc/cpubenchmark.h>
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/linepointerassembly.h>
 #include <libgeodecomp/storage/linepointerupdatefunctor.h>
@@ -38,8 +39,6 @@
 #include <iomanip>
 #include <iostream>
 #include <stdio.h>
-
-#include "cpubenchmark.h"
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;
@@ -1556,6 +1555,12 @@ public:
     }
 };
 
+// padding is fine:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 class LBMCell
 {
 public:
@@ -1965,6 +1970,10 @@ public:
     State state;
 
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #ifdef _MSC_BUILD
 #pragma warning( push )
