@@ -328,7 +328,7 @@ public:
         for (int i = 0; i < nz; ++i) {
             int m, n;
             double tmp;
-            if (fscanf(f, "%d %d %lg\n", &m, &n, &tmp) != 3) {
+            if (FSCANF(f, "%d %d %lg\n", &m, &n, &tmp) != 3) {
                 throw std::logic_error("Failed to parse mtx format");
             }
             weights << std::make_pair(Coord<2>(m - 1, n - 1), tmp);
