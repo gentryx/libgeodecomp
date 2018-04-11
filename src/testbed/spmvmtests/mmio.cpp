@@ -543,3 +543,7 @@ char  *mm_typecode_to_str(MM_typecode matcode)
     return mm_strdup(buffer);
 
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
