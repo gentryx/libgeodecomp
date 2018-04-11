@@ -403,7 +403,7 @@ public:
     {
         int elementsPerChunk = 5;
         int numChunks = numCells / elementsPerChunk;
-        Coord<2> gridSize = Coord<2>::diagonal(sqrt(numChunks));
+        Coord<2> gridSize = Coord<2>::diagonal(int(sqrt(numChunks)));
         Coord<2> chunkDim(100, 100);
         Coord<2> globalDim = chunkDim.scale(gridSize);
         double minDistance = 10;
@@ -2541,7 +2541,7 @@ public:
         Grid grid1(region);
 
         // 2. init grid old
-        const unsigned maxT = 3.0e8 / dim.x();
+        const unsigned maxT = unsigned(3.0e8 / dim.x());
         SparseMatrixInitializer<SPMVMCell, Grid> init(dim, maxT);
         init.grid(&grid1);
         Grid grid2 = grid1;
@@ -2603,7 +2603,7 @@ public:
         Grid grid1(size);
 
         // 2. init grid old
-        const unsigned maxT = 3.0e8 / dim.x();
+        const unsigned maxT = unsigned(3.0e8 / dim.x());
         SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
         init.grid(&grid1);
         Grid grid2 = grid1;
@@ -2666,7 +2666,7 @@ public:
         Grid grid1(size);
 
         // 2. init grid old
-        const unsigned maxT = 3.0e8 / dim.x();
+        const unsigned maxT = unsigned(3.0e8 / dim.x());
         SparseMatrixInitializer<SPMVMSoACellInf, Grid> init(dim, maxT);
         init.grid(&grid1);
         Grid grid2 = grid1;

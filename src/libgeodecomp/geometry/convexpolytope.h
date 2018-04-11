@@ -172,8 +172,8 @@ public:
         Coord<DIM> minInt;
         Coord<DIM> deltaInt;
         for (int i = 0; i < DIM; ++i) {
-            minInt[i] = minCoord[i];
-            deltaInt[i] = delta[i];
+            minInt[i] = int(minCoord[i]);
+            deltaInt[i] = int(delta[i]);
         }
         myBoundingBox = CoordBox<DIM>(minInt, deltaInt);
 
