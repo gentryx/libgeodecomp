@@ -2244,14 +2244,14 @@ public:
     template<typename SHORT_VEC, typename COUNTER_TYPE, typename END_TYPE, typename HOOD_TYPE>
     void operator()(SHORT_VEC shortVec, COUNTER_TYPE *counter, END_TYPE end, HOOD_TYPE& hoodOld) const
     {
-        typedef SHORT_VEC ShortVec;
+        typedef SHORT_VEC MyShortVec;
 
-        for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
-            ShortVec tmp;
+        for (; hoodNew.index() < end; hoodNew += MyShortVec::ARITY, ++hoodOld) {
+            MyShortVec tmp;
             tmp.load_aligned(&hoodNew->sum());
 
             for (const auto& j: hoodOld.weights(0)) {
-                ShortVec weights, values;
+                MyShortVec weights, values;
                 weights.load_aligned(j.second());
                 values.gather(&hoodOld->value(), j.first());
                 tmp += values * weights;
@@ -2316,11 +2316,11 @@ public:
     template<typename SHORT_VEC, typename COUNTER_TYPE, typename END_TYPE, typename HOOD_TYPE>
     void operator()(SHORT_VEC shortVec, COUNTER_TYPE *counter, END_TYPE end, HOOD_TYPE& hoodOld) const
     {
-        typedef SHORT_VEC ShortVec;
+        typedef SHORT_VEC MyShortVec;
 
-        ShortVec tmp, weights, values;
+        MyShortVec tmp, weights, values;
 
-        for (; hoodNew.index() < end; hoodNew += ShortVec::ARITY, ++hoodOld) {
+        for (; hoodNew.index() < end; hoodNew += MyShortVec::ARITY, ++hoodOld) {
             tmp = &hoodNew->sum();
 
             for (const auto& j: hoodOld.weights(0)) {
