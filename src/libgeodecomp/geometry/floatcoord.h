@@ -11,17 +11,22 @@
 #endif
 
 #include <algorithm>
+// fixme: experiment 4996: unknown here
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4996 )
+#endif
+
 #include <sstream>
 
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
 
+// fixme: experiment 4996: bad here
 // fixme: experiment 4996: unknown here
 #ifdef _MSC_BUILD
 #pragma warning( disable : 4996 )
 #endif
-
 
 namespace LibGeoDecomp {
 
