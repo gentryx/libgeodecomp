@@ -13,6 +13,10 @@
 #include <libgeodecomp/geometry/partitions/hilbertpartition.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
+// fixme: experiment 4996: unknown here
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4996 )
+#endif
 #include <libgeodecomp/misc/cpubenchmark.h>
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/linepointerassembly.h>
@@ -33,10 +37,7 @@
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
 
-// fixme: experiment 4996: unknown here
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4996 )
-#endif
+// fixme: experiment 4996: bad here
 
 #include <emmintrin.h>
 #ifdef __AVX__
