@@ -2,15 +2,16 @@
 #define LIBGEODECOMP_MISC_APITRAITS_H
 
 #include <libgeodecomp/config.h>
-// fixme: experiment 4996: unknown here
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4996 )
-#endif
-
+// fixme: experiment 4996: good here
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+
+// fixme: experiment 4996: unknown here
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4996 )
+#endif
 
 // Kill warning 4514 in system headers
 #ifdef _MSC_BUILD
