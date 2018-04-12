@@ -10,6 +10,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
+
 /**
  * is a functor which (tada) updates a single row (or the fraction
  * described by the Streak) in the grid. It will manufacture suitable
@@ -185,6 +190,10 @@ private:
         CELL::updateLineX(newLine, x, endX, hood, nanoStep);
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
