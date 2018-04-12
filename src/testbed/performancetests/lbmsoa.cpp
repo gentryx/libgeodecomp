@@ -8,6 +8,12 @@
 
 using namespace LibGeoDecomp;
 
+// padding is fine:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
+
 class LBMSoACell
 {
 public:
@@ -269,3 +275,8 @@ std::string LBMSoA::unit()
 {
     return "GLUPS";
 }
+
+// fixme: scope this to local code region
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

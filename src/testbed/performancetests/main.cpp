@@ -1808,6 +1808,10 @@ public:
 #undef SQR
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 class LBMClassic : public CPUBenchmark
 {
 public:
