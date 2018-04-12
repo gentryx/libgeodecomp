@@ -12,17 +12,11 @@
  *
  */
 
-// fixme: bisection: good here
-
 #ifdef _MSC_BUILD
 #pragma warning( push )
 #pragma warning( disable : 4710 )
 #endif
 #include <vector>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 // fixme: bisection: bad here
 
@@ -59,6 +53,11 @@
 #include <map>
 
 #include "mmio.h"
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 
 // fixme: bisection: bad here
 
