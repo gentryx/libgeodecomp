@@ -27,10 +27,7 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/cpubenchmark.h>
 
-// fixme: pop here TBD
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+// fixme: bisection: pop bad here
 
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
@@ -38,6 +35,11 @@
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredupdatefunctor.h>
 #include <libgeodecomp/storage/updatefunctor.h>
+
+// fixme: pop here TBD
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
