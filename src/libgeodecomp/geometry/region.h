@@ -24,10 +24,14 @@
 namespace LibGeoDecomp {
 
 // Hardwire this warning to off as MSVC would otherwise complain about
-// inline functions not being included in object files:
+// inline functions not being included in object files. Ditto for
+// inlining/not inlining functions. Also, hardwire warning 4626 to off
+// as MSVC would otherwise complain about an assignment operator
+// missing -- which is clearly there:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4626 4710 4711 4820 )
+
 #endif
 
 template<typename CELL_TYPE, int DIM>
@@ -169,13 +173,6 @@ public:
     }
 };
 
-// Hardwire this warning to off as MSVC would otherwise complain about
-// an assignment operator missing -- which is clearly there:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4626 )
-#endif
-
 /**
  * internal helper class
  */
@@ -292,10 +289,6 @@ private:
     const std::size_t offsetIndex;
 };
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 /**
  * internal helper class
  */
@@ -326,13 +319,6 @@ public:
 private:
     const std::size_t offsetIndex;
 };
-
-// Hardwire this warning to off as MSVC would otherwise complain about
-// an assignment operator missing -- which is clearly there:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4626 )
-#endif
 
 /**
  * internal helper class
@@ -408,10 +394,6 @@ public:
 private:
     const Coord<COORD_DIM> offsets;
 };
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 /**
  * internal helper class
@@ -584,11 +566,6 @@ public:
 };
 
 }
-
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4820 )
-#endif
 
 /**
  * Region stores a set of coordinates. It performs a run-length
@@ -1770,10 +1747,6 @@ private:
         }
     }
 };
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 namespace RegionHelpers {
 
