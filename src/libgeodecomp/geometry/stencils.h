@@ -456,6 +456,11 @@ private:
     };
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
+
 #define ADD_COORD(STENCIL, DIM, RADIUS, INDEX, X, Y, Z)                 \
     template<>                                                          \
     template<>                                                          \
@@ -573,6 +578,10 @@ ADD_COORD(VonNeumann, 3, 1, 3,  0,  0,  0);
 ADD_COORD(VonNeumann, 3, 1, 4,  1,  0,  0);
 ADD_COORD(VonNeumann, 3, 1, 5,  0,  1,  0);
 ADD_COORD(VonNeumann, 3, 1, 6,  0,  0,  1);
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
