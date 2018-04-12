@@ -6,10 +6,10 @@
 #include <libgeodecomp/examples/latticegas/interactivesimulator.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
 
-// Kill warning 4514 in system headers
+// Kill some warnings in system headers
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4710 4711 )
 #endif
 
 #include <iostream>
@@ -17,10 +17,8 @@
 #include <QtCore/QTimer>
 #include <QThreadPool>
 
-// Kill warning 4514 in system headers
 #ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( pop )
 #endif
 
 void testModel()

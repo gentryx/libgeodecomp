@@ -15,10 +15,10 @@
 #include <libgeodecomp/parallelization/nesting/stepper.h>
 #include <libgeodecomp/parallelization/nesting/hpxstepper.h>
 
-// Kill warning 4514 in system headers
+// Kill some warnings in system headers
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4710 4711 )
 #endif
 
 #include <hpx/config.hpp>

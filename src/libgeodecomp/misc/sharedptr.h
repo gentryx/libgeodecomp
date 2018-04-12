@@ -1,10 +1,10 @@
 #ifndef LIBGEODECOMP_MISC_SHAREDPTR_H
 #define LIBGEODECOMP_MISC_SHAREDPTR_H
 
-// Kill warning 4514 in system headers
+// Kill some warnings in system headers
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4710 4711 )
 #endif
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SHARED_PTR

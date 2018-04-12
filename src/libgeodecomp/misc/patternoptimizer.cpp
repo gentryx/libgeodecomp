@@ -1,12 +1,13 @@
-// Kill warning 4514 in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 )
-#endif
-
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
+
+// Kill some warnings in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4710 4711 )
+#endif
+
 #include <iostream>
 #include <sstream>
 #include <stdexcept>

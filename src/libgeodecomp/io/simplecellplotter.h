@@ -8,10 +8,10 @@
 #include <libgeodecomp/storage/filter.h>
 #include <libgeodecomp/storage/selector.h>
 
-// Kill warning 4514 in system headers
+// Kill some warnings in system headers
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4710 4711 )
 #endif
 
 #include <stdexcept>
