@@ -11,6 +11,15 @@
  * http://math.nist.gov/MatrixMarket/mmio-c.html
  *
  */
+
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
+
+#include <vector>
+
+
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/io/simpleinitializer.h>
