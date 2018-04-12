@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_STRINGOPS_H
 #define LIBGEODECOMP_MISC_STRINGOPS_H
 
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/stringvec.h>
 
 // Kill some warnings in system headers
