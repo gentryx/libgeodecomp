@@ -28,17 +28,19 @@
 
 namespace LibGeoDecomp {
 
+// Hardwire this warning to off as MSVC would otherwise complain about
+// inline functions not being included in object files. Also, don't
+// warn about not inlining, especially not if the function isn't
+// declared as inline -- and vice versa.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4710 4711 )
+#endif
+
 template<typename VALUETYPE, int C, int SIGMA>
 class SellCSigmaSparseMatrixContainer;
 
 namespace SellHelpers {
-
-// Hardwire this warning to off as MSVC would otherwise complain about
-// inline functions not being included in object files:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 )
-#endif
 
 /**
  * Helper struct used for sorting.
@@ -58,16 +60,6 @@ public:
     std::size_t rowLength;
     std::size_t rowIndex;
 };
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
-// Not inlining is OK. BTW: It's not even being requested, MSVC...
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4710 )
-#endif
 
 /**
  * Helper class to initialize the sell container from an adjacency matrix.
@@ -194,10 +186,6 @@ public:
         }
     }
 };
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 }
 
@@ -351,6 +339,10 @@ private:
         return (n == 0) ? 0 : ((n - 1) / C);
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

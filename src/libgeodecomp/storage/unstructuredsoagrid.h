@@ -146,7 +146,7 @@ private:
 
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4820 )
+#pragma warning( disable : 4710 4820 )
 #endif
 
 /**
@@ -515,10 +515,6 @@ private:
     }
 };
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 template<typename ELEMENT_TYPE, std::size_t MATRICES, typename WEIGHT_TYPE, int C, int SIGMA>
 inline
 std::ostream& operator<<(std::ostream& os,
@@ -527,6 +523,10 @@ std::ostream& operator<<(std::ostream& os,
     os << grid.toString();
     return os;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
