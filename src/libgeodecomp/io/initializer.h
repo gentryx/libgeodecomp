@@ -108,9 +108,22 @@ public:
         Random::seed(index);
     }
 
+    // Static analysis would make MSVC issue a warning that the return
+    // statement is never going to be called. That's intentional.
+    // Also, don't fuzz about inlining.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4702 4710 )
+#endif
+
     /**
      * Returns the list of neighboring nodes for at least all IDs
-     * stored in the Region. Given a node n_1 \in region, a node n_2
+     * stored in the Region.
+     *
+     * UnstructuredGrid models need to override this. StructuredGrid
+     * codes can safely ignore it.
+     *
+     * Given a node n_1 \in region, a node n_2
      * is assumed to be a neighbor of n_1, iff there is a directed
      * edge (n_1, n_2) in the adjacency list of the unstructured grid.
      */
@@ -120,11 +133,21 @@ public:
         return AdjacencyPtr();
     }
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
+
 private:
     template<typename TOPOLOGY>
     void checkTopologyIfAdjacencyIsNeeded(const TOPOLOGY /* unused */) const
     {
-        // intentionally left blank
+        std::string message(
+            "Unstructured models need to override getAdjacency() in their initializer."
+            "See LibGeoDecomp's unstructured grid example codes for instructions.");
+
+        LOG(FATAL, message);
+        throw std::logic_error(message);
     }
 
     void checkTopologyIfAdjacencyIsNeeded(const Topologies::Unstructured::Topology /* unused */) const
