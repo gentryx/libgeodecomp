@@ -16,7 +16,6 @@
 #pragma warning( push )
 #pragma warning( disable : 4710 )
 #endif
-#include <vector>
 
 // fixme: bisection: pop bad here
 
@@ -40,6 +39,7 @@
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
 
+// fixme: bisection: pop good here
 // fixme: pop here TBD
 #ifdef _MSC_BUILD
 #pragma warning( pop )
