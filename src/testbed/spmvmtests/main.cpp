@@ -30,13 +30,14 @@
 // fixme: bisection: pop bad here
 
 #include <libgeodecomp/storage/unstructuredgrid.h>
-#include <libgeodecomp/storage/unstructuredneighborhood.h>
-#include <libgeodecomp/storage/unstructuredsoagrid.h>
-
 // fixme: pop here TBD
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
+#include <libgeodecomp/storage/unstructuredneighborhood.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
+
+// fixme: bisection: pop good here
 
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredupdatefunctor.h>
