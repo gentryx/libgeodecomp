@@ -189,6 +189,7 @@ class NormalizeCoord
 public:
     template<int DIM>
     __host__ __device__
+    LIBFLATARRAY_INLINE
     Coord<DIM> operator()(const Coord<DIM>& coord, const Coord<DIM>& dim)
     {
         if (OutOfBounds<TOPOLOGY>()(coord, dim)) {
