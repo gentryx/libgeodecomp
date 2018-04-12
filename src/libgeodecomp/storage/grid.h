@@ -18,7 +18,7 @@ class CoordMap;
 
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 4820 )
+#pragma warning( disable : 4514 4710 4711 4820 )
 #endif
 
 /**
@@ -304,10 +304,6 @@ private:
     CELL_TYPE edgeCell;
 };
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 template<typename _CharT, typename _Traits, typename _CellT, typename _TopologyT>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
@@ -316,6 +312,10 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
     __os << grid.toString();
     return __os;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
