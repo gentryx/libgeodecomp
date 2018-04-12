@@ -4,7 +4,7 @@ set(RELATIVE_PATH "")
 include(auto.cmake)
 
 if(WITH_INTRINSICS)
-  add_executable(libgeodecomp_testbed_performancetests main.cpp)
+  add_executable(libgeodecomp_testbed_performancetests main.cpp lbmsoa.cpp)
   set_target_properties(libgeodecomp_testbed_performancetests PROPERTIES OUTPUT_NAME performancetests)
   target_link_libraries(libgeodecomp_testbed_performancetests ${LOCAL_LIBGEODECOMP_LINK_LIB})
 endif()
