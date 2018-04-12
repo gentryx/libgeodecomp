@@ -13,9 +13,18 @@
  */
 
 // fixme: bisection: good here
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
 #include <vector>
 
-// fixme: bisection: good here
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
+// fixme: bisection: bad here
 // fixme: scope this to local code region
 #ifdef _MSC_BUILD
 #pragma warning( disable : 4710 )
