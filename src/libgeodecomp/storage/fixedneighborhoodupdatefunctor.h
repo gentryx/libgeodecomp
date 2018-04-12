@@ -28,10 +28,14 @@ namespace LibGeoDecomp {
 
 namespace FixedNeighborhoodUpdateFunctorHelpers {
 
-// Prevent MSVC from complaining about failed inlining
 #ifdef _MSC_BUILD
 #pragma warning( push )
+// Prevent MSVC from complaining about failed inlining
 #pragma warning( disable : 4710 )
+// Constant conditional expressions are fine here, the compiler will
+// be smart enough to optimize this away. They're there so we don't
+// have to write redundant code for every combination of flags:
+#pragma warning( disable : 4127 )
 #endif
 
 /**
@@ -83,14 +87,6 @@ public:
             concurrencySpec,                                            \
             modelThreadingSpec                                          \
 
-        // Constant conditional expressions are fine here, the
-        // compiler will be smart enough to optimize this away.
-        // They're there so we don't have to write redundant code for
-        // every combination of flags:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4127 )
-#endif
         if ((CUR_DIM == 2) && (HIGH == true)) {
             if (TOPOLOGY::template WrapsAxis<CUR_DIM>::VALUE &&
                 (normalizedOriginOld[CUR_DIM] == ((*dimensionsOld)[CUR_DIM] - 1))) {
@@ -134,16 +130,8 @@ public:
                     LGD_FIXEDNEIGHBORHOODUPDATEFUNCTORHELPERS_INVOKE_PARAMS);
             }
         }
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
     }
 };
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 /**
  * See above
@@ -220,14 +208,6 @@ public:
         boundarySouth  = BOUNDARY_SOUTH  ?  (*dimensionsNew)[2] : 0;
         boundaryNorth  = BOUNDARY_NORTH  ? -(*dimensionsNew)[2] : 0;
 
-        // Constant conditional expressions are fine here, the
-        // compiler will be smart enough to optimize this away.
-        // They're there so we don't have to write redundant code for
-        // every combination of flags:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4127 )
-#endif
         // special case: on left boundary
         if (TOPOLOGY::template WrapsAxis<0>::VALUE && (originOld.x() == 0)) {
             boundaryWest   = (*dimensionsNew)[0];
@@ -296,9 +276,6 @@ public:
             CELL::updateLineX(hood, indexEnd, hoodNew, nanoStep);
         }
     }
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 };
 
 }
@@ -382,6 +359,10 @@ private:
     const CONCURRENCY_FUNCTOR *myConcurrencySpec;
     const ANY_THREADED_UPDATE *myModelThreadingSpec;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
