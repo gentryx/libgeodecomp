@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/likely.h>
+#include <libflatarray/include/libflatarray/macros.hpp>
 
 // Kill some warnings in system headers
 #ifdef _MSC_BUILD
