@@ -16,12 +16,7 @@
 
 #include <vector>
 
-// fixme: scope this to local code region
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
-#endif
-
-
+// fixme: bisection: good here
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
@@ -56,6 +51,12 @@
 #include <map>
 
 #include "mmio.h"
+
+
+// fixme: scope this to local code region
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;
