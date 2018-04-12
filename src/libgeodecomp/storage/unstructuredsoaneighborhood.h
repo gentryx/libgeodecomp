@@ -10,10 +10,10 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 
-// Kill warning 4514 in system headers
+// Kill some warnings in system headers
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4710 )
 #endif
 
 #include <iterator>

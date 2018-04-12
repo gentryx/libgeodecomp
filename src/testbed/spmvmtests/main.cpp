@@ -28,12 +28,13 @@
 #include <libgeodecomp/misc/cpubenchmark.h>
 
 // fixme: bisection: pop bad here
-
-#include <libgeodecomp/storage/unstructuredgrid.h>
 // fixme: pop here TBD
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
+
+#include <libgeodecomp/storage/unstructuredgrid.h>
+// fixme: bisection: pop bad here
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 
