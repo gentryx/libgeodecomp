@@ -142,12 +142,8 @@ private:
     template<typename TOPOLOGY>
     void checkTopologyIfAdjacencyIsNeeded(const TOPOLOGY /* unused */) const
     {
-        std::string message(
-            "Unstructured models need to override getAdjacency() in their initializer."
-            "See LibGeoDecomp's unstructured grid example codes for instructions.");
-
-        LOG(FATAL, message);
-        throw std::logic_error(message);
+        // Intentinally left blank. Structured models may return an
+        // empty adjacency.
     }
 
     void checkTopologyIfAdjacencyIsNeeded(const Topologies::Unstructured::Topology /* unused */) const
