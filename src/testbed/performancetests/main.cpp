@@ -1,3 +1,8 @@
+// fixme: scope this to local code region
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
+
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/io/simpleinitializer.h>

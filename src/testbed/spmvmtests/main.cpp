@@ -12,12 +12,15 @@
  *
  */
 
+// fixme: bisection: good here
+
+#include <vector>
+
 // fixme: scope this to local code region
 #ifdef _MSC_BUILD
 #pragma warning( disable : 4710 )
 #endif
 
-#include <vector>
 
 
 #include <libgeodecomp/config.h>
