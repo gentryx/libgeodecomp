@@ -32,14 +32,17 @@
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
-#include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
-#include <libgeodecomp/storage/unstructuredupdatefunctor.h>
-#include <libgeodecomp/storage/updatefunctor.h>
 
 // fixme: pop here TBD
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
+
+#include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
+#include <libgeodecomp/storage/unstructuredupdatefunctor.h>
+#include <libgeodecomp/storage/updatefunctor.h>
+
+// fixme: bisection: pop good here
 
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
