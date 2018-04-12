@@ -26,6 +26,12 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/cpubenchmark.h>
+
+// fixme: pop here TBD
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
@@ -40,11 +46,6 @@
 #include <libflatarray/macros.hpp>
 
 // fixme: bisection: pop good here
-// fixme: pop here TBD
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 #if defined(__AVX__) || defined(__MIC__)
 #include <immintrin.h>
 #endif
