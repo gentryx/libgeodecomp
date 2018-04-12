@@ -18,7 +18,7 @@
 #endif
 #include <vector>
 
-// fixme: bisection: bad here
+// fixme: bisection: pop bad here
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
@@ -40,6 +40,11 @@
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
 
+// fixme: pop here TBD
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #if defined(__AVX__) || defined(__MIC__)
 #include <immintrin.h>
 #endif
@@ -54,12 +59,7 @@
 
 #include "mmio.h"
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
-
-// fixme: bisection: bad here
+// fixme: bisection: pop good here
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;
