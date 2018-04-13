@@ -25,6 +25,11 @@
 #include <libgeodecomp/config.h>
 #include "mmio.h"
 
+// disable this for the rest of the file:
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif
+
 FILE *mm_fopen(const char *pathname, const char *mode)
 {
 #ifdef _MSC_BUILD
@@ -585,7 +590,3 @@ char  *mm_typecode_to_str(MM_typecode matcode)
     return mm_strdup(buffer);
 
 }
-
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
-#endif
