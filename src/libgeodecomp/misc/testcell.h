@@ -151,13 +151,13 @@ public:
     {};
 
     Coord<DIM> pos;
-    CoordBox<DIM> dimensions;
+    Coord<DIM> dimensions;
     unsigned cycleCounter;
     bool isEdgeCell;
     bool isValid;
-    double testValue;
+    float testValue;
 
-    static double defaultValue()
+    static float defaultValue()
     {
         return 666;
     }
@@ -173,9 +173,9 @@ public:
         const Coord<DIM>& pos,
         const Coord<DIM>& gridDim,
         unsigned cycleCounter = 0,
-        double testValue = defaultValue()) :
+        float testValue = defaultValue()) :
         pos(pos),
-        dimensions(Coord<DIM>(), gridDim),
+        dimensions(gridDim),
         cycleCounter(cycleCounter),
         isValid(true),
         testValue(testValue)
@@ -196,7 +196,7 @@ public:
     __host__ __device__
     bool inBounds(const Coord<DIM>& c) const
     {
-        return !TOPOLOGY::isOutOfBounds(c, dimensions.dimensions);
+        return !TOPOLOGY::isOutOfBounds(c, CoordBox<DIM>(Coord<DIM>(), dimensions.dimensions));
     }
 
     bool operator==(const TestCell& other) const
@@ -347,7 +347,9 @@ public:
             }
 
             Coord<DIM> rawPos = pos + relativeLoc;
-            Coord<DIM> expectedPos = TOPOLOGY::normalize(rawPos, dimensions.dimensions);
+            Coord<DIM> expectedPos = TOPOLOGY::normalize(
+                rawPos,
+                CoordBox<DIM>(Coord<DIM>(), dimensions.dimensions));
 
             if (other.pos != expectedPos) {
 #ifndef __CUDACC__
@@ -415,8 +417,8 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
 
 LIBFLATARRAY_REGISTER_SOA(
     LibGeoDecomp::TestCellSoA,
-    ((double)(testValue))
-    ((LibGeoDecomp::CoordBox<3>)(dimensions))
+    ((float)(testValue))
+    ((LibGeoDecomp::Coord<3>)(dimensions))
     ((LibGeoDecomp::Coord<3>)(pos))
     ((unsigned)(cycleCounter))
     ((bool)(isEdgeCell))
