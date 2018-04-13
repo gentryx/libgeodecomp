@@ -1274,6 +1274,7 @@ public:
     {}
 
     template<typename HOOD_OLD, typename HOOD_NEW>
+    LIBFLATARRAY_INLINE
     static void updateSingle(HOOD_OLD& hoodOld, HOOD_NEW& hoodNew)
     {
         hoodNew.temp() =
@@ -1398,6 +1399,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD, int X, int Y, int Z>
+    LIBFLATARRAY_INLINE
     static void load(QuadM128 *q, const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
     {
         q->a = load<0>(hood, coord);
@@ -1407,6 +1409,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD, int X, int Y, int Z>
+    LIBFLATARRAY_INLINE
     static void load(PentaM128 *q, const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
     {
         q->b = load<2>(hood, coord);
@@ -1416,12 +1419,14 @@ public:
     }
 
     template<int OFFSET, typename NEIGHBORHOOD, int X, int Y, int Z>
+    LIBFLATARRAY_INLINE
     static __m128d load(const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
     {
         return load<OFFSET>(&hood[coord].temp());
     }
 
     template<int OFFSET>
+    LIBFLATARRAY_INLINE
     static __m128d load(const double *p)
     {
         return _mm_load_pd(p + OFFSET);
