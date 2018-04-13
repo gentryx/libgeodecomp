@@ -26,8 +26,9 @@ namespace LibGeoDecomp {
 
 class MockSimulator {
 public:
-    std::string MockSimulator::events;
+    static std::string MockSimulator::events;
 };
+
 std::string MockSimulator::events;
 
 }
