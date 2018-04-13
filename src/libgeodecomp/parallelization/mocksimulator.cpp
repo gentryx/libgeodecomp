@@ -9,6 +9,9 @@
 // TestGrid dummy(LibGeoDecomp::Coord<2>(10, 20));
 // #endif
 
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/parallelization/monolithicsimulator.h>
+#include <libgeodecomp/storage/grid.h>
 
 // Kill some warnings in system headers:
 #ifdef _MSC_BUILD
