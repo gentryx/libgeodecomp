@@ -3,12 +3,12 @@
 
 namespace LibGeoDecomp {
 
-namespace UnstructuredLoopPeelerHelpers {
-
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4626 5027 )
+#pragma warning( disable : 4626 4710 4711 5027 )
 #endif
+
+namespace UnstructuredLoopPeelerHelpers {
 
 /**
  * This is a wrapper for UnstructuredSoANeighborhood to do scalar
@@ -62,10 +62,6 @@ private:
     HOOD& hood;
 };
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 }
 
 /**
@@ -106,6 +102,9 @@ void unstructuredLoopPeeler(COUNTER_TYPE1 *counter, const COUNTER_TYPE2& end, HO
     lambda(lfa_local_scalar(),    counter, end,      wrappedHood);
 }
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
