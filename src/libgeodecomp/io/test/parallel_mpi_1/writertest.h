@@ -1,9 +1,20 @@
-#include <cxxtest/TestSuite.h>
-#include <vector>
-#include <stdexcept>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/writer.h>
+
+// Kill some warnings in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4710 4711 )
+#endif
+
+#include <cxxtest/TestSuite.h>
+#include <vector>
+#include <stdexcept>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 using namespace LibGeoDecomp;
 

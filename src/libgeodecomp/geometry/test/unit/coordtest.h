@@ -1,4 +1,11 @@
 #include <libgeodecomp/config.h>
+
+// Kill some warnings in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4710 4711 )
+#endif
+
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #endif
@@ -11,6 +18,11 @@
 
 #include <sstream>
 #include <cxxtest/TestSuite.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>

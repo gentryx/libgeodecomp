@@ -1,5 +1,3 @@
-#include <cxxtest/TestSuite.h>
-
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
@@ -14,8 +12,19 @@
 #include <libflatarray/soa_accessor.hpp>
 #include <libflatarray/short_vec.hpp>
 
-#include <vector>
+// Kill some warnings in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4710 4711 )
+#endif
+
+#include <cxxtest/TestSuite.h>
 #include <map>
+#include <vector>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;

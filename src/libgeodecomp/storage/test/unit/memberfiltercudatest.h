@@ -1,6 +1,16 @@
+// Kill some warnings in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4710 4711 )
+#endif
+
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <cxxtest/TestSuite.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/memberfilter.h>
 #include <libgeodecomp/storage/soagrid.h>

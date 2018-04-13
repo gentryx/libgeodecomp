@@ -1,11 +1,21 @@
-#include <vector>
+#include <libgeodecomp/config.h>
+
+// Kill some warnings in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4710 4711 )
+#endif
 
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/config.h>
+#include <vector>
 
 #ifdef LIBGEODECOMP_WITH_CUDA
 #include <cuda.h>
 #include <libflatarray/cuda_array.hpp>
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX

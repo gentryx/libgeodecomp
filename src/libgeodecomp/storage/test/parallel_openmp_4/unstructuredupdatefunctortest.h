@@ -1,4 +1,16 @@
+// Kill some warnings in system headers
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4710 4711 )
+#endif
+
 #include <cxxtest/TestSuite.h>
+#include <map>
+#include <vector>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
@@ -13,9 +25,6 @@
 #include <libflatarray/macros.hpp>
 #include <libflatarray/soa_accessor.hpp>
 #include <libflatarray/short_vec.hpp>
-
-#include <vector>
-#include <map>
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;
