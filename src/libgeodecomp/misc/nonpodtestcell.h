@@ -73,10 +73,7 @@ public:
     {
 #define HOOD(X, Y) neighborhood[FixedCoord<X, Y, 0>()]
 
-        coord = HOOD( 0,  0).coord;
-        simSpace = HOOD( 0,  0).simSpace;
-        cycleCounter = HOOD( 0,  0).cycleCounter + 1;
-        seenNeighbors = HOOD( 0,  0).seenNeighbors;
+        *this = HOOD( 0,  0);
 
         // ultimately seenNeighbors should contain all coordinates (as
         // missingNeighbors did initiallty)...
