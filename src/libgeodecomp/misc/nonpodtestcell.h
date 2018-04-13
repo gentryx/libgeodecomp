@@ -41,7 +41,9 @@ public:
     class Initializer : public SimpleInitializer<NonPoDTestCell>
     {
     public:
-        Initializer() : SimpleInitializer<NonPoDTestCell>(Coord<2>(15, 10), 20)
+        Initializer(int scalingFactor = 1) : SimpleInitializer<NonPoDTestCell>(
+            Coord<2>(15 * scalingFactor, 10 * scalingFactor),
+            20 * scalingFactor)
         {}
 
         virtual void grid(GridBase<NonPoDTestCell, 2> *target)

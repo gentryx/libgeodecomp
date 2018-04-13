@@ -802,7 +802,6 @@ public:
         sim.run();
     }
 
-
     void testWriterFunctionality2DWithGhostZoneWidth2()
     {
         typedef HpxSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
@@ -1782,6 +1781,52 @@ public:
 
         sim.run();
 #endif
+    }
+
+    void testNonPoDCellLittle()
+    {
+        int scalingFactor = 1;
+
+        typedef HpxSimulator<NonPoDTestCell, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 2;
+        SimulatorType sim(
+            new NonPoDTestCell::Initializer(scalingFactor),
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            false,
+            "/HpxSimulatorTest/testNonPoDCellLittle");
+
+        sim.run();
+    }
+
+    void testNonPoDCellBig()
+    {
+        int scalingFactor = 3;
+
+        typedef HpxSimulator<NonPoDTestCell, ZCurvePartition<2> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 2;
+        SimulatorType sim(
+            new NonPoDTestCell::Initializer(scalingFactor),
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            false,
+            "/HpxSimulatorTest/testNonPoDCellBig");
+
+        sim.run();
     }
 
     void removeFile(std::string name)

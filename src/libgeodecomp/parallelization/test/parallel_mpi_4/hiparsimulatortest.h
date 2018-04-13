@@ -1250,19 +1250,66 @@ public:
         sim->run();
     }
 
-    void testNonPoDCell()
+    void testNonPoDCellLittleWithSmallGhost()
     {
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+        ghostZoneWidth = 1;
+        int scalingFactor = 1;
 
-        // fixme: disabled until #46 is fixed
-        // ghostZoneWidth = 3;
+        HiParSimulator<NonPoDTestCell, ZCurvePartition<2> > sim(
+            new NonPoDTestCell::Initializer(scalingFactor),
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+        sim.run();
 
-        // HiParSimulator<NonPoDTestCell, ZCurvePartition<2> > sim(
-        //     new NonPoDTestCell::Initializer(),
-        //     new MockBalancer(),
-        //     loadBalancingPeriod,
-        //     ghostZoneWidth);
-        // sim.run();
+#endif
+    }
+
+    void testNonPoDCellLittleWithBigGhost()
+    {
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+        ghostZoneWidth = 3;
+        int scalingFactor = 1;
+
+        HiParSimulator<NonPoDTestCell, ZCurvePartition<2> > sim(
+            new NonPoDTestCell::Initializer(scalingFactor),
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+        sim.run();
+
+#endif
+    }
+
+    void testNonPoDCellBigWithSmallGhost()
+    {
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+        ghostZoneWidth = 1;
+        int scalingFactor = 3;
+
+        HiParSimulator<NonPoDTestCell, ZCurvePartition<2> > sim(
+            new NonPoDTestCell::Initializer(scalingFactor),
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+        sim.run();
+
+#endif
+    }
+
+    void testNonPoDCellBigWithBigGhost()
+    {
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+        ghostZoneWidth = 3;
+        int scalingFactor = 3;
+
+        HiParSimulator<NonPoDTestCell, ZCurvePartition<2> > sim(
+            new NonPoDTestCell::Initializer(scalingFactor),
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+        sim.run();
 
 #endif
     }
