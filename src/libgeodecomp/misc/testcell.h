@@ -4,7 +4,6 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/geometry/coord.h>
-#include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/storage/coordmap.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>
@@ -196,7 +195,7 @@ public:
     __host__ __device__
     bool inBounds(const Coord<DIM>& c) const
     {
-        return !TOPOLOGY::isOutOfBounds(c, CoordBox<DIM>(Coord<DIM>(), dimensions.dimensions));
+        return !TOPOLOGY::isOutOfBounds(c, dimensions);
     }
 
     bool operator==(const TestCell& other) const
@@ -309,10 +308,12 @@ public:
                      << "--------------" << "\n";
             return false;
 #else
-            // this is a dirty hack to circumvent buggy code
+            // This is a dirty hack to circumvent buggy code
             // generation in CUDA 7.5 for GF108. If not enabled
             // CudaSimulatorTest::test1dTorus() will fail.
-            return true;
+            // Returns true for 1d Torus only:
+            typedef typename TOPOLOGY::WrapsAxis<0> WrapsAxis;
+            return (DIM == 1) && (WrapsAxis::VALUE == true);
 #endif
         }
 
@@ -334,8 +335,15 @@ public:
                          << toString() << ":\n"
                          << "cycle counter out of sync with neighbor "
                          << other.toString() << "\n";
-#endif
                 return false;
+#else
+                // This is a dirty hack to circumvent buggy code
+                // generation in CUDA 9.0 on GM107. If not enabled
+                // CudaSimulatorTest::test1dTorus() will fail.
+                // Returns true for 1d Torus only:
+                typedef typename TOPOLOGY::WrapsAxis<0> WrapsAxis;
+                return (DIM == 1) && (WrapsAxis::VALUE == true);
+#endif
             }
 
             if (other.dimensions != dimensions) {
@@ -347,9 +355,7 @@ public:
             }
 
             Coord<DIM> rawPos = pos + relativeLoc;
-            Coord<DIM> expectedPos = TOPOLOGY::normalize(
-                rawPos,
-                CoordBox<DIM>(Coord<DIM>(), dimensions.dimensions));
+            Coord<DIM> expectedPos = TOPOLOGY::normalize(rawPos, dimensions);
 
             if (other.pos != expectedPos) {
 #ifndef __CUDACC__
@@ -417,9 +423,9 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
 
 LIBFLATARRAY_REGISTER_SOA(
     LibGeoDecomp::TestCellSoA,
-    ((float)(testValue))
     ((LibGeoDecomp::Coord<3>)(dimensions))
     ((LibGeoDecomp::Coord<3>)(pos))
+    ((float)(testValue))
     ((unsigned)(cycleCounter))
     ((bool)(isEdgeCell))
     ((bool)(isValid)))
