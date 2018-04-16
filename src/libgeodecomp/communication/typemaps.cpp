@@ -705,11 +705,11 @@ Typemaps::generateMapLibGeoDecomp_TestCell_1_() {
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
         MemberSpec(getAddress(&obj->cycleCounter), lookup<unsigned >(), 1),
-        MemberSpec(getAddress(&obj->dimensions), lookup<CoordBox<1 > >(), 1),
+        MemberSpec(getAddress(&obj->dimensions), lookup<Coord<1 > >(), 1),
         MemberSpec(getAddress(&obj->isEdgeCell), lookup<bool >(), 1),
         MemberSpec(getAddress(&obj->isValid), lookup<bool >(), 1),
         MemberSpec(getAddress(&obj->pos), lookup<Coord<1 > >(), 1),
-        MemberSpec(getAddress(&obj->testValue), lookup<double >(), 1)
+        MemberSpec(getAddress(&obj->testValue), lookup<float >(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -747,11 +747,11 @@ Typemaps::generateMapLibGeoDecomp_TestCell_2_() {
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
         MemberSpec(getAddress(&obj->cycleCounter), lookup<unsigned >(), 1),
-        MemberSpec(getAddress(&obj->dimensions), lookup<CoordBox<2 > >(), 1),
+        MemberSpec(getAddress(&obj->dimensions), lookup<Coord<2 > >(), 1),
         MemberSpec(getAddress(&obj->isEdgeCell), lookup<bool >(), 1),
         MemberSpec(getAddress(&obj->isValid), lookup<bool >(), 1),
         MemberSpec(getAddress(&obj->pos), lookup<Coord<2 > >(), 1),
-        MemberSpec(getAddress(&obj->testValue), lookup<double >(), 1)
+        MemberSpec(getAddress(&obj->testValue), lookup<float >(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -789,11 +789,11 @@ Typemaps::generateMapLibGeoDecomp_TestCell_3_() {
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
         MemberSpec(getAddress(&obj->cycleCounter), lookup<unsigned >(), 1),
-        MemberSpec(getAddress(&obj->dimensions), lookup<CoordBox<3 > >(), 1),
+        MemberSpec(getAddress(&obj->dimensions), lookup<Coord<3 > >(), 1),
         MemberSpec(getAddress(&obj->isEdgeCell), lookup<bool >(), 1),
         MemberSpec(getAddress(&obj->isValid), lookup<bool >(), 1),
         MemberSpec(getAddress(&obj->pos), lookup<Coord<3 > >(), 1),
-        MemberSpec(getAddress(&obj->testValue), lookup<double >(), 1)
+        MemberSpec(getAddress(&obj->testValue), lookup<float >(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
