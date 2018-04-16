@@ -1,11 +1,13 @@
 #ifndef LIBGEODECOMP_IO_PARALLELTESTWRITER_H
 #define LIBGEODECOMP_IO_PARALLELTESTWRITER_H
 
-#include <list>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
+
+#include <list>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 
@@ -30,7 +32,11 @@ public:
         expectedSteps(expectedSteps),
         expectedEvents(expectedEvents),
         lastStep(-1)
-    {}
+    {
+        if (expectedEvents.size() != expectedEvents.size()) {
+            throw std::invalid_argument("ParallelTestWriter needs the same amount of expected steps as events ");
+        }
+    }
 
     virtual void stepFinished(
         const GridType& grid,
