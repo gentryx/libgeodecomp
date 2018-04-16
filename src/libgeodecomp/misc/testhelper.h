@@ -127,7 +127,8 @@
             bool flag = flagValid && flagEdge && flagCounter;           \
             ollKorrect &= flag;                                         \
             if (!flag) {                                                \
-                message << "TS_ASSERT_TEST_GRID failed at Coord " << *i << "\n" \
+                message << "TS_ASSERT_TEST_GRID failed at Coord " << *i \
+                        << " in expectedCycle " << expectedCycle << "\n" \
                         << "  flagValid: " << flagValid << "\n"         \
                         << "  flagEdge: " << flagEdge << "\n"           \
                         << "  flagCounter: " << flagCounter << "\n";    \
