@@ -211,6 +211,7 @@ public:
             cycle);
     }
 
+    // fixme: split this test to reduce memory consumption
     void testSteererFunctionality2DWithGhostZoneWidth1()
     {
         typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
@@ -1320,14 +1321,40 @@ public:
         sim->run();
     }
 
-    void testSoA()
+    void testSoAWithGhostZoneWidth1()
     {
+        int ghostZoneWidth = 1;
         int startStep = 0;
         int endStep = 21;
+        Coord<3> dim(15, 10, 13);
 
         HiParSimulator<TestCellSoA, ZCurvePartition<3> > sim(
-            new TestInitializer<TestCellSoA>(),
-            rank? 0 : new NoOpBalancer());
+            new TestInitializer<TestCellSoA>(dim, endStep, startStep),
+            rank? 0 : new NoOpBalancer(),
+            100000,
+            ghostZoneWidth);
+
+        Writer<TestCellSoA> *writer = 0;
+        if (rank == 0) {
+            writer = new TestWriter<TestCellSoA>(3, startStep, endStep);
+        }
+        sim.addWriter(new CollectingWriter<TestCellSoA>(writer));
+
+        sim.run();
+    }
+
+    void testSoAWithGhostZoneWidth3()
+    {
+        int ghostZoneWidth = 3;
+        int startStep = 3;
+        int endStep = 26;
+        Coord<3> dim(16, 12, 14);
+
+        HiParSimulator<TestCellSoA, ZCurvePartition<3> > sim(
+            new TestInitializer<TestCellSoA>(dim, endStep, startStep),
+            rank? 0 : new NoOpBalancer(),
+            100000,
+            ghostZoneWidth);
 
         Writer<TestCellSoA> *writer = 0;
         if (rank == 0) {
@@ -1353,10 +1380,10 @@ public:
         std::vector<unsigned> expectedSteps;
         std::vector<WriterEvent> expectedEvents;
         expectedSteps << 7
-                      << 10
-                      << 13
-                      << 16
-                      << 19
+                      << 9
+                      << 12
+                      << 15
+                      << 18
                       << 20;
         expectedEvents << WRITER_INITIALIZED
                        << WRITER_STEP_FINISHED
@@ -1384,9 +1411,9 @@ public:
         std::vector<unsigned> expectedSteps;
         std::vector<WriterEvent> expectedEvents;
         expectedSteps << 7
-                      << 11
-                      << 15
-                      << 19
+                      << 8
+                      << 12
+                      << 16
                       << 20;
         expectedEvents << WRITER_INITIALIZED
                        << WRITER_STEP_FINISHED
@@ -1413,11 +1440,13 @@ public:
         std::vector<unsigned> expectedSteps;
         std::vector<WriterEvent> expectedEvents;
         expectedSteps << 7
-                      << 9
-                      << 11
-                      << 13
+                      << 8
+                      << 10
+                      << 12
+                      << 14
                       << 15;
         expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
                        << WRITER_STEP_FINISHED
                        << WRITER_STEP_FINISHED
                        << WRITER_STEP_FINISHED
@@ -1442,11 +1471,13 @@ public:
         std::vector<unsigned> expectedSteps;
         std::vector<WriterEvent> expectedEvents;
         expectedSteps << 7
-                      << 10
-                      << 13
-                      << 16
+                      << 9
+                      << 12
+                      << 15
+                      << 18
                       << 19;
         expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
                        << WRITER_STEP_FINISHED
                        << WRITER_STEP_FINISHED
                        << WRITER_STEP_FINISHED
@@ -1471,12 +1502,12 @@ public:
         std::vector<unsigned> expectedSteps;
         std::vector<WriterEvent> expectedEvents;
         expectedSteps << 5
-                      << 8
-                      << 11
-                      << 14
-                      << 17
-                      << 20
-                      << 23
+                      << 6
+                      << 9
+                      << 12
+                      << 15
+                      << 18
+                      << 21
                       << 24;
         expectedEvents << WRITER_INITIALIZED
                        << WRITER_STEP_FINISHED

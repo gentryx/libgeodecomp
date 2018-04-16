@@ -360,7 +360,7 @@ public:
         CUDAGrid<TestCell<2> > grid(box);
         Selector<TestCell<2> > selector(&TestCell<2>::testValue, "testValue");
 
-        std::vector<double> buffer;
+        std::vector<float> buffer;
         for (int i = 0; i < 90; ++i) {
             buffer << i;
         }
@@ -420,10 +420,10 @@ public:
         int offset = (40 - 30) + (30 - 20) * 40 + (20 - 10) * 40 * 50;
 
         for (int i = 0; i < 30; ++i) {
-            TS_ASSERT_EQUALS(buffer[i].testValue, double(i));
+            TS_ASSERT_EQUALS(buffer[i].testValue, float(i));
         }
         for (int i = 30; i < 45; ++i) {
-            TS_ASSERT_EQUALS(buffer[i].testValue, double(i - 30 + offset));
+            TS_ASSERT_EQUALS(buffer[i].testValue, float(i - 30 + offset));
         }
 
         // check loadRegion()
@@ -439,7 +439,7 @@ public:
             grid.get(*i, lineBuf.data());
 
             for (int x = 0; x < i->length(); ++x) {
-                TS_ASSERT_EQUALS(lineBuf[x].testValue, double(counter));
+                TS_ASSERT_EQUALS(lineBuf[x].testValue, float(counter));
                 ++counter;
             }
         }
@@ -477,12 +477,12 @@ public:
 
         int offset = (34 - 30) + (25 - 20) * 40 + (16 - 10) * 40 * 50;
         for (int i = 0; i < 30; ++i) {
-            TS_ASSERT_EQUALS(buffer[i].testValue, double(i + offset));
+            TS_ASSERT_EQUALS(buffer[i].testValue, float(i + offset));
         }
 
         offset = (44 - 30) + (35 - 20) * 40 + (26 - 10) * 40 * 50;
         for (int i = 30; i < 45; ++i) {
-            TS_ASSERT_EQUALS(buffer[i].testValue, double(i - 30 + offset));
+            TS_ASSERT_EQUALS(buffer[i].testValue, float(i - 30 + offset));
         }
 
         // check loadRegion()
@@ -501,7 +501,7 @@ public:
             grid.get(streak, lineBuf.data());
 
             for (int x = 0; x < i->length(); ++x) {
-                TS_ASSERT_EQUALS(lineBuf[x].testValue, double(counter));
+                TS_ASSERT_EQUALS(lineBuf[x].testValue, float(counter));
                 ++counter;
             }
         }

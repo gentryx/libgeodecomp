@@ -96,7 +96,13 @@ public:
 
         if (remove) {
             storedNanoSteps.erase(globalNanoStep);
-            storedNanoSteps << globalNanoStep + NANO_STEPS * steerer->getPeriod();
+            std::size_t stride = NANO_STEPS * steerer->getPeriod();
+            std::size_t nextNanoStep =  globalNanoStep + stride;
+            // first step might not be a multiple of the input period, so
+            // this correction is required to get the input in sync with
+            // global time steps.
+            nextNanoStep -= (nextNanoStep % stride);
+            storedNanoSteps << nextNanoStep;
         }
 
         // fixme: apply SteererFeedback!

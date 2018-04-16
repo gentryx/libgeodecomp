@@ -422,7 +422,7 @@ public:
                << Streak<3>(Coord<3>(15, 11, 11), 33);
 
         // check testVal:
-        std::vector<double> testValVec(region.size());
+        std::vector<float> testValVec(region.size());
 
         grid1.saveMember(
             testValVec.data(),

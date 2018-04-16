@@ -8,6 +8,8 @@
 
 using namespace LibGeoDecomp;
 
+// fixme: split this into multiple test files (one per SOA model) to speed up compilation
+
 class SoATestCell
 {
 public:

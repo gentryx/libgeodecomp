@@ -26,14 +26,14 @@ public:
         LibFlatArray::cuda_array<TestCell<2> > deviceCellVec(40);
         std::vector<TestCell<2> > hostCellVec(40);
 
-        std::vector<double> hostBuffer(40, -1);
+        std::vector<float> hostBuffer(40, -1);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
             hostCellVec[i].testValue = i + 0.54321;
         }
         deviceCellVec.load(&hostCellVec[0]);
 
-        DefaultCUDAFilter<TestCell<2>, double, double> filter;
+        DefaultCUDAFilter<TestCell<2>, float, float> filter;
 
         filter.copyMemberOutImpl(
             deviceCellVec.data(),
@@ -44,7 +44,7 @@ public:
             &TestCell<2>::testValue);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
-            TS_ASSERT_EQUALS(i + 0.54321, hostBuffer[i]);
+            TS_ASSERT_EQUALS(float(i + 0.54321), hostBuffer[i]);
         }
 
 
@@ -79,15 +79,15 @@ public:
         LibFlatArray::cuda_array<TestCell<2> > deviceCellVec(1903);
         std::vector<TestCell<2> > hostCellVec(1903);
 
-        LibFlatArray::cuda_array<double> deviceBuffer(1903, -1);
-        std::vector<double> hostBuffer(1903, -1);
+        LibFlatArray::cuda_array<float> deviceBuffer(1903, -1);
+        std::vector<float> hostBuffer(1903, -1);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
             hostCellVec[i].testValue = i + 0.0513;
         }
         deviceCellVec.load(&hostCellVec[0]);
 
-        DefaultCUDAFilter<TestCell<2>, double, double> filter;
+        DefaultCUDAFilter<TestCell<2>, float, float> filter;
 
         filter.copyMemberOutImpl(
             deviceCellVec.data(),
@@ -100,7 +100,7 @@ public:
         deviceBuffer.save(&hostBuffer[0]);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
-            TS_ASSERT_EQUALS(i + 0.0513, hostBuffer[i]);
+            TS_ASSERT_EQUALS(float(i + 0.0513), hostBuffer[i]);
         }
 
         // TEST 2: Copy In (Device to Device)
@@ -135,13 +135,13 @@ public:
         // TEST 1: Copy Out (Host to Host)
         std::vector<TestCell<2> > hostCellVec(69);
 
-        std::vector<double> hostBuffer(69, -1);
+        std::vector<float> hostBuffer(69, -1);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
             hostCellVec[i].testValue = i + 0.666;
         }
 
-        DefaultCUDAFilter<TestCell<2>, double, double> filter;
+        DefaultCUDAFilter<TestCell<2>, float, float> filter;
 
         filter.copyMemberOutImpl(
             hostCellVec.data(),
@@ -152,7 +152,7 @@ public:
             &TestCell<2>::testValue);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
-            TS_ASSERT_EQUALS(i + 0.666, hostBuffer[i]);
+            TS_ASSERT_EQUALS(float(i + 0.666), hostBuffer[i]);
         }
 
 
@@ -184,14 +184,14 @@ public:
         // TEST 1: Copy Out (Host to Device)
         std::vector<TestCell<2> > hostCellVec(4711);
 
-        LibFlatArray::cuda_array<double> deviceBuffer(4711, -1);
-        std::vector<double> hostBuffer(4711, -1);
+        LibFlatArray::cuda_array<float> deviceBuffer(4711, -1);
+        std::vector<float> hostBuffer(4711, -1);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
             hostCellVec[i].testValue = i + 1799;
         }
 
-        DefaultCUDAFilter<TestCell<2>, double, double> filter;
+        DefaultCUDAFilter<TestCell<2>, float, float> filter;
 
         filter.copyMemberOutImpl(
             hostCellVec.data(),
@@ -234,17 +234,17 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Device to Device)
-        LibFlatArray::cuda_array<double> deviceMemberVec(66, -1);
-        std::vector<double> hostMemberVec(66, -2);
-        LibFlatArray::cuda_array<double> deviceBuffer(66, -3);
-        std::vector<double> hostBuffer(66, -4);
+        LibFlatArray::cuda_array<float> deviceMemberVec(66, -1);
+        std::vector<float> hostMemberVec(66, -2);
+        LibFlatArray::cuda_array<float> deviceBuffer(66, -3);
+        std::vector<float> hostBuffer(66, -4);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
             hostMemberVec[i] = i + 0.661;
         }
         deviceMemberVec.load(&hostMemberVec[0]);
 
-        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, double, double>();
+        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, float, float>();
         filter->copyStreakOut(
             reinterpret_cast<char*>(deviceMemberVec.data()),
             MemoryLocation::CUDA_DEVICE,
@@ -255,7 +255,7 @@ public:
         deviceBuffer.save(&hostBuffer[0]);
 
         for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
-            TS_ASSERT_EQUALS(i + 0.661, hostBuffer[i]);
+            TS_ASSERT_EQUALS(float(i + 0.661), hostBuffer[i]);
         }
 
         // TEST 2: Copy In (Device to Device)
@@ -276,7 +276,7 @@ public:
         deviceMemberVec.save(&hostMemberVec[0]);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
-            TS_ASSERT_EQUALS(0.662 + i, hostMemberVec[i]);
+            TS_ASSERT_EQUALS(float(0.662 + i), hostMemberVec[i]);
         }
 #endif
     }
@@ -285,16 +285,16 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Device to Host)
-        LibFlatArray::cuda_array<double> deviceMemberVec(77, -1);
-        std::vector<double> hostMemberVec(77, -2);
-        std::vector<double> hostBuffer(77, -4);
+        LibFlatArray::cuda_array<float> deviceMemberVec(77, -1);
+        std::vector<float> hostMemberVec(77, -2);
+        std::vector<float> hostBuffer(77, -4);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
             hostMemberVec[i] = i + 0.771;
         }
         deviceMemberVec.load(&hostMemberVec[0]);
 
-        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, double, double>();
+        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, float, float>();
         filter->copyStreakOut(
             reinterpret_cast<char*>(deviceMemberVec.data()),
             MemoryLocation::CUDA_DEVICE,
@@ -304,7 +304,7 @@ public:
             77);
 
         for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
-            TS_ASSERT_EQUALS(i + 0.771, hostBuffer[i]);
+            TS_ASSERT_EQUALS(float(i + 0.771), hostBuffer[i]);
         }
 
         // TEST 2: Copy In (Host to Device)
@@ -323,7 +323,7 @@ public:
         deviceMemberVec.save(&hostMemberVec[0]);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
-            TS_ASSERT_EQUALS(0.772 + i, hostMemberVec[i]);
+            TS_ASSERT_EQUALS(float(0.772 + i), hostMemberVec[i]);
         }
 #endif
     }
@@ -332,15 +332,15 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Host to Device)
-        std::vector<double> hostMemberVec(99, -2);
-        LibFlatArray::cuda_array<double> deviceBuffer(99, -3);
-        std::vector<double> hostBuffer(99, -4);
+        std::vector<float> hostMemberVec(99, -2);
+        LibFlatArray::cuda_array<float> deviceBuffer(99, -3);
+        std::vector<float> hostBuffer(99, -4);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
             hostMemberVec[i] = i + 0.991;
         }
 
-        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, double, double>();
+        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, float, float>();
         filter->copyStreakOut(
             reinterpret_cast<char*>(&hostMemberVec[0]),
             MemoryLocation::HOST,
@@ -351,7 +351,7 @@ public:
         deviceBuffer.save(&hostBuffer[0]);
 
         for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
-            TS_ASSERT_EQUALS(i + 0.991, hostBuffer[i]);
+            TS_ASSERT_EQUALS(float(i + 0.991), hostBuffer[i]);
         }
 
         // TEST 2: Copy In (Device to Host)
@@ -370,7 +370,7 @@ public:
             99);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
-            TS_ASSERT_EQUALS(0.992 + i, hostMemberVec[i]);
+            TS_ASSERT_EQUALS(float(0.992 + i), hostMemberVec[i]);
         }
 #endif
     }
@@ -379,14 +379,14 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Host to Host)
-        std::vector<double> hostMemberVec(55, -1);
-        std::vector<double> hostBuffer(55, -2);
+        std::vector<float> hostMemberVec(55, -1);
+        std::vector<float> hostBuffer(55, -2);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
             hostMemberVec[i] = i + 0.551;
         }
 
-        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, double, double>();
+        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, float, float>();
         filter->copyStreakOut(
             reinterpret_cast<char*>(&hostMemberVec[0]),
             MemoryLocation::HOST,
@@ -396,7 +396,7 @@ public:
             55);
 
         for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
-            TS_ASSERT_EQUALS(i + 0.551, hostBuffer[i]);
+            TS_ASSERT_EQUALS(float(i + 0.551), hostBuffer[i]);
         }
 
         // TEST 2: Copy In (Host to Host)
@@ -413,7 +413,7 @@ public:
             55);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
-            TS_ASSERT_EQUALS(0.552 + i, hostMemberVec[i]);
+            TS_ASSERT_EQUALS(float(0.552 + i), hostMemberVec[i]);
         }
 #endif
     }

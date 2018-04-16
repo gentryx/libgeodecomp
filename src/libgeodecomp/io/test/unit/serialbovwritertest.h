@@ -43,8 +43,8 @@ public:
         simTest.run();
 
         Grid<TestCell<3>, Topologies::Cube<3>::Topology> buffer(dimensions);
-        Grid<double, Topologies::Cube<3>::Topology> expected(dimensions);
-        Grid<double, Topologies::Cube<3>::Topology> actual;
+        Grid<float, Topologies::Cube<3>::Topology> expected(dimensions);
+        Grid<float, Topologies::Cube<3>::Topology> actual;
 
         init->grid(&buffer);
         CoordBox<3> box(Coord<3>(), dimensions);
@@ -91,7 +91,7 @@ public:
             expected << "TIME: " << time << "\n"
                      << "DATA_FILE: " << filename << "\n"
                      << "DATA_SIZE: 13 12 11\n"
-                     << "DATA_FORMAT: DOUBLE\n"
+                     << "DATA_FORMAT: FLOAT\n"
                      << "VARIABLE: val\n"
                      << "DATA_ENDIAN: LITTLE\n"
                      << "BRICK_ORIGIN: 0 0 0\n"
@@ -104,14 +104,14 @@ public:
         }
     }
 
-    Grid<double, Topologies::Cube<3>::Topology> readGrid(
+    Grid<float, Topologies::Cube<3>::Topology> readGrid(
         std::string filename,
         Coord<3> dimensions)
     {
-        Grid<double, Topologies::Cube<3>::Topology> ret(dimensions);
+        Grid<float, Topologies::Cube<3>::Topology> ret(dimensions);
         std::ifstream file(filename.c_str());
         TS_ASSERT(file);
-        file.read(reinterpret_cast<char*>(&ret[Coord<3>()]), dimensions.prod() * sizeof(double));
+        file.read(reinterpret_cast<char*>(&ret[Coord<3>()]), dimensions.prod() * sizeof(float));
 
         return ret;
     }

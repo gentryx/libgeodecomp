@@ -11,6 +11,7 @@
 #include <libgeodecomp/io/unstructuredtestinitializer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
+#include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/misc/unstructuredtestcell.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
@@ -461,6 +462,33 @@ public:
             testSim->region,
             cycle);
     }
+
+    // fixme
+//     void testNonPoDCellLittle()
+//     {
+//         std::cout << "testNonPoDCellLittle\n";
+// #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+//         int scalingFactor = 1;
+
+//         StripingSimulator<NonPoDTestCell> sim(
+//             new NonPoDTestCell::Initializer(scalingFactor),
+//             rank? 0 : new NoOpBalancer());
+//         sim.run();
+// #endif
+//     }
+
+//     void testNonPoDCellBig()
+//     {
+//         std::cout << "testNonPoDCellBig\n";
+// #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+//         int scalingFactor = 3;
+
+//         StripingSimulator<NonPoDTestCell> sim(
+//             new NonPoDTestCell::Initializer(scalingFactor),
+//             rank? 0 : new NoOpBalancer());
+//         sim.run();
+// #endif
+//     }
 
     void testSoA()
     {

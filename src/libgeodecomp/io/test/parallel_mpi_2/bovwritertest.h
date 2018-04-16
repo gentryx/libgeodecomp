@@ -46,8 +46,8 @@ public:
 
         if (MPILayer().rank() == 0) {
             Grid<TestCell<3>, Topologies::Cube<3>::Topology> buffer(dimensions);
-            Grid<double, Topologies::Cube<3>::Topology> expected(dimensions);
-            Grid<double, Topologies::Cube<3>::Topology> actual;
+            Grid<float, Topologies::Cube<3>::Topology> expected(dimensions);
+            Grid<float, Topologies::Cube<3>::Topology> actual;
 
             init->grid(&buffer);
             CoordBox<3> box(Coord<3>(), dimensions);
@@ -79,15 +79,15 @@ public:
         }
     }
 
-    Grid<double, Topologies::Cube<3>::Topology> readGrid(
+    Grid<float, Topologies::Cube<3>::Topology> readGrid(
         std::string filename,
         Coord<3> dimensions)
     {
-        Grid<double, Topologies::Cube<3>::Topology> ret(dimensions);
+        Grid<float, Topologies::Cube<3>::Topology> ret(dimensions);
         MPIIO<TestCell<3>, Topologies::Cube<3>::Topology> mpiio;
         MPI_File file = mpiio.openFileForRead(
             filename, MPI_COMM_SELF);
-        MPI_File_read(file, &ret[Coord<3>()], dimensions.prod(), MPI_DOUBLE, MPI_STATUS_IGNORE);
+        MPI_File_read(file, &ret[Coord<3>()], dimensions.prod(), MPI_FLOAT, MPI_STATUS_IGNORE);
         MPI_File_close(&file);
         return ret;
     }

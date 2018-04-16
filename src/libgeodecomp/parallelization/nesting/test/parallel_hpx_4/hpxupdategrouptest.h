@@ -21,6 +21,8 @@ namespace LibGeoDecomp {
 
 namespace DummySimulatorHelpers {
 
+// fix: also split this up into multiple tests to see if this helps with reducing memory footprint
+
 std::map<std::string, hpx::lcos::local::promise<std::size_t> > localUpdateGroups;
 std::map<std::string, hpx::lcos::local::promise<std::size_t> > globalUpdateGroups;
 std::map<std::string, hpx::lcos::local::promise<std::vector<std::size_t> > > localityIndices;

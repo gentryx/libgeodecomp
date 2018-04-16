@@ -46,18 +46,18 @@ typedef TestInitializer<TestCellSoA3dTorus> TestInitializerSoA3dTorus;
 LIBFLATARRAY_REGISTER_SOA(
     LibGeoDecomp::TestCellSoA3dCube,
     ((LibGeoDecomp::Coord<3>)(pos))
-    ((LibGeoDecomp::CoordBox<3>)(dimensions))
+    ((LibGeoDecomp::Coord<3>)(dimensions))
     ((unsigned)(cycleCounter))
     ((bool)(isEdgeCell))
-    ((bool)(isValid))((double)(testValue)))
+    ((bool)(isValid))((float)(testValue)))
 
 LIBFLATARRAY_REGISTER_SOA(
     LibGeoDecomp::TestCellSoA3dTorus,
     ((LibGeoDecomp::Coord<3>)(pos))
-    ((LibGeoDecomp::CoordBox<3>)(dimensions))
+    ((LibGeoDecomp::Coord<3>)(dimensions))
     ((unsigned)(cycleCounter))
     ((bool)(isEdgeCell))
-    ((bool)(isValid))((double)(testValue)))
+    ((bool)(isValid))((float)(testValue)))
 
 
 namespace LibGeoDecomp {

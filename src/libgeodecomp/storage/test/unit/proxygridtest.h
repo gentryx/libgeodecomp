@@ -75,7 +75,7 @@ public:
             CoordBox<3>(Coord<3>(-3, -2, -1), Coord<3>(26, 14, 12)));
         ProxyGrid<TestCellSoA, 3> subGrid(&mainGrid, CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(20, 10, 10)));
 
-        std::vector<double> vecA;
+        std::vector<float> vecA;
         vecA << 10.0
              << 10.1
              << 10.2
@@ -101,29 +101,29 @@ public:
           << Coord<3>(19, 9, 9);
 
         subGrid.loadMember(&vecA[0], MemoryLocation::HOST, s, r);
-        TS_ASSERT_EQUALS(10.0, subGrid.get(Coord<3>( 0, 0, 0)).testValue);
-        TS_ASSERT_EQUALS(10.1, subGrid.get(Coord<3>( 1, 0, 0)).testValue);
-        TS_ASSERT_EQUALS(10.2, subGrid.get(Coord<3>( 2, 0, 0)).testValue);
-        TS_ASSERT_EQUALS(10.3, subGrid.get(Coord<3>(19, 0, 0)).testValue);
-        TS_ASSERT_EQUALS(10.4, subGrid.get(Coord<3>( 0, 9, 0)).testValue);
-        TS_ASSERT_EQUALS(10.5, subGrid.get(Coord<3>(19, 9, 0)).testValue);
-        TS_ASSERT_EQUALS(10.6, subGrid.get(Coord<3>( 0, 0, 9)).testValue);
-        TS_ASSERT_EQUALS(10.7, subGrid.get(Coord<3>(19, 0, 9)).testValue);
-        TS_ASSERT_EQUALS(10.8, subGrid.get(Coord<3>( 0, 9, 9)).testValue);
-        TS_ASSERT_EQUALS(10.9, subGrid.get(Coord<3>(19, 9, 9)).testValue);
+        TS_ASSERT_EQUALS(float(10.0), subGrid.get(Coord<3>( 0, 0, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.1), subGrid.get(Coord<3>( 1, 0, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.2), subGrid.get(Coord<3>( 2, 0, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.3), subGrid.get(Coord<3>(19, 0, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.4), subGrid.get(Coord<3>( 0, 9, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.5), subGrid.get(Coord<3>(19, 9, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.6), subGrid.get(Coord<3>( 0, 0, 9)).testValue);
+        TS_ASSERT_EQUALS(float(10.7), subGrid.get(Coord<3>(19, 0, 9)).testValue);
+        TS_ASSERT_EQUALS(float(10.8), subGrid.get(Coord<3>( 0, 9, 9)).testValue);
+        TS_ASSERT_EQUALS(float(10.9), subGrid.get(Coord<3>(19, 9, 9)).testValue);
 
-        TS_ASSERT_EQUALS(10.0, mainGrid.get(Coord<3>( 0, 0, 0)).testValue);
-        TS_ASSERT_EQUALS(10.1, mainGrid.get(Coord<3>( 1, 0, 0)).testValue);
-        TS_ASSERT_EQUALS(10.2, mainGrid.get(Coord<3>( 2, 0, 0)).testValue);
-        TS_ASSERT_EQUALS(10.3, mainGrid.get(Coord<3>(19, 0, 0)).testValue);
-        TS_ASSERT_EQUALS(10.4, mainGrid.get(Coord<3>( 0, 9, 0)).testValue);
-        TS_ASSERT_EQUALS(10.5, mainGrid.get(Coord<3>(19, 9, 0)).testValue);
-        TS_ASSERT_EQUALS(10.6, mainGrid.get(Coord<3>( 0, 0, 9)).testValue);
-        TS_ASSERT_EQUALS(10.7, mainGrid.get(Coord<3>(19, 0, 9)).testValue);
-        TS_ASSERT_EQUALS(10.8, mainGrid.get(Coord<3>( 0, 9, 9)).testValue);
-        TS_ASSERT_EQUALS(10.9, mainGrid.get(Coord<3>(19, 9, 9)).testValue);
+        TS_ASSERT_EQUALS(float(10.0), mainGrid.get(Coord<3>( 0, 0, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.1), mainGrid.get(Coord<3>( 1, 0, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.2), mainGrid.get(Coord<3>( 2, 0, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.3), mainGrid.get(Coord<3>(19, 0, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.4), mainGrid.get(Coord<3>( 0, 9, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.5), mainGrid.get(Coord<3>(19, 9, 0)).testValue);
+        TS_ASSERT_EQUALS(float(10.6), mainGrid.get(Coord<3>( 0, 0, 9)).testValue);
+        TS_ASSERT_EQUALS(float(10.7), mainGrid.get(Coord<3>(19, 0, 9)).testValue);
+        TS_ASSERT_EQUALS(float(10.8), mainGrid.get(Coord<3>( 0, 9, 9)).testValue);
+        TS_ASSERT_EQUALS(float(10.9), mainGrid.get(Coord<3>(19, 9, 9)).testValue);
 
-        std::vector<double> vecB(10);
+        std::vector<float> vecB(10);
         subGrid.saveMember(&vecB[0], MemoryLocation::HOST, s, r);
         TS_ASSERT_EQUALS(vecA, vecB);
 }

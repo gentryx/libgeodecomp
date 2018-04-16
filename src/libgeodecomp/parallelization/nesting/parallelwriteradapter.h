@@ -81,6 +81,10 @@ public:
             lastCall);
         erase_min(requestedNanoSteps);
         std::size_t nextNanoStep = nanoStep + stride;
+        // first step might not be a multiple of the output period, so
+        // this correction is required to get the output in sync with
+        // global time steps.
+        nextNanoStep -= (nextNanoStep % stride);
         pushRequest(nextNanoStep);
     }
 

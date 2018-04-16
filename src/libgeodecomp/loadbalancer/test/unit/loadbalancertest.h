@@ -29,6 +29,7 @@ public:
         speeds << 0.5
                << 0.5
                << 0.5;
+
         std::vector<std::size_t> weights;
         weights = balancer.initialWeights(9, speeds);
 

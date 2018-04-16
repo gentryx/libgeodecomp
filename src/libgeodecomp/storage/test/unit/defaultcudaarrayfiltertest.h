@@ -12,7 +12,6 @@
 #include <libgeodecomp/communication/hpxserialization.h>
 #endif
 
-#include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/defaultcudaarrayfilter.h>
 
 using namespace LibGeoDecomp;
