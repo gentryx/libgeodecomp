@@ -11,11 +11,7 @@
 #pragma warning (disable: 2304)
 #endif
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
+#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
 
 #include <iostream>
 #include <stdexcept>
@@ -25,9 +21,7 @@
 #include <cuda_runtime.h>
 #endif
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
 
 #ifdef __ICC
 #pragma warning pop

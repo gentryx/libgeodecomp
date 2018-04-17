@@ -3,11 +3,7 @@
 
 #include <libgeodecomp/config.h>
 
-// Kill some warnings in system headers:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4548 4710 4711 4996 )
-#endif
+#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
@@ -28,9 +24,7 @@
 #include <sstream>
 #include <vector>
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
 
 namespace LibGeoDecomp {
 

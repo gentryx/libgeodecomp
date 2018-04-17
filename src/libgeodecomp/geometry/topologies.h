@@ -5,18 +5,12 @@
 #include <libgeodecomp/misc/likely.h>
 #include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
+#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
 
 #include <iostream>
 #include <stdexcept>
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
 
 namespace LibGeoDecomp {
 

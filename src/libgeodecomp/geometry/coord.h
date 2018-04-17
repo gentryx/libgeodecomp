@@ -7,16 +7,13 @@
 
 // HPX' config needs to be included before Boost's config:
 #include <libgeodecomp/config.h>
+
+#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
+
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #include <hpx/runtime/serialization/array.hpp>
 #include <hpx/runtime/serialization/serialize.hpp>
-#endif
-
-// Kill some warnings in system headers:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 4996 )
 #endif
 
 // For Intel MPI we need to source mpi.h before stdio.h:
@@ -28,9 +25,6 @@
 #include <cstdlib>
 #include <string>
 #include <sstream>
-
-#include <libgeodecomp/geometry/fixedcoord.h>
-#include <libgeodecomp/geometry/floatcoord.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/mpl/bool.hpp>
@@ -66,9 +60,10 @@
 
 #endif
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
+
+#include <libgeodecomp/geometry/fixedcoord.h>
+#include <libgeodecomp/geometry/floatcoord.h>
 
 namespace LibGeoDecomp {
 

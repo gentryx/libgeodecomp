@@ -1,11 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_MATH_H
 #define LIBGEODECOMP_MISC_MATH_H
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
+#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
 
 #ifdef _MSC_BUILD
 #  ifndef _USE_MATH_DEFINES
@@ -15,10 +11,7 @@
 
 #include <cmath>
 
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
 
 #define LIBGEODECOMP_PI 3.14159265359
 

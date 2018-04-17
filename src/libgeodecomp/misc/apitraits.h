@@ -7,23 +7,14 @@
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
-// Kill some warnings in system headers:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4996 )
-#endif
-
+#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
 #ifdef LIBGEODECOMP_WITH_MPI
-#include <mpi.h>
+#  include <mpi.h>
 #endif
-
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
-#include <sstream>
+#  include <sstream>
 #endif
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
 
 namespace LibGeoDecomp {
 
