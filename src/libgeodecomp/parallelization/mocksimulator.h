@@ -1,9 +1,22 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_MOCKSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_MOCKSIMULATOR_H
 
+#include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <libgeodecomp/storage/grid.h>
+
+// Kill some warnings in system headers:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4548 4710 4711 4996 )
+#endif
+
+#include <string>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 namespace LibGeoDecomp {
 
