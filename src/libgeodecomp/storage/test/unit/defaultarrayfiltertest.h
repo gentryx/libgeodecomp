@@ -1,6 +1,8 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/storage/defaultarrayfilter.h>
+#include <libgeodecomp/misc/apitraits.h>
+#include <libflatarray/flat_array.hpp>
 #include <vector>
 
 using namespace LibGeoDecomp;
