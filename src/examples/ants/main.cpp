@@ -6,6 +6,19 @@
 // #include <libgeodecomp/geometry/region.h>
 // #include <libgeodecomp/geometry/regionbasedadjacency.h>
 // #include <libgeodecomp/misc/sharedptr.h>
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
+#include <string>
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
+
 #include <libgeodecomp/misc/apitraits.h>
 // #include <libgeodecomp/misc/random.h>
 // #include <libgeodecomp/storage/gridbase.h>
