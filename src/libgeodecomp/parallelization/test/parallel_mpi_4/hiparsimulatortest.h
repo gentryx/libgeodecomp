@@ -1,4 +1,3 @@
-#include <libgeodecomp.h>
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/mockwriter.h>
@@ -9,6 +8,7 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/unstructuredtestinitializer.h>
 #include <libgeodecomp/loadbalancer/mockbalancer.h>
+#include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
@@ -1319,50 +1319,6 @@ public:
     {
         sim->addWriter(new AccumulatingWriter());
         sim->run();
-    }
-
-    void testSoAWithGhostZoneWidth1()
-    {
-        int ghostZoneWidth = 1;
-        int startStep = 0;
-        int endStep = 21;
-        Coord<3> dim(15, 10, 13);
-
-        HiParSimulator<TestCellSoA, ZCurvePartition<3> > sim(
-            new TestInitializer<TestCellSoA>(dim, endStep, startStep),
-            rank? 0 : new NoOpBalancer(),
-            100000,
-            ghostZoneWidth);
-
-        Writer<TestCellSoA> *writer = 0;
-        if (rank == 0) {
-            writer = new TestWriter<TestCellSoA>(3, startStep, endStep);
-        }
-        sim.addWriter(new CollectingWriter<TestCellSoA>(writer));
-
-        sim.run();
-    }
-
-    void testSoAWithGhostZoneWidth3()
-    {
-        int ghostZoneWidth = 3;
-        int startStep = 3;
-        int endStep = 26;
-        Coord<3> dim(16, 12, 14);
-
-        HiParSimulator<TestCellSoA, ZCurvePartition<3> > sim(
-            new TestInitializer<TestCellSoA>(dim, endStep, startStep),
-            rank? 0 : new NoOpBalancer(),
-            100000,
-            ghostZoneWidth);
-
-        Writer<TestCellSoA> *writer = 0;
-        if (rank == 0) {
-            writer = new TestWriter<TestCellSoA>(3, startStep, endStep);
-        }
-        sim.addWriter(new CollectingWriter<TestCellSoA>(writer));
-
-        sim.run();
     }
 
     void testUnstructured()

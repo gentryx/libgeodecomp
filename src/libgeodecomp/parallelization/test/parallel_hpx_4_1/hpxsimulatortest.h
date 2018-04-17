@@ -15,8 +15,6 @@
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
-// fixme: add autobuild to test test LGD compiles with hpx and "ulimit -v 3600000" of memory
-
 using namespace LibGeoDecomp;
 
 typedef TestCell<2> TestCell2;
