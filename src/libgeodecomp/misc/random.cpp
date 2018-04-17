@@ -14,6 +14,12 @@
 
 namespace LibGeoDecomp {
 
+// inlining, not inlining is fine here:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 // http://www.math.keio.ac.jp/~matumoto/ver980409.html
 
 // This is the ``Mersenne Twister'' random number generator MT19937, which
@@ -178,5 +184,9 @@ uint32 randomMT()
 
     return y ^ (y >> 18);
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
