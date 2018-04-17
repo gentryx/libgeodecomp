@@ -6,15 +6,16 @@
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libflatarray/macros.hpp>
 
-#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #ifdef LIBGEODECOMP_WITH_MPI
 #  include <mpi.h>
 #endif
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #  include <sstream>
 #endif
-#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 

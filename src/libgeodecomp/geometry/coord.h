@@ -7,8 +7,9 @@
 
 // HPX' config needs to be included before Boost's config:
 #include <libgeodecomp/config.h>
+#include <libflatarray/macros.hpp>
 
-#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
@@ -60,7 +61,7 @@
 
 #endif
 
-#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 #include <libgeodecomp/geometry/fixedcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>

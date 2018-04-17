@@ -11,8 +11,9 @@
 #pragma warning (disable: 2304)
 #endif
 
-#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
+#include <libflatarray/macros.hpp>
 
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <iostream>
 #include <stdexcept>
 
@@ -20,8 +21,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #endif
-
-#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 #ifdef __ICC
 #pragma warning pop

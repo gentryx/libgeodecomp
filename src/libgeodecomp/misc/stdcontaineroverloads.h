@@ -2,9 +2,9 @@
 #define LIBGEODECOMP_MISC_STDCONTAINEROVERLOADS_H
 
 #include <libgeodecomp/config.h>
+#include <libflatarray/macros.hpp>
 
-#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #endif
@@ -23,8 +23,7 @@
 #include <set>
 #include <sstream>
 #include <vector>
-
-#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 

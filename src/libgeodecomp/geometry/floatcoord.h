@@ -2,11 +2,12 @@
 #define LIBGEODECOMP_GEOMETRY_FLOATCOORD_H
 
 #include <libgeodecomp/misc/math.h>
+#include <libflatarray/macros.hpp>
 
-#include <libflatarray/detail/disable_system_header_warnings_1.hpp>
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <algorithm>
 #include <sstream>
-#include <libflatarray/detail/disable_system_header_warnings_2.hpp>
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
