@@ -6,14 +6,12 @@
 // #include <libgeodecomp/geometry/region.h>
 // #include <libgeodecomp/geometry/regionbasedadjacency.h>
 // #include <libgeodecomp/misc/sharedptr.h>
-// #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 // #include <libgeodecomp/misc/random.h>
 // #include <libgeodecomp/storage/gridbase.h>
 // #include <libgeodecomp/geometry/regionbasedadjacency.h>
 // #include <libgeodecomp/io/simplecellplotter.h>
 // #include <libgeodecomp/io/tracingwriter.h>
-
-namespace LibGeoDecomp {}
 
 using namespace LibGeoDecomp;
 
@@ -26,23 +24,23 @@ using namespace LibGeoDecomp;
 //                         Coord<2>( 0,  1),
 //                         Coord<2>( 1,  1)};
 
-// // don't warn about padding here, we just don't care.
-// #ifdef _MSC_BUILD
-// #pragma warning( push )
-// #pragma warning( disable : 4820 )
-// #endif
+// don't warn about padding here, we just don't care.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4820 )
+#endif
 
-// class Cell
-// {
-// public:
-//     friend void runSimulation();
+class Cell
+{
+public:
+    friend void runSimulation();
 
-//     class API :
-//         public APITraits::HasNanoSteps<3>
-//     {};
+    class API :
+        public APITraits::HasNanoSteps<3>
+    {};
 
-//     enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};
-//     static const double PI;
+    enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};
+    static const double PI;
 
 //     explicit Cell(State state=EMPTY) :
 //         state(state),
@@ -156,14 +154,14 @@ using namespace LibGeoDecomp;
 //         target = Coord<2>(0, 0);
 //     }
 
-// };
+};
 
-// #ifdef _MSC_BUILD
-// #pragma warning( pop )
-// #endif
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 
-// const double Cell::PI = 3.14159265;
+const double Cell::PI = 3.14159265;
 
 // class CellToColor
 // {
