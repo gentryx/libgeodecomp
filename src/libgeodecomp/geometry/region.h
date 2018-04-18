@@ -687,7 +687,7 @@ public:
 #pragma warning( push )
 #pragma warning( disable : 4710 4711 )
 #endif
-    inline void clear()
+    void clear()
     {
         for (int i = 0; i < DIM; ++i) {
             indices[i].clear();
@@ -974,7 +974,7 @@ public:
 #pragma warning( push )
 #pragma warning( disable : 4710 4711 )
 #endif
-    inline Region& operator<<(const CoordBox<DIM>& box)
+    Region& operator<<(const CoordBox<DIM>& box)
     {
         Region buf;
         for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak();
