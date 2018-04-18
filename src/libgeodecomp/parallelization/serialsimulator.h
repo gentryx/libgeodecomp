@@ -12,6 +12,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 4820 )
+#endif
+
 /**
  * SerialSimulator is the simplest implementation of the Simulator
  * concept (or rather the MonolithicSimulator, to be exact). It's
@@ -186,6 +191,10 @@ protected:
         }
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

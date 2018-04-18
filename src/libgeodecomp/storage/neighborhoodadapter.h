@@ -8,6 +8,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 /**
  * This class is most useful for interfacing meshless codes with
  * LibGeoDecomp. It can retrieve cells matching a certain id from the
@@ -67,6 +72,10 @@ public:
 private:
     const NEIGHBORHOOD *neighbors;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

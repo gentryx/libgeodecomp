@@ -3,23 +3,15 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/storage/memorylocation.h>
+#include <libflatarray/macros.hpp>
 
 #ifdef LIBGEODECOMP_WITH_MPI
 #include <libgeodecomp/communication/typemaps.h>
 #endif
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <typeinfo>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
@@ -27,7 +19,7 @@ namespace LibGeoDecomp {
 // inline functions not being included in object files:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4710 4711 )
 #endif
 
 namespace FilterBaseHelpers {

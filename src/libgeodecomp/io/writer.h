@@ -2,25 +2,16 @@
 #define LIBGEODECOMP_IO_WRITER_H
 
 #include <libgeodecomp/config.h>
-
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #ifdef LIBGEODECOMP_WITH_MPI
 #include <mpi.h>
 #endif
-
 #include <string>
 #include <stdexcept>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
@@ -31,6 +22,11 @@ enum WriterEvent {
 };
 
 template <class CELL_TYPE> class MonolithicSimulator;
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
 
 /**
  * Writer and ParallelWriter are the superclasses for all output
@@ -106,6 +102,10 @@ protected:
     std::string prefix;
     unsigned period;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

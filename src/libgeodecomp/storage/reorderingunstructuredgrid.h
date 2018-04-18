@@ -6,18 +6,11 @@
 
 #include <libgeodecomp/storage/serializationbuffer.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4996 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <algorithm>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 class SparseMatrixVectorMultiplication;
 
@@ -26,10 +19,11 @@ namespace LibGeoDecomp {
 namespace ReorderingUnstructuredGridHelpers {
 
 // Hardwire this warning to off as MSVC would otherwise complain about
-// inline functions not being included in object files:
+// inline functions not being included in object files, and padding.
+// And yadda yadda yadda.
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4266 4514 4626 4820 5027 )
 #endif
 
 typedef std::pair<int, int> IntPair;
@@ -49,15 +43,6 @@ std::vector<IntPair>::const_iterator mapLogicalToPhysicalID(int logicalID, const
 
     return pos;
 }
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4626 5027 )
-#endif
 
 /**
  * Helper class which converts logical coordinates to physical ones
@@ -121,10 +106,6 @@ private:
     }
 };
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 /**
  * Type switch
  */
@@ -152,11 +133,6 @@ public:
 };
 
 }
-
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4266 )
-#endif
 
 /**
  * This grid will rearrange cells in its delegate grid to match the
@@ -602,6 +578,7 @@ private:
 #ifdef _MSC_BUILD
 #pragma warning( pop )
 #endif
+
 
 }
 

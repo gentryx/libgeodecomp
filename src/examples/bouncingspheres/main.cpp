@@ -23,6 +23,11 @@ class MyAPI :
     public APITraits::HasNanoSteps<2>
 {};
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 4820 )
+#endif
+
 class Sphere;
 
 class Boundary
@@ -72,12 +77,6 @@ private:
     FloatCoord<3> normal;
     double glow;
 };
-
-
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4820 )
-#endif
 
 class Sphere
 {

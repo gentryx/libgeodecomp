@@ -1,18 +1,12 @@
 #ifndef LIBGEODECOMP_IO_TRACINGWRITER_H
 #define LIBGEODECOMP_IO_TRACINGWRITER_H
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
+#include <libflatarray/macros.hpp>
 
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <iostream>
 #include <stdexcept>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/timestringconversion.h>
@@ -24,7 +18,7 @@ namespace LibGeoDecomp {
 
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4626 5027 )
+#pragma warning( disable : 4626 4820 5027 )
 #endif
 
 /**

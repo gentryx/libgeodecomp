@@ -1,23 +1,24 @@
 #ifndef LIBGEODECOMP_MISC_CLONABLE_H
 #define LIBGEODECOMP_MISC_CLONABLE_H
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
+#include <libflatarray/macros.hpp>
 
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <stdexcept>
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/runtime/serialization/base_object.hpp>
 #endif
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
+
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
 
 /**
  * This class adds a virtual copy constructor to child classes. It's
@@ -61,6 +62,10 @@ public:
         return new IMPLEMENTATION(*ret);
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
