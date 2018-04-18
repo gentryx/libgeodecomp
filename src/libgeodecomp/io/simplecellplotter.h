@@ -7,30 +7,23 @@
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/storage/filter.h>
 #include <libgeodecomp/storage/selector.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PUSH
 #include <stdexcept>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
 class PPMWriterTest;
 
-namespace SimpleCellPlotterHelpers {
-
-// do not warn about padding...
+// do not warn about padding or inlining.
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4820 )
+#pragma warning( disable : 4710 4711 4820 )
 #endif
+
+namespace SimpleCellPlotterHelpers {
 
 /**
  * Converts a cell to color, based on a user-supplied palette and
@@ -123,10 +116,6 @@ private:
     }
 };
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 }
 
 /**
@@ -174,6 +163,10 @@ public:
 private:
     Selector<CELL_TYPE> cellToColorSelector;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

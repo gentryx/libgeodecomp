@@ -6,21 +6,20 @@
 #include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/image.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4996 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PUSH
 #include <algorithm>
 #include <vector>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POP
 
 namespace LibGeoDecomp {
+
+// do not warn about padding or inlining.
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 4820 )
+#endif
 
 /**
  * This class renders a 2D grid of cells by stitching together the 2D
@@ -98,6 +97,10 @@ private:
     Coord<2> cellDim;
     CELL_PLOTTER cellPlotter;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
