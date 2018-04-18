@@ -10,6 +10,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 namespace GridBaseHelpers {
 
 /**
@@ -140,17 +145,9 @@ public:
      */
     virtual const Region<DIM>& boundingRegion()
     {
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4710 4711 )
-#endif
         myBoundingRegion.clear();
         myBoundingRegion << boundingBox();
         return myBoundingRegion;
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
     }
 
     /**
@@ -314,6 +311,9 @@ protected:
         const Region<DIM>& region) = 0;
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 }
 
 #endif

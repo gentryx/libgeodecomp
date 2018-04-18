@@ -6,28 +6,22 @@
 *
 */
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
+#include <libgeodecomp/config.h>
+#include <libflatarray/macros.hpp>
 
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <stdexcept>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
-#include <libgeodecomp/config.h>
 #include "mmio.h"
 
 // disable this for the rest of the file:
 #ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
+#pragma warning( disable : 4710 4711  )
 #endif
 
 FILE *mm_fopen(const char *pathname, const char *mode)
