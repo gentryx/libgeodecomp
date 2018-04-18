@@ -1,11 +1,9 @@
 #ifndef LIBGEODECOMP_MISC_SIMULATIONPARAMETERS_H
 #define LIBGEODECOMP_MISC_SIMULATIONPARAMETERS_H
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
+#include <libflatarray/macros.hpp>
+
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 
 // HPX' config needs to be included before Boost's config:
 #include <libgeodecomp/config.h>
@@ -15,9 +13,7 @@
 
 #include <stdexcept>
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
@@ -29,8 +25,7 @@ namespace LibGeoDecomp {
 // inline functions not being included in object files:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
-#pragma warning( disable : 4820 )
+#pragma warning( disable : 4514 4710 4711 4820 )
 #endif
 
 namespace SimulationParametersHelpers {
