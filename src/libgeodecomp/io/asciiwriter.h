@@ -5,21 +5,14 @@
 #include <libgeodecomp/io/plotter.h>
 #include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/storage/image.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <string>
 #include <cerrno>
 #include <fstream>
 #include <iomanip>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 

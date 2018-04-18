@@ -1,17 +1,11 @@
 #ifndef LIBGEODECOMP_GEOMETRY_ADJACENCYMANUFACTURER_H
 #define LIBGEODECOMP_GEOMETRY_ADJACENCYMANUFACTURER_H
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
+#include <libflatarray/macros.hpp>
 
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <stdexcept>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 #include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/region.h>

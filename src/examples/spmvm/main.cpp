@@ -6,22 +6,15 @@
 #include <libgeodecomp/misc/math.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <cstdlib>
 #include <map>
 #include <fstream>
 #include <string>
 #include <stdexcept>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 using namespace LibGeoDecomp;
 
@@ -194,6 +187,4 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_EOF

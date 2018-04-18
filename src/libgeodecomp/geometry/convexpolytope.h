@@ -10,6 +10,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 /**
  * ConvexPolytope is an intersection of half-spaces. On the 2D plane
  * this is a convex polygone, in 3D space a convex polyhedron.
@@ -406,6 +411,10 @@ private:
         throw std::logic_error("oops, boundary case in boundary generation should be logically impossible!");
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

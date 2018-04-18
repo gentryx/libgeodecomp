@@ -362,8 +362,7 @@ template<int DIM>
 bool ZCurvePartition<DIM>::cachesInitialized = ZCurvePartition<DIM>::fillCaches();
 
 #ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4710 4711 )
+#pragma warning( pop )
 #endif
 
 }

@@ -9,7 +9,6 @@ LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/runtime/serialization/base_object.hpp>
 #endif
-
 LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
