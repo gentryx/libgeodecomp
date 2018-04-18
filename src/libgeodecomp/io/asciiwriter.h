@@ -16,6 +16,11 @@ LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 /**
  * An output plugin for writing text files. Uses the same selector
  * infrastucture as the BOVWriter.
@@ -178,6 +183,10 @@ private:
     OutputDelegate *filter;
     Selector<CELL_TYPE> selector;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

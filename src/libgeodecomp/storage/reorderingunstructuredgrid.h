@@ -23,7 +23,7 @@ namespace ReorderingUnstructuredGridHelpers {
 // And yadda yadda yadda.
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4266 4514 4626 4820 5027 )
+#pragma warning( disable : 4266 4514 4626 4710 4711 4820 5027 )
 #endif
 
 typedef std::pair<int, int> IntPair;

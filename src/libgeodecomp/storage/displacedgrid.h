@@ -9,7 +9,7 @@ namespace LibGeoDecomp {
 
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4820 )
+#pragma warning( disable : 4710 4711 4820 )
 #endif
 
 /**

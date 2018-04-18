@@ -1,16 +1,10 @@
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
 #include <libgeodecomp/misc/random.h>
+#include <libflatarray/macros.hpp>
+
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <stdio.h>
 #include <stdlib.h>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
@@ -190,3 +184,5 @@ uint32 randomMT()
 #endif
 
 }
+
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_EOF

@@ -15,6 +15,11 @@ LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 /**
  * The initializer sets up the initial state of the grid. For this a
  * Simulator will invoke Initializer::grid(). Keep in mind that grid()
@@ -163,6 +168,10 @@ private:
         return makeShared<Adjacency>(new RegionBasedAdjacency());
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

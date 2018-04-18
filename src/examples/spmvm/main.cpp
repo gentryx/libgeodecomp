@@ -60,6 +60,11 @@ public:
     double sum;
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 class CellInitializerDiagonal : public SimpleInitializer<Cell>
 {
 public:
@@ -154,6 +159,10 @@ public:
         grid->setWeights(0, weights);
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 void runSimulation(int argc, char *argv[])
 {
