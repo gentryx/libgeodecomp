@@ -9,7 +9,7 @@
 #include <libgeodecomp/storage/selector.h>
 #include <libflatarray/macros.hpp>
 
-LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PUSH
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <stdexcept>
 LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
