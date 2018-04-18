@@ -11,23 +11,22 @@
 #include <libgeodecomp/storage/vanillaupdatefunctor.h>
 #include <libgeodecomp/storage/unstructuredupdatefunctor.h>
 #include <libgeodecomp/storage/updatefunctormacros.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/runtime/launch_policy.hpp>
 #include <hpx/parallel/algorithms/for_each.hpp>
 #endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 namespace LibGeoDecomp {
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
 
 namespace UpdateFunctorHelpers {
 
@@ -456,6 +455,10 @@ public:
             typename APITraits::SelectThreadedUpdate<CELL>::Value());
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

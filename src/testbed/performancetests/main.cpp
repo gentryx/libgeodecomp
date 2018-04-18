@@ -2850,6 +2850,4 @@ int main(int argc, char **argv)
     return 0;
 }
 
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_EOF
