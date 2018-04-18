@@ -7,19 +7,12 @@
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/selector.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <cstddef>
 #include <vector>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
@@ -690,6 +683,10 @@ public:
         }
     }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
     inline void clear()
     {
         for (int i = 0; i < DIM; ++i) {
@@ -699,6 +696,9 @@ public:
         myBoundingBox = CoordBox<DIM>();
         geometryCacheTainted = false;
     }
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
     inline const CoordBox<DIM>& boundingBox() const
     {
@@ -970,6 +970,10 @@ public:
         return *this;
     }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
     inline Region& operator<<(const CoordBox<DIM>& box)
     {
         Region buf;
@@ -985,6 +989,9 @@ public:
 
         return *this;
     }
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
     /**
      * Remove the given Streak (or all of its coordinates) from the

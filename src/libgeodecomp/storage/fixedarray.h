@@ -2,19 +2,12 @@
 #define LIBGEODECOMP_STORAGE_FIXEDARRAY_H
 
 #include <libgeodecomp/config.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4996 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <algorithm>
 #include <stdexcept>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
@@ -85,6 +78,7 @@ public:
         return SIZE;
     }
 
+    LIBFLATARRAY_INLINE
     void push_back(const T& t)
     {
         if (elements >= SIZE) {
@@ -93,6 +87,7 @@ public:
         store[elements++] = t;
     }
 
+    LIBFLATARRAY_INLINE
     FixedArray<T, SIZE>& operator<<(const T& t)
     {
         push_back(t);

@@ -6,6 +6,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 /**
  * This class implements a direct search (pattern search) which
  * searches a given neighborhood to find better parameters.
@@ -36,6 +41,11 @@ private:
 
     std::string patternToString(std::vector<SimulationParameters> pattern);
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 }
 
 #endif

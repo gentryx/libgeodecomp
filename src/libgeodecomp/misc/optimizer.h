@@ -7,11 +7,10 @@
 namespace LibGeoDecomp {
 
 // Hardwire this warning to off as MSVC would otherwise complain about
-// inline functions not being included in object files:
+// inline functions not being included in object files -- and such.
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
-#pragma warning( disable : 4820 )
+#pragma warning( disable : 4514 4710 4711 4820 )
 #endif
 
 /**

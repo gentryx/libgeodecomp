@@ -4,19 +4,12 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/topologies.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <iostream>
 #include <stdexcept>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
@@ -185,7 +178,8 @@ public:
     class StreakIterator
     {
     public:
-        inline StreakIterator(
+        LIBFLATARRAY_INLINE
+        StreakIterator(
             const Coord<DIM>& origin,
             const Coord<DIM>& dimensions) :
             streak(origin, origin.x() + dimensions.x()),

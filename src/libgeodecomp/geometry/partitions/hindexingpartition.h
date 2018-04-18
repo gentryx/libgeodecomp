@@ -441,6 +441,10 @@ public:
             *curDim = Coord<2>(std::abs(dim.x()), std::abs(dim.y()));
         }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
         static inline Coord<2> newOrigin(
             unsigned curType,
             unsigned curCounter,
@@ -492,6 +496,9 @@ public:
 
             throw std::invalid_argument("bad curType or curCounter");
         }
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
         static inline Coord<2> subtriangleDimensions(const Coord<2>& dimensions, unsigned type)
         {

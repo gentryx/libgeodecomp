@@ -163,7 +163,7 @@ public:
         return iterator;
     }
 
-    inline void operator++()
+    LIBFLATARRAY_INLINE void operator++()
     {
         ++iterator;
 

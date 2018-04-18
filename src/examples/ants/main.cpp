@@ -12,6 +12,7 @@
 #include <libgeodecomp/geometry/regionbasedadjacency.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/tracingwriter.h>
+#include <libflatarray/macros.hpp>
 
 using namespace LibGeoDecomp;
 
@@ -292,6 +293,4 @@ int main(int /* argc */, char** /* argv */)
     return 0;
 }
 
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_EOF
