@@ -16,7 +16,7 @@ namespace LibGeoDecomp {
 // inline functions not being included in object files:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4710 4711 )
 #endif
 
 namespace TopologiesHelpers {
@@ -111,6 +111,14 @@ template<class TOPOLOGY>
 class OutOfBounds
 {
 public:
+
+    // MSVC is wrong here: yes, we are using coord and dim in this
+    // function, it's just that the comparison may be statically
+    // short-wired because of WrapsAxis:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4100 4710 4711 )
+#endif
     __host__ __device__
     bool operator()(const Coord<1> coord, const Coord<1> dim)
     {
@@ -118,13 +126,6 @@ public:
             ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0])));
     }
 
-    // MSVC is wrong here: yes, we are using coord and dim in this
-    // function, it's just that the comparison may be statically
-    // short-wired because of WrapsAxis:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4100 )
-#endif
     __host__ __device__
     bool operator()(const Coord<2> coord, const Coord<2> dim)
     {
@@ -132,9 +133,6 @@ public:
             ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0]))) ||
             ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1])));
     }
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 
 #if !defined(__NVCC__) || (__CUDACC_VER_MAJOR__ >= 8)
@@ -145,12 +143,6 @@ public:
 #endif
 #endif
 #endif
-
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4100 )
-#endif
-
     __host__ __device__
     bool operator()(const Coord<3> coord, const Coord<3> dim)
     {
@@ -159,17 +151,16 @@ public:
             ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1]))) ||
             ((!WrapsAxis<2, TOPOLOGY>::VALUE) && ((coord[2] < 0) || (coord[2] >= dim[2])));
     }
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 #if !defined(__NVCC__) || (__CUDACC_VER_MAJOR__ >= 8)
 #ifdef __GNUG__
 #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6) )
 #pragma GCC diagnostic pop
 #endif
 #endif
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 };
 

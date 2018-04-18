@@ -10,6 +10,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 /**
  * This class is an adapter for implementing n-body codes and
  * molecular dynamics (MD) applications with LibGeoDecomp. A BoxCell
@@ -174,6 +179,10 @@ protected:
         }
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

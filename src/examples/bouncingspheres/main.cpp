@@ -173,7 +173,7 @@ typedef BoxCell<FixedArray<Boundary, 30> > BoundariesContainer;
 
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4626 5027 )
+#pragma warning( disable : 4626 4710 4711 5027 )
 #endif
 
 DECLARE_MULTI_CONTAINER_CELL(

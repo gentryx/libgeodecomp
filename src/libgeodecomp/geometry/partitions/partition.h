@@ -8,6 +8,11 @@
 
 namespace LibGeoDecomp {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 /**
  * The base class for all domain decomposition schemes. By having all
  * these schemes implement a common interface, we can easily swap
@@ -56,6 +61,10 @@ protected:
     std::vector<std::size_t> weights;
     std::vector<std::size_t> startOffsets;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

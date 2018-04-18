@@ -98,6 +98,11 @@ public:
         initHelper(&streak, iterators, *region, offset, additionalLength);
     }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
     inline void operator++()
     {
         ++iterators[0];
@@ -131,6 +136,10 @@ public:
             streak.origin[i] = iterators[i]->first + offset[i];
         }
     }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
     inline bool operator==(const RegionStreakIterator& other) const
     {

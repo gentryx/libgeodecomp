@@ -15,30 +15,23 @@
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhoodnew.h>
 #include <libgeodecomp/storage/updatefunctormacros.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/async.hpp>
 #include <hpx/parallel/algorithms/for_each.hpp>
 #endif
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
-namespace UnstructuredUpdateFunctorHelpers {
-
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4626 5027 )
+#pragma warning( disable : 4626 4710 4711 5027 )
 #endif
+
+namespace UnstructuredUpdateFunctorHelpers {
 
 /**
  * Functor to be used from with LibFlatArray from within
@@ -115,10 +108,6 @@ private:
     const CONCURRENCY_SPEC& concurrencySpec;
     const MODEL_THREADING_SPEC& modelThreadingSpec;
 };
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 }
 
@@ -248,6 +237,10 @@ public:
                 modelThreadingSpec));
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

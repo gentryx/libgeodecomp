@@ -6,23 +6,21 @@
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/storage/grid.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <bitset>
 #include <sstream>
 #include <stdexcept>
 #include <list>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
 
 /**
  * Another space-filling curve, this one is based on a zip-zag pattern
@@ -362,6 +360,11 @@ Coord<DIM> ZCurvePartition<DIM>::maxCachedDimensions;
 
 template<int DIM>
 bool ZCurvePartition<DIM>::cachesInitialized = ZCurvePartition<DIM>::fillCaches();
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
 
 }
 
