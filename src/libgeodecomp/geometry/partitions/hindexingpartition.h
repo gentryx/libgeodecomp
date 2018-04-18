@@ -6,21 +6,14 @@
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/grid.h>
+#include <libflatarray/macros.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <iostream>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
@@ -578,7 +571,7 @@ private:
     Coord<2> origin;
     Coord<2> dimensions;
 
-    static inline bool fillCaches()
+    static bool fillCaches()
     {
         // store triangles of at most maxDim in size
         Coord<2> maxDim(17, 17);

@@ -26,7 +26,7 @@ namespace LibGeoDecomp {
 // inline functions not being included in object files:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4710 4711 )
 #endif
 
 /**

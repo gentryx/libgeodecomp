@@ -1,15 +1,4 @@
-// Hardwire this warning to off as MSVC would otherwise complain about
-// inline functions not being included in object files:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 )
-#endif
-
 #include <libgeodecomp/geometry/partitions/hindexingpartition.h>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 namespace LibGeoDecomp {
 
@@ -26,10 +15,17 @@ SharedPtr<HIndexingPartition::CacheType>::Type HIndexingPartition::triangleCoord
 
 std::map<std::pair<Coord<2>, unsigned>, unsigned> HIndexingPartition::triangleLengthCache;
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 bool HIndexingPartition::cachesInitialized = HIndexingPartition::fillCaches();
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_EOF

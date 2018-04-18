@@ -682,10 +682,6 @@ public:
         }
     }
 
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4710 4711 )
-#endif
     void clear()
     {
         for (int i = 0; i < DIM; ++i) {
@@ -695,9 +691,6 @@ public:
         myBoundingBox = CoordBox<DIM>();
         geometryCacheTainted = false;
     }
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
     inline const CoordBox<DIM>& boundingBox() const
     {
@@ -969,10 +962,6 @@ public:
         return *this;
     }
 
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4710 4711 )
-#endif
     Region& operator<<(const CoordBox<DIM>& box)
     {
         Region buf;
@@ -988,9 +977,6 @@ public:
 
         return *this;
     }
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
     /**
      * Remove the given Streak (or all of its coordinates) from the

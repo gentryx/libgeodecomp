@@ -1,15 +1,4 @@
-// Hardwire this warning to off as MSVC would otherwise complain about
-// inline functions not being included in object files:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 )
-#endif
-
 #include <libgeodecomp/geometry/partitions/hilbertpartition.h>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 namespace LibGeoDecomp {
 
@@ -32,10 +21,18 @@ int HilbertPartition::squareSectorTransitions[4][4] = {
 
 SharedPtr<HilbertPartition::CacheType>::Type HilbertPartition::squareCoordsCache;
 Coord<2> HilbertPartition::maxCachedDimensions;
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 bool HilbertPartition::cachesInitialized = HilbertPartition::fillCaches();
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_EOF
