@@ -48,6 +48,7 @@ class MemberFilterCudaTest : public CxxTest::TestSuite
 public:
     void testBasics()
     {
+#ifdef LIBGEODECOMP_WITH_CUDA
         typedef SharedPtr<FilterBase<TestCell<2> > >::Type FilterPtr;
         FilterPtr filter(new MemberFilter<TestCell<2>, Coord<2> >(&Coord<2>::c));
 
@@ -62,10 +63,12 @@ public:
 #endif
         TS_ASSERT_EQUALS("INT", selector.typeName());
         TS_ASSERT_EQUALS(2, selector.arity());
+#endif
     }
 
     void testHostAoS()
     {
+#ifdef LIBGEODECOMP_WITH_CUDA
         typedef SharedPtr<FilterBase<TestCell<2> > >::Type FilterPtr;
         FilterPtr filter(new MemberFilter<TestCell<2>, CoordBox<2> >(&CoordBox<2>::dimensions));
 
@@ -119,10 +122,12 @@ public:
 
         TS_ASSERT_EQUALS(sizeof(Coord<2>), filter->sizeOf());
         TS_ASSERT_EQUALS(1, selector.arity());
+#endif
     }
 
     void testHostSoA()
     {
+#ifdef LIBGEODECOMP_WITH_CUDA
         LibFlatArray::cuda_array<CoordBox<3> > deviceBuffer1(30);
         LibFlatArray::cuda_array<Coord<3> > deviceBuffer2(30);
         std::vector<CoordBox<3> > hostBuffer1;
@@ -187,6 +192,7 @@ public:
 
         TS_ASSERT_EQUALS(sizeof(Coord<3>), filter->sizeOf());
         TS_ASSERT_EQUALS(1, selector.arity());
+#endif
     }
 
 };
