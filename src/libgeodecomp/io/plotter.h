@@ -8,10 +8,10 @@
 #include <libgeodecomp/storage/image.h>
 #include <libflatarray/macros.hpp>
 
-LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PUSH
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <algorithm>
 #include <vector>
-LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POP
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 namespace LibGeoDecomp {
 
