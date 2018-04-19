@@ -39,81 +39,81 @@ FILE *mm_fopen(const char *pathname, const char *mode)
 #endif
 }
 
-// int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
-//                 double **val_, int **I_, int **J_)
-// {
-//     FILE *f;
-//     MM_typecode matcode;
-//     int M, N, nz;
-//     int i;
-//     double *val;
-//     int *I, *J;
+int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
+                double **val_, int **I_, int **J_)
+{
+    FILE *f;
+    MM_typecode matcode;
+    int M, N, nz;
+    int i;
+    double *val;
+    int *I, *J;
 
-//     if ((f = mm_fopen(fname, "r")) == NULL)
-//             return -1;
-
-
-//     if (mm_read_banner(f, &matcode) != 0)
-//     {
-//         printf("mm_read_unsymetric: Could not process Matrix Market banner ");
-//         printf(" in file [%s]\n", fname);
-//         return -1;
-//     }
+    if ((f = mm_fopen(fname, "r")) == NULL)
+            return -1;
 
 
+    if (mm_read_banner(f, &matcode) != 0)
+    {
+        printf("mm_read_unsymetric: Could not process Matrix Market banner ");
+        printf(" in file [%s]\n", fname);
+        return -1;
+    }
 
-//     if ( !(mm_is_real(matcode) && mm_is_matrix(matcode) &&
-//             mm_is_sparse(matcode)))
-//     {
-//         fprintf(stderr, "Sorry, this application does not support ");
-//         fprintf(stderr, "Market Market type: [%s]\n",
-//                 mm_typecode_to_str(matcode));
-//         return -1;
-//     }
 
-//     /* find out size of sparse matrix: M, N, nz .... */
 
-//     if (mm_read_mtx_crd_size(f, &M, &N, &nz) !=0)
-//     {
-//         fprintf(stderr, "read_unsymmetric_sparse(): could not parse matrix size.\n");
-//         return -1;
-//     }
+    if ( !(mm_is_real(matcode) && mm_is_matrix(matcode) &&
+            mm_is_sparse(matcode)))
+    {
+        fprintf(stderr, "Sorry, this application does not support ");
+        fprintf(stderr, "Market Market type: [%s]\n",
+                mm_typecode_to_str(matcode));
+        return -1;
+    }
 
-//     *M_ = M;
-//     *N_ = N;
-//     *nz_ = nz;
+    /* find out size of sparse matrix: M, N, nz .... */
 
-//     /* reseve memory for matrices */
+    if (mm_read_mtx_crd_size(f, &M, &N, &nz) !=0)
+    {
+        fprintf(stderr, "read_unsymmetric_sparse(): could not parse matrix size.\n");
+        return -1;
+    }
 
-//     I = (int *) malloc(nz * sizeof(int));
-//     J = (int *) malloc(nz * sizeof(int));
-//     val = (double *) malloc(nz * sizeof(double));
+    *M_ = M;
+    *N_ = N;
+    *nz_ = nz;
 
-//     if (!I || !J || !val) {
-//         throw std::runtime_error("malloc() failed");
-//     }
+    /* reseve memory for matrices */
 
-//     *val_ = val;
-//     *I_ = I;
-//     *J_ = J;
+    I = (int *) malloc(nz * sizeof(int));
+    J = (int *) malloc(nz * sizeof(int));
+    val = (double *) malloc(nz * sizeof(double));
 
-//     /* NOTE: when reading in doubles, ANSI C requires the use of the "l"  */
-//     /*   specifier as in "%lg", "%lf", "%le", otherwise errors will occur */
-//     /*  (ANSI C X3.159-1989, Sec. 4.9.6.2, p. 136 lines 13-15)            */
+    if (!I || !J || !val) {
+        throw std::runtime_error("malloc() failed");
+    }
 
-//     for (i=0; i<nz; i++)
-//     {
-//         int rc = FSCANF(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
-//         if (rc != 3) {
-//             throw std::runtime_error("failed to parse input file");
-//         }
-//         I[i]--;  /* adjust from 1-based to 0-based */
-//         J[i]--;
-//     }
-//     fclose(f);
+    *val_ = val;
+    *I_ = I;
+    *J_ = J;
 
-//     return 0;
-// }
+    /* NOTE: when reading in doubles, ANSI C requires the use of the "l"  */
+    /*   specifier as in "%lg", "%lf", "%le", otherwise errors will occur */
+    /*  (ANSI C X3.159-1989, Sec. 4.9.6.2, p. 136 lines 13-15)            */
+
+    for (i=0; i<nz; i++)
+    {
+        int rc = FSCANF(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
+        if (rc != 3) {
+            throw std::runtime_error("failed to parse input file");
+        }
+        I[i]--;  /* adjust from 1-based to 0-based */
+        J[i]--;
+    }
+    fclose(f);
+
+    return 0;
+}
 
 // int mm_is_valid(MM_typecode matcode)
 // {
