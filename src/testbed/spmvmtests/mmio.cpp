@@ -26,18 +26,17 @@
 
 FILE *mm_fopen(const char *pathname, const char *mode)
 {
-    return 0; // FIXME
-// #ifdef _MSC_BUILD
-//     FILE *ret;
+#ifdef _MSC_BUILD
+    FILE *ret;
 
-//     errno_t err = fopen_s(&ret, pathname, mode);
-//     if (err != 0) {
-//         return NULL;
-//     }
-//     return ret;
-// #else
-//     return fopen(pathname, mode);
-// #endif
+    errno_t err = fopen_s(&ret, pathname, mode);
+    if (err != 0) {
+        return NULL;
+    }
+    return ret;
+#else
+    return fopen(pathname, mode);
+#endif
 }
 
 // int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
