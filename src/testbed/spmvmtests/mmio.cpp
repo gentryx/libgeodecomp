@@ -17,15 +17,16 @@
 // #include <ctype.h>
 // LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
-// #include "mmio.h"
+#include "mmio.h"
 
 // disable this for the rest of the file:
 #ifdef _MSC_BUILD
 #pragma warning( disable : 4710 4711  )
 #endif
 
-// FILE *mm_fopen(const char *pathname, const char *mode)
-// {
+FILE *mm_fopen(const char *pathname, const char *mode)
+{
+    return 0; // FIXME
 // #ifdef _MSC_BUILD
 //     FILE *ret;
 
@@ -37,7 +38,7 @@
 // #else
 //     return fopen(pathname, mode);
 // #endif
-// }
+}
 
 // int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
 //                 double **val_, int **I_, int **J_)
