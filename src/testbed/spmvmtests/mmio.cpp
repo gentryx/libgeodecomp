@@ -9,13 +9,13 @@
 // #include <libgeodecomp/config.h>
 #include <libflatarray/macros.hpp>
 
-// LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 // #include <stdexcept>
 // #include <stdio.h>
 // #include <string.h>
 // #include <stdlib.h>
-// #include <ctype.h>
-// LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
+#include <ctype.h>
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 #include "mmio.h"
 
