@@ -111,17 +111,14 @@ const T& (max)(const std::vector<T, Allocator>& vec)
     return *(std::max_element(vec.begin(), vec.end()));
 }
 
-template <typename T, typename Allocator, typename U>
-inline std::vector<T, Allocator>& operator<<(std::vector<T, Allocator>& vec, const U& obj)
-{
 #ifdef _MSC_BUILD
 #pragma warning( push )
 #pragma warning( disable : 4710 4711 )
 #endif
+template <typename T, typename Allocator, typename U>
+inline std::vector<T, Allocator>& operator<<(std::vector<T, Allocator>& vec, const U& obj)
+{
     vec.push_back(obj);
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
     return vec;
 }
 
@@ -134,6 +131,10 @@ inline std::vector<T, Allocator>& operator<<(std::vector<T, Allocator>& vec, U&&
     return vec;
 }
 
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
 #endif
 
 template <typename T, typename Allocator>

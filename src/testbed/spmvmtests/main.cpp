@@ -12,13 +12,6 @@
  *
  */
 
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4710 4711 )
-#endif
-
-// fixme: bisection: pop bad here
-
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/io/simpleinitializer.h>
@@ -26,25 +19,12 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/cpubenchmark.h>
-
-// fixme: bisection: pop bad here
-// fixme: pop here TBD
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
 #include <libgeodecomp/storage/unstructuredgrid.h>
-// fixme: bisection: pop bad here
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
-
-// fixme: bisection: pop good here
-
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredupdatefunctor.h>
 #include <libgeodecomp/storage/updatefunctor.h>
-
-// fixme: bisection: pop good here
 
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>

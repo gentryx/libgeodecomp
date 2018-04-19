@@ -1,8 +1,3 @@
-// fixme: scope this to local code region
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
-#endif
-
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/cpubenchmark.h>
@@ -13,10 +8,10 @@
 
 using namespace LibGeoDecomp;
 
-// padding is fine:
+// Padding is fine. Also, don't warn about inlining.
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4820 )
+#pragma warning( disable : 4710 4711 4820 )
 #endif
 
 class LBMSoACell
@@ -207,7 +202,7 @@ public:
 // 32-bit machine:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4307 4514 )
+#pragma warning( disable : 4307 4514 4710 4711 )
 #endif
 
 LIBFLATARRAY_REGISTER_SOA(
@@ -281,7 +276,4 @@ std::string LBMSoA::unit()
     return "GLUPS";
 }
 
-// fixme: scope this to local code region
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_EOF
