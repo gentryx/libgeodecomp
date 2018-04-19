@@ -1861,6 +1861,11 @@ public:
     }
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 template<class PARTITION>
 class PartitionBenchmark : public CPUBenchmark
 {
@@ -1911,6 +1916,10 @@ public:
 private:
     std::string name;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #ifdef LIBGEODECOMP_WITH_CPP14
 typedef double ValueType;

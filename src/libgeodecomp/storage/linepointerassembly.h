@@ -132,6 +132,11 @@ public:
 
 }
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
+
 /**
  * will initialize an array of pointers so that it can be used with
  * LinePointerNeighborhood.
@@ -148,6 +153,10 @@ public:
                          STENCIL>()(pointers, streak, &grid);
     }
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 
