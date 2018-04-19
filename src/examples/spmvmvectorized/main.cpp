@@ -12,21 +12,13 @@
 #include <libflatarray/macros.hpp>
 #include <libflatarray/short_vec.hpp>
 
-// Kill some warnings in system headers
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 4710 4711 )
-#endif
-
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 #include <cstdlib>
 #include <map>
 #include <fstream>
 #include <string>
 #include <stdexcept>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;
@@ -38,10 +30,11 @@ static const int C = 4;
 static const int SIGMA = 1;
 typedef short_vec<ValueType, C> ShortVec;
 
-// Removing inline functions is fine:
+// Removing inline functions is fine. Also, don't overzealously warn
+// about std::copy() usage.
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4710 4711 4996 )
 #endif
 
 class Cell
@@ -91,21 +84,7 @@ public:
     double sum;
 };
 
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
-
-// Don't overzealously warn about std::copy() usage:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4996 )
-#endif
-
 LIBFLATARRAY_REGISTER_SOA(Cell, ((double)(sum))((double)(value)))
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 class CellInitializerDiagonal : public SimpleInitializer<Cell>
 {
@@ -197,6 +176,10 @@ public:
     }
 };
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 static
 void runSimulation(int argc, char *argv[])
 {
@@ -243,6 +226,4 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-#ifdef _MSC_BUILD
-#pragma warning( disable : 4710 )
-#endif
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_EOF
