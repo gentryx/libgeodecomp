@@ -7,7 +7,7 @@
 */
 
 // #include <libgeodecomp/config.h>
-// #include <libflatarray/macros.hpp>
+#include <libflatarray/macros.hpp>
 
 // LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
 // #include <stdexcept>
