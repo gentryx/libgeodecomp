@@ -114,7 +114,14 @@ const T& (max)(const std::vector<T, Allocator>& vec)
 template <typename T, typename Allocator, typename U>
 inline std::vector<T, Allocator>& operator<<(std::vector<T, Allocator>& vec, const U& obj)
 {
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 4711 )
+#endif
     vec.push_back(obj);
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
     return vec;
 }
 

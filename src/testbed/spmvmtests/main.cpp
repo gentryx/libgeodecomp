@@ -52,7 +52,8 @@
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
 
-// fixme: bisection: pop good here
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
+
 #if defined(__AVX__) || defined(__MIC__)
 #include <immintrin.h>
 #endif
@@ -67,7 +68,7 @@
 
 #include "mmio.h"
 
-// fixme: bisection: pop good here
+LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;

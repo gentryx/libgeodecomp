@@ -103,7 +103,8 @@ public:
 #pragma warning( disable : 4710 4711 )
 #endif
 
-    inline void operator++()
+    LIBFLATARRAY_INLINE
+    void operator++()
     {
         ++iterators[0];
         if (iterators[0] == region->indicesEnd(0)) {
