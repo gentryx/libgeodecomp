@@ -115,113 +115,113 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     return 0;
 }
 
-// int mm_is_valid(MM_typecode matcode)
-// {
-//     if (!mm_is_matrix(matcode)) return 0;
-//     if (mm_is_dense(matcode) && mm_is_pattern(matcode)) return 0;
-//     if (mm_is_real(matcode) && mm_is_hermitian(matcode)) return 0;
-//     if (mm_is_pattern(matcode) && (mm_is_hermitian(matcode) ||
-//                 mm_is_skew(matcode))) return 0;
-//     return 1;
-// }
+int mm_is_valid(MM_typecode matcode)
+{
+    if (!mm_is_matrix(matcode)) return 0;
+    if (mm_is_dense(matcode) && mm_is_pattern(matcode)) return 0;
+    if (mm_is_real(matcode) && mm_is_hermitian(matcode)) return 0;
+    if (mm_is_pattern(matcode) && (mm_is_hermitian(matcode) ||
+                mm_is_skew(matcode))) return 0;
+    return 1;
+}
 
-// int mm_read_banner(FILE *f, MM_typecode *matcode)
-// {
-//     char line[MM_MAX_LINE_LENGTH];
-//     char banner[MM_MAX_TOKEN_LENGTH];
-//     char mtx[MM_MAX_TOKEN_LENGTH];
-//     char crd[MM_MAX_TOKEN_LENGTH];
-//     char data_type[MM_MAX_TOKEN_LENGTH];
-//     char storage_scheme[MM_MAX_TOKEN_LENGTH];
-//     char *p;
-
-
-//     mm_clear_typecode(matcode);
-
-//     if (fgets(line, MM_MAX_LINE_LENGTH, f) == NULL)
-//         return MM_PREMATURE_EOF;
-
-// #ifdef _MSC_BUILD
-//     if (sscanf_s(line, "%s %s %s %s %s",
-//                  banner,         MM_MAX_TOKEN_LENGTH,
-//                  mtx,            MM_MAX_TOKEN_LENGTH,
-//                  crd,            MM_MAX_TOKEN_LENGTH,
-//                  data_type,      MM_MAX_TOKEN_LENGTH,
-//                  storage_scheme, MM_MAX_TOKEN_LENGTH) != 5)
-// #else
-//     if (sscanf(line, "%s %s %s %s %s",
-//                   banner,
-//                   mtx,
-//                   crd,
-//                   data_type,
-//                   storage_scheme) != 5)
-// #endif
-//         return MM_PREMATURE_EOF;
-
-//     for (p=mtx; *p!='\0'; *p=char(tolower(*p)),p++);  /* convert to lower case */
-//     for (p=crd; *p!='\0'; *p=char(tolower(*p)),p++);
-//     for (p=data_type; *p!='\0'; *p=char(tolower(*p)),p++);
-//     for (p=storage_scheme; *p!='\0'; *p=char(tolower(*p)),p++);
-
-//     /* check for banner */
-//     if (strncmp(banner, MatrixMarketBanner, strlen(MatrixMarketBanner)) != 0)
-//         return MM_NO_HEADER;
-
-//     /* first field should be "mtx" */
-//     if (strcmp(mtx, MM_MTX_STR) != 0)
-//         return  MM_UNSUPPORTED_TYPE;
-//     mm_set_matrix(matcode);
+int mm_read_banner(FILE *f, MM_typecode *matcode)
+{
+    char line[MM_MAX_LINE_LENGTH];
+    char banner[MM_MAX_TOKEN_LENGTH];
+    char mtx[MM_MAX_TOKEN_LENGTH];
+    char crd[MM_MAX_TOKEN_LENGTH];
+    char data_type[MM_MAX_TOKEN_LENGTH];
+    char storage_scheme[MM_MAX_TOKEN_LENGTH];
+    char *p;
 
 
-//     /* second field describes whether this is a sparse matrix (in coordinate
-//             storgae) or a dense array */
+    mm_clear_typecode(matcode);
+
+    if (fgets(line, MM_MAX_LINE_LENGTH, f) == NULL)
+        return MM_PREMATURE_EOF;
+
+#ifdef _MSC_BUILD
+    if (sscanf_s(line, "%s %s %s %s %s",
+                 banner,         MM_MAX_TOKEN_LENGTH,
+                 mtx,            MM_MAX_TOKEN_LENGTH,
+                 crd,            MM_MAX_TOKEN_LENGTH,
+                 data_type,      MM_MAX_TOKEN_LENGTH,
+                 storage_scheme, MM_MAX_TOKEN_LENGTH) != 5)
+#else
+    if (sscanf(line, "%s %s %s %s %s",
+                  banner,
+                  mtx,
+                  crd,
+                  data_type,
+                  storage_scheme) != 5)
+#endif
+        return MM_PREMATURE_EOF;
+
+    for (p=mtx; *p!='\0'; *p=char(tolower(*p)),p++);  /* convert to lower case */
+    for (p=crd; *p!='\0'; *p=char(tolower(*p)),p++);
+    for (p=data_type; *p!='\0'; *p=char(tolower(*p)),p++);
+    for (p=storage_scheme; *p!='\0'; *p=char(tolower(*p)),p++);
+
+    /* check for banner */
+    if (strncmp(banner, MatrixMarketBanner, strlen(MatrixMarketBanner)) != 0)
+        return MM_NO_HEADER;
+
+    /* first field should be "mtx" */
+    if (strcmp(mtx, MM_MTX_STR) != 0)
+        return  MM_UNSUPPORTED_TYPE;
+    mm_set_matrix(matcode);
 
 
-//     if (strcmp(crd, MM_SPARSE_STR) == 0)
-//         mm_set_sparse(matcode);
-//     else
-//     if (strcmp(crd, MM_DENSE_STR) == 0)
-//             mm_set_dense(matcode);
-//     else
-//         return MM_UNSUPPORTED_TYPE;
+    /* second field describes whether this is a sparse matrix (in coordinate
+            storgae) or a dense array */
 
 
-//     /* third field */
-
-//     if (strcmp(data_type, MM_REAL_STR) == 0)
-//         mm_set_real(matcode);
-//     else
-//     if (strcmp(data_type, MM_COMPLEX_STR) == 0)
-//         mm_set_complex(matcode);
-//     else
-//     if (strcmp(data_type, MM_PATTERN_STR) == 0)
-//         mm_set_pattern(matcode);
-//     else
-//     if (strcmp(data_type, MM_INT_STR) == 0)
-//         mm_set_integer(matcode);
-//     else
-//         return MM_UNSUPPORTED_TYPE;
+    if (strcmp(crd, MM_SPARSE_STR) == 0)
+        mm_set_sparse(matcode);
+    else
+    if (strcmp(crd, MM_DENSE_STR) == 0)
+            mm_set_dense(matcode);
+    else
+        return MM_UNSUPPORTED_TYPE;
 
 
-//     /* fourth field */
+    /* third field */
 
-//     if (strcmp(storage_scheme, MM_GENERAL_STR) == 0)
-//         mm_set_general(matcode);
-//     else
-//     if (strcmp(storage_scheme, MM_SYMM_STR) == 0)
-//         mm_set_symmetric(matcode);
-//     else
-//     if (strcmp(storage_scheme, MM_HERM_STR) == 0)
-//         mm_set_hermitian(matcode);
-//     else
-//     if (strcmp(storage_scheme, MM_SKEW_STR) == 0)
-//         mm_set_skew(matcode);
-//     else
-//         return MM_UNSUPPORTED_TYPE;
+    if (strcmp(data_type, MM_REAL_STR) == 0)
+        mm_set_real(matcode);
+    else
+    if (strcmp(data_type, MM_COMPLEX_STR) == 0)
+        mm_set_complex(matcode);
+    else
+    if (strcmp(data_type, MM_PATTERN_STR) == 0)
+        mm_set_pattern(matcode);
+    else
+    if (strcmp(data_type, MM_INT_STR) == 0)
+        mm_set_integer(matcode);
+    else
+        return MM_UNSUPPORTED_TYPE;
 
 
-//     return 0;
-// }
+    /* fourth field */
+
+    if (strcmp(storage_scheme, MM_GENERAL_STR) == 0)
+        mm_set_general(matcode);
+    else
+    if (strcmp(storage_scheme, MM_SYMM_STR) == 0)
+        mm_set_symmetric(matcode);
+    else
+    if (strcmp(storage_scheme, MM_HERM_STR) == 0)
+        mm_set_hermitian(matcode);
+    else
+    if (strcmp(storage_scheme, MM_SKEW_STR) == 0)
+        mm_set_skew(matcode);
+    else
+        return MM_UNSUPPORTED_TYPE;
+
+
+    return 0;
+}
 
 // int mm_write_mtx_crd_size(FILE *f, int M, int N, int nz)
 // {
