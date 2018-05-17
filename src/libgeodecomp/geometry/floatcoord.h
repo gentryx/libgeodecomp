@@ -676,6 +676,23 @@ public:
 
     template<template<int> class OTHER_COORD>
     inline
+    FloatCoord<3> operator&(const OTHER_COORD<3>& a) const
+    {
+        return FloatCoord<3>(c[1]*a[2] - c[2]*a[1], c[2]*a[0] - c[0]*a[2], c[0]*a[1] - c[1]*a[0]);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    FloatCoord<3>& operator&=(const OTHER_COORD<3>& a)
+    {
+        c[0] = c[1]*a[2] - c[2]*a[1];
+        c[1] = c[2]*a[0] - c[0]*a[2];
+        c[2] = c[0]*a[1] - c[1]*a[0];
+        return *this;
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
     bool operator==(const OTHER_COORD<3>& a) const
     {
         return (c[0] == a[0]) && (c[1] == a[1]) && (c[2] == a[2]);
