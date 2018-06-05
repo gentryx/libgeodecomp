@@ -3,6 +3,38 @@
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 
+/**
+ * Test model for use with Boost.Serialization
+ */
+class MyComplicatedCell1
+{
+public:
+    class API : public LibGeoDecomp::APITraits::HasBoostSerialization
+    {};
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    {
+    }
+
+    inline bool operator==(const MyComplicatedCell1& other)
+    {
+        return
+            (x     == other.x) &&
+            (cargo == other.cargo);
+    }
+
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& archive, int version)
+    {
+        archive & x;
+        archive & cargo;
+    }
+
+    int x;
+    std::vector<int> cargo;
+};
+
 class MyDummyCell
 {
 public:
@@ -401,6 +433,72 @@ public:
             --index;
         }
     }
+
+    void testBoostSerialization()
+    {
+        typedef DisplacedGrid<MyComplicatedCell1> GridType;
+
+        Coord<2> dim(30, 20);
+        CoordBox<2> box(Coord<2>(200, 100), dim);
+
+        GridType sendGrid(box);
+        GridType recvGrid(box);
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            MyComplicatedCell1 cell;
+            cell.cargo << i->x();
+            cell.cargo << i->y();
+            cell.x = i->x() * 100 + i->y();
+            sendGrid.set(*i, cell);
+        }
+
+        Region<2> region;
+        region << Streak<2>(Coord<2>(201, 101), 229)
+               << Streak<2>(Coord<2>(201, 102), 202)
+               << Streak<2>(Coord<2>(228, 102), 229)
+               << Streak<2>(Coord<2>(201, 103), 202)
+               << Streak<2>(Coord<2>(228, 103), 229)
+               << Streak<2>(Coord<2>(201, 104), 202)
+               << Streak<2>(Coord<2>(228, 104), 229)
+               << Streak<2>(Coord<2>(201, 105), 202)
+               << Streak<2>(Coord<2>(228, 105), 229)
+               << Streak<2>(Coord<2>(201, 106), 202)
+               << Streak<2>(Coord<2>(228, 106), 229)
+               << Streak<2>(Coord<2>(201, 107), 202)
+               << Streak<2>(Coord<2>(228, 107), 229)
+               << Streak<2>(Coord<2>(201, 108), 202)
+               << Streak<2>(Coord<2>(228, 108), 229)
+               << Streak<2>(Coord<2>(201, 109), 202)
+               << Streak<2>(Coord<2>(228, 109), 229)
+               << Streak<2>(Coord<2>(201, 110), 202)
+               << Streak<2>(Coord<2>(228, 110), 229)
+               << Streak<2>(Coord<2>(201, 111), 202)
+               << Streak<2>(Coord<2>(228, 111), 229)
+               << Streak<2>(Coord<2>(201, 112), 202)
+               << Streak<2>(Coord<2>(228, 112), 229)
+               << Streak<2>(Coord<2>(201, 113), 202)
+               << Streak<2>(Coord<2>(228, 113), 229)
+               << Streak<2>(Coord<2>(201, 114), 202)
+               << Streak<2>(Coord<2>(228, 114), 229)
+               << Streak<2>(Coord<2>(201, 115), 202)
+               << Streak<2>(Coord<2>(228, 115), 229)
+               << Streak<2>(Coord<2>(201, 116), 202)
+               << Streak<2>(Coord<2>(228, 116), 229)
+               << Streak<2>(Coord<2>(201, 117), 229);
+        TS_ASSERT_EQUALS(region.size(), 86);
+
+        std::vector<char> buffer;
+        sendGrid.saveRegion(&buffer, region);
+
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_DIFFERS(sendGrid[*i], recvGrid[*i]);
+        }
+        recvGrid.loadRegion(buffer, region);
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_EQUALS(sendGrid[*i], recvGrid[*i]);
+        }
+    }
+
 };
 
 }
