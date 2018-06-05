@@ -354,7 +354,7 @@ public:
             ++iter;
         }
 
-        // manupulate test data:
+        // manipulate test data:
         for (int i = 0; i < 70; ++i) {
             buffer[i].pos = Coord<2>(-i, -10);
         }
@@ -418,7 +418,7 @@ public:
             ++iter;
         }
 
-        // manupulate test data:
+        // manipulate test data:
         for (int i = 0; i < 90; ++i) {
             buffer[i].pos = Coord<2>(-i, -20);
         }
@@ -434,7 +434,8 @@ public:
         }
     }
 
-    void testBoostSerialization()
+    // fixme: test with offset, too
+    void testLoadSaveRegionWithBoostSerialization()
     {
         typedef DisplacedGrid<MyComplicatedCell1> GridType;
 
@@ -498,7 +499,6 @@ public:
             TS_ASSERT_EQUALS(sendGrid[*i], recvGrid[*i]);
         }
     }
-
 };
 
 }
