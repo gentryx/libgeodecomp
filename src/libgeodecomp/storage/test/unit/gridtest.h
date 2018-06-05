@@ -547,7 +547,6 @@ public:
         }
     }
 
-    // fixme: test with offset, too
     void testLoadSaveRegionWithBoostSerialization()
     {
         typedef Grid<MyComplicatedCell1> GridType;
@@ -567,31 +566,32 @@ public:
         }
 
         Region<2> region;
-        region << Streak<2>(Coord<2>( 1, 1), 12)
-               << Streak<2>(Coord<2>( 1, 2),  2)
-               << Streak<2>(Coord<2>(11, 2), 12)
-               << Streak<2>(Coord<2>( 1, 3),  2)
-               << Streak<2>(Coord<2>(11, 3), 12)
-               << Streak<2>(Coord<2>( 1, 4),  2)
-               << Streak<2>(Coord<2>(11, 4), 12)
-               << Streak<2>(Coord<2>( 1, 5),  2)
-               << Streak<2>(Coord<2>(11, 5), 12)
-               << Streak<2>(Coord<2>( 1, 6),  2)
-               << Streak<2>(Coord<2>(11, 6), 12)
-               << Streak<2>(Coord<2>( 1, 7),  2)
-               << Streak<2>(Coord<2>(11, 7), 12)
-               << Streak<2>(Coord<2>( 1, 8), 12);
+        region << Streak<2>(Coord<2>(4001, 3001), 4012)
+               << Streak<2>(Coord<2>(4001, 3002), 4002)
+               << Streak<2>(Coord<2>(4011, 3002), 4012)
+               << Streak<2>(Coord<2>(4001, 3003), 4002)
+               << Streak<2>(Coord<2>(4011, 3003), 4012)
+               << Streak<2>(Coord<2>(4001, 3004), 4002)
+               << Streak<2>(Coord<2>(4011, 3004), 4012)
+               << Streak<2>(Coord<2>(4001, 3005), 4002)
+               << Streak<2>(Coord<2>(4011, 3005), 4012)
+               << Streak<2>(Coord<2>(4001, 3006), 4002)
+               << Streak<2>(Coord<2>(4011, 3006), 4012)
+               << Streak<2>(Coord<2>(4001, 3007), 4002)
+               << Streak<2>(Coord<2>(4011, 3007), 4012)
+               << Streak<2>(Coord<2>(4001, 3008), 4012);
         TS_ASSERT_EQUALS(region.size(), 34);
+        Coord<2> offset(-4000, -3000);
 
         std::vector<char> buffer;
-        sendGrid.saveRegion(&buffer, region);
+        sendGrid.saveRegion(&buffer, region, offset);
 
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
-            TS_ASSERT_DIFFERS(sendGrid[*i], recvGrid[*i]);
+            TS_ASSERT_DIFFERS(sendGrid[*i + offset], recvGrid[*i + offset]);
         }
-        recvGrid.loadRegion(buffer, region);
+        recvGrid.loadRegion(buffer, region, offset);
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
-            TS_ASSERT_EQUALS(sendGrid[*i], recvGrid[*i]);
+            TS_ASSERT_EQUALS(sendGrid[*i + offset], recvGrid[*i + offset]);
         }
     }
 
