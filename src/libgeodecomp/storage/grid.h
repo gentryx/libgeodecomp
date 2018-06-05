@@ -25,7 +25,7 @@
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <libgeodecomp/misc/cudaboostworkaround.h>
-#include <libgeodecomp/communication/hpxserialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <hpx/runtime/serialization/input_archive.hpp>
 #include <hpx/runtime/serialization/output_archive.hpp>
 #endif
@@ -338,7 +338,6 @@ protected:
                                "Does this model not support serialization?");
     }
 
-    // fixme: needs test for HPX
     // fixme: needs performance test
     // fixme: for better performance, avoid operator[] in inner loop
     void saveRegionImplementation(
@@ -347,18 +346,15 @@ protected:
         const typename Region<DIM>::StreakIterator& end,
         const APITraits::TrueType&) const
     {
-        // fixme:
-        // #ifdef LIBGEODECOMP_WITH_HPX
-        //          int archive_flags = boost::archive::no_header;
-        //          archive_flags |= hpx::util::disable_data_chunking;
-        //          hpx::util::binary_filter *f = 0;
-        //          hpx::serialization::output_archive archive(*vec, f, archive_flags);
-        // #else
+#ifdef LIBGEODECOMP_WITH_HPX
+        int archiveFlags = boost::archive::no_header | hpx::serialization::disable_data_chunking;
+        hpx::serialization::output_archive archive(*buffer, archiveFlags);
+#else
         typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
         Device sink(*buffer);
         boost::iostreams::stream<Device> stream(sink);
         boost::archive::binary_oarchive archive(stream);
-        // #endif
+#endif
 
         for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
             Coord<DIM> c = i->origin;
@@ -378,24 +374,20 @@ protected:
                                "Does this model not support serialization?");
     }
 
-    // fixme: needs test for HPX
     void loadRegionImplementation(
         const std::vector<char>& buffer,
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end,
         const APITraits::TrueType&)
     {
-        // fixme:
-        //        #ifdef LIBGEODECOMP_WITH_HPX
-        //         int archive_flags = boost::archive::no_header;
-        //         archive_flags |= hpx::util::disable_data_chunking;
-        //         hpx::serialization::input_archive archive(vec, vec.size(), archive_flags);
-        // #else
+#ifdef LIBGEODECOMP_WITH_HPX
+        hpx::serialization::input_archive archive(buffer, buffer.size());
+#else
         typedef boost::iostreams::basic_array_source<char> Device;
         Device source(&buffer.front(), buffer.size());
         boost::iostreams::stream<Device> stream(source);
         boost::archive::binary_iarchive archive(stream);
-        // #endif
+#endif
 
         for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
             Coord<DIM> c = i->origin;
