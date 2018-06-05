@@ -42,6 +42,38 @@ public:
 
 LIBFLATARRAY_REGISTER_SOA(MyDummyCell, ((int)(x))((double)(y))((char)(z)) )
 
+/**
+ * Test model for use with Boost.Serialization
+ */
+class MyComplicatedCell1
+{
+public:
+    class API : public LibGeoDecomp::APITraits::HasBoostSerialization
+    {};
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    {
+    }
+
+    inline bool operator==(const MyComplicatedCell1& other)
+    {
+        return
+            (x     == other.x) &&
+            (cargo == other.cargo);
+    }
+
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& archive, int version)
+    {
+        archive & x;
+        archive & cargo;
+    }
+
+    int x;
+    std::vector<int> cargo;
+};
+
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -525,6 +557,53 @@ public:
 
         Grid<int, Topologies::Torus<3>::Topology> grid3;
         TS_ASSERT_EQUALS(Coord<3>(), grid3.getDimensions());
+    }
+
+    void testBoostSerialization()
+    {
+        typedef Grid<MyComplicatedCell1> GridType;
+
+        Coord<2> dim(13, 10);
+        CoordBox<2> box(Coord<2>(), dim);
+
+        GridType sendGrid(dim);
+        GridType recvGrid(dim);
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            MyComplicatedCell1 cell;
+            cell.cargo << i->x();
+            cell.cargo << i->y();
+            cell.x = i->x() * 100 + i->y();
+            sendGrid.set(*i, cell);
+        }
+
+        Region<2> region;
+        region << Streak<2>(Coord<2>(1, 1), 12)
+               << Streak<2>(Coord<2>(1, 2), 2)
+               << Streak<2>(Coord<2>(7, 2), 8)
+               << Streak<2>(Coord<2>(1, 3), 2)
+               << Streak<2>(Coord<2>(7, 3), 8)
+               << Streak<2>(Coord<2>(1, 4), 2)
+               << Streak<2>(Coord<2>(7, 4), 8)
+               << Streak<2>(Coord<2>(1, 5), 2)
+               << Streak<2>(Coord<2>(7, 5), 8)
+               << Streak<2>(Coord<2>(1, 6), 2)
+               << Streak<2>(Coord<2>(7, 6), 8)
+               << Streak<2>(Coord<2>(1, 7), 2)
+               << Streak<2>(Coord<2>(7, 7), 8)
+               << Streak<2>(Coord<2>(1, 8), 12);
+        TS_ASSERT_EQUALS(region.size(), 34);
+
+        std::vector<char> buffer;
+        sendGrid.saveRegion(&buffer, region);
+
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_DIFFERS(sendGrid[*i], recvGrid[*i]);
+        }
+        recvGrid.loadRegion(buffer, region);
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_EQUALS(sendGrid[*i], recvGrid[*i]);
+        }
     }
 
 private:
