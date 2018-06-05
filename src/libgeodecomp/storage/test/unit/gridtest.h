@@ -482,7 +482,7 @@ public:
             ++iter;
         }
 
-        // manupulate test data:
+        // manipulate test data:
         for (int i = 0; i < 10; ++i) {
             buffer[i].pos = Coord<2>(-i, -10);
         }
@@ -531,7 +531,7 @@ public:
             ++iter;
         }
 
-        // manupulate test data:
+        // manipulate test data:
         for (int i = 0; i < 10; ++i) {
             buffer[i].pos = Coord<2>(-i, -12);
         }
@@ -547,19 +547,8 @@ public:
         }
     }
 
-    void testCreationOfZeroSizedGrid()
-    {
-        Grid<int, Topologies::Torus<1>::Topology> grid1;
-        TS_ASSERT_EQUALS(Coord<1>(), grid1.getDimensions());
-
-        Grid<int, Topologies::Torus<2>::Topology> grid2;
-        TS_ASSERT_EQUALS(Coord<2>(), grid2.getDimensions());
-
-        Grid<int, Topologies::Torus<3>::Topology> grid3;
-        TS_ASSERT_EQUALS(Coord<3>(), grid3.getDimensions());
-    }
-
-    void testBoostSerialization()
+    // fixme: test with offset, too
+    void testLoadSaveRegionWithBoostSerialization()
     {
         typedef Grid<MyComplicatedCell1> GridType;
 
@@ -578,20 +567,20 @@ public:
         }
 
         Region<2> region;
-        region << Streak<2>(Coord<2>(1, 1), 12)
-               << Streak<2>(Coord<2>(1, 2), 2)
-               << Streak<2>(Coord<2>(7, 2), 8)
-               << Streak<2>(Coord<2>(1, 3), 2)
-               << Streak<2>(Coord<2>(7, 3), 8)
-               << Streak<2>(Coord<2>(1, 4), 2)
-               << Streak<2>(Coord<2>(7, 4), 8)
-               << Streak<2>(Coord<2>(1, 5), 2)
-               << Streak<2>(Coord<2>(7, 5), 8)
-               << Streak<2>(Coord<2>(1, 6), 2)
-               << Streak<2>(Coord<2>(7, 6), 8)
-               << Streak<2>(Coord<2>(1, 7), 2)
-               << Streak<2>(Coord<2>(7, 7), 8)
-               << Streak<2>(Coord<2>(1, 8), 12);
+        region << Streak<2>(Coord<2>( 1, 1), 12)
+               << Streak<2>(Coord<2>( 1, 2),  2)
+               << Streak<2>(Coord<2>(11, 2), 12)
+               << Streak<2>(Coord<2>( 1, 3),  2)
+               << Streak<2>(Coord<2>(11, 3), 12)
+               << Streak<2>(Coord<2>( 1, 4),  2)
+               << Streak<2>(Coord<2>(11, 4), 12)
+               << Streak<2>(Coord<2>( 1, 5),  2)
+               << Streak<2>(Coord<2>(11, 5), 12)
+               << Streak<2>(Coord<2>( 1, 6),  2)
+               << Streak<2>(Coord<2>(11, 6), 12)
+               << Streak<2>(Coord<2>( 1, 7),  2)
+               << Streak<2>(Coord<2>(11, 7), 12)
+               << Streak<2>(Coord<2>( 1, 8), 12);
         TS_ASSERT_EQUALS(region.size(), 34);
 
         std::vector<char> buffer;
@@ -606,6 +595,17 @@ public:
         }
     }
 
+    void testCreationOfZeroSizedGrid()
+    {
+        Grid<int, Topologies::Torus<1>::Topology> grid1;
+        TS_ASSERT_EQUALS(Coord<1>(), grid1.getDimensions());
+
+        Grid<int, Topologies::Torus<2>::Topology> grid2;
+        TS_ASSERT_EQUALS(Coord<2>(), grid2.getDimensions());
+
+        Grid<int, Topologies::Torus<3>::Topology> grid3;
+        TS_ASSERT_EQUALS(Coord<3>(), grid3.getDimensions());
+    }
 private:
     Grid<TestCell<2> > *testGrid;
 };
