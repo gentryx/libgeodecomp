@@ -327,9 +327,9 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     void saveRegionImplementation(
-        std::vector<char> *buffer,
-        const typename Region<DIM>::StreakIterator& begin,
-        const typename Region<DIM>::StreakIterator& end,
+        std::vector<char> * /* buffer */,
+        const typename Region<DIM>::StreakIterator& /* begin */,
+        const typename Region<DIM>::StreakIterator& /* end */,
         const APITraits::FalseType&) const
     {
         throw std::logic_error("saveRegionImplementation() with char buffer not implemented. "
@@ -363,9 +363,9 @@ public:
     }
 
     void loadRegionImplementation(
-        const std::vector<char>& buffer,
-        const typename Region<DIM>::StreakIterator& begin,
-        const typename Region<DIM>::StreakIterator& end,
+        const std::vector<char>& /* buffer */,
+        const typename Region<DIM>::StreakIterator& /* begin */,
+        const typename Region<DIM>::StreakIterator& /* end */,
         const APITraits::FalseType&)
     {
         throw std::logic_error("loadRegionImplementation() with char buffer not implemented. "
