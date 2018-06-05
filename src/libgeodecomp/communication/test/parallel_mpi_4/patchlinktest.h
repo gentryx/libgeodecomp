@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/communication/boostserialization.h>
-#include <libgeodecomp/communication/hpxserialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/communication/patchlink.h>
 #include <libgeodecomp/communication/typemaps.h>
@@ -17,6 +17,7 @@
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/misc/sharedptr.h>
 #include <libgeodecomp/misc/testhelper.h>

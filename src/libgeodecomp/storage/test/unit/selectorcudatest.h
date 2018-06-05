@@ -7,7 +7,7 @@
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
-#include <libgeodecomp/communication/hpxserialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #endif
 
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
