@@ -7,6 +7,7 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/coordmap.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
@@ -295,7 +296,7 @@ public:
         const Coord<DIM>& offset = Coord<DIM>()) const
     {
         typedef typename APITraits::SelectBoostSerialization<CELL_TYPE>::Value Trait;
-        saveRegionImplementation(buffer, region, offset, Trait());
+        saveRegionImplementation(buffer, region.beginStreak(), region.endStreak(), Trait());
     }
 #endif
 
@@ -320,7 +321,7 @@ public:
         const Coord<DIM>& offset = Coord<DIM>())
     {
         typedef typename APITraits::SelectBoostSerialization<CELL_TYPE>::Value Trait;
-        loadRegionImplementation(buffer, region, offset, Trait());
+        loadRegionImplementation(buffer, region.beginStreak(), region.endStreak(), Trait());
     }
 #endif
 
@@ -329,17 +330,21 @@ protected:
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     void saveRegionImplementation(
         std::vector<char> *buffer,
-        const Region<DIM>& region,
-        const Coord<DIM>& offset,
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end,
         const APITraits::FalseType&) const
     {
-        // fixme: throw exception, should not be called
+        throw std::logic_error("saveRegionImplementation() with char buffer not implemented. "
+                               "Does this model not support serialization?");
     }
 
+    // fixme: needs test for HPX
+    // fixme: needs performance test
+    // fixme: for better performance, avoid operator[] in inner loop
     void saveRegionImplementation(
         std::vector<char> *buffer,
-        const Region<DIM>& region,
-        const Coord<DIM>& offset,
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end,
         const APITraits::TrueType&) const
     {
         // fixme:
@@ -355,24 +360,29 @@ protected:
         boost::archive::binary_oarchive archive(stream);
         // #endif
 
-        for (typename Region<DIM>::Iterator i = region.begin(); i != region.end(); ++i) {
-            archive & (*this)[*i];
+        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
+            Coord<DIM> c = i->origin;
+            for (; c.x() < i->endX; ++c.x()) {
+                archive & (*this)[c];
+            }
         }
     }
 
     void loadRegionImplementation(
         const std::vector<char>& buffer,
-        const Region<DIM>& region,
-        const Coord<DIM>& offset,
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end,
         const APITraits::FalseType&)
     {
-        // fixme: throw exception here, should not be called
+        throw std::logic_error("loadRegionImplementation() with char buffer not implemented. "
+                               "Does this model not support serialization?");
     }
 
+    // fixme: needs test for HPX
     void loadRegionImplementation(
         const std::vector<char>& buffer,
-        const Region<DIM>& region,
-        const Coord<DIM>& offset,
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end,
         const APITraits::TrueType&)
     {
         // fixme:
@@ -387,8 +397,11 @@ protected:
         boost::archive::binary_iarchive archive(stream);
         // #endif
 
-        for (typename Region<DIM>::Iterator i = region.begin(); i != region.end(); ++i) {
-            archive & (*this)[*i];
+        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
+            Coord<DIM> c = i->origin;
+            for (; c.x() < i->endX; ++c.x()) {
+                archive & (*this)[c];
+            }
         }
     }
 #endif
