@@ -296,7 +296,7 @@ public:
         const Coord<DIM>& offset = Coord<DIM>()) const
     {
         typedef typename APITraits::SelectBoostSerialization<CELL_TYPE>::Value Trait;
-        saveRegionImplementation(buffer, region.beginStreak(), region.endStreak(), Trait());
+        saveRegionImplementation(buffer, region.beginStreak(offset), region.endStreak(offset), Trait());
     }
 #endif
 
@@ -321,11 +321,9 @@ public:
         const Coord<DIM>& offset = Coord<DIM>())
     {
         typedef typename APITraits::SelectBoostSerialization<CELL_TYPE>::Value Trait;
-        loadRegionImplementation(buffer, region.beginStreak(), region.endStreak(), Trait());
+        loadRegionImplementation(buffer, region.beginStreak(offset), region.endStreak(offset), Trait());
     }
 #endif
-
-protected:
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     void saveRegionImplementation(
