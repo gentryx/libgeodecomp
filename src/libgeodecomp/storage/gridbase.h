@@ -224,7 +224,7 @@ public:
             throw std::invalid_argument("cannot save member as selector was created for different type");
         }
 
-        saveMemberImplementation(reinterpret_cast<char*>(target), targetLocation, selector, region);
+        saveMemberImplementation(reinterpret_cast<char*>(target), targetLocation, selector, region.beginStreak(), region.endStreak());
     }
 
     /**
@@ -238,7 +238,7 @@ public:
         const Selector<CELL>& selector,
         const Region<DIM>& region) const
     {
-        saveMemberImplementation(target, targetLocation, selector, region);
+        saveMemberImplementation(target, targetLocation, selector, region.beginStreak(), region.endStreak());
     }
 
     /**
@@ -257,7 +257,7 @@ public:
             throw std::invalid_argument("cannot load member as selector was created for different type");
         }
 
-        loadMemberImplementation(reinterpret_cast<const char*>(source), sourceLocation, selector, region);
+        loadMemberImplementation(reinterpret_cast<const char*>(source), sourceLocation, selector, region.beginStreak(), region.endStreak());
     }
 
     /**
@@ -297,13 +297,15 @@ protected:
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region) const = 0;
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end) const = 0;
 
     virtual void loadMemberImplementation(
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region) = 0;
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end) = 0;
 };
 
 }

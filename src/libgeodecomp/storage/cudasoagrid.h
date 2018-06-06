@@ -347,7 +347,8 @@ protected:
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region) const
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end) const
     {
         delegate.callback(
             SoAGridHelpers::SaveMember<CELL, DIM>(
@@ -355,7 +356,8 @@ protected:
                 MemoryLocation::CUDA_DEVICE,
                 targetLocation,
                 selector,
-                region,
+                begin,
+                end,
                 box.origin,
                 edgeRadii));
     }
@@ -364,7 +366,8 @@ protected:
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region)
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end)
     {
         delegate.callback(
             SoAGridHelpers::LoadMember<CELL, DIM>(
@@ -372,7 +375,8 @@ protected:
                 sourceLocation,
                 MemoryLocation::CUDA_DEVICE,
                 selector,
-                region,
+                begin,
+                end,
                 box.origin,
                 edgeRadii));
     }

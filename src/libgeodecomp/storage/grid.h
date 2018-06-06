@@ -400,9 +400,10 @@ public:
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<CELL_TYPE>& selector,
-        const Region<DIM>& region) const
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end) const
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
             selector.copyMemberOut(
                 &(*this)[i->origin],
                 MemoryLocation::HOST,
@@ -417,9 +418,10 @@ public:
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<CELL_TYPE>& selector,
-        const Region<DIM>& region)
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end)
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
             selector.copyMemberIn(
                 source,
                 sourceLocation,

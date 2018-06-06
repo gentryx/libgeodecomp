@@ -485,28 +485,30 @@ private:
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<CellType>& selector,
-        const Region<DIM>& region) const
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end) const
     {
-        delegate.saveMemberImplementation(
+        delegate.saveMemberImplementationGeneric(
             target,
             targetLocation,
             selector,
-            ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
-            ReorderingRegionIterator(region.end(), logicalToPhysicalIDs));
+            ReorderingRegionIterator(Region<DIM>::Iterator(begin), logicalToPhysicalIDs),
+            ReorderingRegionIterator(Region<DIM>::Iterator(end),   logicalToPhysicalIDs));
     }
 
     virtual void loadMemberImplementation(
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<CellType>& selector,
-        const Region<DIM>& region)
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end)
     {
-        delegate.loadMemberImplementation(
+        delegate.loadMemberImplementationGeneric(
             source,
             sourceLocation,
             selector,
-            ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
-            ReorderingRegionIterator(region.end(), logicalToPhysicalIDs));
+            ReorderingRegionIterator(Region<DIM>::Iterator(begin), logicalToPhysicalIDs),
+            ReorderingRegionIterator(Region<DIM>::Iterator(end),   logicalToPhysicalIDs));
     }
 
     void reorderDelegateGrid(std::vector<IntPair>&& newLogicalToPhysicalIDs, std::vector<int>&& newPhysicalToLogicalIDs)

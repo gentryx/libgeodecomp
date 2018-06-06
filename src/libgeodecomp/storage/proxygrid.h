@@ -63,18 +63,20 @@ public:
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region) const
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end) const
     {
-        delegate->saveMemberImplementation(target, targetLocation, selector, region);
+        delegate->saveMemberImplementation(target, targetLocation, selector, begin, end);
     }
 
     void loadMemberImplementation(
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region)
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end)
     {
-        delegate->loadMemberImplementation(source, sourceLocation, selector, region);
+        delegate->loadMemberImplementation(source, sourceLocation, selector, begin, end);
     }
 
 private:

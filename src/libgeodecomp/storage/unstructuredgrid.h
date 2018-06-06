@@ -427,7 +427,7 @@ public:
 #endif
 
     template<typename ITER1, typename ITER2>
-    void saveMemberImplementation(
+    void saveMemberImplementationGeneric(
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<ELEMENT_TYPE>& selector,
@@ -441,7 +441,7 @@ public:
     }
 
     template<typename ITER1, typename ITER2>
-    void loadMemberImplementation(
+    void loadMemberImplementationGeneric(
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<ELEMENT_TYPE>& selector,
@@ -459,18 +459,20 @@ protected:
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<ELEMENT_TYPE>& selector,
-        const Region<DIM>& region) const
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end) const
     {
-        saveMemberImplementation(target, targetLocation, selector, region.beginStreak(), region.endStreak());
+        saveMemberImplementationGeneric(target, targetLocation, selector, begin, end);
     }
 
     void loadMemberImplementation(
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<ELEMENT_TYPE>& selector,
-        const Region<DIM>& region)
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end)
     {
-        loadMemberImplementation(source, sourceLocation, selector, region.beginStreak(), region.endStreak());
+        loadMemberImplementationGeneric(source, sourceLocation, selector, begin, end);
     }
 
 private:

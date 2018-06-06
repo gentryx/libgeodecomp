@@ -161,14 +161,16 @@ public:
         MemoryLocation::Location sourceLocation,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region,
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end,
         const Coord<DIM>& origin,
         const Coord<3>& edgeRadii) :
         target(target),
         sourceLocation(sourceLocation),
         targetLocation(targetLocation),
         selector(selector),
-        region(region),
+        begin(begin),
+        end(end),
         origin(origin),
         edgeRadii(edgeRadii)
     {}
@@ -178,7 +180,7 @@ public:
     {
         char *currentTarget = target;
 
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
             accessor.index() = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakOut(
@@ -197,7 +199,8 @@ private:
     MemoryLocation::Location sourceLocation;
     MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
-    const Region<DIM>& region;
+    const typename Region<DIM>::StreakIterator& begin;
+    const typename Region<DIM>::StreakIterator& end;
     const Coord<DIM>& origin;
     const Coord<3>& edgeRadii;
     long memberOffset;
@@ -215,14 +218,16 @@ public:
         MemoryLocation::Location sourceLocation,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region,
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end,
         const Coord<DIM>& origin,
         const Coord<3>& edgeRadii) :
         source(source),
         sourceLocation(sourceLocation),
         targetLocation(targetLocation),
         selector(selector),
-        region(region),
+        begin(begin),
+        end(end),
         origin(origin),
         edgeRadii(edgeRadii)
     {}
@@ -232,7 +237,7 @@ public:
     {
         const char *currentSource = source;
 
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
             accessor.index() = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
 
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
@@ -253,7 +258,8 @@ private:
     MemoryLocation::Location sourceLocation;
     MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
-    const Region<DIM>& region;
+    const typename Region<DIM>::StreakIterator& begin;
+    const typename Region<DIM>::StreakIterator& end;
     const Coord<DIM>& origin;
     const Coord<3>& edgeRadii;
     long memberOffset;
@@ -563,7 +569,8 @@ protected:
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region) const
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end) const
     {
         delegate.callback(
             SoAGridHelpers::SaveMember<CELL, DIM>(
@@ -571,7 +578,8 @@ protected:
                 MemoryLocation::HOST,
                 targetLocation,
                 selector,
-                region,
+                begin,
+                end,
                 box.origin,
                 edgeRadii));
     }
@@ -580,7 +588,8 @@ protected:
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<CELL>& selector,
-        const Region<DIM>& region)
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end)
     {
         delegate.callback(
             SoAGridHelpers::LoadMember<CELL, DIM>(
@@ -588,7 +597,8 @@ protected:
                 sourceLocation,
                 MemoryLocation::HOST,
                 selector,
-                region,
+                begin,
+                end,
                 box.origin,
                 edgeRadii));
     }
