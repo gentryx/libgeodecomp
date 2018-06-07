@@ -5,6 +5,38 @@
 #include <libgeodecomp/storage/soagrid.h>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 
+/**
+ * Test model for use with Boost.Serialization
+ */
+class MyComplicatedCell1
+{
+public:
+    class API : public LibGeoDecomp::APITraits::HasBoostSerialization
+    {};
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    {
+    }
+
+    inline bool operator==(const MyComplicatedCell1& other)
+    {
+        return
+            (x     == other.x) &&
+            (cargo == other.cargo);
+    }
+
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& archive, int version)
+    {
+        archive & x;
+        archive & cargo;
+    }
+
+    int x;
+    std::vector<int> cargo;
+};
+
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -126,7 +158,110 @@ public:
         std::vector<float> vecB(10);
         subGrid.saveMember(&vecB[0], MemoryLocation::HOST, s, r);
         TS_ASSERT_EQUALS(vecA, vecB);
-}
+    }
+
+    void testLoadSaveRegion()
+    {
+        Coord<2> origin(200, 100);
+        Coord<2> dim(50, 40);
+        Coord<2> end = origin + dim;
+        DisplacedGrid<TestCell<2> > mainGrid(CoordBox<2>(origin, dim));
+        ProxyGrid<TestCell<2>, 2> subGrid(&mainGrid, CoordBox<2>(Coord<2>(210, 110), Coord<2>(30, 20)));
+
+        int num = 200;
+        for (int y = origin.y(); y < end.y(); y++) {
+            for (int x = origin.x(); x < end.x(); x++) {
+                mainGrid[Coord<2>(x, y)] =
+                    TestCell<2>(Coord<2>(x, y), mainGrid.getDimensions());
+                mainGrid[Coord<2>(x, y)].testValue =  num++;
+            }
+        }
+
+        Region<2> region;
+        region << Streak<2>(Coord<2>(210, 110), 240)
+               << Streak<2>(Coord<2>(215, 111), 240)
+               << Streak<2>(Coord<2>(210, 129), 230);
+        std::vector<TestCell<2> > buffer(region.size());
+
+        subGrid.saveRegion(&buffer, region);
+
+        Region<2>::Iterator iter = region.begin();
+        for (int i = 0; i < region.size(); ++i) {
+            TestCell<2> actual = mainGrid.get(*iter);
+            TestCell<2> expected(*iter, mainGrid.getDimensions());
+            int expectedIndex = 200 + (*iter - origin).toIndex(dim);
+            expected.testValue = expectedIndex;
+
+            TS_ASSERT_EQUALS(actual, expected);
+            ++iter;
+        }
+
+        // manipulate test data:
+        for (int i = 0; i < region.size(); ++i) {
+            buffer[i].pos = Coord<2>(-i, -10);
+        }
+
+        int index = 0;
+        subGrid.loadRegion(buffer, region);
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            Coord<2> actual = mainGrid.get(*i).pos;
+            Coord<2> expected = Coord<2>(index, -10);
+            TS_ASSERT_EQUALS(actual, expected);
+
+            --index;
+        }
+    }
+
+    void testLoadSaveRegionWithBoostSerialization()
+    {
+        typedef DisplacedGrid<MyComplicatedCell1> GridType;
+
+        Coord<2> dim(300, 400);
+        CoordBox<2> box(Coord<2>(-100, -100), dim);
+
+        GridType mainSendGrid(box);
+        GridType mainRecvGrid(box);
+
+        ProxyGrid<MyComplicatedCell1, 2> subSendGrid(&mainSendGrid, CoordBox<2>(Coord<2>(-20, -20), Coord<2>(50, 60)));
+        ProxyGrid<MyComplicatedCell1, 2> subRecvGrid(&mainRecvGrid, CoordBox<2>(Coord<2>(-20, -20), Coord<2>(50, 60)));
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            MyComplicatedCell1 cell;
+            cell.cargo << i->x();
+            cell.cargo << i->y();
+            cell.x = i->x() * 100 + i->y();
+            mainSendGrid.set(*i, cell);
+        }
+
+        Region<2> region;
+        region << Streak<2>(Coord<2>(5001, 7001), 5012)
+               << Streak<2>(Coord<2>(5001, 7002), 5002)
+               << Streak<2>(Coord<2>(5011, 7002), 5012)
+               << Streak<2>(Coord<2>(5001, 7003), 5002)
+               << Streak<2>(Coord<2>(5011, 7003), 5012)
+               << Streak<2>(Coord<2>(5001, 7004), 5002)
+               << Streak<2>(Coord<2>(5011, 7004), 5012)
+               << Streak<2>(Coord<2>(5001, 7005), 5002)
+               << Streak<2>(Coord<2>(5011, 7005), 5012)
+               << Streak<2>(Coord<2>(5001, 7006), 5002)
+               << Streak<2>(Coord<2>(5011, 7006), 5012)
+               << Streak<2>(Coord<2>(5001, 7007), 5002)
+               << Streak<2>(Coord<2>(5011, 7007), 5012)
+               << Streak<2>(Coord<2>(5001, 7008), 5012);
+        TS_ASSERT_EQUALS(region.size(), 34);
+        Coord<2> offset(-5000, -7000);
+
+        std::vector<char> buffer;
+        subSendGrid.saveRegion(&buffer, region, offset);
+
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_DIFFERS(mainSendGrid[*i + offset], mainRecvGrid[*i + offset]);
+        }
+        subRecvGrid.loadRegion(buffer, region, offset);
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_EQUALS(mainSendGrid[*i + offset], mainRecvGrid[*i + offset]);
+        }
+    }
 };
 
 }

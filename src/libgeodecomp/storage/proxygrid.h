@@ -59,6 +59,42 @@ public:
         return viewBox;
     }
 
+    void saveRegion(
+        std::vector<CELL> *buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        delegate->saveRegion(buffer, region, offset);
+    }
+
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+    void saveRegion(
+        std::vector<char> *buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        delegate->saveRegion(buffer, region, offset);
+    }
+#endif
+
+    void loadRegion(
+        const std::vector<CELL>& buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset = Coord<DIM>())
+    {
+        delegate->loadRegion(buffer, region, offset);
+    }
+
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+    void loadRegion(
+        const std::vector<char>& buffer,
+        const Region<DIM>& region,
+        const Coord<DIM>& offset = Coord<DIM>())
+    {
+        delegate->loadRegion(buffer, region, offset);
+    }
+#endif
+
     void saveMemberImplementation(
         char *target,
         MemoryLocation::Location targetLocation,
