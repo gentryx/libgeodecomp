@@ -434,7 +434,6 @@ public:
         }
     }
 
-    // fixme: test with offset, too
     void testLoadSaveRegionWithBoostSerialization()
     {
         typedef DisplacedGrid<MyComplicatedCell1> GridType;
