@@ -117,6 +117,11 @@ public:
         c[0] = int(other[0]);
     }
 
+    inline explicit Coord(std::initializer_list<int> list)
+    {
+        c[0] = list.size() ? *list.begin() : 0;
+    }
+
 #ifdef __CUDACC__
     inline Coord(const dim3& dim)
     {
@@ -362,6 +367,19 @@ public:
     {
         c[0] = int(other[0]);
         c[1] = int(other[1]);
+    }
+
+    inline explicit Coord(std::initializer_list<int> list)
+    {
+        int i = 0;
+        for (int coord : list){
+            c[i] = coord;
+            if (i > 1)
+                break;
+        }
+        for (; i < 2; i++){
+            c[i] = 0;
+        }
     }
 
 #ifdef __CUDACC__
@@ -622,6 +640,19 @@ public:
         c[0] = int(other[0]);
         c[1] = int(other[1]);
         c[2] = int(other[2]);
+    }
+
+    inline explicit Coord(std::initializer_list<int> list)
+    {
+        int i = 0;
+        for (int coord : list){
+            c[i] = coord;
+            if (i > 2)
+                break;
+        }
+        for (; i < 3; i++){
+            c[i] = 0;
+        }
     }
 
 #ifdef __CUDACC__

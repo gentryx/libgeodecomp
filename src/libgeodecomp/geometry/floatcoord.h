@@ -44,6 +44,11 @@ public:
         c[0] = x;
     }
 
+    inline explicit FloatCoord(std::initializer_list<double> list)
+    {
+        c[0] = list.size() ? *list.begin() : 0;
+    }
+
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:
 #pragma warning push
@@ -271,6 +276,20 @@ public:
     {
         c[0] = x;
         c[1] = y;
+    }
+
+    inline explicit FloatCoord(std::initializer_list<double> list)
+    {
+        int i = 0;
+        for (int coord : list){
+            c[i] = coord;
+            i++;
+            if (i > 1)
+                break;
+        }
+        for (; i < 2; i++){
+            c[i] = 0;
+        }
     }
 
 #ifdef __ICC
@@ -525,6 +544,21 @@ public:
         c[0] = x;
         c[1] = y;
         c[2] = z;
+    }
+
+    inline 
+    explicit FloatCoord(std::initializer_list<int> list)
+    {
+        int i = 0;
+        for (int coord : list){
+            c[i] = coord;
+            i++;
+            if (i > 2)
+                break;
+        }
+        for (; i < 3; i++){
+            c[i] = 0;
+        }
     }
 
 #ifdef __ICC
