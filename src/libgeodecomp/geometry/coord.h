@@ -117,10 +117,12 @@ public:
         c[0] = int(other[0]);
     }
 
+#ifdef LIBGEODECOMP_WITH_CPP14
     inline explicit Coord(std::initializer_list<int> list)
     {
         c[0] = list.size() ? *list.begin() : 0;
     }
+#endif
 
 #ifdef __CUDACC__
     inline Coord(const dim3& dim)
@@ -369,18 +371,22 @@ public:
         c[1] = int(other[1]);
     }
 
+#ifdef LIBGEODECOMP_WITH_CPP14
     inline explicit Coord(std::initializer_list<int> list)
     {
         int i = 0;
-        for (int coord : list){
+        for (int coord : list) {
             c[i] = coord;
-            if (i > 1)
+            i++;
+            if (i > 1) {
                 break;
+            }
         }
-        for (; i < 2; i++){
+        for (; i < 2; i++) {
             c[i] = 0;
         }
     }
+#endif
 
 #ifdef __CUDACC__
     inline Coord(const dim3& dim)
@@ -642,18 +648,22 @@ public:
         c[2] = int(other[2]);
     }
 
+#ifdef LIBGEODECOMP_WITH_CPP14
     inline explicit Coord(std::initializer_list<int> list)
     {
         int i = 0;
-        for (int coord : list){
+        for (int coord : list) {
             c[i] = coord;
-            if (i > 2)
+            i++;
+            if (i > 2) {
                 break;
+            }
         }
-        for (; i < 3; i++){
+        for (; i < 3; i++) {
             c[i] = 0;
         }
     }
+#endif
 
 #ifdef __CUDACC__
     inline Coord(const dim3& dim)

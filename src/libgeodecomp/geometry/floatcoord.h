@@ -44,10 +44,12 @@ public:
         c[0] = x;
     }
 
+#ifdef LIBGEODECOMP_WITH_CPP14
     inline explicit FloatCoord(std::initializer_list<double> list)
     {
         c[0] = list.size() ? *list.begin() : 0;
     }
+#endif
 
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:
@@ -278,19 +280,22 @@ public:
         c[1] = y;
     }
 
+#ifdef LIBGEODECOMP_WITH_CPP14
     inline explicit FloatCoord(std::initializer_list<double> list)
     {
         int i = 0;
-        for (int coord : list){
+        for (int coord : list) {
             c[i] = coord;
             i++;
-            if (i > 1)
+            if (i > 1) {
                 break;
+            }
         }
-        for (; i < 2; i++){
+        for (; i < 2; i++) {
             c[i] = 0;
         }
     }
+#endif
 
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:
@@ -546,20 +551,23 @@ public:
         c[2] = z;
     }
 
+#ifdef LIBGEODECOMP_WITH_CPP14
     inline 
     explicit FloatCoord(std::initializer_list<int> list)
     {
         int i = 0;
-        for (int coord : list){
+        for (int coord : list) {
             c[i] = coord;
             i++;
-            if (i > 2)
+            if (i > 2) {
                 break;
+            }
         }
-        for (; i < 3; i++){
+        for (; i < 3; i++) {
             c[i] = 0;
         }
     }
+#endif
 
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:

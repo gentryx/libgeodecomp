@@ -409,6 +409,7 @@ public:
 
     void testInitializerList()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         TS_ASSERT_EQUALS(Coord<1>{}, Coord<1>(0));
         TS_ASSERT_EQUALS(Coord<1>{2}, Coord<1>(2));
         TS_ASSERT_EQUALS(Coord<1>{2, 3}, Coord<1>(2));
@@ -423,6 +424,7 @@ public:
         TS_ASSERT_EQUALS(Coord<3>{2, 3}, Coord<3>(2, 3, 0));
         TS_ASSERT_EQUALS(Coord<3>{2, 3, 4}, Coord<3>(2, 3, 4));
         TS_ASSERT_EQUALS(Coord<3>{2, 3, 4, 5}, Coord<3>(2, 3, 4));
+#endif
     }
 
 private:
