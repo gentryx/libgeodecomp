@@ -1,9 +1,35 @@
 /**
  * Copyright 2014-2017 Andreas Schäfer
+ * Copyright 2018 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
+
+namespace LibFlatArray {}
+
+// disable certain warnings from system headers when compiling with
+// Microsoft Visual Studio:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4514 4710 )
+#endif
+
+#include <iostream>
+#include <list>
+#include <sstream>
+
+#ifdef __SSE__
+#include <xmmintrin.h>
+#endif
+
+#ifdef __AVX__
+#include <immintrin.h>
+#endif
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #include <libflatarray/flat_array.hpp>
 #include <libflatarray/short_vec.hpp>
@@ -15,28 +41,7 @@
 // and LibFlatArray source. Also disable overly eager sign conversion
 // and overflow warnings:
 #ifdef _MSC_BUILD
-#pragma warning( disable : 4244 4305 4307 4365 4456 4514 4710 )
-#endif
-
-// disable certain warnings from system headers when compiling with
-// Microsoft Visual Studio:
-#ifdef _MSC_BUILD
-#pragma warning( push )
-#pragma warning( disable : 4514 )
-#endif
-
-#include <iostream>
-#include <list>
-#ifdef __SSE__
-#include <xmmintrin.h>
-#endif
-
-#ifdef __AVX__
-#include <immintrin.h>
-#endif
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
+#pragma warning( disable : 4244 4305 4307 4365 4456 4514 )
 #endif
 
 #define WEIGHT_S 0.11
@@ -709,6 +714,12 @@ public:
             dim_z(dim_z)
         {}
 
+// not inlining is ok:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
+
         template<typename accessor_type1, typename accessor_type2>
         void operator()(accessor_type1& accessor_old,
                         accessor_type2& accessor_new) const
@@ -782,6 +793,11 @@ public:
 #pragma warning( pop )
 #endif
         }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 
     private:
         long dim_x;
@@ -885,6 +901,12 @@ public:
     float charge;
 };
 
+// not inlining is ok:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
+
 LIBFLATARRAY_REGISTER_SOA(Particle,
                           ((float)(posX))
                           ((float)(posY))
@@ -893,6 +915,11 @@ LIBFLATARRAY_REGISTER_SOA(Particle,
                           ((float)(velY))
                           ((float)(velZ))
                           ((float)(charge)))
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
 
 class ArrayParticle
 {
@@ -2336,6 +2363,12 @@ public:
         counter(counter)
     {}
 
+// not inlining is ok:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
+
     template<typename ACCESSOR>
     void operator()(ACCESSOR& particle) {
         for (int t = 0; t < repeats; ++t) {
@@ -2345,6 +2378,10 @@ public:
             LIBFLATARRAY_LOOP_PEELER(Float, long, i.index(), n, update, i);
         }
     }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
     template<typename Float, typename ACCESSOR>
     void update(long& /* unused_counter */, long end, ACCESSOR& i)
@@ -2580,3 +2617,7 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( disable : 4710 )
+#endif

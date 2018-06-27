@@ -55,6 +55,11 @@ public:
      * might allocate excessive amounts of memory.
      */
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
+
     /**
      * Means that the code will be used with 1D grids only -- makes
      * sense mostly for use with unstructured grids.
@@ -251,6 +256,10 @@ public:
         }
     };
 
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
+
     /**
      * select_asymmetric_dual_callback:
      *
@@ -260,6 +269,8 @@ public:
      * need no asymmetric callback), or if their sizes may differ
      * (makes sense if you need to do some sorts of reductions or run
      * a multi-grid code).
+     *
+     * The default is to assume no asymmetric callback.
      *
      * WARNING: if soa_accessor is instantiated for n sizes, then
      * has_asymmetric_dual_callback will increase this to n * n.

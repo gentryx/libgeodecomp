@@ -15,6 +15,11 @@ namespace detail {
 
 namespace flat_array {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 4710 5027 )
+#endif
+
 /**
  * Same as load_functor, but the other way around.
  */
@@ -59,6 +64,10 @@ private:
     char *target;
     std::size_t count;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #ifdef LIBFLATARRAY_WITH_CUDA
 #ifdef __CUDACC__

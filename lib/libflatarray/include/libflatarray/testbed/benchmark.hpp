@@ -1,5 +1,6 @@
 /**
  * Copyright 2014-2017 Andreas Schäfer
+ * Copyright 2018 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,11 +13,10 @@
 // Microsoft Visual Studio:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
-#pragma warning( disable : 4668 )
-#pragma warning( disable : 4820 )
+#pragma warning( disable : 4514 4548 4668 4711 4820 4996  )
 #endif
 
+#include <string>
 #include <vector>
 
 #ifdef _WIN32
@@ -58,7 +58,6 @@ public:
         gettimeofday(&t, 0);
         return t.tv_sec + t.tv_usec * 1.0e-6;
 #endif
-
     }
 
 };

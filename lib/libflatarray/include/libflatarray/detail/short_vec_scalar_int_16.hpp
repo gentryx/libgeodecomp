@@ -1,6 +1,7 @@
 /**
  * Copyright 2015 Kurt Kanzenbach
  * Copyright 2016-2017 Andreas Schäfer
+ * Copyright 2018 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -16,6 +17,7 @@
 
 #include <libflatarray/config.h>
 #include <libflatarray/short_vec_base.hpp>
+#include <libflatarray/detail/macros.hpp>
 
 // disable certain warnings from system headers when compiling with
 // Microsoft Visual Studio:
@@ -328,7 +330,7 @@ public:
             static_cast<int>(std::sqrt(val[15])));
     }
 
-    inline
+    LIBFLATARRAY_INLINE
     void load(const int *data)
     {
         val[ 0] = data[ 0];
@@ -349,13 +351,13 @@ public:
         val[15] = data[15];
     }
 
-    inline
+    LIBFLATARRAY_INLINE
     void load_aligned(const int *data)
     {
         load(data);
     }
 
-    inline
+    LIBFLATARRAY_INLINE
     void store(int *data) const
     {
         *(data +  0) = val[ 0];
@@ -376,13 +378,13 @@ public:
         *(data + 15) = val[15];
     }
 
-    inline
+    LIBFLATARRAY_INLINE
     void store_aligned(int *data) const
     {
         store(data);
     }
 
-    inline
+    LIBFLATARRAY_INLINE
     void store_nt(int *data) const
     {
         store(data);
@@ -434,7 +436,7 @@ private:
     int val[16];
 };
 
-inline
+LIBFLATARRAY_INLINE
 void operator<<(int *data, const short_vec<int, 16>& vec)
 {
     vec.store(data);
@@ -450,6 +452,12 @@ short_vec<int, 16> sqrt(const short_vec<int, 16>& vec)
     return vec.sqrt();
 }
 
+// not inlining is ok:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
+
 template<typename _CharT, typename _Traits>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
@@ -462,6 +470,10 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
          << "]";
     return __os;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

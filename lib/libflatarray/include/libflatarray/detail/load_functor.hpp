@@ -17,6 +17,11 @@ namespace detail {
 
 namespace flat_array {
 
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4626 4710 5027 )
+#endif
+
 /**
  * The purpose of this functor is to load a row of cells which are
  * already prepackaged (in SoA form) in a raw data segment (i.e. all
@@ -64,6 +69,10 @@ private:
     const char *source;
     std::size_t count;
 };
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #ifdef LIBFLATARRAY_WITH_CUDA
 #ifdef __CUDACC__

@@ -1,6 +1,7 @@
 /**
  * Copyright 2014-2017 Andreas Schäfer
  * Copyright 2015 Kurt Kanzenbach
+ * Copyright 2018 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -14,6 +15,7 @@
     (LIBFLATARRAY_WIDEST_VECTOR_ISA == LIBFLATARRAY_MIC)
 
 #include <libflatarray/config.h>
+#include <libflatarray/detail/macros.hpp>
 #include <libflatarray/short_vec_base.hpp>
 
 // disable certain warnings from system headers when compiling with
@@ -393,7 +395,7 @@ public:
         ptr[offsets[7]] = val[ 7];
     }
 
-    inline
+    LIBFLATARRAY_INLINE
     void blend(const mask_type& mask, const short_vec<float, 8>& other)
     {
         if (mask & (1 << 0)) {
@@ -442,6 +444,12 @@ short_vec<float, 8> sqrt(const short_vec<float, 8>& vec)
     return vec.sqrt();
 }
 
+// not inlining is ok:
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
+
 template<typename _CharT, typename _Traits>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
@@ -452,6 +460,10 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
          << "]";
     return __os;
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

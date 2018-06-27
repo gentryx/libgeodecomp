@@ -1,5 +1,6 @@
 /**
  * Copyright 2014-2017 Andreas Schäfer
+ * Copyright 2018 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -11,18 +12,14 @@
 #include <libflatarray/testbed/benchmark.hpp>
 
 // disable certain warnings from system headers when compiling with
-// Microsoft Visual Studio:
+// Microsoft Visual Studio. Also disable them for this class.
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 )
+#pragma warning( disable : 4514 4710 )
 #endif
 
 #include <fstream>
 #include <iostream>
-
-#ifdef _MSC_BUILD
-#pragma warning( pop )
-#endif
 
 namespace LibFlatArray {
 
@@ -114,7 +111,10 @@ private:
     }
 };
 
-
 }
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 #endif

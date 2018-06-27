@@ -1,6 +1,6 @@
 /**
  * Copyright 2015-2017 Andreas Schäfer
- * Copyright 2017 Google
+ * Copyright 2017-2018 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -13,7 +13,7 @@
 // Microsoft Visual Studio:
 #ifdef _MSC_BUILD
 #pragma warning( push )
-#pragma warning( disable : 4514 4996 )
+#pragma warning( disable : 4514 4710 4996 )
 #endif
 
 #include <algorithm>
@@ -25,6 +25,11 @@
 namespace LibFlatArray {
 
 namespace detail {
+
+#ifdef _MSC_BUILD
+#pragma warning( push )
+#pragma warning( disable : 4710 )
+#endif
 
 template<long SIZE>
 class soa_array_member_copy_helper
@@ -267,6 +272,10 @@ public:
     };
 };
 
+
+#ifdef _MSC_BUILD
+#pragma warning( pop )
+#endif
 
 }
 

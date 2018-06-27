@@ -1,5 +1,6 @@
 /**
  * Copyright 2014-2016 Andreas Schäfer
+ * Copyright 2018 Google
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -13,6 +14,28 @@
 #include <libflatarray/detail/macros.hpp>
 #include <libflatarray/detail/offset.hpp>
 #include <libflatarray/detail/sibling_short_vec_switch.hpp>
+
+#ifdef _MSC_BUILD
+#  define LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE       \
+    __pragma( warning( push ) )                                 \
+    __pragma( warning( disable : 4514 4548 4626 4710 4711 4820 4996 5027 ) )
+#else
+#  define LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_PRE
+#endif
+
+#ifdef _MSC_BUILD
+#  define LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST      \
+    __pragma( warning( pop ) )
+#else
+#  define LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_POST
+#endif
+
+#ifdef _MSC_BUILD
+#  define LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_EOF       \
+    __pragma( warning( disable : 4710 ) )
+#else
+#  define LIBFLATARRAY_DISABLE_SYSTEM_HEADER_WARNINGS_EOF
+#endif
 
 /**
  * This macro is convenient when you need to return instances of the
@@ -57,7 +80,7 @@
  */
 #  define LIBFLATARRAY_REGISTER_SOA(CELL_TYPE, CELL_MEMBERS)    \
     __pragma( warning( push ) )                                 \
-    __pragma( warning( disable : 4307 4514 ) )                  \
+    __pragma( warning( disable : 4307 4514 4996 ) )             \
     LIBFLATARRAY_REGISTER_SOA_MAIN(CELL_TYPE, CELL_MEMBERS)     \
     __pragma( warning( pop ) )                                  \
 
@@ -281,7 +304,7 @@
         }                                                               \
                                                                         \
         __host__ __device__                                             \
-        inline                                                          \
+        LIBFLATARRAY_INLINE                                             \
         void destroy_members()                                          \
         {                                                               \
             LIBFLATARRAY_FOR_EACH(                                      \
