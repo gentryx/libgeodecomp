@@ -492,8 +492,8 @@ private:
             target,
             targetLocation,
             selector,
-            ReorderingRegionIterator(Region<DIM>::Iterator(begin), logicalToPhysicalIDs),
-            ReorderingRegionIterator(Region<DIM>::Iterator(end),   logicalToPhysicalIDs));
+            ReorderingRegionIterator(typename Region<DIM>::Iterator(begin), logicalToPhysicalIDs),
+            ReorderingRegionIterator(typename Region<DIM>::Iterator(end),   logicalToPhysicalIDs));
     }
 
     virtual void loadMemberImplementation(
@@ -507,8 +507,8 @@ private:
             source,
             sourceLocation,
             selector,
-            ReorderingRegionIterator(Region<DIM>::Iterator(begin), logicalToPhysicalIDs),
-            ReorderingRegionIterator(Region<DIM>::Iterator(end),   logicalToPhysicalIDs));
+            ReorderingRegionIterator(typename Region<DIM>::Iterator(begin), logicalToPhysicalIDs),
+            ReorderingRegionIterator(typename Region<DIM>::Iterator(end),   logicalToPhysicalIDs));
     }
 
     void reorderDelegateGrid(std::vector<IntPair>&& newLogicalToPhysicalIDs, std::vector<int>&& newPhysicalToLogicalIDs)
