@@ -146,7 +146,7 @@ public:
         return iterators[0] == region->indicesEnd(0);
     }
 
-private:
+protected:
     IndexVectorType::const_iterator iterators[DIM];
     Streak<DIM> streak;
     Coord<DIM> offset;

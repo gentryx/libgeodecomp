@@ -30,6 +30,60 @@ namespace LibGeoDecomp {
 #pragma warning( disable : 4820 )
 #endif
 
+namespace DisplacedGridHelpers {
+
+template<class TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
+class NormalizingIterator : public RegionStreakIterator<TOPOLOGY::DIM, Region<TOPOLOGY::DIM> >
+{
+public:
+    static const int DIM = TOPOLOGY::DIM;
+    inline NormalizingIterator(
+        const RegionStreakIterator<DIM, Region<DIM> >& iter,
+        const Coord<DIM>& origin,
+        const Coord<DIM>& topoDimensions) :
+        RegionStreakIterator<DIM, Region<DIM> >(iter),
+        origin(origin),
+        topoDimensions(topoDimensions)
+    {
+        normalize();
+    }
+
+    inline void operator++()
+    {
+        RegionStreakIterator<DIM, Region<DIM> >::operator++();
+        normalize();
+    }
+
+    inline const Streak<DIM>& operator*() const
+    {
+        return normalizedStreak;
+    }
+
+    inline const Streak<DIM> *operator->() const
+    {
+        return &normalizedStreak;
+    }
+
+private:
+    Streak<DIM> normalizedStreak;
+    const Coord<DIM>& origin;
+    const Coord<DIM>& topoDimensions;
+
+    inline void normalize()
+    {
+        normalizedStreak = this->streak;
+        normalizedStreak.origin -= origin;
+
+        if (TOPOLOGICALLY_CORRECT) {
+            normalizedStreak.origin = TOPOLOGY::normalize(normalizedStreak.origin, topoDimensions);
+        }
+
+        normalizedStreak.endX = normalizedStreak.origin.x() + this->streak.length();
+    }
+};
+
+}
+
 /**
  * A grid whose origin has been shiftet by a certain offset. If
  * TOPOLOGICALLY_CORRECT is set to true, the coordinates will be
@@ -190,19 +244,9 @@ public:
         const Region<DIM>& region,
         const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        CELL_TYPE *source = buffer->data();
-        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
-            Coord<DIM> relativeCoord = i->origin - origin;
-            if (TOPOLOGICALLY_CORRECT) {
-                relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
-            }
-
-            Streak<DIM> streak(relativeCoord, relativeCoord.x() + i->length());
-
-            delegate.get(streak, source);
-            source += i->length();
-        }
+        typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT> NormalizingIterator;
+        NormalizingIterator iter(region.beginStreak(offset), origin, topoDimensions);
+        delegate.saveRegionImplementation(buffer, iter, region.endStreak(offset - origin));
     }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
