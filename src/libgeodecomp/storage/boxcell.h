@@ -32,8 +32,7 @@ public:
     typedef typename APITraits::SelectTopology<Cargo>::Value Topology;
 
     class API :
-        public APITraits::SelectAPI<Cargo>::Value,
-        public APITraits::HasStencil<Stencils::Moore<Topology::DIM, 1> >
+        public APITraits::SelectAPI<Cargo>::Value
     {};
 
     const static int DIM = Topology::DIM;
