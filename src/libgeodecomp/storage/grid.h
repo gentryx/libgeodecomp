@@ -280,13 +280,7 @@ public:
         const Region<DIM>& region,
         const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        CELL_TYPE *target = buffer->data();
-
-        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
-            get(*i, target);
-            target += i->length();
-        }
+        saveRegionImplementation(buffer, region.beginStreak(offset), region.endStreak(offset));
     }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
@@ -305,13 +299,7 @@ public:
         const Region<DIM>& region,
         const Coord<DIM>& offset = Coord<DIM>())
     {
-        const CELL_TYPE *source = buffer.data();
-
-        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
-            set(*i, source);
-            source += i->length();
-        }
+        loadRegionImplementation(buffer, region.beginStreak(offset), region.endStreak(offset));
     }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
@@ -325,7 +313,36 @@ public:
     }
 #endif
 
+    template<typename ITER1, typename ITER2>
+    void saveRegionImplementation(
+        std::vector<CELL_TYPE> *buffer,
+        const ITER1& begin,
+        const ITER2& end) const
+    {
+        CELL_TYPE *target = buffer->data();
+
+        for (ITER1 i = begin; i != end; ++i) {
+            get(*i, target);
+            target += i->length();
+        }
+    }
+
+    template<typename ITER1, typename ITER2>
+    void loadRegionImplementation(
+        const std::vector<CELL_TYPE>& buffer,
+        const ITER1& begin,
+        const ITER2& end)
+    {
+        const CELL_TYPE *source = buffer.data();
+
+        for (ITER1 i = begin; i != end; ++i) {
+            set(*i, source);
+            source += i->length();
+        }
+    }
+
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+    // fixme: use templates for iterators here, add test that fails without
     void saveRegionImplementation(
         std::vector<char> * /* buffer */,
         const typename Region<DIM>::StreakIterator& /* begin */,
@@ -336,6 +353,7 @@ public:
                                "Does this model not support serialization?");
     }
 
+    // fixme: use templates for iterators here, add test that fails without
     // fixme: needs performance test
     // fixme: for better performance, avoid operator[] in inner loop
     void saveRegionImplementation(
