@@ -214,6 +214,7 @@ public:
 
     void testLoadSaveRegionWithBoostSerialization()
     {
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
         typedef DisplacedGrid<MyComplicatedCell1> GridType;
 
         Coord<2> dim(300, 400);
@@ -261,6 +262,7 @@ public:
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
             TS_ASSERT_EQUALS(mainSendGrid[*i + offset], mainRecvGrid[*i + offset]);
         }
+#endif
     }
 };
 
