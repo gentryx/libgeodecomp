@@ -186,7 +186,7 @@ public:
         subGrid.saveRegion(&buffer, region);
 
         Region<2>::Iterator iter = region.begin();
-        for (int i = 0; i < region.size(); ++i) {
+        for (std::size_t i = 0; i < region.size(); ++i) {
             TestCell<2> actual = mainGrid.get(*iter);
             TestCell<2> expected(*iter, mainGrid.getDimensions());
             int expectedIndex = 200 + (*iter - origin).toIndex(dim);
@@ -197,7 +197,7 @@ public:
         }
 
         // manipulate test data:
-        for (int i = 0; i < region.size(); ++i) {
+        for (std::size_t i = 0; i < region.size(); ++i) {
             buffer[i].pos = Coord<2>(-i, -10);
         }
 
