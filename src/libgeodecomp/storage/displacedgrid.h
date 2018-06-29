@@ -39,6 +39,7 @@ public:
     static const int DIM = TOPOLOGY::DIM;
     inline NormalizingIterator(
         const RegionStreakIterator<DIM, Region<DIM> >& iter,
+        // fixme: get rid of this
         const Coord<DIM>& origin,
         const Coord<DIM>& topoDimensions) :
         RegionStreakIterator<DIM, Region<DIM> >(iter),
@@ -265,19 +266,9 @@ public:
         const Region<DIM>& region,
         const Coord<DIM>& offset = Coord<DIM>())
     {
-        const CELL_TYPE *source = buffer.data();
-        typename Region<DIM>::StreakIterator end = region.endStreak(offset);
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(offset); i != end; ++i) {
-            Coord<DIM> relativeCoord = i->origin - origin;
-            if (TOPOLOGICALLY_CORRECT) {
-                relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
-            }
-
-            Streak<DIM> streak(relativeCoord, relativeCoord.x() + i->length());
-
-            delegate.set(streak, source);
-            source += i->length();
-        }
+        typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT> NormalizingIterator;
+        NormalizingIterator iter(region.beginStreak(offset), origin, topoDimensions);
+        delegate.loadRegionImplementation(buffer, iter, region.endStreak(offset - origin));
     }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
