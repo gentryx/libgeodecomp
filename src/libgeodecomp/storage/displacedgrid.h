@@ -33,16 +33,17 @@ namespace LibGeoDecomp {
 namespace DisplacedGridHelpers {
 
 template<class TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
-class NormalizingIterator : public RegionStreakIterator<TOPOLOGY::DIM, Region<TOPOLOGY::DIM> >
+class NormalizingIterator : private RegionStreakIterator<TOPOLOGY::DIM, Region<TOPOLOGY::DIM> >
 {
 public:
     static const int DIM = TOPOLOGY::DIM;
+    typedef RegionStreakIterator<DIM, Region<DIM> > StreakIterator;
 
     inline NormalizingIterator(
-        const RegionStreakIterator<DIM, Region<DIM> >& iter,
+        const StreakIterator& iter,
         const Coord<DIM>& origin,
         const Coord<DIM>& topoDimensions) :
-        RegionStreakIterator<DIM, Region<DIM> >(iter),
+        StreakIterator(iter),
         topoDimensions(topoDimensions)
     {
         this->offset -= origin;
@@ -52,9 +53,9 @@ public:
     }
 
     inline NormalizingIterator(
-        const RegionStreakIterator<DIM, Region<DIM> >& iter,
+        const StreakIterator& iter,
         const Coord<DIM>& topoDimensions) :
-        RegionStreakIterator<DIM, Region<DIM> >(iter),
+        StreakIterator(iter),
         topoDimensions(topoDimensions)
     {
         normalize();
@@ -62,13 +63,31 @@ public:
 
     inline void operator++()
     {
-        RegionStreakIterator<DIM, Region<DIM> >::operator++();
+        StreakIterator::operator++();
         normalize();
     }
 
+    inline bool operator==(const StreakIterator& other) const
+    {
+        return StreakIterator::operator==(other);
+    }
+
+    inline bool operator!=(const StreakIterator& other) const
+    {
+        return StreakIterator::operator!=(other);
+    }
+
+    inline const Streak<DIM>& operator*() const
+    {
+        return StreakIterator::operator*();
+    }
+
+    inline const Streak<DIM> *operator->() const
+    {
+        return StreakIterator::operator->();
+    }
+
 private:
-    // fixme: get rid of this, too?
-    Streak<DIM> normalizedStreak;
     const Coord<DIM>& topoDimensions;
 
     inline void normalize()
