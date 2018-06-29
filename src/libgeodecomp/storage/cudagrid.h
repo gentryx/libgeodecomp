@@ -147,6 +147,7 @@ public:
 
         CellType *cursor = target->data();
 
+        // fixme: this is slow
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
@@ -168,6 +169,7 @@ public:
 
         const CellType *cursor = source.data();
 
+        // fixme: this is slow
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
@@ -181,6 +183,7 @@ public:
     template<typename GRID_TYPE, typename REGION>
     void saveRegion(GRID_TYPE *target, const REGION& region) const
     {
+        // fixme: this is slow
         for (typename REGION::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
@@ -193,6 +196,7 @@ public:
     template<typename GRID_TYPE, typename REGION>
     void loadRegion(const GRID_TYPE& source, const REGION& region)
     {
+        // fixme: this is slow
         for (typename REGION::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
@@ -229,6 +233,7 @@ protected:
     {
         char *targetCursor = target;
 
+        // fixme: this is slow
         for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
             selector.copyMemberOut(
                 address(i->origin),
@@ -250,6 +255,7 @@ protected:
     {
         const char *sourceCursor = source;
 
+        // fixme: this is slow
         for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
             selector.copyMemberIn(
                 sourceCursor,

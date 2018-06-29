@@ -363,7 +363,6 @@ public:
         return nodeSet;
     }
 
-    // fixme: use forwarding to delegate for all serialization types
     virtual void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
         delegate.saveRegion(
@@ -373,7 +372,6 @@ public:
             region.size());
     }
 
-    // fixme: use forwarding to delegate for all serialization types
     virtual void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
         delegate.loadRegion(

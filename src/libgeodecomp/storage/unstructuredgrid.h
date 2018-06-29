@@ -313,6 +313,7 @@ public:
     {
         ELEMENT_TYPE *target = buffer->data();
 
+        // fixme: delegate here?
         for (ITER1 i = start; i != end; ++i) {
             get(*i, target);
             target += i->length();
@@ -333,6 +334,7 @@ public:
     {
         const ELEMENT_TYPE *source = buffer.data();
 
+        // fixme: delegate here?
         for (ITER1 i = start; i != end; ++i) {
             set(*i, source);
             source += i->length();
@@ -373,6 +375,7 @@ public:
         const Coord<DIM>& offset,
         const APITraits::TrueType&) const
     {
+        // fixme: delegate here?
         // fixme:
         // #ifdef LIBGEODECOMP_WITH_HPX
         //          int archive_flags = boost::archive::no_header;
@@ -406,6 +409,7 @@ public:
         const Coord<DIM>& offset,
         const APITraits::TrueType&)
     {
+        // fixme: delegate here?
         // fixme:
         //        #ifdef LIBGEODECOMP_WITH_HPX
         //         int archive_flags = boost::archive::no_header;
@@ -434,6 +438,7 @@ public:
         const ITER1& start,
         const ITER2& end) const
     {
+        // fixme: delegate here?
         for (ITER1 i = start; i != end; ++i) {
             selector.copyMemberOut(&(*this)[i->origin], MemoryLocation::HOST, target, targetLocation, i->length());
             target += selector.sizeOfExternal() * i->length();
@@ -448,6 +453,7 @@ public:
         const ITER1& start,
         const ITER2& end)
     {
+        // fixme: delegate here?
         for (ITER1 i = start; i != end; ++i) {
             selector.copyMemberIn(source, sourceLocation, &(*this)[i->origin], MemoryLocation::HOST, i->length());
             source += selector.sizeOfExternal() * i->length();
