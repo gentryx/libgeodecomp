@@ -329,15 +329,14 @@ protected:
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end) const
     {
-        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
-            selector.copyMemberOut(
-                &(*this)[i->origin],
-                MemoryLocation::HOST,
-                target,
-                targetLocation,
-                std::size_t(i->length()));
-            target += selector.sizeOfExternal() * i->length();
-        }
+        typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT> NormalizingIterator;
+
+        delegate.saveMemberImplementationTemplated(
+            target,
+            targetLocation,
+            selector,
+            NormalizingIterator(begin, origin, topoDimensions),
+            end);
     }
 
     void loadMemberImplementation(
@@ -347,15 +346,14 @@ protected:
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end)
     {
-        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
-            selector.copyMemberIn(
-                source,
-                sourceLocation,
-                &(*this)[i->origin],
-                MemoryLocation::HOST,
-                std::size_t(i->length()));
-            source += selector.sizeOfExternal() * i->length();
-        }
+        typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT> NormalizingIterator;
+
+        delegate.loadMemberImplementationTemplated(
+            source,
+            sourceLocation,
+            selector,
+            NormalizingIterator(begin, origin, topoDimensions),
+            end);
     }
 
 private:

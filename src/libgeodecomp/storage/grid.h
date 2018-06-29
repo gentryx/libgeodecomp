@@ -421,7 +421,23 @@ public:
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end) const
     {
-        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
+        saveMemberImplementationTemplated(
+            target,
+            targetLocation,
+            selector,
+            begin,
+            end);
+    }
+
+    template<typename ITERATOR_TYPE1, typename ITERATOR_TYPE2>
+    void saveMemberImplementationTemplated(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL_TYPE>& selector,
+        const ITERATOR_TYPE1& begin,
+        const ITERATOR_TYPE2& end) const
+    {
+        for (ITERATOR_TYPE1 i = begin; i != end; ++i) {
             selector.copyMemberOut(
                 &(*this)[i->origin],
                 MemoryLocation::HOST,
@@ -439,7 +455,23 @@ public:
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end)
     {
-        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
+        loadMemberImplementationTemplated(
+            source,
+            sourceLocation,
+            selector,
+            begin,
+            end);
+    }
+
+    template<typename ITERATOR_TYPE1, typename ITERATOR_TYPE2>
+    void loadMemberImplementationTemplated(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL_TYPE>& selector,
+        const ITERATOR_TYPE1& begin,
+        const ITERATOR_TYPE2& end)
+    {
+        for (ITERATOR_TYPE1 i = begin; i != end; ++i) {
             selector.copyMemberIn(
                 source,
                 sourceLocation,
