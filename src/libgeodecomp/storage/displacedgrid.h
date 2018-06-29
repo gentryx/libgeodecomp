@@ -66,16 +66,6 @@ public:
         normalize();
     }
 
-    inline const Streak<DIM>& operator*() const
-    {
-        return normalizedStreak;
-    }
-
-    inline const Streak<DIM> *operator->() const
-    {
-        return &normalizedStreak;
-    }
-
 private:
     // fixme: get rid of this, too?
     Streak<DIM> normalizedStreak;
@@ -83,13 +73,11 @@ private:
 
     inline void normalize()
     {
-        normalizedStreak = this->streak;
-
         if (TOPOLOGICALLY_CORRECT) {
-            normalizedStreak.origin = TOPOLOGY::normalize(normalizedStreak.origin, topoDimensions);
+            int length = this->streak.length();
+            this->streak.origin = TOPOLOGY::normalize(this->streak.origin, topoDimensions);
+            this->streak.endX = this->streak.origin.x() + length;
         }
-
-        normalizedStreak.endX = normalizedStreak.origin.x() + this->streak.length();
     }
 };
 
