@@ -37,13 +37,24 @@ class NormalizingIterator : public RegionStreakIterator<TOPOLOGY::DIM, Region<TO
 {
 public:
     static const int DIM = TOPOLOGY::DIM;
+
     inline NormalizingIterator(
         const RegionStreakIterator<DIM, Region<DIM> >& iter,
-        // fixme: get rid of this
         const Coord<DIM>& origin,
         const Coord<DIM>& topoDimensions) :
         RegionStreakIterator<DIM, Region<DIM> >(iter),
-        origin(origin),
+        topoDimensions(topoDimensions)
+    {
+        this->offset -= origin;
+        this->streak.origin -= origin;
+        this->streak.endX -= origin.x();
+        normalize();
+    }
+
+    inline NormalizingIterator(
+        const RegionStreakIterator<DIM, Region<DIM> >& iter,
+        const Coord<DIM>& topoDimensions) :
+        RegionStreakIterator<DIM, Region<DIM> >(iter),
         topoDimensions(topoDimensions)
     {
         normalize();
@@ -66,14 +77,13 @@ public:
     }
 
 private:
+    // fixme: get rid of this, too?
     Streak<DIM> normalizedStreak;
-    const Coord<DIM>& origin;
     const Coord<DIM>& topoDimensions;
 
     inline void normalize()
     {
         normalizedStreak = this->streak;
-        normalizedStreak.origin -= origin;
 
         if (TOPOLOGICALLY_CORRECT) {
             normalizedStreak.origin = TOPOLOGY::normalize(normalizedStreak.origin, topoDimensions);
@@ -246,7 +256,7 @@ public:
         const Coord<DIM>& offset = Coord<DIM>()) const
     {
         typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT> NormalizingIterator;
-        NormalizingIterator iter(region.beginStreak(offset), origin, topoDimensions);
+        NormalizingIterator iter(region.beginStreak(offset - origin), topoDimensions);
         delegate.saveRegionImplementation(buffer, iter, region.endStreak(offset - origin));
     }
 
@@ -267,7 +277,7 @@ public:
         const Coord<DIM>& offset = Coord<DIM>())
     {
         typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT> NormalizingIterator;
-        NormalizingIterator iter(region.beginStreak(offset), origin, topoDimensions);
+        NormalizingIterator iter(region.beginStreak(offset - origin), topoDimensions);
         delegate.loadRegionImplementation(buffer, iter, region.endStreak(offset - origin));
     }
 
