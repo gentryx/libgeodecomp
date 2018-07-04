@@ -146,9 +146,17 @@ public:
         return iterators[0] == region->indicesEnd(0);
     }
 
+    inline
+    void decreaseOffset(const Coord<DIM>& delta)
+    {
+        offset -= delta;
+    }
+
 protected:
-    IndexVectorType::const_iterator iterators[DIM];
     Streak<DIM> streak;
+
+private:
+    IndexVectorType::const_iterator iterators[DIM];
     Coord<DIM> offset;
     int additionalLength;
     const REGION *region;

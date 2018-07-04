@@ -32,30 +32,30 @@ namespace LibGeoDecomp {
 
 namespace DisplacedGridHelpers {
 
-template<class TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
-class NormalizingIterator : private RegionStreakIterator<TOPOLOGY::DIM, Region<TOPOLOGY::DIM> >
+template<class TOPOLOGY, bool TOPOLOGICALLY_CORRECT, typename PARENT = RegionStreakIterator<TOPOLOGY::DIM, Region<TOPOLOGY::DIM> > >
+class NormalizingIterator : private PARENT
 {
 public:
     static const int DIM = TOPOLOGY::DIM;
-    typedef RegionStreakIterator<DIM, Region<DIM> > StreakIterator;
+    typedef PARENT ParentIterator;
 
     inline NormalizingIterator(
-        const StreakIterator& iter,
+        const ParentIterator& iter,
         const Coord<DIM>& origin,
         const Coord<DIM>& topoDimensions) :
-        StreakIterator(iter),
+        ParentIterator(iter),
         topoDimensions(topoDimensions)
     {
-        this->offset -= origin;
+        this->decreaseOffset(origin);
         this->streak.origin -= origin;
         this->streak.endX -= origin.x();
         normalize();
     }
 
     inline NormalizingIterator(
-        const StreakIterator& iter,
+        const ParentIterator& iter,
         const Coord<DIM>& topoDimensions) :
-        StreakIterator(iter),
+        ParentIterator(iter),
         topoDimensions(topoDimensions)
     {
         normalize();
@@ -63,28 +63,28 @@ public:
 
     inline void operator++()
     {
-        StreakIterator::operator++();
+        ParentIterator::operator++();
         normalize();
     }
 
-    inline bool operator==(const StreakIterator& other) const
+    inline bool operator==(const ParentIterator& other) const
     {
-        return StreakIterator::operator==(other);
+        return ParentIterator::operator==(other);
     }
 
-    inline bool operator!=(const StreakIterator& other) const
+    inline bool operator!=(const ParentIterator& other) const
     {
-        return StreakIterator::operator!=(other);
+        return ParentIterator::operator!=(other);
     }
 
     inline const Streak<DIM>& operator*() const
     {
-        return StreakIterator::operator*();
+        return ParentIterator::operator*();
     }
 
     inline const Streak<DIM> *operator->() const
     {
-        return StreakIterator::operator->();
+        return ParentIterator::operator->();
     }
 
 private:
@@ -298,6 +298,28 @@ public:
         delegate.loadRegionImplementation(buffer, region.beginStreak(offset - origin), region.endStreak(offset - origin), Trait());
     }
 #endif
+
+    template<typename ITER1, typename ITER2>
+    void saveRegionImplementation(
+        std::vector<CELL_TYPE> *buffer,
+        const ITER1& begin,
+        const ITER2& end) const
+    {
+        typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT, ITER1> NormalizingIterator;
+        NormalizingIterator iter(begin, topoDimensions);
+        delegate.saveRegionImplementation(buffer, iter, end);
+    }
+
+    template<typename ITER1, typename ITER2>
+    void loadRegionImplementation(
+        const std::vector<CELL_TYPE>& buffer,
+        const ITER1& begin,
+        const ITER2& end)
+    {
+        typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT, ITER1> NormalizingIterator;
+        NormalizingIterator iter(begin, topoDimensions);
+        delegate.loadRegionImplementation(buffer, iter, end);
+    }
 
     inline CoordMapType getNeighborhood(const Coord<DIM>& center) const
     {
