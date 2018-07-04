@@ -164,11 +164,11 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredGrid<int> foo(Coord<1>(100), 1, -1);
-        TS_ASSERT_EQUALS(foo.getEdgeElement(), -1);
+        TS_ASSERT_EQUALS(foo.getEdge(), -1);
         TS_ASSERT_EQUALS(foo[Coord<1>(-1)], -1);
 
         foo[Coord<1>(-1)] = -2;
-        TS_ASSERT_EQUALS(foo.getEdgeElement(), -2);
+        TS_ASSERT_EQUALS(foo.getEdge(), -2);
         TS_ASSERT_EQUALS(foo[Coord<1>(-1)],-2);
 
         foo.setEdge(-3);

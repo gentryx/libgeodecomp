@@ -9,6 +9,7 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/storage/selector.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
@@ -56,14 +57,10 @@ public:
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
-        elements(dim.x(), defaultElement),
-        origin(0),
-        edgeElement(edgeElement),
-        dimension(dim)
+        elements(CoordBox<1>(Coord<1>(), dim), defaultElement, edgeElement)
     {
         for (std::size_t i = 0; i < MATRICES; ++i) {
-            matrices[i] =
-                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C ,SIGMA>(dim.x());
+            matrices[i] = SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C ,SIGMA>(dim.x());
         }
     }
 
@@ -73,14 +70,11 @@ public:
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
-        elements(box.dimensions.x(), defaultElement),
-        origin(box.origin.x()),
-        edgeElement(edgeElement),
-        dimension(box.dimensions)
+        elements(box, defaultElement, edgeElement)
     {
+        // fixme: allocation too large here? (this is allocating an array of size "box.origin.x() + dimension.x()")
         for (std::size_t i = 0; i < MATRICES; ++i) {
-            matrices[i] =
-                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(box.origin.x() + dimension.x());
+            matrices[i] = SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(box.origin.x() + box.dimensions.x());
         }
     }
 
@@ -125,29 +119,17 @@ public:
 
     inline const Coord<DIM>& getDimensions() const
     {
-        return dimension;
+        return elements.getDimensions();
     }
 
     inline const ELEMENT_TYPE& operator[](const int i) const
     {
-        int y = i - origin;
-
-        if (y < 0 || y >= dimension.x()) {
-            return getEdgeElement();
-        }
-
-        return elements[y];
+        return elements[Coord<1>(i)];
     }
 
     inline ELEMENT_TYPE& operator[](const int i)
     {
-        int y = i - origin;
-
-        if (y < 0 || y >= dimension.x()) {
-            return getEdgeElement();
-        }
-
-        return elements[y];
+        return elements[Coord<1>(i)];
     }
 
     inline ELEMENT_TYPE& operator[](const Coord<DIM>& coord)
@@ -167,8 +149,7 @@ public:
             return true;
         }
 
-        if ((edgeElement != other.edgeElement) ||
-            (elements    != other.elements)) {
+        if (elements != other.elements) {
             return false;
         }
 
@@ -187,7 +168,7 @@ public:
             return false;
         }
 
-        if (edgeElement != other.getEdge()) {
+        if (elements.getEdge() != other.getEdge()) {
             return false;
         }
 
@@ -217,20 +198,20 @@ public:
 
     inline void resize(const CoordBox<DIM>& newDim)
     {
-        const ELEMENT_TYPE defaultElement = elements.size() ? elements[0] : edgeElement;
+        elements.resize(newDim);
 
-        *this = UnstructuredGrid(
-            newDim.dimensions,
-            defaultElement,
-            edgeElement);
+        // fixme: allocation too large here? (this is allocating an array of size "box.origin.x() + dimension.x()")
+        for (std::size_t i = 0; i < MATRICES; ++i) {
+            matrices[i] = SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(boundingBox().origin.x() + getDimensions().x());
+        }
     }
 
     inline std::string toString() const
     {
         std::ostringstream message;
-        message << "Unstructured Grid <" << DIM << ">(" << dimension.x() << ")\n"
+        message << "Unstructured Grid <" << DIM << ">(" << getDimensions().x() << ")\n"
                 << "boundingBox: " << boundingBox()  << "\n"
-                << "edgeElement: " << edgeElement;
+                << "edgeElement: " << getEdge();
 
         CoordBox<DIM> box = boundingBox();
         int index = 0;
@@ -274,161 +255,70 @@ public:
         }
     }
 
-    inline ELEMENT_TYPE& getEdgeElement()
-    {
-        return edgeElement;
-    }
-
-    inline const ELEMENT_TYPE& getEdgeElement() const
-    {
-        return edgeElement;
-    }
-
     void setEdge(const ELEMENT_TYPE& element)
     {
-        getEdgeElement() = element;
+        elements.setEdge(element);
     }
 
     const ELEMENT_TYPE& getEdge() const
     {
-        return getEdgeElement();
+        return elements.getEdge();
     }
 
     CoordBox<DIM> boundingBox() const
     {
-        return CoordBox<DIM>(Coord<DIM>(origin), dimension);
+        return elements.boundingBox();
     }
 
     inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>()) const
     {
-        saveRegion(
-            buffer,
-            region.beginStreak(offset),
-            region.endStreak(offset),
-            region.size());
+        elements.saveRegion(buffer, region, offset);
     }
 
-    template<typename ITER1, typename ITER2>
-    inline void saveRegion(std::vector<ELEMENT_TYPE> *buffer, const ITER1& start, const ITER2& end, int size) const
-    {
-        ELEMENT_TYPE *target = buffer->data();
-
-        // fixme: delegate here?
-        for (ITER1 i = start; i != end; ++i) {
-            get(*i, target);
-            target += i->length();
-        }
-    }
-
-    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>())
-    {
-        loadRegion(
-            buffer,
-            region.beginStreak(offset),
-            region.endStreak(offset),
-            region.size());
-    }
-
-    template<typename ITER1, typename ITER2>
-    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const ITER1& start, const ITER2& end, int size)
-    {
-        const ELEMENT_TYPE *source = buffer.data();
-
-        // fixme: delegate here?
-        for (ITER1 i = start; i != end; ++i) {
-            set(*i, source);
-            source += i->length();
-        }
-    }
-
-    // fixme: rework to use infrastructure in DisplacedGrid
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     void saveRegion(
         std::vector<char> *buffer,
         const Region<DIM>& region,
         const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        typedef typename APITraits::SelectBoostSerialization<ELEMENT_TYPE>::Value Trait;
-        saveRegionImplementation(buffer, region, offset, Trait());
+        elements.saveRegion(buffer, region, offset);
+    }
+#endif
+
+    inline void loadRegion(const std::vector<ELEMENT_TYPE>& buffer, const Region<DIM>& region, const Coord<1>& offset = Coord<DIM>())
+    {
+        elements.loadRegion(buffer, region, offset);
     }
 
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
     void loadRegion(
         const std::vector<char>& buffer,
         const Region<DIM>& region,
         const Coord<DIM>& offset = Coord<DIM>())
     {
-        typedef typename APITraits::SelectBoostSerialization<ELEMENT_TYPE>::Value Trait;
-        loadRegionImplementation(buffer, region, offset, Trait());
-    }
-    void saveRegionImplementation(
-        std::vector<char> *buffer,
-        const Region<DIM>& region,
-        const Coord<DIM>& offset,
-        const APITraits::FalseType&) const
-    {
-        std::cout << "fixme: throw exception, should not be called\n";
-    }
-
-    void saveRegionImplementation(
-        std::vector<char> *buffer,
-        const Region<DIM>& region,
-        const Coord<DIM>& offset,
-        const APITraits::TrueType&) const
-    {
-        // fixme: delegate here?
-        // fixme:
-        // #ifdef LIBGEODECOMP_WITH_HPX
-        //          int archive_flags = boost::archive::no_header;
-        //          archive_flags |= hpx::util::disable_data_chunking;
-        //          hpx::util::binary_filter *f = 0;
-        //          hpx::serialization::output_archive archive(*vec, f, archive_flags);
-        // #else
-        typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
-        Device sink(*buffer);
-        boost::iostreams::stream<Device> stream(sink);
-        boost::archive::binary_oarchive archive(stream);
-        // #endif
-
-        for (typename Region<DIM>::Iterator i = region.begin(); i != region.end(); ++i) {
-            archive & get(*i);
-        }
-    }
-
-    void loadRegionImplementation(
-        const std::vector<char>& buffer,
-        const Region<DIM>& region,
-        const Coord<DIM>& offset,
-        const APITraits::FalseType&)
-    {
-        std::cout << "fixme: throw exception, should not be called\n";
-    }
-
-    void loadRegionImplementation(
-        const std::vector<char>& buffer,
-        const Region<DIM>& region,
-        const Coord<DIM>& offset,
-        const APITraits::TrueType&)
-    {
-        // fixme: delegate here?
-        // fixme:
-        //        #ifdef LIBGEODECOMP_WITH_HPX
-        //         int archive_flags = boost::archive::no_header;
-        //         archive_flags |= hpx::util::disable_data_chunking;
-        //         hpx::serialization::input_archive archive(vec, vec.size(), archive_flags);
-        // #else
-        typedef boost::iostreams::basic_array_source<char> Device;
-        Device source(&buffer.front(), buffer.size());
-        boost::iostreams::stream<Device> stream(source);
-        boost::archive::binary_iarchive archive(stream);
-        // #endif
-
-        for (typename Region<DIM>::Iterator i = region.begin(); i != region.end(); ++i) {
-            ELEMENT_TYPE cell;
-            archive & cell;
-            set(i, cell);
-        }
+        elements.loadRegion(buffer, region, offset);
     }
 #endif
+
+    template<typename ITER1, typename ITER2>
+    void saveRegionImplementation(
+        std::vector<ELEMENT_TYPE> *buffer,
+        const ITER1& begin,
+        const ITER2& end,
+        int /* unused: size */ = 0) const
+    {
+        elements.saveRegionImplementation(buffer, begin, end);
+    }
+
+    template<typename ITER1, typename ITER2>
+    void loadRegionImplementation(
+        const std::vector<ELEMENT_TYPE>& buffer,
+        const ITER1& begin,
+        const ITER2& end,
+        int /* unused: size */ = 0)
+    {
+        elements.loadRegionImplementation(buffer, begin, end);
+    }
 
     template<typename ITER1, typename ITER2>
     void saveMemberImplementationGeneric(
@@ -482,11 +372,8 @@ protected:
     }
 
 private:
-    std::vector<ELEMENT_TYPE> elements;
-    int origin;
+    DisplacedGrid<ELEMENT_TYPE, Topologies::Cube<1>::Topology> elements;
     SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA> matrices[MATRICES];
-    ELEMENT_TYPE edgeElement;
-    Coord<DIM> dimension;
 };
 
 template<typename _CharT, typename _Traits, typename ELEMENT_TYPE, std::size_t MATRICES, typename WEIGHT_TYPE, int C, int SIGMA>
