@@ -374,11 +374,11 @@ public:
         StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
         StreakIteratorType end(  region.endStreak(),   Coord<3>(offset.x(), 0, 0));
 
-        saveRegion(target, start, end, region.size());
+        saveRegionImplementation(target, start, end, region.size());
     }
 
     template<typename ITER1, typename ITER2>
-    inline void saveRegion(std::vector<char> *target, const ITER1& start, const ITER2& end, int size) const
+    inline void saveRegionImplementation(std::vector<char> *target, const ITER1& start, const ITER2& end, int size) const
     {
         elements.save(start, end, target->data(), size);
     }
@@ -389,11 +389,11 @@ public:
         StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
         StreakIteratorType end(  region.endStreak(),   Coord<3>(offset.x(), 0, 0));
 
-        loadRegion(source, start, end, region.size());
+        loadRegionImplementation(source, start, end, region.size());
     }
 
     template<typename ITER1, typename ITER2>
-    inline void loadRegion(const std::vector<char>& source, const ITER1& start, const ITER2& end, int size)
+    inline void loadRegionImplementation(const std::vector<char>& source, const ITER1& start, const ITER2& end, int size)
     {
         elements.load(start, end, source.data(), size);
     }

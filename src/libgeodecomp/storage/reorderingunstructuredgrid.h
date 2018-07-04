@@ -45,7 +45,7 @@ public:
         iter(iter),
         logicalToPhysicalIDs(logicalToPhysicalIDs)
     {
-        updateOrigin();
+        updateStreak();
     }
 
     inline
@@ -58,38 +58,43 @@ public:
     void operator++()
     {
         ++iter;
-        updateOrigin();
+        updateStreak();
     }
 
     inline
-    const ReorderingRegionIterator *operator->() const
+    const Streak<DIM> *operator->() const
     {
-        return this;
+        return &streak;
     }
 
     inline
-    Streak<DIM> operator*() const
+    const Streak<DIM>& operator*() const
     {
-        return Streak<DIM>(origin, origin.x() + 1);
+        return streak;
     }
 
-    Coord<DIM> origin;
-
     inline
-    bool operator!=(const ReorderingRegionIterator& other)
+    bool operator!=(const ReorderingRegionIterator& other) const
     {
         return iter != other.iter;
     }
 
-private:
+    inline
+    void decreaseOffset(const Coord<DIM>& /* unused: delta */)
+    {}
+
+protected:
+    Streak<DIM> streak;
     Region<1>::Iterator iter;
     const std::vector<IntPair>& logicalToPhysicalIDs;
 
-    void updateOrigin()
+    void updateStreak()
     {
         std::vector<IntPair>::const_iterator i = mapLogicalToPhysicalID(iter->x(), logicalToPhysicalIDs);
         if (i != logicalToPhysicalIDs.end()) {
-            origin.x() = i->second;
+            int index = i->second;
+            streak.origin.x() = index;
+            streak.endX = index + 1;
         }
     }
 };
@@ -365,7 +370,7 @@ public:
 
     virtual void saveRegion(BufferType *buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        delegate.saveRegion(
+        delegate.saveRegionImplementation(
             buffer,
             ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
             ReorderingRegionIterator(region.end(), logicalToPhysicalIDs),
@@ -374,7 +379,7 @@ public:
 
     virtual void loadRegion(const BufferType& buffer, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        delegate.loadRegion(
+        delegate.loadRegionImplementation(
             buffer,
             ReorderingRegionIterator(region.begin(), logicalToPhysicalIDs),
             ReorderingRegionIterator(region.end(), logicalToPhysicalIDs),
