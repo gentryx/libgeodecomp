@@ -421,7 +421,7 @@ public:
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end) const
     {
-        saveMemberImplementationTemplated(
+        saveMemberImplementationGeneric(
             target,
             targetLocation,
             selector,
@@ -430,7 +430,7 @@ public:
     }
 
     template<typename ITERATOR_TYPE1, typename ITERATOR_TYPE2>
-    void saveMemberImplementationTemplated(
+    void saveMemberImplementationGeneric(
         char *target,
         MemoryLocation::Location targetLocation,
         const Selector<CELL_TYPE>& selector,
@@ -455,7 +455,7 @@ public:
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end)
     {
-        loadMemberImplementationTemplated(
+        loadMemberImplementationGeneric(
             source,
             sourceLocation,
             selector,
@@ -464,7 +464,7 @@ public:
     }
 
     template<typename ITERATOR_TYPE1, typename ITERATOR_TYPE2>
-    void loadMemberImplementationTemplated(
+    void loadMemberImplementationGeneric(
         const char *source,
         MemoryLocation::Location sourceLocation,
         const Selector<CELL_TYPE>& selector,

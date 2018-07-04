@@ -359,9 +359,25 @@ protected:
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end) const
     {
-        typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT> NormalizingIterator;
+        saveMemberImplementationGeneric(
+            target,
+            targetLocation,
+            selector,
+            begin,
+            end);
+    }
 
-        delegate.saveMemberImplementationTemplated(
+    template<typename ITER1, typename ITER2>
+    void saveMemberImplementationGeneric(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL_TYPE>& selector,
+        const ITER1& begin,
+        const ITER2& end) const
+    {
+        typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT, ITER1> NormalizingIterator;
+
+        delegate.saveMemberImplementationGeneric(
             target,
             targetLocation,
             selector,
@@ -376,9 +392,25 @@ protected:
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end)
     {
-        typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT> NormalizingIterator;
+        loadMemberImplementationGeneric(
+            source,
+            sourceLocation,
+            selector,
+            begin,
+            end);
+    }
 
-        delegate.loadMemberImplementationTemplated(
+    template<typename ITER1, typename ITER2>
+    void loadMemberImplementationGeneric(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL_TYPE>& selector,
+        const ITER1& begin,
+        const ITER2& end)
+    {
+        typedef DisplacedGridHelpers::NormalizingIterator<TOPOLOGY, TOPOLOGICALLY_CORRECT, ITER1> NormalizingIterator;
+
+        delegate.loadMemberImplementationGeneric(
             source,
             sourceLocation,
             selector,
