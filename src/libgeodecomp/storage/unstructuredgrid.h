@@ -328,11 +328,12 @@ public:
         const ITER1& start,
         const ITER2& end) const
     {
-        // fixme: delegate here?
-        for (ITER1 i = start; i != end; ++i) {
-            selector.copyMemberOut(&(*this)[i->origin], MemoryLocation::HOST, target, targetLocation, i->length());
-            target += selector.sizeOfExternal() * i->length();
-        }
+        elements.saveMemberImplementationGeneric(
+            target,
+            targetLocation,
+            selector,
+            start,
+            end);
     }
 
     template<typename ITER1, typename ITER2>
@@ -343,11 +344,12 @@ public:
         const ITER1& start,
         const ITER2& end)
     {
-        // fixme: delegate here?
-        for (ITER1 i = start; i != end; ++i) {
-            selector.copyMemberIn(source, sourceLocation, &(*this)[i->origin], MemoryLocation::HOST, i->length());
-            source += selector.sizeOfExternal() * i->length();
-        }
+        elements.loadMemberImplementationGeneric(
+            source,
+            sourceLocation,
+            selector,
+            start,
+            end);
     }
 
 protected:

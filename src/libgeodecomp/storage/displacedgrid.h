@@ -351,22 +351,6 @@ public:
         return message.str();
     }
 
-protected:
-    void saveMemberImplementation(
-        char *target,
-        MemoryLocation::Location targetLocation,
-        const Selector<CELL_TYPE>& selector,
-        const typename Region<DIM>::StreakIterator& begin,
-        const typename Region<DIM>::StreakIterator& end) const
-    {
-        saveMemberImplementationGeneric(
-            target,
-            targetLocation,
-            selector,
-            begin,
-            end);
-    }
-
     template<typename ITER1, typename ITER2>
     void saveMemberImplementationGeneric(
         char *target,
@@ -385,21 +369,6 @@ protected:
             end);
     }
 
-    void loadMemberImplementation(
-        const char *source,
-        MemoryLocation::Location sourceLocation,
-        const Selector<CELL_TYPE>& selector,
-        const typename Region<DIM>::StreakIterator& begin,
-        const typename Region<DIM>::StreakIterator& end)
-    {
-        loadMemberImplementationGeneric(
-            source,
-            sourceLocation,
-            selector,
-            begin,
-            end);
-    }
-
     template<typename ITER1, typename ITER2>
     void loadMemberImplementationGeneric(
         const char *source,
@@ -415,6 +384,37 @@ protected:
             sourceLocation,
             selector,
             NormalizingIterator(begin, origin, topoDimensions),
+            end);
+    }
+
+protected:
+    void saveMemberImplementation(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL_TYPE>& selector,
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end) const
+    {
+        saveMemberImplementationGeneric(
+            target,
+            targetLocation,
+            selector,
+            begin,
+            end);
+    }
+
+    void loadMemberImplementation(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL_TYPE>& selector,
+        const typename Region<DIM>::StreakIterator& begin,
+        const typename Region<DIM>::StreakIterator& end)
+    {
+        loadMemberImplementationGeneric(
+            source,
+            sourceLocation,
+            selector,
+            begin,
             end);
     }
 
