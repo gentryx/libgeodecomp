@@ -152,7 +152,7 @@ public:
 /**
  * Extract a single member variable from a SoA grid
  */
-template<typename CELL, int DIM>
+template<typename CELL, int DIM, typename ITER1, typename ITER2>
 class SaveMember
 {
 public:
@@ -161,15 +161,15 @@ public:
         MemoryLocation::Location sourceLocation,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
-        const typename Region<DIM>::StreakIterator& begin,
-        const typename Region<DIM>::StreakIterator& end,
+        const ITER1& start,
+        const ITER2& end,
         const Coord<DIM>& origin,
         const Coord<3>& edgeRadii) :
         target(target),
         sourceLocation(sourceLocation),
         targetLocation(targetLocation),
         selector(selector),
-        begin(begin),
+        start(start),
         end(end),
         origin(origin),
         edgeRadii(edgeRadii)
@@ -180,7 +180,7 @@ public:
     {
         char *currentTarget = target;
 
-        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
+        for (typename Region<DIM>::StreakIterator i = start; i != end; ++i) {
             accessor.index() = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakOut(
@@ -199,8 +199,8 @@ private:
     MemoryLocation::Location sourceLocation;
     MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
-    const typename Region<DIM>::StreakIterator& begin;
-    const typename Region<DIM>::StreakIterator& end;
+    const ITER1& start;
+    const ITER2& end;
     const Coord<DIM>& origin;
     const Coord<3>& edgeRadii;
     long memberOffset;
@@ -209,7 +209,7 @@ private:
 /**
  * Counterpart to SaveMember
  */
-template<typename CELL, int DIM>
+template<typename CELL, int DIM, typename ITER1, typename ITER2>
 class LoadMember
 {
 public:
@@ -218,15 +218,15 @@ public:
         MemoryLocation::Location sourceLocation,
         MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
-        const typename Region<DIM>::StreakIterator& begin,
-        const typename Region<DIM>::StreakIterator& end,
+        const ITER1& start,
+        const ITER2& end,
         const Coord<DIM>& origin,
         const Coord<3>& edgeRadii) :
         source(source),
         sourceLocation(sourceLocation),
         targetLocation(targetLocation),
         selector(selector),
-        begin(begin),
+        start(start),
         end(end),
         origin(origin),
         edgeRadii(edgeRadii)
@@ -237,7 +237,7 @@ public:
     {
         const char *currentSource = source;
 
-        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
+        for (typename Region<DIM>::StreakIterator i = start; i != end; ++i) {
             accessor.index() = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
 
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
@@ -258,8 +258,8 @@ private:
     MemoryLocation::Location sourceLocation;
     MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
-    const typename Region<DIM>::StreakIterator& begin;
-    const typename Region<DIM>::StreakIterator& end;
+    const ITER1& start;
+    const ITER2& end;
     const Coord<DIM>& origin;
     const Coord<3>& edgeRadii;
     long memberOffset;
@@ -573,7 +573,7 @@ protected:
         const typename Region<DIM>::StreakIterator& end) const
     {
         delegate.callback(
-            SoAGridHelpers::SaveMember<CELL, DIM>(
+            SoAGridHelpers::SaveMember<CELL, DIM, typename Region<DIM>::StreakIterator, typename Region<DIM>::StreakIterator>(
                 target,
                 MemoryLocation::HOST,
                 targetLocation,
@@ -592,7 +592,7 @@ protected:
         const typename Region<DIM>::StreakIterator& end)
     {
         delegate.callback(
-            SoAGridHelpers::LoadMember<CELL, DIM>(
+            SoAGridHelpers::LoadMember<CELL, DIM, typename Region<DIM>::StreakIterator, typename Region<DIM>::StreakIterator>(
                 source,
                 sourceLocation,
                 MemoryLocation::HOST,

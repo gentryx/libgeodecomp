@@ -351,7 +351,7 @@ protected:
         const typename Region<DIM>::StreakIterator& end) const
     {
         delegate.callback(
-            SoAGridHelpers::SaveMember<CELL, DIM>(
+            SoAGridHelpers::SaveMember<CELL, DIM, typename Region<DIM>::StreakIterator, typename Region<DIM>::StreakIterator>(
                 target,
                 MemoryLocation::CUDA_DEVICE,
                 targetLocation,
@@ -370,7 +370,7 @@ protected:
         const typename Region<DIM>::StreakIterator& end)
     {
         delegate.callback(
-            SoAGridHelpers::LoadMember<CELL, DIM>(
+            SoAGridHelpers::LoadMember<CELL, DIM, typename Region<DIM>::StreakIterator, typename Region<DIM>::StreakIterator>(
                 source,
                 sourceLocation,
                 MemoryLocation::CUDA_DEVICE,
