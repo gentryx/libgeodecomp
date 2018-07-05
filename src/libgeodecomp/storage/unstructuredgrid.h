@@ -57,24 +57,10 @@ public:
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
-        elements(CoordBox<1>(Coord<1>(), dim), defaultElement, edgeElement)
+        elements(dim, defaultElement, edgeElement)
     {
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] = SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C ,SIGMA>(dim.x());
-        }
-    }
-
-    explicit
-    UnstructuredGrid(
-        const CoordBox<DIM> box,
-        const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
-        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
-        const Coord<DIM>& /* topological dimension is irrelevant here */ = Coord<DIM>()) :
-        elements(box, defaultElement, edgeElement)
-    {
-        // fixme: allocation too large here? (this is allocating an array of size "box.origin.x() + dimension.x()")
-        for (std::size_t i = 0; i < MATRICES; ++i) {
-            matrices[i] = SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(box.origin.x() + box.dimensions.x());
         }
     }
 
@@ -198,11 +184,14 @@ public:
 
     inline void resize(const CoordBox<DIM>& newDim)
     {
-        elements.resize(newDim);
+        if (newDim.origin.x() > 0) {
+            throw std::logic_error("UnstructuredGrid::resize() called with non-zero offset");
+        }
 
-        // fixme: allocation too large here? (this is allocating an array of size "box.origin.x() + dimension.x()")
+        elements.resize(newDim.dimensions);
+
         for (std::size_t i = 0; i < MATRICES; ++i) {
-            matrices[i] = SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(boundingBox().origin.x() + getDimensions().x());
+            matrices[i] = SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(getDimensions().x());
         }
     }
 
@@ -374,7 +363,7 @@ protected:
     }
 
 private:
-    DisplacedGrid<ELEMENT_TYPE, Topologies::Cube<1>::Topology> elements;
+    Grid<ELEMENT_TYPE, Topologies::Cube<1>::Topology> elements;
     SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA> matrices[MATRICES];
 };
 

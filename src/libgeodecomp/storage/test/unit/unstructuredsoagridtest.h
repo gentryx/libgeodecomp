@@ -85,7 +85,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         MySoACell1 defaultCell(5);
         MySoACell1 edgeCell(-1);
-        CoordBox<1> dim(Coord<1>(0), Coord<1>(100));
+        Coord<1> dim(100);
 
         UnstructuredSoAGrid<MySoACell1> grid(dim, defaultCell, edgeCell);
 
@@ -101,7 +101,7 @@ public:
     void testGetAndSet()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        UnstructuredSoAGrid<MySoACell1> grid(CoordBox<1>(Coord<1>(), Coord<1>(10)));
+        UnstructuredSoAGrid<MySoACell1> grid(Coord<1>(10));
         MySoACell1 elem1(1);
         MySoACell1 elem2(2);
         grid.set(Coord<1>(5), elem1);
@@ -121,7 +121,7 @@ public:
 
         Region<1> boundingRegion;
         boundingRegion << box;
-        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid(box);
+        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid(dim);
         TS_ASSERT_EQUALS(box, grid.boundingBox());
         TS_ASSERT_EQUALS(boundingRegion, grid.boundingRegion());
 
@@ -149,8 +149,7 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         Coord<1> dim(100);
-        CoordBox<1> box(Coord<1>(), dim);
-        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid(box);
+        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid(dim);
 
         for (int i = 0; i < dim.x(); ++i) {
             grid.set(Coord<1>(i), UnstructuredTestCellSoA1(i, 4711, true));
@@ -182,8 +181,8 @@ public:
 
         grid.saveRegion(&buffer, regionOffset10, Coord<1>(-10));
 
-        box.dimensions.x() = 200;
-        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid2(box);
+        dim.x() = 200;
+        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid2(dim);
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             UnstructuredTestCellSoA1 actual = grid2.get(*i);
@@ -207,8 +206,7 @@ public:
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         Coord<1> dim(100);
-        CoordBox<1> box(Coord<1>(), dim);
-        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid(box);
+        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid(dim);
 
         for (int i = 0; i < dim.x(); ++i) {
             grid.set(Coord<1>(i), UnstructuredTestCellSoA1(i, 4711, true));
@@ -226,8 +224,8 @@ public:
 
         grid.saveRegion(&buffer, region);
 
-        box.dimensions.x() = 200;
-        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid2(box);
+        dim.x() = 200;
+        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid2(dim);
 
         for (Region<1>::Iterator i = region.begin(); i != region.end(); ++i) {
             UnstructuredTestCellSoA1 actual = grid2.get(*i);
@@ -253,7 +251,7 @@ public:
         Selector<MySoACell1> valSelector(&MySoACell1::val, "val");
         MySoACell1 defaultCell(5);
         MySoACell1 edgeCell(-1);
-        CoordBox<1> dim(Coord<1>(), Coord<1>(100));
+        Coord<1> dim(100);
         UnstructuredSoAGrid<MySoACell1> grid(dim, defaultCell, edgeCell);
 
         Region<1> region;
@@ -294,7 +292,7 @@ public:
         Selector<MySoACell2> valSelector(&MySoACell2::y, "y");
         MySoACell2 defaultCell(5, 6, 7);
         MySoACell2 edgeCell(-1, -2, -3);
-        CoordBox<1> dim(Coord<1>(), Coord<1>(100));
+        Coord<1> dim(100);
         UnstructuredSoAGrid<MySoACell2> grid(dim, defaultCell, edgeCell);
 
         Region<1> region;
@@ -328,29 +326,6 @@ public:
         grid.loadMember(valVector.data(), MemoryLocation::HOST, valSelector, region);
         for (int i = 0; i < static_cast<int>(region.size()); ++i) {
             TS_ASSERT_EQUALS(grid.get(Coord<1>(i)), MySoACell2(5, -i, 7));
-        }
-#endif
-    }
-
-    void testOffset()
-    {
-#ifdef LIBGEODECOMP_WITH_CPP14
-        Coord<1> origin(1000);
-        Coord<1> dim(50);
-        CoordBox<1> box(origin, dim);
-
-        UnstructuredSoAGrid<UnstructuredTestCellSoA1> grid(box);
-        TS_ASSERT_EQUALS(box, grid.boundingBox());
-
-        for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
-            UnstructuredTestCellSoA1 cell = grid.get(*i);
-            cell.id = i->x();
-            grid.set(*i, cell);
-        }
-
-        for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
-            UnstructuredTestCellSoA1 cell = grid.get(*i);
-            TS_ASSERT_EQUALS(cell.id, i->x());
         }
 #endif
     }

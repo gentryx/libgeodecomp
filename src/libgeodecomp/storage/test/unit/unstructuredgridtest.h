@@ -343,7 +343,7 @@ public:
 
         Region<1> boundingRegion;
         boundingRegion << box;
-        UnstructuredGrid<UnstructuredTestCellSoA1> grid(box);
+        UnstructuredGrid<UnstructuredTestCellSoA1> grid(dim);
         TS_ASSERT_EQUALS(box, grid.boundingBox());
         TS_ASSERT_EQUALS(boundingRegion, grid.boundingRegion());
 
@@ -372,26 +372,6 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredGrid<UnstructuredTestCellSoA1> grid;
         grid.resize(CoordBox<1>(Coord<1>(0), Coord<1>(10)));
-#endif
-    }
-
-    void testOffset()
-    {
-#ifdef LIBGEODECOMP_WITH_CPP14
-        Coord<1> origin(1000);
-        Coord<1> dim(50);
-        CoordBox<1> box(origin, dim);
-
-        UnstructuredGrid<UnstructuredTestCellSoA1> grid(box);
-        TS_ASSERT_EQUALS(box, grid.boundingBox());
-
-        for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
-            grid[*i].id = i->x();
-        }
-
-        for (CoordBox<1>::Iterator i = box.begin(); i != box.end(); ++i) {
-            TS_ASSERT_EQUALS(grid[*i].id, i->x());
-        }
 #endif
     }
 };

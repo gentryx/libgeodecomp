@@ -191,8 +191,7 @@ public:
             }
         }
 
-        CoordBox<1> delegateBox(Coord<1>(0), Coord<1>(nodeSet.size()));
-        delegate = DELEGATE_GRID(delegateBox, defaultElement, edgeElement);
+        delegate = DELEGATE_GRID(Coord<1>(nodeSet.size()), defaultElement, edgeElement);
     }
 
     /**
@@ -516,8 +515,7 @@ private:
 
     void reorderDelegateGrid(std::vector<IntPair>&& newLogicalToPhysicalIDs, std::vector<int>&& newPhysicalToLogicalIDs)
     {
-        CoordBox<1> box(Coord<1>(), nodeSet.boundingBox().dimensions);
-        DELEGATE_GRID newDelegate(box);
+        DELEGATE_GRID newDelegate(nodeSet.boundingBox().dimensions);
         for (Region<1>::Iterator i = nodeSet.begin(); i != nodeSet.end(); ++i) {
             using ReorderingUnstructuredGridHelpers::mapLogicalToPhysicalID;
             std::vector<IntPair>::const_iterator iter;
