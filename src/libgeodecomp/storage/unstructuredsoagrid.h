@@ -23,96 +23,6 @@
 
 namespace LibGeoDecomp {
 
-namespace UnstructuredSoAGridHelpers {
-
-// fixme: kill this?
-/**
- * Internal helper class to save a region of a cell member.
- */
-template<typename CELL, int DIM, typename ITER1, typename ITER2>
-class SaveMember
-{
-public:
-    SaveMember(
-        char *target,
-        MemoryLocation::Location targetLocation,
-        const Selector<CELL>& selector,
-        const ITER1& start,
-        const ITER2& end) :
-        target(target),
-        targetLocation(targetLocation),
-        selector(selector),
-        start(start),
-        end(end)
-    {}
-
-    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
-    {
-        char *currentTarget = target;
-
-        for (auto i = start; i != end; ++i) {
-            accessor.index() = i->origin.x();
-            const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
-            selector.copyStreakOut(data, MemoryLocation::HOST, currentTarget,
-                                   targetLocation, i->length(), DIM_X);
-            currentTarget += selector.sizeOfExternal() * i->length();
-        }
-    }
-
-private:
-    char *target;
-    MemoryLocation::Location targetLocation;
-    const Selector<CELL>& selector;
-    const ITER1& start;
-    const ITER2& end;
-};
-
-// fixme: kill this?
-/**
- * Internal helper class to load a region of a cell member.
- */
-template<typename CELL, int DIM, typename ITER1, typename ITER2>
-class LoadMember
-{
-public:
-    LoadMember(
-        const char *source,
-        MemoryLocation::Location sourceLocation,
-        const Selector<CELL>& selector,
-        const ITER1& start,
-        const ITER2& end) :
-        source(source),
-        sourceLocation(sourceLocation),
-        selector(selector),
-        start(start),
-        end(end)
-    {}
-
-    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
-    {
-        const char *currentSource = source;
-
-        for (auto i = start; i != end; ++i) {
-            accessor.index() = i->origin.x();
-            char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
-            selector.copyStreakIn(currentSource, sourceLocation, currentTarget,
-                                  MemoryLocation::HOST, i->length(), DIM_X);
-            currentSource += selector.sizeOfExternal() * i->length();
-        }
-    }
-
-private:
-    const char *source;
-    MemoryLocation::Location sourceLocation;
-    const Selector<CELL>& selector;
-    const ITER1& start;
-    const ITER2& end;
-};
-
-}
-
 /**
  * A unstructured grid for irregular structures using SoA memory layout.
  */
@@ -372,9 +282,12 @@ public:
         const ITER1& start,
         const ITER2& end) const
     {
-        elements.callback(
-            UnstructuredSoAGridHelpers::SaveMember<ELEMENT_TYPE, DIM, ITER1, ITER2>(
-                target, targetLocation, selector, start, end));
+        elements.saveMemberImplementationGeneric(
+            target,
+            targetLocation,
+            selector,
+            start,
+            end);
     }
 
     template<typename ITER1, typename ITER2>
@@ -385,9 +298,12 @@ public:
         const ITER1& start,
         const ITER2& end)
     {
-        elements.callback(
-            UnstructuredSoAGridHelpers::LoadMember<ELEMENT_TYPE, DIM, ITER1, ITER2>(
-                source, sourceLocation, selector, start, end));
+        elements.loadMemberImplementationGeneric(
+            source,
+            sourceLocation,
+            selector,
+            start,
+            end);
     }
 
 protected:
