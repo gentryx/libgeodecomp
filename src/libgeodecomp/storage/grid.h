@@ -342,7 +342,6 @@ public:
     }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
-    // fixme: use templates for iterators here, add test that fails without
     void saveRegionImplementation(
         std::vector<char> * /* buffer */,
         const typename Region<DIM>::StreakIterator& /* begin */,
@@ -353,8 +352,6 @@ public:
                                "Does this model not support serialization?");
     }
 
-    // fixme: use templates for iterators here, add test that fails without
-    // fixme: needs performance test
     // fixme: for better performance, avoid operator[] in inner loop
     void saveRegionImplementation(
         std::vector<char> *buffer,
