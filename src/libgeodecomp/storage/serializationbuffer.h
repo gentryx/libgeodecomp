@@ -119,8 +119,7 @@ public:
 
     static std::size_t minimumStorageSize(const std::size_t size)
     {
-        // fixme: wouldn't 0 work here?
-        return size;
+        return 0;
     }
 
     static void resize(BufferType *buffer, const std::size_t /* unused: size */)
@@ -132,15 +131,6 @@ public:
     {
         return &buffer.front();
     }
-
-    // fixme: get rid of this?
-//     static inline InsertIteratorType getInsertIterator(BufferType *buffer)
-//     {
-// typedef boost::iostreams::back_insert_device<std::vector<char> > DeviceType;
-// DeviceType sink(*buffer);
-// boost::iostreams::stream<Device> stream(sink);
-// return boost::archive::binary_oarchive archive(stream);
-//     }
 
 #ifdef LIBGEODECOMP_WITH_MPI
     static inline MPI_Datatype cellMPIDataType()
@@ -210,12 +200,6 @@ public:
     {
         Implementation::resize(buffer, regionSize);
     }
-
-    // fixme: delete this?
-    // static inline InsertIteratorType getInsertIterator(BufferType *buffer)
-    // {
-    //     Implementation::getInsertIterator(buffer);
-    // }
 
 #ifdef LIBGEODECOMP_WITH_MPI
     /**
