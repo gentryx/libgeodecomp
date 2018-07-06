@@ -522,7 +522,6 @@ public:
 
     void saveRegion(std::vector<char> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        SerializationBuffer<CELL>::resize(target, region);
         Coord<3> actualOffset = edgeRadii;
         for (int i = 0; i < DIM; ++i) {
             actualOffset[i] += -box.origin[i] + offset[i];
@@ -532,18 +531,25 @@ public:
         StreakIteratorType start(region.beginStreak(), actualOffset);
         StreakIteratorType end(  region.endStreak(),   actualOffset);
 
-        delegate.save(start, end, target->data(), region.size());
+        saveRegionImplementationInternal(target, start, end, region.size());
+    }
+
+    template<typename ITER1, typename ITER2>
+    inline void saveRegionImplementation(std::vector<char> *target, const ITER1& start, const ITER2& end, int size) const
+    {
+        SerializationBuffer<CELL>::resize(target, size);
+        typedef SoAGridHelpers::OffsetStreakIterator<ITER1, DIM> StreakIteratorType;
+
+        Coord<3> offset(-box.origin.x());
+        saveRegionImplementationInternal(
+            target,
+            StreakIteratorType(start, offset),
+            StreakIteratorType(end, offset),
+            size);
     }
 
     void loadRegion(const std::vector<char>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::minimumStorageSize(region);
-        if (source.size() < expectedMinimumSize) {
-            throw std::logic_error(
-                "source buffer too small (is " + StringOps::itoa(source.size()) +
-                ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
-        }
-
         Coord<3> actualOffset = edgeRadii;
         for (int i = 0; i < DIM; ++i) {
             actualOffset[i] += -box.origin[i] + offset[i];
@@ -551,9 +557,22 @@ public:
 
         typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
         StreakIteratorType start(region.beginStreak(), actualOffset);
-        StreakIteratorType end(  region.endStreak(),   actualOffset);
+        StreakIteratorType end(region.endStreak(), actualOffset);
 
-        delegate.load(start, end, source.data(), region.size());
+        loadRegionImplementationInternal(source, start, end, region.size());
+    }
+
+    template<typename ITER1, typename ITER2>
+    inline void loadRegionImplementation(const std::vector<char>& source, const ITER1& start, const ITER2& end, int size)
+    {
+        typedef SoAGridHelpers::OffsetStreakIterator<ITER1, DIM> StreakIteratorType;
+        Coord<3> offset(-box.origin.x());
+
+        loadRegionImplementationInternal(
+            source,
+            StreakIteratorType(start, offset),
+            StreakIteratorType(end, offset),
+            size);
     }
 
     static Coord<3> calcEdgeRadii()
@@ -565,6 +584,26 @@ public:
     }
 
 protected:
+    template<typename ITER1, typename ITER2>
+    inline void saveRegionImplementationInternal(std::vector<char> *target, const ITER1& start, const ITER2& end, int size) const
+    {
+        SerializationBuffer<CELL>::resize(target, size);
+        delegate.save(start, end, target->data(), size);
+    }
+
+    template<typename ITER1, typename ITER2>
+    inline void loadRegionImplementationInternal(const std::vector<char>& source, const ITER1& start, const ITER2& end, int size)
+    {
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::minimumStorageSize(size);
+        if (source.size() < expectedMinimumSize) {
+            throw std::logic_error(
+                "source buffer too small (is " + StringOps::itoa(source.size()) +
+                ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
+        }
+
+        delegate.load(start, end, source.data(), size);
+    }
+
     void saveMemberImplementation(
         char *target,
         MemoryLocation::Location targetLocation,

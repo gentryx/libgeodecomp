@@ -67,7 +67,7 @@ public:
         std::size_t rank,
         bool lastCall)
     {
-        SerializationBuffer<CELL_TYPE>::resize(&buffer, validRegion);
+        SerializationBuffer<CELL_TYPE>::resize(&buffer, validRegion.size());
         grid.saveRegion(&buffer, validRegion);
 
         if (mpiLayer.rank() == root) {
@@ -86,7 +86,7 @@ public:
                 if (mpiLayer.rank() == root) {
                     Region<DIM> recvRegion;
                     mpiLayer.recvRegion(&recvRegion, sender);
-                    SerializationBuffer<CELL_TYPE>::resize(&buffer, recvRegion);
+                    SerializationBuffer<CELL_TYPE>::resize(&buffer, recvRegion.size());
 
                     mpiLayer.recv(
                         buffer.data(),

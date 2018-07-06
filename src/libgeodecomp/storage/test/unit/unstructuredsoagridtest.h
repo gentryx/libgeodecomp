@@ -177,7 +177,7 @@ public:
         TS_ASSERT_EQUALS(10, regionOffset30.size());
 
         std::vector<char> buffer;
-        SerializationBuffer<UnstructuredTestCellSoA1>::resize(&buffer, region);
+        SerializationBuffer<UnstructuredTestCellSoA1>::resize(&buffer, region.size());
 
         grid.saveRegion(&buffer, regionOffset10, Coord<1>(-10));
 
@@ -220,7 +220,7 @@ public:
         TS_ASSERT_EQUALS(10, region.size());
 
         std::vector<char> buffer;
-        SerializationBuffer<UnstructuredTestCellSoA1>::resize(&buffer, region);
+        SerializationBuffer<UnstructuredTestCellSoA1>::resize(&buffer, region.size());
 
         grid.saveRegion(&buffer, region);
 

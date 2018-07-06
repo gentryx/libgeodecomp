@@ -301,14 +301,14 @@ public:
 
     void saveRegion(std::vector<char> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::minimumStorageSize(region);
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::minimumStorageSize(region.size());
         if (target->size() < expectedMinimumSize) {
             throw std::logic_error(
                 "target buffer too small (is " + StringOps::itoa(target->size()) +
                 ", expected at least: " + StringOps::itoa(expectedMinimumSize) + ")");
         }
 
-        SerializationBuffer<CELL>::resize(target, region);
+        SerializationBuffer<CELL>::resize(target, region.size());
         Coord<3> actualOffset = edgeRadii;
         for (int i = 0; i < DIM; ++i) {
             actualOffset[i] += -box.origin[i] + offset[i];
@@ -323,7 +323,7 @@ public:
 
     void loadRegion(const std::vector<char>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::minimumStorageSize(region);
+        std::size_t expectedMinimumSize = SerializationBuffer<CELL>::minimumStorageSize(region.size());
         if (source.size() < expectedMinimumSize) {
             throw std::logic_error(
                 "source buffer too small (is " + StringOps::itoa(source.size()) +

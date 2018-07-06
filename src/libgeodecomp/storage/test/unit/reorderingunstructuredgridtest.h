@@ -244,7 +244,7 @@ public:
         }
 
         std::vector<TestCell> buffer;
-        SerializationBuffer<TestCell>::resize(&buffer, region3);
+        SerializationBuffer<TestCell>::resize(&buffer, region3.size());
 
         grid1.saveRegion(&buffer, region3);
         grid2.loadRegion(buffer, region3);
@@ -299,7 +299,7 @@ public:
         }
 
         std::vector<char> buffer;
-        SerializationBuffer<TestCell>::resize(&buffer, region3);
+        SerializationBuffer<TestCell>::resize(&buffer, region3.size());
 
         grid1.saveRegion(&buffer, region3);
         grid2.loadRegion(buffer, region3);
@@ -530,7 +530,7 @@ public:
             init.grid(&grid2);
 
             std::vector<TestCell> buffer;
-            SerializationBuffer<TestCell>::resize(&buffer, intersection);
+            SerializationBuffer<TestCell>::resize(&buffer, intersection.size());
 
             grid.saveRegion(&buffer, intersection);
             grid2.loadRegion(buffer, intersection);
@@ -710,7 +710,7 @@ public:
             init.grid(&grid2);
 
             std::vector<char> buffer;
-            SerializationBuffer<TestCell>::resize(&buffer, intersection);
+            SerializationBuffer<TestCell>::resize(&buffer, intersection.size());
 
             grid.saveRegion(&buffer, intersection);
             grid2.loadRegion(buffer, intersection);

@@ -136,7 +136,7 @@ public:
             }
 
             wait();
-            SerializationBuffer<CellType>::resize(&buffer, region);
+            SerializationBuffer<CellType>::resize(&buffer, region.size());
             grid.saveRegion(&buffer, region);
             sendHeader(FixedSize());
             mpiLayer.send(&buffer[0], dest, buffer.size(), tag, cellMPIDatatype);

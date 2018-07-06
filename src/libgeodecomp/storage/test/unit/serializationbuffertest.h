@@ -21,10 +21,10 @@ public:
 
         SerializationBufferType::BufferType buf = SerializationBufferType::create(region);
         TS_ASSERT_EQUALS(buf.size(), region.size());
-        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region), region.size());
+        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region.size()), region.size());
 
         region << Streak<2>(Coord<2>(0, 0), 20);
-        SerializationBufferType::resize(&buf, region);
+        SerializationBufferType::resize(&buf, region.size());
         TS_ASSERT_EQUALS(buf.size(), region.size());
 
         TS_ASSERT_EQUALS(SerializationBufferType::getData(buf), &buf[0]);
@@ -43,10 +43,10 @@ public:
 
         SerializationBufferType::BufferType buf = SerializationBufferType::create(region);
         TS_ASSERT_EQUALS(buf.size(), region.size());
-        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region), region.size());
+        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region.size()), region.size());
 
         region << Streak<3>(Coord<3>(0, 0, 0), 20);
-        SerializationBufferType::resize(&buf, region);
+        SerializationBufferType::resize(&buf, region.size());
         TS_ASSERT_EQUALS(buf.size(), region.size());
 
         TS_ASSERT_EQUALS(SerializationBufferType::getData(buf), &buf[0]);
@@ -66,13 +66,13 @@ public:
         SerializationBufferType::BufferType buf = SerializationBufferType::create(region);
         std::size_t expectedSize = LibFlatArray::aggregated_member_size<TestCellSoA>::VALUE * region.size();
         TS_ASSERT_EQUALS(buf.size(), expectedSize);
-        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region), expectedSize);
+        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region.size()), expectedSize);
 
         region << Streak<3>(Coord<3>(0, 0, 0), 25);
         expectedSize = LibFlatArray::aggregated_member_size<TestCellSoA>::VALUE * region.size();
-        SerializationBufferType::resize(&buf, region);
+        SerializationBufferType::resize(&buf, region.size());
         TS_ASSERT_EQUALS(buf.size(), expectedSize);
-        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region), expectedSize);
+        TS_ASSERT_EQUALS(SerializationBufferType::minimumStorageSize(region.size()), expectedSize);
 
         TS_ASSERT_EQUALS(SerializationBufferType::getData(buf), &buf[0]);
 

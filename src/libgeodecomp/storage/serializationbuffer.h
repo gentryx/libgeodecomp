@@ -24,19 +24,17 @@ public:
     template<typename REGION>
     static BufferType create(const REGION& region)
     {
-        return BufferType(minimumStorageSize(region));
+        return BufferType(minimumStorageSize(region.size()));
     }
 
-    template<typename REGION>
-    static std::size_t minimumStorageSize(const REGION& region)
+    static std::size_t minimumStorageSize(const std::size_t size)
     {
-        return region.size();
+        return size;
     }
 
-    template<typename REGION>
-    static void resize(BufferType *buffer, const REGION& region)
+    static void resize(BufferType *buffer, const std::size_t regionSize)
     {
-        return buffer->resize(minimumStorageSize(region));
+        return buffer->resize(minimumStorageSize(regionSize));
     }
 
     static ElementType *getData(BufferType& buffer)
@@ -71,19 +69,17 @@ public:
     template<typename REGION>
     static BufferType create(const REGION& region)
     {
-        return BufferType(minimumStorageSize(region));
+        return BufferType(minimumStorageSize(region.size()));
     }
 
-    template<typename REGION>
-    static std::size_t minimumStorageSize(const REGION& region)
+    static std::size_t minimumStorageSize(const std::size_t size)
     {
-        return LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size();
+        return LibFlatArray::aggregated_member_size<CELL>::VALUE * size;
     }
 
-    template<typename REGION>
-    static void resize(BufferType *buffer, const REGION& region)
+    static void resize(BufferType *buffer, const std::size_t regionSize)
     {
-        return buffer->resize(minimumStorageSize(region));
+        return buffer->resize(minimumStorageSize(regionSize));
     }
 
     static ElementType *getData(BufferType& buffer)
@@ -121,14 +117,13 @@ public:
         return BufferType();
     }
 
-    template<typename REGION>
-    static std::size_t minimumStorageSize(const REGION& region)
+    static std::size_t minimumStorageSize(const std::size_t size)
     {
-        return region.size();
+        // fixme: wouldn't 0 work here?
+        return size;
     }
 
-    template<typename REGION>
-    static void resize(BufferType *buffer, const REGION& region)
+    static void resize(BufferType *buffer, const std::size_t /* unused: size */)
     {
         buffer->resize(0);
     }
@@ -138,6 +133,7 @@ public:
         return &buffer.front();
     }
 
+    // fixme: get rid of this?
 //     static inline InsertIteratorType getInsertIterator(BufferType *buffer)
 //     {
 // typedef boost::iostreams::back_insert_device<std::vector<char> > DeviceType;
@@ -194,29 +190,28 @@ public:
 
     /**
      * Returns the minimum number of bytes that are required to store
-     * the number of cells as outlined by region.
+     * the number of cells in a region.
      *
      * For standard and SoA models this is generally identical with
      * the amount of actually allocated memory. For dynamic
      * serialization such as Boost Serialization the actual ammount is
      * often larger.
      */
-    template<typename REGION>
-    static std::size_t minimumStorageSize(const REGION& region)
+    static std::size_t minimumStorageSize(const std::size_t regionSize)
     {
-        return Implementation::minimumStorageSize(region);
+        return Implementation::minimumStorageSize(regionSize);
     }
 
     /**
-     * Adapts the buffer size so that it can hold a set of cells as
-     * described by region.
+     * Adapts the buffer size so that it can hold as many cells as
+     * given:
      */
-    template<typename REGION>
-    static inline void resize(BufferType *buffer, const REGION& region)
+    static inline void resize(BufferType *buffer, const std::size_t regionSize)
     {
-        Implementation::resize(buffer, region);
+        Implementation::resize(buffer, regionSize);
     }
 
+    // fixme: delete this?
     // static inline InsertIteratorType getInsertIterator(BufferType *buffer)
     // {
     //     Implementation::getInsertIterator(buffer);

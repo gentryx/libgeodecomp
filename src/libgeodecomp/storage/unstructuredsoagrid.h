@@ -143,7 +143,7 @@ public:
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
-        elements(dim.x(), 1, 1),
+        elements(CoordBox<DIM>(Coord<DIM>(), dim)),
         edgeElement(edgeElement),
         dimension(dim)
     {
@@ -156,7 +156,7 @@ public:
         // the grid size should be padded to the total number of chunks
         // -> no border cases for vectorization
         const std::size_t rowsPadded = ((dimension.x() - 1) / C + 1) * C;
-        elements.resize(rowsPadded, 1, 1);
+        elements.resize(CoordBox<DIM>(Coord<DIM>(), Coord<1>(rowsPadded)));
 
         // init soa_grid
         for (std::size_t i = 0; i < rowsPadded; ++i) {
@@ -274,7 +274,7 @@ public:
 
         *this = UnstructuredSoAGrid(
             newDim.dimensions,
-            elements.get(0, 0, 0),
+            elements.get(Coord<1>()),
             edgeElement);
     }
 
@@ -313,7 +313,7 @@ public:
 
     inline void set(const Streak<DIM>& streak, const ELEMENT_TYPE *cells)
     {
-        elements.set(streak.origin.x(), 0, 0, cells, streak.length());
+        elements.set(streak, cells);
     }
 
     inline ELEMENT_TYPE get(const Coord<DIM>& coord) const
@@ -327,7 +327,7 @@ public:
 
     inline void get(const Streak<DIM>& streak, ELEMENT_TYPE *cells) const
     {
-        elements.get(streak.origin.x(), 0, 0, cells, streak.length());
+        elements.get(streak, cells);
     }
 
     inline ELEMENT_TYPE& getEdgeElement()
@@ -369,32 +369,24 @@ public:
 
     inline void saveRegion(std::vector<char> *target, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
-        StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
-        StreakIteratorType end(  region.endStreak(),   Coord<3>(offset.x(), 0, 0));
-
-        saveRegionImplementation(target, start, end, region.size());
+        saveRegionImplementation(target, region.beginStreak(offset), region.endStreak(offset), region.size());
     }
 
     template<typename ITER1, typename ITER2>
     inline void saveRegionImplementation(std::vector<char> *target, const ITER1& start, const ITER2& end, int size) const
     {
-        elements.save(start, end, target->data(), size);
+        elements.saveRegionImplementation(target, start, end, size);
     }
 
     inline void loadRegion(const std::vector<char>& source, const Region<DIM>& region, const Coord<DIM>& offset = Coord<DIM>())
     {
-        typedef SoAGridHelpers::OffsetStreakIterator<typename Region<DIM>::StreakIterator, DIM> StreakIteratorType;
-        StreakIteratorType start(region.beginStreak(), Coord<3>(offset.x(), 0, 0));
-        StreakIteratorType end(  region.endStreak(),   Coord<3>(offset.x(), 0, 0));
-
-        loadRegionImplementation(source, start, end, region.size());
+        loadRegionImplementation(source, region.beginStreak(offset), region.endStreak(offset), region.size());
     }
 
     template<typename ITER1, typename ITER2>
     inline void loadRegionImplementation(const std::vector<char>& source, const ITER1& start, const ITER2& end, int size)
     {
-        elements.load(start, end, source.data(), size);
+        elements.loadRegionImplementation(source, start, end, size);
     }
 
     template<typename ITER1, typename ITER2>
@@ -445,21 +437,22 @@ protected:
     }
 
 private:
-    LibFlatArray::soa_grid<ELEMENT_TYPE> elements;
+    SoAGrid<ELEMENT_TYPE, Topologies::Torus<1>::Topology> elements;
     SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA> matrices[MATRICES];
+    // fixme: get rid of this
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;
 
     inline
     ELEMENT_TYPE get(int x) const
     {
-        return elements.get(x, 0, 0);
+        return elements.get(Coord<1>(x));
     }
 
     inline
     void set(int x, const ELEMENT_TYPE& cell)
     {
-        elements.set(x, 0, 0, cell);
+        elements.set(Coord<1>(x), cell);
     }
 };
 

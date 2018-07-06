@@ -200,14 +200,14 @@ private:
              i != innerGhostRegions.end();
              ++i) {
             sendBuffers[i->first] = BufferType();
-            SerializationBuffer<CELL_TYPE>::resize(&sendBuffers[i->first], i->second);
+            SerializationBuffer<CELL_TYPE>::resize(&sendBuffers[i->first], i->second.size());
         }
 
         for (typename std::map<int, Region<DIM> >::iterator i = outerGhostRegions.begin();
              i != outerGhostRegions.end();
              ++i) {
             recvBuffers[i->first] = BufferType();
-            SerializationBuffer<CELL_TYPE>::resize(&recvBuffers[i->first], i->second);
+            SerializationBuffer<CELL_TYPE>::resize(&recvBuffers[i->first], i->second.size());
         }
     }
 
@@ -556,7 +556,7 @@ private:
                 Region<DIM> intersection = fillRegion(intersectionStart, intersectionEnd);
                 receiveRegions << intersection;
                 receiveBuffers << BufferType();
-                SerializationBuffer<CELL_TYPE>::resize(&receiveBuffers.back(), intersection);
+                SerializationBuffer<CELL_TYPE>::resize(&receiveBuffers.back(), intersection.size());
 
                 mpilayer.recv(
                     receiveBuffers.back().data(),
@@ -583,7 +583,7 @@ private:
             if (intersectionEnd > intersectionStart) {
                 Region<DIM> intersection = fillRegion(intersectionStart, intersectionEnd);
                 sendBuffers << BufferType();
-                SerializationBuffer<CELL_TYPE>::resize(&sendBuffers.back(), intersection);
+                SerializationBuffer<CELL_TYPE>::resize(&sendBuffers.back(), intersection.size());
                 curStripe->saveRegion(&sendBuffers.back(), intersection);
                 mpilayer.send(
                     sendBuffers.back().data(),
