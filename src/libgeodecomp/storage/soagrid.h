@@ -180,7 +180,7 @@ public:
     {
         char *currentTarget = target;
 
-        for (typename Region<DIM>::StreakIterator i = start; i != end; ++i) {
+        for (ITER1 i = start; i != end; ++i) {
             accessor.index() = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakOut(
@@ -237,7 +237,7 @@ public:
     {
         const char *currentSource = source;
 
-        for (typename Region<DIM>::StreakIterator i = start; i != end; ++i) {
+        for (ITER1 i = start; i != end; ++i) {
             accessor.index() = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
 
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
@@ -583,6 +583,46 @@ public:
             Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : Stencil::RADIUS);
     }
 
+    template<typename ITER1, typename ITER2>
+    void saveMemberImplementationGeneric(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL>& selector,
+        const ITER1& begin,
+        const ITER2& end) const
+    {
+        delegate.callback(
+            SoAGridHelpers::SaveMember<CELL, DIM, ITER1, ITER2>(
+                target,
+                MemoryLocation::HOST,
+                targetLocation,
+                selector,
+                begin,
+                end,
+                box.origin,
+                edgeRadii));
+    }
+
+    template<typename ITER1, typename ITER2>
+    void loadMemberImplementationGeneric(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL>& selector,
+        const ITER1& begin,
+        const ITER2& end)
+    {
+        delegate.callback(
+            SoAGridHelpers::LoadMember<CELL, DIM, ITER1, ITER2>(
+                source,
+                sourceLocation,
+                MemoryLocation::HOST,
+                selector,
+                begin,
+                end,
+                box.origin,
+                edgeRadii));
+    }
+
 protected:
     template<typename ITER1, typename ITER2>
     inline void saveRegionImplementationInternal(std::vector<char> *target, const ITER1& start, const ITER2& end, int size) const
@@ -611,16 +651,12 @@ protected:
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end) const
     {
-        delegate.callback(
-            SoAGridHelpers::SaveMember<CELL, DIM, typename Region<DIM>::StreakIterator, typename Region<DIM>::StreakIterator>(
-                target,
-                MemoryLocation::HOST,
-                targetLocation,
-                selector,
-                begin,
-                end,
-                box.origin,
-                edgeRadii));
+        saveMemberImplementationGeneric(
+            target,
+            targetLocation,
+            selector,
+            begin,
+            end);
     }
 
     void loadMemberImplementation(
@@ -630,16 +666,12 @@ protected:
         const typename Region<DIM>::StreakIterator& begin,
         const typename Region<DIM>::StreakIterator& end)
     {
-        delegate.callback(
-            SoAGridHelpers::LoadMember<CELL, DIM, typename Region<DIM>::StreakIterator, typename Region<DIM>::StreakIterator>(
-                source,
-                sourceLocation,
-                MemoryLocation::HOST,
-                selector,
-                begin,
-                end,
-                box.origin,
-                edgeRadii));
+        loadMemberImplementationGeneric(
+            source,
+            sourceLocation,
+            selector,
+            begin,
+            end);
     }
 
 private:
