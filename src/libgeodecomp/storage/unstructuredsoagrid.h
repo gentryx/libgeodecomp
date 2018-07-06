@@ -25,6 +25,7 @@ namespace LibGeoDecomp {
 
 namespace UnstructuredSoAGridHelpers {
 
+// fixme: kill this?
 /**
  * Internal helper class to save a region of a cell member.
  */
@@ -67,6 +68,7 @@ private:
     const ITER2& end;
 };
 
+// fixme: kill this?
 /**
  * Internal helper class to load a region of a cell member.
  */
@@ -137,30 +139,28 @@ public:
 
     static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<ELEMENT_TYPE>::VALUE;
 
+    static CoordBox<DIM> paddedBoundingBox(const Coord<DIM>& dim)
+    {
+        // the grid size should be padded to the total number of chunks
+        // -> no border cases for vectorization
+        const std::size_t rowsPadded = ((dim.x() - 1) / C + 1) * C;
+
+        return CoordBox<DIM>(Coord<DIM>(), Coord<1>(rowsPadded));
+    }
+
     explicit
     UnstructuredSoAGrid(
         const Coord<DIM> dim = Coord<DIM>(11),
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
         const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
-        elements(CoordBox<DIM>(Coord<DIM>(), dim)),
-        edgeElement(edgeElement),
+        elements(paddedBoundingBox(dim), defaultElement, edgeElement),
         dimension(dim)
     {
         // init matrices
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
-                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(dimension.x());
-        }
-
-        // the grid size should be padded to the total number of chunks
-        // -> no border cases for vectorization
-        const std::size_t rowsPadded = ((dimension.x() - 1) / C + 1) * C;
-        elements.resize(CoordBox<DIM>(Coord<DIM>(), Coord<1>(rowsPadded)));
-
-        // init soa_grid
-        for (std::size_t i = 0; i < rowsPadded; ++i) {
-            set(i, defaultElement);
+                SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA>(dim.x());
         }
     }
 
@@ -204,11 +204,6 @@ public:
         return matrices[matrixID];
     }
 
-    inline const Coord<DIM>& getDimensions() const
-    {
-        return dimension;
-    }
-
     inline ELEMENT_TYPE operator[](const Coord<DIM>& coord) const
     {
         return (*this)[coord.x()];
@@ -221,8 +216,7 @@ public:
             return true;
         }
 
-        if ((edgeElement != other.edgeElement) ||
-            (elements    != other.elements)) {
+        if (elements != other.elements) {
             return false;
         }
 
@@ -241,7 +235,7 @@ public:
             return false;
         }
 
-        if (edgeElement != other.getEdge()) {
+        if (getEdge() != other.getEdge()) {
             return false;
         }
 
@@ -275,15 +269,15 @@ public:
         *this = UnstructuredSoAGrid(
             newDim.dimensions,
             elements.get(Coord<1>()),
-            edgeElement);
+            elements.getEdge());
     }
 
     inline std::string toString() const
     {
         std::ostringstream message;
-        message << "Unstructured Grid SoA<" << DIM << ">(" << dimension.x() << ")\n"
+        message << "Unstructured Grid SoA<" << DIM << ">(" << boundingBox().dimensions.x() << ")\n"
                 << "boundingBox: " << boundingBox()  << "\n"
-                << "edgeElement: " << edgeElement;
+                << "edgeElement: " << getEdge();
 
         CoordBox<DIM> box = boundingBox();
         int index = 0;
@@ -303,12 +297,7 @@ public:
 
     inline void set(const Coord<DIM>& coord, const ELEMENT_TYPE& element)
     {
-        if ((coord.x() < 0) || (coord.x() >= dimension.x())) {
-            edgeElement = element;
-            return;
-        }
-
-        set(coord.x(), element);
+        elements.set(coord, element);
     }
 
     inline void set(const Streak<DIM>& streak, const ELEMENT_TYPE *cells)
@@ -318,11 +307,7 @@ public:
 
     inline ELEMENT_TYPE get(const Coord<DIM>& coord) const
     {
-        if ((coord.x() < 0) || (coord.x() >= dimension.x())) {
-            return edgeElement;
-        }
-
-        return get(coord.x());
+        return elements.get(coord);
     }
 
     inline void get(const Streak<DIM>& streak, ELEMENT_TYPE *cells) const
@@ -330,24 +315,14 @@ public:
         elements.get(streak, cells);
     }
 
-    inline ELEMENT_TYPE& getEdgeElement()
-    {
-        return edgeElement;
-    }
-
-    inline const ELEMENT_TYPE& getEdgeElement() const
-    {
-        return edgeElement;
-    }
-
     inline void setEdge(const ELEMENT_TYPE& element)
     {
-        getEdgeElement() = element;
+        elements.setEdge(element);
     }
 
     inline const ELEMENT_TYPE& getEdge() const
     {
-        return getEdgeElement();
+        return elements.getEdge();
     }
 
     inline CoordBox<DIM> boundingBox() const
@@ -439,8 +414,6 @@ protected:
 private:
     SoAGrid<ELEMENT_TYPE, Topologies::Torus<1>::Topology> elements;
     SellCSigmaSparseMatrixContainer<WEIGHT_TYPE, C, SIGMA> matrices[MATRICES];
-    // fixme: get rid of this
-    ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;
 
     inline

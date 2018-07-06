@@ -93,8 +93,7 @@ public:
             TS_ASSERT_EQUALS(grid.get(Coord<1>(i)), defaultCell);
         }
 
-        TS_ASSERT_EQUALS(grid.getEdgeElement(), edgeCell);
-        TS_ASSERT_EQUALS(grid.get(Coord<1>(-1)), edgeCell);
+        TS_ASSERT_EQUALS(grid.getEdge(), edgeCell);
 #endif
     }
 
