@@ -99,32 +99,6 @@ protected:
     }
 };
 
-/**
- * Type switch
- */
-template<typename T>
-class Selector;
-
-/**
- * see above
- */
-template<>
-class Selector<APITraits::TrueType>
-{
-public:
-    typedef ReorderingRegionIterator<3> Value;
-};
-
-/**
- * see above
- */
-template<>
-class Selector<APITraits::FalseType>
-{
-public:
-    typedef ReorderingRegionIterator<1> Value;
-};
-
 }
 
 /**
@@ -154,22 +128,22 @@ public:
     friend class UnstructuredTestCellTest;
     friend class ::SparseMatrixVectorMultiplication;
 
+    const static int DIM = 1;
+    const static int SIGMA = DELEGATE_GRID::SIGMA;
+    const static int C = DELEGATE_GRID::C;
+
     typedef typename DELEGATE_GRID::CellType CellType;
     typedef typename DELEGATE_GRID::SparseMatrix SparseMatrix;
     typedef typename DELEGATE_GRID::StorageType StorageType;
     typedef typename DELEGATE_GRID::WeightType WeightType;
     typedef typename APITraits::SelectSoA<CellType>::Value SoAFlag;
     typedef typename SerializationBuffer<CellType>::BufferType BufferType;
-    typedef typename ReorderingUnstructuredGridHelpers::Selector<SoAFlag>::Value ReorderingRegionIterator;
+    typedef ReorderingUnstructuredGridHelpers::ReorderingRegionIterator<DIM> ReorderingRegionIterator;
 
     typedef std::pair<int, int> IntPair;
 
     using GridBase<CellType, 1>::saveRegion;
     using GridBase<CellType, 1>::loadRegion;
-
-    const static int DIM = 1;
-    const static int SIGMA = DELEGATE_GRID::SIGMA;
-    const static int C = DELEGATE_GRID::C;
 
     template<typename NODE_SET_TYPE = Region<1> >
     explicit ReorderingUnstructuredGrid(
