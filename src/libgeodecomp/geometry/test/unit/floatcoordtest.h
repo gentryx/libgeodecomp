@@ -600,20 +600,20 @@ public:
         void testInitializerList()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-        TS_ASSERT_EQUALS(FloatCoord<1>{}, FloatCoord<1>(0));
-        TS_ASSERT_EQUALS(FloatCoord<1>{2}, FloatCoord<1>(2));
-        TS_ASSERT_EQUALS(FloatCoord<1>{2, 3}, FloatCoord<1>(2));
+        TS_ASSERT_EQUALS((FloatCoord<1>{}), FloatCoord<1>(0));
+        TS_ASSERT_EQUALS((FloatCoord<1>{2}), FloatCoord<1>(2));
+        TS_ASSERT_EQUALS((FloatCoord<1>{2, 3}), FloatCoord<1>(2));
 
-        TS_ASSERT_EQUALS(FloatCoord<2>{}, FloatCoord<2>(0, 0));
-        TS_ASSERT_EQUALS(FloatCoord<2>{2}, FloatCoord<2>(2, 0));
-        TS_ASSERT_EQUALS(FloatCoord<2>{2, 3}, FloatCoord<2>(2, 3));
-        TS_ASSERT_EQUALS(FloatCoord<2>{2, 3, 4}, FloatCoord<2>(2, 3));
+        TS_ASSERT_EQUALS((FloatCoord<2>{}), FloatCoord<2>(0, 0));
+        TS_ASSERT_EQUALS((FloatCoord<2>{2}), FloatCoord<2>(2, 0));
+        TS_ASSERT_EQUALS((FloatCoord<2>{2, 3}), FloatCoord<2>(2, 3));
+        TS_ASSERT_EQUALS((FloatCoord<2>{2, 3, 4}), FloatCoord<2>(2, 3));
 
-        TS_ASSERT_EQUALS(FloatCoord<3>{}, FloatCoord<3>(0, 0, 0));
-        TS_ASSERT_EQUALS(FloatCoord<3>{2}, FloatCoord<3>(2, 0, 0));
-        TS_ASSERT_EQUALS(FloatCoord<3>{2, 3}, FloatCoord<3>(2, 3, 0));
-        TS_ASSERT_EQUALS(FloatCoord<3>{2, 3, 4}, FloatCoord<3>(2, 3, 4));
-        TS_ASSERT_EQUALS(FloatCoord<3>{2, 3, 4, 5}, FloatCoord<3>(2, 3, 4));
+        TS_ASSERT_EQUALS((FloatCoord<3>{}), FloatCoord<3>(0, 0, 0));
+        TS_ASSERT_EQUALS((FloatCoord<3>{2}), FloatCoord<3>(2, 0, 0));
+        TS_ASSERT_EQUALS((FloatCoord<3>{2, 3}), FloatCoord<3>(2, 3, 0));
+        TS_ASSERT_EQUALS((FloatCoord<3>{2, 3, 4}), FloatCoord<3>(2, 3, 4));
+        TS_ASSERT_EQUALS((FloatCoord<3>{2, 3, 4, 5}), FloatCoord<3>(2, 3, 4));
 #endif
     }
 
