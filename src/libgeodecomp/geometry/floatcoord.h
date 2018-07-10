@@ -45,7 +45,7 @@ public:
     }
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    inline explicit FloatCoord(std::initializer_list<double> list)
+    inline FloatCoord(std::initializer_list<double> list)
     {
         c[0] = list.size() ? *list.begin() : 0;
     }
@@ -281,7 +281,7 @@ public:
     }
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    inline explicit FloatCoord(std::initializer_list<double> list)
+    inline FloatCoord(std::initializer_list<double> list)
     {
         int i = 0;
         for (int coord : list) {
@@ -552,8 +552,7 @@ public:
     }
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    inline 
-    explicit FloatCoord(std::initializer_list<int> list)
+    inline FloatCoord(std::initializer_list<double> list)
     {
         int i = 0;
         for (int coord : list) {
