@@ -352,7 +352,6 @@ public:
                                "Does this model not support serialization?");
     }
 
-    // fixme: for better performance, avoid operator[] in inner loop
     void saveRegionImplementation(
         std::vector<char> *buffer,
         const typename Region<DIM>::StreakIterator& begin,
@@ -371,8 +370,10 @@ public:
 
         for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
             Coord<DIM> c = i->origin;
+            const CELL_TYPE *cell = &(*this)[c];
             for (; c.x() < i->endX; ++c.x()) {
-                archive & (*this)[c];
+                archive & *cell;
+                ++cell;
             }
         }
     }
@@ -404,8 +405,10 @@ public:
 
         for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
             Coord<DIM> c = i->origin;
+            CELL_TYPE *cell = &(*this)[c];
             for (; c.x() < i->endX; ++c.x()) {
-                archive & (*this)[c];
+                archive & *cell;
+                ++cell;
             }
         }
     }
