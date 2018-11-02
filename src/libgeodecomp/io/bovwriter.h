@@ -41,7 +41,8 @@ public:
         const MPI_Comm& communicator = MPI_COMM_WORLD) :
         Clonable<ParallelWriter<CELL_TYPE>, BOVWriter<CELL_TYPE> >(prefix, period),
         selector(member, "var"),
-        brickletDim(brickletDim)
+        brickletDim(brickletDim),
+        datatype(selector.mpiDatatype())
     {}
 
     BOVWriter(
