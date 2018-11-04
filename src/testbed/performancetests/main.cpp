@@ -2528,7 +2528,7 @@ public:
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
-        const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
+        const Coord<1> size(dim.x());
         Grid grid1(size);
 
         // 2. init grid old
@@ -2540,7 +2540,7 @@ public:
         // 3. call updateFunctor()
         double seconds = 0;
         Region<1> region;
-        region << Streak<1>(Coord<1>(0), size.dimensions.x());
+        region << Streak<1>(Coord<1>(0), size.x());
         UnstructuredUpdateFunctor<SPMVMSoACell> updateFunctor;
         UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
         APITraits::SelectThreadedUpdate<SPMVMSoACell>::Value threadedUpdateSpec;
@@ -2591,7 +2591,7 @@ public:
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACellInf, MATRICES, ValueType, C, SIGMA> Grid;
-        const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
+        const Coord<1> size(dim.x());
         Grid grid1(size);
 
         // 2. init grid old
@@ -2603,7 +2603,7 @@ public:
         // 3. call updateFunctor()
         double seconds = 0;
         Region<1> region;
-        region << Streak<1>(Coord<1>(0), size.dimensions.x());
+        region << Streak<1>(Coord<1>(0), size.x());
         UnstructuredUpdateFunctor<SPMVMSoACellInf> updateFunctor;
         UpdateFunctorHelpers::ConcurrencyEnableOpenMP concurrencySpec(true, true);
         APITraits::SelectThreadedUpdate<SPMVMSoACellInf>::Value threadedUpdateSpec;
@@ -2681,7 +2681,7 @@ public:
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
         typedef SellCSigmaSparseMatrixContainer<ValueType, C, SIGMA> Matrix;
-        const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
+        const Coord<1> size(dim.x());
         Grid gridOld(size);
         Grid gridNew(size);
 
@@ -2699,7 +2699,7 @@ public:
         ValueType *rhsPtr; // = hoodOld.valuePtr;
         ValueType *resPtr; // = hoodNew.sumPtr;
         gridOld.callback(&gridNew, GetPointer<SPMVMSoACell, ValueType>(&resPtr, &rhsPtr));
-        const int rowsPadded = ((size.dimensions.x() - 1) / C + 1) * C;
+        const int rowsPadded = ((size.x() - 1) / C + 1) * C;
         double seconds = 0;
         {
             ScopedTimer timer(&seconds);
