@@ -377,7 +377,7 @@ public:
     {
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
-        const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
+        const Coord<1> size(dim.x());
         Grid gridOld(size);
         Grid gridNew(size);
 
@@ -389,7 +389,7 @@ public:
         // 3. call updateFunctor()
         double seconds = 0;
         Region<1> region;
-        region << Streak<1>(Coord<1>(0), size.dimensions.x());
+        region << Streak<1>(Coord<1>(0), size.x());
         {
             ScopedTimer t(&seconds);
             updateFunctor(region, gridOld, &gridNew, 0);
@@ -460,7 +460,7 @@ public:
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
 
         // 1. create grids
-        const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
+        const Coord<1> size(dim.x());
         Grid gridOld(size);
         Grid gridNew(size);
 
@@ -478,7 +478,7 @@ public:
         double *rhsPtr; // = hoodOld.valuePtr;
         double *resPtr; // = hoodNew.sumPtr;
         gridOld.callback(&gridNew, GetPointer(&resPtr, &rhsPtr));
-        const int rowsPadded = ((size.dimensions.x() - 1) / C + 1) * C;
+        const int rowsPadded = ((size.x() - 1) / C + 1) * C;
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -678,7 +678,7 @@ public:
         Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
 
         // 1. create grids
-        const CoordBox<1> size(Coord<1>(0), Coord<1>(dim.x()));
+        const Coord<1> size(dim.x());
         Grid gridOld(size);
         Grid gridNew(size);
 
