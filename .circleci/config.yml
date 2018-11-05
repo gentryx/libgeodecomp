@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run: mkdir build
-      - run: sudo apt-get update && sudo apt-get install -y openmpi-bin
+      - run: sudo apt-get update && sudo apt-get install -y openmpi-bin cmake
       - run: cd build && cmake -DWITH_THREADS=false ..
       - run: cd build && make
   test:
@@ -15,7 +15,7 @@ jobs:
     steps:
       - checkout
       - run: mkdir build
-      - run: sudo apt-get update && sudo apt-get install -y openmpi-bin
+      - run: sudo apt-get update && sudo apt-get install -y openmpi-bin cmake
       - run: cd build && cmake -DWITH_THREADS=false ..
       - run: cd build && make tests
       - run: cd build && make check
