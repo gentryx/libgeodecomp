@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-        - image: "debian:stretch"
+      - image: "debian:stretch"
      steps:
       - checkout
       - run: mkdir build
@@ -10,7 +10,7 @@ jobs:
       - run: cd build && make
   test:
     docker:
-        - image: "debian:stretch"
+      - image: "debian:stretch"
     steps:
       - checkout
       - run: mkdir build
