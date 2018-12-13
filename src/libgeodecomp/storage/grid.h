@@ -342,20 +342,22 @@ public:
     }
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+    template<typename ITER1, typename ITER2>
     void saveRegionImplementation(
         std::vector<char> * /* buffer */,
-        const typename Region<DIM>::StreakIterator& /* begin */,
-        const typename Region<DIM>::StreakIterator& /* end */,
+        const ITER1& /* begin */,
+        const ITER2& /* end */,
         const APITraits::FalseType&) const
     {
         throw std::logic_error("saveRegionImplementation() with char buffer not implemented. "
                                "Does this model not support serialization?");
     }
 
+    template<typename ITER1, typename ITER2>
     void saveRegionImplementation(
         std::vector<char> *buffer,
-        const typename Region<DIM>::StreakIterator& begin,
-        const typename Region<DIM>::StreakIterator& end,
+        const ITER1& begin,
+        const ITER2& end,
         const APITraits::TrueType&) const
     {
 #ifdef LIBGEODECOMP_WITH_HPX
@@ -368,7 +370,7 @@ public:
         boost::archive::binary_oarchive archive(stream);
 #endif
 
-        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
+        for (ITER1 i = begin; i != end; ++i) {
             Coord<DIM> c = i->origin;
             const CELL_TYPE *cell = &(*this)[c];
             for (; c.x() < i->endX; ++c.x()) {
@@ -378,20 +380,22 @@ public:
         }
     }
 
+    template<typename ITER1, typename ITER2>
     void loadRegionImplementation(
         const std::vector<char>& /* buffer */,
-        const typename Region<DIM>::StreakIterator& /* begin */,
-        const typename Region<DIM>::StreakIterator& /* end */,
+        const ITER1& /* begin */,
+        const ITER2& /* end */,
         const APITraits::FalseType&)
     {
         throw std::logic_error("loadRegionImplementation() with char buffer not implemented. "
                                "Does this model not support serialization?");
     }
 
+    template<typename ITER1, typename ITER2>
     void loadRegionImplementation(
         const std::vector<char>& buffer,
-        const typename Region<DIM>::StreakIterator& begin,
-        const typename Region<DIM>::StreakIterator& end,
+        const ITER1& begin,
+        const ITER2& end,
         const APITraits::TrueType&)
     {
 #ifdef LIBGEODECOMP_WITH_HPX
@@ -403,7 +407,7 @@ public:
         boost::archive::binary_iarchive archive(stream);
 #endif
 
-        for (typename Region<DIM>::StreakIterator i = begin; i != end; ++i) {
+        for (ITER1 i = begin; i != end; ++i) {
             Coord<DIM> c = i->origin;
             CELL_TYPE *cell = &(*this)[c];
             for (; c.x() < i->endX; ++c.x()) {

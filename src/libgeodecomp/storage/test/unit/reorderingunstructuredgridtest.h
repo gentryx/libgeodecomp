@@ -5,14 +5,69 @@
 #include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/reorderingunstructuredgrid.h>
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+#include <libgeodecomp/misc/cudaboostworkaround.h>
+#include <libgeodecomp/communication/boostserialization.h>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/array.hpp>
+#include <boost/iostreams/device/back_inserter.hpp>
+#endif
+
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <libgeodecomp/misc/cudaboostworkaround.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
+#include <hpx/runtime/serialization/input_archive.hpp>
+#include <hpx/runtime/serialization/output_archive.hpp>
+#endif
+
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
+
+/**
+ * Test model for use with Boost.Serialization
+ */
+class SimpleSerializableCell
+{
+public:
+    class API :
+        public APITraits::HasBoostSerialization,
+        public APITraits::HasUnstructuredTopology
+    {};
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    {
+    }
+
+    inline bool operator==(const SimpleSerializableCell& other)
+    {
+        return
+            (x     == other.x) &&
+            (cargo == other.cargo);
+    }
+
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& archive, int version)
+    {
+        archive & x;
+        archive & cargo;
+    }
+
+    int x;
+    std::vector<int> cargo;
+};
+
+
 
 class ReorderingUnstructuredGridTest : public CxxTest::TestSuite
 {
 public:
     typedef Topologies::Unstructured::Topology Topology;
+
     void testResize()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
@@ -785,6 +840,99 @@ public:
                  << Streak<1>(Coord<1>( 88), 120);
 
         TS_ASSERT_EQUALS(expected, actual);
+#endif
+    }
+
+    void testLoadSaveRegionWithBoostSerialization()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        typedef GridTypeSelector<SimpleSerializableCell, Topology, false, APITraits::FalseType>::Value GridType;
+
+        Region<1> nodeSet;
+        nodeSet << Streak<1>(Coord<1>(10), 20)
+                << Streak<1>(Coord<1>(30), 40)
+                << Streak<1>(Coord<1>(50), 60);
+        GridType grid(nodeSet);
+
+        std::vector<int> cargo;
+        cargo.push_back(1);
+        cargo.push_back(1);
+
+        for (auto i: nodeSet) {
+            SimpleSerializableCell cell;
+            cell.x = i.x();
+            cell.cargo = cargo;
+            grid.set(i, cell);
+
+            int next = cargo[cargo.size() - 1] + cargo[cargo.size() - 2];
+            cargo.push_back(next);
+        }
+
+        Region<1> subset;
+        subset << Streak<1>(Coord<1>(10), 15)
+               << Streak<1>(Coord<1>(51), 52)
+               << Streak<1>(Coord<1>(55), 60);
+        std::vector<char> buffer;
+        grid.saveRegion(&buffer, subset);
+
+        std::vector<SimpleSerializableCell> cells(subset.size());
+        {
+#ifdef LIBGEODECOMP_WITH_HPX
+            hpx::serialization::input_archive archive(buffer, buffer.size());
+#else
+            typedef boost::iostreams::basic_array_source<char> Device;
+            Device source(&buffer.front(), buffer.size());
+            boost::iostreams::stream<Device> stream(source);
+            boost::archive::binary_iarchive archive(stream);
+#endif
+            for (std::size_t i = 0; i < subset.size(); ++i) {
+                archive & cells[i];
+            }
+        }
+
+        for (int i = 0; i < 5; ++i) {
+            TS_ASSERT_EQUALS(i + 10, cells[i].x);
+            TS_ASSERT_EQUALS(i +  2, cells[i].cargo.size());
+        }
+        for (int i = 5; i < 6; ++i) {
+            TS_ASSERT_EQUALS(i + 46, cells[i].x);
+            TS_ASSERT_EQUALS(i + 18, cells[i].cargo.size());
+        }
+        for (int i = 6; i < 11; ++i) {
+            TS_ASSERT_EQUALS(i + 49, cells[i].x);
+            TS_ASSERT_EQUALS(i + 21, cells[i].cargo.size());
+        }
+
+        for (int i = 0; i < 11; ++i) {
+            cells[i].x = i + 1000;
+            cells[i].cargo = std::vector<int>(100, i * 1000);
+        }
+
+        {
+#ifdef LIBGEODECOMP_WITH_HPX
+            int archiveFlags = boost::archive::no_header | hpx::serialization::disable_data_chunking;
+            hpx::serialization::output_archive archive(buffer, archiveFlags);
+#else
+            typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
+            Device sink(buffer);
+            boost::iostreams::stream<Device> stream(sink);
+            boost::archive::binary_oarchive archive(stream);
+#endif
+            for (int i = 0; i < 11; ++i) {
+                archive & cells[i];
+            }
+        }
+
+        grid.loadRegion(buffer, subset);
+        int counter = 0;
+
+        for (Coord<1> i: subset) {
+            SimpleSerializableCell cell = grid.get(i);
+            TS_ASSERT_EQUALS(counter + 1000, cell.x);
+            TS_ASSERT_EQUALS(100, cell.cargo.size());
+            TS_ASSERT_EQUALS(1000 * counter, cell.cargo[99]);
+            ++counter;
+        }
 #endif
     }
 };

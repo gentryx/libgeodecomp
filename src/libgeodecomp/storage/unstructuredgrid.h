@@ -309,6 +309,30 @@ public:
         elements.loadRegionImplementation(buffer, begin, end);
     }
 
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+    template<typename ITER1, typename ITER2>
+    void saveRegionImplementation(
+        std::vector<char> *buffer,
+        const ITER1& begin,
+        const ITER2& end,
+        int /* unused: size */ = 0) const
+    {
+        typedef typename APITraits::SelectBoostSerialization<ELEMENT_TYPE>::Value Trait;
+        elements.saveRegionImplementation(buffer, begin, end, Trait());
+    }
+
+    template<typename ITER1, typename ITER2>
+    void loadRegionImplementation(
+        const std::vector<char>& buffer,
+        const ITER1& begin,
+        const ITER2& end,
+        int /* unused: size */ = 0)
+    {
+        typedef typename APITraits::SelectBoostSerialization<ELEMENT_TYPE>::Value Trait;
+        elements.loadRegionImplementation(buffer, begin, end, Trait());
+    }
+#endif
+
     template<typename ITER1, typename ITER2>
     void saveMemberImplementationGeneric(
         char *target,
