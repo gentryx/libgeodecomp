@@ -846,6 +846,7 @@ public:
     void testLoadSaveRegionWithBoostSerialization()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
         typedef GridTypeSelector<SimpleSerializableCell, Topology, false, APITraits::FalseType>::Value GridType;
 
         Region<1> nodeSet;
@@ -933,6 +934,7 @@ public:
             TS_ASSERT_EQUALS(1000 * counter, cell.cargo[99]);
             ++counter;
         }
+#endif
 #endif
     }
 };
