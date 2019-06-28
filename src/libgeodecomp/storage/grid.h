@@ -407,6 +407,7 @@ public:
         boost::archive::binary_iarchive archive(stream);
 #endif
 
+        // fixme: why no streak fusion from reorderinggrid?
         for (ITER1 i = begin; i != end; ++i) {
             Coord<DIM> c = i->origin;
             CELL_TYPE *cell = &(*this)[c];
