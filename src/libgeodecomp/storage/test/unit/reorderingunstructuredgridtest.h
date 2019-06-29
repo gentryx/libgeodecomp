@@ -910,6 +910,7 @@ public:
         }
 
         {
+            buffer.clear();
 #ifdef LIBGEODECOMP_WITH_HPX
             int archiveFlags = boost::archive::no_header | hpx::serialization::disable_data_chunking;
             hpx::serialization::output_archive archive(buffer, archiveFlags);
