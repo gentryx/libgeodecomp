@@ -18,6 +18,7 @@
 #pragma warning( disable : 4514 4710 )
 #endif
 
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 
@@ -32,6 +33,22 @@ public:
     }
 
     std::string device()
+    {
+        try {
+            std::string model = parse_proc_cpu();
+            // this nondescript model name is found on GCP, maybe elsewhere too:
+            if (model.find("Intel(R) Xeon(R) CPU @") == std::string::npos) {
+                return model;
+            }
+
+            return parse_likwid_topology();
+        } catch (const std::runtime_error&) {
+            return "unknown CPU";
+        }
+    }
+
+private:
+    static std::string parse_proc_cpu()
     {
         std::ifstream file("/proc/cpuinfo");
         const std::size_t bufferSize = 1 << 12;
@@ -59,7 +76,36 @@ public:
         throw std::runtime_error("could not parse /proc/cpuinfo");
     }
 
-private:
+    static std::string parse_likwid_topology()
+    {
+        std::string read_buffer(100000, ' ');
+        FILE *file = popen("likwid-topologfy -O", "r");
+        if (file == NULL) {
+            throw std::runtime_error("failed to get output from likwid-topology");
+        }
+
+        std::string cpu_type;
+        std::string cpu_name;
+
+        while (fgets(&read_buffer[0], read_buffer.size(), file) != NULL) {
+            std::vector<std::string> tokens = tokenize(read_buffer, ',');
+            for (std::vector<std::string>::iterator i = tokens.begin(); i != tokens.end(); ++i) {
+                if (i->find("CPU type") != std::string::npos) {
+                    cpu_type = *(++i);
+                }
+                if (i->find("CPU name") != std::string::npos) {
+                    cpu_name = *(++i);
+                }
+            }
+        }
+
+        if (cpu_type.empty() || cpu_name.empty()) {
+            throw std::runtime_error("failed to parse likwid-topology");
+        }
+        std::vector<std::string> tokens = tokenize(cpu_name, '@');
+        return cpu_type + " @ " + tokens[1];
+    }
+
     static std::string trim(const std::string& string)
     {
         if (string.size() == 0) {
