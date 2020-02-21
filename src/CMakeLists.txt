@@ -335,11 +335,12 @@ endif()
 target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
 
 #============= 6. INSTALLER CONFIG ===================================
+include(GNUInstallDirs)
 install(
   TARGETS geodecomp
   EXPORT ${PACKAGE_NAME}-targets
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib)
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/config.h" DESTINATION include/${PACKAGE_NAME})
 install(FILES libgeodecomp.h DESTINATION include)
