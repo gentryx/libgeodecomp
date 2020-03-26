@@ -19,8 +19,8 @@
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
-#include <hpx/runtime/serialization/input_archive.hpp>
-#include <hpx/runtime/serialization/output_archive.hpp>
+#include <hpx/serialization/input_archive.hpp>
+#include <hpx/serialization/output_archive.hpp>
 #endif
 
 using namespace LibGeoDecomp;

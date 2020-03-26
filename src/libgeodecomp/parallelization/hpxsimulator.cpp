@@ -3,7 +3,7 @@
 
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 #include <hpx/include/lcos.hpp>
-#include <hpx/lcos/broadcast.hpp>
+#include <hpx/collectives/broadcast.hpp>
 
 namespace LibGeoDecomp {
 namespace HpxSimulatorHelpers {

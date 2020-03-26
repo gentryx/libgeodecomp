@@ -10,10 +10,10 @@
  * just pull in this header.
  */
 #include <libgeodecomp/communication/hpxserialization.h>
-#include <hpx/runtime/serialization/map.hpp>
-#include <hpx/runtime/serialization/serialize.hpp>
-#include <hpx/runtime/serialization/shared_ptr.hpp>
-#include <hpx/runtime/serialization/vector.hpp>
+#include <hpx/serialization/map.hpp>
+#include <hpx/serialization/serialize.hpp>
+#include <hpx/serialization/shared_ptr.hpp>
+#include <hpx/serialization/vector.hpp>
 
 #endif
 
