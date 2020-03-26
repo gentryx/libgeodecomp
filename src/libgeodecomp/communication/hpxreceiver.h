@@ -135,7 +135,7 @@ public:
             vec << receiver->get(i).get();
         }
 
-        return std::move(vec);
+        return vec;
     }
 
 private:
