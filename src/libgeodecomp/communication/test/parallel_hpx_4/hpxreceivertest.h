@@ -1,9 +1,8 @@
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
-#include <hpx/lcos/broadcast.hpp>
+#include <hpx/collectives/broadcast.hpp>
 #include <hpx/runtime/components/component_factory.hpp>
-#include <hpx/runtime/serialization/serialize_buffer.hpp>
-#include <hpx/util/unwrapped.hpp>
+#include <hpx/serialization/serialize_buffer.hpp>
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/misc/stringops.h>
 

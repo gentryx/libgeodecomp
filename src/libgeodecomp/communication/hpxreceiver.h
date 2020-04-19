@@ -10,10 +10,9 @@
 
 #include <hpx/include/components.hpp>
 #include <hpx/include/lcos.hpp>
-#include <hpx/lcos/broadcast.hpp>
-#include <hpx/lcos/local/receive_buffer.hpp>
+#include <hpx/collectives/broadcast.hpp>
+#include <hpx/local_lcos/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
-#include <hpx/util/unwrapped.hpp>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/stringops.h>
 
@@ -136,7 +135,7 @@ public:
             vec << receiver->get(i).get();
         }
 
-        return std::move(vec);
+        return vec;
     }
 
 private:

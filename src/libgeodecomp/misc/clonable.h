@@ -5,7 +5,7 @@
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <libgeodecomp/misc/cudaboostworkaround.h>
-#include <hpx/runtime/serialization/base_object.hpp>
+#include <hpx/serialization/base_object.hpp>
 #endif
 
 namespace LibGeoDecomp {

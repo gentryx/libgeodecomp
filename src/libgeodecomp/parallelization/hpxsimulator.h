@@ -6,11 +6,10 @@
 
 #include <libgeodecomp/misc/cudaboostworkaround.h>
 #include <hpx/config.hpp>
-#include <hpx/runtime/serialization/set.hpp>
-#include <hpx/runtime/serialization/string.hpp>
-#include <hpx/runtime/serialization/vector.hpp>
-#include <hpx/include/lcos.hpp>
-#include <hpx/lcos/broadcast.hpp>
+#include <hpx/serialization/set.hpp>
+#include <hpx/serialization/string.hpp>
+#include <hpx/serialization/vector.hpp>
+#include <hpx/collectives/broadcast.hpp>
 
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>

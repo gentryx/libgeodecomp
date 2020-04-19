@@ -2,7 +2,8 @@
 #define LIBGEODECOMP_STORAGE_PATCHPROVIDER_H
 
 #ifdef LIBGEODECOMP_WITH_HPX
-#include <hpx/lcos/local/spinlock.hpp>
+#include <hpx/include/threads.hpp>
+#include <hpx/synchronization/spinlock.hpp>
 #include <mutex>
 #endif
 

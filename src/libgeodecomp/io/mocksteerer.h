@@ -4,6 +4,11 @@
 #include <sstream>
 #include <libgeodecomp/io/steerer.h>
 
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/include/threads.hpp>
+#include <hpx/concurrency/spinlock.hpp>
+#endif
+
 namespace LibGeoDecomp {
 
 namespace MockSteererHelpers {

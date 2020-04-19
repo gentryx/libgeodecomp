@@ -8,6 +8,11 @@
 #include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/testcell.h>
 
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/include/threads.hpp>
+#include <hpx/concurrency/spinlock.hpp>
+#endif
+
 #include <sstream>
 
 namespace LibGeoDecomp {

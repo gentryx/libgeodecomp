@@ -11,7 +11,7 @@
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
-#include <hpx/runtime/serialization/set.hpp>
+#include <hpx/serialization/set.hpp>
 #endif
 
 namespace LibGeoDecomp {
