@@ -49,7 +49,7 @@ jobs:
     - name: clang-7.0
       dist: bionic
       compiler: clang
-      env: CXX_COMPILER=clang++ C_COMPILER=clang FORCE_AVX_OFF=false
+      env: CXX_COMPILER=clang++ C_COMPILER=clang FORCE_AVX_OFF=false LD_LIBRARY_PATH=/usr/local/clang-7.0.0/lib:$LD_LIBRARY_PATH
 
 before_script:
     - mkdir build
