@@ -1,5 +1,4 @@
 language: cpp
-sudo: false
 
 cache:
   apt: true
@@ -24,7 +23,7 @@ jobs:
           packages:
             - g++-4.9
       env: CXX_COMPILER=g++-4.9 C_COMPILER=gcc-4.9 FORCE_AVX_OFF=true
-    - name gcc-5
+    - name: gcc-5
       compiler: gcc
       addons:
         apt:
@@ -42,7 +41,7 @@ jobs:
             - llvm-toolchain-precise-3.7
           packages:
             - clang-3.7
-      env: CXX_COMPILER=clang++-3.7 C_COMPILER=clang-3.7 FORCE_AVX_OFF=false
+      env: CXX_COMPILER=clang++-3.7 C_COMPILER=clang-3.7 FORCE_AVX_OFF=true
 
 before_script:
     - mkdir build
