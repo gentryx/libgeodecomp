@@ -29,7 +29,7 @@ public:
         }
 
         int buffer = 0;
-        TS_ASSERT_THROWS(buffer = neighbors[4711].id, std::logic_error);
+        TS_ASSERT_THROWS(buffer = neighbors[4711].id, std::logic_error&);
         if (buffer != 0) {
             id -= 10000;
         }
@@ -105,8 +105,8 @@ public:
         container.insert(4, MockCell(4, &ids));
 
         TS_ASSERT_EQUALS(std::size_t(5), container.size());
-        TS_ASSERT_THROWS(container.insert(47, MockCell(47, 0)), std::logic_error);
-        TS_ASSERT_THROWS(container.insert(3,  MockCell(3 , 0)), std::logic_error);
+        TS_ASSERT_THROWS(container.insert(47, MockCell(47, 0)), std::logic_error&);
+        TS_ASSERT_THROWS(container.insert(3,  MockCell(3 , 0)), std::logic_error&);
 
 
         for (int i = 0; i < 5; ++i) {
@@ -146,7 +146,7 @@ public:
         container.insert(7, MockCell(2, &ids));
         TS_ASSERT_EQUALS(std::size_t(5), container.size());
 
-        TS_ASSERT_THROWS(container.insert(8, MockCell(2, &ids)), std::logic_error);
+        TS_ASSERT_THROWS(container.insert(8, MockCell(2, &ids)), std::logic_error&);
     }
 
     void testRemove()

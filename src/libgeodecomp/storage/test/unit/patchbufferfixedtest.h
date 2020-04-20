@@ -81,7 +81,7 @@ public:
         patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 2, 0, true);
         TS_ASSERT_EQUALS(testGrid1, compGrid);
 
-        TS_ASSERT_THROWS(patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 2, 0, true), std::logic_error);
+        TS_ASSERT_THROWS(patchBuffer.get(&compGrid, validRegion, dimensions.dimensions, 2, 0, true), std::logic_error&);
     }
 
 private:

@@ -50,7 +50,7 @@ public:
     void testPeriodMustBePositive()
     {
         TS_ASSERT_THROWS(HollowWriter<TestCell<2> >("foobar", 0),
-                         std::invalid_argument);
+                         std::invalid_argument&);
     }
 };
 

@@ -11,7 +11,7 @@ public:
     void testBasic()
     {
         Palette<double> pal;
-        TS_ASSERT_THROWS(pal[0], std::logic_error);
+        TS_ASSERT_THROWS(pal[0], std::logic_error&);
 
         pal.addColor(-1, Color(50, 0, 0));
         TS_ASSERT_EQUALS(Color(50, 0, 0), pal[ 0]);

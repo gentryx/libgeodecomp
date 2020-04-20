@@ -71,13 +71,13 @@ public:
     void testIllegalSliceUpperLeft()
     {
         Image a(10, 20, Color::RED);
-        TS_ASSERT_THROWS(a.slice(Coord<2>(-5, -5), 10, 10), std::invalid_argument);
+        TS_ASSERT_THROWS(a.slice(Coord<2>(-5, -5), 10, 10), std::invalid_argument&);
     }
 
     void testIllegalSliceLowerRight()
     {
         Image a(10, 20, Color::RED);
-        TS_ASSERT_THROWS(a.slice(Coord<2>(5, 15), 10, 10), std::invalid_argument);
+        TS_ASSERT_THROWS(a.slice(Coord<2>(5, 15), 10, 10), std::invalid_argument&);
     }
 
     void testFillBox()

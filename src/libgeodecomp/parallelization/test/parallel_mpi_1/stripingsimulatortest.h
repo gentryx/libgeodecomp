@@ -189,14 +189,14 @@ public:
     {
         StripingSimulator<TestCell<2> > s(
             new TestInitializer<TestCell<2> >(), new BadBalancerSum());
-        TS_ASSERT_THROWS(s.balanceLoad(), std::invalid_argument);
+        TS_ASSERT_THROWS(s.balanceLoad(), std::invalid_argument&);
     }
 
     void testBadBalancerNum()
     {
         StripingSimulator<TestCell<2> > s(
             new TestInitializer<TestCell<2> >(), new BadBalancerNum());
-        TS_ASSERT_THROWS(s.balanceLoad(), std::invalid_argument);
+        TS_ASSERT_THROWS(s.balanceLoad(), std::invalid_argument&);
     }
 
     void test3D()

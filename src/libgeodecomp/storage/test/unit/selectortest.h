@@ -89,7 +89,7 @@ public:
         TS_ASSERT_EQUALS(1, selectorY.arity());
         TS_ASSERT_EQUALS(1, selectorZ.arity());
 
-        TS_ASSERT_THROWS(selectorX.typeName(), std::invalid_argument);
+        TS_ASSERT_THROWS(selectorX.typeName(), std::invalid_argument&);
         TS_ASSERT_EQUALS("DOUBLE", selectorY.typeName());
         TS_ASSERT_EQUALS("BYTE",   selectorZ.typeName());
     }

@@ -45,7 +45,7 @@ public:
     {
     public:
         typedef NeighborhoodIterator<WRITE_CONTAINER, NEIGHBORHOOD, DIM, COLLECTION_INTERFACE> IteratorType;
-        typedef typename NeighborhoodIteratorHelpers::Adapter<WRITE_CONTAINER, IteratorType>::Adapter Value;
+        typedef typename NeighborhoodIteratorHelpers::Adapter<WRITE_CONTAINER, IteratorType> Value;
     };
 
     inline explicit BoxCell(

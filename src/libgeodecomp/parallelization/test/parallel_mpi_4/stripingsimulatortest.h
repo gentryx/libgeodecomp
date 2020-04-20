@@ -394,12 +394,12 @@ public:
         if (rank == 0) {
             TS_ASSERT_THROWS(
                 StripingSimulator<TestCell<2> > s(new TestInitializer<TestCell<2> >(), 0),
-                std::invalid_argument);
+                std::invalid_argument&);
         } else {
             TS_ASSERT_THROWS(
                 StripingSimulator<TestCell<2> > s(new TestInitializer<TestCell<2> >(),
                                                   new NoOpBalancer),
-                std::invalid_argument);
+                std::invalid_argument&);
         }
     }
 

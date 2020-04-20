@@ -33,8 +33,8 @@ public:
         TS_ASSERT_EQUALS(3, a[2]);
 
         FixedArray<int, 10> b;
-        TS_ASSERT_THROWS(b.reserve(11), std::out_of_range);
-        TS_ASSERT_THROWS(b.resize(11), std::out_of_range);
+        TS_ASSERT_THROWS(b.reserve(11), std::out_of_range&);
+        TS_ASSERT_THROWS(b.resize(11), std::out_of_range&);
 
         b.reserve(3);
         TS_ASSERT_EQUALS(std::size_t(0), b.size());
@@ -135,8 +135,8 @@ public:
         TS_ASSERT_EQUALS(sourceA += sourceB, expected);
         TS_ASSERT_EQUALS(sourceA, expected);
 
-        TS_ASSERT_THROWS(sourceA +  sourceB, std::out_of_range);
-        TS_ASSERT_THROWS(sourceA += sourceB, std::out_of_range);
+        TS_ASSERT_THROWS(sourceA +  sourceB, std::out_of_range&);
+        TS_ASSERT_THROWS(sourceA += sourceB, std::out_of_range&);
     }
 
     void testComparison()

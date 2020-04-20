@@ -134,8 +134,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             new SimFabTestInitializer(dim, maxSteps));
-        TS_ASSERT_THROWS(ats.getSimulation("1.CUDASimulator"), std::invalid_argument);
-        TS_ASSERT_THROWS(ats.getSimulation("NoSimulator"), std::invalid_argument);
+        TS_ASSERT_THROWS(ats.getSimulation("1.CUDASimulator"), std::invalid_argument&);
+        TS_ASSERT_THROWS(ats.getSimulation("NoSimulator"), std::invalid_argument&);
 #endif
 #endif
     }

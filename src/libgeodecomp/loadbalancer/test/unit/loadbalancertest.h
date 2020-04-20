@@ -104,7 +104,7 @@ public:
 
         // intentionally left empty
         std::vector<double> speeds;
-        TS_ASSERT_THROWS(balancer.initialWeights(6, speeds), std::invalid_argument);
+        TS_ASSERT_THROWS(balancer.initialWeights(6, speeds), std::invalid_argument&);
     }
 };
 

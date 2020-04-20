@@ -14,8 +14,8 @@ public:
     void testConstructor()
     {
         // newLoadWeight gotta be in [0, 1]
-        TS_ASSERT_THROWS(OozeBalancer(-1), std::invalid_argument);
-        TS_ASSERT_THROWS(OozeBalancer(1.1), std::invalid_argument);
+        TS_ASSERT_THROWS(OozeBalancer(-1), std::invalid_argument&);
+        TS_ASSERT_THROWS(OozeBalancer(1.1), std::invalid_argument&);
     }
 
     void checkExpectedOptimalDistribution(OozeBalancer::LoadVec expected, OozeBalancer::WeightVec loads, OozeBalancer::LoadVec relLoads)
