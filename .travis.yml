@@ -6,7 +6,8 @@ cache:
 
 matrix:
   include:
-    - compiler: gcc
+    - name: gcc-4.6
+      compiler: gcc
       addons:
         apt:
           sources:
@@ -14,15 +15,17 @@ matrix:
           packages:
             - g++-4.6
       env: CXX_COMPILER=g++-4.6 C_COMPILER=gcc-4.6 FORCE_AVX_OFF=true
-    - compiler: gcc
+    - name: gcc-4.9
+      compiler: gcc
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
-      env: CXX_COMPILER=g++-4.9 C_COMPILER=gcc-4.9 FORCE_AVX_OFF=false
-    - compiler: gcc
+      env: CXX_COMPILER=g++-4.9 C_COMPILER=gcc-4.9 FORCE_AVX_OFF=true
+    - name gcc-5
+      compiler: gcc
       addons:
         apt:
           sources:
@@ -30,7 +33,8 @@ matrix:
           packages:
             - g++-5
       env: CXX_COMPILER=g++-5 C_COMPILER=gcc-5 FORCE_AVX_OFF=false
-    - compiler: clang
+    - name: clang-3.7
+      compiler: clang
       addons:
         apt:
           sources:
