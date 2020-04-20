@@ -35,7 +35,7 @@ jobs:
     - name: gcc-7.4.0
       dist: bionic
       compiler: gcc
-      env: CXX_COMPILER=gcc-7.4.0 C_COMPILER=gcc-7.4.0 FORCE_AVX_OFF=false
+      env: CXX_COMPILER=gcc C_COMPILER=gcc FORCE_AVX_OFF=false
     - name: clang-3.7
       compiler: clang
       addons:
