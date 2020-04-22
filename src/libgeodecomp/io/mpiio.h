@@ -152,10 +152,18 @@ public:
         MPI_Comm comm)
     {
         MPI_File file;
-        MPI_File_open(
+        int res = MPI_File_open(
             comm, const_cast<char*>(filename.c_str()),
             MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL,
             &file);
+	if (res != 0) {
+	    char buf[MPI_MAX_ERROR_STRING];
+	    int length;
+	    MPI_Error_string(res, buf, &length);
+	    std::ostringstream temp;
+	    temp << "MPI_File_open() failed with error \"" << buf << "\"";
+	    throw std::runtime_error(temp.str());
+	}
         MPI_File_set_errhandler(file, MPI_ERRORS_ARE_FATAL);
         return file;
     }
