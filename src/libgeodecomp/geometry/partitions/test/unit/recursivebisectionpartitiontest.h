@@ -105,7 +105,7 @@ public:
                 dim,
                 0,
                 weights),
-            std::invalid_argument);
+            std::invalid_argument&);
     }
 
     void checkCuboid(
