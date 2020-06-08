@@ -17,6 +17,12 @@ public:
         public APITraits::HasSoA
     {};
 
+    SoACell() :
+        c(0.0),
+        a(0),
+        b(0)
+    {}
+
     double c;
     int a;
     char b;

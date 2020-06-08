@@ -3,8 +3,8 @@
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 #include <hpx/include/lcos.hpp>
-#include <hpx/lcos/broadcast.hpp>
-#include <hpx/lcos/local/receive_buffer.hpp>
+#include <hpx/collectives/broadcast.hpp>
+#include <hpx/local_lcos/receive_buffer.hpp>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/testinitializer.h>

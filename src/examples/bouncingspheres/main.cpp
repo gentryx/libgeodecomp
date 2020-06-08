@@ -82,10 +82,8 @@ public:
     typedef MyAPI API;
 
     explicit Sphere(
-        int myID = 0,
         const FloatCoord<3>& myPos = FloatCoord<3>(),
         const FloatCoord<3>& myVel = FloatCoord<3>()) :
-        id(myID),
         pos(myPos),
         vel(myVel)
     {}
@@ -153,10 +151,8 @@ public:
     }
 
 private:
-    int id;
     FloatCoord<3> pos;
     FloatCoord<3> vel;
-    double col;
 };
 
 typedef BoxCell<FixedArray<Sphere,   30> > SpheresContainer;
@@ -323,7 +319,6 @@ public:
                                 FloatCoord<3>(CONTAINER_DIM, CONTAINER_DIM, CONTAINER_DIM));
 
             container.spheres << Sphere(
-                *j * Coord<3>(1, 100, 10000),
                 center,
                 FloatCoord<3>(
                     pseudo_rand1,
