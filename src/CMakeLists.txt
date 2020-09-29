@@ -35,12 +35,6 @@ if(WITH_BOOST_MPI)
 endif()
 
 if(WITH_CUDA)
-  if (${CUDA_VERSION} VERSION_LESS 8.0)
-    set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_20")
-  else()
-    set(CUDA_NVCC_FLAGS "--gpu-architecture=compute_35")
-  endif()
-
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${CUDA_INCLUDE_DIRS})
 endif()
 
@@ -50,13 +44,11 @@ endif()
 
 if(WITH_HPX)
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${HPX_INCLUDE_DIRS})
-  add_definitions(${HPX_CXX_COMPILE_FLAGS})
-  set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/src")
   set(HPXRUN "${HPX_PREFIX}/bin/hpxrun.py")
+  # HPX doesn't export libraries or lib dirs. We have to use hpx_setup_target() below.
 endif()
 
 if(WITH_MPI)
-  add_definitions(${MPI_COMPILE_FLAGS})
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${MPI_INCLUDE_PATH})
 endif()
 
@@ -77,12 +69,6 @@ endif()
 
 if(WITH_THREADS)
   set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
-
-if(WITH_THREADS)
-  if (NOT WITH_LIBPTHREAD)
-    set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -pthread")
-  endif()
 endif()
 
 set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} ${libflatarray_FLAGS}")
@@ -280,11 +266,6 @@ if(WITH_HPX)
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DHPX_DEBUG)
   endif()
-  set(LIBGEODECOMP_LINK_LIBRARIES
-    ${LIBGEODECOMP_LINK_LIBRARIES}
-    hpx
-    hpx_init
-    ${HPX_LIBRARIES})
 endif()
 
 if(WITH_CUDA)
@@ -332,7 +313,8 @@ if(WITH_VISIT)
   set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${VisIt_LIBRARIES} ${PYTHON_LIBRARIES} dl)
 endif()
 
-target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
+target_link_libraries(geodecomp PUBLIC ${LIBGEODECOMP_LINK_LIBRARIES})
+hpx_setup_target(geodecomp)
 
 #============= 6. INSTALLER CONFIG ===================================
 include(GNUInstallDirs)

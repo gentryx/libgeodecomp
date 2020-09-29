@@ -11,10 +11,16 @@ project(${PACKAGE_NAME})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 include(util)
 include(CheckCXXCompilerFlag)
+include(CheckLanguage)
 
 if (CMAKE_VERSION VERSION_GREATER 2.7)
   cmake_policy(SET CMP0012 NEW)
 endif()
+
+if (CMAKE_VERSION VERSION_GREATER 3.17)
+  cmake_policy(SET CMP0104 NEW)
+endif()
+
 
 # this is a workaround for CMake complaining about the interface
 # include path of geodecomp.lib including the current build
@@ -76,7 +82,21 @@ set(PythonLibs_FIND_VERSION 2)
 # setting this variable is required since CMake 3.0
 set(PythonLibs_FIND_VERSION_MAJOR 2)
 
-find_package(CUDA QUIET)
+if(CMAKE_VERSION VERSION_LESS 3.10)
+  find_package(CUDA QUIET)
+  if(NOT DEFINED CUDA_FOUND)
+    set(CUDA_FOUND false)
+  endif()
+else()
+  check_language(CUDA)
+  if(CMAKE_CUDA_COMPILER)
+    enable_language(CUDA)
+    set(CUDA_FOUND true)
+  else()
+    set(CUDA_FOUND false)
+  endif()
+endif()
+
 find_package(Doxygen)
 find_package(OpenCL)
 find_package(MPI)
@@ -104,9 +124,6 @@ if(NOT DEFINED Boost_MOVE_FOUND)
   set(Boost_MOVE_FOUND false)
 endif()
 
-if(NOT DEFINED CUDA_FOUND)
-  set(CUDA_FOUND false)
-endif()
 
 if(NOT DEFINED DOXYGEN_FOUND)
   set(DOXYGEN_FOUND false)
@@ -293,8 +310,6 @@ lgd_add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOU
 lgd_add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics. Only used for tests and examples." ${AMD64_LINUX} true)
 
 lgd_add_config_option(WITH_LAX_VISIT_TESTS "Remove some of the stricter assertions from VisIt related unit tests -- VisIt sometimes produces erroneous results when running on a remote machine (e.g. for autobuilds)" false true)
-
-lgd_add_config_option(WITH_LIBPTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." true false)
 
 lgd_add_config_option(WITH_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
 

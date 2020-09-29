@@ -71,24 +71,30 @@ if(allowed_test AND selected_test)
       endif()
 
       string(REPLACE "test.h" "${TEST_SUFFIX}" source "${header}")
+      set(SOURCE_FULL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
 
       if(IS_CUDA_TEST)
         if(WITH_CUDA)
-            cuda_compile(generated_files "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
-            list(APPEND SOURCES "${generated_files}")
+          if(CMAKE_VERSION VERSION_LESS 3.10)
+            cuda_compile(GENERATED_FILES "${SOURCE_FULL_PATH}")
+
+            list(APPEND SOURCES "${GENERATED_FILES}")
+          else()
+            list(APPEND SOURCES "${SOURCE_FULL_PATH}")
           endif()
+        endif()
       else()
-        list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
+        list(APPEND SOURCES "${SOURCE_FULL_PATH}")
       endif()
 
       # make sure that each test source will include mpi.h first for
       # Intel MPI compliance (which is touchy if stdio.h has been
       # included beforehand).
       add_custom_command(
-        OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+        OUTPUT "${SOURCE_FULL_PATH}"
         COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
-	COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-	COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+	COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${SOURCE_FULL_PATH}"
+	COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${SOURCE_FULL_PATH}"
 	COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
         DEPENDS "${header}" )
     endif()
@@ -105,8 +111,8 @@ if(allowed_test AND selected_test)
 
   if(is_hpx_test)
     set(main_function "
-#include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
+#include <hpx/hpx.hpp>
 
 int run_tests(int argc, char **argv);
 
@@ -123,7 +129,6 @@ int main(int argc, char **argv)
     // initial overhead caused by broadcasting the work from one to
     // all other localities:
     std::vector<std::string> config(1, \"hpx.run_hpx_main!=1\");
-
     return hpx::init(argc, argv, config);
 }
 ")
@@ -175,7 +180,7 @@ int main(int argc, char **argv)
   file(WRITE "main.cpp" "${main_function}")
 
   if(HAS_CUDA_TESTS AND WITH_CUDA)
-    cuda_add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
+    lfa_cuda_add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
   else()
     add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
   endif()
