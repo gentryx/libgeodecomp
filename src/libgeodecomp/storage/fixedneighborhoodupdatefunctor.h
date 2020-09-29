@@ -3,7 +3,7 @@
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
-#include <hpx/runtime/launch_policy.hpp>
+#include <hpx/future.hpp>
 #include <hpx/parallel/algorithms/for_each.hpp>
 #endif
 
