@@ -314,7 +314,9 @@ if(WITH_VISIT)
 endif()
 
 target_link_libraries(geodecomp PUBLIC ${LIBGEODECOMP_LINK_LIBRARIES})
-hpx_setup_target(geodecomp)
+if(WITH_HPX)
+  hpx_setup_target(geodecomp)
+endif()
 
 #============= 6. INSTALLER CONFIG ===================================
 include(GNUInstallDirs)
