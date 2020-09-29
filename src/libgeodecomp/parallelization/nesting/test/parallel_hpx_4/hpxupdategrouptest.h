@@ -4,7 +4,8 @@
 #include <hpx/hpx_init.hpp>
 #include <hpx/collectives/broadcast_direct.hpp>
 #include <hpx/include/lcos.hpp>
-#include <hpx/lcos_local/receive_buffer.hpp>
+#include <hpx/collectives/broadcast.hpp>
+#include <hpx/local_lcos/receive_buffer.hpp>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/testinitializer.h>
