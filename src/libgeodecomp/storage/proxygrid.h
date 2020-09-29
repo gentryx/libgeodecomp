@@ -14,7 +14,7 @@ template<typename CELL, int DIM, typename WEIGHT_TYPE = double>
 class ProxyGrid : public GridBase<CELL, DIM, WEIGHT_TYPE>
 {
 public:
-    ProxyGrid(GridBase<CELL, DIM> *delegate, const CoordBox<DIM>& viewBox) :
+    ProxyGrid(GridBase<CELL, DIM, WEIGHT_TYPE> *delegate, const CoordBox<DIM>& viewBox) :
         delegate(delegate),
         viewBox(viewBox)
     {}
@@ -58,6 +58,9 @@ public:
     {
         return viewBox;
     }
+
+    using GridBase<CELL, DIM, WEIGHT_TYPE>::saveRegion;
+    using GridBase<CELL, DIM, WEIGHT_TYPE>::loadRegion;
 
     void saveRegion(
         std::vector<CELL> *buffer,

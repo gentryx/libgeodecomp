@@ -55,12 +55,27 @@ public:
         array << 10 << 11 << 12 << 13;
 
         FixedArray<int, 10> expectedA;
+        // This loop is not actually required, only included to get
+        // rid of a compiler warning.
+        for (std::size_t i = 0; i < 10; ++i) {
+            expectedA.begin()[i] = 0;
+        }
         expectedA << 10 << 12 << 13;
 
         FixedArray<int, 15> expectedB;
+        // This loop is not actually required, only included to get
+        // rid of a compiler warning.
+        for (std::size_t i = 0; i < 15; ++i) {
+            expectedB.begin()[i] = 0;
+        }
         expectedB << 12 << 13;
 
         FixedArray<int, 20> expectedC;
+        // This loop is not actually required, only included to get
+        // rid of a compiler warning.
+        for (std::size_t i = 0; i < 20; ++i) {
+            expectedC.begin()[i] = 0;
+        }
         expectedC << 12;
 
         FixedArray<int, 25> expectedD;

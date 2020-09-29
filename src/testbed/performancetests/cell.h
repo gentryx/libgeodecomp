@@ -17,6 +17,12 @@ public:
         public APITraits::HasSoA
     {};
 
+    SoACell() :
+        c(0.0),
+        a(0),
+        b(0)
+    {}
+
     double c;
     int a;
     char b;
@@ -31,6 +37,12 @@ public:
         public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
         public APITraits::HasTorusTopology<3>
     {};
+
+    Cell() :
+        c(0.0),
+        a(0),
+        b(0)
+    {}
 
     double c;
     int a;
