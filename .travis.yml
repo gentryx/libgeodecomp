@@ -14,30 +14,120 @@ jobs:
           packages:
             - g++-4.6
       env: CXX_COMPILER=g++-4.6 C_COMPILER=gcc-4.6 FORCE_AVX_OFF=true
+    - name: gcc-4.7
+      compiler: gcc
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.7
+      env: CXX_COMPILER=g++-4.7 C_COMPILER=gcc-4.7
+    - name: gcc-4.8
+      compiler: gcc
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.8
+      env: CXX_COMPILER=g++-4.8 C_COMPILER=gcc-4.8
     - name: gcc-4.9
       compiler: gcc
+      dist: xenial
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
-      env: CXX_COMPILER=g++-4.9 C_COMPILER=gcc-4.9 FORCE_AVX_OFF=true
-    - name: gcc-5
+      env: CXX_COMPILER=g++-4.9 C_COMPILER=gcc-4.9
+    - name: gcc-5.5
       compiler: gcc
+      dist: xenial
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-      env: CXX_COMPILER=g++-5 C_COMPILER=gcc-5 FORCE_AVX_OFF=false
-    - name: gcc-7.4.0
-      dist: bionic
+      env: CXX_COMPILER=g++-5 C_COMPILER=gcc-5
+    - name: gcc-6.4
       compiler: gcc
-      env: CXX_COMPILER=g++ C_COMPILER=gcc FORCE_AVX_OFF=false
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env: CXX_COMPILER=g++-6 C_COMPILER=gcc-6
+    - name: gcc-7.4
+      compiler: gcc
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+      env: CXX_COMPILER=g++ C_COMPILER=gcc
+    - name: gcc-8.4
+      compiler: gcc
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+      env: CXX_COMPILER=g++-8 C_COMPILER=gcc-8
+    - name: gcc-9.3
+      compiler: gcc
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+      env: CXX_COMPILER=g++-9 C_COMPILER=gcc-9
+    - name: gcc-10.1
+      compiler: gcc
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-10
+      env: CXX_COMPILER=g++-10 C_COMPILER=gcc-10
+
+    - name: clang-3.5
+      compiler: clang
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.5
+          packages:
+            - clang-3.5
+      env: CXX_COMPILER=clang++-3.5 C_COMPILER=clang-3.5 FORCE_AVX_OFF=true
+    - name: clang-3.6
+      compiler: clang
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang-3.6
+      env: CXX_COMPILER=clang++-3.6 C_COMPILER=clang-3.6 FORCE_AVX_OFF=true
     - name: clang-3.7
       compiler: clang
+      dist: xenial
       addons:
         apt:
           sources:
@@ -46,10 +136,93 @@ jobs:
           packages:
             - clang-3.7
       env: CXX_COMPILER=clang++-3.7 C_COMPILER=clang-3.7 FORCE_AVX_OFF=true
-    - name: clang-7.0
-      dist: bionic
+    - name: clang-3.8
       compiler: clang
-      env: CXX_COMPILER=clang++ C_COMPILER=clang FORCE_AVX_OFF=false LD_LIBRARY_PATH=/usr/local/clang-7.0.0/lib:$LD_LIBRARY_PATH
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - clang-3.8
+      env: CXX_COMPILER=clang++-3.8 C_COMPILER=clang-3.8
+    - name: clang-4.0
+      compiler: clang
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-4.0
+          packages:
+            - clang-4.0
+      env: CXX_COMPILER=clang++-4.0 C_COMPILER=clang-4.0 FORCE_AVX_OFF=true
+    - name: clang-5.0
+      compiler: clang
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-5.0
+          packages:
+            - clang-5.0
+      env: CXX_COMPILER=clang++-5.0 C_COMPILER=clang-5.0
+    - name: clang-6.0
+      compiler: clang
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-6.0
+          packages:
+            - clang-6.0
+      env: CXX_COMPILER=clang++-6.0 C_COMPILER=clang-6.0
+    - name: clang-7.0
+      compiler: clang
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-7
+          packages:
+            - clang-7
+      env: CXX_COMPILER=clang++-7 C_COMPILER=clang-7
+    - name: clang-8.0
+      compiler: clang
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - clang-8
+      env: CXX_COMPILER=clang++-8 C_COMPILER=clang-8
+    - name: clang-9.0
+      compiler: clang
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - clang-9
+      env: CXX_COMPILER=clang++-9 C_COMPILER=clang-9
+    - name: clang-10.0
+      compiler: clang
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: deb https://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main
+              key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+          packages:
+            - clang-10
+      env: CXX_COMPILER=clang++-10 C_COMPILER=clang-10 FORCE_AVX_OFF=false
 
 before_script:
     - mkdir build
