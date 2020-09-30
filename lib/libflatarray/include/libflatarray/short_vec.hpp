@@ -297,13 +297,19 @@ public:
 #    define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_ARM_NEON
 #  endif
 
+// This ugly conditional is required for Travis CI, where some VMs
+// define __AVX512F__ despite running an ancient GCC 5.
+#if defined( __AVX512F__) && (!defined(__GNUC__) || (__GNUC__ >= 7)) && (!defined(__clang__) || (__clang_major__ >= 4))
+#  define LFA_AVX512_HELPER
+#endif
+
 #  ifndef LIBFLATARRAY_WIDEST_VECTOR_ISA
 // Only the case of the IBM PC is complicated. No thanks to you,
 // history!
 #    ifdef __MIC__
 #      define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_MIC
 #    else
-#      ifdef __AVX512F__
+#      ifdef LFA_AVX512_HELPER
 #        define LIBFLATARRAY_WIDEST_VECTOR_ISA LIBFLATARRAY_AVX512F
 #      else
 #        ifdef __AVX2__
@@ -333,31 +339,6 @@ public:
 #    endif
 #  endif
 
-#endif
-
-// Dirty workaround for using GCC 6.4.0 with CUDA related to GCC
-// changing the data type in the signatured of intrinsic function, but
-// not updating the built-in functions as well. Without this,
-// compilation would fail with a lots of error messages a la
-//
-// avx512vlintrin.h(11169): error: argument of type "void *" is incompatible with parameter of type "int *"
-//
-#if defined(__GNUC__) && defined(__CUDACC__)
-#  if ((__GNUC__ == 6) && (__GNUC_MINOR__ == 4))
-#    define _AVX512BWINTRIN_H_INCLUDED
-#    define _AVX512CDINTRIN_H_INCLUDED
-#    define _AVX512DQINTRIN_H_INCLUDED
-#    define _AVX512ERINTRIN_H_INCLUDED
-#    define _AVX512FINTRIN_H_INCLUDED
-#    define _AVX512IFMAINTRIN_H_INCLUDED
-#    define _AVX512IFMAVLINTRIN_H_INCLUDED
-#    define _AVX512PFINTRIN_H_INCLUDED
-#    define _AVX512VBMIINTRIN_H_INCLUDED
-#    define _AVX512VBMIVLINTRIN_H_INCLUDED
-#    define _AVX512VLBWINTRIN_H_INCLUDED
-#    define _AVX512VLDQINTRIN_H_INCLUDED
-#    define _AVX512VLINTRIN_H_INCLUDED
-#  endif
 #endif
 
 #include <libflatarray/detail/short_vec_avx512_double_8.hpp>
