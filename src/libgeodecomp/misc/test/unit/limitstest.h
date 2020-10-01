@@ -16,10 +16,12 @@ public:
         TS_ASSERT(value0 < value1);
 
         value0 -= 1;
-        TS_ASSERT_EQUALS(value0, value1);
+        value1 += 1;
 
-        TS_ASSERT_EQUALS(INT_MIN, value0);
-        TS_ASSERT_EQUALS(INT_MAX, value1);
+        int delta0 = Limits<int>::getMax() - value0;
+        int delta1 = Limits<int>::getMin() - value1;
+        TS_ASSERT_EQUALS(delta0, 0);
+        TS_ASSERT_EQUALS(delta1, 0);
     }
 
     void testFloat()
