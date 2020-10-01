@@ -136,6 +136,8 @@ jobs:
       env: CXX_COMPILER=g++-10 C_COMPILER=gcc-10
     - <<: *gcc10
       arch: arm64
+      script:
+        - cmake --build .
     - <<: *gcc10
       arch: ppc64le
     - <<: *gcc10
