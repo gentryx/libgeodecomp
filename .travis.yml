@@ -3,10 +3,41 @@ language: cpp
 cache:
   apt: true
 
+before_script:
+    - mkdir build
+    - cd build
+    - $CXX_COMPILER -v
+    # Do we actually need to disable Qt5 here?
+    - cmake -DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER -DWITH_AVX_FORCED_OFF=$FORCE_AVX_OFF -DWITH_QT5=false ..
+
+script:
+    - cmake --build .
+    - cmake --build . --target tests
+    - cmake --build . --target  check
+
+env: FORCE_AVX_OFF=false
+
 jobs:
+  allow_failures:
+    # fixme: remove this once the Windows branch is merged
+    os: windows
+
   include:
+    - name: macOS
+      os: osx
+      osx_image: xcode12u
+      env: CXX_COMPILER=clang++ C_COMPILER=clang
+
+    - name: Windows
+      os: windows
+      before_script:
+        - mkdir build
+        - cd build
+        - cmake ..
+
     - name: gcc-4.6
       compiler: gcc
+      dist: xenial
       addons:
         apt:
           sources:
@@ -92,7 +123,8 @@ jobs:
           packages:
             - g++-9
       env: CXX_COMPILER=g++-9 C_COMPILER=gcc-9
-    - name: gcc-10.1
+    - &gcc10
+      name: gcc-10.1
       compiler: gcc
       dist: bionic
       addons:
@@ -102,6 +134,14 @@ jobs:
           packages:
             - g++-10
       env: CXX_COMPILER=g++-10 C_COMPILER=gcc-10
+    - <<: *gcc10
+      arch: arm64
+      script:
+        - cmake --build .
+    - <<: *gcc10
+      arch: ppc64le
+    - <<: *gcc10
+      arch: s390x
 
     - name: clang-3.5
       compiler: clang
@@ -211,7 +251,8 @@ jobs:
           packages:
             - clang-9
       env: CXX_COMPILER=clang++-9 C_COMPILER=clang-9
-    - name: clang-10.0
+    - &clang10
+      name: clang-10.0
       compiler: clang
       dist: bionic
       addons:
@@ -222,14 +263,10 @@ jobs:
               key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
           packages:
             - clang-10
-      env: CXX_COMPILER=clang++-10 C_COMPILER=clang-10 FORCE_AVX_OFF=false
-
-before_script:
-    - mkdir build
-    - cd build
-    - cmake -DWITH_QT5=false -DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER -DWITH_AVX_FORCED_OFF=$FORCE_AVX_OFF ..
-
-script:
-    - make
-    - make tests
-    - make check
+      env: CXX_COMPILER=clang++-10 C_COMPILER=clang-10
+    - <<: *clang10
+      arch: arm64
+    - <<: *clang10
+      arch: ppc64le
+    - <<: *clang10
+      arch: s390x
