@@ -40,7 +40,7 @@ public:
     static double time()
     {
 #ifdef LIBGEODECOMP_WITH_HPX
-        return hpx::util::high_resolution_timer::now();
+        return hpx::chrono::high_resolution_timer::now();
 #else
         return LibFlatArray::benchmark::time();
 #endif
