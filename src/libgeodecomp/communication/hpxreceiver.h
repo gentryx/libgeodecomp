@@ -119,7 +119,7 @@ public:
             )
             {
                 hpx::lcos::broadcast_apply<typename HPXReceiver::receiveAction>(
-                    hpx::util::unwrap(idsFuture), rank, data);
+                    hpx::unwrap(idsFuture), rank, data);
                 return receiverFuture.get();
             },
             HPXReceiver<CARGO>::make(name, rank),
