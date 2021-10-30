@@ -25,27 +25,27 @@ public:
     virtual ~HPXComponentRegistrator()
     {}
 
-    static hpx::components::component_factory<hpx::components::simple_component<COMPONENT> > *instanceA;
-    static hpx::components::component_registry< hpx::components::simple_component<COMPONENT>, ::hpx::components::factory_check> *instanceB;
+    static hpx::components::component_factory<hpx::components::component<COMPONENT> > *instanceA;
+    static hpx::components::component_registry< hpx::components::component<COMPONENT>, ::hpx::components::factory_check> *instanceB;
 
-    virtual hpx::components::component_factory<hpx::components::simple_component<COMPONENT> > *foo1()
+    virtual hpx::components::component_factory<hpx::components::component<COMPONENT> > *foo1()
     {
-        instanceA = new hpx::components::component_factory<hpx::components::simple_component<COMPONENT> >(0, 0, false);
+        instanceA = new hpx::components::component_factory<hpx::components::component<COMPONENT> >(0, 0, false);
         return instanceA;
     }
 
-    virtual hpx::components::component_registry< hpx::components::simple_component<COMPONENT>, ::hpx::components::factory_check> *foo2()
+    virtual hpx::components::component_registry< hpx::components::component<COMPONENT>, ::hpx::components::factory_check> *foo2()
     {
-        instanceB = new hpx::components::component_registry< hpx::components::simple_component<COMPONENT>, ::hpx::components::factory_check>();
+        instanceB = new hpx::components::component_registry< hpx::components::component<COMPONENT>, ::hpx::components::factory_check>();
         return instanceB;
     }
 };
 
 template<typename COMPONENT>
-hpx::components::component_factory<hpx::components::simple_component<COMPONENT> > *HPXComponentRegistrator<COMPONENT>::instanceA;
+hpx::components::component_factory<hpx::components::component<COMPONENT> > *HPXComponentRegistrator<COMPONENT>::instanceA;
 
 template<typename COMPONENT>
-hpx::components::component_registry< hpx::components::simple_component<COMPONENT>, ::hpx::components::factory_check> *HPXComponentRegistrator<COMPONENT>::instanceB;
+hpx::components::component_registry< hpx::components::component<COMPONENT>, ::hpx::components::factory_check> *HPXComponentRegistrator<COMPONENT>::instanceB;
 
 }
 
@@ -90,10 +90,10 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
     public:                                                             \
         hpx_plugin_exporter_factory()                                   \
         {                                                               \
-            static hpx::util::plugin::concrete_factory< hpx::components::component_factory_base, hpx::components::component_factory<hpx::components::simple_component<TEMPLATE>> > cf; \
+            static hpx::util::plugin::concrete_factory< hpx::components::component_factory_base, hpx::components::component_factory<hpx::components::component<TEMPLATE>> > cf; \
             hpx::util::plugin::abstract_factory<hpx::components::component_factory_base>* w = &cf; \
                                                                         \
-            std::string actname(typeid(hpx::components::simple_component<TEMPLATE>).name()); \
+            std::string actname(typeid(hpx::components::component<TEMPLATE>).name()); \
             boost::algorithm::to_lower(actname);                        \
             LIBGEODECOMP_HPX_PLUGIN_FACTORY()->insert( std::make_pair(actname, w)); \
         }                                                               \
@@ -118,7 +118,7 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
         init_registry_factory_static<TEMPLATE>()                        \
         {                                                               \
             hpx::components::static_factory_load_data_type data = {     \
-                typeid(hpx::components::simple_component<TEMPLATE>).name(), \
+                typeid(hpx::components::component<TEMPLATE>).name(), \
                 LIBGEODECOMP_HPX_PLUGIN_FACTORY                         \
             };                                                          \
             hpx::components::init_registry_factory(data);               \
@@ -135,13 +135,13 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
     namespace hpx {                                                     \
     namespace components {                                              \
                                                                         \
-    template <PARAMS> struct unique_component_name<hpx::components::component_factory<hpx::components::simple_component<TEMPLATE > > > \
+    template <PARAMS> struct unique_component_name<hpx::components::component_factory<hpx::components::component<TEMPLATE > > > \
     {                                                                   \
         typedef char const* type;                                       \
                                                                         \
         static type call(void)                                          \
         {                                                               \
-            return typeid(hpx::components::simple_component<TEMPLATE >).name(); \
+            return typeid(hpx::components::component<TEMPLATE >).name(); \
         }                                                               \
     };                                                                  \
                                                                         \
@@ -162,9 +162,9 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
     public:                                                             \
         hpx_plugin_exporter_registry()                                  \
         {                                                               \
-            static hpx::util::plugin::concrete_factory< hpx::components::component_registry_base, hpx::components::component_registry<hpx::components::simple_component<TEMPLATE>, ::hpx::components::factory_check> > cf; \
+            static hpx::util::plugin::concrete_factory< hpx::components::component_registry_base, hpx::components::component_registry<hpx::components::component<TEMPLATE>, ::hpx::components::factory_check> > cf; \
             hpx::util::plugin::abstract_factory<hpx::components::component_registry_base>* w = &cf; \
-            std::string actname(typeid(hpx::components::simple_component<TEMPLATE>).name()); \
+            std::string actname(typeid(hpx::components::component<TEMPLATE>).name()); \
             boost::algorithm::to_lower(actname);                        \
             LIBGEODECOMP_HPX_PLUGIN_REGISTRY()->insert( std::make_pair(actname, w)); \
         }                                                               \
@@ -181,12 +181,12 @@ hpx::components::component_registry< hpx::components::simple_component<COMPONENT
     namespace components {                                              \
                                                                         \
     template <PARAMS>                                                   \
-    struct unique_component_name<hpx::components::component_registry<hpx::components::simple_component<TEMPLATE >, ::hpx::components::factory_check> > \
+    struct unique_component_name<hpx::components::component_registry<hpx::components::component<TEMPLATE >, ::hpx::components::factory_check> > \
     {                                                                   \
         typedef char const* type;                                       \
         static type call (void)                                         \
         {                                                               \
-            return typeid(hpx::components::simple_component<TEMPLATE >).name(); \
+            return typeid(hpx::components::component<TEMPLATE >).name(); \
         }                                                               \
     };                                                                  \
                                                                         \
