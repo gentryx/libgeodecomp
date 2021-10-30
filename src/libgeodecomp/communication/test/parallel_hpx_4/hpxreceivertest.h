@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
 #include <hpx/collectives/broadcast.hpp>
-#include <hpx/runtime/components/component_factory.hpp>
+#include <hpx/modules/runtime_components.hpp>
 #include <hpx/serialization/serialize_buffer.hpp>
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/misc/stringops.h>
