@@ -6,6 +6,8 @@
 #include <hpx/include/lcos.hpp>
 #include <hpx/collectives/broadcast.hpp>
 #include <hpx/lcos_local/receive_buffer.hpp>
+#include <hpx/components_base/server/component.hpp>
+#include <hpx/components_base/server/component_base.hpp>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/testinitializer.h>
@@ -37,7 +39,7 @@ std::string patchProviderName(const std::string& basename, std::size_t sourceRan
 }
 
 template<typename CELL>
-class DummyPatchLinkProvider : public hpx::components::simple_component_base<DummyPatchLinkProvider<CELL> >
+class DummyPatchLinkProvider : public hpx::components::component_base<DummyPatchLinkProvider<CELL> >
 {
 public:
     DummyPatchLinkProvider(std::size_t sourceRank = -1, std::size_t targetRank = -1) :
@@ -66,7 +68,7 @@ private:
 };
 
 template<typename CELL>
-class DummyPatchLinkAccepter : public hpx::components::simple_component_base<DummyPatchLinkAccepter<CELL> >
+class DummyPatchLinkAccepter : public hpx::components::component_base<DummyPatchLinkAccepter<CELL> >
 {
 public:
     DummyPatchLinkAccepter(const std::string& basename = "", std::size_t sourceRank = -1, std::size_t targetRank = -1) :
@@ -112,7 +114,7 @@ private:
  */
 
 template<typename CELL>
-class DummyUpdateGroup : public hpx::components::simple_component_base<DummyUpdateGroup<CELL> >
+class DummyUpdateGroup : public hpx::components::component_base<DummyUpdateGroup<CELL> >
 {
 public:
     DummyUpdateGroup(
@@ -207,15 +209,15 @@ void allDone()
 }
 
 // register component
-typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkAccepter<int> > DummyPatchLinkAccepterType_int;
+typedef hpx::components::component<LibGeoDecomp::DummyPatchLinkAccepter<int> > DummyPatchLinkAccepterType_int;
 HPX_REGISTER_COMPONENT(DummyPatchLinkAccepterType_int, DummyPatchLinkAccepter_int );
-typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkAccepter<std::size_t> > DummyPatchLinkAccepterType_stdSizeT;
+typedef hpx::components::component<LibGeoDecomp::DummyPatchLinkAccepter<std::size_t> > DummyPatchLinkAccepterType_stdSizeT;
 HPX_REGISTER_COMPONENT(DummyPatchLinkAccepterType_stdSizeT, DummyPatchLinkAccepter_stdSizeT );
 
 // register component
-typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkProvider<int> > DummyPatchLinkProviderType_int;
+typedef hpx::components::component<LibGeoDecomp::DummyPatchLinkProvider<int> > DummyPatchLinkProviderType_int;
 HPX_REGISTER_COMPONENT(DummyPatchLinkProviderType_int, DummyPatchLinkProvider_int );
-typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkProvider<std::size_t> > DummyPatchLinkProviderType_stdSizeT;
+typedef hpx::components::component<LibGeoDecomp::DummyPatchLinkProvider<std::size_t> > DummyPatchLinkProviderType_stdSizeT;
 HPX_REGISTER_COMPONENT(DummyPatchLinkProviderType_stdSizeT, DummyPatchLinkProvider_stdSizeT );
 
 // register action
@@ -225,9 +227,9 @@ typedef LibGeoDecomp::DummyPatchLinkProvider<std::size_t>::receive_action DummyP
 HPX_REGISTER_ACTION(DummyPatchLinkProvider_receive_action_stdSizeT);
 
 // register component
-typedef hpx::components::simple_component<LibGeoDecomp::DummyUpdateGroup<int> > DummyUpdateGroupType_int;
+typedef hpx::components::component<LibGeoDecomp::DummyUpdateGroup<int> > DummyUpdateGroupType_int;
 HPX_REGISTER_COMPONENT(DummyUpdateGroupType_int, DummyUpdateGroup_int );
-typedef hpx::components::simple_component<LibGeoDecomp::DummyUpdateGroup<std::size_t> > DummyUpdateGroupType_stdSizeT;
+typedef hpx::components::component<LibGeoDecomp::DummyUpdateGroup<std::size_t> > DummyUpdateGroupType_stdSizeT;
 HPX_REGISTER_COMPONENT(DummyUpdateGroupType_stdSizeT, DummyUpdateGroup_stdSizeT );
 
 // register action

@@ -129,7 +129,11 @@ int main(int argc, char **argv)
     // initial overhead caused by broadcasting the work from one to
     // all other localities:
     std::vector<std::string> config(1, \"hpx.run_hpx_main!=1\");
-    return hpx::init(argc, argv, config);
+
+    hpx::init_params init_args;
+    init_args.cfg = config;
+
+    return hpx::init(argc, argv, init_args);
 }
 ")
   endif()

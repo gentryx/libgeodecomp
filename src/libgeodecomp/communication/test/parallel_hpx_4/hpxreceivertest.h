@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
 #include <hpx/collectives/broadcast.hpp>
-#include <hpx/runtime/components/component_factory.hpp>
+#include <hpx/modules/runtime_components.hpp>
 #include <hpx/serialization/serialize_buffer.hpp>
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/misc/stringops.h>
@@ -119,7 +119,7 @@ public:
         std::string name = "testMultipleReceivers";
         std::shared_ptr<ReceiverType3> receiver = ReceiverType3::make(name, rank).get();
         std::vector<hpx::future<hpx::id_type> > futures = ReceiverType3::find_all(name, size);
-        std::vector<hpx::id_type> ids = hpx::util::unwrap(futures);
+        std::vector<hpx::id_type> ids = hpx::unwrap(futures);
 
         hpx::lcos::broadcast_apply<ReceiverType3::receiveAction>(ids, rank, rank + 0.456);
 
